@@ -1,24 +1,14 @@
-h1 {
-  font-family: "Imperial Script", cursive;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 6rem;
-  color: #dab2ff;
-  text-align: center;
-}
+
 .home-container {
   width: 100%;
 }
-
-.columns {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
+h1 {
+  font-weight: 400;
+  font-style: normal;
+  font-size: 6rem;
+  color: #000;
+  text-align: center;
 }
-
-.left-column {
-  background-color: #272727;
-}
-.right-column {
-  border: 1px solid white; /* TEMP: visual debug */
+h2 {
+  text-align: center;
 }
