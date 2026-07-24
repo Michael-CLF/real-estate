@@ -1,0 +1,125 @@
+<form
+  class="search-filter-bar"
+  [formGroup]="filterForm"
+  (ngSubmit)="applyFilters()"
+>
+  <div class="search-filter-bar__field search-filter-bar__field--location">
+    <label for="marketplace-location">
+      City or ZIP code
+    </label>
+
+    <input
+      id="marketplace-location"
+      type="text"
+      formControlName="location"
+      placeholder="Raleigh or 27609"
+      autocomplete="postal-code"
+    />
+  </div>
+
+  <div class="search-filter-bar__field">
+  <label for="marketplace-property-type">
+    Property type
+  </label>
+
+  <select
+    id="marketplace-property-type"
+    formControlName="propertyType"
+  >
+    <option value="">
+      Property types
+    </option>
+
+    @for (
+      option of propertyTypeOptions;
+      track option.value
+    ) {
+      <option [value]="option.value">
+        {{ option.label }}
+      </option>
+    }
+  </select>
+</div>
+
+<div class="search-filter-bar__field">
+  <label for="marketplace-min-price">
+    Minimum price
+  </label>
+
+  <input
+    id="marketplace-min-price"
+    type="number"
+    formControlName="minimumPrice"
+    placeholder="No minimum"
+    min="0"
+    step="10000"
+  />
+</div>
+
+<div class="search-filter-bar__field">
+  <label for="marketplace-max-price">
+    Maximum price
+  </label>
+
+  <input
+    id="marketplace-max-price"
+    type="number"
+    formControlName="maximumPrice"
+    placeholder="No maximum"
+    min="0"
+    step="10000"
+  />
+</div>
+
+<div class="search-filter-bar__field search-filter-bar__field--small">
+  <label for="marketplace-bedrooms">
+    Bedrooms
+  </label>
+
+  <select
+    id="marketplace-bedrooms"
+    formControlName="minimumBedrooms"
+  >
+    <option [ngValue]="null">Any</option>
+    <option [ngValue]="1">1+</option>
+    <option [ngValue]="2">2+</option>
+    <option [ngValue]="3">3+</option>
+    <option [ngValue]="4">4+</option>
+    <option [ngValue]="5">5+</option>
+  </select>
+</div>
+
+<div class="search-filter-bar__field search-filter-bar__field--small">
+  <label for="marketplace-bathrooms">
+    Bathrooms
+  </label>
+
+  <select
+    id="marketplace-bathrooms"
+    formControlName="minimumBathrooms"
+  >
+    <option [ngValue]="null">Any</option>
+    <option [ngValue]="1">1+</option>
+    <option [ngValue]="2">2+</option>
+    <option [ngValue]="3">3+</option>
+    <option [ngValue]="4">4+</option>
+  </select>
+</div>
+
+  <div class="search-filter-bar__actions">
+    <button
+      class="search-filter-bar__apply"
+      type="submit"
+    >
+      Search
+    </button>
+
+    <button
+      class="search-filter-bar__clear"
+      type="button"
+      (click)="clearFilters()"
+    >
+      Clear
+    </button>
+  </div>
+</form>

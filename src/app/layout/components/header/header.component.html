@@ -1,1 +1,58 @@
-<p>header works!</p>
+<header class="site-header">
+  <div class="site-header__container">
+    <a
+      class="site-header__brand"
+      routerLink="/"
+      aria-label="Home"
+      (click)="closeMobileMenu()"
+    >
+      <span class="site-header__brand-mark" aria-hidden="true">
+        H
+      </span>
+
+      <span class="site-header__brand-content">
+        <span class="site-header__brand-name">
+          HomeDirect
+        </span>
+
+        <span class="site-header__brand-tagline">
+          Buy and sell with confidence
+        </span>
+      </span>
+    </a>
+
+    <app-navigation
+      class="site-header__navigation"
+      [isMobileMenuOpen]="isMobileMenuOpen()"
+      (navigationSelected)="closeMobileMenu()"
+    />
+
+    <div class="site-header__actions">
+      <a
+        class="site-header__login"
+        routerLink="/login"
+      >
+        Log in
+      </a>
+
+      <a
+        class="site-header__signup"
+        routerLink="/register"
+      >
+        Get started
+      </a>
+    </div>
+
+    <button
+      class="site-header__menu-button"
+      type="button"
+      [attr.aria-expanded]="isMobileMenuOpen()"
+      aria-label="Toggle navigation menu"
+      (click)="toggleMobileMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>

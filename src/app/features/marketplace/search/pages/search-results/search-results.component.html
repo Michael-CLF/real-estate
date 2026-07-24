@@ -1,0 +1,96 @@
+<main class="search-results">
+  <div class="search-results__container">
+    @if (viewModel$ | async; as viewModel) {
+    <app-search-filter-bar [filters]="viewModel.filters" />
+    <header class="search-results__header">
+      <div class="search-results__heading-group">
+        <p class="search-results__eyebrow">
+          Marketplace
+        </p>
+
+        <h1>{{ viewModel.heading }}</h1>
+
+        <p class="search-results__count">
+          @if (viewModel.result.totalCount === 1) {
+          1 property found
+          } @else {
+          {{ viewModel.result.totalCount }}
+          properties found
+          }
+        </p>
+      </div>
+
+      <div class="search-results__sort">
+        <label for="listing-sort">
+          Sort by
+        </label>
+
+        <select id="listing-sort" [value]="viewModel.filters.sort ?? 'newest'" (change)="onSortChange($event)">
+          @for (
+          option of sortOptions;
+          track option.value
+          ) {
+          <option [value]="option.value">
+            {{ option.label }}
+          </option>
+          }
+        </select>
+      </div>
+    </header>
+
+    @if (viewModel.hasError) {
+    <section class="search-results__message" role="alert">
+      <h2>Listings could not be loaded</h2>
+
+      <p>
+        There was a problem retrieving the marketplace
+        listings. Please refresh the page and try again.
+      </p>
+    </section>
+    } @else if (viewModel.result.listings.length) {
+    <section class="search-results__grid" aria-label="Property listings">
+      @for (
+      listing of viewModel.result.listings;
+      track listing.id
+      ) {
+      <app-listing-card [listing]="listing" />
+      }
+    </section>
+
+    @if (viewModel.result.totalPages > 1) {
+    <nav class="search-results__pagination" aria-label="Listing result pages">
+      <button type="button" [disabled]="viewModel.result.page <= 1" (click)="goToPreviousPage(
+                viewModel.result.page
+              )">
+        Previous
+      </button>
+
+      <p>
+        Page {{ viewModel.result.page }}
+        of {{ viewModel.result.totalPages }}
+      </p>
+
+      <button type="button" [disabled]="
+                viewModel.result.page >=
+                viewModel.result.totalPages
+              " (click)="goToNextPage(
+                viewModel.result.page,
+                viewModel.result.totalPages
+              )">
+        Next
+      </button>
+    </nav>
+    }
+    } @else {
+    <section class="search-results__message">
+      <h2>No properties matched your search</h2>
+
+      <p>
+        Try changing the location, price range, or
+        property requirements.
+      </p>
+    </section>
+    }
+    }
+  </div>
+</main>

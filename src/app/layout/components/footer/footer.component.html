@@ -1,1 +1,67 @@
-<p>footer works!</p>
+<footer class="site-footer">
+  <div class="site-footer__container">
+    <div class="site-footer__brand">
+      <a
+        class="site-footer__brand-link"
+        routerLink="/"
+        aria-label="HomeDirect home"
+      >
+        <span
+          class="site-footer__brand-mark"
+          aria-hidden="true"
+        >
+          H
+        </span>
+
+        <span class="site-footer__brand-content">
+          <span class="site-footer__brand-name">
+            HomeDirect
+          </span>
+
+          <span class="site-footer__brand-tagline">
+            Buy and sell with confidence
+          </span>
+        </span>
+      </a>
+
+      <p class="site-footer__description">
+        A simpler way to search, buy, sell, and finance real estate.
+      </p>
+    </div>
+
+    <div class="site-footer__sections">
+      @for (section of footerSections; track section.title) {
+        <section class="site-footer__section">
+          <h2 class="site-footer__section-title">
+            {{ section.title }}
+          </h2>
+
+          <ul class="site-footer__links">
+            @for (link of section.links; track link.route) {
+              <li>
+                <a
+                  class="site-footer__link"
+                  [routerLink]="link.route"
+                >
+                  {{ link.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+  </div>
+
+  <div class="site-footer__bottom">
+    <div class="site-footer__bottom-container">
+      <p class="site-footer__copyright">
+        © {{ currentYear }} HomeDirect. All rights reserved.
+      </p>
+
+      <p class="site-footer__disclaimer">
+        Real estate information is provided for informational purposes only.
+      </p>
+    </div>
+  </div>
+</footer>

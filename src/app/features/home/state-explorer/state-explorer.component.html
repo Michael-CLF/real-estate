@@ -3,25 +3,26 @@
   aria-labelledby="state-explorer-title"
 >
   <div class="state-explorer__header">
-      <h2 class="state-explorer__title">
-            Find a home in every state
-        </h2>
+    <h2
+      class="state-explorer__title"
+      id="state-explorer-title"
+    >
+      Find a home in every state
+    </h2>
   </div>
 
   <div class="state-explorer__panel">
     <div class="state-explorer__grid">
       @for (state of states; track state.abbreviation) {
-        <button
+        <a
           class="state-card"
           [class.state-card--active]="state.isActive"
-          [disabled]="!state.isActive"
           [attr.aria-label]="
             state.isActive
               ? 'Browse listings in ' + state.name
-              : state.name + ' coming soon'
+              : 'Learn more about our plans for ' + state.name
           "
-          type="button"
-          (click)="selectState(state)"
+          [routerLink]="['/states', state.slug]"
         >
           <span class="state-card__abbreviation">
             {{ state.abbreviation }}
@@ -33,22 +34,22 @@
             </span>
 
             <span class="state-card__status">
-              {{ state.isActive ? 'Browse listings' : 'Coming soon' }}
+              {{ state.isActive ? 'Available now' : 'Coming soon' }}
             </span>
           </span>
 
-         <span class="state-card__flag-wrapper">
-  <img
-    class="state-card__flag"
-    [alt]="state.name + ' state flag'"
-    [src]="
-      '/assets/images/state-flags/' +
-      state.abbreviation.toLowerCase() +
-      '.svg'
-    "
-  />
-</span>
-        </button>
+          <span class="state-card__flag-wrapper">
+            <img
+              class="state-card__flag"
+              [alt]="state.name + ' state flag'"
+              [src]="
+                '/assets/images/state-flags/' +
+                state.abbreviation.toLowerCase() +
+                '.svg'
+              "
+            />
+          </span>
+        </a>
       }
     </div>
   </div>

@@ -1,1 +1,20 @@
-<p>navigation works!</p>
+<nav
+  class="navigation"
+  [class.navigation--open]="isMobileMenuOpen()"
+  aria-label="Primary navigation"
+>
+  <ul class="navigation__list">
+    @for (item of navigationItems; track item.route) {
+      <li class="navigation__item">
+        <a
+          class="navigation__link"
+          [routerLink]="item.route"
+          routerLinkActive="navigation__link--active"
+          (click)="handleNavigationSelected()"
+        >
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

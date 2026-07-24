@@ -1,0 +1,118 @@
+@if (state(); as selectedState) {
+  @if (selectedState.isActive) {
+    <section class="state-page state-page--active">
+      <div class="state-page__container">
+        <div class="state-page__content">
+          <span class="state-page__status state-page__status--active">
+            Available now
+          </span>
+
+          <h1 class="state-page__title">
+            Find real estate in {{ selectedState.name }}
+          </h1>
+
+          <p class="state-page__description">
+            Search homes, explore local markets, and access tools for
+            buying, selling, and financing real estate in
+            {{ selectedState.name }}.
+          </p>
+
+          <div class="state-page__actions">
+            <a
+              class="state-page__button state-page__button--primary"
+              routerLink="/buy"
+            >
+              Search homes
+            </a>
+
+            <a
+              class="state-page__button state-page__button--secondary"
+              routerLink="/sell"
+            >
+              Sell a home
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <section class="state-page state-page--coming-soon">
+      <div class="state-page__container">
+        <div class="state-page__content">
+          <span class="state-page__status">
+            Coming soon
+          </span>
+
+          <h1 class="state-page__title">
+            We are building in {{ selectedState.name }}
+          </h1>
+
+          <p class="state-page__description">
+            Our real estate marketplace is currently launching in North
+            Carolina, and we plan to expand into as many states as possible.
+            {{ selectedState.name }} is part of that expansion plan.
+          </p>
+
+          <p class="state-page__description">
+            Contact us to receive more information, express interest in the
+            platform, or let us know whether you are interested in buying,
+            selling, financing, or partnering with us in
+            {{ selectedState.name }}.
+          </p>
+
+          <div class="state-page__actions">
+            <a
+              class="state-page__button state-page__button--primary"
+              routerLink="/contact"
+              [queryParams]="{
+                interest: 'state-launch',
+                state: selectedState.name
+              }"
+            >
+              Contact us about {{ selectedState.name }}
+            </a>
+
+            <a
+              class="state-page__button state-page__button--secondary"
+              routerLink="/"
+            >
+              Explore other states
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="state-page__visual"
+          aria-hidden="true"
+        >
+          <div class="state-page__construction">
+            <span class="state-page__construction-icon">
+              🏗
+            </span>
+
+            <span class="state-page__construction-label">
+              Marketplace under construction
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+} @else {
+  <section class="state-page">
+    <div class="state-page__not-found">
+      <h1>State not found</h1>
+
+      <p>
+        The state page you requested could not be found.
+      </p>
+
+      <a
+        class="state-page__button state-page__button--primary"
+        routerLink="/"
+      >
+        Return home
+      </a>
+    </div>
+  </section>
+}

@@ -1,0 +1,222 @@
+@use 'styles/abstracts/variables' as variables;
+
+:host {
+  display: block;
+}
+
+.state-page {
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff 0%,
+      #f8fafc 55%,
+      #ecfeff 100%
+    );
+  min-height: calc(100vh - 4.75rem);
+  padding: 5rem 1.5rem;
+
+  &__container {
+    align-items: center;
+    display: grid;
+    gap: 4rem;
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    margin: 0 auto;
+    max-width: 1280px;
+  }
+
+  &__content {
+    max-width: 46rem;
+  }
+
+  &__status {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    color: #1d4ed8;
+    display: inline-flex;
+    font-family: variables.$font-body;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0.875rem;
+    text-transform: uppercase;
+
+    &--active {
+      background: #dcfce7;
+      border-color: #bbf7d0;
+      color: #15803d;
+    }
+  }
+
+  &__title {
+    color: #0f172a;
+    font-family: variables.$font-heading;
+    font-size: clamp(2.75rem, 6vw, 5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    margin: 1.5rem 0 0;
+  }
+
+  &__description {
+    color: #475569;
+    font-family: variables.$font-body;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    margin: 1.5rem 0 0;
+    max-width: 42rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.875rem;
+    margin-top: 2rem;
+  }
+
+  &__button {
+    align-items: center;
+    border-radius: 0.625rem;
+    display: inline-flex;
+    font-family: variables.$font-body;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+
+    &--primary {
+      background: #2563eb;
+      border: 1px solid #2563eb;
+      box-shadow: 0 0.5rem 1.25rem rgb(37 99 235 / 18%);
+      color: #ffffff;
+
+      &:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+        transform: translateY(-1px);
+      }
+    }
+
+    &--secondary {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+
+      &:hover {
+        border-color: #94a3b8;
+        color: #0f172a;
+        transform: translateY(-1px);
+      }
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgb(37 99 235 / 25%);
+      outline-offset: 3px;
+    }
+  }
+
+  &__visual {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+
+  &__construction {
+    align-items: center;
+    aspect-ratio: 1;
+    background:
+      linear-gradient(
+        145deg,
+        #ffffff 0%,
+        #e0f2fe 100%
+      );
+    border: 1px solid #bae6fd;
+    border-radius: 2rem;
+    box-shadow: 0 2rem 4rem rgb(15 23 42 / 12%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 25rem;
+    padding: 3rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  &__construction-icon {
+    font-size: 6rem;
+    line-height: 1;
+  }
+
+  &__construction-label {
+    color: #334155;
+    font-family: variables.$font-heading;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+  }
+
+  &__not-found {
+    margin: 0 auto;
+    max-width: 40rem;
+    text-align: center;
+
+    h1 {
+      color: #0f172a;
+      font-family: variables.$font-heading;
+      font-size: 3rem;
+      margin: 0;
+    }
+
+    p {
+      color: #475569;
+      font-family: variables.$font-body;
+      line-height: 1.7;
+      margin: 1rem 0 2rem;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .state-page {
+    padding: 4rem 1.5rem;
+
+    &__container {
+      grid-template-columns: 1fr;
+    }
+
+    &__visual {
+      justify-content: flex-start;
+    }
+
+    &__construction {
+      max-width: 32rem;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .state-page {
+    padding: 3rem 1rem;
+
+    &__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__button {
+      width: 100%;
+    }
+
+    &__construction {
+      border-radius: 1.25rem;
+      padding: 2rem;
+    }
+  }
+}

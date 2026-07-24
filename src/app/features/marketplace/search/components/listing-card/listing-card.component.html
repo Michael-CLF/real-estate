@@ -1,0 +1,69 @@
+<article class="listing-card">
+  <a
+    class="listing-card__image-link"
+    [routerLink]="['/listings', listing().id]"
+    [attr.aria-label]="'View ' + listing().title"
+  >
+    @if (listing().featuredPhotoUrl) {
+      <img
+        class="listing-card__image"
+        [src]="listing().featuredPhotoUrl"
+        [alt]="accessibleImageText()"
+        loading="lazy"
+      />
+    } @else {
+      <div class="listing-card__image-placeholder">
+        <span>No photo available</span>
+      </div>
+    }
+
+    <button
+      class="listing-card__favorite"
+      type="button"
+      aria-label="Save this listing"
+      title="Save listing"
+      (click)="$event.preventDefault(); $event.stopPropagation()"
+    >
+      <span aria-hidden="true">♡</span>
+    </button>
+  </a>
+
+  <div class="listing-card__content">
+    <p class="listing-card__price">
+      {{ listing().price | currency:'USD':'symbol':'1.0-0' }}
+    </p>
+
+    @if (propertyFacts().length) {
+      <p class="listing-card__facts">
+        @for (
+          fact of propertyFacts();
+          track fact;
+          let isLast = $last
+        ) {
+          <span>{{ fact }}</span>
+
+          @if (!isLast) {
+            <span
+              class="listing-card__separator"
+              aria-hidden="true"
+            >
+              •
+            </span>
+          }
+        }
+      </p>
+    }
+
+    <h2 class="listing-card__title">
+      <a [routerLink]="['/listings', listing().id]">
+        {{ listing().title }}
+      </a>
+    </h2>
+
+    <p class="listing-card__location">
+      {{ listing().city }},
+      {{ listing().stateAbbreviation }}
+      {{ listing().postalCode }}
+    </p>
+  </div>
+</article>
