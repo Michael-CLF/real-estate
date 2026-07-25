@@ -27,7 +27,7 @@ import {
 } from '../../../../../core/domains/marketplace/repositories/marketplace-listing.repository';
 import {
   MockMarketplaceListingRepository
-} from '../../../../../core/domains/marketplace/services/mock-marketplace-listing.repository';
+} from '../../../../../core/domains/marketplace/repositories/mock-marketplace-listing.repository';
 import {
   ListingCardComponent
 } from '../../components/listing-card/listing-card.component';

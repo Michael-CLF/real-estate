@@ -1,0 +1,69 @@
+<div class="seller-dashboard">
+
+  <header class="seller-dashboard__header">
+
+    <div>
+      <h1>Seller Dashboard</h1>
+      <p>
+        Manage your property, monitor activity, and respond to buyers.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="manage-listing-button">
+      Manage Listing
+    </button>
+
+  </header>
+
+  @if (loading) {
+
+    <div class="seller-dashboard__loading">
+      <h2>Loading Dashboard...</h2>
+      <p>Please wait while we load your listing.</p>
+    </div>
+
+  } @else if (errorMessage) {
+
+    <div class="seller-dashboard__loading">
+      <h2>Dashboard unavailable</h2>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+  } @else {
+
+    @if (propertySummary) {
+      <app-property-summary-card
+        [property]="propertySummary">
+      </app-property-summary-card>
+    }
+
+    <app-listing-metrics-card
+      [metrics]="listingMetrics">
+    </app-listing-metrics-card>
+
+    <section class="seller-dashboard__card-grid">
+
+      <app-next-steps-card
+        [steps]="nextSteps">
+      </app-next-steps-card>
+
+        <app-activity-card
+        [activities]="recentActivity">
+      </app-activity-card>
+
+      <app-upcoming-showing-card
+        [showing]="upcomingShowing">
+      </app-upcoming-showing-card>
+
+      <app-latest-offer-card
+        [offer]="latestOffer">
+      </app-latest-offer-card>
+
+
+    </section>
+
+  }
+
+</div>

@@ -1,0 +1,35 @@
+
+<section class="listing-metrics-card">
+
+  <div class="listing-metrics-card__header">
+    <h2>Listing Performance</h2>
+    <p>See how buyers are engaging with your property.</p>
+  </div>
+
+  <div class="listing-metrics-card__grid">
+
+    @for (metric of metrics; track metric.label) {
+
+      <article class="metric">
+
+        <span class="metric__label">
+          {{ metric.label }}
+        </span>
+
+        <div class="metric__value">
+          {{ metric.value }}
+        </div>
+
+        @if (metric.helperText) {
+          <span class="metric__helper">
+            {{ metric.helperText }}
+          </span>
+        }
+
+      </article>
+
+    }
+
+  </div>
+
+</section>

@@ -1,0 +1,64 @@
+<section class="next-steps-card">
+
+  <div class="next-steps-card__header">
+    <div>
+      <h2>Next Steps</h2>
+      <p>Complete these items to improve your listing.</p>
+    </div>
+  </div>
+
+  @if (requiredSteps.length > 0) {
+
+    <div class="next-steps-card__section">
+
+      <h3>Action Required</h3>
+
+      @for (step of requiredSteps; track step.title) {
+
+        <div class="step step--required">
+
+          <div class="step__content">
+            <h4>{{ step.title }}</h4>
+            <p>{{ step.description }}</p>
+          </div>
+
+          <button type="button">
+            {{ step.action }}
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+  @if (recommendedSteps.length > 0) {
+
+    <div class="next-steps-card__section">
+
+      <h3>Recommended</h3>
+
+      @for (step of recommendedSteps; track step.title) {
+
+        <div class="step">
+
+          <div class="step__content">
+            <h4>{{ step.title }}</h4>
+            <p>{{ step.description }}</p>
+          </div>
+
+          <button type="button">
+            {{ step.action }}
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</section>

@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.seller-dashboard {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.seller-dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.seller-dashboard__header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.seller-dashboard__header p {
+  margin: 0.45rem 0 0;
+  color: #64748b;
+}
+
+.manage-listing-button {
+  flex-shrink: 0;
+  min-height: 46px;
+  padding: 0.8rem 1.4rem;
+  border: 0;
+  border-radius: 10px;
+ background-color: #154360;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.manage-listing-button:hover {
+  background: #034F3B;
+  transform: translateY(-1px);
+}
+
+app-property-summary-card,
+app-listing-metrics-card,
+app-next-steps-card,
+app-upcoming-showing-card,
+app-latest-offer-card,
+app-activity-card {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Listing performance remains full width */
+
+app-listing-metrics-card {
+  width: 100%;
+}
+
+/* The remaining four dashboard sections use half-width cards */
+
+.seller-dashboard__card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.seller-dashboard__card-grid > * {
+  min-width: 0;
+  height: 100%;
+}
+
+/* Keeps paired cards aligned even if their content lengths differ */
+
+.seller-dashboard__card-grid app-next-steps-card,
+.seller-dashboard__card-grid app-upcoming-showing-card,
+.seller-dashboard__card-grid app-latest-offer-card,
+.seller-dashboard__card-grid app-activity-card {
+  display: flex;
+}
+
+.seller-dashboard__card-grid app-next-steps-card > *,
+.seller-dashboard__card-grid app-upcoming-showing-card > *,
+.seller-dashboard__card-grid app-latest-offer-card > *,
+.seller-dashboard__card-grid app-activity-card > * {
+  width: 100%;
+}
+
+/* Collapse to one column on smaller screens */
+
+@media (max-width: 1050px) {
+  .seller-dashboard__card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .seller-dashboard {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .seller-dashboard__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .manage-listing-button {
+    width: 100%;
+  }
+}

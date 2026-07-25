@@ -1,0 +1,50 @@
+<section class="activity-card">
+
+  <div class="activity-card__header">
+    <h2>Recent Activity</h2>
+    <p>Your latest listing activity.</p>
+  </div>
+
+  @if (activities.length > 0) {
+
+    <div class="activity-list">
+
+      @for (activity of activities; track activity.timestamp) {
+
+        <article class="activity">
+
+          <div class="activity__dot"></div>
+
+          <div class="activity__content">
+
+            <h3>{{ activity.title }}</h3>
+
+            <p>{{ activity.description }}</p>
+
+            <span>
+              {{ activity.timestamp | date:'MMM d, y • h:mm a' }}
+            </span>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  } @else {
+
+    <div class="empty-state">
+
+      <h3>No recent activity</h3>
+
+      <p>
+        Listing updates, offers, showings, and important events will appear here.
+      </p>
+
+    </div>
+
+  }
+
+</section>

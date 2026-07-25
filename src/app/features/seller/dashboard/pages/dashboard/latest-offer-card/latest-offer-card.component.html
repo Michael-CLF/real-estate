@@ -1,0 +1,58 @@
+<section class="latest-offer-card">
+
+  <div class="latest-offer-card__header">
+    <h2>Latest Offer</h2>
+  </div>
+
+  @if (offer) {
+
+    <div class="offer">
+
+      <div class="offer__amount">
+        {{ offer.amount | currency:'USD':'symbol':'1.0-0' }}
+      </div>
+
+      <div class="offer__submitted">
+        Submitted {{ offer.submittedDate | date:'MMMM d, y' }}
+      </div>
+
+      <div class="offer__details">
+
+        <div class="offer__item">
+          <span class="label">Buyer</span>
+          <strong>{{ offer.buyerName }}</strong>
+        </div>
+
+        <div class="offer__item">
+          <span class="label">Financing</span>
+          <strong>{{ offer.financing }}</strong>
+        </div>
+
+        <div class="offer__item">
+          <span class="label">Contingencies</span>
+          <strong>{{ offer.contingencies }}</strong>
+        </div>
+
+      </div>
+
+      <button type="button">
+        Review All Offers
+      </button>
+
+    </div>
+
+  } @else {
+
+    <div class="empty-state">
+
+      <h3>No offers yet</h3>
+
+      <p>
+        When buyers submit an offer, it will appear here.
+      </p>
+
+    </div>
+
+  }
+
+</section>

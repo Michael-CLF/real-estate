@@ -1,0 +1,73 @@
+:host {
+  display: block;
+}
+
+.listing-metrics-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.listing-metrics-card__header {
+  margin-bottom: 1.75rem;
+}
+
+.listing-metrics-card__header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.listing-metrics-card__header p {
+  margin-top: .5rem;
+  color: #6b7280;
+}
+
+.listing-metrics-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+}
+
+.metric {
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fafafa;
+  transition: all .2s ease;
+}
+
+.metric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.metric__label {
+  display: block;
+  font-size: .85rem;
+  color: #6b7280;
+  margin-bottom: .5rem;
+}
+
+.metric__value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.metric__helper {
+  display: block;
+  margin-top: .75rem;
+  font-size: .85rem;
+  color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .listing-metrics-card__grid {
+    grid-template-columns: 1fr;
+  }
+}

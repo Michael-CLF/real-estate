@@ -29,7 +29,7 @@ import {
 } from '../../../../../core/domains/marketplace/repositories/marketplace-listing.repository';
 import {
   MockMarketplaceListingRepository
-} from '../../../../../core/domains/marketplace/services/mock-marketplace-listing.repository';
+} from '../../../../../core/domains/marketplace/repositories/mock-marketplace-listing.repository';
 import {
   ListingGalleryComponent
 } from '../../components/listing-gallery/listing-gallery.component';

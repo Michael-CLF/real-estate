@@ -1,0 +1,41 @@
+<header class="app-header">
+  <div class="header-left">
+    <button class="menu-button" type="button" aria-label="Open navigation">
+      ☰
+    </button>
+
+    <div class="brand">
+      <span class="brand-logo">🏡</span>
+      <div class="brand-text">
+        <span class="brand-name">RealEstateOS</span>
+        <span class="brand-tagline">Enterprise Platform</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header-center">
+    <input
+      class="search-input"
+      type="search"
+      placeholder="Search properties, users, transactions..."
+    />
+  </div>
+
+  <div class="header-right">
+    <button class="icon-button" type="button" aria-label="Notifications">
+      🔔
+    </button>
+
+    <button class="icon-button" type="button" aria-label="Messages">
+      ✉
+    </button>
+
+    <button class="user-button" type="button">
+      <div class="avatar">
+        {{ userName.charAt(0) }}
+      </div>
+
+      <span>{{ userName }}</span>
+    </button>
+  </div>
+</header>

@@ -7,7 +7,7 @@ import {
   MarketplaceListingSummary
 } from '../models/listing-search-filters.model';
 import { MarketplaceListing } from '../models/marketplace-listing.model';
-import { MarketplaceListingRepository } from '../repositories/marketplace-listing.repository';
+import { MarketplaceListingRepository } from './marketplace-listing.repository';
 
 @Injectable()
 export class MockMarketplaceListingRepository

@@ -1,0 +1,53 @@
+<section class="upcoming-showing-card">
+
+  <div class="upcoming-showing-card__header">
+    <h2>Upcoming Showing</h2>
+  </div>
+
+  @if (showing) {
+
+    <div class="showing">
+
+      <div class="showing__date">
+        {{ showing.date | date:'EEEE, MMMM d' }}
+      </div>
+
+      <div class="showing__time">
+        {{ showing.date | date:'h:mm a' }}
+      </div>
+
+      <div class="showing__details">
+
+        <div class="showing__item">
+          <span class="label">Buyer</span>
+          <strong>{{ showing.buyerName }}</strong>
+        </div>
+
+        <div class="showing__item">
+          <span class="label">Showing Agent</span>
+          <strong>{{ showing.agentName }}</strong>
+        </div>
+
+      </div>
+
+      <button type="button">
+        View All Showing Details
+      </button>
+
+    </div>
+
+  } @else {
+
+    <div class="empty-state">
+
+      <h3>No showings scheduled</h3>
+
+      <p>
+        When a buyer schedules a showing, it will appear here.
+      </p>
+
+    </div>
+
+  }
+
+</section>
