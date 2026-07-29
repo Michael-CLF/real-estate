@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '../../core/authentication/auth.guard';
 import { AuthenticatedLayoutComponent } from '../../layout/layouts/authenticated-layout/authenticated-layout.component';
 
-export const SELLER_ROUTES: Routes = [
+export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
     component: AuthenticatedLayoutComponent,
@@ -11,15 +11,10 @@ export const SELLER_ROUTES: Routes = [
     canActivateChild: [authGuard],
     children: [
       {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-      {
         path: 'dashboard',
         loadComponent: () =>
-          import('./dashboard/pages/seller-dashboard/seller-dashboard.component').then(
-            m => m.SellerDashboardComponent
+          import('./dashboard.component').then(
+            m => m.DashboardComponent
           )
       }
     ]

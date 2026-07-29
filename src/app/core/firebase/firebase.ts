@@ -9,4 +9,7 @@ export const firebaseApp = initializeApp(environment.firebase);
 
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
-export const functions = getFunctions(firebaseApp);
+export const functions = getFunctions(
+  firebaseApp,
+  'us-east1'
+);

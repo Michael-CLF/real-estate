@@ -57,19 +57,19 @@ export const routes: Routes = [
           )
       },
       {
-  path: 'register',
-  loadComponent: () =>
-    import('./features/authentication/pages/register/register.component').then(
-      (component) => component.RegisterComponent
-    )
-},
-{
-  path: 'sign-in',
-  loadComponent: () =>
-    import('./features/authentication/pages/sign-in/sign-in.component').then(
-      (component) => component.SignInComponent
-    )
-},
+        path: 'register',
+        loadComponent: () =>
+          import('./features/authentication/pages/register/register.component').then(
+            (component) => component.RegisterComponent
+          )
+      },
+      {
+        path: 'sign-in',
+        loadComponent: () =>
+          import('./features/authentication/pages/sign-in/sign-in.component').then(
+            (component) => component.SignInComponent
+          )
+      },
       {
         path: 'homes',
         loadChildren: () =>
@@ -97,12 +97,12 @@ export const routes: Routes = [
       }
     ]
   },
-  {
-  path: 'seller',
+ {
+  path: 'dashboard',
   loadChildren: () =>
-    import('./features/seller/seller.routes').then(
-      m => m.SELLER_ROUTES
-    ),
+    import('./features/dashboard/dashboard.routes').then(
+      m => m.DASHBOARD_ROUTES
+    )
 },
   {
     path: '**',

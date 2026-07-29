@@ -133,7 +133,7 @@ export class SignInComponent {
 
       if (!existingUser) {
         throw new Error(
-          'No account was found for this email address. Please create an account first.'
+          'No account exists for this email address. Please register before signing in.'
         );
       }
 
@@ -148,7 +148,7 @@ export class SignInComponent {
 
       sessionStorage.removeItem('pendingOtpEmail');
 
-      await this.router.navigate(['/seller/dashboard']);
+      await this.router.navigate(['/dashboard']);
     } catch (error) {
       console.error('Unable to verify OTP code:', error);
 
@@ -337,19 +337,19 @@ export class SignInComponent {
 
         await this.userRepository.create({
           id: firebaseUser.uid,
-          email: firebaseUser.email ?? '',
-          phone: firebaseUser.phoneNumber,
 
           firstName,
           lastName,
           displayName,
 
-          roles: ['seller'],
-          status: 'active',
+          email: firebaseUser.email ?? '',
+          phone: firebaseUser.phoneNumber,
+
+          photoURL: firebaseUser.photoURL,
 
           emailVerified: firebaseUser.emailVerified,
-          phoneVerified: false,
-          identityStatus: 'not_started',
+
+          status: 'active',
 
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -366,7 +366,7 @@ export class SignInComponent {
         );
       }
 
-      await this.router.navigate(['/seller/dashboard']);
+      await this.router.navigate(['/dashboard']);
     } catch (error) {
       console.error(
         'Unable to sign in with Google:',

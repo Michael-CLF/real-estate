@@ -6,30 +6,35 @@ import {
   signal
 } from '@angular/core';
 import {
-  HttpsCallableResult,
+  FunctionsError,
   httpsCallable
 } from 'firebase/functions';
-import { signInWithCustomToken } from 'firebase/auth';
+import {
+  signInWithCustomToken
+} from 'firebase/auth';
 
 import {
   auth,
   functions
 } from '../firebase/firebase';
 
-export interface SendOtpResponse {
-  success: boolean;
-  message: string;
-  expiresAt?: string;
-  error?: string;
+interface SendOtpRequest {
+  email: string;
 }
 
-export interface VerifyOtpResponse {
-  success: boolean;
-  message: string;
-  customToken?: string;
-  token?: string;
-  isNewUser?: boolean;
-  error?: string;
+interface SendOtpResponse {
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+}
+
+interface VerifyOtpRequest {
+  email: string;
+  code: string;
+}
+
+interface VerifyOtpResponse {
+  customToken: string;
+  isNewUser: boolean;
 }
 
 @Injectable({
@@ -43,23 +48,32 @@ export class OtpService implements OnDestroy {
 
   readonly attemptsRemaining = signal(3);
   readonly timeRemainingSeconds = signal(0);
+  readonly resendRemainingSeconds = signal(0);
 
   private readonly expiresAt = signal<Date | null>(null);
+  private readonly resendAvailableAt = signal<Date | null>(null);
   private readonly currentTime = signal(new Date());
 
   readonly isExpired = computed(
-    () => this.timeRemainingSeconds() <= 0
+    () =>
+      this.otpSent() &&
+      this.timeRemainingSeconds() <= 0
   );
 
-  readonly formattedTimeRemaining = computed(() => {
-    const totalSeconds = this.timeRemainingSeconds();
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+  readonly canResend = computed(
+    () =>
+      this.otpSent() &&
+      this.resendRemainingSeconds() <= 0 &&
+      !this.isLoading()
+  );
 
-    return `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`;
-  });
+  readonly formattedTimeRemaining = computed(() =>
+    this.formatSeconds(this.timeRemainingSeconds())
+  );
+
+  readonly formattedResendRemaining = computed(() =>
+    this.formatSeconds(this.resendRemainingSeconds())
+  );
 
   private readonly timerId: ReturnType<typeof setInterval>;
 
@@ -69,21 +83,19 @@ export class OtpService implements OnDestroy {
     }, 1000);
 
     effect(() => {
-      const expiration = this.expiresAt();
-      const now = this.currentTime();
-
-      if (!expiration) {
-        this.timeRemainingSeconds.set(0);
-        return;
-      }
-
-      const remainingMilliseconds =
-        expiration.getTime() - now.getTime();
+      const now = this.currentTime().getTime();
 
       this.timeRemainingSeconds.set(
-        Math.max(
-          0,
-          Math.floor(remainingMilliseconds / 1000)
+        this.calculateRemainingSeconds(
+          this.expiresAt(),
+          now
+        )
+      );
+
+      this.resendRemainingSeconds.set(
+        this.calculateRemainingSeconds(
+          this.resendAvailableAt(),
+          now
         )
       );
     });
@@ -95,38 +107,42 @@ export class OtpService implements OnDestroy {
 
     try {
       const callable = httpsCallable<
-        { email: string },
+        SendOtpRequest,
         SendOtpResponse
       >(
         functions,
-        'sendOTP'
+        'sendOtp'
       );
 
-      const result: HttpsCallableResult<SendOtpResponse> =
-        await callable({
-          email: email.trim().toLowerCase()
-        });
+      const result = await callable({
+        email: this.normalizeEmail(email)
+      });
 
-      const response = result.data;
+      const {
+        expiresInSeconds,
+        resendAvailableInSeconds
+      } = result.data;
 
-      if (!response.success) {
-        throw new Error(
-          response.message || 'Unable to send verification code.'
-        );
-      }
+      const now = Date.now();
 
-      if (response.expiresAt) {
-        this.expiresAt.set(
-          new Date(response.expiresAt)
-        );
-      }
+      this.expiresAt.set(
+        new Date(
+          now + expiresInSeconds * 1000
+        )
+      );
+
+      this.resendAvailableAt.set(
+        new Date(
+          now + resendAvailableInSeconds * 1000
+        )
+      );
 
       this.otpSent.set(true);
       this.attemptsRemaining.set(3);
     } catch (error) {
       const message = this.getErrorMessage(
         error,
-        'Unable to send verification code.'
+        'Unable to send the verification code.'
       );
 
       this.errorMessage.set(message);
@@ -144,38 +160,45 @@ export class OtpService implements OnDestroy {
     this.errorMessage.set('');
 
     try {
+      if (!this.otpSent()) {
+        throw new Error(
+          'Request a verification code first.'
+        );
+      }
+
       if (this.isExpired()) {
         throw new Error(
-          'Code has expired. Please request a new one.'
+          'The verification code has expired. Request a new code.'
+        );
+      }
+
+      if (!/^\d{6}$/.test(code.trim())) {
+        throw new Error(
+          'Enter the complete six-digit verification code.'
         );
       }
 
       const callable = httpsCallable<
-        {
-          email: string;
-          code: string;
-        },
+        VerifyOtpRequest,
         VerifyOtpResponse
       >(
         functions,
-        'verifyOTP'
+        'verifyOtp'
       );
 
-      const result: HttpsCallableResult<VerifyOtpResponse> =
-        await callable({
-          email: email.trim().toLowerCase(),
-          code
-        });
+      const result = await callable({
+        email: this.normalizeEmail(email),
+        code: code.trim()
+      });
 
-      const response = result.data;
-      const customToken =
-        response.customToken ?? response.token;
+      const {
+        customToken,
+        isNewUser
+      } = result.data;
 
-      if (!response.success || !customToken) {
-        this.decreaseAttempts();
-
+      if (!customToken) {
         throw new Error(
-          response.message || 'Invalid verification code.'
+          'The authentication token was not returned.'
         );
       }
 
@@ -184,19 +207,22 @@ export class OtpService implements OnDestroy {
         customToken
       );
 
-      const isNewUser = response.isNewUser ?? false;
-
       this.reset();
 
       return isNewUser;
     } catch (error) {
       const message = this.getErrorMessage(
         error,
-        'Invalid verification code.'
+        'Unable to verify the code.'
       );
 
+      if (this.isInvalidCodeError(error)) {
+        this.decreaseAttempts();
+      }
+
       if (
-        message.toLowerCase().includes('too many attempts')
+        message.toLowerCase().includes('too many') ||
+        message.toLowerCase().includes('maximum')
       ) {
         this.attemptsRemaining.set(0);
       }
@@ -211,7 +237,9 @@ export class OtpService implements OnDestroy {
   reset(): void {
     this.otpSent.set(false);
     this.expiresAt.set(null);
+    this.resendAvailableAt.set(null);
     this.timeRemainingSeconds.set(0);
+    this.resendRemainingSeconds.set(0);
     this.attemptsRemaining.set(3);
     this.errorMessage.set('');
     this.isLoading.set(false);
@@ -225,9 +253,52 @@ export class OtpService implements OnDestroy {
     clearInterval(this.timerId);
   }
 
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private calculateRemainingSeconds(
+    targetDate: Date | null,
+    currentTime: number
+  ): number {
+    if (!targetDate) {
+      return 0;
+    }
+
+    const remainingMilliseconds =
+      targetDate.getTime() - currentTime;
+
+    return Math.max(
+      0,
+      Math.ceil(remainingMilliseconds / 1000)
+    );
+  }
+
+  private formatSeconds(totalSeconds: number): string {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
+  }
+
   private decreaseAttempts(): void {
     this.attemptsRemaining.update(
       attempts => Math.max(0, attempts - 1)
+    );
+  }
+
+  private isInvalidCodeError(error: unknown): boolean {
+    if (!(error instanceof FunctionsError)) {
+      return false;
+    }
+
+    return (
+      error.code === 'functions/invalid-argument' ||
+      error.code === 'functions/permission-denied'
     );
   }
 
@@ -235,10 +306,28 @@ export class OtpService implements OnDestroy {
     error: unknown,
     fallback: string
   ): string {
-    if (error instanceof Error && error.message) {
-      return error.message;
+    if (error instanceof FunctionsError) {
+      return this.cleanFirebaseMessage(
+        error.message || fallback
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message
+    ) {
+      return this.cleanFirebaseMessage(
+        error.message
+      );
     }
 
     return fallback;
+  }
+
+  private cleanFirebaseMessage(message: string): string {
+    return message
+      .replace(/^Firebase:\s*/i, '')
+      .replace(/\s*\(functions\/[^)]+\)\.?$/i, '')
+      .trim();
   }
 }

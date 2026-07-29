@@ -6,7 +6,7 @@ import {
 
 setGlobalOptions(globalFunctionOptions);
 
-export * from './authentication';
+export * from './authentication/otp';
 export * from './identity';
 export * from './listings';
 export * from './payments';

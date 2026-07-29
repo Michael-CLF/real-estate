@@ -1,30 +1,20 @@
-import { UserRole } from './user-role.type';
-import { UserStatus } from './user-status.type';
-
-export type IdentityVerificationStatus =
-  | 'not_started'
-  | 'pending'
-  | 'verified'
-  | 'failed';
-
 export interface PlatformUser {
   id: string;
-
-  email: string;
-  phone: string | null;
 
   firstName: string;
   lastName: string;
   displayName: string;
 
-  roles: UserRole[];
-  status: UserStatus;
+  email: string;
+  phone: string | null;
+
+  photoURL?: string | null;
 
   emailVerified: boolean;
-  phoneVerified: boolean;
-  identityStatus: IdentityVerificationStatus;
 
-  createdAt: unknown;
-  updatedAt: unknown;
-  lastLoginAt: unknown | null;
+  status: 'active' | 'disabled';
+
+  createdAt: Date;
+  updatedAt: Date;
+  lastLoginAt: Date;
 }
