@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
+
+import { authGuard } from '../../core/authentication/auth.guard';
 import { AuthenticatedLayoutComponent } from '../../layout/layouts/authenticated-layout/authenticated-layout.component';
 
 export const SELLER_ROUTES: Routes = [
   {
     path: '',
     component: AuthenticatedLayoutComponent,
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
       {
         path: '',

@@ -57,6 +57,20 @@ export const routes: Routes = [
           )
       },
       {
+  path: 'register',
+  loadComponent: () =>
+    import('./features/authentication/pages/register/register.component').then(
+      (component) => component.RegisterComponent
+    )
+},
+{
+  path: 'sign-in',
+  loadComponent: () =>
+    import('./features/authentication/pages/sign-in/sign-in.component').then(
+      (component) => component.SignInComponent
+    )
+},
+      {
         path: 'homes',
         loadChildren: () =>
           import('./features/marketplace/marketplace.routes').then(

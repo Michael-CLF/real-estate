@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 
 import {
+  GoogleAuthProvider,
+  Unsubscribe,
   User,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
+  UserCredential,
+  onAuthStateChanged as firebaseOnAuthStateChanged,
+  signInWithPopup,
+  signOut
 } from 'firebase/auth';
 
 import { auth } from '../infrastructure/firebase/firebase';
@@ -19,27 +21,37 @@ export class AuthService {
     return auth.currentUser;
   }
 
-  onAuthStateChanged(callback: (user: User | null) => void): void {
-    onAuthStateChanged(auth, callback);
+  get currentUserUid(): string | null {
+    return auth.currentUser?.uid ?? null;
   }
 
-  async register(email: string, password: string) {
-    return createUserWithEmailAndPassword(
+  get isAuthenticated(): boolean {
+    return auth.currentUser !== null;
+  }
+
+  onAuthStateChanged(
+    callback: (user: User | null) => void
+  ): Unsubscribe {
+    return firebaseOnAuthStateChanged(
       auth,
-      email,
-      password
+      callback
     );
   }
 
-  async login(email: string, password: string) {
-    return signInWithEmailAndPassword(
+  async signInWithGoogle(): Promise<UserCredential> {
+    const provider = new GoogleAuthProvider();
+
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+
+    return signInWithPopup(
       auth,
-      email,
-      password
+      provider
     );
   }
 
-  async logout() {
-    return signOut(auth);
+  async logout(): Promise<void> {
+    await signOut(auth);
   }
 }

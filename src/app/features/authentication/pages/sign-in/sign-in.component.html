@@ -1,0 +1,193 @@
+<div class="sign-in-page">
+  <div class="sign-in-container">
+    <h1 class="page-title">Sign In to Your Account</h1>
+
+    <section class="sign-in-card">
+      @if (currentStep() === 'email') {
+        <form
+          class="sign-in-form"
+          [formGroup]="loginForm"
+          (ngSubmit)="sendOtpCode()"
+        >
+          <div class="form-field">
+            <label for="email">Email Address</label>
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email address"
+              autocomplete="email"
+              [disabled]="isLoading()"
+            />
+
+            @if (
+              emailControl.invalid &&
+              (emailControl.dirty || emailControl.touched)
+            ) {
+              <div class="field-error">
+                @if (emailControl.errors?.['required']) {
+                  <span>Email is required.</span>
+                }
+
+                @if (emailControl.errors?.['email']) {
+                  <span>Please enter a valid email address.</span>
+                }
+              </div>
+            }
+          </div>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="loginForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              Sending Code...
+            } @else {
+              Send Verification Code
+            }
+          </button>
+
+          <p class="divider-text">or continue with</p>
+
+          <button
+            type="button"
+            class="google-button"
+            [disabled]="isLoading()"
+            (click)="signInWithGoogle()"
+          >
+            <img
+              src="assets/images/google-logo.webp"
+              alt="Google"
+            />
+
+            <span>Continue with Google</span>
+          </button>
+
+          <p class="account-link">
+            Don't have an account?
+            <a routerLink="/register">Sign up</a>
+          </p>
+        </form>
+
+        @if (errorMessage()) {
+          <div class="error-alert" role="alert">
+            {{ errorMessage() }}
+          </div>
+        }
+      }
+
+      @if (currentStep() === 'code') {
+        <div class="otp-view">
+          <h2 class="card-title">Check Your Email</h2>
+
+          <p class="otp-description">
+            We sent a six-digit verification code to
+            <strong>{{ loginForm.controls.email.value }}</strong>
+          </p>
+
+          <div class="otp-inputs">
+            @for (digit of codeDigits(); track $index) {
+              <input
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="1"
+                autocomplete="one-time-code"
+                class="otp-input"
+                [id]="'code-' + $index"
+                [value]="digit"
+                [disabled]="isLoading()"
+                [attr.aria-label]="
+                  'Verification code digit ' + ($index + 1)
+                "
+                (input)="onCodeDigitInput($index, $event)"
+                (keydown)="onCodeDigitKeydown($index, $event)"
+                (paste)="
+                  $index === 0
+                    ? onCodePaste($event)
+                    : null
+                "
+              />
+            }
+          </div>
+
+          @if (!otpService.isExpired()) {
+            <p class="timer">
+              Code expires in
+              <strong>
+                {{ otpService.formattedTimeRemaining() }}
+              </strong>
+            </p>
+          } @else {
+            <p class="timer expired">
+              Your verification code has expired.
+            </p>
+          }
+
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="
+              isLoading() ||
+              codeDigits().join('').length !== 6 ||
+              otpService.isExpired()
+            "
+            (click)="verifyOtpCode()"
+          >
+            @if (isLoading()) {
+              Verifying...
+            } @else {
+              Verify Code
+            }
+          </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="isLoading()"
+            (click)="resendOtpCode()"
+          >
+            Didn't receive it? Resend code
+          </button>
+
+          <button
+            type="button"
+            class="text-button"
+            [disabled]="isLoading()"
+            (click)="goBackToEmail()"
+          >
+            Use a different email
+          </button>
+
+          @if (errorMessage()) {
+            <div class="error-alert" role="alert">
+              <span>{{ errorMessage() }}</span>
+
+              @if (otpService.attemptsRemaining() > 0) {
+                <span class="attempts">
+                  {{ otpService.attemptsRemaining() }}
+                  attempts remaining
+                </span>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (currentStep() === 'verifying') {
+        <div class="verifying-view">
+          <h2 class="card-title">Verifying Your Code</h2>
+
+          <div
+            class="loader"
+            aria-hidden="true"
+          ></div>
+
+          <p>Please wait while we sign you in.</p>
+        </div>
+      }
+    </section>
+  </div>
+</div>

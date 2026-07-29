@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { AuthState } from '../../../../../../core/authentication/auth.state';
 
 import { FirestoreService } from '../../../../../../core/firebase/firestore.service';
 
@@ -15,14 +16,22 @@ import { DashboardViewModel } from '../../../../models/dashboard-view.model';
 export class SellerDashboardService {
 
   private readonly firestore = inject(FirestoreService);
-
+  private readonly authState = inject(AuthState);
   private readonly companyId = 'realestateos-main';
 
   async getDashboard(): Promise<DashboardViewModel> {
 
-    const listings = await this.firestore.getAll<Listing>(
-      `companies/${this.companyId}/listings`
-    );
+    const currentUserId = this.authState.uid;
+
+    if (!currentUserId) {
+      throw new Error('No authenticated seller.');
+    }
+
+    const listings = (
+      await this.firestore.getAll<Listing>(
+        `companies/${this.companyId}/listings`
+      )
+    ).filter(listing => listing.sellerId === currentUserId);
 
     const offers = await this.firestore.getAll<Offer>(
       `companies/${this.companyId}/offers`

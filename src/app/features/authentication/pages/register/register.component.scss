@@ -1,0 +1,87 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+}
+
+.register-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  color: #154360;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.register-form {
+  max-width: 520px;
+  margin: 2rem auto 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+label {
+  color: #154360;
+}
+
+input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #c7d0d9;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.create-btn{
+  background-color: #154360;
+  color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.create-btn:hover:not(:disabled) {
+  background: #10344d;
+}
+
+.create-btn:disabled {
+  background: #b8c2cc;
+  color: #f5f5f5;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: .8;
+}
+
+.sign-in-link{
+  text-align: center;
+}
+
+.field-error{
+  color: #c00000;
+  font-weight: 600;
+  font-size: .95rem;
+}
+
