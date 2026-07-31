@@ -14,9 +14,9 @@ import {
   RouterLink
 } from '@angular/router';
 
-import { AuthService } from '../../../../core/authentication/auth.service';
-import { OtpService } from '../../../../core/authentication/otp.service';
-import { FirebaseUserRepository } from '../../../../core/firebase/firebase-user.repository';
+import { AuthService } from '../../../../core/authentication/services/auth.service';
+import { OtpService } from '../../../../core/authentication/services/otp.service';
+import { FirebaseUserRepository } from '../../../../core/infrastructure/firebase/firebase-user.repository';
 
 @Component({
   selector: 'app-sign-in',
@@ -336,7 +336,7 @@ export class SignInComponent {
         const lastName = nameParts.slice(1).join(' ');
 
         await this.userRepository.create({
-          id: firebaseUser.uid,
+          uid: firebaseUser.uid,
 
           firstName,
           lastName,

@@ -180,7 +180,7 @@
             {{
               loading
                 ? 'Sending Code...'
-                : 'Create an Account'
+                : 'Creating an Account'
             }}
           </button>
         </div>
@@ -194,21 +194,22 @@
       </form>
     } @else {
       <div class="register-header otp-header">
-        <p class="eyebrow">
-          Email Verification
-        </p>
-
-        <h1>
+       
+        <h1 class="title">
           Enter Your Code
         </h1>
-
-        <p class="intro">
-          We sent a six-digit verification code to
-          <strong>
-            {{ pendingRegistration?.email }}
-          </strong>
-        </p>
       </div>
+        @if (errorMessage) {
+          <p class="form-error">
+            {{ errorMessage }}
+          </p>
+        }
+
+        @if (successMessage) {
+          <p class="form-success">
+            {{ successMessage }}
+          </p>
+        }
 
       <form
         class="register-form otp-form"
@@ -262,17 +263,6 @@
           </p>
         }
 
-        @if (errorMessage) {
-          <p class="form-error">
-            {{ errorMessage }}
-          </p>
-        }
-
-        @if (successMessage) {
-          <p class="form-success">
-            {{ successMessage }}
-          </p>
-        }
 
         <div class="button-row">
           <button

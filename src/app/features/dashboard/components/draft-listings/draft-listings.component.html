@@ -1,0 +1,34 @@
+<section class="draft-listings">
+
+  <header class="section-header">
+    <h2>Draft Listings</h2>
+    <p>Continue working on unfinished listings.</p>
+  </header>
+
+  @for (listing of listings(); track listing.Uid) {
+
+    <article class="listing-card">
+
+      <div class="listing-info">
+
+        <h3>{{ listing.addressLine1 }}</h3>
+
+        <p>
+          {{ listing.city }}, {{ listing.state }}
+        </p>
+
+      </div>
+
+      <a
+        class="continue-button"
+        [routerLink]="['/seller/listings', listing.Uid]">
+
+        Continue Listing
+
+      </a>
+
+    </article>
+
+  }
+
+</section>

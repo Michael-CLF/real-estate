@@ -4,7 +4,7 @@ import {
   computed,
   input
 } from '@angular/core';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import {
@@ -16,7 +16,6 @@ import {
   standalone: true,
   imports: [
     CurrencyPipe,
-    DecimalPipe,
     RouterLink
   ],
   templateUrl: './listing-card.component.html',

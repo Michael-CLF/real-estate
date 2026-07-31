@@ -1,5 +1,5 @@
-import { ListingStatus } from './listing-status.type';
-import { PropertyType } from './property-type.type';
+import { ListingStatus } from '../../listings/models/listing-status.type';
+import { PropertyType } from '../../property/models/property-type.type';
 
 export type ListingSortOption =
   | 'newest'
@@ -44,7 +44,7 @@ export interface ListingSearchResult {
 
 export interface MarketplaceListingSummary {
   id: string;
-  sellerId: string;
+  sellerUid: string;
 
   title: string;
   propertyType: PropertyType;

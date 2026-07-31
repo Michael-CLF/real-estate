@@ -28,7 +28,7 @@
 
 .listing-metrics-card__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
 }
 
@@ -47,16 +47,16 @@
 
 .metric__label {
   display: block;
+  margin-bottom: .5rem;
   font-size: .85rem;
   color: #6b7280;
-  margin-bottom: .5rem;
 }
 
 .metric__value {
   font-size: 2rem;
   font-weight: 700;
-  color: #111827;
   line-height: 1.1;
+  color: #111827;
 }
 
 .metric__helper {
@@ -67,7 +67,9 @@
 }
 
 @media (max-width: 768px) {
+
   .listing-metrics-card__grid {
     grid-template-columns: 1fr;
   }
+
 }

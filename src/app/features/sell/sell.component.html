@@ -1,1 +1,41 @@
-<p>sell works!</p>
+<section class="sell">
+
+  <header class="sell__header">
+
+    <div>
+
+      <h1>My Listings</h1>
+
+      <p>
+        Manage your draft, active and sold listings.
+      </p>
+
+    </div>
+
+    <a
+      class="new-listing-button"
+      routerLink="/sell/new">
+
+      + New Listing
+
+    </a>
+
+  </header>
+
+  <nav class="listing-tabs">
+
+    <button class="active">Draft</button>
+
+    <button>Active</button>
+
+    <button>Under Contract</button>
+
+    <button>Sold</button>
+
+  </nav>
+
+  <app-draft-listings
+    [listings]="dashboardState.state().draftListings">
+  </app-draft-listings>
+
+</section>

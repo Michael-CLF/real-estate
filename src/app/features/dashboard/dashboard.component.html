@@ -1,69 +1,80 @@
-<div class="seller-dashboard">
+<section class="dashboard">
 
-  <header class="seller-dashboard__header">
+  @if (dashboardState.state().showWelcome) {
 
-    <div>
-      <h1>Seller Dashboard</h1>
-      <p>
-        Manage your property, monitor activity, and respond to buyers.
-      </p>
-    </div>
+  <header class="dashboard__header">
 
-    <button
-      type="button"
-      class="manage-listing-button">
-      Manage Listing
-    </button>
+    <h1>Welcome to Your NavStreet Dashboard</h1>
+
+    <p>
+      Buy or sell real estate with confidence. What would you like to do today?
+    </p>
 
   </header>
 
-  @if (loading) {
+  <section class="dashboard__welcome-actions">
 
-    <div class="seller-dashboard__loading">
-      <h2>Loading Dashboard...</h2>
-      <p>Please wait while we load your listing.</p>
-    </div>
+    <a class="action-card" routerLink="/homes">
 
-  } @else if (errorMessage) {
+      <div class="action-card__icon">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
 
-    <div class="seller-dashboard__loading">
-      <h2>Dashboard unavailable</h2>
-      <p>{{ errorMessage }}</p>
-    </div>
+      <h2 class="card-title">Browse Properties</h2>
 
-  } @else {
+      <p>
+        Search homes, save favorites, and begin your home search.
+      </p>
 
-    @if (propertySummary) {
-      <app-property-summary-card
-        [property]="propertySummary">
-      </app-property-summary-card>
-    }
+    </a>
 
-    <app-listing-metrics-card
-      [metrics]="listingMetrics">
-    </app-listing-metrics-card>
+    <a class="action-card" routerLink="/seller/listings/new">
 
-    <section class="seller-dashboard__card-grid">
+      <div class="action-card__icon">
+        <i class="fa-solid fa-house-circle-plus"></i>
+      </div>
 
-      <app-next-steps-card
-        [steps]="nextSteps">
-      </app-next-steps-card>
+      <h2 class="card-title">List a Property</h2>
 
-        <app-activity-card
-        [activities]="recentActivity">
-      </app-activity-card>
+      <p>
+        Create your first property listing and start selling today.
+      </p>
 
-      <app-upcoming-showing-card
-        [showing]="upcomingShowing">
-      </app-upcoming-showing-card>
+    </a>
 
-      <app-latest-offer-card
-        [offer]="latestOffer">
-      </app-latest-offer-card>
+  </section>
 
+  <section class="dashboard-placeholder">
 
-    </section>
+    <h3 class="info">Your Activity</h3>
+
+    <p>
+      As you begin using NavStreet, this dashboard will automatically display:
+    </p>
+
+    <ul>
+      <li>Draft Listings</li>
+      <li>Active Listings</li>
+      <li>Saved Homes</li>
+      <li>Messages</li>
+      <li>Offers</li>
+      <li>Upcoming Showings</li>
+      <li>Recent Activity</li>
+      <li>Property Metrics</li>
+    </ul>
+
+  </section>
 
   }
 
-</div>
+  @if (dashboardState.state().hasDraftListings) {
+
+  <app-draft-listings [listings]="dashboardState.state().draftListings">
+  </app-draft-listings>
+
+  <app-saved-homes [savedHomes]="dashboardState.state().savedProperties">
+  </app-saved-homes>
+
+  }
+
+</section>

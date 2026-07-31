@@ -20,7 +20,7 @@ import {
 import {
   PROPERTY_TYPE_OPTIONS,
   PropertyType
-} from '../../../../../core/domains/marketplace/models/property-type.type';
+} from '../../../../../core/domains/property/models/property-type.type';
 
 interface SearchFilterFormValue {
   location: string;

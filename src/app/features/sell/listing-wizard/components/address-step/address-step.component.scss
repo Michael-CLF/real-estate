@@ -1,0 +1,52 @@
+.wizard-step {
+  max-width: 900px;
+}
+
+h2 {
+  margin-bottom: .5rem;
+  color: #154360;
+}
+
+p {
+  margin-bottom: 2rem;
+  color: #64748b;
+}
+
+select {
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+option {
+  font-size: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  margin-bottom: .5rem;
+  font-weight: 600;
+}
+
+input {
+  padding: .85rem 1rem;
+  border: 1px solid #dbe3ec;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.three-column {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .three-column {
+    grid-template-columns: 1fr;
+  }
+}

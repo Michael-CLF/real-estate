@@ -1,0 +1,53 @@
+.draft-listings {
+  margin-top: 2rem;
+}
+
+.section-header {
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.section-header p {
+  margin: .5rem 0 0;
+  color: #64748b;
+}
+
+.listing-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.listing-info h3 {
+  margin: 0;
+}
+
+.listing-info p {
+  margin: .35rem 0 0;
+  color: #64748b;
+}
+
+.continue-button {
+  text-decoration: none;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+
+  .listing-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}

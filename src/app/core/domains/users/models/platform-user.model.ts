@@ -1,5 +1,5 @@
 export interface PlatformUser {
-  id: string;
+  uid: string;
 
   firstName: string;
   lastName: string;

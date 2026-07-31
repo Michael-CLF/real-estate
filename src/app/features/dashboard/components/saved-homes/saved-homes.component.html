@@ -1,0 +1,52 @@
+<p>saved-homes works!</p>
+<section class="saved-homes">
+
+  <header class="section-header">
+    <h2>Saved Homes</h2>
+  </header>
+
+  @if (savedHomes().length === 0) {
+
+    <div class="empty-state">
+
+      <p>You haven't saved any homes yet.</p>
+
+      <a
+        routerLink="/search"
+        class="browse-button">
+
+        Browse Properties
+
+      </a>
+
+    </div>
+
+  } @else {
+
+    @for (home of savedHomes(); track home.listingUid) {
+
+      <article class="saved-home-card">
+
+        <div>
+
+          <h3>{{ home.address }}</h3>
+
+          <p>
+            {{ home.city }}, {{ home.state }}
+          </p>
+
+        </div>
+
+        <div class="price">
+
+          {{ home.price | currency }}
+
+        </div>
+
+      </article>
+
+    }
+
+  }
+
+</section>

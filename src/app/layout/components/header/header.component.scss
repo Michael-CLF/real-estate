@@ -149,6 +149,12 @@
   }
 }
 
+.site-header__logo {
+  width: 260px;
+  height: auto;
+  display: block;
+}
+
 @media (max-width: 1050px) {
   .site-header {
     &__container {

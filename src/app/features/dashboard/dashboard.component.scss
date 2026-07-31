@@ -1,126 +1,81 @@
-:host {
-  display: block;
-}
-
-.seller-dashboard {
-  width: 100%;
-  max-width: 1500px;
+.dashboard {
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  padding: 3rem 2rem 5rem;
 }
 
-.seller-dashboard__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+.dashboard__header {
+  margin-bottom: 3rem;
 }
 
-.seller-dashboard__header h1 {
+.dashboard__header h1 {
   margin: 0;
-  color: #0f172a;
-  font-size: 2rem;
-  font-weight: 750;
-  line-height: 1.15;
-}
-
-.seller-dashboard__header p {
-  margin: 0.45rem 0 0;
-  color: #64748b;
-}
-
-.manage-listing-button {
-  flex-shrink: 0;
-  min-height: 46px;
-  padding: 0.8rem 1.4rem;
-  border: 0;
-  border-radius: 10px;
- background-color: #154360;
-  color: #ffffff;
-  font: inherit;
+  font-size: clamp(2.2rem, 4vw, 3rem);
   font-weight: 700;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  color: #154360;
 }
 
-.manage-listing-button:hover {
-  background: #034F3B;
-  transform: translateY(-1px);
+.dashboard__header p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 700px;
+  line-height: 1.6;
 }
 
-app-property-summary-card,
-app-listing-metrics-card,
-app-next-steps-card,
-app-upcoming-showing-card,
-app-latest-offer-card,
-app-activity-card {
-  display: block;
-  width: 100%;
-  min-width: 0;
-}
-
-/* Listing performance remains full width */
-
-app-listing-metrics-card {
-  width: 100%;
-}
-
-/* The remaining four dashboard sections use half-width cards */
-
-.seller-dashboard__card-grid {
+.dashboard__welcome-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 40px;
 }
 
-.seller-dashboard__card-grid > * {
-  min-width: 0;
-  height: 100%;
+.action-card {
+  display: block;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  border-radius: 18px;
+  text-decoration: none;
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease;
 }
 
-/* Keeps paired cards aligned even if their content lengths differ */
-
-.seller-dashboard__card-grid app-next-steps-card,
-.seller-dashboard__card-grid app-upcoming-showing-card,
-.seller-dashboard__card-grid app-latest-offer-card,
-.seller-dashboard__card-grid app-activity-card {
-  display: flex;
+.action-card:hover {
+  transform: translateY(-6px);
+  border-color: #154360;
+  box-shadow: 0 14px 30px rgba(0,0,0,.08);
 }
 
-.seller-dashboard__card-grid app-next-steps-card > *,
-.seller-dashboard__card-grid app-upcoming-showing-card > *,
-.seller-dashboard__card-grid app-latest-offer-card > *,
-.seller-dashboard__card-grid app-activity-card > * {
-  width: 100%;
+.action-card h2 {
+  margin: 0 0 1rem;
+  color: #154360;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
-/* Collapse to one column on smaller screens */
+.action-card p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.7;
+  font-size: 1rem;
+}
 
-@media (max-width: 1050px) {
-  .seller-dashboard__card-grid {
+.info {
+  color: #154360;
+  font-size: 2rem;
+}
+
+@media (max-width: 768px) {
+
+  .dashboard {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .dashboard__welcome-actions {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 700px) {
-  .seller-dashboard {
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .seller-dashboard__header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-
-  .manage-listing-button {
-    width: 100%;
-  }
 }

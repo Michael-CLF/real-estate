@@ -36,7 +36,7 @@ import {
 } from '../../components/search-filter-bar/search-filter-bar.component';
 import {
   PropertyType
-} from '../../../../../core/domains/marketplace/models/property-type.type';
+} from '../../../../../core/domains/property/models/property-type.type';
 
 interface SearchResultsViewModel {
   result: ListingSearchResult;

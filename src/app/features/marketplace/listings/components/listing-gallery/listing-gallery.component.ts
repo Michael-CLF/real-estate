@@ -8,7 +8,7 @@ import {
 
 import {
   ListingPhoto
-} from '../../../../../core/domains/marketplace/models/listing-photo.model';
+} from '../../../../../core/domains/listings/models/listing-photo.model';
 
 @Component({
   selector: 'app-listing-gallery',

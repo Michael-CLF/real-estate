@@ -12,11 +12,11 @@ export abstract class MarketplaceListingRepository {
   ): Observable<ListingSearchResult>;
 
   abstract getListingById(
-    listingId: string
+    listingUid: string
   ): Observable<MarketplaceListing | null>;
 
   abstract getListingsBySellerId(
-    sellerId: string
+    sellerUid: string
   ): Observable<MarketplaceListing[]>;
 
   abstract getFeaturedListings(

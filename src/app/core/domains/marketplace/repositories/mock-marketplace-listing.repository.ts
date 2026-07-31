@@ -15,8 +15,8 @@ export class MockMarketplaceListingRepository
 
   private readonly listings: MarketplaceListing[] = [
     {
-      id: 'raleigh-modern-home-001',
-      sellerId: 'seller-demo-001',
+    uid: 'raleigh-modern-home-001',
+      sellerUid: 'seller-demo-001',
 
       status: 'published',
       propertyType: 'single_family',
@@ -62,8 +62,8 @@ export class MockMarketplaceListingRepository
       updatedAt: new Date('2026-07-20T14:00:00')
     },
     {
-      id: 'wake-forest-traditional-home-002',
-      sellerId: 'seller-demo-002',
+      uid: 'wake-forest-traditional-home-002',
+      sellerUid: 'seller-demo-002',
 
       status: 'published',
       propertyType: 'single_family',
@@ -109,8 +109,8 @@ export class MockMarketplaceListingRepository
       updatedAt: new Date('2026-07-18T15:30:00')
     },
     {
-      id: 'durham-townhouse-003',
-      sellerId: 'seller-demo-001',
+      uid: 'durham-townhouse-003',
+      sellerUid: 'seller-demo-001',
 
       status: 'published',
       propertyType: 'townhouse',
@@ -247,10 +247,10 @@ export class MockMarketplaceListingRepository
   }
 
   override getListingById(
-    listingId: string
+    listingUid: string
   ): Observable<MarketplaceListing | null> {
     const listing = this.listings.find(
-      currentListing => currentListing.id === listingId
+      currentListing => currentListing.uid === listingUid
     );
 
     return of(listing ?? null);
@@ -261,7 +261,7 @@ export class MockMarketplaceListingRepository
   ): Observable<MarketplaceListing[]> {
     return of(
       this.listings.filter(
-        listing => listing.sellerId === sellerId
+        listing => listing.sellerUid === sellerId
       )
     );
   }
@@ -328,8 +328,8 @@ export class MockMarketplaceListingRepository
     listing: MarketplaceListing
   ): MarketplaceListingSummary {
     return {
-      id: listing.id,
-      sellerId: listing.sellerId,
+      id: listing.uid,
+      sellerUid: listing.sellerUid,
 
       title: listing.title,
       propertyType: listing.propertyType,

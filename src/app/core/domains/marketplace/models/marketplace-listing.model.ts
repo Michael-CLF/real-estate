@@ -1,6 +1,6 @@
-import { ListingPhoto } from './listing-photo.model';
-import { ListingStatus } from './listing-status.type';
-import { PropertyType } from './property-type.type';
+import { ListingPhoto } from '../../listings/models/listing-photo.model';
+import { ListingStatus } from '../../listings/models/listing-status.type';
+import { PropertyType } from '../../property/models/property-type.type';
 
 export interface ListingAddress {
   addressLine1: string;
@@ -22,8 +22,8 @@ export interface ListingLocation {
 }
 
 export interface MarketplaceListing {
-  id: string;
-  sellerId: string;
+  uid: string;
+  sellerUid: string;
 
   status: ListingStatus;
   propertyType: PropertyType;

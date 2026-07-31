@@ -26,7 +26,7 @@ export interface Property {
   id?: string;
   location?: Location;
   media: Media;
-  ownerUserId: string;
+  ownerUserUid: string;
   parcel: Parcel;
   parking: Parking;
   propertyType: PropertyType;

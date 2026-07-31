@@ -16,10 +16,11 @@ import {
 
 import {
   OtpService
-} from '../../../../core/authentication/otp.service';
+} from '../../../../core/authentication/services/otp.service';
 
 import { auth } from '../../../../core/infrastructure/firebase/firebase';
-import { FirebaseUserRepository } from '../../../../core/firebase/firebase-user.repository';
+import { FirebaseUserRepository } from "../../../../core/infrastructure/firebase/firebase-user.repository"
+
 
 interface PendingRegistration {
   firstName: string;
@@ -251,7 +252,11 @@ export class RegisterComponent {
         code
       );
 
+      console.log('STEP 1');
+
       const firebaseUser = auth.currentUser;
+
+      console.log('STEP 2', firebaseUser);
 
       if (!firebaseUser) {
         throw new Error(
@@ -265,8 +270,11 @@ export class RegisterComponent {
         );
 
       if (!existingUser) {
+        console.log('Creating Firestore user...');
+
+        console.log('STEP 3A', existingUser);
         await this.userRepository.create({
-          id: firebaseUser.uid,
+          uid: firebaseUser.uid,
 
           firstName: this.pendingRegistration.firstName,
           lastName: this.pendingRegistration.lastName,
@@ -286,15 +294,29 @@ export class RegisterComponent {
           updatedAt: new Date(),
           lastLoginAt: new Date()
         });
+        console.log('STEP 3B - User created');
       }
+
+      console.log('STEP 4');
 
       sessionStorage.removeItem(
         'pendingRegistration'
       );
 
-      await this.router.navigate([
+      const navigated = await this.router.navigate([
         '/dashboard'
       ]);
+
+      console.log('Navigation result:', navigated);
+      console.log('Current URL:', this.router.url);
+
+
+      if (!firebaseUser) {
+        throw new Error(
+          'Authentication succeeded but no Firebase user was found.'
+        );
+      }
+
     } catch (error) {
       console.error(
         'Unable to verify registration code:',
@@ -312,38 +334,38 @@ export class RegisterComponent {
   }
 
   async resendCode(): Promise<void> {
-  if (
-    !this.pendingRegistration ||
-    !this.canResend ||
-    this.loading
-  ) {
-    return;
+    if (
+      !this.pendingRegistration ||
+      !this.canResend ||
+      this.loading
+    ) {
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      await this.otpService.sendOtp(
+        this.pendingRegistration.email
+      );
+
+      this.otpForm.reset();
+
+      this.successMessage =
+        'A new verification code has been sent.';
+    } catch (error) {
+      this.errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'We could not resend the code.';
+    } finally {
+      this.loading = false;
+      this.changeDetectorRef.detectChanges();
+    }
   }
 
-  this.loading = true;
-  this.errorMessage = '';
-  this.successMessage = '';
-
-  try {
-    await this.otpService.sendOtp(
-      this.pendingRegistration.email
-    );
-
-    this.otpForm.reset();
-
-    this.successMessage =
-      'A new verification code has been sent.';
-  } catch (error) {
-    this.errorMessage =
-      error instanceof Error
-        ? error.message
-        : 'We could not resend the code.';
-  } finally {
-    this.loading = false;
-    this.changeDetectorRef.detectChanges();
-  }
-}
- 
   changeEmail(): void {
     this.otpService.reset();
     this.otpForm.reset();

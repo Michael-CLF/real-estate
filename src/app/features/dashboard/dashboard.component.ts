@@ -1,54 +1,35 @@
 import {
-  ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
-  OnInit,
-  inject
+  inject,
+  OnInit
 } from '@angular/core';
-import {
-  PropertySummary,
-  PropertySummaryCardComponent
-} from './components/property-summary-card/property-summary-card.component';
 
-import {
-  ListingMetric,
-  ListingMetricsCardComponent
-} from './components/listing-metrics-card/listing-metrics-card.component';
+import { RouterLink } from '@angular/router';
 
-import {
-  NextStep,
-  NextStepsCardComponent
-} from './components/next-steps-card/next-steps-card.component';
+import { DraftListingsComponent } from './components/draft-listings/draft-listings.component';
+import { DashboardStateService } from './services/dashboard-state.service';
+import { SavedHomesComponent } from './components/saved-homes/saved-homes.component';
 
-import {
-  UpcomingShowing,
-  UpcomingShowingCardComponent
-} from './components/upcoming-showing-card/upcoming-showing-card.component';
-
-import {
-  LatestOffer,
-  LatestOfferCardComponent
-} from './components/latest-offer-card/latest-offer-card.component';
-
-import {
-  ActivityItem,
-  ActivityCardComponent
-} from './components/activity-card/activity-card.component';
-
-import { DashboardViewModel } from '../../features/seller/models/dashboard-view.model';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    PropertySummaryCardComponent,
-    ListingMetricsCardComponent,
-    NextStepsCardComponent,
-    UpcomingShowingCardComponent,
-    LatestOfferCardComponent,
-    ActivityCardComponent
+    RouterLink,
+    DraftListingsComponent,
+    SavedHomesComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent  {
+export class DashboardComponent implements OnInit {
+
+  protected readonly dashboardState = inject(DashboardStateService);
+
+  async ngOnInit(): Promise<void> {
+    await this.dashboardState.load();
+  }
+
 }
