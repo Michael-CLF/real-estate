@@ -1,1 +1,89 @@
-<p>pricing-step works!</p>
+<section class="wizard-step">
+  <div class="pricing-header">
+    <h2>Pricing</h2>
+    <p>Set the asking price for your property.</p>
+  </div>
+
+  <form [formGroup]="form">
+    <div class="pricing-grid">
+      <div class="pricing-entry">
+        <label for="listPrice">Listing Price</label>
+
+        <div class="currency-input">
+          <span class="currency-input__symbol">$</span>
+
+          <input
+            id="listPrice"
+            type="number"
+            formControlName="listPrice"
+            min="1"
+            max="1000000000"
+            step="1000"
+            placeholder="425000">
+        </div>
+
+        <p class="field-help">
+          Enter the price you want buyers to see on your listing.
+        </p>
+
+        @if (
+          form.controls.listPrice.touched &&
+          form.controls.listPrice.hasError('required')
+        ) {
+          <p class="field-error">
+            Listing price is required.
+          </p>
+        }
+
+        @if (
+          form.controls.listPrice.touched &&
+          form.controls.listPrice.hasError('min')
+        ) {
+          <p class="field-error">
+            Enter a valid listing price.
+          </p>
+        }
+
+        @if (
+          form.controls.listPrice.touched &&
+          form.controls.listPrice.hasError('max')
+        ) {
+          <p class="field-error">
+            Listing price cannot exceed $1 billion.
+          </p>
+        }
+      </div>
+
+      <aside class="pricing-summary">
+        <span class="pricing-summary__label">
+          Your Listing Price
+        </span>
+
+        <strong class="pricing-summary__price">
+          {{ formattedListPrice }}
+        </strong>
+
+        <div class="pricing-summary__divider"></div>
+
+        <div class="pricing-summary__detail">
+          <span>Price per square foot</span>
+          <strong>{{ pricePerSquareFoot }}</strong>
+        </div>
+      </aside>
+    </div>
+
+    <div class="pricing-note">
+      <div class="pricing-note__icon">i</div>
+
+      <div>
+        <strong>You control your asking price.</strong>
+
+        <p>
+          Your listing price will be displayed to buyers when your property
+          is published. You can update your asking price later from your
+          seller dashboard.
+        </p>
+      </div>
+    </div>
+  </form>
+</section>

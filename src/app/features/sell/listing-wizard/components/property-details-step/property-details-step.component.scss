@@ -1,0 +1,137 @@
+.wizard-step {
+  width: 100%;
+}
+
+.wizard-step h2 {
+  margin: 0 0 .5rem;
+  color: #154360;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.1;
+}
+
+.step-description {
+  margin: 0 0 2rem;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.three-column {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: .75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.field input,
+.field select {
+  min-height: 48px;
+}
+
+.field textarea {
+  min-height: 160px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #154360;
+  outline: 2px solid rgba(21, 67, 96, .12);
+  outline-offset: 1px;
+}
+
+.optional {
+  color: #64748b;
+  font-size: .875rem;
+  font-weight: 400;
+}
+
+.input-with-suffix {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-with-suffix input {
+  min-width: 0;
+  border-radius: 8px 0 0 8px;
+}
+
+.input-with-suffix span {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  border: 1px solid #cbd5e1;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.description-field {
+  margin-top: .25rem;
+}
+
+.description-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.character-count {
+  margin-left: auto;
+  color: #64748b;
+  font-size: .8rem;
+  white-space: nowrap;
+}
+
+.field-error {
+  margin: .25rem 0 0;
+  color: #c00000;
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .three-column {
+    grid-template-columns: 1fr;
+  }
+
+  .description-footer {
+    flex-direction: column;
+  }
+
+  .character-count {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}

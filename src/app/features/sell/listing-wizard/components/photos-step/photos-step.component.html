@@ -1,1 +1,94 @@
-<p>photos-step works!</p>
+<section class="wizard-step">
+    <h2>Property Photos</h2>
+
+    <p>
+        Add photos that show buyers what makes your property special.
+        The first photo will be used as the primary listing photo.
+    </p>
+
+    <div class="photo-upload" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+
+        <div class="photo-upload__icon">
+            +
+        </div>
+
+        <h3>Add Property Photos</h3>
+
+        <p>
+            Drag and drop photos here, or choose photos from your computer.
+        </p>
+
+        <label class="photo-upload__button">
+            Choose Photos
+
+            <input type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onFilesSelected($event)">
+        </label>
+
+        <span class="photo-upload__limit">
+            {{ photos().length }} of {{ maxPhotos }} photos
+        </span>
+        @if (isProcessing()) {
+        <p class="photo-processing">
+            Optimizing photos...
+        </p>
+        }
+
+        @if (errorMessage()) {
+        <p class="photo-error">
+            {{ errorMessage() }}
+        </p>
+        }
+    </div>
+
+    @if (photos().length > 0) {
+    <div class="photo-section-header">
+        <div>
+            <h3>Your Photos</h3>
+
+            <p>
+                Choose the primary photo buyers will see first.
+            </p>
+        </div>
+    </div>
+
+    <div class="photo-grid">
+        @for (photo of photos(); track photo.id) {
+        <article class="photo-card" [class.photo-card--primary]="photo.isPrimary">
+
+            <div class="photo-card__image">
+                <img [src]="photo.thumbnail.previewUrl" [alt]="photo.originalFileName">
+
+                @if (photo.isPrimary) {
+                <span class="photo-card__badge">
+                    Primary Photo
+                </span>
+                }
+
+                <button type="button" class="photo-card__remove" aria-label="Remove photo"
+                    (click)="removePhoto(photo.id)">
+                    ×
+                </button>
+            </div>
+
+            <div class="photo-card__footer">
+                @if (!photo.isPrimary) {
+                <button type="button" class="photo-card__primary-button" (click)="setPrimary(photo.id)">
+                    Make Primary
+                </button>
+                } @else {
+                <span class="photo-card__primary-label">
+                    Primary listing photo
+                </span>
+                }
+
+                <span class="photo-card__details">
+                    WebP ·
+                    {{ photo.fullImage.width }} × {{ photo.fullImage.height }} ·
+                    {{ formatFileSize(photo.fullImage.size) }}
+                </span>
+            </div>
+        </article>
+        }
+    </div>
+    }
+</section>

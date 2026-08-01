@@ -1,34 +1,77 @@
 <section class="draft-listings">
-
   <header class="section-header">
-    <h2>Draft Listings</h2>
-    <p>Continue working on unfinished listings.</p>
+    <div>
+      <h2>Draft Listings</h2>
+      <p>Continue working on unfinished listings.</p>
+    </div>
   </header>
 
-  @for (listing of listings(); track listing.Uid) {
+  @if (listings().length > 0) {
+    <div class="draft-listings__grid">
+      @for (listing of listings(); track listing.Uid) {
+        <article class="listing-card">
+          <div class="listing-card__content">
+            <div class="listing-card__header">
+              <div>
+                <span class="draft-badge">Draft</span>
+                <h3>{{ listing.addressLine1 }}</h3>
+                <p class="location">
+                  {{ listing.city }}, {{ listing.state }} {{ listing.zipCode }}
+                </p>
+              </div>
+            </div>
 
-    <article class="listing-card">
+            <div class="progress">
+              <div class="progress__header">
+                <span>Listing progress</span>
+                <strong>{{ listing.completionPercent ?? 0 }}%</strong>
+              </div>
 
-      <div class="listing-info">
+              <div
+                class="progress__track"
+                role="progressbar"
+                aria-label="Listing completion"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="listing.completionPercent ?? 0">
+                <div
+                  class="progress__bar"
+                  [style.width.%]="listing.completionPercent ?? 0">
+                </div>
+              </div>
+            </div>
 
-        <h3>{{ listing.addressLine1 }}</h3>
+            <div class="draft-details">
+              <div class="draft-detail">
+                <span class="draft-detail__label">Next step</span>
+                <strong>{{ getStepLabel(listing.draftStep) }}</strong>
+              </div>
 
-        <p>
-          {{ listing.city }}, {{ listing.state }}
-        </p>
+              <div class="draft-detail">
+                <span class="draft-detail__label">Last updated</span>
+                <strong>{{ listing.updatedAt | date:'MMM d, y' }}</strong>
+              </div>
+            </div>
+          </div>
 
-      </div>
-
-      <a
-        class="continue-button"
-        [routerLink]="['/seller/listings', listing.Uid]">
-
-        Continue Listing
-
+          <div class="listing-card__actions">
+            <a
+              class="continue-button"
+              [routerLink]="['/sell/new']"
+              [queryParams]="{ listingId: listing.Uid }">
+              Continue Listing
+            </a>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <h3>No draft listings</h3>
+      <p>When you start a new listing, your unfinished listing will appear here.</p>
+      <a routerLink="/sell/new" class="new-listing-button">
+        Start a New Listing
       </a>
-
-    </article>
-
+    </div>
   }
-
 </section>

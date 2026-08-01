@@ -1,8 +1,29 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import {
+  CommonModule
+} from '@angular/common';
+import {
+  Component,
+  effect,
+  inject,
+  input,
+  output
+} from '@angular/core';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 
 import { ZipCodeService } from '../../../../../core/infrastructure/zip/zip-code.service';
+
+export interface AddressFormValue {
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  county: string;
+}
 
 @Component({
   selector: 'app-address-step',
@@ -15,9 +36,13 @@ import { ZipCodeService } from '../../../../../core/infrastructure/zip/zip-code.
   styleUrl: './address-step.component.scss'
 })
 export class AddressStepComponent {
-
   private readonly fb = inject(FormBuilder);
   private readonly zipCodeService = inject(ZipCodeService);
+
+  readonly initialValue = input<AddressFormValue | null>(null);
+
+  readonly validityChange = output<boolean>();
+  readonly valueChange = output<AddressFormValue>();
 
   readonly states = [
     { code: 'AL', name: 'Alabama' },
@@ -73,7 +98,6 @@ export class AddressStepComponent {
   ];
 
   readonly form = this.fb.nonNullable.group({
-
     addressLine1: [
       '',
       [
@@ -82,14 +106,12 @@ export class AddressStepComponent {
         Validators.maxLength(100)
       ]
     ],
-
     addressLine2: [
       '',
       [
         Validators.maxLength(100)
       ]
     ],
-
     city: [
       '',
       [
@@ -98,12 +120,10 @@ export class AddressStepComponent {
         Validators.pattern(/^[A-Za-z\s'-]+$/)
       ]
     ],
-
     state: [
       'NC',
       Validators.required
     ],
-
     zipCode: [
       '',
       [
@@ -111,23 +131,44 @@ export class AddressStepComponent {
         Validators.pattern(/^\d{5}$/)
       ]
     ],
-
     county: [
       {
         value: '',
         disabled: true
       }
     ]
-
   });
 
+  constructor() {
+    effect(() => {
+      const initialValue = this.initialValue();
+
+      if (initialValue) {
+        this.form.setValue(initialValue, {
+          emitEvent: false
+        });
+      }
+
+      this.validityChange.emit(this.form.valid);
+    });
+
+    this.form.valueChanges.subscribe(() => {
+      this.valueChange.emit(
+        this.form.getRawValue() as AddressFormValue
+      );
+
+      this.validityChange.emit(this.form.valid);
+    });
+  }
+
   async lookupZipCode(): Promise<void> {
-
-    console.log('lookupZipCode fired');
-
     const zip = this.form.controls.zipCode.value.trim();
 
-    if (zip.length !== 5) {
+    this.form.patchValue({
+      county: ''
+    });
+
+    if (!/^\d{5}$/.test(zip)) {
       return;
     }
 
@@ -136,13 +177,12 @@ export class AddressStepComponent {
     const result = this.zipCodeService.lookup(zip);
 
     if (!result) {
-
       this.form.controls.zipCode.setErrors({
         invalidZipCode: true
       });
 
+      this.validityChange.emit(false);
       return;
-
     }
 
     this.form.patchValue({
@@ -150,5 +190,15 @@ export class AddressStepComponent {
       state: result.state,
       county: result.county
     });
+
+    this.form.controls.zipCode.updateValueAndValidity({
+      emitEvent: false
+    });
+
+    this.valueChange.emit(
+      this.form.getRawValue() as AddressFormValue
+    );
+
+    this.validityChange.emit(this.form.valid);
   }
 }

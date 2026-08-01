@@ -45,6 +45,19 @@ input {
   gap: 1rem;
 }
 
+.field-error {
+  margin: 0.25rem 0 0;
+  color: #c00000;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.optional {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
 @media (max-width: 768px) {
   .three-column {
     grid-template-columns: 1fr;

@@ -1,1 +1,318 @@
-<p>review-step works!</p>
+<section class="review-step">
+    <header class="review-step__header">
+        <h2>Review Your Listing</h2>
+        <p>Review your property information before continuing to publish your listing.</p>
+    </header>
+
+    <div class="review-section">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <span class="review-section__number">1</span>
+                <h3>Property Address</h3>
+            </div>
+            <button type="button" class="edit-button" (click)="edit(1)">
+                Edit
+            </button>
+        </div>
+
+        <div class="review-section__content">
+            <p class="review-address">
+                {{ formattedAddress }}
+            </p>
+
+            @if (address()?.county) {
+                <p class="review-muted">
+                    {{ address()!.county }} County
+                </p>
+            }
+        </div>
+    </div>
+
+    <div class="review-section">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <span class="review-section__number">2</span>
+                <h3>Property Details</h3>
+            </div>
+            <button type="button" class="edit-button" (click)="edit(2)">
+                Edit
+            </button>
+        </div>
+
+        <div class="review-section__content">
+            <div class="review-details-grid">
+                <div class="review-detail">
+                    <span class="review-detail__label">Property Type</span>
+                    <span class="review-detail__value">
+                        {{ formattedPropertyType }}
+                    </span>
+                </div>
+
+                <div class="review-detail">
+                    <span class="review-detail__label">Bedrooms</span>
+                    <span class="review-detail__value">
+                        {{ formatNumber(propertyDetails()?.bedrooms) }}
+                    </span>
+                </div>
+
+                <div class="review-detail">
+                    <span class="review-detail__label">Bathrooms</span>
+                    <span class="review-detail__value">
+                        {{ formatNumber(propertyDetails()?.bathrooms) }}
+                    </span>
+                </div>
+
+                <div class="review-detail">
+                    <span class="review-detail__label">Square Feet</span>
+                    <span class="review-detail__value">
+                        {{ formatNumber(propertyDetails()?.squareFeet) }}
+                    </span>
+                </div>
+
+                <div class="review-detail">
+                    <span class="review-detail__label">Year Built</span>
+                    <span class="review-detail__value">
+                        {{ formatNumber(propertyDetails()?.yearBuilt) }}
+                    </span>
+                </div>
+
+                <div class="review-detail">
+                    <span class="review-detail__label">Lot Size</span>
+                    <span class="review-detail__value">
+                        @if (propertyDetails()?.lotSize !== null && propertyDetails()?.lotSize !== undefined) {
+                            {{ propertyDetails()?.lotSize }} acres
+                        } @else {
+                            —
+                        }
+                    </span>
+                </div>
+            </div>
+
+            @if (propertyDetails()?.description) {
+                <div class="review-description">
+                    <span class="review-detail__label">Property Description</span>
+                    <p>{{ propertyDetails()!.description }}</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="review-section">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <span class="review-section__number">3</span>
+                <h3>Property Features</h3>
+            </div>
+            <button type="button" class="edit-button" (click)="edit(3)">
+                Edit
+            </button>
+        </div>
+
+        <div class="review-section__content">
+            @if (selectedFeatures.length > 0) {
+                <div class="review-features">
+                    @for (feature of selectedFeatures; track feature) {
+                        <span class="review-feature">
+                            {{ feature }}
+                        </span>
+                    }
+                </div>
+            } @else {
+                <p class="review-muted">
+                    No additional property features selected.
+                </p>
+            }
+        </div>
+    </div>
+
+    <div class="review-section">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <span class="review-section__number">4</span>
+                <h3>Photos</h3>
+            </div>
+            <button type="button" class="edit-button" (click)="edit(4)">
+                Edit
+            </button>
+        </div>
+
+        <div class="review-section__content">
+            @if (photos().length > 0) {
+                <div class="review-photos">
+                    @for (photo of photos(); track photo.id) {
+                        <div
+                            class="review-photo"
+                            [class.review-photo--primary]="photo.isPrimary">
+
+                            <img
+                                [src]="photo.thumbnail.previewUrl"
+                                alt="Property photo">
+
+                            @if (photo.isPrimary) {
+                                <span class="review-photo__badge">
+                                    Primary Photo
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <p class="review-muted">
+                    {{ photos().length }} of 20 photos added
+                </p>
+            } @else {
+                <p class="review-muted">
+                    No photos added.
+                </p>
+            }
+        </div>
+    </div>
+
+    <div class="review-section">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <span class="review-section__number">5</span>
+                <h3>Pricing</h3>
+            </div>
+            <button type="button" class="edit-button" (click)="edit(5)">
+                Edit
+            </button>
+        </div>
+
+        <div class="review-section__content">
+            <div class="review-pricing">
+                <div>
+                    <span class="review-detail__label">
+                        Listing Price
+                    </span>
+
+                    <div class="review-pricing__price">
+                        {{ formattedPrice }}
+                    </div>
+                </div>
+
+                <div>
+                    <span class="review-detail__label">
+                        Price per Square Foot
+                    </span>
+
+                    <div class="review-pricing__secondary">
+                        {{ pricePerSquareFoot }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="review-section review-section--promotion">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <h3>Promotion Code</h3>
+            </div>
+        </div>
+
+        <div class="review-section__content">
+            <p class="review-muted">
+                Have a promotional or discount code? Enter it below.
+            </p>
+
+            <div class="promo-code">
+                <label for="promoCode">
+                    Discount Code
+                </label>
+
+                <div class="promo-code__controls">
+                    <input
+                        id="promoCode"
+                        class="promo-code__input"
+                        type="text"
+                        maxlength="50"
+                        autocomplete="off"
+                        placeholder="Enter discount code"
+                        [value]="promoCode()"
+                        (input)="onPromoCodeInput($any($event.target).value)">
+
+                    <button
+                        type="button"
+                        class="promo-code__apply"
+                        [disabled]="!promoCode().trim()"
+                        (click)="applyPromoCode()">
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="review-section review-section--featured">
+        <div class="review-section__header">
+            <div class="review-section__title">
+                <h3>Featured Listing</h3>
+            </div>
+        </div>
+
+        <div class="review-section__content">
+            <div class="featured-upgrade">
+                <div class="featured-upgrade__content">
+                    <div class="featured-upgrade__heading">
+                        <span class="featured-upgrade__badge">
+                            ★ Featured
+                        </span>
+
+                        <span class="featured-upgrade__price">
+                            + $10
+                        </span>
+                    </div>
+
+                    <h4>
+                        Give your property additional exposure
+                    </h4>
+
+                    <p>
+                        Featured listings receive prominent placement on NavStreet
+                        and display a Featured badge to help the property stand out
+                        to buyers.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="featured-upgrade__button"
+                    [class.featured-upgrade__button--selected]="featuredListing()"
+                    (click)="toggleFeaturedListing()">
+
+                    @if (featuredListing()) {
+                        ✓ Featured Listing Added
+                    } @else {
+                        Add Featured Listing
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="review-section review-section--certification">
+        <div class="review-section__content">
+            <label class="certification">
+                <input
+                    #certificationCheckbox
+                    type="checkbox"
+                    [checked]="certificationAccepted()"
+                    (change)="onCertificationChange(certificationCheckbox.checked)">
+
+                <span class="certification__checkmark"></span>
+
+                <span class="certification__text">
+                    <strong>Seller Certification</strong>
+
+                    <span>
+                        I certify that the information provided in this listing is
+                        accurate and complete to the best of my knowledge. I
+                        understand that I am responsible for the accuracy of the
+                        property information I submit.
+                    </span>
+                </span>
+            </label>
+        </div>
+    </div>
+</section>

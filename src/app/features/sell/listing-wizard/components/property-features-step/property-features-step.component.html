@@ -1,1 +1,246 @@
-<p>property-features-step works!</p>
+<section class="wizard-step">
+    <h2>Property Features</h2>
+    <p class="step-description">
+        Highlight the features and amenities that make your property stand out.
+    </p>
+
+    <form [formGroup]="form">
+
+        <div class="feature-question">
+            <div>
+                <h3>Add property features</h3>
+                <p>
+                    Select the features and amenities that help buyers understand what your property offers.
+                </p>
+            </div>
+
+            <div class="answer-buttons">
+                <button type="button" class="answer-button" [class.answer-button--selected]="mode === 'add'"
+                    (click)="selectAddFeatures()">
+                    Add Features
+                </button>
+
+                <button type="button" class="answer-button" [class.answer-button--selected]="mode === 'skip'"
+                    (click)="selectSkip()">
+                    Skip
+                </button>
+            </div>
+        </div>
+
+        @if (mode === 'add') {
+        <div class="feature-grid">
+            <article class="feature-card">
+                <h3>Kitchen</h3>
+                <p>Select the features included in the kitchen.</p>
+
+                <div class="options-grid">
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="kitchenIsland">
+                        <span>Kitchen Island</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="pantry">
+                        <span>Pantry</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="stoneCountertops">
+                        <span>Granite / Quartz Countertops</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="stainlessAppliances">
+                        <span>Stainless Appliances</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="gasRange">
+                        <span>Gas Range</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="doubleOven">
+                        <span>Double Oven</span>
+                    </label>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <h3>Living & Interior</h3>
+                <p>Select notable interior features.</p>
+
+                <div class="options-grid">
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="fireplace">
+                        <span>Fireplace</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="hardwoodFloors">
+                        <span>Hardwood Floors</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="vaultedCeilings">
+                        <span>Vaulted Ceilings</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="homeOffice">
+                        <span>Home Office</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="bonusRoom">
+                        <span>Bonus Room</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="basement">
+                        <span>Basement</span>
+                    </label>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <h3>Primary Bedroom & Bath</h3>
+                <p>Select features of the primary suite.</p>
+
+                <div class="options-grid">
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="walkInCloset">
+                        <span>Walk-In Closet</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="ensuiteBath">
+                        <span>Ensuite Bath</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="doubleVanity">
+                        <span>Double Vanity</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="soakingTub">
+                        <span>Soaking Tub</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="separateShower">
+                        <span>Separate Shower</span>
+                    </label>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <h3>Exterior & Outdoor</h3>
+                <p>Select outdoor living and property features.</p>
+
+                <div class="options-grid">
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="deck">
+                        <span>Deck</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="patio">
+                        <span>Patio</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="porch">
+                        <span>Porch</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="fencedYard">
+                        <span>Fenced Yard</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="pool">
+                        <span>Pool</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="outdoorKitchen">
+                        <span>Outdoor Kitchen</span>
+                    </label>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <h3>Parking & Garage</h3>
+                <p>Select the property's parking features.</p>
+
+                <div class="options-grid">
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="attachedGarage">
+                        <span>Attached Garage</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="detachedGarage">
+                        <span>Detached Garage</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="carport">
+                        <span>Carport</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="evCharging">
+                        <span>EV Charging</span>
+                    </label>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <h3>Systems & Efficiency</h3>
+                <p>Select major systems and energy features.</p>
+
+                <div class="options-grid">
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="centralHvac">
+                        <span>Central HVAC</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="heatPump">
+                        <span>Heat Pump</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="gasHeat">
+                        <span>Gas Heat</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="centralAir">
+                        <span>Central Air</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="solarPanels">
+                        <span>Solar Panels</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="generator">
+                        <span>Generator</span>
+                    </label>
+
+                    <label class="feature-option">
+                        <input type="checkbox" formControlName="smartThermostat">
+                        <span>Smart Thermostat</span>
+                    </label>
+                </div>
+            </article>
+        </div>
+        }
+    </form>
+</section>

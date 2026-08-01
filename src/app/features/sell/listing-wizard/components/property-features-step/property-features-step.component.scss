@@ -1,0 +1,155 @@
+.wizard-step {
+  h2 {
+    margin: 0 0 0.5rem;
+    color: #154360;
+    font-size: 2.5rem;
+    line-height: 1.1;
+  }
+}
+
+.step-description {
+  margin: 0 0 2rem;
+  color: #5f7187;
+  font-size: 1rem;
+}
+
+.feature-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #d6e0ea;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+
+  h3 {
+    margin: 0 0 0.35rem;
+    color: #154360;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.answer-buttons {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.75rem;
+}
+
+.answer-button {
+  min-width: 5rem;
+  padding: 0.7rem 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #154360;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    border-color: #154360;
+  }
+
+  &--selected {
+    border-color: #154360;
+    background: #154360;
+    color: #ffffff;
+  }
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.feature-card {
+  padding: 1.5rem;
+  border: 1px solid #d6e0ea;
+  border-radius: 0.75rem;
+  background: #ffffff;
+
+  h3 {
+    margin: 0 0 0.35rem;
+    color: #154360;
+    font-size: 1.2rem;
+  }
+
+  > p {
+    margin: 0 0 1.25rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.feature-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  color: #26384a;
+  font-size: 0.95rem;
+  cursor: pointer;
+
+  input {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: 0 0 auto;
+    accent-color: #154360;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 900px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .wizard-step {
+    h2 {
+      font-size: 2rem;
+    }
+  }
+
+  .feature-question {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .answer-buttons {
+    width: 100%;
+  }
+
+  .answer-button {
+    flex: 1;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card {
+    padding: 1.25rem;
+  }
+}

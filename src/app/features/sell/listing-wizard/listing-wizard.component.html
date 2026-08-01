@@ -1,5 +1,106 @@
 <section class="listing-wizard">
+    <div class="listing-wizard__container">
+        <header class="wizard-header">
+            <div>
+                <span class="wizard-header__eyebrow">
+                    Create Listing
+                </span>
 
-    <app-address-step />
+                <h1>
+                    Create Your Listing
+                </h1>
 
+                <p>
+                    Complete each step to prepare your property for buyers.
+                </p>
+            </div>
+
+            <div class="wizard-header__step">
+                Step {{ currentStep() }} of {{ steps.length }}
+            </div>
+        </header>
+
+        <nav class="wizard-progress" aria-label="Listing progress">
+            @for (step of steps; track step.number) {
+            <button type="button" class="wizard-progress__step"
+                [class.wizard-progress__step--active]="currentStep() === step.number"
+                [class.wizard-progress__step--complete]="currentStep() > step.number"
+                [disabled]="step.number > currentStep()" (click)="goToStep(step.number)">
+
+                <span class="wizard-progress__number">
+                    @if (currentStep() > step.number) {
+                    ✓
+                    } @else {
+                    {{ step.number }}
+                    }
+                </span>
+
+                <span class="wizard-progress__label">
+                    {{ step.label }}
+                </span>
+            </button>
+            }
+        </nav>
+
+        <main class="wizard-content">
+            @switch (currentStep()) {
+            @case (1) {
+            <app-address-step [initialValue]="addressData()" (valueChange)="onAddressChange($event)"
+                (validityChange)="onStepValidityChange(1, $event)" />
+            }
+
+            @case (2) {
+            <app-property-details-step [initialValue]="propertyDetailsData()"
+                (valueChange)="onPropertyDetailsChange($event)" (validityChange)="onStepValidityChange(2, $event)" />
+            }
+
+            @case (3) {
+            <app-property-features-step [initialValue]="propertyFeaturesData()"
+                (valueChange)="onPropertyFeaturesChange($event)" (validityChange)="onStepValidityChange(3, $event)" />
+            }
+
+            @case (4) {
+            <app-photos-step [initialValue]="photosData()" (valueChange)="onPhotosChange($event)"
+                (validityChange)="onStepValidityChange(4, $event)" />
+            }
+
+            @case (5) {
+            <app-pricing-step [initialValue]="pricingData()" [squareFeet]="propertyDetailsData()?.squareFeet ?? null"
+                (valueChange)="onPricingChange($event)" (validityChange)="onStepValidityChange(5, $event)" />
+            }
+
+            @case (6) {
+            <app-review-step [address]="addressData()" [propertyDetails]="propertyDetailsData()"
+                [features]="propertyFeaturesData()" [photos]="photosData()" [pricing]="pricingData()"
+                (editStep)="goToStep($event)" (validityChange)="onStepValidityChange(6, $event)" />
+            }
+            }
+        </main>
+
+        <footer class="wizard-navigation">
+            <div class="wizard-navigation__left">
+                @if (currentStep() > 1) {
+                <button type="button" class="button button--secondary" (click)="previousStep()">
+                    ← Back
+                </button>
+                }
+            </div>
+
+            <div class="wizard-navigation__status">
+                Step {{ currentStep() }} of {{ steps.length }}
+            </div>
+
+            <div class="wizard-navigation__right">
+                @if (currentStep() < steps.length) { <button type="button" class="button button--primary"
+                    [disabled]="!isCurrentStepValid()" (click)="nextStep()">
+                    Continue →
+                    </button>
+                    } @else {
+                    <button type="button" class="button button--primary" [disabled]="!isCurrentStepValid()">
+                        Continue
+                    </button>
+                    }
+            </div>
+        </footer>
+    </div>
 </section>

@@ -1,75 +1,133 @@
 <section class="wizard-step">
+  <h2>Property Address</h2>
 
-    <h2>Property Address</h2>
+  <p>
+    Enter the address of the property you want to sell.
+  </p>
 
-    <p>
-        Enter the address of the property you want to sell.
-    </p>
+  <form [formGroup]="form">
+    <div class="field">
+      <label for="addressLine1">Street Address</label>
 
-    <form [formGroup]="form">
+      <input
+        id="addressLine1"
+        type="text"
+        formControlName="addressLine1">
 
-        <div class="field">
+      @if (form.controls.addressLine1.touched) {
+        @if (form.controls.addressLine1.hasError('required')) {
+          <p class="field-error">Street address is required.</p>
+        }
 
-            <label>Street Address</label>
+        @if (form.controls.addressLine1.hasError('minlength')) {
+          <p class="field-error">Street address must be at least 5 characters.</p>
+        }
 
-            <input type="text" formControlName="addressLine1">
+        @if (form.controls.addressLine1.hasError('maxlength')) {
+          <p class="field-error">Street address cannot exceed 100 characters.</p>
+        }
+      }
+    </div>
 
-        </div>
+    <div class="field">
+      <label for="addressLine2">
+        Address Line 2
+        <span class="optional">(optional)</span>
+      </label>
 
-        <div class="field">
+      <input
+        id="addressLine2"
+        type="text"
+        formControlName="addressLine2">
 
-            <label>Address Line 2</label>
+      @if (
+        form.controls.addressLine2.touched &&
+        form.controls.addressLine2.hasError('maxlength')
+      ) {
+        <p class="field-error">Address Line 2 cannot exceed 100 characters.</p>
+      }
+    </div>
 
-            <input type="text" formControlName="addressLine2">
+    <div class="three-column">
+      <div class="field">
+        <label for="city">City</label>
 
-        </div>
+        <input
+          id="city"
+          type="text"
+          formControlName="city">
 
-        <div class="three-column">
+        @if (form.controls.city.touched) {
+          @if (form.controls.city.hasError('required')) {
+            <p class="field-error">City is required.</p>
+          }
 
-            <div class="field">
+          @if (form.controls.city.hasError('minlength')) {
+            <p class="field-error">City must be at least 2 characters.</p>
+          }
 
-                <label>City</label>
+          @if (form.controls.city.hasError('pattern')) {
+            <p class="field-error">City cannot contain numbers or invalid characters.</p>
+          }
+        }
+      </div>
 
-                <input type="text" formControlName="city">
+      <div class="field">
+        <label for="state">State</label>
 
-            </div>
+        <select
+          id="state"
+          formControlName="state">
+          @for (state of states; track state.code) {
+            <option [value]="state.code">
+              {{ state.name }}
+            </option>
+          }
+        </select>
 
-            <div class="field">
+        @if (
+          form.controls.state.touched &&
+          form.controls.state.hasError('required')
+        ) {
+          <p class="field-error">State is required.</p>
+        }
+      </div>
 
-                <label>State</label>
+      <div class="field">
+        <label for="zipCode">ZIP Code</label>
 
-                <select formControlName="state">
+        <input
+          id="zipCode"
+          type="text"
+          inputmode="numeric"
+          formControlName="zipCode"
+          maxlength="5"
+          (blur)="lookupZipCode()">
 
-                    @for (state of states; track state.code) {
+        @if (form.controls.zipCode.touched) {
+          @if (form.controls.zipCode.hasError('required')) {
+            <p class="field-error">ZIP Code is required.</p>
+          }
 
-                    <option [value]="state.code">
-                        {{ state.name }}
-                    </option>
+          @if (form.controls.zipCode.hasError('pattern')) {
+            <p class="field-error">ZIP Code must contain exactly 5 digits.</p>
+          }
 
-                    }
+          @if (form.controls.zipCode.hasError('invalidZipCode')) {
+            <p class="field-error">Enter a valid U.S. ZIP Code.</p>
+          }
+        }
+      </div>
 
-                </select>
+      <div class="field">
+        <label for="county">County</label>
 
-            </div>
-
-            <div class="field">
-
-                <label>ZIP Code</label>
-
-                <input type="text" formControlName="zipCode" maxlength="5" (blur)="lookupZipCode()">
-
-            </div>
-
-            <div class="field">
-
-                <label>County</label>
-
-                <input type="text" formControlName="county" readonly>
-
-            </div>
-
-        </div>
-
-    </form>
-
+        <input
+          id="county"
+          type="text"
+          formControlName="county"
+          readonly>
+      </div>
+    </div>
+  </form>
 </section>
