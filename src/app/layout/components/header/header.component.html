@@ -1,32 +1,86 @@
 <header class="site-header">
   <div class="site-header__container">
-    <a class="site-header__brand" routerLink="/" aria-label="Home" (click)="closeMobileMenu()">
 
-
-
+    <a
+      class="site-header__brand"
+      routerLink="/"
+      aria-label="Home"
+      (click)="closeMobileMenu()"
+    >
       <span class="site-header__brand-content">
-        <img class="site-header__logo" src="/assets/images/navstreet.svg" alt="NavStreet">
+        <img
+          class="site-header__logo"
+          src="/assets/images/navstreet.svg"
+          alt="NavStreet"
+        >
       </span>
     </a>
 
-    <app-navigation class="site-header__navigation" [isMobileMenuOpen]="isMobileMenuOpen()"
-      (navigationSelected)="closeMobileMenu()" />
+    <app-navigation
+      class="site-header__navigation"
+      [isMobileMenuOpen]="isMobileMenuOpen()"
+      (navigationSelected)="closeMobileMenu()"
+    />
 
     <div class="site-header__actions">
-      <a class="site-header__login" routerLink="/login">
-        Log in
-      </a>
 
-      <a class="site-header__signup" routerLink="/register">
-        Get started
-      </a>
+      @if (!authState.loading()) {
+
+        @if (authState.isAuthenticated()) {
+
+          <a
+            class="site-header__login"
+            routerLink="/dashboard"
+          >
+            Dashboard
+          </a>
+
+          <button
+            type="button"
+            class="site-header__signup"
+            [disabled]="isLoggingOut()"
+            (click)="logout()"
+          >
+            @if (isLoggingOut()) {
+              Logging out...
+            } @else {
+              Log out
+            }
+          </button>
+
+        } @else {
+
+          <a
+            class="site-header__login"
+            routerLink="/sign-in"
+          >
+            Log in
+          </a>
+
+          <a
+            class="site-header__signup"
+            routerLink="/register"
+          >
+            Get started
+          </a>
+
+        }
+
+      }
+
     </div>
 
-    <button class="site-header__menu-button" type="button" [attr.aria-expanded]="isMobileMenuOpen()"
-      aria-label="Toggle navigation menu" (click)="toggleMobileMenu()">
+    <button
+      class="site-header__menu-button"
+      type="button"
+      [attr.aria-expanded]="isMobileMenuOpen()"
+      aria-label="Toggle navigation menu"
+      (click)="toggleMobileMenu()"
+    >
       <span></span>
       <span></span>
       <span></span>
     </button>
+
   </div>
 </header>

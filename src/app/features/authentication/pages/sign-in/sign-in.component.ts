@@ -4,19 +4,30 @@ import {
   inject,
   signal
 } from '@angular/core';
+
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
+
 import {
+  ActivatedRoute,
   Router,
   RouterLink
 } from '@angular/router';
 
-import { AuthService } from '../../../../core/authentication/services/auth.service';
-import { OtpService } from '../../../../core/authentication/services/otp.service';
-import { FirebaseUserRepository } from '../../../../core/infrastructure/firebase/firebase-user.repository';
+import {
+  AuthService
+} from '../../../../core/authentication/services/auth.service';
+
+import {
+  OtpService
+} from '../../../../core/authentication/services/otp.service';
+
+import {
+  FirebaseUserRepository
+} from '../../../../core/infrastructure/firebase/firebase-user.repository';
 
 @Component({
   selector: 'app-sign-in',
@@ -29,16 +40,29 @@ import { FirebaseUserRepository } from '../../../../core/infrastructure/firebase
   styleUrl: './sign-in.component.scss'
 })
 export class SignInComponent {
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
-  private readonly userRepository = inject(FirebaseUserRepository);
-  private readonly router = inject(Router);
 
-  readonly otpService = inject(OtpService);
+  private readonly formBuilder =
+    inject(FormBuilder);
 
-  readonly currentStep = signal<'email' | 'code' | 'verifying'>(
-    'email'
-  );
+  private readonly authService =
+    inject(AuthService);
+
+  private readonly userRepository =
+    inject(FirebaseUserRepository);
+
+  private readonly router =
+    inject(Router);
+
+  private readonly route =
+    inject(ActivatedRoute);
+
+  readonly otpService =
+    inject(OtpService);
+
+  readonly currentStep =
+    signal<'email' | 'code' | 'verifying'>(
+      'email'
+    );
 
   readonly codeDigits = signal<string[]>([
     '',
@@ -49,44 +73,77 @@ export class SignInComponent {
     ''
   ]);
 
-  readonly googleLoading = signal(false);
-  readonly errorMessage = signal('');
+  readonly googleLoading =
+    signal(false);
+
+  readonly errorMessage =
+    signal('');
 
   readonly isLoading = computed(
-    () => this.otpService.isLoading() || this.googleLoading()
+    () =>
+      this.otpService.isLoading() ||
+      this.googleLoading()
   );
 
-  readonly loginForm = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]]
-  });
+  readonly loginForm =
+    this.formBuilder.nonNullable.group({
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.email
+        ]
+      ]
+    });
 
   get emailControl() {
     return this.loginForm.controls.email;
   }
 
   async sendOtpCode(): Promise<void> {
-    if (this.loginForm.invalid || this.isLoading()) {
+    if (
+      this.loginForm.invalid ||
+      this.isLoading()
+    ) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
     this.errorMessage.set('');
 
-    const email = this.getNormalizedEmail();
+    const email =
+      this.getNormalizedEmail();
 
     try {
-      await this.otpService.sendOtp(email);
+      await this.otpService.sendOtp(
+        email
+      );
 
-      sessionStorage.setItem('pendingOtpEmail', email);
+      sessionStorage.setItem(
+        'pendingOtpEmail',
+        email
+      );
 
       this.currentStep.set('code');
-      this.codeDigits.set(['', '', '', '', '', '']);
+
+      this.codeDigits.set([
+        '',
+        '',
+        '',
+        '',
+        '',
+        ''
+      ]);
 
       setTimeout(() => {
         this.focusCodeInput(0);
       });
+
     } catch (error) {
-      console.error('Unable to request sign-in code:', error);
+      console.error(
+        'Unable to request sign-in code:',
+        error
+      );
 
       this.errorMessage.set(
         this.getErrorMessage(
@@ -102,12 +159,14 @@ export class SignInComponent {
       return;
     }
 
-    const code = this.codeDigits().join('');
+    const code =
+      this.codeDigits().join('');
 
     if (code.length !== 6) {
       this.errorMessage.set(
         'Please enter all six digits of the verification code.'
       );
+
       return;
     }
 
@@ -115,11 +174,16 @@ export class SignInComponent {
     this.currentStep.set('verifying');
 
     try {
-      const email = this.getNormalizedEmail();
+      const email =
+        this.getNormalizedEmail();
 
-      await this.otpService.verifyOtp(email, code);
+      await this.otpService.verifyOtp(
+        email,
+        code
+      );
 
-      const firebaseUser = this.authService.currentUser;
+      const firebaseUser =
+        this.authService.currentUser;
 
       if (!firebaseUser) {
         throw new Error(
@@ -127,13 +191,23 @@ export class SignInComponent {
         );
       }
 
-      const existingUser = await this.userRepository.getById(
-        firebaseUser.uid
-      );
+      const existingUser =
+        await this.userRepository.getById(
+          firebaseUser.uid
+        );
 
+      /*
+       * OTP authentication can create a Firebase Auth
+       * identity even when the person has never completed
+       * NavStreet registration.
+       *
+       * Do not leave that orphaned Firebase session signed in.
+       */
       if (!existingUser) {
+        await this.authService.logout();
+
         throw new Error(
-          'No account exists for this email address. Please register before signing in.'
+          'No NavStreet account exists for this email address. Please register first.'
         );
       }
 
@@ -146,14 +220,28 @@ export class SignInComponent {
         }
       );
 
-      sessionStorage.removeItem('pendingOtpEmail');
+      sessionStorage.removeItem(
+        'pendingOtpEmail'
+      );
 
-      await this.router.navigate(['/dashboard']);
+      await this.navigateAfterAuthentication();
+
     } catch (error) {
-      console.error('Unable to verify OTP code:', error);
+      console.error(
+        'Unable to verify OTP code:',
+        error
+      );
 
       this.currentStep.set('code');
-      this.codeDigits.set(['', '', '', '', '', '']);
+
+      this.codeDigits.set([
+        '',
+        '',
+        '',
+        '',
+        '',
+        ''
+      ]);
 
       this.errorMessage.set(
         this.getErrorMessage(
@@ -174,7 +262,15 @@ export class SignInComponent {
     }
 
     this.errorMessage.set('');
-    this.codeDigits.set(['', '', '', '', '', '']);
+
+    this.codeDigits.set([
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
+    ]);
 
     try {
       await this.otpService.sendOtp(
@@ -184,8 +280,12 @@ export class SignInComponent {
       setTimeout(() => {
         this.focusCodeInput(0);
       });
+
     } catch (error) {
-      console.error('Unable to resend OTP code:', error);
+      console.error(
+        'Unable to resend OTP code:',
+        error
+      );
 
       this.errorMessage.set(
         this.getErrorMessage(
@@ -202,7 +302,16 @@ export class SignInComponent {
     }
 
     this.otpService.reset();
-    this.codeDigits.set(['', '', '', '', '', '']);
+
+    this.codeDigits.set([
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
+    ]);
+
     this.errorMessage.set('');
     this.currentStep.set('email');
   }
@@ -211,17 +320,33 @@ export class SignInComponent {
     index: number,
     event: Event
   ): void {
-    const input = event.target as HTMLInputElement;
-    const value = input.value.replace(/\D/g, '').slice(0, 1);
+
+    const input =
+      event.target as HTMLInputElement;
+
+    const value = input.value
+      .replace(/\D/g, '')
+      .slice(0, 1);
 
     input.value = value;
 
-    const digits = [...this.codeDigits()];
-    digits[index] = value;
-    this.codeDigits.set(digits);
+    const digits = [
+      ...this.codeDigits()
+    ];
 
-    if (value && index < 5) {
-      this.focusCodeInput(index + 1);
+    digits[index] = value;
+
+    this.codeDigits.set(
+      digits
+    );
+
+    if (
+      value &&
+      index < 5
+    ) {
+      this.focusCodeInput(
+        index + 1
+      );
     }
 
     if (
@@ -237,31 +362,63 @@ export class SignInComponent {
     index: number,
     event: KeyboardEvent
   ): void {
-    if (event.key === 'Backspace') {
-      const digits = [...this.codeDigits()];
 
-      if (!digits[index] && index > 0) {
+    if (event.key === 'Backspace') {
+      const digits = [
+        ...this.codeDigits()
+      ];
+
+      if (
+        !digits[index] &&
+        index > 0
+      ) {
         digits[index - 1] = '';
-        this.codeDigits.set(digits);
-        this.focusCodeInput(index - 1);
+
+        this.codeDigits.set(
+          digits
+        );
+
+        this.focusCodeInput(
+          index - 1
+        );
+
         event.preventDefault();
+
         return;
       }
 
       digits[index] = '';
-      this.codeDigits.set(digits);
+
+      this.codeDigits.set(
+        digits
+      );
+
       return;
     }
 
-    if (event.key === 'ArrowLeft' && index > 0) {
-      this.focusCodeInput(index - 1);
+    if (
+      event.key === 'ArrowLeft' &&
+      index > 0
+    ) {
+      this.focusCodeInput(
+        index - 1
+      );
+
       event.preventDefault();
+
       return;
     }
 
-    if (event.key === 'ArrowRight' && index < 5) {
-      this.focusCodeInput(index + 1);
+    if (
+      event.key === 'ArrowRight' &&
+      index < 5
+    ) {
+      this.focusCodeInput(
+        index + 1
+      );
+
       event.preventDefault();
+
       return;
     }
 
@@ -273,13 +430,17 @@ export class SignInComponent {
     }
   }
 
-  onCodePaste(event: ClipboardEvent): void {
+  onCodePaste(
+    event: ClipboardEvent
+  ): void {
+
     event.preventDefault();
 
-    const pastedCode = event.clipboardData
-      ?.getData('text')
-      .replace(/\D/g, '')
-      .slice(0, 6);
+    const pastedCode =
+      event.clipboardData
+        ?.getData('text')
+        .replace(/\D/g, '')
+        .slice(0, 6);
 
     if (!pastedCode) {
       return;
@@ -289,23 +450,37 @@ export class SignInComponent {
       .padEnd(6, ' ')
       .slice(0, 6)
       .split('')
-      .map(digit => digit.trim());
+      .map(
+        digit => digit.trim()
+      );
 
-    this.codeDigits.set(digits);
+    this.codeDigits.set(
+      digits
+    );
 
-    const focusIndex = Math.min(
-      pastedCode.length,
-      6
-    ) - 1;
+    const focusIndex =
+      Math.min(
+        pastedCode.length,
+        6
+      ) - 1;
 
-    this.focusCodeInput(Math.max(focusIndex, 0));
+    this.focusCodeInput(
+      Math.max(
+        focusIndex,
+        0
+      )
+    );
 
-    if (pastedCode.length === 6) {
+    if (
+      pastedCode.length === 6
+    ) {
       void this.verifyOtpCode();
     }
   }
 
-  async signInWithGoogle(): Promise<void> {
+  async signInWithGoogle():
+    Promise<void> {
+
     if (this.isLoading()) {
       return;
     }
@@ -317,7 +492,8 @@ export class SignInComponent {
       const credential =
         await this.authService.signInWithGoogle();
 
-      const firebaseUser = credential.user;
+      const firebaseUser =
+        credential.user;
 
       const existingUser =
         await this.userRepository.getById(
@@ -326,14 +502,21 @@ export class SignInComponent {
 
       if (!existingUser) {
         const displayName =
-          firebaseUser.displayName?.trim() ?? '';
+          firebaseUser.displayName
+            ?.trim() ?? '';
 
-        const nameParts = displayName
-          .split(/\s+/)
-          .filter(Boolean);
+        const nameParts =
+          displayName
+            .split(/\s+/)
+            .filter(Boolean);
 
-        const firstName = nameParts[0] ?? '';
-        const lastName = nameParts.slice(1).join(' ');
+        const firstName =
+          nameParts[0] ?? '';
+
+        const lastName =
+          nameParts
+            .slice(1)
+            .join(' ');
 
         await this.userRepository.create({
           uid: firebaseUser.uid,
@@ -342,12 +525,17 @@ export class SignInComponent {
           lastName,
           displayName,
 
-          email: firebaseUser.email ?? '',
-          phone: firebaseUser.phoneNumber,
+          email:
+            firebaseUser.email ?? '',
 
-          photoURL: firebaseUser.photoURL,
+          phone:
+            firebaseUser.phoneNumber,
 
-          emailVerified: firebaseUser.emailVerified,
+          photoURL:
+            firebaseUser.photoURL,
+
+          emailVerified:
+            firebaseUser.emailVerified,
 
           status: 'active',
 
@@ -355,18 +543,25 @@ export class SignInComponent {
           updatedAt: new Date(),
           lastLoginAt: new Date()
         });
+
       } else {
         await this.userRepository.update(
           firebaseUser.uid,
           {
-            emailVerified: firebaseUser.emailVerified,
-            lastLoginAt: new Date(),
-            updatedAt: new Date()
+            emailVerified:
+              firebaseUser.emailVerified,
+
+            lastLoginAt:
+              new Date(),
+
+            updatedAt:
+              new Date()
           }
         );
       }
 
-      await this.router.navigate(['/dashboard']);
+      await this.navigateAfterAuthentication();
+
     } catch (error) {
       console.error(
         'Unable to sign in with Google:',
@@ -379,21 +574,65 @@ export class SignInComponent {
           'Google sign-in could not be completed. Please try again.'
         )
       );
+
     } finally {
       this.googleLoading.set(false);
     }
   }
 
-  private getNormalizedEmail(): string {
-    return this.loginForm.controls.email.value
+  protected get returnUrl(): string | null {
+    return this.getSafeReturnUrl();
+  }
+
+  private getNormalizedEmail():
+    string {
+
+    return this.loginForm
+      .controls
+      .email
+      .value
       .trim()
       .toLowerCase();
   }
 
-  private focusCodeInput(index: number): void {
-    const input = document.getElementById(
-      `code-${index}`
-    ) as HTMLInputElement | null;
+  private async navigateAfterAuthentication():
+    Promise<void> {
+
+    const returnUrl =
+      this.getSafeReturnUrl();
+
+    await this.router.navigateByUrl(
+      returnUrl ?? '/dashboard'
+    );
+  }
+
+  private getSafeReturnUrl():
+    string | null {
+
+    const returnUrl =
+      this.route.snapshot.queryParamMap.get(
+        'returnUrl'
+      );
+
+    if (
+      !returnUrl ||
+      !returnUrl.startsWith('/') ||
+      returnUrl.startsWith('//')
+    ) {
+      return null;
+    }
+
+    return returnUrl;
+  }
+
+  private focusCodeInput(
+    index: number
+  ): void {
+
+    const input =
+      document.getElementById(
+        `code-${index}`
+      ) as HTMLInputElement | null;
 
     input?.focus();
     input?.select();
@@ -403,7 +642,11 @@ export class SignInComponent {
     error: unknown,
     fallback: string
   ): string {
-    if (error instanceof Error && error.message) {
+
+    if (
+      error instanceof Error &&
+      error.message
+    ) {
       return error.message;
     }
 

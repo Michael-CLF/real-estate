@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   output,
   signal
@@ -26,6 +27,14 @@ import {
   PricingFormValue
 } from '../pricing-step/pricing-step.component';
 
+import {
+  DiscountCodeService
+} from '../../../../../core/domains/payments/services/discount-code.service';
+
+import {
+  ValidDiscountCodeResult
+} from '../../../../../core/domains/payments/models/discount-code.model';
+
 @Component({
   selector: 'app-review-step',
   standalone: true,
@@ -35,6 +44,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewStepComponent {
+  private readonly discountCodeService = inject(DiscountCodeService);
+
   readonly address = input<AddressFormValue | null>(null);
   readonly propertyDetails = input<PropertyDetailsFormValue | null>(null);
   readonly features = input<PropertyFeaturesStepValue | null>(null);
@@ -43,6 +54,8 @@ export class ReviewStepComponent {
 
   readonly editStep = output<number>();
   readonly promoCodeChange = output<string>();
+  readonly promotionApplied =
+  output<ValidDiscountCodeResult | null>();
 
   readonly featuredListingChange = output<boolean>();
   readonly certificationChange = output<boolean>();
@@ -52,24 +65,123 @@ export class ReviewStepComponent {
   protected readonly featuredListing = signal(false);
   protected readonly certificationAccepted = signal(false);
 
+  protected readonly promoCodeLoading = signal(false);
+  protected readonly promoCodeValid = signal(false);
+  protected readonly promoCodeMessage = signal('');
+  protected readonly appliedDiscount = signal<ValidDiscountCodeResult | null>(
+    null
+  );
+
+
   protected edit(step: number): void {
     this.editStep.emit(step);
   }
 
   protected onPromoCodeInput(value: string): void {
-    const normalizedValue = value.trim().toUpperCase();
+    const normalizedValue = value
+      .trim()
+      .toUpperCase();
 
     this.promoCode.set(normalizedValue);
+
+    /*
+     * If the seller changes the code after successfully applying one,
+     * the previous validation result is no longer valid.
+     */
+    this.promoCodeValid.set(false);
+    this.promoCodeMessage.set('');
+    this.appliedDiscount.set(null);
+
     this.promoCodeChange.emit(normalizedValue);
   }
-  protected applyPromoCode(): void {
+
+  protected async applyPromoCode(): Promise<void> {
     const code = this.promoCode().trim();
 
-    if (!code) {
+    if (!code || this.promoCodeLoading()) {
       return;
     }
 
-    this.promoCodeChange.emit(code);
+    this.promoCodeLoading.set(true);
+    this.promoCodeValid.set(false);
+    this.promoCodeMessage.set('');
+    this.appliedDiscount.set(null);
+
+    try {
+      const result = await this.discountCodeService.validateCode(
+        code,
+        this.purchaseSubtotal
+      );
+
+      this.promoCodeMessage.set(result.message);
+
+      if (!result.valid) {
+        this.promoCodeValid.set(false);
+        return;
+      }
+
+      this.promoCodeValid.set(true);
+      this.appliedDiscount.set(result);
+
+      /*
+       * Only tell the parent wizard that the promotion has been
+       * successfully applied after backend validation succeeds.
+       */
+      this.promoCodeChange.emit(result.code);
+    } finally {
+      this.promoCodeLoading.set(false);
+    }
+  }
+
+  protected get purchaseSubtotal(): number {
+    /*
+     * For development/testing we are using the planned
+     * $49 NavStreet listing fee.
+     *
+     * Featured Listing adds $10 when selected.
+     *
+     * These amounts will eventually come from authoritative
+     * server-side pricing rather than being trusted from Angular.
+     */
+    const listingFee = 49;
+    const featuredListingFee =
+      this.featuredListing()
+        ? 10
+        : 0;
+
+    return listingFee + featuredListingFee;
+  }
+
+  protected get formattedSubtotal(): string {
+    return this.formatCurrency(
+      this.purchaseSubtotal
+    );
+  }
+
+  protected get formattedDiscountAmount(): string {
+    const discount = this.appliedDiscount();
+
+    if (!discount) {
+      return this.formatCurrency(0);
+    }
+
+    return this.formatCurrency(
+      discount.discountAmount
+    );
+  }
+
+  protected get formattedTotalAfterDiscount(): string {
+    const discount = this.appliedDiscount();
+
+    if (!discount) {
+      return this.formatCurrency(
+        this.purchaseSubtotal
+      );
+    }
+
+    return this.formatCurrency(
+      discount.totalAfterDiscount
+    );
   }
 
   protected get formattedAddress(): string {
@@ -87,7 +199,8 @@ export class ReviewStepComponent {
   }
 
   protected get formattedPropertyType(): string {
-    const propertyType = this.propertyDetails()?.propertyType;
+    const propertyType =
+      this.propertyDetails()?.propertyType;
 
     if (!propertyType) {
       return '—';
@@ -107,33 +220,45 @@ export class ReviewStepComponent {
   }
 
   protected get formattedPrice(): string {
-    const price = this.pricing()?.listPrice;
+    const price =
+      this.pricing()?.listPrice;
 
     if (!price) {
       return '—';
     }
 
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(price);
+    return new Intl.NumberFormat(
+      'en-US',
+      {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }
+    ).format(price);
   }
 
   protected get pricePerSquareFoot(): string {
-    const price = this.pricing()?.listPrice;
-    const squareFeet = this.propertyDetails()?.squareFeet;
+    const price =
+      this.pricing()?.listPrice;
+
+    const squareFeet =
+      this.propertyDetails()?.squareFeet;
 
     if (!price || !squareFeet) {
       return '—';
     }
 
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(price / squareFeet);
+    return new Intl.NumberFormat(
+      'en-US',
+      {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    ).format(
+      price / squareFeet
+    );
   }
 
   protected get selectedFeatures(): string[] {
@@ -184,7 +309,9 @@ export class ReviewStepComponent {
       smartThermostat: 'Smart Thermostat'
     };
 
-    return Object.entries(featureData.features)
+    return Object.entries(
+      featureData.features
+    )
       .filter(([, selected]) => selected)
       .map(([key]) => labels[key] ?? key);
   }
@@ -192,25 +319,66 @@ export class ReviewStepComponent {
   protected get primaryPhoto(): ListingPhoto | null {
     const photos = this.photos();
 
-    return photos.find(photo => photo.isPrimary) ?? photos[0] ?? null;
+    return photos.find(
+      photo => photo.isPrimary
+    ) ?? photos[0] ?? null;
   }
 
-  protected formatNumber(value: number | null | undefined): string {
-    if (value === null || value === undefined) {
+  protected formatNumber(
+    value: number | null | undefined
+  ): string {
+    if (
+      value === null ||
+      value === undefined
+    ) {
       return '—';
     }
-    return new Intl.NumberFormat('en-US').format(value);
+
+    return new Intl.NumberFormat(
+      'en-US'
+    ).format(value);
   }
 
   protected toggleFeaturedListing(): void {
-    const selected = !this.featuredListing();
+    const selected =
+      !this.featuredListing();
 
     this.featuredListing.set(selected);
+
+    /*
+     * Changing the purchase subtotal invalidates any
+     * previously calculated promotion result.
+     */
+    if (this.appliedDiscount()) {
+      this.promoCodeValid.set(false);
+      this.promoCodeMessage.set(
+        'Your purchase options changed. Apply the discount code again.'
+      );
+      this.appliedDiscount.set(null);
+    }
+
     this.featuredListingChange.emit(selected);
   }
-protected onCertificationChange(checked: boolean): void {
-  this.certificationAccepted.set(checked);
-  this.certificationChange.emit(checked);
-  this.validityChange.emit(checked);
-}
+
+  protected onCertificationChange(
+    checked: boolean
+  ): void {
+    this.certificationAccepted.set(checked);
+    this.certificationChange.emit(checked);
+    this.validityChange.emit(checked);
+  }
+
+  private formatCurrency(
+    value: number
+  ): string {
+    return new Intl.NumberFormat(
+      'en-US',
+      {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    ).format(value);
+  }
 }

@@ -1,6 +1,20 @@
 import { Routes } from '@angular/router';
 
-import { PublicLayoutComponent } from './layout/layouts/public-layout/public-layout.component';
+import {
+  PublicLayoutComponent
+} from './layout/layouts/public-layout/public-layout.component';
+
+import {
+  authGuard
+} from './core/authentication/guards/auth.guard';
+
+import {
+  accountGuard
+} from './core/authentication/guards/account.guard';
+
+import {
+  guestGuard
+} from './core/authentication/guards/guest.guard';
 
 export const routes: Routes = [
   {
@@ -14,6 +28,7 @@ export const routes: Routes = [
             component => component.HomeComponent
           )
       },
+
       {
         path: 'about',
         loadComponent: () =>
@@ -21,6 +36,7 @@ export const routes: Routes = [
             component => component.AboutComponent
           )
       },
+
       {
         path: 'buy',
         loadComponent: () =>
@@ -28,6 +44,7 @@ export const routes: Routes = [
             component => component.BuyComponent
           )
       },
+
       {
         path: 'contact',
         loadComponent: () =>
@@ -35,6 +52,7 @@ export const routes: Routes = [
             component => component.ContactComponent
           )
       },
+
       {
         path: 'mortgage',
         loadComponent: () =>
@@ -42,6 +60,7 @@ export const routes: Routes = [
             component => component.MortgageComponent
           )
       },
+
       {
         path: 'resources',
         loadComponent: () =>
@@ -49,15 +68,61 @@ export const routes: Routes = [
             component => component.ResourcesComponent
           )
       },
+
+      /*
+       * Account Dashboard
+       *
+       * The user must have both:
+       * 1. A valid Firebase authentication session.
+       * 2. An active NavStreet user profile.
+       *
+       * Because this route is inside PublicLayoutComponent,
+       * the dashboard receives the standard NavStreet
+       * header and footer.
+       */
+      {
+        path: 'dashboard',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/dashboard.component'
+          ).then(
+            component => component.DashboardComponent
+          )
+      },
+
+      /*
+       * My Listings
+       *
+       * This is authenticated NavStreet account functionality.
+       */
       {
         path: 'sell',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
         loadComponent: () =>
           import('./features/sell/sell.component').then(
             component => component.SellComponent
           )
       },
+
+      /*
+       * Create Listing
+       *
+       * A valid NavStreet account is required before
+       * a listing can be created.
+       */
       {
         path: 'sell/new',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
         loadComponent: () =>
           import(
             './features/sell/listing-wizard/listing-wizard.component'
@@ -65,8 +130,15 @@ export const routes: Routes = [
             component => component.ListingWizardComponent
           )
       },
+
+      /*
+       * Registration / account completion.
+       */
       {
         path: 'register',
+        canActivate: [
+          guestGuard
+        ],
         loadComponent: () =>
           import(
             './features/authentication/pages/register/register.component'
@@ -74,8 +146,15 @@ export const routes: Routes = [
             component => component.RegisterComponent
           )
       },
+
+      /*
+       * Sign-in.
+       */
       {
         path: 'sign-in',
+        canActivate: [
+          guestGuard
+        ],
         loadComponent: () =>
           import(
             './features/authentication/pages/sign-in/sign-in.component'
@@ -83,13 +162,20 @@ export const routes: Routes = [
             component => component.SignInComponent
           )
       },
+
+      /*
+       * Marketplace browsing remains public.
+       */
       {
         path: 'homes',
         loadChildren: () =>
-          import('./features/marketplace/marketplace.routes').then(
+          import(
+            './features/marketplace/marketplace.routes'
+          ).then(
             routes => routes.MARKETPLACE_ROUTES
           )
       },
+
       {
         path: 'listings/:listingId',
         loadComponent: () =>
@@ -99,6 +185,7 @@ export const routes: Routes = [
             component => component.ListingDetailsComponent
           )
       },
+
       {
         path: 'states/:stateSlug',
         loadComponent: () =>
@@ -110,13 +197,7 @@ export const routes: Routes = [
       }
     ]
   },
-  {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('./features/dashboard/dashboard.component').then(
-        component => component.DashboardComponent
-      )
-  },
+
   {
     path: '**',
     redirectTo: ''

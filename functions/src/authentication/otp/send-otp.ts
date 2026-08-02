@@ -95,6 +95,13 @@ export const sendOtp = onCall<
       code,
       hashSecret,
     );
+    logger.info(
+      'OTP hash created.',
+      {
+        emailDomain: getEmailDomain(email),
+        hashFingerprint: codeHash.slice(0, 12),
+      },
+    );
 
     await saveOtpRequest(
       email,

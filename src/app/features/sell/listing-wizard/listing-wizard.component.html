@@ -72,10 +72,29 @@
             @case (6) {
             <app-review-step [address]="addressData()" [propertyDetails]="propertyDetailsData()"
                 [features]="propertyFeaturesData()" [photos]="photosData()" [pricing]="pricingData()"
-                (editStep)="goToStep($event)" (validityChange)="onStepValidityChange(6, $event)" />
+                (editStep)="goToStep($event)" (featuredListingChange)="onFeaturedListingChange($event)"
+                (promotionApplied)="onPromotionApplied($event)" (certificationChange)="onCertificationChange($event)"
+                (validityChange)="onStepValidityChange(6, $event)" />
             }
             }
         </main>
+
+        @if (saveError()) {
+        <div class="wizard-save-error">
+            {{ saveError() }}
+        </div>
+        }
+
+        @if (createdListingUid()) {
+        <div class="wizard-save-success">
+            Listing saved successfully.
+            Listing ID: {{ createdListingUid() }}
+        </div>
+        }
+
+        <div style="padding: 12px; background: white; color: black; margin-bottom: 12px;">
+            Firebase Auth: {{ authenticationStatus }}
+        </div>
 
         <footer class="wizard-navigation">
             <div class="wizard-navigation__left">
@@ -96,8 +115,14 @@
                     Continue →
                     </button>
                     } @else {
-                    <button type="button" class="button button--primary" [disabled]="!isCurrentStepValid()">
+                    <button type="button" class="button button--primary"
+                        [disabled]="!isCurrentStepValid() || isSaving()" (click)="saveListing()">
+
+                        @if (isSaving()) {
+                        Saving...
+                        } @else {
                         Continue
+                        }
                     </button>
                     }
             </div>

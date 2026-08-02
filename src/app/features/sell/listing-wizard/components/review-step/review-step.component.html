@@ -21,9 +21,9 @@
             </p>
 
             @if (address()?.county) {
-                <p class="review-muted">
-                    {{ address()!.county }} County
-                </p>
+            <p class="review-muted">
+                {{ address()!.county }} County
+            </p>
             }
         </div>
     </div>
@@ -80,19 +80,19 @@
                     <span class="review-detail__label">Lot Size</span>
                     <span class="review-detail__value">
                         @if (propertyDetails()?.lotSize !== null && propertyDetails()?.lotSize !== undefined) {
-                            {{ propertyDetails()?.lotSize }} acres
+                        {{ propertyDetails()?.lotSize }} acres
                         } @else {
-                            —
+                        —
                         }
                     </span>
                 </div>
             </div>
 
             @if (propertyDetails()?.description) {
-                <div class="review-description">
-                    <span class="review-detail__label">Property Description</span>
-                    <p>{{ propertyDetails()!.description }}</p>
-                </div>
+            <div class="review-description">
+                <span class="review-detail__label">Property Description</span>
+                <p>{{ propertyDetails()!.description }}</p>
+            </div>
             }
         </div>
     </div>
@@ -110,17 +110,17 @@
 
         <div class="review-section__content">
             @if (selectedFeatures.length > 0) {
-                <div class="review-features">
-                    @for (feature of selectedFeatures; track feature) {
-                        <span class="review-feature">
-                            {{ feature }}
-                        </span>
-                    }
-                </div>
+            <div class="review-features">
+                @for (feature of selectedFeatures; track feature) {
+                <span class="review-feature">
+                    {{ feature }}
+                </span>
+                }
+            </div>
             } @else {
-                <p class="review-muted">
-                    No additional property features selected.
-                </p>
+            <p class="review-muted">
+                No additional property features selected.
+            </p>
             }
         </div>
     </div>
@@ -138,32 +138,28 @@
 
         <div class="review-section__content">
             @if (photos().length > 0) {
-                <div class="review-photos">
-                    @for (photo of photos(); track photo.id) {
-                        <div
-                            class="review-photo"
-                            [class.review-photo--primary]="photo.isPrimary">
+            <div class="review-photos">
+                @for (photo of photos(); track photo.id) {
+                <div class="review-photo" [class.review-photo--primary]="photo.isPrimary">
 
-                            <img
-                                [src]="photo.thumbnail.previewUrl"
-                                alt="Property photo">
+                    <img [src]="photo.thumbnail.previewUrl" alt="Property photo">
 
-                            @if (photo.isPrimary) {
-                                <span class="review-photo__badge">
-                                    Primary Photo
-                                </span>
-                            }
-                        </div>
+                    @if (photo.isPrimary) {
+                    <span class="review-photo__badge">
+                        Primary Photo
+                    </span>
                     }
                 </div>
+                }
+            </div>
 
-                <p class="review-muted">
-                    {{ photos().length }} of 20 photos added
-                </p>
+            <p class="review-muted">
+                {{ photos().length }} of 20 photos added
+            </p>
             } @else {
-                <p class="review-muted">
-                    No photos added.
-                </p>
+            <p class="review-muted">
+                No photos added.
+            </p>
             }
         </div>
     </div>
@@ -222,24 +218,65 @@
                 </label>
 
                 <div class="promo-code__controls">
-                    <input
-                        id="promoCode"
-                        class="promo-code__input"
-                        type="text"
-                        maxlength="50"
-                        autocomplete="off"
-                        placeholder="Enter discount code"
-                        [value]="promoCode()"
+                    <input id="promoCode" class="promo-code__input" type="text" maxlength="50" autocomplete="off"
+                        placeholder="Enter discount code" [value]="promoCode()" [disabled]="promoCodeLoading()"
                         (input)="onPromoCodeInput($any($event.target).value)">
 
-                    <button
-                        type="button"
-                        class="promo-code__apply"
-                        [disabled]="!promoCode().trim()"
-                        (click)="applyPromoCode()">
+                    <button type="button" class="promo-code__apply"
+                        [disabled]="!promoCode().trim() || promoCodeLoading()" (click)="applyPromoCode()">
+
+                        @if (promoCodeLoading()) {
+                        Checking...
+                        } @else {
                         Apply
+                        }
                     </button>
                 </div>
+
+                @if (promoCodeMessage()) {
+                <div class="promo-code__message" [class.promo-code__message--success]="promoCodeValid()"
+                    [class.promo-code__message--error]="!promoCodeValid()">
+
+                    {{ promoCodeMessage() }}
+                </div>
+                }
+
+                @if (promoCodeValid() && appliedDiscount()) {
+                <div class="promo-code__summary">
+                    <div class="promo-code__summary-row">
+                        <span>NavStreet listing</span>
+                        <strong>$49.00</strong>
+                    </div>
+
+                    @if (featuredListing()) {
+                    <div class="promo-code__summary-row">
+                        <span>Featured Listing</span>
+                        <strong>$10.00</strong>
+                    </div>
+                    }
+
+                    <div class="promo-code__summary-row">
+                        <span>Subtotal</span>
+                        <strong>{{ formattedSubtotal }}</strong>
+                    </div>
+
+                    <div class="promo-code__summary-row
+                               promo-code__summary-row--discount">
+                        <span>Promotion</span>
+                        <strong>
+                            −{{ formattedDiscountAmount }}
+                        </strong>
+                    </div>
+
+                    <div class="promo-code__summary-row
+                               promo-code__summary-row--total">
+                        <span>Total</span>
+                        <strong>
+                            {{ formattedTotalAfterDiscount }}
+                        </strong>
+                    </div>
+                </div>
+                }
             </div>
         </div>
     </div>
@@ -275,16 +312,13 @@
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    class="featured-upgrade__button"
-                    [class.featured-upgrade__button--selected]="featuredListing()"
-                    (click)="toggleFeaturedListing()">
+                <button type="button" class="featured-upgrade__button"
+                    [class.featured-upgrade__button--selected]="featuredListing()" (click)="toggleFeaturedListing()">
 
                     @if (featuredListing()) {
-                        ✓ Featured Listing Added
+                    ✓ Featured Listing Added
                     } @else {
-                        Add Featured Listing
+                    Add Featured Listing
                     }
                 </button>
             </div>
@@ -294,10 +328,7 @@
     <div class="review-section review-section--certification">
         <div class="review-section__content">
             <label class="certification">
-                <input
-                    #certificationCheckbox
-                    type="checkbox"
-                    [checked]="certificationAccepted()"
+                <input #certificationCheckbox type="checkbox" [checked]="certificationAccepted()"
                     (change)="onCertificationChange(certificationCheckbox.checked)">
 
                 <span class="certification__checkmark"></span>

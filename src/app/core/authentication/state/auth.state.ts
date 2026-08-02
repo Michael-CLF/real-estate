@@ -1,35 +1,87 @@
-import { Injectable, signal } from '@angular/core';
-import { User, onAuthStateChanged } from 'firebase/auth';
+import {
+  Injectable,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
 
-import { auth } from '../../infrastructure/firebase/firebase';
+import {
+  User
+} from 'firebase/auth';
+
+import {
+  AuthService
+} from '../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthState {
 
-  private readonly _user = signal<User | null>(null);
+  private readonly authService = inject(AuthService);
 
-  private readonly _loading = signal(true);
+  /*
+   * Firebase authentication initialization state.
+   *
+   * true:
+   * We do not yet know whether the browser has an
+   * authenticated Firebase session.
+   *
+   * false:
+   * Firebase has completed its initial auth-state check.
+   */
+  readonly loading = signal(true);
 
-  readonly user = this._user.asReadonly();
+  /*
+   * The currently authenticated Firebase user.
+   *
+   * null means the user is signed out.
+   */
+  readonly user = signal<User | null>(null);
 
-  readonly loading = this._loading.asReadonly();
+  /*
+   * Authentication is only considered established after
+   * Firebase has finished initializing and returned a user.
+   */
+  readonly isAuthenticated = computed(
+    () =>
+      !this.loading() &&
+      this.user() !== null
+  );
 
-  readonly isAuthenticated = () => this._user() !== null;
+  /*
+   * Convenience UID for guards, repositories and components.
+   */
+  readonly uid = computed(
+    () => this.user()?.uid ?? null
+  );
+
+  /*
+   * Convenience email for authenticated-user UI.
+   */
+  readonly email = computed(
+    () => this.user()?.email ?? null
+  );
+
+  /*
+   * Explicit signed-out state.
+   *
+   * This is intentionally different from loading.
+   * While Firebase is initializing, we do not yet know
+   * whether the user is signed in or signed out.
+   */
+  readonly isSignedOut = computed(
+    () =>
+      !this.loading() &&
+      this.user() === null
+  );
 
   constructor() {
-    onAuthStateChanged(auth, (user) => {
-      this._user.set(user);
-      this._loading.set(false);
-    });
-  }
-
-  get uid(): string | null {
-    return this._user()?.uid ?? null;
-  }
-
-  get email(): string | null {
-    return this._user()?.email ?? null;
+    this.authService.onAuthStateChanged(
+      user => {
+        this.user.set(user);
+        this.loading.set(false);
+      }
+    );
   }
 }

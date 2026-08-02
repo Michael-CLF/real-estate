@@ -5,10 +5,12 @@ import {
   effect,
   signal
 } from '@angular/core';
+
 import {
   FunctionsError,
   httpsCallable
 } from 'firebase/functions';
+
 import {
   signInWithCustomToken
 } from 'firebase/auth';
@@ -68,11 +70,15 @@ export class OtpService implements OnDestroy {
   );
 
   readonly formattedTimeRemaining = computed(() =>
-    this.formatSeconds(this.timeRemainingSeconds())
+    this.formatSeconds(
+      this.timeRemainingSeconds()
+    )
   );
 
   readonly formattedResendRemaining = computed(() =>
-    this.formatSeconds(this.resendRemainingSeconds())
+    this.formatSeconds(
+      this.resendRemainingSeconds()
+    )
   );
 
   private readonly timerId: ReturnType<typeof setInterval>;
@@ -101,7 +107,10 @@ export class OtpService implements OnDestroy {
     });
   }
 
-  async sendOtp(email: string): Promise<void> {
+  async sendOtp(
+    email: string
+  ): Promise<void> {
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -118,7 +127,10 @@ export class OtpService implements OnDestroy {
         email: this.normalizeEmail(email)
       });
 
-      console.log('verifyOtp function returned:', result.data);
+      console.log(
+        'sendOtp function returned:',
+        result.data
+      );
 
       const {
         expiresInSeconds,
@@ -141,14 +153,18 @@ export class OtpService implements OnDestroy {
 
       this.otpSent.set(true);
       this.attemptsRemaining.set(3);
+
     } catch (error) {
+
       const message = this.getErrorMessage(
         error,
         'Unable to send the verification code.'
       );
 
       this.errorMessage.set(message);
+
       throw new Error(message);
+
     } finally {
       this.isLoading.set(false);
     }
@@ -158,10 +174,12 @@ export class OtpService implements OnDestroy {
     email: string,
     code: string
   ): Promise<boolean> {
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
     try {
+
       if (!this.otpSent()) {
         throw new Error(
           'Request a verification code first.'
@@ -174,7 +192,9 @@ export class OtpService implements OnDestroy {
         );
       }
 
-      if (!/^\d{6}$/.test(code.trim())) {
+      const normalizedCode = code.trim();
+
+      if (!/^\d{6}$/.test(normalizedCode)) {
         throw new Error(
           'Enter the complete six-digit verification code.'
         );
@@ -190,30 +210,18 @@ export class OtpService implements OnDestroy {
 
       const result = await callable({
         email: this.normalizeEmail(email),
-        code: code.trim()
+        code: normalizedCode
       });
 
-      console.log('verifyOtp returned:', result.data);
+      console.log(
+        'verifyOtp function returned:',
+        result.data
+      );
 
       const {
         customToken,
         isNewUser
       } = result.data;
-
-      console.log('Signing in with custom token...');
-
-      const credential = await signInWithCustomToken(
-        auth,
-        customToken
-      );
-
-      console.log('Credential:', credential);
-      console.log('User:', credential.user);
-      console.log('Current user:', auth.currentUser);
-
-      this.reset();
-
-      return isNewUser;
 
       if (!customToken) {
         throw new Error(
@@ -221,15 +229,32 @@ export class OtpService implements OnDestroy {
         );
       }
 
-      await signInWithCustomToken(
-        auth,
-        customToken
+      console.log(
+        'OTP verified. Signing in with Firebase custom token...'
+      );
+
+      const credential =
+        await signInWithCustomToken(
+          auth,
+          customToken
+        );
+
+      console.log(
+        'Firebase authentication successful:',
+        credential.user.uid
+      );
+
+      console.log(
+        'Firebase current user:',
+        auth.currentUser?.uid ?? null
       );
 
       this.reset();
 
       return isNewUser;
+
     } catch (error) {
+
       const message = this.getErrorMessage(
         error,
         'Unable to verify the code.'
@@ -247,7 +272,9 @@ export class OtpService implements OnDestroy {
       }
 
       this.errorMessage.set(message);
+
       throw new Error(message);
+
     } finally {
       this.isLoading.set(false);
     }
@@ -257,8 +284,10 @@ export class OtpService implements OnDestroy {
     this.otpSent.set(false);
     this.expiresAt.set(null);
     this.resendAvailableAt.set(null);
+
     this.timeRemainingSeconds.set(0);
     this.resendRemainingSeconds.set(0);
+
     this.attemptsRemaining.set(3);
     this.errorMessage.set('');
     this.isLoading.set(false);
@@ -272,14 +301,20 @@ export class OtpService implements OnDestroy {
     clearInterval(this.timerId);
   }
 
-  private normalizeEmail(email: string): string {
-    return email.trim().toLowerCase();
+  private normalizeEmail(
+    email: string
+  ): string {
+
+    return email
+      .trim()
+      .toLowerCase();
   }
 
   private calculateRemainingSeconds(
     targetDate: Date | null,
     currentTime: number
   ): number {
+
     if (!targetDate) {
       return 0;
     }
@@ -289,13 +324,21 @@ export class OtpService implements OnDestroy {
 
     return Math.max(
       0,
-      Math.ceil(remainingMilliseconds / 1000)
+      Math.ceil(
+        remainingMilliseconds / 1000
+      )
     );
   }
 
-  private formatSeconds(totalSeconds: number): string {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+  private formatSeconds(
+    totalSeconds: number
+  ): string {
+
+    const minutes =
+      Math.floor(totalSeconds / 60);
+
+    const seconds =
+      totalSeconds % 60;
 
     return `${minutes
       .toString()
@@ -306,18 +349,27 @@ export class OtpService implements OnDestroy {
 
   private decreaseAttempts(): void {
     this.attemptsRemaining.update(
-      attempts => Math.max(0, attempts - 1)
+      attempts =>
+        Math.max(
+          0,
+          attempts - 1
+        )
     );
   }
 
-  private isInvalidCodeError(error: unknown): boolean {
+  private isInvalidCodeError(
+    error: unknown
+  ): boolean {
+
     if (!(error instanceof FunctionsError)) {
       return false;
     }
 
     return (
-      error.code === 'functions/invalid-argument' ||
-      error.code === 'functions/permission-denied'
+      error.code ===
+        'functions/invalid-argument' ||
+      error.code ===
+        'functions/permission-denied'
     );
   }
 
@@ -325,6 +377,7 @@ export class OtpService implements OnDestroy {
     error: unknown,
     fallback: string
   ): string {
+
     if (error instanceof FunctionsError) {
       return this.cleanFirebaseMessage(
         error.message || fallback
@@ -343,10 +396,16 @@ export class OtpService implements OnDestroy {
     return fallback;
   }
 
-  private cleanFirebaseMessage(message: string): string {
+  private cleanFirebaseMessage(
+    message: string
+  ): string {
+
     return message
       .replace(/^Firebase:\s*/i, '')
-      .replace(/\s*\(functions\/[^)]+\)\.?$/i, '')
+      .replace(
+        /\s*\(functions\/[^)]+\)\.?$/i,
+        ''
+      )
       .trim();
   }
 }

@@ -5,7 +5,7 @@
 .listing-wizard {
   min-height: calc(100vh - 160px);
   padding: 3rem 1.5rem 4rem;
-  background: #f7f9fc;
+  background: #102F44;
 }
 
 .listing-wizard__container {
@@ -34,20 +34,20 @@
 
 .wizard-header h1 {
   margin: 0;
-  color: #154360;
+  color: #ffffff;
   font-size: 2.5rem;
   line-height: 1.1;
 }
 
 .wizard-header p {
   margin: .75rem 0 0;
-  color: #64748b;
+  color: #ffffff;
   font-size: 1.05rem;
 }
 
 .wizard-header__step {
   flex-shrink: 0;
-  color: #64748b;
+  color: #cdcdcd;
   font-weight: 600;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .wizard-navigation__status {
-  color: #64748b;
+  color: #cdcdcd;
   font-size: .9rem;
   font-weight: 600;
 }
@@ -165,8 +165,8 @@
 
 .button--primary {
   border: 1px solid #154360;
-  background: #154360;
-  color: #fff;
+  background: #ffffff;
+  color: #154360;
 }
 
 .button--primary:disabled {
@@ -180,9 +180,6 @@
   background: #cbd5e1;
 }
 
-.button--primary:hover {
-  background: #10374f;
-}
 
 .button--secondary {
   border: 1px solid #cbd5e1;
