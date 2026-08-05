@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   input,
   output,
@@ -51,11 +52,12 @@ export class ReviewStepComponent {
   readonly features = input<PropertyFeaturesStepValue | null>(null);
   readonly photos = input<ListingPhoto[]>([]);
   readonly pricing = input<PricingFormValue | null>(null);
+  readonly initialFeaturedListing =
+    input(false);
 
   readonly editStep = output<number>();
-  readonly promoCodeChange = output<string>();
   readonly promotionApplied =
-  output<ValidDiscountCodeResult | null>();
+    output<ValidDiscountCodeResult | null>();
 
   readonly featuredListingChange = output<boolean>();
   readonly certificationChange = output<boolean>();
@@ -72,33 +74,49 @@ export class ReviewStepComponent {
     null
   );
 
+  constructor() {
+    effect(() => {
+      this.featuredListing.set(
+        this.initialFeaturedListing()
+      );
+    });
+  }
+
 
   protected edit(step: number): void {
     this.editStep.emit(step);
   }
 
-  protected onPromoCodeInput(value: string): void {
+  protected onPromoCodeInput(
+    value: string
+  ): void {
     const normalizedValue = value
       .trim()
       .toUpperCase();
 
-    this.promoCode.set(normalizedValue);
+    this.promoCode.set(
+      normalizedValue
+    );
 
     /*
-     * If the seller changes the code after successfully applying one,
-     * the previous validation result is no longer valid.
+     * Editing the code invalidates any promotion that
+     * was previously validated against the purchase.
      */
     this.promoCodeValid.set(false);
     this.promoCodeMessage.set('');
     this.appliedDiscount.set(null);
 
-    this.promoCodeChange.emit(normalizedValue);
+    this.promotionApplied.emit(null);
   }
 
   protected async applyPromoCode(): Promise<void> {
-    const code = this.promoCode().trim();
+    const code =
+      this.promoCode().trim();
 
-    if (!code || this.promoCodeLoading()) {
+    if (
+      !code ||
+      this.promoCodeLoading()
+    ) {
       return;
     }
 
@@ -107,16 +125,25 @@ export class ReviewStepComponent {
     this.promoCodeMessage.set('');
     this.appliedDiscount.set(null);
 
+    /*
+     * Until validation succeeds, the parent wizard
+     * must not retain a previous promotion.
+     */
+    this.promotionApplied.emit(null);
+
     try {
-      const result = await this.discountCodeService.validateCode(
-        code,
-        this.purchaseSubtotal
+      const result =
+        await this.discountCodeService
+          .validateCode(
+            code,
+            this.purchaseSubtotal
+          );
+
+      this.promoCodeMessage.set(
+        result.message
       );
 
-      this.promoCodeMessage.set(result.message);
-
       if (!result.valid) {
-        this.promoCodeValid.set(false);
         return;
       }
 
@@ -124,10 +151,21 @@ export class ReviewStepComponent {
       this.appliedDiscount.set(result);
 
       /*
-       * Only tell the parent wizard that the promotion has been
-       * successfully applied after backend validation succeeds.
+       * Send the complete validated result to the wizard
+       * so it can persist the discount with the draft.
        */
-      this.promoCodeChange.emit(result.code);
+      this.promotionApplied.emit(result);
+    } catch (error) {
+      console.error(
+        'Failed to validate promotion code.',
+        error
+      );
+
+      this.promoCodeMessage.set(
+        'We could not validate this code. Please try again.'
+      );
+
+      this.promotionApplied.emit(null);
     } finally {
       this.promoCodeLoading.set(false);
     }
@@ -343,23 +381,28 @@ export class ReviewStepComponent {
     const selected =
       !this.featuredListing();
 
-    this.featuredListing.set(selected);
+    this.featuredListing.set(
+      selected
+    );
 
     /*
-     * Changing the purchase subtotal invalidates any
-     * previously calculated promotion result.
+     * The subtotal changed, so any previously validated
+     * discount must be cleared both locally and in the
+     * parent wizard.
      */
     if (this.appliedDiscount()) {
       this.promoCodeValid.set(false);
+
       this.promoCodeMessage.set(
         'Your purchase options changed. Apply the discount code again.'
       );
+
       this.appliedDiscount.set(null);
     }
 
+    this.promotionApplied.emit(null);
     this.featuredListingChange.emit(selected);
   }
-
   protected onCertificationChange(
     checked: boolean
   ): void {

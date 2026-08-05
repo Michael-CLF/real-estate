@@ -1,19 +1,29 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   inject,
   signal
 } from '@angular/core';
 
-import { auth } from '../../../core/infrastructure/firebase/firebase';
+import {
+  ActivatedRoute,
+  Router,
+  RouterLink
+} from '@angular/router';
 
 import {
-  ListingFeatures
-} from '../../../core/domains/listings/models/listing.model';
+  auth
+} from '../../../core/infrastructure/firebase/firebase';
 
 import {
   ListingService
 } from '../../../core/domains/listings/services/listing.service';
+
+import {
+  ListingDraftStep,
+  ListingFeatures
+} from '../../../core/domains/listings/models/listing.model';
 
 import {
   ValidDiscountCodeResult
@@ -48,10 +58,16 @@ import {
   ReviewStepComponent
 } from './components/review-step/review-step.component';
 
+import {
+  ListingPhotoStorageService
+} from '../../../core/infrastructure/listings/listing-photo-storage.service';
+
+
 interface WizardStep {
   number: number;
   label: string;
 }
+
 
 @Component({
   selector: 'app-listing-wizard',
@@ -62,226 +78,980 @@ interface WizardStep {
     PropertyFeaturesStepComponent,
     PhotosStepComponent,
     PricingStepComponent,
-    ReviewStepComponent
+    ReviewStepComponent,
+    RouterLink
   ],
   templateUrl: './listing-wizard.component.html',
   styleUrl: './listing-wizard.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
 })
-export class ListingWizardComponent {
-  private readonly listingService = inject(ListingService);
+export class ListingWizardComponent
+  implements OnInit {
 
-  protected readonly currentStep = signal(1);
+  private readonly listingService =
+    inject(ListingService);
 
-  protected readonly photosData = signal<ListingPhoto[]>([]);
+  private readonly route =
+    inject(ActivatedRoute);
 
-  protected readonly pricingData =
-    signal<PricingFormValue | null>(null);
+  private readonly router =
+    inject(Router);
+
+  private readonly listingPhotoStorageService =
+    inject(ListingPhotoStorageService);
+
+
+  protected readonly listingUid =
+    signal<string | null>(null);
+
+  protected readonly isInitializing =
+    signal(true);
+
+  protected readonly initializationError =
+    signal('');
+
+  protected readonly currentStep =
+    signal(1);
+
+  protected readonly completedSteps =
+    signal<ListingDraftStep[]>([]);
+
 
   protected readonly addressData =
     signal<AddressFormValue | null>(null);
 
   protected readonly propertyDetailsData =
-    signal<PropertyDetailsFormValue | null>(null);
+    signal<PropertyDetailsFormValue | null>(
+      null
+    );
 
   protected readonly propertyFeaturesData =
-    signal<PropertyFeaturesStepValue | null>(null);
+    signal<PropertyFeaturesStepValue | null>(
+      null
+    );
+
+  protected readonly photosData =
+    signal<ListingPhoto[]>([]);
+
+  protected readonly pricingData =
+    signal<PricingFormValue | null>(null);
+
 
   protected readonly featuredListing =
     signal(false);
 
   protected readonly appliedPromotion =
-    signal<ValidDiscountCodeResult | null>(null);
+    signal<ValidDiscountCodeResult | null>(
+      null
+    );
 
   protected readonly certificationAccepted =
     signal(false);
 
+
   protected readonly isSaving =
+    signal(false);
+
+  protected readonly isSavingPhotos =
     signal(false);
 
   protected readonly saveError =
     signal('');
 
-  protected readonly createdListingUid =
-    signal<string | null>(null);
+  protected readonly photoSaveError =
+    signal('');
 
-  protected readonly stepValidity = signal<Record<number, boolean>>({
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
-    6: false
-  });
+  protected readonly listingContentComplete =
+    signal(false);
+
+
+  protected readonly stepValidity =
+    signal<Record<number, boolean>>({
+      1: false,
+      2: false,
+      3: false,
+      4: false,
+      5: false,
+      6: false
+    });
+
 
   protected readonly steps: WizardStep[] = [
-    { number: 1, label: 'Address' },
-    { number: 2, label: 'Property Details' },
-    { number: 3, label: 'Features' },
-    { number: 4, label: 'Photos' },
-    { number: 5, label: 'Pricing' },
-    { number: 6, label: 'Review' }
+    {
+      number: 1,
+      label: 'Address'
+    },
+    {
+      number: 2,
+      label: 'Property Details'
+    },
+    {
+      number: 3,
+      label: 'Features'
+    },
+    {
+      number: 4,
+      label: 'Photos'
+    },
+    {
+      number: 5,
+      label: 'Pricing'
+    },
+    {
+      number: 6,
+      label: 'Review'
+    }
   ];
+
+
+  async ngOnInit(): Promise<void> {
+    await this.initializeDraft();
+  }
+
+
+  private async initializeDraft(): Promise<void> {
+    const user = auth.currentUser;
+
+    if (!user) {
+      this.initializationError.set(
+        'Your authentication session could not be found. Please sign in again.'
+      );
+
+      this.isInitializing.set(false);
+      return;
+    }
+
+    const routeListingUid =
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
+
+    try {
+      if (routeListingUid) {
+        await this.loadExistingDraft(
+          routeListingUid,
+          user.uid
+        );
+
+        return;
+      }
+
+      await this.createNewDraft(
+        user.uid
+      );
+    } catch (error) {
+      console.error(
+        'Failed to initialize listing draft.',
+        error
+      );
+
+      this.initializationError.set(
+        error instanceof Error
+          ? error.message
+          : 'We could not open your listing draft.'
+      );
+    } finally {
+      this.isInitializing.set(false);
+    }
+  }
+
+
+  private async createNewDraft(
+    sellerUid: string
+  ): Promise<void> {
+    const listingUid =
+      await this.listingService
+        .createInitialDraft(
+          sellerUid
+        );
+
+    this.listingUid.set(
+      listingUid
+    );
+
+    await this.router.navigate(
+      [
+        '/sell/listings',
+        listingUid,
+        'edit'
+      ],
+      {
+        replaceUrl: true
+      }
+    );
+  }
+
+
+  private async loadExistingDraft(
+    listingUid: string,
+    sellerUid: string
+  ): Promise<void> {
+    const draft =
+      await this.listingService
+        .getSellerDraft(
+          listingUid,
+          sellerUid
+        );
+
+    if (!draft) {
+      throw new Error(
+        'This listing draft could not be found.'
+      );
+    }
+
+    this.listingUid.set(
+      listingUid
+    );
+
+    this.completedSteps.set([
+      ...draft.progress.completedSteps
+    ]);
+
+
+    if (draft.address) {
+      this.addressData.set({
+        addressLine1:
+          draft.address.addressLine1,
+
+        addressLine2:
+          draft.address.addressLine2 ?? '',
+
+        city:
+          draft.address.city,
+
+        state:
+          draft.address.state,
+
+        zipCode:
+          draft.address.zipCode,
+
+        county:
+          draft.address.county
+      });
+
+      this.setStepValidity(
+        1,
+        true
+      );
+    }
+
+
+    if (draft.propertyDetails) {
+      this.propertyDetailsData.set({
+        propertyType:
+          draft.propertyDetails.propertyType,
+
+        bedrooms:
+          draft.propertyDetails.bedrooms,
+
+        bathrooms:
+          draft.propertyDetails.bathrooms,
+
+        squareFeet:
+          draft.propertyDetails.squareFeet,
+
+        yearBuilt:
+          draft.propertyDetails.yearBuilt,
+
+        lotSize:
+          draft.propertyDetails.lotSize ??
+          null,
+
+        description:
+          draft.propertyDetails.description ??
+          ''
+      });
+
+      this.setStepValidity(
+        2,
+        true
+      );
+    }
+
+
+    if (draft.features) {
+      const hasSelectedFeatures =
+        Object.values(
+          draft.features
+        ).some(
+          selected => selected === true
+        );
+
+      this.propertyFeaturesData.set({
+        mode:
+          hasSelectedFeatures
+            ? 'add'
+            : 'skip',
+
+        features: {
+          ...draft.features
+        }
+      });
+
+      this.setStepValidity(
+        3,
+        true
+      );
+    }
+
+
+    const restoredPhotos: ListingPhoto[] =
+      [...(draft.photos ?? [])]
+        .sort(
+          (
+            firstPhoto,
+            secondPhoto
+          ) =>
+            firstPhoto.sortOrder -
+            secondPhoto.sortOrder
+        )
+        .map(photo => ({
+          id:
+            photo.id,
+
+          originalFileName:
+            photo.originalFileName,
+
+          fullImage: {
+            blob: null,
+
+            previewUrl:
+              photo.fullImageUrl,
+
+            width:
+              photo.width,
+
+            height:
+              photo.height,
+
+            size:
+              photo.sizeBytes,
+
+            mimeType:
+              'image/webp'
+          },
+
+          thumbnail: {
+            blob: null,
+
+            previewUrl:
+              photo.thumbnailUrl,
+
+            width:
+              photo.thumbnailWidth,
+
+            height:
+              photo.thumbnailHeight,
+
+            size:
+              photo.thumbnailSizeBytes,
+
+            mimeType:
+              'image/webp'
+          },
+
+          isPrimary:
+            photo.isPrimary,
+
+          storageReference:
+            photo
+        }));
+
+    this.photosData.set(
+      restoredPhotos
+    );
+
+    if (restoredPhotos.length > 0) {
+      this.setStepValidity(
+        4,
+        true
+      );
+    }
+
+
+    if (draft.pricing) {
+      this.pricingData.set({
+        listPrice:
+          draft.pricing.listPrice
+      });
+
+      this.setStepValidity(
+        5,
+        true
+      );
+    }
+
+
+    this.featuredListing.set(
+      draft.featuredListing
+    );
+
+    this.currentStep.set(
+      this.stepNumberFromDraftStep(
+        draft.progress.currentStep
+      )
+    );
+  }
+
+
+  private stepNumberFromDraftStep(
+    draftStep: ListingDraftStep
+  ): number {
+    switch (draftStep) {
+      case 'property_details':
+        return 2;
+
+      case 'property_features':
+        return 3;
+
+      case 'photos':
+        return 4;
+
+      case 'pricing':
+        return 5;
+
+      case 'review':
+        return 6;
+
+      case 'address':
+      default:
+        return 1;
+    }
+  }
+
 
   protected onStepValidityChange(
     step: number,
     isValid: boolean
   ): void {
-    this.stepValidity.update(validity => ({
-      ...validity,
-      [step]: isValid
-    }));
+    this.setStepValidity(
+      step,
+      isValid
+    );
   }
+
+
+  private setStepValidity(
+    step: number,
+    isValid: boolean
+  ): void {
+    this.stepValidity.update(
+      validity => ({
+        ...validity,
+        [step]: isValid
+      })
+    );
+  }
+
 
   protected onAddressChange(
     value: AddressFormValue
   ): void {
-    this.addressData.set(value);
+    this.addressData.set(
+      value
+    );
+
     this.invalidateCertification();
   }
+
 
   protected onPropertyDetailsChange(
     value: PropertyDetailsFormValue
   ): void {
-    this.propertyDetailsData.set(value);
+    this.propertyDetailsData.set(
+      value
+    );
+
     this.invalidateCertification();
   }
+
 
   protected onPropertyFeaturesChange(
     value: PropertyFeaturesStepValue
   ): void {
-    this.propertyFeaturesData.set(value);
+    this.propertyFeaturesData.set(
+      value
+    );
+
     this.invalidateCertification();
   }
 
-  protected onPhotosChange(
+
+  protected async onPhotosChange(
     photos: ListingPhoto[]
-  ): void {
-    this.photosData.set(photos);
+  ): Promise<void> {
+    this.photosData.set(
+      photos
+    );
+
     this.invalidateCertification();
+
+    const listingUid =
+      this.listingUid();
+
+    const user =
+      auth.currentUser;
+
+    if (
+      !listingUid ||
+      !user ||
+      this.isSavingPhotos()
+    ) {
+      return;
+    }
+
+    if (photos.length === 0) {
+      this.photoSaveError.set(
+        'At least one listing photo is required.'
+      );
+
+      return;
+    }
+
+    this.photoSaveError.set('');
+    this.isSavingPhotos.set(true);
+
+    try {
+      const references =
+        await this.listingPhotoStorageService
+          .uploadPhotos(
+            user.uid,
+            listingUid,
+            photos
+          );
+
+      await this.listingService
+        .updateDraftPhotos(
+          listingUid,
+          user.uid,
+          references,
+          this.completedSteps()
+        );
+
+      this.addCompletedStep(
+        'photos'
+      );
+
+      const persistedPhotos =
+        photos.map(photo => {
+          const storageReference =
+            references.find(
+              reference =>
+                reference.id === photo.id
+            );
+
+          if (!storageReference) {
+            return photo;
+          }
+
+          this.revokeTemporaryPhotoUrls(
+            photo
+          );
+
+          return {
+            ...photo,
+
+            fullImage: {
+              ...photo.fullImage,
+
+              blob: null,
+
+              previewUrl:
+                storageReference
+                  .fullImageUrl
+            },
+
+            thumbnail: {
+              ...photo.thumbnail,
+
+              blob: null,
+
+              previewUrl:
+                storageReference
+                  .thumbnailUrl
+            },
+
+            isPrimary:
+              storageReference.isPrimary,
+
+            storageReference
+          };
+        });
+
+      this.photosData.set(
+        persistedPhotos
+      );
+    } catch (error) {
+      console.error(
+        'Failed to save listing photos.',
+        error
+      );
+
+      this.photoSaveError.set(
+        error instanceof Error
+          ? error.message
+          : 'We could not save your listing photos. Please try again.'
+      );
+    } finally {
+      this.isSavingPhotos.set(false);
+    }
   }
+
 
   protected onPricingChange(
     value: PricingFormValue
   ): void {
-    this.pricingData.set(value);
+    this.pricingData.set(
+      value
+    );
+
     this.invalidateCertification();
   }
+
 
   protected onFeaturedListingChange(
     selected: boolean
   ): void {
-    this.featuredListing.set(selected);
+    this.featuredListing.set(
+      selected
+    );
 
-    /*
-     * The purchase subtotal changed, so any previously
-     * validated promotion should no longer be persisted.
-     */
-    this.appliedPromotion.set(null);
+    this.appliedPromotion.set(
+      null
+    );
+
+    this.invalidateCertification();
   }
+
 
   protected onPromotionApplied(
-    promotion: ValidDiscountCodeResult | null
+    promotion:
+      ValidDiscountCodeResult | null
   ): void {
-    this.appliedPromotion.set(promotion);
+    this.appliedPromotion.set(
+      promotion
+    );
+
+    this.invalidateCertification();
   }
+
 
   protected onCertificationChange(
     accepted: boolean
   ): void {
-    this.certificationAccepted.set(accepted);
+    this.certificationAccepted.set(
+      accepted
+    );
 
-    this.onStepValidityChange(
+    this.setStepValidity(
       6,
       accepted
     );
   }
 
+
   protected isCurrentStepValid(): boolean {
-    return this.stepValidity()[this.currentStep()] ?? false;
+    return (
+      this.stepValidity()[
+        this.currentStep()
+      ] ?? false
+    );
   }
+
 
   protected previousStep(): void {
-    if (this.currentStep() > 1) {
-      this.currentStep.update(
-        step => step - 1
-      );
-
-      this.scrollToTop();
-    }
-  }
-
-  protected nextStep(): void {
-    if (!this.isCurrentStepValid()) {
+    if (
+      this.currentStep() <= 1 ||
+      this.isSaving() ||
+      this.isSavingPhotos()
+    ) {
       return;
     }
 
-    if (this.currentStep() < this.steps.length) {
-      this.currentStep.update(
-        step => step + 1
-      );
+    this.currentStep.update(
+      step => step - 1
+    );
 
-      this.scrollToTop();
-    }
+    this.scrollToTop();
   }
 
-  protected goToStep(step: number): void {
-    if (step < this.currentStep()) {
-      this.currentStep.set(step);
-      this.scrollToTop();
-    }
-  }
 
-  protected get authenticationStatus(): string {
-    const user = auth.currentUser;
-
-    if (!user) {
-      return 'NOT SIGNED IN';
-    }
-
-    return `SIGNED IN — UID: ${user.uid}`;
-  }
-
-  protected async saveListing(): Promise<void> {
+  protected async nextStep(): Promise<void> {
     if (
+      !this.isCurrentStepValid() ||
       this.isSaving() ||
-      !this.isCurrentStepValid()
+      this.isSavingPhotos()
     ) {
       return;
     }
 
     this.saveError.set('');
+    this.isSaving.set(true);
 
-    const user = auth.currentUser;
+    try {
+      await this.saveCurrentStep();
 
-    if (!user) {
-      this.saveError.set(
-        'You must be signed in before creating a listing.'
+      if (
+        this.currentStep() <
+        this.steps.length
+      ) {
+        this.currentStep.update(
+          step => step + 1
+        );
+
+        this.scrollToTop();
+      }
+    } catch (error) {
+      console.error(
+        'Failed to save listing step.',
+        error
       );
-      return;
+
+      this.saveError.set(
+        error instanceof Error
+          ? error.message
+          : 'We could not save this step. Please try again.'
+      );
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+
+  protected goToStep(
+    step: number
+  ): void {
+    if (
+      step < this.currentStep() &&
+      !this.isSaving() &&
+      !this.isSavingPhotos()
+    ) {
+      this.currentStep.set(
+        step
+      );
+
+      this.scrollToTop();
+    }
+  }
+
+
+  private async saveCurrentStep(): Promise<void> {
+    const listingUid =
+      this.listingUid();
+
+    const user =
+      auth.currentUser;
+
+    if (!listingUid || !user) {
+      throw new Error(
+        'Your authenticated listing session could not be found.'
+      );
     }
 
-    const address =
-      this.addressData();
+    switch (this.currentStep()) {
+      case 1: {
+        const address =
+          this.addressData();
 
-    const propertyDetails =
-      this.propertyDetailsData();
+        if (!address) {
+          throw new Error(
+            'Please complete the property address.'
+          );
+        }
 
-    const propertyFeatures =
-      this.propertyFeaturesData();
+        await this.listingService
+          .saveAddressStep(
+            listingUid,
+            user.uid,
+            address
+          );
 
-    const pricing =
-      this.pricingData();
+        this.addCompletedStep(
+          'address'
+        );
 
+        return;
+      }
+
+      case 2: {
+        const propertyDetails =
+          this.propertyDetailsData();
+
+        if (
+          !propertyDetails ||
+          !propertyDetails.propertyType ||
+          propertyDetails.bedrooms === null ||
+          propertyDetails.bathrooms === null ||
+          propertyDetails.squareFeet === null ||
+          propertyDetails.yearBuilt === null
+        ) {
+          throw new Error(
+            'Please complete all required property details.'
+          );
+        }
+
+        await this.listingService
+          .savePropertyDetailsStep(
+            listingUid,
+            user.uid,
+            {
+              propertyType:
+                propertyDetails.propertyType,
+
+              bedrooms:
+                propertyDetails.bedrooms,
+
+              bathrooms:
+                propertyDetails.bathrooms,
+
+              squareFeet:
+                propertyDetails.squareFeet,
+
+              yearBuilt:
+                propertyDetails.yearBuilt,
+
+              lotSize:
+                propertyDetails.lotSize ??
+                undefined,
+
+              description:
+                propertyDetails.description
+            },
+            this.completedSteps()
+          );
+
+        this.addCompletedStep(
+          'property_details'
+        );
+
+        return;
+      }
+
+      case 3: {
+        const propertyFeatures =
+          this.propertyFeaturesData();
+
+        if (
+          !propertyFeatures ||
+          propertyFeatures.mode ===
+            'unselected'
+        ) {
+          throw new Error(
+            'Please complete the property features step.'
+          );
+        }
+
+        const features: ListingFeatures =
+          propertyFeatures.mode === 'skip'
+            ? this.emptyFeatures()
+            : propertyFeatures.features;
+
+        await this.listingService
+          .saveFeaturesStep(
+            listingUid,
+            user.uid,
+            features,
+            this.completedSteps()
+          );
+
+        this.addCompletedStep(
+          'property_features'
+        );
+
+        return;
+      }
+
+      case 4: {
+        const photos =
+          this.photosData();
+
+        if (photos.length === 0) {
+          throw new Error(
+            'At least one listing photo is required.'
+          );
+        }
+
+        const references =
+          photos
+            .map(
+              photo =>
+                photo.storageReference
+            )
+            .filter(
+              reference =>
+                reference !== undefined
+            );
+
+        if (
+          references.length !==
+          photos.length
+        ) {
+          throw new Error(
+            'Your photos are still being saved. Please wait a moment and try again.'
+          );
+        }
+
+        await this.listingService
+          .updateDraftPhotos(
+            listingUid,
+            user.uid,
+            references,
+            this.completedSteps()
+          );
+
+        this.addCompletedStep(
+          'photos'
+        );
+
+        return;
+      }
+
+      case 5: {
+        const pricing =
+          this.pricingData();
+
+        if (
+          !pricing ||
+          pricing.listPrice === null ||
+          pricing.listPrice <= 0
+        ) {
+          throw new Error(
+            'Please enter a valid listing price.'
+          );
+        }
+
+        await this.listingService
+          .savePricingStep(
+            listingUid,
+            user.uid,
+            {
+              listPrice:
+                pricing.listPrice
+            },
+            this.featuredListing(),
+            this.completedSteps()
+          );
+
+        this.addCompletedStep(
+          'pricing'
+        );
+
+        return;
+      }
+
+      default:
+        return;
+    }
+  }
+
+
+  protected async completeListing(): Promise<void> {
     if (
-      !address ||
-      !propertyDetails ||
-      !propertyFeatures ||
-      !pricing
+      this.isSaving() ||
+      this.isSavingPhotos() ||
+      !this.isCurrentStepValid()
     ) {
-      this.saveError.set(
-        'Some listing information is missing. Please review each step before continuing.'
-      );
       return;
     }
 
@@ -289,167 +1059,106 @@ export class ListingWizardComponent {
       this.saveError.set(
         'You must accept the seller certification before continuing.'
       );
+
       return;
     }
 
-    if (!propertyDetails.propertyType) {
+    const listingUid =
+      this.listingUid();
+
+    const user =
+      auth.currentUser;
+
+    if (!listingUid || !user) {
       this.saveError.set(
-        'Please select a property type before continuing.'
+        'Your authenticated listing session could not be found.'
       );
+
       return;
     }
 
-    if (
-      propertyDetails.bedrooms === null ||
-      propertyDetails.bathrooms === null ||
-      propertyDetails.squareFeet === null ||
-      propertyDetails.yearBuilt === null
-    ) {
-      this.saveError.set(
-        'Some required property details are missing. Please review the Property Details step.'
-      );
-      return;
-    }
-
-    if (
-      propertyFeatures.mode === 'unselected'
-    ) {
-      this.saveError.set(
-        'Please complete the property features step.'
-      );
-      return;
-    }
-
-    if (
-      pricing.listPrice === null ||
-      pricing.listPrice <= 0
-    ) {
-      this.saveError.set(
-        'Please enter a valid listing price before continuing.'
-      );
-      return;
-    }
-
-    const features: ListingFeatures =
-      propertyFeatures.mode === 'skip'
-        ? this.emptyFeatures()
-        : propertyFeatures.features;
-
-    const promotion =
-      this.appliedPromotion();
-
+    this.saveError.set('');
     this.isSaving.set(true);
 
     try {
-      const listingUid =
-        await this.listingService.createDraft({
-          sellerUid: user.uid,
+      await this.listingService
+        .completeListingContent(
+          listingUid,
+          user.uid,
+          true,
+          this.completedSteps()
+        );
 
-          address: {
-            addressLine1:
-              address.addressLine1,
-
-            addressLine2:
-              address.addressLine2,
-
-            city:
-              address.city,
-
-            state:
-              address.state,
-
-            zipCode:
-              address.zipCode,
-
-            county:
-              address.county
-          },
-
-          propertyDetails: {
-            propertyType:
-              propertyDetails.propertyType,
-
-            bedrooms:
-              propertyDetails.bedrooms,
-
-            bathrooms:
-              propertyDetails.bathrooms,
-
-            squareFeet:
-              propertyDetails.squareFeet,
-
-            yearBuilt:
-              propertyDetails.yearBuilt,
-
-            lotSize:
-              propertyDetails.lotSize,
-
-            description:
-              propertyDetails.description
-          },
-
-          features,
-
-          pricing: {
-            listPrice:
-              pricing.listPrice
-          },
-
-          featuredListing:
-            this.featuredListing(),
-
-          promotion:
-            promotion
-              ? {
-                code:
-                  promotion.code,
-
-                type:
-                  promotion.type,
-
-                value:
-                  promotion.value,
-
-                discountAmount:
-                  promotion.discountAmount
-              }
-              : undefined,
-
-          certificationAccepted:
-            this.certificationAccepted()
-        });
-
-      this.createdListingUid.set(
-        listingUid
+      this.addCompletedStep(
+        'review'
       );
 
-      console.log(
-        'Draft listing created:',
-        listingUid
+      this.listingContentComplete.set(
+        true
       );
 
+      this.scrollToTop();
     } catch (error) {
       console.error(
-        'Failed to create draft listing.',
+        'Failed to complete listing content.',
         error
       );
 
       this.saveError.set(
-        'We could not save your listing. Please try again.'
+        error instanceof Error
+          ? error.message
+          : 'We could not complete your listing. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  private invalidateCertification(): void {
-    this.certificationAccepted.set(false);
 
-    this.stepValidity.update(validity => ({
-      ...validity,
-      6: false
-    }));
+  private addCompletedStep(
+    completedStep: ListingDraftStep
+  ): void {
+    const workflowOrder:
+      ListingDraftStep[] = [
+        'address',
+        'property_details',
+        'property_features',
+        'photos',
+        'pricing',
+        'review'
+      ];
+
+    this.completedSteps.update(
+      completedSteps => {
+        const uniqueSteps =
+          new Set([
+            ...completedSteps,
+            completedStep
+          ]);
+
+        return workflowOrder.filter(
+          step => uniqueSteps.has(step)
+        );
+      }
+    );
   }
+
+
+  private invalidateCertification(): void {
+    this.certificationAccepted.set(
+      false
+    );
+
+    this.setStepValidity(
+      6,
+      false
+    );
+
+    this.listingContentComplete.set(
+      false
+    );
+  }
+
 
   private emptyFeatures(): ListingFeatures {
     return {
@@ -494,6 +1203,32 @@ export class ListingWizardComponent {
       smartThermostat: false
     };
   }
+
+
+  private revokeTemporaryPhotoUrls(
+    photo: ListingPhoto
+  ): void {
+    if (
+      photo.fullImage.blob &&
+      photo.fullImage.previewUrl
+        .startsWith('blob:')
+    ) {
+      URL.revokeObjectURL(
+        photo.fullImage.previewUrl
+      );
+    }
+
+    if (
+      photo.thumbnail.blob &&
+      photo.thumbnail.previewUrl
+        .startsWith('blob:')
+    ) {
+      URL.revokeObjectURL(
+        photo.thumbnail.previewUrl
+      );
+    }
+  }
+
 
   private scrollToTop(): void {
     window.scrollTo({

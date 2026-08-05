@@ -16,26 +16,35 @@ import {
   ImageProcessingService
 } from '../../../../../core/infrastructure/image-processing/image-processing.service';
 
+import {
+  ListingPhotoReference
+} from '../../../../../core/domains/listings/models/listing.model';
+
 export interface ListingPhoto {
   id: string;
   originalFileName: string;
+
   fullImage: {
-    blob: Blob;
+    blob: Blob | null;
     previewUrl: string;
     width: number;
     height: number;
     size: number;
     mimeType: 'image/webp';
   };
+
   thumbnail: {
-    blob: Blob;
+    blob: Blob | null;
     previewUrl: string;
     width: number;
     height: number;
     size: number;
     mimeType: 'image/webp';
   };
+
   isPrimary: boolean;
+
+  storageReference?: ListingPhotoReference;
 }
 
 @Component({

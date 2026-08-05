@@ -1,122 +1,123 @@
 @if (listings().length > 0) {
 
-  <div class="listing-grid">
+<div class="listing-grid">
 
-    @for (
-      listing of listings();
-      track $index
-    ) {
+  @for (
+  listing of listings();
+  track $index
+  ) {
 
-      <article class="listing-card">
+  <article class="listing-card">
 
-        <div class="listing-card__top">
+    <div class="listing-card__top">
 
-          <div class="listing-card__identity">
+      <div class="listing-card__identity">
 
-            <div class="listing-card__badges">
+        <div class="listing-card__badges">
 
-              <span
-                class="listing-card__status"
-                [class.listing-card__status--active]="listing.status === 'active'"
-                [class.listing-card__status--draft]="listing.status === 'draft'"
-              >
-                {{ listing.status }}
-              </span>
+          <span class="listing-card__status" [class.listing-card__status--active]="listing.status === 'active'"
+            [class.listing-card__status--draft]="listing.status === 'draft'">
+            {{ listing.status }}
+          </span>
 
-              @if (listing.featuredListing) {
-                <span class="listing-card__featured">
-                  Featured
-                </span>
-              }
-
-            </div>
-
-            <h3>
-              {{ listing.addressLine1 }}
-            </h3>
-
-            <p class="listing-card__location">
-              {{ listing.city }},
-              {{ listing.state }}
-              {{ listing.zipCode }}
-            </p>
-
-          </div>
-
-          <strong class="listing-card__price">
-            {{ listing.listPrice | currency:'USD':'symbol':'1.0-0' }}
-          </strong>
+          @if (listing.featuredListing) {
+          <span class="listing-card__featured">
+            Featured
+          </span>
+          }
 
         </div>
 
-        <div class="listing-card__details">
+        <h3>
+          {{ listing.addressLine1 }}
+        </h3>
 
-          <span>
-            <strong>{{ listing.bedrooms }}</strong>
-            Beds
-          </span>
+        <p class="listing-card__location">
+          {{ listing.city }},
+          {{ listing.state }}
+          {{ listing.zipCode }}
+        </p>
 
-          <span>
-            <strong>{{ listing.bathrooms }}</strong>
-            Baths
-          </span>
+      </div>
 
-          <span>
-            <strong>{{ listing.squareFeet }}</strong>
-            Sq Ft
-          </span>
+      <div class="listing-card__price">
 
-        </div>
+        <span class="listing-card__price-label">
+          Listing Price:
+        </span>
 
-        <div class="listing-card__footer">
+        <strong>
+          @if (listing.listPrice > 0) {
+          {{ listing.listPrice | currency:'USD':'symbol':'1.0-0' }}
+          } @else {
+          Not set
+          }
+        </strong>
 
-          <div class="listing-card__meta">
+      </div>
+    </div>
 
-            @if (listing.status === 'draft') {
-              <span>
-                {{ listing.completionPercent }}% complete
-              </span>
-            } @else {
-              <span>
-                Listing is live
-              </span>
-            }
+    <div class="listing-card__details">
 
-          </div>
+      <span>
+        <strong>{{ listing.bedrooms }}</strong>
+        Beds
+      </span>
 
-          <button
-            type="button"
-            class="listing-card__action"
-            (click)="actionSelected.emit(listing)"
-          >
-            {{ actionLabel() }}
-          </button>
+      <span>
+        <strong>{{ listing.bathrooms }}</strong>
+        Baths
+      </span>
 
-        </div>
+      <span>
+        <strong>{{ listing.squareFeet }}</strong>
+        Sq Ft
+      </span>
 
-      </article>
+    </div>
 
-    }
+    <div class="listing-card__footer">
 
-  </div>
+      <div class="listing-card__meta">
+
+        @if (listing.status === 'draft') {
+        <span>
+          {{ listing.completionPercent }}% complete
+        </span>
+        } @else {
+        <span>
+          Listing is live
+        </span>
+        }
+
+      </div>
+
+      <button type="button" class="listing-card__action" (click)="actionSelected.emit(listing)">
+        {{ actionLabel() }}
+      </button>
+
+    </div>
+
+  </article>
+
+  }
+
+</div>
 
 } @else {
 
-  <div class="empty-listings">
+<div class="empty-listings">
 
-    <h3>No properties here yet</h3>
+  <h3>No properties here yet</h3>
 
-    <p>
-      {{ emptyMessage() }}
-    </p>
+  <p>
+    {{ emptyMessage() }}
+  </p>
 
-    <a
-      routerLink="/sell/new"
-      class="empty-listings__button"
-    >
-      List a Property
-    </a>
+  <a routerLink="/sell/new" class="empty-listings__button">
+    List a Property
+  </a>
 
-  </div>
+</div>
 
 }

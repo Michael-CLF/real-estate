@@ -130,6 +130,19 @@ export const routes: Routes = [
             component => component.ListingWizardComponent
           )
       },
+      {
+        path: 'sell/listings/:listingUid/edit',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/sell/listing-wizard/listing-wizard.component'
+          ).then(
+            component => component.ListingWizardComponent
+          )
+      },
 
       /*
        * Registration / account completion.

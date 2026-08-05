@@ -97,13 +97,25 @@ export interface ListingFeatures {
 }
 
 export interface ListingPhotoReference {
+  id: string;
+  originalFileName: string;
+
   storagePath: string;
   thumbnailStoragePath: string;
+
+  fullImageUrl: string;
+  thumbnailUrl: string;
+
   isPrimary: boolean;
   sortOrder: number;
+
   width: number;
   height: number;
   sizeBytes: number;
+
+  thumbnailWidth: number;
+  thumbnailHeight: number;
+  thumbnailSizeBytes: number;
 }
 
 export interface ListingPromotion {
@@ -150,3 +162,119 @@ export type ListingDraftStep =
   | 'photos'
   | 'pricing'
   | 'review';
+
+  /*
+ * A listing draft remains in the listingDrafts collection
+ * until identity verification, payment, and publication
+ * requirements have been completed.
+ */
+export interface ListingDraft {
+  Uid: string;
+  sellerUid: string;
+
+  address?: ListingDraftAddress;
+  propertyDetails?: ListingDraftPropertyDetails;
+  features?: ListingFeatures;
+  photos?: ListingPhotoReference[];
+  pricing?: ListingDraftPricing;
+
+  primaryPhotoUrl?: string;
+  photoUrls?: string[];
+
+  featuredListing: boolean;
+  promotion?: ListingPromotion;
+
+  certification: ListingCertification;
+
+  progress: ListingDraftProgress;
+  publication: ListingPublicationWorkflow;
+
+  createdAt: Date;
+  updatedAt: Date;
+  lastSavedAt: Date;
+}
+
+export interface ListingDraftAddress {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  county: string;
+}
+
+export interface ListingDraftPropertyDetails {
+  propertyType: PropertyType;
+  bedrooms: number;
+  bathrooms: number;
+  squareFeet: number;
+  lotSize?: number;
+  yearBuilt: number;
+  description?: string;
+}
+
+export interface ListingDraftPricing {
+  listPrice: number;
+}
+
+export interface ListingDraftProgress {
+  /*
+   * The step the seller should see when reopening
+   * the listing wizard.
+   */
+  currentStep: ListingDraftStep;
+
+  /*
+   * The most recent step that was successfully
+   * validated and saved.
+   */
+  lastCompletedStep?: ListingDraftStep;
+
+  completedSteps: ListingDraftStep[];
+
+  completionPercent: number;
+
+  contentStatus:
+    | 'in_progress'
+    | 'complete';
+}
+
+export interface ListingPublicationWorkflow {
+  status: ListingPublicationStatus;
+
+  identityStatus: ListingIdentityStatus;
+  paymentStatus: ListingPaymentStatus;
+
+  stripeCheckoutSessionId?: string;
+  stripePaymentIntentId?: string;
+
+  paymentAmount?: number;
+  paidAt?: Date;
+
+  publishedListingUid?: string;
+  publishedAt?: Date;
+}
+
+export type ListingPublicationStatus =
+  | 'content_incomplete'
+  | 'identity_required'
+  | 'identity_pending'
+  | 'payment_required'
+  | 'payment_processing'
+  | 'payment_failed'
+  | 'ready_to_publish'
+  | 'published';
+
+export type ListingIdentityStatus =
+  | 'not_started'
+  | 'pending'
+  | 'verified'
+  | 'failed'
+  | 'requires_input';
+
+export type ListingPaymentStatus =
+  | 'not_started'
+  | 'pending'
+  | 'paid'
+  | 'failed'
+  | 'refunded';

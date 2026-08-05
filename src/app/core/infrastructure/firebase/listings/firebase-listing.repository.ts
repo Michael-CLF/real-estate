@@ -1,43 +1,181 @@
-import { Injectable } from '@angular/core';
+import {
+  Injectable
+} from '@angular/core';
 
 import {
+  DocumentData,
+  DocumentSnapshot,
   addDoc,
   collection,
   doc,
   getDoc,
+  getDocs,
+  query,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  where
 } from 'firebase/firestore';
 
-import { firestore } from '../firebase';
+import {
+  firestore
+} from '../firebase';
 
 import {
-  Listing
+  Listing,
+  ListingDraft
 } from '../../../domains/listings/models/listing.model';
 
 import {
+  InitialListingDraft,
   ListingRepository
 } from '../../../domains/listings/repositories/listing.repository';
+
 
 @Injectable({
   providedIn: 'root'
 })
-export class FirebaseListingRepository extends ListingRepository {
+export class FirebaseListingRepository
+  extends ListingRepository {
 
-  async createDraft(
-    listing: Omit<Listing, 'Uid' | 'createdAt' | 'updatedAt'>
+  private readonly draftCollectionName =
+    'listingDrafts';
+
+  private readonly publishedCollectionName =
+    'listings';
+
+
+  /*
+   * DRAFT OPERATIONS
+   */
+
+  async createInitialDraft(
+    draft: InitialListingDraft
   ): Promise<string> {
-
-    const listingsCollection = collection(
+    const draftsCollection = collection(
       firestore,
-      'listings'
+      this.draftCollectionName
+    );
+
+    const sanitizedDraft =
+      this.removeUndefinedValues(draft);
+
+    const documentReference = await addDoc(
+      draftsCollection,
+      {
+        ...sanitizedDraft,
+
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastSavedAt: serverTimestamp()
+      }
+    );
+
+    return documentReference.id;
+  }
+
+
+  async updateDraft(
+    listingUid: string,
+    changes: Partial<ListingDraft>
+  ): Promise<void> {
+    const draftReference = doc(
+      firestore,
+      this.draftCollectionName,
+      listingUid
+    );
+
+    const sanitizedChanges =
+      this.removeUndefinedValues(changes);
+
+    await updateDoc(
+      draftReference,
+      {
+        ...sanitizedChanges,
+
+        updatedAt: serverTimestamp(),
+        lastSavedAt: serverTimestamp()
+      }
+    );
+  }
+
+
+  async getDraftByUid(
+    listingUid: string
+  ): Promise<ListingDraft | null> {
+    const draftReference = doc(
+      firestore,
+      this.draftCollectionName,
+      listingUid
+    );
+
+    const snapshot = await getDoc(
+      draftReference
+    );
+
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return this.mapDraftSnapshot(
+      snapshot
+    );
+  }
+
+
+  async getDraftsBySellerUid(
+    sellerUid: string
+  ): Promise<ListingDraft[]> {
+    const draftsQuery = query(
+      collection(
+        firestore,
+        this.draftCollectionName
+      ),
+      where(
+        'sellerUid',
+        '==',
+        sellerUid
+      )
+    );
+
+    const snapshot = await getDocs(
+      draftsQuery
+    );
+
+    return snapshot.docs
+      .map(
+        draftSnapshot =>
+          this.mapDraftSnapshot(
+            draftSnapshot
+          )
+      )
+      .sort(
+        (firstDraft, secondDraft) =>
+          secondDraft.updatedAt.getTime() -
+          firstDraft.updatedAt.getTime()
+      );
+  }
+
+
+  /*
+   * PUBLISHED LISTING OPERATIONS
+   */
+
+  async createPublishedListing(
+    listing: Omit<
+      Listing,
+      'Uid' | 'createdAt' | 'updatedAt'
+    >
+  ): Promise<string> {
+    const publishedCollection = collection(
+      firestore,
+      this.publishedCollectionName
     );
 
     const sanitizedListing =
       this.removeUndefinedValues(listing);
 
     const documentReference = await addDoc(
-      listingsCollection,
+      publishedCollection,
       {
         ...sanitizedListing,
 
@@ -49,36 +187,13 @@ export class FirebaseListingRepository extends ListingRepository {
     return documentReference.id;
   }
 
-  async updateDraft(
-    listingUid: string,
-    changes: Partial<Listing>
-  ): Promise<void> {
 
-    const listingReference = doc(
-      firestore,
-      'listings',
-      listingUid
-    );
-
-    const sanitizedChanges =
-      this.removeUndefinedValues(changes);
-
-    await updateDoc(
-      listingReference,
-      {
-        ...sanitizedChanges,
-        updatedAt: serverTimestamp()
-      }
-    );
-  }
-
-  async getByUid(
+  async getPublishedListingByUid(
     listingUid: string
   ): Promise<Listing | null> {
-
     const listingReference = doc(
       firestore,
-      'listings',
+      this.publishedCollectionName,
       listingUid
     );
 
@@ -97,24 +212,134 @@ export class FirebaseListingRepository extends ListingRepository {
 
       Uid: snapshot.id,
 
-      createdAt:
-        data['createdAt']?.toDate?.() ??
-        new Date(),
+      certification: {
+        ...data['certification'],
 
-      updatedAt:
-        data['updatedAt']?.toDate?.() ??
-        new Date(),
+        acceptedAt:
+          this.toOptionalDate(
+            data['certification']?.acceptedAt
+          )
+      },
 
       publishedAt:
-        data['publishedAt']?.toDate?.()
+        this.toOptionalDate(
+          data['publishedAt']
+        ),
 
+      createdAt:
+        this.toDate(
+          data['createdAt']
+        ),
+
+      updatedAt:
+        this.toDate(
+          data['updatedAt']
+        )
     } as Listing;
   }
 
-  private removeUndefinedValues<T>(value: T): T {
+
+  /*
+   * FIRESTORE MAPPING
+   */
+
+  private mapDraftSnapshot(
+    snapshot: DocumentSnapshot<DocumentData>
+  ): ListingDraft {
+    const data = snapshot.data();
+
+    if (!data) {
+      throw new Error(
+        `Listing draft ${snapshot.id} contains no data.`
+      );
+    }
+
+    return {
+      ...data,
+
+      Uid: snapshot.id,
+
+      certification: {
+        ...data['certification'],
+
+        acceptedAt:
+          this.toOptionalDate(
+            data['certification']?.acceptedAt
+          )
+      },
+
+      publication: {
+        ...data['publication'],
+
+        paidAt:
+          this.toOptionalDate(
+            data['publication']?.paidAt
+          ),
+
+        publishedAt:
+          this.toOptionalDate(
+            data['publication']?.publishedAt
+          )
+      },
+
+      createdAt:
+        this.toDate(
+          data['createdAt']
+        ),
+
+      updatedAt:
+        this.toDate(
+          data['updatedAt']
+        ),
+
+      lastSavedAt:
+        this.toDate(
+          data['lastSavedAt']
+        )
+    } as ListingDraft;
+  }
+
+
+  private toDate(
+    value: unknown
+  ): Date {
+    if (value instanceof Date) {
+      return value;
+    }
+
+    if (
+      value !== null &&
+      typeof value === 'object' &&
+      'toDate' in value &&
+      typeof value.toDate === 'function'
+    ) {
+      return value.toDate();
+    }
+
+    return new Date();
+  }
+
+
+  private toOptionalDate(
+    value: unknown
+  ): Date | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    return this.toDate(
+      value
+    );
+  }
+
+
+  private removeUndefinedValues<T>(
+    value: T
+  ): T {
     if (Array.isArray(value)) {
-      return value.map(item =>
-        this.removeUndefinedValues(item)
+      return value.map(
+        item =>
+          this.removeUndefinedValues(item)
       ) as T;
     }
 
@@ -125,11 +350,15 @@ export class FirebaseListingRepository extends ListingRepository {
     ) {
       return Object.fromEntries(
         Object.entries(value)
-          .filter(([, item]) => item !== undefined)
-          .map(([key, item]) => [
-            key,
-            this.removeUndefinedValues(item)
-          ])
+          .filter(
+            ([, item]) =>
+              item !== undefined
+          )
+          .map(
+            ([key, item]) => [
+              key,
+              this.removeUndefinedValues(item)
+            ])
       ) as T;
     }
 

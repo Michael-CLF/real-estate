@@ -101,7 +101,9 @@ export class DashboardComponent implements OnInit {
 
     if (listing.status === 'draft') {
       await this.router.navigate([
-        '/sell/new'
+        '/sell/listings',
+        listing.Uid,
+        'edit'
       ]);
 
       return;
