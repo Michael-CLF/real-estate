@@ -1,4 +1,7 @@
-import { inject, Injectable } from '@angular/core';
+import {
+  inject,
+  Injectable
+} from '@angular/core';
 
 import {
   Listing,
@@ -8,6 +11,10 @@ import {
 import {
   ListingRepository
 } from '../repositories/listing.repository';
+
+import {
+  LISTING_WORKFLOW_CONFIG
+} from '../../../configuration/listing-workflow.config';
 
 export interface CreateListingDraftInput {
   sellerUid: string;
@@ -53,7 +60,9 @@ export interface CreateListingDraftInput {
   providedIn: 'root'
 })
 export class ListingService {
-  private readonly repository = inject(ListingRepository);
+
+  private readonly repository =
+    inject(ListingRepository);
 
   async createDraft(
     input: CreateListingDraftInput
@@ -65,38 +74,81 @@ export class ListingService {
       );
     }
 
+    /*
+     * TEMPORARY DEVELOPMENT BYPASS
+     *
+     * During development, a completed listing may be
+     * published without Stripe Identity or payment.
+     *
+     * identityVerified and paymentCompleted intentionally
+     * remain false because those events did not actually
+     * occur.
+     */
+    const bypassIdentityAndPayment =
+      LISTING_WORKFLOW_CONFIG.bypassIdentityAndPayment;
+
     const listing: Omit<
       Listing,
       'Uid' | 'createdAt' | 'updatedAt'
     > = {
       sellerUid: input.sellerUid,
 
-      addressLine1: input.address.addressLine1,
-      addressLine2: input.address.addressLine2 || undefined,
-      city: input.address.city,
-      state: input.address.state,
-      zipCode: input.address.zipCode,
-      county: input.address.county,
+      addressLine1:
+        input.address.addressLine1,
 
-      listPrice: input.pricing.listPrice,
+      addressLine2:
+        input.address.addressLine2 ||
+        undefined,
 
-      propertyType: input.propertyDetails.propertyType,
-      bedrooms: input.propertyDetails.bedrooms,
-      bathrooms: input.propertyDetails.bathrooms,
-      squareFeet: input.propertyDetails.squareFeet,
-      lotSize: input.propertyDetails.lotSize ?? undefined,
-      yearBuilt: input.propertyDetails.yearBuilt,
-      description: input.propertyDetails.description,
+      city:
+        input.address.city,
 
-      features: input.features,
+      state:
+        input.address.state,
+
+      zipCode:
+        input.address.zipCode,
+
+      county:
+        input.address.county,
+
+      listPrice:
+        input.pricing.listPrice,
+
+      propertyType:
+        input.propertyDetails.propertyType,
+
+      bedrooms:
+        input.propertyDetails.bedrooms,
+
+      bathrooms:
+        input.propertyDetails.bathrooms,
+
+      squareFeet:
+        input.propertyDetails.squareFeet,
+
+      lotSize:
+        input.propertyDetails.lotSize ??
+        undefined,
+
+      yearBuilt:
+        input.propertyDetails.yearBuilt,
+
+      description:
+        input.propertyDetails.description,
+
+      features:
+        input.features,
 
       primaryPhotoUrl: undefined,
       photoUrls: [],
       photos: [],
 
-      featuredListing: input.featuredListing,
+      featuredListing:
+        input.featuredListing,
 
-      promotion: input.promotion,
+      promotion:
+        input.promotion,
 
       certification: {
         accepted: true,
@@ -106,31 +158,51 @@ export class ListingService {
       workflow: {
         identityVerified: false,
         paymentCompleted: false,
-        published: false
+        published:
+          bypassIdentityAndPayment
       },
 
-      status: 'draft',
-      draftStep: 'review',
+      status:
+        bypassIdentityAndPayment
+          ? 'active'
+          : 'draft',
+
+      draftStep:
+        bypassIdentityAndPayment
+          ? undefined
+          : 'review',
+
       completionPercent: 100,
 
       daysOnMarket: 0,
       views: 0,
-      favorites: 0
+      favorites: 0,
+
+      publishedAt:
+        bypassIdentityAndPayment
+          ? new Date()
+          : undefined
     };
 
-    return this.repository.createDraft(listing);
+    return this.repository.createDraft(
+      listing
+    );
   }
 
   async getListing(
     listingUid: string
   ): Promise<Listing | null> {
-    return this.repository.getByUid(listingUid);
+
+    return this.repository.getByUid(
+      listingUid
+    );
   }
 
   async updateDraft(
     listingUid: string,
     changes: Partial<Listing>
   ): Promise<void> {
+
     await this.repository.updateDraft(
       listingUid,
       changes

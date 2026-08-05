@@ -11,6 +11,8 @@ export class DashboardStateService {
   private readonly dashboardService = inject(DashboardService);
 
   readonly state = signal<DashboardState>({
+    firstName: '',
+
     hasListings: false,
     hasDraftListings: false,
     hasSavedProperties: false,
@@ -25,32 +27,43 @@ export class DashboardStateService {
     savedProperties: []
   });
 
-
-
   async load(): Promise<void> {
 
-    const draftListings =
-      await this.dashboardService.getDraftListings();
+    const [
+      firstName,
+      draftListings,
+      activeListings,
+      savedProperties
+    ] = await Promise.all([
+      this.dashboardService.getCurrentUserFirstName(),
+      this.dashboardService.getDraftListings(),
+      this.dashboardService.getActiveListings(),
+      this.dashboardService.getSavedHomes()
+    ]);
 
-    const activeListings =
-      await this.dashboardService.getActiveListings();
+    this.state.update(state => ({
+      ...state,
 
-    const savedProperties = await this.dashboardService.getSavedHomes();
+      firstName,
+      draftListings,
+      activeListings,
+      savedProperties,
 
-   this.state.update(state => ({
-  ...state,
-  draftListings,
-  activeListings,
-  savedProperties,
-  hasDraftListings: draftListings.length > 0,
-  hasListings: draftListings.length + activeListings.length > 0,
-  hasSavedProperties: savedProperties.length > 0,
-  showWelcome:
-    draftListings.length === 0 &&
-    activeListings.length === 0 &&
-    savedProperties.length === 0
-}));
+      hasDraftListings:
+        draftListings.length > 0,
 
+      hasListings:
+        draftListings.length +
+        activeListings.length > 0,
+
+      hasSavedProperties:
+        savedProperties.length > 0,
+
+      showWelcome:
+        draftListings.length === 0 &&
+        activeListings.length === 0 &&
+        savedProperties.length === 0
+    }));
   }
 
 }

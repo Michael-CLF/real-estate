@@ -1,40 +1,16 @@
 <section class="welcome">
 
   <header class="welcome__header">
-    <h1>Welcome to NavStreet</h1>
+
+    <h1>
+      Welcome to NavStreet@if (firstName()) {, {{ firstName() }}}
+    </h1>
 
     <p>
-      Whether you're buying your next home or selling your current one,
-      everything starts here.
+      Manage your properties, saved homes, offers,
+      messages and activity from one place.
     </p>
+
   </header>
-
-  <div class="welcome__actions">
-
-    <a
-      class="action-card"
-      routerLink="/search">
-
-      <h2>Browse Properties</h2>
-
-      <p>
-        Search homes, save your favorites, and start your home search.
-      </p>
-
-    </a>
-
-    <a
-      class="action-card"
-      routerLink="/sell">
-
-      <h2>List a Property</h2>
-
-      <p>
-        Create your first property listing and begin selling with NavStreet.
-      </p>
-
-    </a>
-
-  </div>
 
 </section>

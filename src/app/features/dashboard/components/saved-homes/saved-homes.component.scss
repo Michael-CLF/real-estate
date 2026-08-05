@@ -1,69 +1,216 @@
-.saved-homes {
-  margin-top: 2rem;
+:host {
+  display: block;
 }
 
-.section-header {
-  margin-bottom: 1rem;
+.saved-properties {
+  margin-top: 3.5rem;
+
+  &__header {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      color: #154360;
+      font-size: clamp(1.75rem, 3vw, 2.4rem);
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0.5rem 0 0;
+      color: #64748b;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+  }
+
+  &__empty {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+
+    padding: 1.75rem 2rem;
+
+    background: #ffffff;
+    border: 1px solid #dbe3ec;
+    border-radius: 14px;
+
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  &__empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 54px;
+    height: 54px;
+
+    border-radius: 50%;
+
+    background: #eef6f8;
+    color: #154360;
+
+    font-size: 1.5rem;
+
+    i {
+      display: block;
+    }
+  }
+
+  &__empty-content {
+    h3 {
+      margin: 0;
+      color: #154360;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0.35rem 0 0;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  }
+
+  &__browse-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+
+    min-height: 46px;
+    padding: 0.75rem 1.25rem;
+
+    border-radius: 8px;
+
+    background: #154360;
+    color: #ffffff;
+
+    font-weight: 700;
+    text-decoration: none;
+
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      background: #10374f;
+      box-shadow: 0 8px 18px rgba(21, 67, 96, 0.18);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
 }
 
-.saved-home-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 1.25rem;
-
-  margin-bottom: 1rem;
-
+.saved-property-card {
+  background: #ffffff;
   border: 1px solid #dbe3ec;
-  border-radius: 12px;
+  border-radius: 14px;
 
-  background: #fff;
-}
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
 
-.saved-home-card h3 {
-  margin: 0 0 .25rem;
-}
+  &__content {
+    padding: 1.5rem;
+  }
 
-.saved-home-card p {
-  margin: 0;
-  color: #64748b;
-}
+  &__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
 
-.price {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #154360;
-}
+    h3 {
+      margin: 0;
+      color: #154360;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
 
-.empty-state {
-  padding: 2rem;
-  text-align: center;
+    p {
+      margin: 0.4rem 0 0;
+      color: #64748b;
+    }
+  }
 
-  border: 1px dashed #cbd5e1;
-  border-radius: 12px;
-}
+  &__price {
+    flex-shrink: 0;
 
-.browse-button {
-  display: inline-block;
-  margin-top: 1rem;
+    color: #154360;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
 
-  padding: .75rem 1.5rem;
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
 
-  border-radius: 8px;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
 
-  background: #154360;
-  color: white;
+    border-top: 1px solid #e6ecef;
+  }
 
-  text-decoration: none;
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.7rem 1rem;
+
+    border-radius: 8px;
+
+    background: #154360;
+    color: #ffffff;
+
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      background: #10374f;
+    }
+  }
 }
 
 @media (max-width: 768px) {
 
-  .saved-home-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .75rem;
+  .saved-properties {
+    margin-top: 2.5rem;
+
+    &__empty {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+
+      padding: 1.5rem;
+    }
+
+    &__browse-button {
+      width: 100%;
+    }
+
+    &__grid {
+      grid-template-columns: 1fr;
+    }
   }
 
+  .saved-property-card {
+
+    &__heading {
+      flex-direction: column;
+    }
+
+    &__footer {
+      justify-content: stretch;
+    }
+
+    &__action {
+      width: 100%;
+    }
+  }
 }

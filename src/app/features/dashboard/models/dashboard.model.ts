@@ -31,3 +31,4 @@ export interface DashboardActivity {
   description: string;
   timestamp: Date;
 }
+

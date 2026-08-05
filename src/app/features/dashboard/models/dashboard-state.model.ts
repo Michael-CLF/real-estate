@@ -1,6 +1,8 @@
 import { Listing } from '../../../core/domains/listings/models/listing.model';
 
 export interface DashboardState {
+  firstName: string;
+
   hasListings: boolean;
   hasDraftListings: boolean;
   hasSavedProperties: boolean;
@@ -12,7 +14,6 @@ export interface DashboardState {
 
   draftListings: Listing[];
   activeListings: Listing[];
-
   savedProperties: SavedPropertySummary[];
 }
 

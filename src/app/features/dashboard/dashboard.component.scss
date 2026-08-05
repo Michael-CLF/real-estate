@@ -6,28 +6,28 @@
 
 .dashboard__header {
   margin-bottom: 3rem;
-}
 
-.dashboard__header h1 {
-  margin: 0;
-  font-size: clamp(2.2rem, 4vw, 3rem);
-  font-weight: 700;
-  color: #154360;
-}
+  h1 {
+    margin: 0;
+    color: #154360;
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 700;
+  }
 
-.dashboard__header p {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  color: #64748b;
-  max-width: 700px;
-  line-height: 1.6;
+  p {
+    max-width: 700px;
+    margin: 1rem 0 0;
+    color: #64748b;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
 }
 
 .dashboard__welcome-actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2rem;
-  margin-bottom: 40px;
+  margin-bottom: 2.5rem;
 }
 
 .action-card {
@@ -38,29 +38,29 @@
   border-radius: 18px;
   text-decoration: none;
   transition:
-    transform .2s ease,
-    box-shadow .2s ease,
-    border-color .2s ease;
-}
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 
-.action-card:hover {
-  transform: translateY(-6px);
-  border-color: #154360;
-  box-shadow: 0 14px 30px rgba(0,0,0,.08);
-}
+  &:hover {
+    transform: translateY(-4px);
+    border-color: #154360;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  }
 
-.action-card h2 {
-  margin: 0 0 1rem;
-  color: #154360;
-  font-size: 2rem;
-  font-weight: 700;
-}
+  h2 {
+    margin: 0 0 1rem;
+    color: #154360;
+    font-size: 2rem;
+    font-weight: 700;
+  }
 
-.action-card p {
-  margin: 0;
-  color: #64748b;
-  line-height: 1.7;
-  font-size: 1rem;
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
 }
 
 .info {
@@ -68,8 +68,122 @@
   font-size: 2rem;
 }
 
-@media (max-width: 768px) {
+.dashboard__listings {
+  margin-bottom: 3rem;
+}
 
+.dashboard__section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0;
+    color: #154360;
+    font-size: clamp(2rem, 3vw, 2.5rem);
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0.5rem 0 0;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}
+
+.dashboard__new-listing {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.75rem 1.25rem;
+  color: #ffffff;
+  background: #154360;
+  border: 1px solid #154360;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    background: #10364d;
+    box-shadow: 0 6px 16px rgba(21, 67, 96, 0.18);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(21, 67, 96, 0.25);
+    outline-offset: 3px;
+  }
+}
+
+.dashboard__listing-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+
+  button {
+    min-height: 42px;
+    padding: 0.65rem 1.25rem;
+    color: #154360;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover {
+      border-color: #154360;
+      background: #f5f9fb;
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba(21, 67, 96, 0.2);
+      outline-offset: 2px;
+    }
+
+    &.active {
+      color: #ffffff;
+      background: #154360;
+      border-color: #154360;
+    }
+  }
+}
+
+.dashboard__secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 1.5rem;
+
+  app-saved-homes,
+  app-activity-card {
+    min-width: 0;
+    height: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard__secondary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
   .dashboard {
     padding: 2rem 1rem 3rem;
   }
@@ -78,4 +192,31 @@
     grid-template-columns: 1fr;
   }
 
+  .dashboard__section-header {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .dashboard__new-listing {
+    width: 100%;
+  }
+
+  .dashboard__listing-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard__listing-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard__secondary-grid {
+    gap: 1rem;
+  }
 }

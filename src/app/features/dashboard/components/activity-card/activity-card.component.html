@@ -1,47 +1,70 @@
-<section class="activity-card">
+<section class="recent-activity">
 
-  <div class="activity-card__header">
+  <header class="recent-activity__header">
+
     <h2>Recent Activity</h2>
-    <p>Your latest listing activity.</p>
-  </div>
 
-  @if (activities.length > 0) {
+    <p>
+      Your latest listing activity.
+    </p>
 
-    <div class="activity-list">
+  </header>
 
-      @for (activity of activities; track activity.timestamp) {
+  @if (activities.length === 0) {
 
-        <article class="activity">
+    <div class="recent-activity__empty">
 
-          <div class="activity__dot"></div>
+      <div class="recent-activity__empty-icon">
+        <i class="fa-regular fa-clock"></i>
+      </div>
 
-          <div class="activity__content">
+      <div class="recent-activity__empty-content">
 
-            <h3>{{ activity.title }}</h3>
+        <h3>No recent activity yet</h3>
 
-            <p>{{ activity.description }}</p>
+        <p>
+          Listing updates, offers, showings, and important events
+          will appear here.
+        </p>
 
-            <span>
+      </div>
+
+    </div>
+
+  } @else {
+
+    <div class="recent-activity__list">
+
+      @for (
+        activity of activities;
+        track activity.timestamp.getTime()
+      ) {
+
+        <article class="activity-item">
+
+          <div class="activity-item__icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+
+          <div class="activity-item__content">
+
+            <h3>
+              {{ activity.title }}
+            </h3>
+
+            <p>
+              {{ activity.description }}
+            </p>
+
+            <time [attr.datetime]="activity.timestamp.toISOString()">
               {{ activity.timestamp | date:'MMM d, y • h:mm a' }}
-            </span>
+            </time>
 
           </div>
 
         </article>
 
       }
-
-    </div>
-
-  } @else {
-
-    <div class="empty-state">
-
-      <h3>No recent activity</h3>
-
-      <p>
-        Listing updates, offers, showings, and important events will appear here.
-      </p>
 
     </div>
 

@@ -1,5 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where
+} from 'firebase/firestore';
 
 import { AuthState } from '../../../core/authentication/state/auth.state';
 import { firestore } from '../../../core/infrastructure/firebase/firebase';
@@ -22,6 +29,27 @@ export class DashboardService {
     }
 
     return uid;
+  }
+
+  async getCurrentUserFirstName(): Promise<string> {
+
+    const userRef = doc(
+      firestore,
+      'users',
+      this.currentUserId
+    );
+
+    const snapshot = await getDoc(userRef);
+
+    if (!snapshot.exists()) {
+      return '';
+    }
+
+    const data = snapshot.data();
+
+    return typeof data['firstName'] === 'string'
+      ? data['firstName'].trim()
+      : '';
   }
 
   async getDraftListings(): Promise<Listing[]> {
@@ -57,7 +85,7 @@ export class DashboardService {
   }
 
   async getSavedHomes(): Promise<SavedPropertySummary[]> {
-  // TODO: Load from Firestore once favorites are implemented.
-  return [];
-}
+    // TODO: Load from Firestore once favorites are implemented.
+    return [];
+  }
 }

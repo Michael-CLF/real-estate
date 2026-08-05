@@ -1,51 +1,95 @@
-<p>saved-homes works!</p>
-<section class="saved-homes">
+<section class="saved-properties">
 
-  <header class="section-header">
-    <h2>Saved Homes</h2>
+  <header class="saved-properties__header">
+
+    <div>
+      <h2>Saved Properties</h2>
+
+      <p>
+        Homes you've saved while browsing NavStreet.
+      </p>
+    </div>
+
   </header>
 
   @if (savedHomes().length === 0) {
 
-    <div class="empty-state">
+    <div class="saved-properties__empty">
 
-      <p>You haven't saved any homes yet.</p>
+      <div class="saved-properties__empty-icon">
+        <i class="fa-regular fa-heart"></i>
+      </div>
+
+      <div class="saved-properties__empty-content">
+
+        <h3>No saved properties yet</h3>
+
+        <p>
+          Browse available homes and save the properties
+          you'd like to revisit.
+        </p>
+
+      </div>
 
       <a
-        routerLink="/search"
-        class="browse-button">
+        routerLink="/homes"
+        class="saved-properties__browse-button"
+      >
+        <i class="fa-solid fa-magnifying-glass"></i>
 
-        Browse Properties
-
+        <span>Browse Properties</span>
       </a>
 
     </div>
 
   } @else {
 
-    @for (home of savedHomes(); track home.listingUid) {
+    <div class="saved-properties__grid">
 
-      <article class="saved-home-card">
+      @for (home of savedHomes(); track home.listingUid) {
 
-        <div>
+        <article class="saved-property-card">
 
-          <h3>{{ home.address }}</h3>
+          <div class="saved-property-card__content">
 
-          <p>
-            {{ home.city }}, {{ home.state }}
-          </p>
+            <div class="saved-property-card__heading">
 
-        </div>
+              <div>
 
-        <div class="price">
+                <h3>
+                  {{ home.address }}
+                </h3>
 
-          {{ home.price | currency }}
+                <p>
+                  {{ home.city }}, {{ home.state }}
+                </p>
 
-        </div>
+              </div>
 
-      </article>
+              <strong class="saved-property-card__price">
+                {{ home.price | currency:'USD':'symbol':'1.0-0' }}
+              </strong>
 
-    }
+            </div>
+
+            <div class="saved-property-card__footer">
+
+              <a
+                [routerLink]="['/listings', home.listingUid]"
+                class="saved-property-card__action"
+              >
+                View Property
+              </a>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
 
   }
 

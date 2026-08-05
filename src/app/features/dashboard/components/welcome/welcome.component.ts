@@ -1,12 +1,18 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input
+} from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-welcome',
   standalone: true,
-  imports: [RouterLink],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WelcomeComponent {}
+export class WelcomeComponent {
+
+  readonly firstName = input<string>('');
+
+}
