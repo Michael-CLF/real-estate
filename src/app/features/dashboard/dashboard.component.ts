@@ -7,6 +7,10 @@ import {
 } from '@angular/core';
 
 import {
+  SavedPropertySummary
+} from './models/dashboard-state.model';
+
+import {
   Router,
   RouterLink
 } from '@angular/router';
@@ -68,6 +72,12 @@ export class DashboardComponent implements OnInit {
     signal<ListingTab>('active');
 
   protected readonly recentActivities: ActivityItem[] = [];
+  protected readonly removingSavedListingUid =
+    signal<string | null>(null);
+
+
+  protected readonly savedPropertyError =
+    signal('');
 
   async ngOnInit(): Promise<void> {
     await this.dashboardState.load();
@@ -113,5 +123,37 @@ export class DashboardComponent implements OnInit {
       'Manage active listing:',
       listing
     );
+  }
+  protected async removeSavedProperty(
+    property: SavedPropertySummary
+  ): Promise<void> {
+    if (this.removingSavedListingUid()) {
+      return;
+    }
+
+    this.savedPropertyError.set('');
+
+    this.removingSavedListingUid.set(
+      property.listingUid
+    );
+
+    try {
+      await this.dashboardState.removeSavedProperty(
+        property.listingUid
+      );
+
+
+    } catch (error: unknown) {
+      console.error(
+        'Unable to remove saved property:',
+        error
+      );
+
+      this.savedPropertyError.set(
+        'We could not remove this property. Please try again.'
+      );
+    } finally {
+      this.removingSavedListingUid.set(null);
+    }
   }
 }

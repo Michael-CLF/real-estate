@@ -1,4 +1,32 @@
-import { Listing } from '../../../core/domains/listings/models/listing.model';
+import {
+  Listing
+} from '../../../core/domains/listings/models/listing.model';
+
+export type SavedPropertyStatus =
+  | 'active'
+  | 'under-contract'
+  | 'sold'
+  | 'withdrawn'
+  | 'unavailable';
+
+export interface SavedPropertySummary {
+  listingUid: string;
+  sellerUid: string;
+
+  address: string;
+  city: string;
+  state: string;
+
+  price: number;
+  primaryPhotoUrl?: string;
+  photo?: string;
+
+  daysOnMarket: number;
+  createdAt: Date | null;
+
+  status: SavedPropertyStatus;
+  statusLabel: string;
+}
 
 export interface DashboardState {
   firstName: string;
@@ -15,16 +43,4 @@ export interface DashboardState {
   draftListings: Listing[];
   activeListings: Listing[];
   savedProperties: SavedPropertySummary[];
-}
-
-export interface SavedPropertySummary {
-  listingUid: string;
-  sellerUid: string;
-  address: string;
-  city: string;
-  state: string;
-  price: number;
-  primaryPhotoUrl?: string;
-  daysOnMarket: number;
-  createdAt: Date;
 }

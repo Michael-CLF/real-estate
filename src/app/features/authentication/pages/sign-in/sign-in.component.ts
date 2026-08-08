@@ -206,9 +206,26 @@ export class SignInComponent {
       if (!existingUser) {
         await this.authService.logout();
 
-        throw new Error(
-          'No NavStreet account exists for this email address. Please register first.'
+        sessionStorage.removeItem(
+          'pendingOtpEmail'
         );
+
+        await this.router.navigate(
+          ['/register'],
+          {
+            queryParams: {
+              email,
+              ...(this.getSafeReturnUrl()
+                ? {
+                  returnUrl:
+                    this.getSafeReturnUrl()
+                }
+                : {})
+            }
+          }
+        );
+
+        return;
       }
 
       await this.userRepository.update(

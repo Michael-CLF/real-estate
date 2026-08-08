@@ -1,6 +1,7 @@
 import {
   ChangeDetectorRef,
   Component,
+  OnInit,
   inject
 } from '@angular/core';
 
@@ -49,7 +50,7 @@ interface PendingRegistration {
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
 
   private readonly formBuilder =
     inject(FormBuilder);
@@ -163,6 +164,19 @@ export class RegisterComponent {
       this.authService.isAuthenticated &&
       this.accountState.hasIncompleteAccount()
     );
+  }
+  ngOnInit(): void {
+    const email =
+      this.route.snapshot.queryParamMap
+        .get('email')
+        ?.trim()
+        .toLowerCase();
+
+    if (email) {
+      this.registerForm.controls.email.setValue(
+        email
+      );
+    }
   }
 
   formatPhoneNumber(event: Event): void {

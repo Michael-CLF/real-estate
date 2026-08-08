@@ -18,25 +18,39 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListingGalleryComponent {
-  readonly photos = input.required<readonly ListingPhoto[]>();
-  readonly fallbackImageUrl = input<string | undefined>();
-  readonly listingTitle = input.required<string>();
+  readonly photos =
+    input.required<readonly ListingPhoto[]>();
+
+  readonly fallbackImageUrl =
+    input<string | undefined>();
+
+  readonly listingTitle =
+    input.required<string>();
 
   readonly selectedIndex = signal(0);
 
   readonly availablePhotos = computed<ListingPhoto[]>(() => {
-    const orderedPhotos = [...this.photos()].sort(
-      (firstPhoto, secondPhoto) =>
-        firstPhoto.sortOrder - secondPhoto.sortOrder
-    );
+    const validPhotos = this.photos()
+      .filter(photo =>
+        this.isUsableImageUrl(photo.url)
+      )
+      .sort(
+        (firstPhoto, secondPhoto) =>
+          firstPhoto.sortOrder -
+          secondPhoto.sortOrder
+      );
 
-    if (orderedPhotos.length) {
-      return orderedPhotos;
+    if (validPhotos.length) {
+      return validPhotos;
     }
 
-    const fallbackImageUrl = this.fallbackImageUrl();
+    const fallbackImageUrl =
+      this.fallbackImageUrl();
 
-    if (!fallbackImageUrl) {
+    if (
+      !fallbackImageUrl ||
+      !this.isUsableImageUrl(fallbackImageUrl)
+    ) {
       return [];
     }
 
@@ -79,7 +93,8 @@ export class ListingGalleryComponent {
   }
 
   showPreviousPhoto(): void {
-    const photoCount = this.availablePhotos().length;
+    const photoCount =
+      this.availablePhotos().length;
 
     if (photoCount <= 1) {
       return;
@@ -93,7 +108,8 @@ export class ListingGalleryComponent {
   }
 
   showNextPhoto(): void {
-    const photoCount = this.availablePhotos().length;
+    const photoCount =
+      this.availablePhotos().length;
 
     if (photoCount <= 1) {
       return;
@@ -103,6 +119,21 @@ export class ListingGalleryComponent {
       currentIndex === photoCount - 1
         ? 0
         : currentIndex + 1
+    );
+  }
+
+  private isUsableImageUrl(
+    value: string | undefined
+  ): value is string {
+    if (!value?.trim()) {
+      return false;
+    }
+
+    return (
+      value.startsWith('https://') ||
+      value.startsWith('http://') ||
+      value.startsWith('data:image/') ||
+      value.startsWith('blob:')
     );
   }
 }

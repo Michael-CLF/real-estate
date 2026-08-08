@@ -210,7 +210,33 @@ export const routes: Routes = [
       }
     ]
   },
-
+  {
+    path: 'sell/listings/:listingUid/verification-return',
+    loadComponent: () =>
+      import(
+        './features/sell/verification-return/verification-return.component'
+      ).then(component =>
+        component.VerificationReturnComponent
+      )
+  },
+  {
+    path: 'sell/listings/:listingUid/payment',
+    loadComponent: () =>
+      import(
+        './features/sell/payment/payment.component'
+      ).then(component =>
+        component.PaymentComponent
+      )
+  },
+  {
+    path: 'sell/listings/:listingUid/payment-return',
+    loadComponent: () =>
+      import(
+        './features/sell/payment-return/payment-return.component'
+      ).then(component =>
+        component.PaymentReturnComponent
+      )
+  },
   {
     path: '**',
     redirectTo: ''

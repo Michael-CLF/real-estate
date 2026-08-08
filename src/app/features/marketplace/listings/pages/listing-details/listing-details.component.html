@@ -1,205 +1,206 @@
 <main class="listing-details">
   <div class="listing-details__container">
-    <a
-      class="listing-details__back-link"
-      routerLink="/homes"
-    >
+    <a class="listing-details__back-link" routerLink="/homes">
       <span aria-hidden="true">←</span>
       Back to listings
     </a>
 
     @if (viewModel$ | async; as viewModel) {
-      @if (viewModel.hasError) {
-        <section
-          class="listing-details__message"
-          role="alert"
-        >
-          <h1>Listing could not be loaded</h1>
+    @if (viewModel.hasError) {
+    <section class="listing-details__message" role="alert">
+      <h1>Listing could not be loaded</h1>
 
-          <p>
-            There was a problem retrieving this property.
-            Please return to the marketplace and try again.
-          </p>
+      <p>
+        There was a problem retrieving this property.
+        Please return to the marketplace and try again.
+      </p>
 
-          <a routerLink="/homes">
-            Return to marketplace
-          </a>
-        </section>
-      } @else if (viewModel.listing; as listing) {
-        <header class="listing-details__header">
-          <div>
-            <p class="listing-details__eyebrow">
-              Property for sale
-            </p>
+      <a routerLink="/homes">
+        Return to marketplace
+      </a>
+    </section>
+    } @else if (viewModel.listing; as listing) {
+    <header class="listing-details__header">
+      <div>
+        <p class="listing-details__eyebrow">
+          Property for sale
+        </p>
 
-            <h1>{{ listing.title }}</h1>
+        <h1>{{ listing.title }}</h1>
 
-            <p class="listing-details__address">
-              {{ listing.address.addressLine1 }},
-              {{ listing.address.city }},
-              {{ listing.address.stateAbbreviation }}
-              {{ listing.address.postalCode }}
-            </p>
-          </div>
+        <p class="listing-details__address">
+          {{ listing.address.addressLine1 }},
+          {{ listing.address.city }},
+          {{ listing.address.stateAbbreviation }}
+          {{ listing.address.postalCode }}
+        </p>
+      </div>
+    </header>
 
-          <div class="listing-details__header-actions">
-            <button
-              type="button"
-              aria-label="Save this listing"
-            >
-              <span aria-hidden="true">♡</span>
-              Save
-            </button>
-          </div>
-        </header>
-
-        <div class="listing-details__layout">
-          <div class="listing-details__primary">
-            <app-listing-gallery
-              [photos]="listing.photos"
-              [fallbackImageUrl]="
+    <div class="listing-details__layout">
+      <div class="listing-details__primary">
+        <app-listing-gallery [photos]="listing.photos" [fallbackImageUrl]="
                 listing.featuredPhotoUrl
-              "
-              [listingTitle]="listing.title"
-            />
+              " [listingTitle]="listing.title" />
 
-            <section class="listing-details__summary">
-              <p class="listing-details__price">
-                {{
-                  listing.price
-                    | currency:'USD':'symbol':'1.0-0'
-                }}
-              </p>
-
-              <div class="listing-details__headline-facts">
-                @if (listing.bedrooms !== undefined) {
-                  <span>
-                    <strong>{{ listing.bedrooms }}</strong>
-                    beds
-                  </span>
-                }
-
-                @if (listing.bathrooms !== undefined) {
-                  <span>
-                    <strong>{{ listing.bathrooms }}</strong>
-                    baths
-                  </span>
-                }
-
-                @if (listing.squareFeet !== undefined) {
-                  <span>
-                    <strong>
-                      {{
-                        listing.squareFeet
-                          | number:'1.0-0'
-                      }}
-                    </strong>
-                    sq. ft.
-                  </span>
-                }
-              </div>
-            </section>
-
-            <section class="listing-details__section">
-              <h2>About this property</h2>
-
-              <p class="listing-details__description">
-                {{ listing.description }}
-              </p>
-            </section>
-
-            <section class="listing-details__section">
-              <h2>Property details</h2>
-
-              <dl class="listing-details__facts">
-                @for (
-                  fact of viewModel.facts;
-                  track fact.label
-                ) {
-                  <div>
-                    <dt>{{ fact.label }}</dt>
-                    <dd>{{ fact.value }}</dd>
-                  </div>
-                }
-              </dl>
-            </section>
-          </div>
-
-          <aside class="listing-details__sidebar">
-            <div class="listing-details__contact-card">
-              <p class="listing-details__contact-eyebrow">
-                Interested in this property?
-              </p>
-
-              <h2>Contact the seller</h2>
-
-              <p>
-                Ask a question, request more information,
-                or arrange a property showing.
-              </p>
-
-              <button type="button">
-                Contact seller
-              </button>
-
-              <p class="listing-details__contact-note">
-                Seller contact and inquiry submission will
-                be connected when buyer accounts and
-                Firebase inquiries are added.
-              </p>
-            </div>
-
-            <div class="listing-details__activity-card">
-              <h2>Listing activity</h2>
-
-              <dl>
-                <div>
-                  <dt>Views</dt>
-                  <dd>
-                    {{
-                      listing.viewCount
-                        | number:'1.0-0'
-                    }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>Favorites</dt>
-                  <dd>
-                    {{
-                      listing.favoriteCount
-                        | number:'1.0-0'
-                    }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>Inquiries</dt>
-                  <dd>
-                    {{
-                      listing.inquiryCount
-                        | number:'1.0-0'
-                    }}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </aside>
-        </div>
-      } @else {
-        <section class="listing-details__message">
-          <h1>Listing not found</h1>
-
-          <p>
-            This listing may have been removed, sold, or
-            is no longer publicly available.
+        <section class="listing-details__summary">
+          <p class="listing-details__price">
+            {{
+            listing.price
+            | currency:'USD':'symbol':'1.0-0'
+            }}
           </p>
 
-          <a routerLink="/homes">
-            Browse available properties
-          </a>
+          <div class="listing-details__headline-facts">
+            @if (listing.bedrooms !== undefined) {
+            <span>
+              <strong>{{ listing.bedrooms }}</strong>
+              beds
+            </span>
+            }
+
+            @if (listing.bathrooms !== undefined) {
+            <span>
+              <strong>{{ listing.bathrooms }}</strong>
+              baths
+            </span>
+            }
+
+            @if (listing.squareFeet !== undefined) {
+            <span>
+              <strong>
+                {{
+                listing.squareFeet
+                | number:'1.0-0'
+                }}
+              </strong>
+              sq. ft.
+            </span>
+            }
+          </div>
         </section>
-      }
+
+        <section class="listing-details__section">
+          <h2>About this property</h2>
+
+          <p class="listing-details__description">
+            {{ listing.description }}
+          </p>
+        </section>
+
+        <section class="listing-details__section">
+          <h2>Property details</h2>
+
+          <dl class="listing-details__facts">
+            @for (
+            fact of viewModel.facts;
+            track fact.label
+            ) {
+            <div>
+              <dt>{{ fact.label }}</dt>
+              <dd>{{ fact.value }}</dd>
+            </div>
+            }
+          </dl>
+        </section>
+      </div>
+
+      <aside class="listing-details__sidebar">
+        <div class="listing-details__contact-card">
+          <p class="listing-details__contact-eyebrow">
+            Interested in this property?
+          </p>
+
+          <h2>Contact the seller</h2>
+
+          <p>
+            Ask a question, request more information,
+            or arrange a property showing.
+          </p>
+
+          <button type="button">
+            Contact seller
+          </button>
+
+          <p class="listing-details__contact-note">
+            Seller contact and inquiry submission will
+            be connected when buyer accounts and
+            Firebase inquiries are added.
+          </p>
+        </div>
+
+        <div class="listing-details__activity-card">
+          <h2>Listing activity</h2>
+
+          <dl>
+            <div>
+              <dt>Views</dt>
+              <dd>
+                {{
+                listing.viewCount
+                | number:'1.0-0'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Favorites</dt>
+              <dd>
+                {{
+                listing.favoriteCount
+                | number:'1.0-0'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Inquiries</dt>
+              <dd>
+                {{
+                listing.inquiryCount
+                | number:'1.0-0'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <button class="listing-details__save-button" type="button"
+          [class.listing-details__save-button--saved]="isSaved()" [disabled]="isSaving()"
+          [attr.aria-pressed]="isSaved()" (click)="toggleSavedListing(listing)">
+          <span aria-hidden="true">
+            {{ isSaved() ? '♥' : '♡' }}
+          </span>
+
+          @if (isSaving()) {
+          Saving...
+          } @else if (isSaved()) {
+          Listing saved
+          } @else {
+          Save this listing
+          }
+        </button>
+
+        @if (saveError()) {
+        <p class="listing-details__save-error" role="alert">
+          {{ saveError() }}
+        </p>
+        }
+      </aside>
+    </div>
+    } @else {
+    <section class="listing-details__message">
+      <h1>Listing not found</h1>
+
+      <p>
+        This listing may have been removed, sold, or
+        is no longer publicly available.
+      </p>
+
+      <a routerLink="/homes">
+        Browse available properties
+      </a>
+    </section>
+    }
     }
   </div>
 </main>

@@ -1,0 +1,124 @@
+:host {
+    display: block;
+    min-height: calc(100vh - 160px);
+    background: #f5f8fa;
+}
+
+.payment-return {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+
+    &__card {
+        padding: 2.5rem 1.25rem;
+        text-align: center;
+        background: #ffffff;
+        border: 1px solid #dbe3ec;
+        border-radius: 18px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    &__eyebrow {
+        display: block;
+        margin-bottom: 0.65rem;
+        color: #15868d;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin: 0;
+        color: #154360;
+        font-family: 'Barlow', sans-serif;
+        font-size: clamp(2rem, 7vw, 2.75rem);
+        line-height: 1.15;
+    }
+
+    p {
+        max-width: 520px;
+        margin: 1rem auto 0;
+        color: #64748b;
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    &__spinner,
+    &__success,
+    &__error {
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 1.5rem;
+        border-radius: 50%;
+    }
+
+    &__spinner {
+        border: 5px solid rgba(21, 67, 96, 0.15);
+        border-top-color: #15868d;
+        animation: payment-spinner 0.8s linear infinite;
+    }
+
+    &__success,
+    &__error {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.75rem;
+    }
+
+    &__success {
+        background: #15868d;
+    }
+
+    &__error {
+        background: #b42318;
+    }
+
+    &__button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50px;
+        margin-top: 1.75rem;
+        padding: 0.8rem 1.5rem;
+        color: #ffffff;
+        font-weight: 750;
+        text-decoration: none;
+        background: #154360;
+        border-radius: 10px;
+
+        &:hover {
+            background: #10364d;
+        }
+
+        &:focus-visible {
+            outline: 3px solid rgba(21, 134, 141, 0.28);
+            outline-offset: 3px;
+        }
+    }
+}
+
+@keyframes payment-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (min-width: 640px) {
+    .payment-return {
+        padding: 4rem 2rem 6rem;
+
+        &__card {
+            padding: 3.5rem;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .payment-return__spinner {
+        animation-duration: 1.8s;
+    }
+}

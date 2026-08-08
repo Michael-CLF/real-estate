@@ -65,5 +65,32 @@ export class DashboardStateService {
         savedProperties.length === 0
     }));
   }
+  async removeSavedProperty(
+    listingUid: string
+  ): Promise<void> {
+    await this.dashboardService.removeSavedHome(
+      listingUid
+    );
 
+    this.state.update(currentState => {
+      const savedProperties =
+        currentState.savedProperties.filter(
+          property =>
+            property.listingUid !== listingUid
+        );
+
+      const hasSavedProperties =
+        savedProperties.length > 0;
+
+      return {
+        ...currentState,
+        savedProperties,
+        hasSavedProperties,
+
+        showWelcome:
+          !currentState.hasListings &&
+          !hasSavedProperties
+      };
+    });
+  }
 }

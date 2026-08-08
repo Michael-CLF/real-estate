@@ -1,92 +1,135 @@
 <section class="listing-wizard">
   <div class="listing-wizard__container">
     @if (isInitializing()) {
-      <div class="wizard-loading">
-        <div
-          class="wizard-loading__spinner"
-          aria-hidden="true">
-        </div>
-
-        <h1 class="prepare-listing">
-          Preparing your listing
-        </h1>
-
-        <p class="prepare-listing">
-          We’re opening your secure draft.
-        </p>
+    <div class="wizard-loading">
+      <div class="wizard-loading__spinner" aria-hidden="true">
       </div>
-    } @else if (initializationError()) {
-      <div class="wizard-initialization-error">
-        <h1>
-          We couldn’t open your listing
-        </h1>
 
-        <p>
-          {{ initializationError() }}
-        </p>
+      <h1 class="prepare-listing">
+        Preparing your listing
+      </h1>
 
-        <a
-          class="button button--primary"
-          routerLink="/dashboard">
-          Return to Dashboard
-        </a>
-      </div>
+      <p class="prepare-listing">
+        We’re opening your secure draft.
+      </p>
+    </div>
     } @else if (listingContentComplete()) {
-      <div class="wizard-save-success">
-        <h1>
-          Your listing information is complete
-        </h1>
+    <div class="verification-preparation" aria-live="polite">
 
-        <p>
-          Your listing draft has been saved. Identity
-          verification and payment are the remaining
-          steps before publication.
-        </p>
+      @if (isSaving()) {
+      <div class="verification-preparation__spinner" role="status" aria-label="Preparing identity verification">
+      </div>
 
-        <a
-          class="button button--secondary"
-          routerLink="/dashboard">
+      <span class="verification-preparation__eyebrow">
+        Secure verification
+      </span>
+
+      <h1>
+        Preparing identity verification
+      </h1>
+
+      <p>
+        Please wait while we securely connect you
+        to Stripe Identity. You’ll be redirected
+        automatically.
+      </p>
+
+      <div class="verification-preparation__security">
+        <span aria-hidden="true">🔒</span>
+
+        <span>
+          Your listing has been saved securely.
+        </span>
+      </div>
+      } @else if (saveError()) {
+      <div class="verification-preparation__error-icon" aria-hidden="true">
+        !
+      </div>
+
+      <h1>
+        We couldn’t open identity verification
+      </h1>
+
+      <p>
+        {{ saveError() }}
+      </p>
+
+      <p class="verification-preparation__saved-message">
+        Your listing information has been saved.
+        You won’t need to enter it again.
+      </p>
+
+      <div class="verification-preparation__actions">
+        <button type="button" class="button button--primary" (click)="completeListing()">
+          Try Again
+        </button>
+
+        <a class="button button--secondary" routerLink="/dashboard">
           Return to Dashboard
         </a>
       </div>
+      } @else {
+      <div class="verification-preparation__spinner" role="status" aria-label="Checking verification status">
+      </div>
+
+      <h1>
+        Checking verification status
+      </h1>
+
+      <p>
+        Please wait while we confirm the next step
+        for your listing.
+      </p>
+      }
+    </div>
+    } @else if (listingContentComplete()) {
+    <div class="wizard-save-success">
+      <h1 class="success">
+        Your listing information is complete
+      </h1>
+
+      <p class="success">
+        Your listing draft has been saved. Identity
+        verification and payment are the remaining
+        steps before publication.
+      </p>
+
+      <a class="button button--secondary" routerLink="/dashboard">
+        Return to Dashboard
+      </a>
+    </div>
     } @else {
-      <header class="wizard-header">
-        <div>
-          <span class="wizard-header__eyebrow">
-            Create Listing
-          </span>
+    <header class="wizard-header">
+      <div>
+        <span class="wizard-header__eyebrow">
+          Create Listing
+        </span>
 
-          <h1>
-            Create Your Listing
-          </h1>
+        <h1>
+          Create Your Listing
+        </h1>
 
-          <p>
-            Complete each step to prepare your
-            property for buyers. Your progress is
-            saved automatically.
-          </p>
-        </div>
+        <p>
+          Complete each step to prepare your
+          property for buyers. Your progress is
+          saved automatically.
+        </p>
+      </div>
 
-        <div class="wizard-header__step">
-          Step {{ currentStep() }} of
-          {{ steps.length }}
-        </div>
-      </header>
+      <div class="wizard-header__step">
+        Step {{ currentStep() }} of
+        {{ steps.length }}
+      </div>
+    </header>
 
-      <nav
-        class="wizard-progress"
-        aria-label="Listing progress">
-        @for (
-          step of steps;
-          track step.number
-        ) {
-          <button
-            type="button"
-            class="wizard-progress__step"
-            [class.wizard-progress__step--active]="
+    <nav class="wizard-progress" aria-label="Listing progress">
+      @for (
+      step of steps;
+      track step.number
+      ) {
+      <button type="button" class="wizard-progress__step" [class.wizard-progress__step--active]="
               currentStep() === step.number
-            "
-            [class.wizard-progress__step--complete]="
+            " [class.wizard-progress__step--complete]="
               completedSteps().includes(
                 step.number === 1
                   ? 'address'
@@ -100,226 +143,177 @@
                           ? 'pricing'
                           : 'review'
               )
-            "
-            [disabled]="
+            " [disabled]="
               step.number > currentStep() ||
               isSaving() ||
               isSavingPhotos()
-            "
-            (click)="goToStep(step.number)">
-            <span class="wizard-progress__number">
-              @if (
-                completedSteps().includes(
-                  step.number === 1
-                    ? 'address'
-                    : step.number === 2
-                      ? 'property_details'
-                      : step.number === 3
-                        ? 'property_features'
-                        : step.number === 4
-                          ? 'photos'
-                          : step.number === 5
-                            ? 'pricing'
-                            : 'review'
-                )
-              ) {
-                ✓
-              } @else {
-                {{ step.number }}
-              }
-            </span>
+            " (click)="goToStep(step.number)">
+        <span class="wizard-progress__number">
+          @if (
+          completedSteps().includes(
+          step.number === 1
+          ? 'address'
+          : step.number === 2
+          ? 'property_details'
+          : step.number === 3
+          ? 'property_features'
+          : step.number === 4
+          ? 'photos'
+          : step.number === 5
+          ? 'pricing'
+          : 'review'
+          )
+          ) {
+          ✓
+          } @else {
+          {{ step.number }}
+          }
+        </span>
 
-            <span class="wizard-progress__label">
-              {{ step.label }}
-            </span>
-          </button>
-        }
-      </nav>
+        <span class="wizard-progress__label">
+          {{ step.label }}
+        </span>
+      </button>
+      }
+    </nav>
 
-      <main class="wizard-content">
-        @switch (currentStep()) {
-          @case (1) {
-            <app-address-step
-              [initialValue]="addressData()"
-              (valueChange)="
+    <main class="wizard-content">
+      @switch (currentStep()) {
+      @case (1) {
+      <app-address-step [initialValue]="addressData()" (valueChange)="
                 onAddressChange($event)
-              "
-              (validityChange)="
+              " (validityChange)="
                 onStepValidityChange(1, $event)
               " />
-          }
+      }
 
-          @case (2) {
-            <app-property-details-step
-              [initialValue]="
+      @case (2) {
+      <app-property-details-step [initialValue]="
                 propertyDetailsData()
-              "
-              (valueChange)="
+              " (valueChange)="
                 onPropertyDetailsChange($event)
-              "
-              (validityChange)="
+              " (validityChange)="
                 onStepValidityChange(2, $event)
               " />
-          }
+      }
 
-          @case (3) {
-            <app-property-features-step
-              [initialValue]="
+      @case (3) {
+      <app-property-features-step [initialValue]="
                 propertyFeaturesData()
-              "
-              (valueChange)="
+              " (valueChange)="
                 onPropertyFeaturesChange($event)
-              "
-              (validityChange)="
+              " (validityChange)="
                 onStepValidityChange(3, $event)
               " />
-          }
+      }
 
-          @case (4) {
-            <app-photos-step
-              [initialValue]="photosData()"
-              (valueChange)="
+      @case (4) {
+      <app-photos-step [initialValue]="photosData()" (valueChange)="
                 onPhotosChange($event)
-              "
-              (validityChange)="
+              " (validityChange)="
                 onStepValidityChange(4, $event)
               " />
 
-            @if (isSavingPhotos()) {
-              <div
-                class="wizard-save-status"
-                role="status">
-                Saving photos...
-              </div>
-            }
-
-            @if (photoSaveError()) {
-              <div
-                class="wizard-save-error"
-                role="alert">
-                {{ photoSaveError() }}
-              </div>
-            }
-          }
-
-          @case (5) {
-            <app-pricing-step
-              [initialValue]="pricingData()"
-              [squareFeet]="
-                propertyDetailsData()
-                  ?.squareFeet ?? null
-              "
-              (valueChange)="
-                onPricingChange($event)
-              "
-              (validityChange)="
-                onStepValidityChange(5, $event)
-              " />
-          }
-
-          @case (6) {
-            <app-review-step
-              [address]="addressData()"
-              [propertyDetails]="
-                propertyDetailsData()
-              "
-              [features]="
-                propertyFeaturesData()
-              "
-              [photos]="photosData()"
-              [pricing]="pricingData()"
-              [initialFeaturedListing]="featuredListing()"
-              (editStep)="goToStep($event)"
-              (featuredListingChange)="
-                onFeaturedListingChange($event)
-              "
-              (promotionApplied)="
-                onPromotionApplied($event)
-              "
-              (certificationChange)="
-                onCertificationChange($event)
-              "
-              (validityChange)="
-                onStepValidityChange(6, $event)
-              " />
-          }
-        }
-      </main>
-
-      @if (saveError()) {
-        <div
-          class="wizard-save-error"
-          role="alert">
-          {{ saveError() }}
-        </div>
+      @if (isSavingPhotos()) {
+      <div class="wizard-save-status" role="status">
+        Saving photos...
+      </div>
       }
 
-      <footer class="wizard-navigation">
-        <div class="wizard-navigation__left">
-          @if (currentStep() > 1) {
-            <button
-              type="button"
-              class="button button--secondary"
-              [disabled]="
+      @if (photoSaveError()) {
+      <div class="wizard-save-error" role="alert">
+        {{ photoSaveError() }}
+      </div>
+      }
+      }
+
+      @case (5) {
+      <app-pricing-step [initialValue]="pricingData()" [squareFeet]="
+                propertyDetailsData()
+                  ?.squareFeet ?? null
+              " (valueChange)="
+                onPricingChange($event)
+              " (validityChange)="
+                onStepValidityChange(5, $event)
+              " />
+      }
+
+      @case (6) {
+      <app-review-step [address]="addressData()" [propertyDetails]="
+                propertyDetailsData()
+              " [features]="
+                propertyFeaturesData()
+              " [photos]="photosData()" [pricing]="pricingData()" [initialFeaturedListing]="featuredListing()"
+        (editStep)="goToStep($event)" (featuredListingChange)="
+                onFeaturedListingChange($event)
+              " (promotionApplied)="
+                onPromotionApplied($event)
+              " (certificationChange)="
+                onCertificationChange($event)
+              " (validityChange)="
+                onStepValidityChange(6, $event)
+              " />
+      }
+      }
+    </main>
+
+    @if (saveError()) {
+    <div class="wizard-save-error" role="alert">
+      {{ saveError() }}
+    </div>
+    }
+
+    <footer class="wizard-navigation">
+      <div class="wizard-navigation__left">
+        @if (currentStep() > 1) {
+        <button type="button" class="button button--secondary" [disabled]="
                 isSaving() ||
                 isSavingPhotos()
-              "
-              (click)="previousStep()">
-              ← Back
-            </button>
-          }
-        </div>
+              " (click)="previousStep()">
+          ← Back
+        </button>
+        }
+      </div>
 
-        <div class="wizard-navigation__status">
+      <div class="wizard-navigation__status">
+        @if (isSaving()) {
+        Saving your progress...
+        } @else if (isSavingPhotos()) {
+        Saving photos...
+        } @else {
+        Step {{ currentStep() }} of
+        {{ steps.length }}
+        }
+      </div>
+
+      <div class="wizard-navigation__right">
+        @if (
+        currentStep() < steps.length ) { <button type="button" class="button button--primary" [disabled]="
+                !isCurrentStepValid() ||
+                isSaving() ||
+                isSavingPhotos()
+              " (click)="nextStep()">
           @if (isSaving()) {
-            Saving your progress...
-          } @else if (isSavingPhotos()) {
-            Saving photos...
+          Saving...
           } @else {
-            Step {{ currentStep() }} of
-            {{ steps.length }}
+          Continue →
           }
-        </div>
-
-        <div class="wizard-navigation__right">
-          @if (
-            currentStep() <
-            steps.length
-          ) {
-            <button
-              type="button"
-              class="button button--primary"
-              [disabled]="
+          </button>
+          } @else {
+          <button type="button" class="button button--primary" [disabled]="
                 !isCurrentStepValid() ||
                 isSaving() ||
                 isSavingPhotos()
-              "
-              (click)="nextStep()">
-              @if (isSaving()) {
-                Saving...
-              } @else {
-                Continue →
-              }
-            </button>
-          } @else {
-            <button
-              type="button"
-              class="button button--primary"
-              [disabled]="
-                !isCurrentStepValid() ||
-                isSaving() ||
-                isSavingPhotos()
-              "
-              (click)="completeListing()">
-              @if (isSaving()) {
-                Saving...
-              } @else {
-                Continue
-              }
-            </button>
+              " (click)="completeListing()">
+            @if (isSaving()) {
+            Saving...
+            } @else {
+            Continue
+            }
+          </button>
           }
-        </div>
-      </footer>
+      </div>
+    </footer>
     }
   </div>
 </section>

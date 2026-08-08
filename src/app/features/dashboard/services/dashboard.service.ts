@@ -2,8 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import {
   collection,
   doc,
+  deleteDoc,
   getDoc,
   getDocs,
+  orderBy,
   query,
   where
 } from 'firebase/firestore';
@@ -15,7 +17,11 @@ import {
   ListingDraft,
   ListingFeatures
 } from '../../../core/domains/listings/models/listing.model';
-import { SavedPropertySummary } from '../models/dashboard-state.model';
+
+import {
+  SavedPropertyStatus,
+  SavedPropertySummary
+} from '../models/dashboard-state.model';
 
 import {
   ListingService
@@ -63,17 +69,18 @@ export class DashboardService {
 
   async getDraftListings(): Promise<Listing[]> {
     const drafts =
-      await this.listingService
-        .getSellerDrafts(
-          this.currentUserId
-        );
+      await this.listingService.getSellerDrafts(
+        this.currentUserId
+      );
 
-    return drafts.map(
-      draft =>
-        this.mapDraftToDashboardListing(
-          draft
-        )
-    );
+    return drafts
+      .filter(draft =>
+        draft.publication.status !== 'published' &&
+        draft.publication.paymentStatus !== 'paid'
+      )
+      .map(draft =>
+        this.mapDraftToDashboardListing(draft)
+      );
   }
 
   async getActiveListings(): Promise<Listing[]> {
@@ -92,9 +99,199 @@ export class DashboardService {
 
   }
 
-  async getSavedHomes(): Promise<SavedPropertySummary[]> {
-    // TODO: Load from Firestore once favorites are implemented.
-    return [];
+  async getSavedHomes():
+    Promise<SavedPropertySummary[]> {
+
+    const savedListingsRef =
+      collection(
+        firestore,
+        'users',
+        this.currentUserId,
+        'savedListings'
+      );
+
+    const savedListingsQuery =
+      query(
+        savedListingsRef,
+        orderBy(
+          'createdAt',
+          'desc'
+        )
+      );
+
+    const snapshot =
+      await getDocs(
+        savedListingsQuery
+      );
+
+    return Promise.all(
+      snapshot.docs.map(
+        async savedListingDocument => {
+
+          const data =
+            savedListingDocument.data();
+
+          const listingUid =
+            typeof data['listingUid'] === 'string'
+              ? data['listingUid']
+              : savedListingDocument.id;
+
+          const listingSnapshot =
+            await getDoc(
+              doc(
+                firestore,
+                'listings',
+                listingUid
+              )
+            );
+
+          const listingStatus =
+            listingSnapshot.exists()
+              ? listingSnapshot.data()['status']
+              : 'unavailable';
+
+          const {
+            status,
+            statusLabel
+          } = this.mapSavedPropertyStatus(
+            listingStatus
+          );
+
+          return {
+            listingUid,
+            sellerUid:
+              typeof data['sellerUid'] === 'string'
+                ? data['sellerUid']
+                : '',
+
+            address:
+              typeof data['address'] === 'string'
+                ? data['address']
+                : '',
+
+            city:
+              typeof data['city'] === 'string'
+                ? data['city']
+                : '',
+
+            state:
+              typeof data['state'] === 'string'
+                ? data['state']
+                : '',
+
+            price:
+              typeof data['price'] === 'number'
+                ? data['price']
+                : 0,
+
+            primaryPhotoUrl:
+              typeof data['primaryPhotoUrl'] ===
+                'string'
+                ? data['primaryPhotoUrl']
+                : undefined,
+
+            photo:
+              typeof data['photo'] === 'string'
+                ? data['photo']
+                : undefined,
+
+            daysOnMarket:
+              typeof data['daysOnMarket'] ===
+                'number'
+                ? data['daysOnMarket']
+                : 0,
+
+            createdAt:
+              data['createdAt']?.toDate?.() ??
+              null,
+
+            status,
+            statusLabel
+          };
+        }
+      )
+    );
+  }
+
+  private mapSavedPropertyStatus(
+    listingStatus: unknown
+  ): {
+    status: SavedPropertyStatus;
+    statusLabel: string;
+  } {
+    if (typeof listingStatus !== 'string') {
+      return {
+        status: 'unavailable',
+        statusLabel: 'No Longer Available'
+      };
+    }
+
+    const normalizedStatus =
+      listingStatus
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, '-')
+        .replace(/\s+/g, '-');
+
+    switch (normalizedStatus) {
+      case 'active':
+      case 'published':
+        return {
+          status: 'active',
+          statusLabel: 'Active'
+        };
+
+      case 'pending':
+      case 'under-contract':
+        return {
+          status: 'under-contract',
+          statusLabel: 'Under Contract'
+        };
+
+      case 'sold':
+      case 'closed':
+        return {
+          status: 'sold',
+          statusLabel: 'Sold'
+        };
+
+      case 'withdrawn':
+      case 'cancelled':
+      case 'canceled':
+        return {
+          status: 'withdrawn',
+          statusLabel: 'Withdrawn'
+        };
+
+      default:
+        return {
+          status: 'unavailable',
+          statusLabel: 'No Longer Available'
+        };
+    }
+  }
+
+  async removeSavedHome(
+    listingUid: string
+  ): Promise<void> {
+    const normalizedListingUid =
+      listingUid.trim();
+
+    if (!normalizedListingUid) {
+      throw new Error(
+        'A listing UID is required.'
+      );
+    }
+
+    const savedListingRef = doc(
+      firestore,
+      'users',
+      this.currentUserId,
+      'savedListings',
+      normalizedListingUid
+    );
+
+    await deleteDoc(savedListingRef);
   }
 
   private mapDraftToDashboardListing(

@@ -1,0 +1,67 @@
+<main class="payment-return">
+    <section class="payment-return__card" aria-live="polite">
+
+        @if (pageState() === 'processing') {
+
+        <div class="payment-return__spinner" aria-hidden="true"></div>
+
+        <span class="payment-return__eyebrow">
+            Payment received
+        </span>
+
+        <h1>Preparing your listing</h1>
+
+        <p>
+            Your payment is being confirmed and your listing
+            is being published. Please keep this page open.
+        </p>
+
+        }
+
+        @if (pageState() === 'published') {
+
+        <div class="payment-return__success" aria-hidden="true">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <span class="payment-return__eyebrow">
+            Listing published
+        </span>
+
+        <h1>Your listing is now active</h1>
+
+        <p>
+            Payment was successful. We’re returning you to
+            your dashboard.
+        </p>
+
+        <a class="payment-return__button" routerLink="/dashboard" [queryParams]="{ listingStatus: 'active' }">
+            Go to Dashboard
+        </a>
+
+        }
+
+        @if (pageState() === 'error') {
+
+        <div class="payment-return__error" aria-hidden="true">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <span class="payment-return__eyebrow">
+            Payment status
+        </span>
+
+        <h1>We couldn’t confirm publication</h1>
+
+        <p role="alert">
+            {{ errorMessage() }}
+        </p>
+
+        <a class="payment-return__button" routerLink="/dashboard">
+            Return to Dashboard
+        </a>
+
+        }
+
+    </section>
+</main>

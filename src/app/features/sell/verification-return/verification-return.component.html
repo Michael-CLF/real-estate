@@ -1,0 +1,232 @@
+<main class="verification-return">
+  <section
+    class="verification-card"
+    aria-live="polite"
+  >
+    @if (
+      pageState() === 'loading' ||
+      pageState() === 'processing'
+    ) {
+      <div
+        class="status-icon status-icon--processing"
+        aria-hidden="true"
+      >
+        <span class="spinner"></span>
+      </div>
+
+      <p class="eyebrow">
+        Identity verification
+      </p>
+
+      <h1>
+        Confirming your verification
+      </h1>
+
+      <p class="intro">
+        Please wait while we securely confirm your identity
+        verification. This normally takes only a few seconds.
+      </p>
+    }
+
+    @if (pageState() === 'verified') {
+      <div
+        class="status-icon status-icon--success"
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-check"></i>
+      </div>
+
+      <p class="eyebrow">
+        Identity verified
+      </p>
+
+      <h1>
+        Thank you for verifying your identity
+      </h1>
+
+      <p class="intro">
+        Your identity has been confirmed. Your listing is ready
+        for the final payment step.
+      </p>
+
+      @if (propertyAddress()) {
+        <p class="property-address">
+          <i
+            class="fa-solid fa-location-dot"
+            aria-hidden="true"
+          ></i>
+
+          {{ propertyAddress() }}
+        </p>
+      }
+
+      <section
+        class="fee-summary"
+        aria-labelledby="fee-summary-title"
+      >
+        <h2 id="fee-summary-title">
+          Payment summary
+        </h2>
+
+        <div class="fee-row">
+          <span>
+            NavStreet listing
+          </span>
+
+          <strong>
+            ${{ listingFee.toFixed(2) }}
+          </strong>
+        </div>
+
+        @if (featuredFee() > 0) {
+          <div class="fee-row">
+            <span>
+              Featured Listing upgrade
+
+              <small>
+                Prominent exposure and Featured badge
+              </small>
+            </span>
+
+            <strong>
+              ${{ featuredFee().toFixed(2) }}
+            </strong>
+          </div>
+        }
+
+        @if (discount() > 0) {
+          <div class="fee-row fee-row--discount">
+            <span>
+              Promotion discount
+
+              @if (draft()?.promotion?.code) {
+                <small>
+                  {{ draft()?.promotion?.code }}
+                </small>
+              }
+            </span>
+
+            <strong>
+              −${{ discount().toFixed(2) }}
+            </strong>
+          </div>
+        }
+
+        <div class="fee-row fee-row--total">
+          <span>
+            Total due
+          </span>
+
+          <strong>
+            ${{ total().toFixed(2) }}
+          </strong>
+        </div>
+      </section>
+
+      <button
+        class="primary-button"
+        type="button"
+        (click)="continueToPayment()"
+      >
+        <span>
+          Continue to Payment
+        </span>
+
+        <i
+          class="fa-solid fa-arrow-right"
+          aria-hidden="true"
+        ></i>
+      </button>
+
+      <p class="secure-note">
+        <i
+          class="fa-solid fa-lock"
+          aria-hidden="true"
+        ></i>
+
+        Payment will be completed securely through Stripe.
+      </p>
+    }
+
+    @if (pageState() === 'requires_input') {
+      <div
+        class="status-icon status-icon--attention"
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-id-card"></i>
+      </div>
+
+      <p class="eyebrow">
+        Additional verification needed
+      </p>
+
+      <h1>
+        Let’s try that again
+      </h1>
+
+      <p class="intro">
+        Stripe could not complete the verification. No payment
+        has been collected, and you can safely try again.
+      </p>
+
+      @if (errorMessage()) {
+        <p
+          class="error-message"
+          role="alert"
+        >
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <button
+        class="primary-button"
+        type="button"
+        [disabled]="isRetrying()"
+        (click)="tryVerificationAgain()"
+      >
+        @if (isRetrying()) {
+          <span>
+            Opening Stripe…
+          </span>
+        } @else {
+          <span>
+            Try Verification Again
+          </span>
+        }
+      </button>
+    }
+
+    @if (pageState() === 'error') {
+      <div
+        class="status-icon status-icon--error"
+        aria-hidden="true"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+        ></i>
+      </div>
+
+      <p class="eyebrow">
+        We couldn’t confirm your status
+      </p>
+
+      <h1>
+        Something went wrong
+      </h1>
+
+      <p
+        class="intro"
+        role="alert"
+      >
+        {{ errorMessage() }}
+      </p>
+
+      <a
+        class="secondary-button"
+        routerLink="/dashboard"
+      >
+        Return to Dashboard
+      </a>
+    }
+  </section>
+</main>

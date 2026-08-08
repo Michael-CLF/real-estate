@@ -21,6 +21,10 @@ import {
 } from '../../../core/domains/listings/services/listing.service';
 
 import {
+  IdentityVerificationService
+} from '../../../core/domains/identity/services/identity-verification.service';
+
+import {
   ListingDraftStep,
   ListingFeatures
 } from '../../../core/domains/listings/models/listing.model';
@@ -91,6 +95,9 @@ export class ListingWizardComponent
 
   private readonly listingService =
     inject(ListingService);
+
+  private readonly identityVerificationService =
+    inject(IdentityVerificationService);
 
   private readonly route =
     inject(ActivatedRoute);
@@ -754,7 +761,7 @@ export class ListingWizardComponent
   protected isCurrentStepValid(): boolean {
     return (
       this.stepValidity()[
-        this.currentStep()
+      this.currentStep()
       ] ?? false
     );
   }
@@ -935,7 +942,7 @@ export class ListingWizardComponent
         if (
           !propertyFeatures ||
           propertyFeatures.mode ===
-            'unselected'
+          'unselected'
         ) {
           throw new Error(
             'Please complete the property features step.'
@@ -1097,17 +1104,66 @@ export class ListingWizardComponent
         true
       );
 
-      this.scrollToTop();
+      const verification =
+        await this.identityVerificationService
+          .startVerification(
+            listingUid
+          );
+
+      if (verification.alreadyVerified) {
+        await this.router.navigate(
+          [
+            '/sell/listings',
+            listingUid,
+            'payment'
+          ],
+          {
+            replaceUrl: true
+          }
+        );
+
+        return;
+      }
+
+      if (verification.verificationUrl) {
+        window.location.assign(
+          verification.verificationUrl
+        );
+
+        return;
+      }
+
+     if (
+  verification.status ===
+  'processing'
+) {
+  await this.router.navigate(
+    [
+      '/sell/listings',
+      listingUid,
+      'verification-return'
+    ],
+    {
+      replaceUrl: true
+    }
+  );
+
+  return;
+}
+
+      throw new Error(
+        'Stripe did not provide a verification link. Please try again.'
+      );
     } catch (error) {
       console.error(
-        'Failed to complete listing content.',
+        'Failed to complete the listing or start identity verification.',
         error
       );
 
       this.saveError.set(
         error instanceof Error
           ? error.message
-          : 'We could not complete your listing. Please try again.'
+          : 'We could not continue to identity verification. Please try again.'
       );
     } finally {
       this.isSaving.set(false);

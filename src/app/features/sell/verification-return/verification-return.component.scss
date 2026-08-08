@@ -1,0 +1,223 @@
+:host {
+  display: block;
+  min-height: calc(100vh - 160px);
+  background:
+    radial-gradient(circle at top right, rgba(21, 134, 141, 0.10), transparent 34%),
+    #f5f8fa;
+}
+
+.verification-return {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 5rem;
+}
+
+.verification-card {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  font-size: 1.8rem;
+
+  &--success {
+    color: #ffffff;
+    background: #15868d;
+  }
+
+  &--processing {
+    background: rgba(21, 67, 96, 0.10);
+  }
+
+  &--attention {
+    color: #9a5b00;
+    background: #fff3d6;
+  }
+
+  &--error {
+    color: #b42318;
+    background: #fee4e2;
+  }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 4px solid rgba(21, 67, 96, 0.18);
+  border-top-color: #154360;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #15868d;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #154360;
+  font-family: 'Barlow', sans-serif;
+  font-size: clamp(2rem, 7vw, 2.75rem);
+  line-height: 1.12;
+}
+
+.intro {
+  max-width: 570px;
+  margin: 1rem auto 0;
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.property-address {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0;
+  color: #334155;
+  font-weight: 600;
+
+  i { margin-top: 0.2rem; color: #15868d; }
+}
+
+.fee-summary {
+  margin: 2rem 0 1.5rem;
+  padding: 1.25rem;
+  text-align: left;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  h2 {
+    margin: 0 0 1rem;
+    color: #154360;
+    font-size: 1.15rem;
+  }
+}
+
+.fee-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  color: #475569;
+
+  span { min-width: 0; }
+  strong { flex: 0 0 auto; color: #1e293b; }
+
+  small {
+    display: block;
+    margin-top: 0.15rem;
+    color: #94a3b8;
+    font-size: 0.78rem;
+  }
+
+  &--discount,
+  &--discount strong { color: #147d64; }
+
+  &--total {
+    margin-top: 0.55rem;
+    padding-top: 1rem;
+    border-top: 1px solid #cbd5e1;
+    color: #154360;
+    font-size: 1.1rem;
+
+    strong { color: #154360; font-size: 1.2rem; }
+  }
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 52px;
+  padding: 0.8rem 1.25rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-visible {
+    outline: 3px solid rgba(21, 134, 141, 0.28);
+    outline-offset: 3px;
+  }
+}
+
+.primary-button {
+  color: #ffffff;
+  background: #154360;
+  border: 1px solid #154360;
+
+  &:hover:not(:disabled) {
+    background: #10364d;
+    box-shadow: 0 8px 20px rgba(21, 67, 96, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &:disabled { opacity: 0.65; cursor: wait; }
+}
+
+.secondary-button {
+  margin-top: 1.5rem;
+  color: #154360;
+  background: #ffffff;
+  border: 1px solid #154360;
+}
+
+.secure-note {
+  margin: 0.9rem 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+
+  i { margin-right: 0.3rem; color: #15868d; }
+}
+
+.error-message {
+  margin: 1.25rem 0;
+  padding: 0.85rem 1rem;
+  color: #c00000;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 9px;
+  font-size: 0.9rem;
+}
+
+@media (min-width: 640px) {
+  .verification-return { padding: 4rem 2rem 6rem; }
+  .verification-card { padding: 3rem; }
+  .fee-summary { padding: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 1.8s; }
+  .primary-button,
+  .secondary-button { transition: none; }
+}

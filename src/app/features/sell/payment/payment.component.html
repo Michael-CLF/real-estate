@@ -1,0 +1,234 @@
+<main class="payment-page">
+  <section
+    class="payment-card"
+    aria-live="polite"
+  >
+    @if (pageState() === 'loading') {
+      <div
+        class="status-icon status-icon--loading"
+        aria-hidden="true"
+      >
+        <span class="spinner"></span>
+      </div>
+
+      <p class="eyebrow">
+        Secure payment
+      </p>
+
+      <h1>
+        Preparing your payment
+      </h1>
+
+      <p class="intro">
+        Please wait while we securely load your listing and
+        payment information.
+      </p>
+    }
+
+    @if (pageState() === 'ready') {
+      <div
+        class="status-icon status-icon--payment"
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-credit-card"></i>
+      </div>
+
+      <p class="eyebrow">
+        Final listing step
+      </p>
+
+      <h1>
+        Complete your payment
+      </h1>
+
+      <p class="intro">
+        Review your listing charges before continuing to
+        Stripe’s secure payment page.
+      </p>
+
+      @if (propertyAddress()) {
+        <div class="property-address">
+          <i
+            class="fa-solid fa-location-dot"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            {{ propertyAddress() }}
+          </span>
+        </div>
+      }
+
+      <section
+        class="payment-summary"
+        aria-labelledby="payment-summary-title"
+      >
+        <h2 id="payment-summary-title">
+          Payment summary
+        </h2>
+
+        <div class="fee-row">
+          <div class="fee-description">
+            <span>
+              NavStreet property listing
+            </span>
+
+            <small>
+              One-time listing publication fee
+            </small>
+          </div>
+
+          <strong>
+            ${{ listingFee.toFixed(2) }}
+          </strong>
+        </div>
+
+        @if (featuredFee() > 0) {
+          <div class="fee-row">
+            <div class="fee-description">
+              <span>
+                Featured Listing upgrade
+              </span>
+
+              <small>
+                Prominent exposure and Featured badge
+              </small>
+            </div>
+
+            <strong>
+              ${{ featuredFee().toFixed(2) }}
+            </strong>
+          </div>
+        }
+
+        @if (discount() > 0) {
+          <div class="fee-row fee-row--discount">
+            <div class="fee-description">
+              <span>
+                Promotion discount
+              </span>
+
+              @if (draft()?.promotion?.code) {
+                <small>
+                  Code: {{ draft()?.promotion?.code }}
+                </small>
+              }
+            </div>
+
+            <strong>
+              −${{ discount().toFixed(2) }}
+            </strong>
+          </div>
+        }
+
+        <div class="fee-row fee-row--total">
+          <span>
+            Total due
+          </span>
+
+          <strong>
+            ${{ total().toFixed(2) }}
+          </strong>
+        </div>
+      </section>
+
+      @if (errorMessage()) {
+        <div
+          class="inline-error"
+          role="alert"
+        >
+          <i
+            class="fa-solid fa-circle-exclamation"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            {{ errorMessage() }}
+          </span>
+        </div>
+      }
+
+      <button
+        class="primary-button"
+        type="button"
+        [disabled]="isOpeningCheckout()"
+        (click)="continueToStripe()"
+      >
+        @if (isOpeningCheckout()) {
+          <span
+            class="button-spinner"
+            aria-hidden="true"
+          ></span>
+
+          <span>
+            Opening secure checkout…
+          </span>
+        } @else {
+          <i
+            class="fa-solid fa-lock"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            Continue to Secure Payment
+          </span>
+
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
+        }
+      </button>
+
+      <div class="stripe-note">
+        <i
+          class="fa-solid fa-shield-halved"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          Your payment is securely processed by Stripe.
+          NavStreet does not store your card information.
+        </p>
+      </div>
+    }
+
+    @if (pageState() === 'error') {
+      <div
+        class="status-icon status-icon--error"
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+
+      <p class="eyebrow">
+        Payment unavailable
+      </p>
+
+      <h1>
+        We couldn’t prepare your payment
+      </h1>
+
+      <p
+        class="intro"
+        role="alert"
+      >
+        {{ errorMessage() }}
+      </p>
+
+      <a
+        class="secondary-button"
+        href="/dashboard"
+      >
+        <i
+          class="fa-solid fa-arrow-left"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          Return to Dashboard
+        </span>
+      </a>
+    }
+  </section>
+</main>

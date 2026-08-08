@@ -1,96 +1,190 @@
 <section class="saved-properties">
 
   <header class="saved-properties__header">
+    <h2>Saved Properties</h2>
 
-    <div>
-      <h2>Saved Properties</h2>
-
-      <p>
-        Homes you've saved while browsing NavStreet.
-      </p>
-    </div>
-
+    <p>
+      Homes you've saved while browsing NavStreet.
+    </p>
   </header>
 
   @if (savedHomes().length === 0) {
 
-    <div class="saved-properties__empty">
+  <div class="saved-properties__empty">
 
-      <div class="saved-properties__empty-icon">
-        <i class="fa-regular fa-heart"></i>
-      </div>
-
-      <div class="saved-properties__empty-content">
-
-        <h3>No saved properties yet</h3>
-
-        <p>
-          Browse available homes and save the properties
-          you'd like to revisit.
-        </p>
-
-      </div>
-
-      <a
-        routerLink="/homes"
-        class="saved-properties__browse-button"
-      >
-        <i class="fa-solid fa-magnifying-glass"></i>
-
-        <span>Browse Properties</span>
-      </a>
-
+    <div class="saved-properties__empty-icon">
+      <i class="fa-regular fa-heart" aria-hidden="true"></i>
     </div>
+
+    <div class="saved-properties__empty-content">
+      <h3>No saved properties yet</h3>
+
+      <p>
+        Browse available homes and save the properties
+        you'd like to revisit.
+      </p>
+    </div>
+
+    <a routerLink="/homes" class="saved-properties__browse-button">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+
+      <span>Browse Properties</span>
+    </a>
+
+  </div>
 
   } @else {
 
-    <div class="saved-properties__grid">
+  <div class="saved-properties__list">
 
-      @for (home of savedHomes(); track home.listingUid) {
+    @for (
+    home of savedHomes();
+    track home.listingUid
+    ) {
 
-        <article class="saved-property-card">
+    <article class="saved-property-card">
 
-          <div class="saved-property-card__content">
+      <div class="saved-property-card__content">
 
-            <div class="saved-property-card__heading">
+        <div class="saved-property-card__heading">
 
-              <div>
+          <div class="saved-property-card__details">
+            <h3>{{ home.address }}</h3>
 
-                <h3>
-                  {{ home.address }}
-                </h3>
+            <p>
+              {{ home.city }}, {{ home.state }}
+            </p>
 
-                <p>
-                  {{ home.city }}, {{ home.state }}
-                </p>
+            <span class="saved-property-card__status" [class.saved-property-card__status--active]="
+      home.status === 'active'
+    " [class.saved-property-card__status--under-contract]="
+      home.status === 'under-contract'
+    " [class.saved-property-card__status--sold]="
+      home.status === 'sold'
+    " [class.saved-property-card__status--withdrawn]="
+      home.status === 'withdrawn'
+    " [class.saved-property-card__status--unavailable]="
+      home.status === 'unavailable'
+    ">
+              {{ home.statusLabel }}
+            </span>
+          </div>
 
-              </div>
+          <strong class="saved-property-card__price">
+            {{
+            home.price
+            | currency:'USD':'symbol':'1.0-0'
+            }}
+          </strong>
 
-              <strong class="saved-property-card__price">
-                {{ home.price | currency:'USD':'symbol':'1.0-0' }}
-              </strong>
+        </div>
 
+        <div class="saved-property-card__footer">
+
+          <div class="saved-property-card__saved-actions">
+
+            <div class="saved-property-card__saved-indicator" aria-label="Saved property" title="Saved property">
+              <i class="fa-solid fa-heart" aria-hidden="true"></i>
             </div>
 
-            <div class="saved-property-card__footer">
-
-              <a
-                [routerLink]="['/listings', home.listingUid]"
-                class="saved-property-card__action"
-              >
-                View Property
-              </a>
-
-            </div>
+            <button type="button" class="saved-property-card__remove" [disabled]="
+                    removingListingUid() ===
+                    home.listingUid
+                  " (click)="requestRemoval(home)">
+              @if (
+              removingListingUid() ===
+              home.listingUid
+              ) {
+              Removing...
+              } @else {
+              Remove
+              }
+            </button>
 
           </div>
 
-        </article>
+          @if (home.status === 'unavailable') {
 
-      }
+          <span class="
+      saved-property-card__action
+      saved-property-card__action--disabled
+    " aria-disabled="true">
+            Unavailable
+          </span>
 
-    </div>
+          } @else {
+
+          <a class="saved-property-card__action" [routerLink]="[
+      '/listings',
+      home.listingUid
+    ]">
+            View Property
+          </a>
+
+          }
+
+        </div>
+
+      </div>
+
+    </article>
+
+    }
+
+  </div>
 
   }
 
 </section>
+
+@if (propertyPendingRemoval(); as property) {
+
+<div class="confirmation-backdrop" role="presentation" (click)="cancelRemoval()">
+
+  <section class="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="remove-property-title"
+    aria-describedby="remove-property-description" (click)="$event.stopPropagation()">
+
+    <div class="confirmation-dialog__icon">
+      <i class="fa-regular fa-heart" aria-hidden="true"></i>
+    </div>
+
+    <h2 id="remove-property-title">
+      Remove saved property?
+    </h2>
+
+    <p id="remove-property-description">
+      {{ property.address }} will be removed from your
+      saved properties. The actual property listing will
+      not be affected.
+    </p>
+
+    <div class="confirmation-dialog__actions">
+
+      <button type="button" class="confirmation-dialog__cancel" [disabled]="
+            removingListingUid() ===
+            property.listingUid
+          " (click)="cancelRemoval()">
+        Cancel
+      </button>
+
+      <button type="button" class="confirmation-dialog__confirm" [disabled]="
+            removingListingUid() ===
+            property.listingUid
+          " (click)="confirmRemoval()">
+        @if (
+        removingListingUid() ===
+        property.listingUid
+        ) {
+        Removing...
+        } @else {
+        Remove Property
+        }
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+}

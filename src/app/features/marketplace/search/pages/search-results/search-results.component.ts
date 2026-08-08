@@ -26,8 +26,8 @@ import {
   MarketplaceListingRepository
 } from '../../../../../core/domains/marketplace/repositories/marketplace-listing.repository';
 import {
-  MockMarketplaceListingRepository
-} from '../../../../../core/domains/marketplace/repositories/mock-marketplace-listing.repository';
+  FirestoreMarketplaceListingRepository
+} from '../../../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
 import {
   ListingCardComponent
 } from '../../components/listing-card/listing-card.component';
@@ -56,7 +56,7 @@ interface SearchResultsViewModel {
   providers: [
     {
       provide: MarketplaceListingRepository,
-      useClass: MockMarketplaceListingRepository
+      useClass: FirestoreMarketplaceListingRepository
     }
   ],
   templateUrl: './search-results.component.html',

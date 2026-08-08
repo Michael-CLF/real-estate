@@ -268,6 +268,7 @@ export type ListingPublicationStatus =
 export type ListingIdentityStatus =
   | 'not_started'
   | 'pending'
+  | 'processing'
   | 'verified'
   | 'failed'
   | 'requires_input';

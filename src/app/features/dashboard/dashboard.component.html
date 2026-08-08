@@ -1,210 +1,181 @@
 <section class="dashboard">
 
-  <app-dashboard-welcome
-    [firstName]="dashboardState.state().firstName"
-  />
+  <app-dashboard-welcome [firstName]="dashboardState.state().firstName" />
 
   @if (dashboardState.state().showWelcome) {
 
-    <header class="dashboard__header">
+  <header class="dashboard__header">
 
-      <h1>Welcome to Your NavStreet Dashboard</h1>
+    <h1>Welcome to Your NavStreet Dashboard</h1>
 
-      <p>
-        Buy or sell real estate with confidence. What would you like to do today?
-      </p>
+    <p>
+      Buy or sell real estate with confidence. What would you like to do today?
+    </p>
 
-    </header>
+  </header>
 
-    <section class="dashboard__welcome-actions">
+  <section class="dashboard__welcome-actions">
 
-      <a class="action-card" routerLink="/homes">
+    <a class="action-card" routerLink="/homes">
 
-        <div class="action-card__icon">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </div>
+      <div class="action-card__icon">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
 
-        <h2 class="card-title">
-          Browse Properties
-        </h2>
-
-        <p>
-          Search homes, save favorites, and begin your home search.
-        </p>
-
-      </a>
-
-      <a class="action-card" routerLink="/sell/new">
-
-        <div class="action-card__icon">
-          <i class="fa-solid fa-house-circle-plus"></i>
-        </div>
-
-        <h2 class="card-title">
-          List a Property
-        </h2>
-
-        <p>
-          Create your first property listing and start selling today.
-        </p>
-
-      </a>
-
-    </section>
-
-    <section class="dashboard-placeholder">
-
-      <h3 class="info">
-        Your Activity
-      </h3>
+      <h2 class="card-title">
+        Browse Properties
+      </h2>
 
       <p>
-        As you begin using NavStreet, this dashboard will automatically display:
+        Search homes, save favorites, and begin your home search.
       </p>
 
-      <ul>
-        <li>Draft Listings</li>
-        <li>Active Listings</li>
-        <li>Saved Homes</li>
-        <li>Messages</li>
-        <li>Offers</li>
-        <li>Upcoming Showings</li>
-        <li>Recent Activity</li>
-        <li>Property Metrics</li>
-      </ul>
+    </a>
 
-    </section>
+    <a class="action-card" routerLink="/sell/new">
+
+      <div class="action-card__icon">
+        <i class="fa-solid fa-house-circle-plus"></i>
+      </div>
+
+      <h2 class="card-title">
+        List a Property
+      </h2>
+
+      <p>
+        Create your first property listing and start selling today.
+      </p>
+
+    </a>
+
+  </section>
+
+  <section class="dashboard-placeholder">
+
+    <h3 class="info">
+      Your Activity
+    </h3>
+
+    <p>
+      As you begin using NavStreet, this dashboard will automatically display:
+    </p>
+
+    <ul>
+      <li>Draft Listings</li>
+      <li>Active Listings</li>
+      <li>Saved Homes</li>
+      <li>Messages</li>
+      <li>Offers</li>
+      <li>Upcoming Showings</li>
+      <li>Recent Activity</li>
+      <li>Property Metrics</li>
+    </ul>
+
+  </section>
 
   }
 
   @if (dashboardState.state().hasListings) {
 
-    <section class="dashboard__listings">
+  <section class="dashboard__listings">
 
-      <div class="dashboard__section-header">
+    <div class="dashboard__section-header">
 
-        <div>
+      <div>
 
-          <h2>My Listings</h2>
+        <h2>My Listings</h2>
 
-          <p>
-            Manage your draft, active, under contract and sold listings.
-          </p>
-
-        </div>
-
-        <a
-          class="dashboard__new-listing"
-          routerLink="/sell/new"
-        >
-          + New Listing
-        </a>
+        <p>
+          Manage your draft, active, under contract and sold listings.
+        </p>
 
       </div>
 
-      <nav
-        class="dashboard__listing-tabs"
-        aria-label="Listing status"
-      >
+      <a class="dashboard__new-listing" routerLink="/sell/new">
+        + New Listing
+      </a>
 
-        <button
-          type="button"
-          [class.active]="selectedListingTab() === 'draft'"
-          (click)="selectListingTab('draft')"
-        >
-          Draft
-        </button>
+    </div>
 
-        <button
-          type="button"
-          [class.active]="selectedListingTab() === 'active'"
-          (click)="selectListingTab('active')"
-        >
-          Active
-        </button>
+    <nav class="dashboard__listing-tabs" aria-label="Listing status">
 
-        <button
-          type="button"
-          [class.active]="selectedListingTab() === 'under-contract'"
-          (click)="selectListingTab('under-contract')"
-        >
-          Under Contract
-        </button>
+      <button type="button" [class.active]="selectedListingTab() === 'draft'" (click)="selectListingTab('draft')">
+        Draft
+      </button>
 
-        <button
-          type="button"
-          [class.active]="selectedListingTab() === 'sold'"
-          (click)="selectListingTab('sold')"
-        >
-          Sold
-        </button>
+      <button type="button" [class.active]="selectedListingTab() === 'active'" (click)="selectListingTab('active')">
+        Active
+      </button>
 
-      </nav>
+      <button type="button" [class.active]="selectedListingTab() === 'under-contract'"
+        (click)="selectListingTab('under-contract')">
+        Under Contract
+      </button>
 
-      @if (selectedListingTab() === 'draft') {
+      <button type="button" [class.active]="selectedListingTab() === 'sold'" (click)="selectListingTab('sold')">
+        Sold
+      </button>
 
-        <app-account-listings
-          title="Draft Listings"
-          subtitle="Continue working on unfinished listings."
-          emptyMessage="You do not have any draft listings."
-          [listings]="dashboardState.state().draftListings"
-          (actionSelected)="manageListing($event)"
-        />
+    </nav>
 
-      }
+    @if (selectedListingTab() === 'draft') {
 
-      @if (selectedListingTab() === 'active') {
+    <app-account-listings title="Draft Listings" subtitle="Continue working on unfinished listings."
+      emptyMessage="You do not have any draft listings." [listings]="dashboardState.state().draftListings"
+      (actionSelected)="manageListing($event)" />
 
-        <app-account-listings
-          title="Active Listings"
-          subtitle="Manage your properties currently listed for sale."
-          emptyMessage="You do not have any active listings."
-          [listings]="dashboardState.state().activeListings"
-          (actionSelected)="manageListing($event)"
-        />
+    }
 
-      }
+    @if (selectedListingTab() === 'active') {
 
-      @if (selectedListingTab() === 'under-contract') {
+    <app-account-listings title="Active Listings" subtitle="Manage your properties currently listed for sale."
+      emptyMessage="You do not have any active listings." [listings]="dashboardState.state().activeListings"
+      (actionSelected)="manageListing($event)" />
 
-        <app-account-listings
-          title="Under Contract"
-          subtitle="Properties currently under contract."
-          emptyMessage="You do not have any properties under contract."
-          [listings]="[]"
-          (actionSelected)="manageListing($event)"
-        />
+    }
 
-      }
+    @if (selectedListingTab() === 'under-contract') {
 
-      @if (selectedListingTab() === 'sold') {
+    <app-account-listings title="Under Contract" subtitle="Properties currently under contract."
+      emptyMessage="You do not have any properties under contract." [listings]="[]"
+      (actionSelected)="manageListing($event)" />
 
-        <app-account-listings
-          title="Sold Listings"
-          subtitle="Review properties you have sold through NavStreet."
-          emptyMessage="You do not have any sold listings."
-          [listings]="[]"
-          (actionSelected)="manageListing($event)"
-        />
+    }
 
-      }
+    @if (selectedListingTab() === 'sold') {
 
-    </section>
+    <app-account-listings title="Sold Listings" subtitle="Review properties you have sold through NavStreet."
+      emptyMessage="You do not have any sold listings." [listings]="[]" (actionSelected)="manageListing($event)" />
+
+    }
+
+  </section>
 
   }
 
-  <section
-    class="dashboard__secondary-grid"
-    aria-label="Saved properties and recent activity"
-  >
+  <section class="dashboard__secondary-grid" aria-label="Saved properties and recent activity">
 
-    <app-saved-homes
-      [savedHomes]="dashboardState.state().savedProperties"
-    />
+    @if (savedPropertyError()) {
 
-    <app-activity-card
-      [activities]="recentActivities"
-    />
+    <div class="dashboard__saved-message dashboard__saved-message--error" role="alert">
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+      <span>
+        {{ savedPropertyError() }}
+      </span>
+    </div>
+
+    }
+
+    <app-saved-homes [savedHomes]="
+    dashboardState.state().savedProperties
+  " [removingListingUid]="
+    removingSavedListingUid()
+  " (removeRequested)="
+    removeSavedProperty($event)
+  " />
+
+    <app-activity-card [activities]="recentActivities" />
 
   </section>
 
