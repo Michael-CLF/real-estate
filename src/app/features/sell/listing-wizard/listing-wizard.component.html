@@ -82,7 +82,7 @@
       </p>
       }
     </div>
-    } @else if (listingContentComplete()) {
+
     <div class="wizard-save-success">
       <h1 class="success">
         Your listing information is complete
@@ -131,17 +131,17 @@
               currentStep() === step.number
             " [class.wizard-progress__step--complete]="
               completedSteps().includes(
-                step.number === 1
-                  ? 'address'
-                  : step.number === 2
-                    ? 'property_details'
-                    : step.number === 3
-                      ? 'property_features'
-                      : step.number === 4
-                        ? 'photos'
-                        : step.number === 5
-                          ? 'pricing'
-                          : 'review'
+              step.number === 1
+  ? 'address'
+  : step.number === 2
+    ? 'property_details'
+    : step.number === 3
+      ? 'property_features'
+      : step.number === 4
+        ? 'photos'
+        : step.number === 5
+          ? 'pricing'
+          : 'review'
               )
             " [disabled]="
               step.number > currentStep() ||

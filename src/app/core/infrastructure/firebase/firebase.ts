@@ -1,26 +1,44 @@
 import { initializeApp } from 'firebase/app';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+
+import {
+  getAnalytics,
+  isSupported
+} from 'firebase/analytics';
+
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import { getStorage } from 'firebase/storage';
 
-import { environment } from '../../../../environments/environment';
+import {
+  environment
+} from '../../../../environments/environment';
 
-export const firebaseApp = initializeApp(environment.firebase);
+export const firebaseApp =
+  initializeApp(environment.firebase);
 
-export const auth = getAuth(firebaseApp);
+export const auth =
+  getAuth(firebaseApp);
 
-export const firestore = getFirestore(firebaseApp);
+export const firestore =
+  getFirestore(firebaseApp);
 
-export const functions = getFunctions(firebaseApp, 'us-east1');
+export const functions =
+  getFunctions(firebaseApp, 'us-east1');
 
-export const storage = getStorage(firebaseApp);
+export const storage =
+  getStorage(firebaseApp);
 
-export let analytics: ReturnType<typeof getAnalytics> | null = null;
+export let analytics:
+  ReturnType<typeof getAnalytics> | null = null;
 
-isSupported().then((supported) => {
-  if (supported) {
-    analytics = getAnalytics(firebaseApp);
-  }
-});
+isSupported()
+  .then((supported) => {
+    if (supported) {
+      analytics =
+        getAnalytics(firebaseApp);
+    }
+  })
+  .catch(() => {
+    analytics = null;
+  });

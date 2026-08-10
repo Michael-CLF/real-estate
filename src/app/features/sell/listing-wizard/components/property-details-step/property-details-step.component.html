@@ -11,56 +11,44 @@
         <select id="propertyType" formControlName="propertyType">
           <option value="">Select property type</option>
           @for (propertyType of propertyTypes; track propertyType.value) {
-            <option [value]="propertyType.value">
-              {{ propertyType.label }}
-            </option>
+          <option [value]="propertyType.value">
+            {{ propertyType.label }}
+          </option>
           }
         </select>
 
         @if (form.controls.propertyType.touched && form.controls.propertyType.hasError('required')) {
-          <p class="field-error">Property type is required.</p>
+        <p class="field-error">Property type is required.</p>
         }
       </div>
 
       <div class="field">
         <label for="bedrooms">Bedrooms</label>
-        <input
-          id="bedrooms"
-          type="number"
-          formControlName="bedrooms"
-          min="0"
-          max="99"
-          step="1">
+        <input id="bedrooms" type="number" formControlName="bedrooms" min="0" max="99" step="1">
 
         @if (form.controls.bedrooms.touched) {
-          @if (form.controls.bedrooms.hasError('required')) {
-            <p class="field-error">Bedrooms are required.</p>
-          }
+        @if (form.controls.bedrooms.hasError('required')) {
+        <p class="field-error">Bedrooms are required.</p>
+        }
 
-          @if (form.controls.bedrooms.hasError('min') || form.controls.bedrooms.hasError('max')) {
-            <p class="field-error">Enter a valid number of bedrooms.</p>
-          }
+        @if (form.controls.bedrooms.hasError('min') || form.controls.bedrooms.hasError('max')) {
+        <p class="field-error">Enter a valid number of bedrooms.</p>
+        }
         }
       </div>
 
       <div class="field">
         <label for="bathrooms">Bathrooms</label>
-        <input
-          id="bathrooms"
-          type="number"
-          formControlName="bathrooms"
-          min="0"
-          max="99"
-          step="0.5">
+        <input id="bathrooms" type="number" formControlName="bathrooms" min="0" max="99" step="0.5">
 
         @if (form.controls.bathrooms.touched) {
-          @if (form.controls.bathrooms.hasError('required')) {
-            <p class="field-error">Bathrooms are required.</p>
-          }
+        @if (form.controls.bathrooms.hasError('required')) {
+        <p class="field-error">Bathrooms are required.</p>
+        }
 
-          @if (form.controls.bathrooms.hasError('min') || form.controls.bathrooms.hasError('max')) {
-            <p class="field-error">Enter a valid number of bathrooms.</p>
-          }
+        @if (form.controls.bathrooms.hasError('min') || form.controls.bathrooms.hasError('max')) {
+        <p class="field-error">Enter a valid number of bathrooms.</p>
+        }
         }
       </div>
     </div>
@@ -68,43 +56,31 @@
     <div class="three-column">
       <div class="field">
         <label for="squareFeet">Square Feet</label>
-        <input
-          id="squareFeet"
-          type="number"
-          formControlName="squareFeet"
-          min="1"
-          max="1000000"
-          step="1">
+        <input id="squareFeet" type="number" formControlName="squareFeet" min="1" max="1000000" step="1">
 
         @if (form.controls.squareFeet.touched) {
-          @if (form.controls.squareFeet.hasError('required')) {
-            <p class="field-error">Square footage is required.</p>
-          }
+        @if (form.controls.squareFeet.hasError('required')) {
+        <p class="field-error">Square footage is required.</p>
+        }
 
-          @if (form.controls.squareFeet.hasError('min') || form.controls.squareFeet.hasError('max')) {
-            <p class="field-error">Enter valid square footage.</p>
-          }
+        @if (form.controls.squareFeet.hasError('min') || form.controls.squareFeet.hasError('max')) {
+        <p class="field-error">Enter valid square footage.</p>
+        }
         }
       </div>
 
       <div class="field">
         <label for="yearBuilt">Year Built</label>
-        <input
-          id="yearBuilt"
-          type="number"
-          formControlName="yearBuilt"
-          min="1600"
-          max="2100"
-          step="1">
+        <input id="yearBuilt" type="number" formControlName="yearBuilt" min="1600" [max]="currentYear + 1" step="1">
 
         @if (form.controls.yearBuilt.touched) {
-          @if (form.controls.yearBuilt.hasError('required')) {
-            <p class="field-error">Year built is required.</p>
-          }
+        @if (form.controls.yearBuilt.hasError('required')) {
+        <p class="field-error">Year built is required.</p>
+        }
 
-          @if (form.controls.yearBuilt.hasError('min') || form.controls.yearBuilt.hasError('max')) {
-            <p class="field-error">Enter a valid year.</p>
-          }
+        @if (form.controls.yearBuilt.hasError('min') || form.controls.yearBuilt.hasError('max')) {
+        <p class="field-error">Enter a valid year.</p>
+        }
         }
       </div>
 
@@ -115,17 +91,82 @@
         </label>
 
         <div class="input-with-suffix">
-          <input
-            id="lotSize"
-            type="number"
-            formControlName="lotSize"
-            min="0"
-            step="0.01">
+          <input id="lotSize" type="number" formControlName="lotSize" min="0" step="0.01">
           <span>acres</span>
         </div>
 
         @if (form.controls.lotSize.touched && form.controls.lotSize.hasError('min')) {
-          <p class="field-error">Lot size cannot be negative.</p>
+        <p class="field-error">Lot size cannot be negative.</p>
+        }
+      </div>
+    </div>
+
+    <div formGroupName="hoa">
+      <div class="three-column">
+        <div class="field">
+          <label for="hasHoa">Homeowners Association</label>
+
+          <select id="hasHoa" formControlName="hasHoa">
+            <option [ngValue]="null">Select an option</option>
+            <option [ngValue]="true">Yes</option>
+            <option [ngValue]="false">No</option>
+          </select>
+
+          @if (
+          form.controls.hoa.controls.hasHoa.touched &&
+          form.controls.hoa.controls.hasHoa.hasError('required')
+          ) {
+          <p class="field-error">
+            Please indicate whether the property has an HOA.
+          </p>
+          }
+        </div>
+
+        @if (form.controls.hoa.controls.hasHoa.value === true) {
+        <div class="field">
+          <label for="hoaFeeAmount">HOA Fee</label>
+
+          <input id="hoaFeeAmount" type="number" formControlName="feeAmount" min="0" max="1000000" step="0.01">
+
+          @if (form.controls.hoa.controls.feeAmount.touched) {
+          @if (form.controls.hoa.controls.feeAmount.hasError('required')) {
+          <p class="field-error">HOA fee is required.</p>
+          }
+
+          @if (
+          form.controls.hoa.controls.feeAmount.hasError('min') ||
+          form.controls.hoa.controls.feeAmount.hasError('max')
+          ) {
+          <p class="field-error">Enter a valid HOA fee.</p>
+          }
+          }
+        </div>
+
+        <div class="field">
+          <label for="hoaFeeFrequency">Fee Frequency</label>
+
+          <select id="hoaFeeFrequency" formControlName="feeFrequency">
+            <option value="">Select frequency</option>
+
+            @for (
+            frequency of hoaFeeFrequencies;
+            track frequency.value
+            ) {
+            <option [value]="frequency.value">
+              {{ frequency.label }}
+            </option>
+            }
+          </select>
+
+          @if (
+          form.controls.hoa.controls.feeFrequency.touched &&
+          form.controls.hoa.controls.feeFrequency.hasError('required')
+          ) {
+          <p class="field-error">
+            HOA fee frequency is required.
+          </p>
+          }
+        </div>
         }
       </div>
     </div>
@@ -133,28 +174,24 @@
     <div class="field description-field">
       <label for="description">Property Description</label>
 
-      <textarea
-        id="description"
-        formControlName="description"
-        rows="7"
-        maxlength="5000"
+      <textarea id="description" formControlName="description" rows="7" maxlength="5000"
         placeholder="Describe the property, including its layout, updates, features, location, and anything else buyers should know.">
       </textarea>
 
       <div class="description-footer">
         <div>
           @if (form.controls.description.touched) {
-            @if (form.controls.description.hasError('required')) {
-              <p class="field-error">Property description is required.</p>
-            }
+          @if (form.controls.description.hasError('required')) {
+          <p class="field-error">Property description is required.</p>
+          }
 
-            @if (form.controls.description.hasError('minlength')) {
-              <p class="field-error">Property description must be at least 20 characters.</p>
-            }
+          @if (form.controls.description.hasError('minlength')) {
+          <p class="field-error">Property description must be at least 20 characters.</p>
+          }
 
-            @if (form.controls.description.hasError('maxlength')) {
-              <p class="field-error">Property description cannot exceed 5,000 characters.</p>
-            }
+          @if (form.controls.description.hasError('maxlength')) {
+          <p class="field-error">Property description cannot exceed 5,000 characters.</p>
+          }
           }
         </div>
 

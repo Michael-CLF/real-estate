@@ -314,6 +314,19 @@ export class FirestoreMarketplaceListingRepository
         documentId: string,
         data: Record<string, unknown>
     ): MarketplaceListing | null {
+        const propertyDetails =
+            this.readRecord(
+                data['propertyDetails']
+            );
+
+        const hoaData =
+            this.readRecord(
+                propertyDetails?.['hoa']
+            ) ??
+            this.readRecord(
+                data['hoa']
+            );
+
         const city = this.readString(
             data['city']
         );
@@ -429,6 +442,38 @@ export class FirestoreMarketplaceListingRepository
                 this.readNumber(
                     data['yearBuilt']
                 ),
+
+            hoa: hoaData
+                ? hoaData['hasHoa'] === true
+                    ? {
+                        hasHoa: true,
+
+                        feeAmount:
+                            this.readNumber(
+                                hoaData['feeAmount']
+                            ),
+
+                        feeFrequency:
+                            this.readString(
+                                hoaData['feeFrequency']
+                            ) as NonNullable<
+                                MarketplaceListing['hoa']
+                            >['feeFrequency'],
+
+                        includedItems:
+                            Array.isArray(
+                                hoaData['includedItems']
+                            )
+                                ? hoaData['includedItems'] as NonNullable<
+                                    MarketplaceListing['hoa']
+                                >['includedItems']
+                                : []
+                    }
+                    : {
+                        hasHoa: false,
+                        includedItems:[]
+                    }
+                : undefined,
 
             address: {
                 addressLine1,
@@ -616,6 +661,16 @@ export class FirestoreMarketplaceListingRepository
                 }
             ).featuredListing
         );
+    }
+
+    private readRecord(
+        value: unknown
+    ): Record<string, unknown> | undefined {
+        return value !== null &&
+            typeof value === 'object' &&
+            !Array.isArray(value)
+            ? value as Record<string, unknown>
+            : undefined;
     }
 
     private readString(

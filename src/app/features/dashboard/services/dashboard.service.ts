@@ -335,8 +335,11 @@ export class DashboardService {
       bedrooms:
         draft.propertyDetails?.bedrooms ?? 0,
 
-      bathrooms:
-        draft.propertyDetails?.bathrooms ?? 0,
+      fullBathrooms:
+        draft.propertyDetails?.fullBathrooms ?? 0,
+
+      halfBathrooms:
+        draft.propertyDetails?.halfBathrooms ?? 0,
 
       squareFeet:
         draft.propertyDetails?.squareFeet ?? 0,
@@ -344,8 +347,14 @@ export class DashboardService {
       lotSize:
         draft.propertyDetails?.lotSize,
 
+      lotSizeUnit:
+        draft.propertyDetails?.lotSizeUnit,
+
       yearBuilt:
         draft.propertyDetails?.yearBuilt,
+
+      stories:
+        draft.propertyDetails?.stories,
 
       description:
         draft.propertyDetails?.description,
@@ -413,48 +422,101 @@ export class DashboardService {
 
 
   private createEmptyFeatures():
-    ListingFeatures {
+ListingFeatures {
 
-    return {
-      kitchenIsland: false,
-      pantry: false,
-      stoneCountertops: false,
-      stainlessAppliances: false,
-      gasRange: false,
-      doubleOven: false,
+  return {
+    // Kitchen
+    kitchenIsland: false,
+    pantry: false,
+    stoneCountertops: false,
+    softCloseCabinetry: false,
+    stainlessAppliances: false,
+    gasRange: false,
+    doubleOven: false,
+    butlersPantry: false,
 
-      fireplace: false,
-      hardwoodFloors: false,
-      vaultedCeilings: false,
-      homeOffice: false,
-      bonusRoom: false,
-      basement: false,
+    // Interior
+    fireplace: false,
+    hardwoodFloors: false,
+    vaultedCeilings: false,
+    homeOffice: false,
+    bonusRoom: false,
+    finishedBasement: false,
+    mudroom: false,
+    homeGym: false,
+    walkInCloset: false,
+    customClosets: false,
+    builtInShelving: false,
+    crownMolding: false,
+    wetBar: false,
+    mediaRoom: false,
+    soundproofing: false,
 
-      walkInCloset: false,
-      ensuiteBath: false,
-      doubleVanity: false,
-      soakingTub: false,
-      separateShower: false,
+    // Primary bathroom
+    ensuiteBath: false,
+    doubleVanity: false,
+    soakingTub: false,
+    separateTubAndShower: false,
+    largeWalkInShower: false,
 
-      deck: false,
-      patio: false,
-      porch: false,
-      fencedYard: false,
-      pool: false,
-      outdoorKitchen: false,
+    // Exterior and outdoor living
+    deck: false,
+    patio: false,
+    porch: false,
+    balcony: false,
+    fencedYard: false,
+    irrigationSystem: false,
+    matureLandscaping: false,
+    landscapeLighting: false,
 
-      attachedGarage: false,
-      detachedGarage: false,
-      carport: false,
-      evCharging: false,
+    pool: false,
+    spaHotTub: false,
+    coveredOutdoorLiving: false,
+    outdoorCeilingFans: false,
+    outdoorHeaters: false,
+    outdoorKitchen: false,
+    builtInGrill: false,
+    firePit: false,
+    outdoorFireplace: false,
 
-      centralHvac: false,
-      heatPump: false,
-      gasHeat: false,
-      centralAir: false,
-      solarPanels: false,
-      generator: false,
-      smartThermostat: false
-    };
-  }
+    shed: false,
+    barn: false,
+    workshop: false,
+    guestHouse: false,
+    aduReady: false,
+    greenhouse: false,
+    gardenArea: false,
+
+    // Parking
+    attachedGarage: false,
+    detachedGarage: false,
+    carport: false,
+    garageWorkshop: false,
+    rvParking: false,
+    boatParking: false,
+    evChargingStatus: 'none',
+
+    // Technology and systems
+    centralHvac: false,
+    heatPump: false,
+    gasHeat: false,
+    centralAir: false,
+    multiZoneHvac: false,
+
+    solarPanels: false,
+    generator: false,
+    smartThermostat: false,
+    smartLighting: false,
+    smartLocks: false,
+    securitySystem: false,
+    securityCameras: false,
+    videoDoorbell: false,
+    hardwiredEthernet: false,
+    builtInSpeakers: false,
+
+    wholeHomeAirFiltration: false,
+    waterFiltrationSystem: false,
+    waterSenseFixtures: false
+  };
+}
 }

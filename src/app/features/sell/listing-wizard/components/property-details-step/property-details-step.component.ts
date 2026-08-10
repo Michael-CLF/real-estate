@@ -8,7 +8,10 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { PropertyType } from '../../../../../core/domains/listings/models/listing.model';
+import {
+  ListingHoaFeeFrequency,
+  PropertyType
+} from '../../../../../core/domains/listings/models/listing.model';
 
 interface PropertyTypeOption {
   value: PropertyType;
@@ -23,6 +26,13 @@ export interface PropertyDetailsFormValue {
   yearBuilt: number | null;
   lotSize: number | null;
   description: string;
+  hoa?: PropertyDetailsHoaFormValue;
+}
+
+export interface PropertyDetailsHoaFormValue {
+  hasHoa: boolean | null;
+  feeAmount: number | null;
+  feeFrequency: ListingHoaFeeFrequency | '';
 }
 
 @Component({
@@ -33,10 +43,14 @@ export interface PropertyDetailsFormValue {
   styleUrl: './property-details-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
+
 export class PropertyDetailsStepComponent {
   private readonly fb = inject(FormBuilder);
 
   readonly initialValue = input<PropertyDetailsFormValue | null>(null);
+
+  readonly currentYear =
+    new Date().getFullYear();
 
   readonly validityChange = output<boolean>();
   readonly valueChange = output<PropertyDetailsFormValue>();
@@ -50,6 +64,21 @@ export class PropertyDetailsStepComponent {
     { value: 'single_family', label: 'Single Family' },
     { value: 'townhome', label: 'Townhome' },
   ];
+
+  readonly hoaFeeFrequencies: {
+    value: ListingHoaFeeFrequency;
+    label: string;
+  }[] = [
+      { value: 'monthly', label: 'Monthly' },
+      { value: 'quarterly', label: 'Quarterly' },
+      {
+        value: 'semi_annually',
+        label: 'Semi-Annually'
+      },
+      { value: 'annually', label: 'Annually' }
+    ];
+
+
 
   readonly form = this.fb.nonNullable.group({
     propertyType: [
@@ -99,7 +128,23 @@ export class PropertyDetailsStepComponent {
         Validators.minLength(20),
         Validators.maxLength(5000)
       ]
-    ]
+    ],
+    hoa: this.fb.nonNullable.group({
+      hasHoa: [
+        null as boolean | null,
+        Validators.required
+      ],
+      feeAmount: [
+        null as number | null,
+        [
+          Validators.min(0),
+          Validators.max(1000000)
+        ]
+      ],
+      feeFrequency: [
+        '' as ListingHoaFeeFrequency | ''
+      ]
+    })
   });
 
   constructor() {
@@ -107,13 +152,74 @@ export class PropertyDetailsStepComponent {
       const initialValue = this.initialValue();
 
       if (initialValue) {
-        this.form.setValue(initialValue, {
-          emitEvent: false
-        });
+        this.form.patchValue(
+          {
+            ...initialValue,
+            hoa: initialValue.hoa ?? {
+              hasHoa: null,
+              feeAmount: null,
+              feeFrequency: ''
+            }
+          },
+          {
+            emitEvent: false
+          }
+        );
       }
 
-      this.validityChange.emit(this.form.valid);
+      this.validityChange.emit(
+        this.form.valid
+      );
     });
+
+    this.form.controls.hoa.controls.hasHoa
+      .valueChanges
+      .subscribe(hasHoa => {
+        const feeAmount =
+          this.form.controls.hoa.controls.feeAmount;
+
+        const feeFrequency =
+          this.form.controls.hoa.controls.feeFrequency;
+
+        if (hasHoa === true) {
+          feeAmount.setValidators([
+            Validators.required,
+            Validators.min(0),
+            Validators.max(1000000)
+          ]);
+
+          feeFrequency.setValidators([
+            Validators.required
+          ]);
+        } else {
+          feeAmount.clearValidators();
+          feeFrequency.clearValidators();
+
+          feeAmount.setValue(null, {
+            emitEvent: false
+          });
+
+          feeFrequency.setValue('', {
+            emitEvent: false
+          });
+        }
+
+        feeAmount.updateValueAndValidity({
+          emitEvent: false
+        });
+
+        feeFrequency.updateValueAndValidity({
+          emitEvent: false
+        });
+
+        this.valueChange.emit(
+          this.form.getRawValue() as PropertyDetailsFormValue
+        );
+
+        this.validityChange.emit(
+          this.form.valid
+        );
+      });
 
     this.form.valueChanges.subscribe(() => {
       this.valueChange.emit(

@@ -1,10 +1,9 @@
-import {
-  Injectable
-} from '@angular/core';
+import { Injectable } from '@angular/core';
 
 import {
   DocumentData,
   DocumentSnapshot,
+  Timestamp,
   addDoc,
   collection,
   doc,
@@ -16,9 +15,7 @@ import {
   where
 } from 'firebase/firestore';
 
-import {
-  firestore
-} from '../firebase';
+import { firestore } from '../firebase';
 
 import {
   Listing,
@@ -27,22 +24,17 @@ import {
 
 import {
   InitialListingDraft,
+  InitialPublishedListing,
+  ListingDraftChanges,
   ListingRepository
 } from '../../../domains/listings/repositories/listing.repository';
-
 
 @Injectable({
   providedIn: 'root'
 })
-export class FirebaseListingRepository
-  extends ListingRepository {
-
-  private readonly draftCollectionName =
-    'listingDrafts';
-
-  private readonly publishedCollectionName =
-    'listings';
-
+export class FirebaseListingRepository extends ListingRepository {
+  private readonly draftCollectionName = 'listingDrafts';
+  private readonly publishedCollectionName = 'listings';
 
   /*
    * DRAFT OPERATIONS
@@ -63,7 +55,6 @@ export class FirebaseListingRepository
       draftsCollection,
       {
         ...sanitizedDraft,
-
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         lastSavedAt: serverTimestamp()
@@ -73,10 +64,9 @@ export class FirebaseListingRepository
     return documentReference.id;
   }
 
-
   async updateDraft(
     listingUid: string,
-    changes: Partial<ListingDraft>
+    changes: ListingDraftChanges
   ): Promise<void> {
     const draftReference = doc(
       firestore,
@@ -91,13 +81,11 @@ export class FirebaseListingRepository
       draftReference,
       {
         ...sanitizedChanges,
-
         updatedAt: serverTimestamp(),
         lastSavedAt: serverTimestamp()
       }
     );
   }
-
 
   async getDraftByUid(
     listingUid: string
@@ -108,19 +96,14 @@ export class FirebaseListingRepository
       listingUid
     );
 
-    const snapshot = await getDoc(
-      draftReference
-    );
+    const snapshot = await getDoc(draftReference);
 
     if (!snapshot.exists()) {
       return null;
     }
 
-    return this.mapDraftSnapshot(
-      snapshot
-    );
+    return this.mapDraftSnapshot(snapshot);
   }
-
 
   async getDraftsBySellerUid(
     sellerUid: string
@@ -137,16 +120,11 @@ export class FirebaseListingRepository
       )
     );
 
-    const snapshot = await getDocs(
-      draftsQuery
-    );
+    const snapshot = await getDocs(draftsQuery);
 
     return snapshot.docs
-      .map(
-        draftSnapshot =>
-          this.mapDraftSnapshot(
-            draftSnapshot
-          )
+      .map((draftSnapshot) =>
+        this.mapDraftSnapshot(draftSnapshot)
       )
       .sort(
         (firstDraft, secondDraft) =>
@@ -155,16 +133,12 @@ export class FirebaseListingRepository
       );
   }
 
-
   /*
    * PUBLISHED LISTING OPERATIONS
    */
 
   async createPublishedListing(
-    listing: Omit<
-      Listing,
-      'Uid' | 'createdAt' | 'updatedAt'
-    >
+    listing: InitialPublishedListing
   ): Promise<string> {
     const publishedCollection = collection(
       firestore,
@@ -178,7 +152,6 @@ export class FirebaseListingRepository
       publishedCollection,
       {
         ...sanitizedListing,
-
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
@@ -186,7 +159,6 @@ export class FirebaseListingRepository
 
     return documentReference.id;
   }
-
 
   async getPublishedListingByUid(
     listingUid: string
@@ -197,47 +169,14 @@ export class FirebaseListingRepository
       listingUid
     );
 
-    const snapshot = await getDoc(
-      listingReference
-    );
+    const snapshot = await getDoc(listingReference);
 
     if (!snapshot.exists()) {
       return null;
     }
 
-    const data = snapshot.data();
-
-    return {
-      ...data,
-
-      Uid: snapshot.id,
-
-      certification: {
-        ...data['certification'],
-
-        acceptedAt:
-          this.toOptionalDate(
-            data['certification']?.acceptedAt
-          )
-      },
-
-      publishedAt:
-        this.toOptionalDate(
-          data['publishedAt']
-        ),
-
-      createdAt:
-        this.toDate(
-          data['createdAt']
-        ),
-
-      updatedAt:
-        this.toDate(
-          data['updatedAt']
-        )
-    } as Listing;
+    return this.mapPublishedListingSnapshot(snapshot);
   }
-
 
   /*
    * FIRESTORE MAPPING
@@ -256,55 +195,71 @@ export class FirebaseListingRepository
 
     return {
       ...data,
-
       Uid: snapshot.id,
 
       certification: {
         ...data['certification'],
-
-        acceptedAt:
-          this.toOptionalDate(
-            data['certification']?.acceptedAt
-          )
+        acceptedAt: this.toOptionalDate(
+          data['certification']?.acceptedAt
+        )
       },
 
       publication: {
         ...data['publication'],
-
-        paidAt:
-          this.toOptionalDate(
-            data['publication']?.paidAt
-          ),
-
-        publishedAt:
-          this.toOptionalDate(
-            data['publication']?.publishedAt
-          )
+        paidAt: this.toOptionalDate(
+          data['publication']?.paidAt
+        ),
+        publishedAt: this.toOptionalDate(
+          data['publication']?.publishedAt
+        )
       },
 
-      createdAt:
-        this.toDate(
-          data['createdAt']
-        ),
-
-      updatedAt:
-        this.toDate(
-          data['updatedAt']
-        ),
-
-      lastSavedAt:
-        this.toDate(
-          data['lastSavedAt']
-        )
+      createdAt: this.toDate(data['createdAt']),
+      updatedAt: this.toDate(data['updatedAt']),
+      lastSavedAt: this.toDate(data['lastSavedAt'])
     } as ListingDraft;
   }
 
+  private mapPublishedListingSnapshot(
+    snapshot: DocumentSnapshot<DocumentData>
+  ): Listing {
+    const data = snapshot.data();
+
+    if (!data) {
+      throw new Error(
+        `Published listing ${snapshot.id} contains no data.`
+      );
+    }
+
+    return {
+      ...data,
+      Uid: snapshot.id,
+
+      certification: {
+        ...data['certification'],
+        acceptedAt: this.toOptionalDate(
+          data['certification']?.acceptedAt
+        )
+      },
+
+      publishedAt: this.toOptionalDate(
+        data['publishedAt']
+      ),
+
+      createdAt: this.toDate(data['createdAt']),
+      updatedAt: this.toDate(data['updatedAt'])
+    } as Listing;
+  }
 
   private toDate(
     value: unknown
   ): Date {
     if (value instanceof Date) {
       return value;
+    }
+
+    if (value instanceof Timestamp) {
+      return value.toDate();
     }
 
     if (
@@ -319,46 +274,43 @@ export class FirebaseListingRepository
     return new Date();
   }
 
-
   private toOptionalDate(
     value: unknown
   ): Date | undefined {
-    if (!value) {
+    if (
+      value === undefined ||
+      value === null
+    ) {
       return undefined;
     }
 
-    return this.toDate(
-      value
-    );
+    return this.toDate(value);
   }
-
 
   private removeUndefinedValues<T>(
     value: T
   ): T {
     if (Array.isArray(value)) {
-      return value.map(
-        item =>
-          this.removeUndefinedValues(item)
+      return value.map((item) =>
+        this.removeUndefinedValues(item)
       ) as T;
     }
 
     if (
       value !== null &&
       typeof value === 'object' &&
-      !(value instanceof Date)
+      !(value instanceof Date) &&
+      !(value instanceof Timestamp)
     ) {
       return Object.fromEntries(
         Object.entries(value)
-          .filter(
-            ([, item]) =>
-              item !== undefined
+          .filter(([, item]) =>
+            item !== undefined
           )
-          .map(
-            ([key, item]) => [
-              key,
-              this.removeUndefinedValues(item)
-            ])
+          .map(([key, item]) => [
+            key,
+            this.removeUndefinedValues(item)
+          ])
       ) as T;
     }
 

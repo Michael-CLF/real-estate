@@ -1,6 +1,10 @@
 import { ListingPhoto } from '../../listings/models/listing-photo.model';
 import { ListingStatus } from '../../listings/models/listing-status.type';
 import { PropertyType } from '../../property/models/property-type.type';
+import {
+  ListingHoa
+} from '../../listings/models/listing.model';
+
 
 export interface ListingAddress {
   addressLine1: string;
@@ -38,6 +42,7 @@ export interface MarketplaceListing {
   squareFeet?: number;
   lotSizeAcres?: number;
   yearBuilt?: number;
+  hoa?: ListingHoa;
 
   address: ListingAddress;
   location: ListingLocation;

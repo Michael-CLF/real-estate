@@ -1,0 +1,317 @@
+<section
+  class="interior-step"
+  aria-labelledby="interior-step-title"
+>
+  <header class="step-header">
+    <p class="step-eyebrow">
+      Property Interior
+    </p>
+
+    <h2 id="interior-step-title">
+      Tell buyers about the interior
+    </h2>
+
+    <p class="step-description">
+      Select the flooring, floor plan,
+      ceiling details, fireplace information,
+      and other interior features that apply
+      to the property.
+    </p>
+  </header>
+
+  <form
+    class="interior-form"
+    [formGroup]="form"
+  >
+    <fieldset class="field-group">
+      <legend>
+        Flooring
+      </legend>
+
+      <p class="field-help">
+        Select every type of flooring found
+        in the home.
+      </p>
+
+      <div class="checkbox-grid">
+        @for (
+          option of flooringTypes;
+          track option.value
+        ) {
+          <label class="checkbox-option">
+            <input
+              type="checkbox"
+              [checked]="
+                isFlooringTypeSelected(
+                  option.value
+                )
+              "
+              (change)="
+                toggleFlooringType(
+                  option.value,
+                  $any($event.target).checked
+                )
+              "
+            />
+
+            <span>
+              {{ option.label }}
+            </span>
+          </label>
+        }
+      </div>
+
+      @if (
+        form.controls.flooringTypes.touched &&
+        form.controls.flooringTypes.value
+          .length === 0
+      ) {
+        <p class="field-error">
+          Select at least one flooring type.
+        </p>
+      }
+
+      @if (
+        isFlooringTypeSelected('other')
+      ) {
+        <div class="other-field">
+          <label for="other-flooring-type">
+            Other flooring type
+          </label>
+
+          <input
+            id="other-flooring-type"
+            type="text"
+            formControlName="otherFlooringType"
+            maxlength="100"
+            autocomplete="off"
+            placeholder="Enter the flooring type"
+          />
+
+          @if (
+            form.controls.otherFlooringType
+              .touched &&
+            form.controls.otherFlooringType
+              .invalid
+          ) {
+            <p class="field-error">
+              Enter the other flooring type.
+            </p>
+          }
+        </div>
+      }
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>
+        Floor plan
+      </legend>
+
+      <p class="field-help">
+        Select the option that best describes
+        the overall layout of the home.
+      </p>
+
+      <div class="radio-grid">
+        @for (
+          option of floorPlans;
+          track option.value
+        ) {
+          <label class="radio-option">
+            <input
+              type="radio"
+              formControlName="floorPlan"
+              [value]="option.value"
+            />
+
+            <span>
+              {{ option.label }}
+            </span>
+          </label>
+        }
+      </div>
+
+      @if (
+        form.controls.floorPlan.touched &&
+        form.controls.floorPlan.invalid
+      ) {
+        <p class="field-error">
+          Select a floor-plan style.
+        </p>
+      }
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>
+        Ceiling features
+      </legend>
+
+      <p class="field-help">
+        Select all ceiling styles or features
+        that apply.
+      </p>
+
+      <div class="checkbox-grid">
+        @for (
+          option of ceilingFeatures;
+          track option.value
+        ) {
+          <label class="checkbox-option">
+            <input
+              type="checkbox"
+              [checked]="
+                isCeilingFeatureSelected(
+                  option.value
+                )
+              "
+              (change)="
+                toggleCeilingFeature(
+                  option.value,
+                  $any($event.target).checked
+                )
+              "
+            />
+
+            <span>
+              {{ option.label }}
+            </span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>
+        Fireplaces
+      </legend>
+
+      <p class="field-help">
+        Enter the number of fireplaces in the
+        home. Enter 0 if there are none.
+      </p>
+
+      <div class="fireplace-count">
+        <label for="fireplace-count">
+          Number of fireplaces
+        </label>
+
+        <input
+          id="fireplace-count"
+          type="number"
+          formControlName="fireplaceCount"
+          min="0"
+          max="20"
+          step="1"
+          inputmode="numeric"
+          placeholder="0"
+        />
+
+        @if (
+          form.controls.fireplaceCount
+            .touched &&
+          form.controls.fireplaceCount
+            .invalid
+        ) {
+          <p class="field-error">
+            Enter a number from 0 to 20.
+          </p>
+        }
+      </div>
+
+      @if (
+        (form.controls.fireplaceCount.value ??
+          0) > 0
+      ) {
+        <div class="conditional-section">
+          <p class="field-label">
+            Fireplace type
+          </p>
+
+          <p class="field-help">
+            Select every fireplace type found
+            in the home.
+          </p>
+
+          <div class="checkbox-grid">
+            @for (
+              option of fireplaceTypes;
+              track option.value
+            ) {
+              <label class="checkbox-option">
+                <input
+                  type="checkbox"
+                  [checked]="
+                    isFireplaceTypeSelected(
+                      option.value
+                    )
+                  "
+                  (change)="
+                    toggleFireplaceType(
+                      option.value,
+                      $any($event.target).checked
+                    )
+                  "
+                />
+
+                <span>
+                  {{ option.label }}
+                </span>
+              </label>
+            }
+          </div>
+
+          @if (
+            form.controls.fireplaceTypes
+              .touched &&
+            form.controls.fireplaceTypes
+              .value.length === 0
+          ) {
+            <p class="field-error">
+              Select at least one fireplace
+              type.
+            </p>
+          }
+        </div>
+      }
+    </fieldset>
+
+    <fieldset class="field-group">
+      <legend>
+        Additional interior features
+      </legend>
+
+      <p class="field-help">
+        Select all additional interior
+        features that apply to the home.
+      </p>
+
+      <div class="checkbox-grid">
+        @for (
+          option of interiorFeatures;
+          track option.value
+        ) {
+          <label class="checkbox-option">
+            <input
+              type="checkbox"
+              [checked]="
+                isInteriorFeatureSelected(
+                  option.value
+                )
+              "
+              (change)="
+                toggleInteriorFeature(
+                  option.value,
+                  $any($event.target).checked
+                )
+              "
+            />
+
+            <span>
+              {{ option.label }}
+            </span>
+          </label>
+        }
+      </div>
+    </fieldset>
+  </form>
+</section>

@@ -3,21 +3,28 @@ import {
   ListingDraft
 } from '../models/listing.model';
 
+export type InitialListingDraft = Omit<
+  ListingDraft,
+  'Uid' | 'createdAt' | 'updatedAt' | 'lastSavedAt'
+>;
 
-export type InitialListingDraft =
+export type ListingDraftChanges = Partial<
   Omit<
     ListingDraft,
-    'Uid' | 'createdAt' | 'updatedAt' | 'lastSavedAt'
-  >;
+    'Uid' | 'sellerUid' | 'createdAt' | 'updatedAt' | 'lastSavedAt'
+  >
+>;
 
+export type InitialPublishedListing = Omit<
+  Listing,
+  'Uid' | 'createdAt' | 'updatedAt'
+>;
 
 export abstract class ListingRepository {
-
   /*
    * DRAFT OPERATIONS
    *
-   * All of these methods operate on:
-   *
+   * These methods operate on:
    * listingDrafts/{listingUid}
    */
 
@@ -27,7 +34,7 @@ export abstract class ListingRepository {
 
   abstract updateDraft(
     listingUid: string,
-    changes: Partial<ListingDraft>
+    changes: ListingDraftChanges
   ): Promise<void>;
 
   abstract getDraftByUid(
@@ -38,11 +45,15 @@ export abstract class ListingRepository {
     sellerUid: string
   ): Promise<ListingDraft[]>;
 
+  /*
+   * PUBLISHED LISTING OPERATIONS
+   *
+   * These methods operate on:
+   * listings/{listingUid}
+   */
+
   abstract createPublishedListing(
-    listing: Omit<
-      Listing,
-      'Uid' | 'createdAt' | 'updatedAt'
-    >
+    listing: InitialPublishedListing
   ): Promise<string>;
 
   abstract getPublishedListingByUid(

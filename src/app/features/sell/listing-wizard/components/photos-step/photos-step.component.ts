@@ -9,10 +9,6 @@ import {
 } from '@angular/core';
 
 import {
-  ProcessedListingImage
-} from '../../../../../core/infrastructure/image-processing/image-processing.models';
-
-import {
   ImageProcessingService
 } from '../../../../../core/infrastructure/image-processing/image-processing.service';
 
@@ -75,7 +71,9 @@ export class PhotosStepComponent {
       const initialPhotos = this.initialValue();
 
       this.photos.set(initialPhotos);
-      this.validityChange.emit(initialPhotos.length >= 1);
+      this.validityChange.emit(
+        initialPhotos.length >= 1
+      );
     });
   }
 
@@ -175,75 +173,97 @@ export class PhotosStepComponent {
     ).toFixed(1)} MB`;
   }
 
-  private async addFiles(files: File[]): Promise<void> {
-    this.errorMessage.set(null);
+ private async addFiles(
+  files: File[]
+): Promise<void> {
+  this.errorMessage.set(null);
 
-    const remainingSlots =
-      this.maxPhotos - this.photos().length;
+  const existingPhotos =
+    this.photos();
 
-    if (remainingSlots <= 0) {
-      this.errorMessage.set(
-        `You can upload a maximum of ${this.maxPhotos} photos.`
-      );
+  const remainingSlots =
+    this.maxPhotos -
+    existingPhotos.length;
 
-      return;
-    }
+  if (remainingSlots <= 0) {
+    this.errorMessage.set(
+      `You can upload a maximum of ${this.maxPhotos} photos.`
+    );
 
-    const filesToProcess = files.slice(
+    return;
+  }
+
+  const filesToProcess =
+    files.slice(
       0,
       remainingSlots
     );
 
-    if (files.length > remainingSlots) {
-      this.errorMessage.set(
-        `Only ${remainingSlots} more photo${
-          remainingSlots === 1 ? '' : 's'
-        } can be added.`
-      );
-    }
+  if (files.length > remainingSlots) {
+    this.errorMessage.set(
+      `Only ${remainingSlots} more photo${
+        remainingSlots === 1
+          ? ''
+          : 's'
+      } can be added.`
+    );
+  }
 
-    this.isProcessing.set(true);
+  this.isProcessing.set(true);
 
-    try {
-      for (const file of filesToProcess) {
-        try {
-          const processedImage =
-            await this.imageProcessingService.process(file);
+  const processedPhotos:
+    ListingPhoto[] = [];
 
-          this.addProcessedImage(processedImage);
-        } catch (error) {
-          const message =
-            error instanceof Error
-              ? error.message
-              : 'An image could not be processed.';
+  try {
+    for (const file of filesToProcess) {
+      try {
+        const processedImage =
+          await this.imageProcessingService
+            .process(file);
 
-          this.errorMessage.set(message);
-        }
+        const isFirstPhoto =
+          existingPhotos.length === 0 &&
+          processedPhotos.length === 0;
+
+        processedPhotos.push({
+          id:
+            processedImage.id,
+
+          originalFileName:
+            processedImage.originalFileName,
+
+          fullImage:
+            processedImage.fullImage,
+
+          thumbnail:
+            processedImage.thumbnail,
+
+          isPrimary:
+            isFirstPhoto
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'An image could not be processed.';
+
+        this.errorMessage.set(
+          message
+        );
       }
-    } finally {
-      this.isProcessing.set(false);
     }
+
+    if (processedPhotos.length > 0) {
+      this.updatePhotos([
+        ...existingPhotos,
+        ...processedPhotos
+      ]);
+    }
+  } finally {
+    this.isProcessing.set(false);
   }
+}
 
-  private addProcessedImage(
-    processedImage: ProcessedListingImage
-  ): void {
-    const currentPhotos = this.photos();
-
-    const photo: ListingPhoto = {
-      id: processedImage.id,
-      originalFileName:
-        processedImage.originalFileName,
-      fullImage: processedImage.fullImage,
-      thumbnail: processedImage.thumbnail,
-      isPrimary: currentPhotos.length === 0
-    };
-
-    this.updatePhotos([
-      ...currentPhotos,
-      photo
-    ]);
-  }
 
   private updatePhotos(
     photos: ListingPhoto[]

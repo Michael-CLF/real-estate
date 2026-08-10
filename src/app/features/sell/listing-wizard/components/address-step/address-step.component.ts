@@ -1,6 +1,7 @@
 import {
   CommonModule
 } from '@angular/common';
+
 import {
   Component,
   effect,
@@ -8,13 +9,17 @@ import {
   input,
   output
 } from '@angular/core';
+
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
 
-import { ZipCodeService } from '../../../../../core/infrastructure/zip/zip-code.service';
+import {
+  ZipCodeService
+} from '../../../../../core/infrastructure/zip/zip-code.service';
+
 
 export interface AddressFormValue {
   addressLine1: string;
@@ -25,6 +30,7 @@ export interface AddressFormValue {
   county: string;
 }
 
+
 @Component({
   selector: 'app-address-step',
   standalone: true,
@@ -32,17 +38,28 @@ export interface AddressFormValue {
     CommonModule,
     ReactiveFormsModule
   ],
-  templateUrl: './address-step.component.html',
-  styleUrl: './address-step.component.scss'
+  templateUrl:
+    './address-step.component.html',
+  styleUrl:
+    './address-step.component.scss'
 })
 export class AddressStepComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly zipCodeService = inject(ZipCodeService);
+  private readonly fb =
+    inject(FormBuilder);
 
-  readonly initialValue = input<AddressFormValue | null>(null);
+  private readonly zipCodeService =
+    inject(ZipCodeService);
 
-  readonly validityChange = output<boolean>();
-  readonly valueChange = output<AddressFormValue>();
+
+  readonly initialValue =
+    input<AddressFormValue | null>(null);
+
+  readonly validityChange =
+    output<boolean>();
+
+  readonly valueChange =
+    output<AddressFormValue>();
+
 
   readonly states = [
     { code: 'AL', name: 'Alabama' },
@@ -97,72 +114,98 @@ export class AddressStepComponent {
     { code: 'WY', name: 'Wyoming' }
   ];
 
-  readonly form = this.fb.nonNullable.group({
-    addressLine1: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(5),
-        Validators.maxLength(100)
+
+  readonly form =
+    this.fb.nonNullable.group({
+      addressLine1: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(5),
+          Validators.maxLength(100)
+        ]
+      ],
+
+      addressLine2: [
+        '',
+        [
+          Validators.maxLength(100)
+        ]
+      ],
+
+      city: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.pattern(
+            /^[A-Za-z\s'-]+$/
+          )
+        ]
+      ],
+
+      state: [
+        'NC',
+        Validators.required
+      ],
+
+      zipCode: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(
+            /^\d{5}$/
+          )
+        ]
+      ],
+
+      county: [
+        {
+          value: '',
+          disabled: true
+        }
       ]
-    ],
-    addressLine2: [
-      '',
-      [
-        Validators.maxLength(100)
-      ]
-    ],
-    city: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^[A-Za-z\s'-]+$/)
-      ]
-    ],
-    state: [
-      'NC',
-      Validators.required
-    ],
-    zipCode: [
-      '',
-      [
-        Validators.required,
-        Validators.pattern(/^\d{5}$/)
-      ]
-    ],
-    county: [
-      {
-        value: '',
-        disabled: true
-      }
-    ]
-  });
+    });
+
 
   constructor() {
     effect(() => {
-      const initialValue = this.initialValue();
+      const initialValue =
+        this.initialValue();
 
       if (initialValue) {
-        this.form.setValue(initialValue, {
-          emitEvent: false
-        });
+        this.form.setValue(
+          initialValue,
+          {
+            emitEvent: false
+          }
+        );
       }
 
-      this.validityChange.emit(this.form.valid);
-    });
-
-    this.form.valueChanges.subscribe(() => {
-      this.valueChange.emit(
-        this.form.getRawValue() as AddressFormValue
+      this.validityChange.emit(
+        this.form.valid
       );
-
-      this.validityChange.emit(this.form.valid);
     });
+
+
+    this.form.valueChanges.subscribe(
+      () => {
+        this.valueChange.emit(
+          this.form.getRawValue()
+        );
+
+        this.validityChange.emit(
+          this.form.valid
+        );
+      }
+    );
   }
 
+
   async lookupZipCode(): Promise<void> {
-    const zip = this.form.controls.zipCode.value.trim();
+    const zip =
+      this.form.controls.zipCode.value
+        .trim();
 
     this.form.patchValue({
       county: ''
@@ -174,7 +217,8 @@ export class AddressStepComponent {
 
     await this.zipCodeService.load();
 
-    const result = this.zipCodeService.lookup(zip);
+    const result =
+      this.zipCodeService.lookup(zip);
 
     if (!result) {
       this.form.controls.zipCode.setErrors({
@@ -182,6 +226,7 @@ export class AddressStepComponent {
       });
 
       this.validityChange.emit(false);
+
       return;
     }
 
@@ -191,14 +236,17 @@ export class AddressStepComponent {
       county: result.county
     });
 
-    this.form.controls.zipCode.updateValueAndValidity({
-      emitEvent: false
-    });
+    this.form.controls.zipCode
+      .updateValueAndValidity({
+        emitEvent: false
+      });
 
     this.valueChange.emit(
-      this.form.getRawValue() as AddressFormValue
+      this.form.getRawValue()
     );
 
-    this.validityChange.emit(this.form.valid);
+    this.validityChange.emit(
+      this.form.valid
+    );
   }
 }

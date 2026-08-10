@@ -5,51 +5,58 @@ import {
 
 import {
   Listing,
+  ListingAccessibility,
+  ListingBathroomFeatures,
+  ListingCommunityAmenities,
+  ListingConstruction,
   ListingDraft,
+  ListingDraftAddress,
+  ListingDraftPricing,
+  ListingDraftPropertyDetails,
   ListingDraftStep,
   ListingFeatures,
-  ListingPhotoReference
+  ListingHoa,
+  ListingInterior,
+  ListingKitchen,
+  ListingParcelAndTaxes,
+  ListingParking,
+  ListingPhotoReference,
+  ListingRooms,
+  ListingSchools,
+  ListingSystems,
+  ListingUtilities
 } from '../models/listing.model';
 
 import {
+  ListingDraftChanges,
   ListingRepository
 } from '../repositories/listing.repository';
 
+export type SaveAddressStepInput =
+  ListingDraftAddress;
 
-export interface SaveAddressStepInput {
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  county: string;
-}
+export type SavePropertyDetailsStepInput =
+  ListingDraftPropertyDetails;
 
-
-export interface SavePropertyDetailsStepInput {
-  propertyType: Listing['propertyType'];
-  bedrooms: number;
-  bathrooms: number;
-  squareFeet: number;
-  yearBuilt: number;
-  lotSize?: number;
-  description?: string;
-}
-
-
-export interface SavePricingStepInput {
-  listPrice: number;
-}
-
+export type SavePricingStepInput =
+  ListingDraftPricing;
 
 @Injectable({
   providedIn: 'root'
 })
 export class ListingService {
-
   private readonly repository =
     inject(ListingRepository);
 
+  private readonly workflowOrder:
+    ListingDraftStep[] = [
+      'address',
+      'property_details',
+      'property_features',
+      'photos',
+      'pricing',
+      'review'
+    ];
 
   async createInitialDraft(
     sellerUid: string
@@ -83,7 +90,6 @@ export class ListingService {
       }
     });
   }
-
 
   async getSellerDraft(
     listingUid: string,
@@ -128,24 +134,19 @@ export class ListingService {
     }
 
     return this.repository
-      .getDraftsBySellerUid(
-        sellerUid
-      );
+      .getDraftsBySellerUid(sellerUid);
   }
-
 
   async saveAddressStep(
     listingUid: string,
     sellerUid: string,
-    address: SaveAddressStepInput
+    address: SaveAddressStepInput,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
   ): Promise<void> {
-    await this.requireSellerDraft(
+    await this.saveSection(
       listingUid,
-      sellerUid
-    );
-
-    await this.repository.updateDraft(
-      listingUid,
+      sellerUid,
       {
         address: {
           addressLine1:
@@ -165,75 +166,235 @@ export class ListingService {
             address.zipCode.trim(),
 
           county:
-            address.county.trim()
-        },
+            address.county.trim(),
 
-        progress: this.buildProgress(
-          'property_details',
-          'address',
-          [
-            'address'
-          ]
-        )
-      }
+          latitude:
+            address.latitude,
+
+          longitude:
+            address.longitude
+        }
+      },
+      'address',
+      'property_details',
+      existingCompletedSteps
     );
   }
 
-
   async savePropertyDetailsStep(
+  listingUid: string,
+  sellerUid: string,
+  propertyDetails:
+    SavePropertyDetailsStepInput,
+  hoa: ListingHoa,
+  existingCompletedSteps:
+    ListingDraftStep[] = []
+): Promise<void> {
+  await this.saveSection(
+    listingUid,
+    sellerUid,
+    {
+      propertyDetails: {
+        ...propertyDetails,
+
+        description:
+          propertyDetails.description
+            ?.trim() ||
+          undefined
+      },
+
+      hoa
+    },
+    'property_details',
+    'property_features',
+    existingCompletedSteps
+  );
+}
+
+  async saveConstructionStep(
     listingUid: string,
     sellerUid: string,
-    propertyDetails:
-      SavePropertyDetailsStepInput,
+    construction: ListingConstruction,
     existingCompletedSteps:
       ListingDraftStep[] = []
   ): Promise<void> {
-    await this.requireSellerDraft(
+    await this.saveSection(
       listingUid,
-      sellerUid
-    );
-
-    await this.repository.updateDraft(
-      listingUid,
-      {
-        propertyDetails: {
-          propertyType:
-            propertyDetails.propertyType,
-
-          bedrooms:
-            propertyDetails.bedrooms,
-
-          bathrooms:
-            propertyDetails.bathrooms,
-
-          squareFeet:
-            propertyDetails.squareFeet,
-
-          yearBuilt:
-            propertyDetails.yearBuilt,
-
-          lotSize:
-            propertyDetails.lotSize,
-
-          description:
-            propertyDetails.description
-              ?.trim() ||
-            undefined
-        },
-
-        progress: this.buildProgress(
-          'property_features',
-          'property_details',
-          [
-            ...existingCompletedSteps,
-            'address',
-            'property_details'
-          ]
-        )
-      }
+      sellerUid,
+      { construction },
+      'construction',
+      'interior',
+      existingCompletedSteps
     );
   }
 
+  async saveInteriorStep(
+    listingUid: string,
+    sellerUid: string,
+    interior: ListingInterior,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      { interior },
+      'interior',
+      'rooms',
+      existingCompletedSteps
+    );
+  }
+
+  async saveRoomsStep(
+    listingUid: string,
+    sellerUid: string,
+    rooms: ListingRooms,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      { rooms },
+      'rooms',
+      'kitchen_bathrooms',
+      existingCompletedSteps
+    );
+  }
+
+  async saveKitchenAndBathroomsStep(
+    listingUid: string,
+    sellerUid: string,
+    kitchen: ListingKitchen,
+    bathrooms: ListingBathroomFeatures,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      {
+        kitchen,
+        bathrooms
+      },
+      'kitchen_bathrooms',
+      'parking',
+      existingCompletedSteps
+    );
+  }
+
+  async saveParkingStep(
+    listingUid: string,
+    sellerUid: string,
+    parking: ListingParking,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      { parking },
+      'parking',
+      'systems_utilities',
+      existingCompletedSteps
+    );
+  }
+
+  async saveSystemsAndUtilitiesStep(
+    listingUid: string,
+    sellerUid: string,
+    systems: ListingSystems,
+    utilities: ListingUtilities,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      {
+        systems,
+        utilities
+      },
+      'systems_utilities',
+      'hoa_community',
+      existingCompletedSteps
+    );
+  }
+
+  async saveHoaAndCommunityStep(
+    listingUid: string,
+    sellerUid: string,
+    hoa: ListingHoa,
+    communityAmenities:
+      ListingCommunityAmenities,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      {
+        hoa,
+        communityAmenities
+      },
+      'hoa_community',
+      'accessibility',
+      existingCompletedSteps
+    );
+  }
+
+  async saveAccessibilityStep(
+    listingUid: string,
+    sellerUid: string,
+    accessibility:
+      ListingAccessibility,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      { accessibility },
+      'accessibility',
+      'schools',
+      existingCompletedSteps
+    );
+  }
+
+  async saveSchoolsStep(
+    listingUid: string,
+    sellerUid: string,
+    schools: ListingSchools,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      { schools },
+      'schools',
+      'parcel_taxes',
+      existingCompletedSteps
+    );
+  }
+
+  async saveParcelAndTaxesStep(
+    listingUid: string,
+    sellerUid: string,
+    parcelAndTaxes:
+      ListingParcelAndTaxes,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      { parcelAndTaxes },
+      'parcel_taxes',
+      'property_features',
+      existingCompletedSteps
+    );
+  }
 
   async saveFeaturesStep(
     listingUid: string,
@@ -242,30 +403,15 @@ export class ListingService {
     existingCompletedSteps:
       ListingDraftStep[] = []
   ): Promise<void> {
-    await this.requireSellerDraft(
+    await this.saveSection(
       listingUid,
-      sellerUid
-    );
-
-    await this.repository.updateDraft(
-      listingUid,
-      {
-        features,
-
-        progress: this.buildProgress(
-          'photos',
-          'property_features',
-          [
-            ...existingCompletedSteps,
-            'address',
-            'property_details',
-            'property_features'
-          ]
-        )
-      }
+      sellerUid,
+      { features },
+      'property_features',
+      'photos',
+      existingCompletedSteps
     );
   }
-
 
   async updateDraftPhotos(
     listingUid: string,
@@ -274,11 +420,6 @@ export class ListingService {
     existingCompletedSteps:
       ListingDraftStep[] = []
   ): Promise<void> {
-    await this.requireSellerDraft(
-      listingUid,
-      sellerUid
-    );
-
     if (photos.length === 0) {
       throw new Error(
         'At least one listing photo is required.'
@@ -293,26 +434,31 @@ export class ListingService {
         secondPhoto.sortOrder
     );
 
-    const primaryPhoto =
+    const selectedPrimaryPhoto =
       orderedPhotos.find(
         photo => photo.isPrimary
-      ) ??
-      orderedPhotos[0];
+      ) ?? orderedPhotos[0];
 
     const normalizedPhotos =
       orderedPhotos.map(
         (photo, index) => ({
           ...photo,
-
           sortOrder: index,
 
           isPrimary:
-            photo.id === primaryPhoto.id
+            photo.id ===
+            selectedPrimaryPhoto.id
         })
       );
 
-    await this.repository.updateDraft(
+    const primaryPhoto =
+      normalizedPhotos.find(
+        photo => photo.isPrimary
+      )!;
+
+    await this.saveSection(
       listingUid,
+      sellerUid,
       {
         photos: normalizedPhotos,
 
@@ -322,23 +468,13 @@ export class ListingService {
           ),
 
         primaryPhotoUrl:
-          primaryPhoto.fullImageUrl,
-
-        progress: this.buildProgress(
-          'pricing',
-          'photos',
-          [
-            ...existingCompletedSteps,
-            'address',
-            'property_details',
-            'property_features',
-            'photos'
-          ]
-        )
-      }
+          primaryPhoto.fullImageUrl
+      },
+      'photos',
+      'pricing',
+      existingCompletedSteps
     );
   }
-
 
   async savePricingStep(
     listingUid: string,
@@ -348,44 +484,33 @@ export class ListingService {
     existingCompletedSteps:
       ListingDraftStep[] = []
   ): Promise<void> {
-    await this.requireSellerDraft(
-      listingUid,
-      sellerUid
-    );
+    if (pricing.listPrice <= 0) {
+      throw new Error(
+        'A valid listing price is required.'
+      );
+    }
 
-    await this.repository.updateDraft(
+    await this.saveSection(
       listingUid,
+      sellerUid,
       {
         pricing: {
           listPrice:
             pricing.listPrice
         },
 
-        featuredListing,
-
-        progress: this.buildProgress(
-          'review',
-          'pricing',
-          [
-            ...existingCompletedSteps,
-            'address',
-            'property_details',
-            'property_features',
-            'photos',
-            'pricing'
-          ]
-        )
-      }
+        featuredListing
+      },
+      'pricing',
+      'review',
+      existingCompletedSteps
     );
   }
-
 
   async completeListingContent(
     listingUid: string,
     sellerUid: string,
-    certificationAccepted: boolean,
-    existingCompletedSteps:
-      ListingDraftStep[] = []
+    certificationAccepted: boolean
   ): Promise<void> {
     const draft =
       await this.requireSellerDraft(
@@ -417,16 +542,9 @@ export class ListingService {
           currentStep: 'review',
           lastCompletedStep: 'review',
 
-          completedSteps:
-            this.normalizeCompletedSteps([
-              ...existingCompletedSteps,
-              'address',
-              'property_details',
-              'property_features',
-              'photos',
-              'pricing',
-              'review'
-            ]),
+          completedSteps: [
+            ...this.workflowOrder
+          ],
 
           completionPercent: 100,
           contentStatus: 'complete'
@@ -444,33 +562,21 @@ export class ListingService {
     );
   }
 
-
   async updateDraft(
     listingUid: string,
     sellerUid: string,
-    changes: Partial<ListingDraft>
+    changes: ListingDraftChanges
   ): Promise<void> {
     await this.requireSellerDraft(
       listingUid,
       sellerUid
     );
 
-    const protectedChanges = {
-      ...changes
-    };
-
-    delete protectedChanges.Uid;
-    delete protectedChanges.sellerUid;
-    delete protectedChanges.createdAt;
-    delete protectedChanges.updatedAt;
-    delete protectedChanges.lastSavedAt;
-
     await this.repository.updateDraft(
       listingUid,
-      protectedChanges
+      changes
     );
   }
-
 
   async getPublishedListing(
     listingUid: string
@@ -481,14 +587,6 @@ export class ListingService {
       );
   }
 
-
-  /*
-   * Temporary compatibility method.
-   *
-   * Existing marketplace code may still call
-   * getListing(). It now reads only from the
-   * published listings collection.
-   */
   async getListing(
     listingUid: string
   ): Promise<Listing | null> {
@@ -497,6 +595,36 @@ export class ListingService {
     );
   }
 
+  private async saveSection(
+    listingUid: string,
+    sellerUid: string,
+    changes: ListingDraftChanges,
+    completedStep: ListingDraftStep,
+    nextStep: ListingDraftStep,
+    existingCompletedSteps:
+      ListingDraftStep[]
+  ): Promise<void> {
+    await this.requireSellerDraft(
+      listingUid,
+      sellerUid
+    );
+
+    await this.repository.updateDraft(
+      listingUid,
+      {
+        ...changes,
+
+        progress: this.buildProgress(
+          nextStep,
+          completedStep,
+          [
+            ...existingCompletedSteps,
+            completedStep
+          ]
+        )
+      }
+    );
+  }
 
   private async requireSellerDraft(
     listingUid: string,
@@ -516,7 +644,6 @@ export class ListingService {
 
     return draft;
   }
-
 
   private buildProgress(
     currentStep: ListingDraftStep,
@@ -546,61 +673,60 @@ export class ListingService {
     };
   }
 
-
   private normalizeCompletedSteps(
     completedSteps: ListingDraftStep[]
   ): ListingDraftStep[] {
-    const workflowOrder:
-      ListingDraftStep[] = [
-        'address',
-        'property_details',
-        'property_features',
-        'photos',
-        'pricing',
-        'review'
-      ];
-
     const uniqueSteps =
       new Set(completedSteps);
 
-    return workflowOrder.filter(
+    return this.workflowOrder.filter(
       step => uniqueSteps.has(step)
     );
   }
 
-
   private calculateCompletionPercent(
     completedSteps: ListingDraftStep[]
   ): number {
-    const totalSteps = 6;
-
     return Math.round(
       (
         completedSteps.length /
-        totalSteps
+        this.workflowOrder.length
       ) * 100
     );
   }
 
-
   private validateCompleteDraft(
     draft: ListingDraft
   ): void {
-    if (!draft.address) {
-      throw new Error(
-        'The listing address is incomplete.'
-      );
-    }
+    const requiredSections: Array<{
+      value: unknown;
+      message: string;
+    }> = [
+      {
+        value: draft.address,
+        message:
+          'The listing address is incomplete.'
+      },
+      {
+        value: draft.propertyDetails,
+        message:
+          'The property details are incomplete.'
+      },
+           {
+        value: draft.features,
+        message:
+          'The property features are incomplete.'
+      }
+    ];
 
-    if (!draft.propertyDetails) {
-      throw new Error(
-        'The property details are incomplete.'
+    const missingSection =
+      requiredSections.find(
+        section => !section.value
       );
-    }
 
-    if (!draft.features) {
+    if (missingSection) {
       throw new Error(
-        'The property features are incomplete.'
+        missingSection.message
       );
     }
 

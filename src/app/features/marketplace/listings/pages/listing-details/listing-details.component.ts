@@ -84,7 +84,7 @@ interface ListingDetailsViewModel {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListingDetailsComponent
-  implements OnInit {
+implements OnInit {
 
   private readonly route =
     inject(ActivatedRoute);
@@ -112,48 +112,48 @@ export class ListingDetailsComponent
 
   readonly viewModel$:
     Observable<ListingDetailsViewModel> =
-    this.route.paramMap.pipe(
-      map(
-        params =>
-          params.get('listingId') ?? ''
-      ),
+      this.route.paramMap.pipe(
+        map(
+          params =>
+            params.get('listingId') ?? ''
+        ),
 
-      switchMap(
-        listingId =>
-          this.listingRepository
-            .getListingById(listingId)
-            .pipe(
-              map(
-                listing => ({
-                  listing,
+        switchMap(
+          listingId =>
+            this.listingRepository
+              .getListingById(listingId)
+              .pipe(
+                map(
+                  listing => ({
+                    listing,
 
-                  facts:
-                    listing
-                      ? this.createListingFacts(
-                        listing
-                      )
-                      : [],
+                    facts:
+                      listing
+                        ? this.createListingFacts(
+                            listing
+                          )
+                        : [],
 
-                  hasError: false
-                })
-              ),
-
-              catchError(
-                () =>
-                  of({
-                    listing: null,
-                    facts: [],
-                    hasError: true
+                    hasError: false
                   })
-              )
-            )
-      ),
+                ),
 
-      shareReplay({
-        bufferSize: 1,
-        refCount: true
-      })
-    );
+                catchError(
+                  () =>
+                    of({
+                      listing: null,
+                      facts: [],
+                      hasError: true
+                    })
+                )
+              )
+        ),
+
+        shareReplay({
+          bufferSize: 1,
+          refCount: true
+        })
+      );
 
   async ngOnInit(): Promise<void> {
     const userUid =
@@ -228,7 +228,6 @@ export class ListingDetailsComponent
   async toggleSavedListing(
     listing: MarketplaceListing
   ): Promise<void> {
-
     if (this.isSaving()) {
       return;
     }
@@ -301,7 +300,6 @@ export class ListingDetailsComponent
     userUid: string,
     listing: MarketplaceListing
   ): Promise<void> {
-
     await this.savedListingService
       .saveListing(
         userUid,
@@ -314,20 +312,21 @@ export class ListingDetailsComponent
   private createListingFacts(
     listing: MarketplaceListing
   ): ListingFact[] {
-
     const facts: ListingFact[] = [];
 
     if (listing.bedrooms !== undefined) {
       facts.push({
         label: 'Bedrooms',
-        value: listing.bedrooms.toString()
+        value:
+          listing.bedrooms.toString()
       });
     }
 
     if (listing.bathrooms !== undefined) {
       facts.push({
         label: 'Bathrooms',
-        value: listing.bathrooms.toString()
+        value:
+          listing.bathrooms.toString()
       });
     }
 
@@ -355,6 +354,32 @@ export class ListingDetailsComponent
       });
     }
 
+    if (listing.hoa) {
+      facts.push({
+        label: 'HOA',
+        value:
+          listing.hoa.hasHoa
+            ? 'Yes'
+            : 'No'
+      });
+
+      if (
+        listing.hoa.hasHoa &&
+        listing.hoa.feeAmount !== undefined &&
+        listing.hoa.feeFrequency
+      ) {
+        facts.push({
+          label: 'HOA fee',
+          value:
+            `${this.formatCurrency(
+              listing.hoa.feeAmount
+            )} ${this.formatHoaFrequency(
+              listing.hoa.feeFrequency
+            )}`
+        });
+      }
+    }
+
     facts.push({
       label: 'Property type',
       value:
@@ -366,11 +391,45 @@ export class ListingDetailsComponent
     return facts;
   }
 
+  private formatCurrency(
+    amount: number
+  ): string {
+    return new Intl.NumberFormat(
+      'en-US',
+      {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }
+    ).format(amount);
+  }
+
+  private formatHoaFrequency(
+    frequency: string
+  ): string {
+    switch (frequency) {
+      case 'monthly':
+        return 'monthly';
+
+      case 'quarterly':
+        return 'quarterly';
+
+      case 'semi_annually':
+        return 'semi-annually';
+
+      case 'annually':
+        return 'annually';
+
+      default:
+        return frequency;
+    }
+  }
+
   private formatPropertyType(
     propertyType:
       MarketplaceListing['propertyType']
   ): string {
-
     switch (propertyType) {
       case 'single_family':
         return 'Single-family home';

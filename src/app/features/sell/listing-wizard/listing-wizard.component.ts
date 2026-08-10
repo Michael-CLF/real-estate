@@ -26,7 +26,8 @@ import {
 
 import {
   ListingDraftStep,
-  ListingFeatures
+  ListingFeatures,
+  ListingHoa
 } from '../../../core/domains/listings/models/listing.model';
 
 import {
@@ -44,6 +45,7 @@ import {
 } from './components/property-details-step/property-details-step.component';
 
 import {
+  PropertyFeaturesFormValue,
   PropertyFeaturesStepComponent,
   PropertyFeaturesStepValue
 } from './components/property-features-step/property-features-step.component';
@@ -353,7 +355,11 @@ export class ListingWizardComponent
           draft.propertyDetails.bedrooms,
 
         bathrooms:
-          draft.propertyDetails.bathrooms,
+          draft.propertyDetails.fullBathrooms +
+          (
+            draft.propertyDetails.halfBathrooms *
+            0.5
+          ),
 
         squareFeet:
           draft.propertyDetails.squareFeet,
@@ -367,7 +373,26 @@ export class ListingWizardComponent
 
         description:
           draft.propertyDetails.description ??
-          ''
+          '',
+
+        hoa: draft.hoa
+          ? {
+            hasHoa:
+              draft.hoa.hasHoa,
+
+            feeAmount:
+              draft.hoa.feeAmount ??
+              null,
+
+            feeFrequency:
+              draft.hoa.feeFrequency ??
+              ''
+          }
+          : {
+            hasHoa: null,
+            feeAmount: null,
+            feeFrequency: ''
+          }
       });
 
       this.setStepValidity(
@@ -378,9 +403,14 @@ export class ListingWizardComponent
 
 
     if (draft.features) {
+      const restoredFeatures =
+        this.toPropertyFeaturesFormValue(
+          draft.features as ListingFeatures
+        );
+
       const hasSelectedFeatures =
         Object.values(
-          draft.features
+          restoredFeatures
         ).some(
           selected => selected === true
         );
@@ -391,9 +421,8 @@ export class ListingWizardComponent
             ? 'add'
             : 'skip',
 
-        features: {
-          ...draft.features
-        }
+        features:
+          restoredFeatures
       });
 
       this.setStepValidity(
@@ -761,7 +790,7 @@ export class ListingWizardComponent
   protected isCurrentStepValid(): boolean {
     return (
       this.stepValidity()[
-      this.currentStep()
+        this.currentStep()
       ] ?? false
     );
   }
@@ -898,6 +927,49 @@ export class ListingWizardComponent
           );
         }
 
+        const hoa =
+          propertyDetails.hoa;
+
+        if (
+          hoa?.hasHoa === null ||
+          hoa?.hasHoa === undefined
+        ) {
+          throw new Error(
+            'Please indicate whether the property has an HOA.'
+          );
+        }
+
+        if (
+          hoa.hasHoa &&
+          (
+            hoa.feeAmount === null ||
+            !hoa.feeFrequency
+          )
+        ) {
+          throw new Error(
+            'Please complete the required HOA information.'
+          );
+        }
+
+        const hoaDetails: ListingHoa = {
+          hasHoa: hoa.hasHoa,
+          includedItems: [],
+
+          ...(hoa.hasHoa &&
+          hoa.feeAmount !== null
+            ? {
+              feeAmount: hoa.feeAmount
+            }
+            : {}),
+
+          ...(hoa.hasHoa &&
+          hoa.feeFrequency
+            ? {
+              feeFrequency: hoa.feeFrequency
+            }
+            : {})
+        };
+
         await this.listingService
           .savePropertyDetailsStep(
             listingUid,
@@ -909,8 +981,15 @@ export class ListingWizardComponent
               bedrooms:
                 propertyDetails.bedrooms,
 
-              bathrooms:
-                propertyDetails.bathrooms,
+              fullBathrooms:
+                Math.floor(
+                  propertyDetails.bathrooms
+                ),
+
+              halfBathrooms:
+                propertyDetails.bathrooms % 1 === 0
+                  ? 0
+                  : 1,
 
               squareFeet:
                 propertyDetails.squareFeet,
@@ -925,6 +1004,7 @@ export class ListingWizardComponent
               description:
                 propertyDetails.description
             },
+            hoaDetails,
             this.completedSteps()
           );
 
@@ -942,7 +1022,7 @@ export class ListingWizardComponent
         if (
           !propertyFeatures ||
           propertyFeatures.mode ===
-          'unselected'
+            'unselected'
         ) {
           throw new Error(
             'Please complete the property features step.'
@@ -952,7 +1032,10 @@ export class ListingWizardComponent
         const features: ListingFeatures =
           propertyFeatures.mode === 'skip'
             ? this.emptyFeatures()
-            : propertyFeatures.features;
+            : this.toListingFeatures(
+              propertyFeatures.features as
+                PropertyFeaturesFormValue
+            );
 
         await this.listingService
           .saveFeaturesStep(
@@ -1092,8 +1175,7 @@ export class ListingWizardComponent
         .completeListingContent(
           listingUid,
           user.uid,
-          true,
-          this.completedSteps()
+          true
         );
 
       this.addCompletedStep(
@@ -1133,23 +1215,23 @@ export class ListingWizardComponent
         return;
       }
 
-     if (
-  verification.status ===
-  'processing'
-) {
-  await this.router.navigate(
-    [
-      '/sell/listings',
-      listingUid,
-      'verification-return'
-    ],
-    {
-      replaceUrl: true
-    }
-  );
+      if (
+        verification.status ===
+        'processing'
+      ) {
+        await this.router.navigate(
+          [
+            '/sell/listings',
+            listingUid,
+            'verification-return'
+          ],
+          {
+            replaceUrl: true
+          }
+        );
 
-  return;
-}
+        return;
+      }
 
       throw new Error(
         'Stripe did not provide a verification link. Please try again.'
@@ -1216,48 +1298,178 @@ export class ListingWizardComponent
   }
 
 
-  private emptyFeatures(): ListingFeatures {
+  private toPropertyFeaturesFormValue(
+    features: ListingFeatures
+  ): PropertyFeaturesFormValue {
+    return {
+      kitchenIsland: features.kitchenIsland,
+      pantry: features.pantry,
+      stoneCountertops: features.stoneCountertops,
+      stainlessAppliances: features.stainlessAppliances,
+      gasRange: features.gasRange,
+      doubleOven: features.doubleOven,
+      fireplace: features.fireplace,
+      hardwoodFloors: features.hardwoodFloors,
+      vaultedCeilings: features.vaultedCeilings,
+      homeOffice: features.homeOffice,
+      bonusRoom: features.bonusRoom,
+      basement: features.finishedBasement,
+      walkInCloset: features.walkInCloset,
+      ensuiteBath: features.ensuiteBath,
+      doubleVanity: features.doubleVanity,
+      soakingTub: features.soakingTub,
+      separateShower: features.separateTubAndShower,
+      deck: features.deck,
+      patio: features.patio,
+      porch: features.porch,
+      fencedYard: features.fencedYard,
+      pool: features.pool,
+      outdoorKitchen: features.outdoorKitchen,
+      attachedGarage: features.attachedGarage,
+      detachedGarage: features.detachedGarage,
+      carport: features.carport,
+      evCharging: features.evChargingStatus !== 'none',
+      centralHvac: features.centralHvac,
+      heatPump: features.heatPump,
+      gasHeat: features.gasHeat,
+      centralAir: features.centralAir,
+      solarPanels: features.solarPanels,
+      generator: features.generator,
+      smartThermostat: features.smartThermostat
+    };
+  }
+
+
+  private toListingFeatures(
+    features: PropertyFeaturesFormValue
+  ): ListingFeatures {
+    return {
+      ...this.emptyListingFeatures(),
+      kitchenIsland: features.kitchenIsland,
+      pantry: features.pantry,
+      stoneCountertops: features.stoneCountertops,
+      stainlessAppliances: features.stainlessAppliances,
+      gasRange: features.gasRange,
+      doubleOven: features.doubleOven,
+      fireplace: features.fireplace,
+      hardwoodFloors: features.hardwoodFloors,
+      vaultedCeilings: features.vaultedCeilings,
+      homeOffice: features.homeOffice,
+      bonusRoom: features.bonusRoom,
+      finishedBasement: features.basement,
+      walkInCloset: features.walkInCloset,
+      ensuiteBath: features.ensuiteBath,
+      doubleVanity: features.doubleVanity,
+      soakingTub: features.soakingTub,
+      separateTubAndShower: features.separateShower,
+      deck: features.deck,
+      patio: features.patio,
+      porch: features.porch,
+      fencedYard: features.fencedYard,
+      pool: features.pool,
+      outdoorKitchen: features.outdoorKitchen,
+      attachedGarage: features.attachedGarage,
+      detachedGarage: features.detachedGarage,
+      carport: features.carport,
+      evChargingStatus: features.evCharging
+        ? 'installed'
+        : 'none',
+      centralHvac: features.centralHvac,
+      heatPump: features.heatPump,
+      gasHeat: features.gasHeat,
+      centralAir: features.centralAir,
+      solarPanels: features.solarPanels,
+      generator: features.generator,
+      smartThermostat: features.smartThermostat
+    };
+  }
+
+
+  private emptyListingFeatures(): ListingFeatures {
     return {
       kitchenIsland: false,
       pantry: false,
       stoneCountertops: false,
+      softCloseCabinetry: false,
       stainlessAppliances: false,
       gasRange: false,
       doubleOven: false,
-
+      butlersPantry: false,
       fireplace: false,
       hardwoodFloors: false,
       vaultedCeilings: false,
       homeOffice: false,
       bonusRoom: false,
-      basement: false,
-
+      finishedBasement: false,
+      mudroom: false,
+      homeGym: false,
       walkInCloset: false,
+      customClosets: false,
+      builtInShelving: false,
+      crownMolding: false,
+      wetBar: false,
+      mediaRoom: false,
+      soundproofing: false,
       ensuiteBath: false,
       doubleVanity: false,
       soakingTub: false,
-      separateShower: false,
-
+      separateTubAndShower: false,
+      largeWalkInShower: false,
       deck: false,
       patio: false,
       porch: false,
+      balcony: false,
       fencedYard: false,
+      irrigationSystem: false,
+      matureLandscaping: false,
+      landscapeLighting: false,
       pool: false,
+      spaHotTub: false,
+      coveredOutdoorLiving: false,
+      outdoorCeilingFans: false,
+      outdoorHeaters: false,
       outdoorKitchen: false,
-
+      builtInGrill: false,
+      firePit: false,
+      outdoorFireplace: false,
+      shed: false,
+      barn: false,
+      workshop: false,
+      guestHouse: false,
+      aduReady: false,
+      greenhouse: false,
+      gardenArea: false,
       attachedGarage: false,
       detachedGarage: false,
       carport: false,
-      evCharging: false,
-
+      garageWorkshop: false,
+      rvParking: false,
+      boatParking: false,
+      evChargingStatus: 'none',
       centralHvac: false,
       heatPump: false,
       gasHeat: false,
       centralAir: false,
+      multiZoneHvac: false,
       solarPanels: false,
       generator: false,
-      smartThermostat: false
+      smartThermostat: false,
+      smartLighting: false,
+      smartLocks: false,
+      securitySystem: false,
+      securityCameras: false,
+      videoDoorbell: false,
+      hardwiredEthernet: false,
+      builtInSpeakers: false,
+      wholeHomeAirFiltration: false,
+      waterFiltrationSystem: false,
+      waterSenseFixtures: false
     };
+  }
+
+
+  private emptyFeatures(): ListingFeatures {
+    return this.emptyListingFeatures();
   }
 
 

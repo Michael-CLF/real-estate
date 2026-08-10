@@ -46,11 +46,18 @@ interface ListingDraftDocument {
     propertyDetails?: {
         propertyType?: string;
         bedrooms?: number;
-        bathrooms?: number;
+        fullBathrooms?: number;
+        halfBathrooms?: number;
         squareFeet?: number;
         lotSize?: number;
         yearBuilt?: number;
         description?: string;
+
+        hoa?: {
+            hasHoa?: boolean;
+            feeAmount?: number;
+            feeFrequency?: string;
+        };
     };
 
     features?: Record<string, boolean>;
@@ -340,7 +347,11 @@ async function publishPaidListing(
 
                 bathrooms:
                     draft.propertyDetails!
-                        .bathrooms!,
+                        .fullBathrooms! +
+                    (
+                        draft.propertyDetails!
+                            .halfBathrooms! * 0.5
+                    ),
 
                 squareFeet:
                     draft.propertyDetails!
@@ -401,6 +412,12 @@ async function publishPaidListing(
                 listingDocument,
                 'description',
                 draft.propertyDetails?.description
+            );
+
+            addOptionalField(
+                listingDocument,
+                'hoa',
+                draft.propertyDetails?.hoa
             );
 
             addOptionalField(
@@ -590,7 +607,9 @@ function validateDraftForPublication(
         !draft.propertyDetails?.propertyType ||
         draft.propertyDetails.bedrooms ===
         undefined ||
-        draft.propertyDetails.bathrooms ===
+        draft.propertyDetails.fullBathrooms ===
+        undefined ||
+        draft.propertyDetails.halfBathrooms ===
         undefined ||
         draft.propertyDetails.squareFeet ===
         undefined
