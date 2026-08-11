@@ -108,7 +108,6 @@ export class DashboardComponent implements OnInit {
   protected async manageListing(
     listing: Listing
   ): Promise<void> {
-
     if (listing.status === 'draft') {
       await this.router.navigate([
         '/sell/listings',
@@ -118,6 +117,13 @@ export class DashboardComponent implements OnInit {
 
       return;
     }
+
+    await this.router.navigate([
+      '/sell/listings',
+      listing.Uid,
+      'manage'
+    ]);
+
 
     console.log(
       'Manage active listing:',

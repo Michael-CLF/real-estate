@@ -1,0 +1,126 @@
+<section class="enhancement-page">
+  <header class="enhancement-header">
+    <div class="enhancement-header__content">
+      <p class="enhancement-header__eyebrow">
+        Enhance your listing
+      </p>
+
+      <h1>{{ listingAddress() }}</h1>
+
+      <p class="enhancement-header__description">
+        Add any details that apply to your property. Every enhancement is
+        optional, and you can leave and return at any time.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+    >
+      Return to Dashboard
+    </button>
+  </header>
+
+  <section
+    class="progress-card"
+    aria-labelledby="enhancement-progress-title"
+  >
+    <div class="progress-card__heading">
+      <div>
+        <h2 id="enhancement-progress-title">
+          Listing enhancements
+        </h2>
+
+        <p>
+          {{ addedSectionCount() }} of
+          {{ totalSectionCount() }} sections added
+        </p>
+      </div>
+
+      <span class="progress-card__percentage">
+        {{ progressPercentage() }}%
+      </span>
+    </div>
+
+    <div
+      class="progress-bar"
+      role="progressbar"
+      aria-label="Listing enhancement progress"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="progressPercentage()"
+    >
+      <div
+        class="progress-bar__fill"
+        [style.width.%]="progressPercentage()"
+      ></div>
+    </div>
+
+    <p class="progress-card__message">
+      Add more property details to help buyers understand your home and make
+      your listing eligible for more precise search results.
+    </p>
+  </section>
+
+  <div class="section-heading">
+    <div>
+      <h2>Property details and amenities</h2>
+
+      <p>
+        Choose any section below. You do not need to complete them in a
+        particular order.
+      </p>
+    </div>
+  </div>
+
+  <div class="enhancement-grid">
+    <article
+      *ngFor="
+        let section of enhancementSections();
+        trackBy: trackSection
+      "
+      class="enhancement-card"
+    >
+      <div class="enhancement-card__top">
+        <div
+          class="enhancement-card__icon"
+          aria-hidden="true"
+        >
+          <i [class]="section.icon"></i>
+        </div>
+
+        <span
+          class="status-badge"
+          [class.status-badge--in-progress]="
+            section.status === 'in-progress'
+          "
+          [class.status-badge--added]="
+            section.status === 'added'
+          "
+        >
+          {{ statusLabel(section.status) }}
+        </span>
+      </div>
+
+      <div class="enhancement-card__content">
+        <h3>{{ section.title }}</h3>
+        <p>{{ section.description }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="card-action"
+        (click)="openSection(section)"
+        [attr.aria-label]="
+          sectionActionLabel(section.status) + ': ' + section.title
+        "
+      >
+        <span>{{ sectionActionLabel(section.status) }}</span>
+        <i
+          class="fa-solid fa-arrow-right"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </article>
+  </div>
+</section>

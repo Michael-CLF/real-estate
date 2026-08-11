@@ -20,6 +20,16 @@ export type InitialPublishedListing = Omit<
   'Uid' | 'createdAt' | 'updatedAt'
 >;
 
+export type PublishedListingChanges = Partial<
+  Omit<
+    Listing,
+    | 'Uid'
+    | 'sellerUid'
+    | 'createdAt'
+    | 'updatedAt'
+  >
+>;
+
 export abstract class ListingRepository {
   /*
    * DRAFT OPERATIONS
@@ -55,6 +65,11 @@ export abstract class ListingRepository {
   abstract createPublishedListing(
     listing: InitialPublishedListing
   ): Promise<string>;
+
+  abstract updatePublishedListing(
+  listingUid: string,
+  changes: PublishedListingChanges
+): Promise<void>;
 
   abstract getPublishedListingByUid(
     listingUid: string

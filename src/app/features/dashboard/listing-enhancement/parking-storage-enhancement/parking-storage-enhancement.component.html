@@ -1,0 +1,572 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button
+      type="button"
+      class="back-button"
+      (click)="returnToEnhancements()"
+    >
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      <span>All enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div class="section-header__icon" aria-hidden="true">
+        <i class="fa-solid fa-warehouse"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Parking &amp; Storage</h1>
+
+        <p class="section-header__description">
+          Describe the property’s garage, driveway, specialty parking,
+          electric-vehicle equipment, storage areas, and workshop spaces.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="selection-summary">
+    <div class="selection-summary__content">
+      <strong>
+        {{ selectedFeatureCount() }}
+        {{ selectedFeatureCount() === 1 ? 'feature' : 'features' }}
+        selected
+      </strong>
+
+      <span>
+        Select only features that are currently available and accurately
+        describe this property.
+      </span>
+    </div>
+
+    @if (selectedFeatureCount() > 0) {
+      <button
+        type="button"
+        class="clear-button"
+        [disabled]="isSaving()"
+        (click)="clearSelections()"
+      >
+        Clear selections
+      </button>
+    }
+  </div>
+
+  <section
+    class="feature-group"
+    aria-labelledby="garage-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-warehouse"></i>
+      </div>
+
+      <div>
+        <h2 id="garage-heading">Garage Features</h2>
+
+        <p>
+          Identify the garage configuration, capacity, location, finish,
+          climate control, and other installed garage features.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of garageFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="covered-parking-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-car-side"></i>
+      </div>
+
+      <div>
+        <h2 id="covered-parking-heading">
+          Carports and Covered Parking
+        </h2>
+
+        <p>
+          Select carports, covered parking pads, porte-cochères, and covered
+          areas designed for cars, recreational vehicles, or boats.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of coveredParkingFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="driveway-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-road"></i>
+      </div>
+
+      <div>
+        <h2 id="driveway-heading">
+          Driveway and Guest Parking
+        </h2>
+
+        <p>
+          Describe driveway materials, access, gates, turnaround areas,
+          parking pads, and additional off-street parking.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of drivewayFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="specialty-parking-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-truck"></i>
+      </div>
+
+      <div>
+        <h2 id="specialty-parking-heading">
+          Specialty and Oversized-Vehicle Parking
+        </h2>
+
+        <p>
+          Identify dedicated parking for RVs, boats, trailers, motorcycles,
+          commercial vehicles, bicycles, and other specialty vehicles.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of specialtyParkingFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="ev-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-charging-station"></i>
+      </div>
+
+      <div>
+        <h2 id="ev-heading">
+          Electric-Vehicle Charging
+        </h2>
+
+        <p>
+          Select installed EV chargers, dedicated outlets, electrical wiring,
+          or solar-powered charging equipment.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of evFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="interior-storage-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-boxes-stacked"></i>
+      </div>
+
+      <div>
+        <h2 id="interior-storage-heading">
+          Interior Storage
+        </h2>
+
+        <p>
+          Highlight closets, pantries, built-ins, attic and basement storage,
+          conditioned storage, and other dedicated interior storage areas.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of interiorStorageFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="exterior-storage-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-shed"></i>
+      </div>
+
+      <div>
+        <h2 id="exterior-storage-heading">
+          Exterior Storage
+        </h2>
+
+        <p>
+          Identify sheds, detached storage buildings, equipment storage,
+          outdoor closets, and covered or secured exterior storage.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of exteriorStorageFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="workshop-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+      </div>
+
+      <div>
+        <h2 id="workshop-heading">
+          Workshop and Project Space
+        </h2>
+
+        <p>
+          Describe attached or detached workshops, utilities, workbenches,
+          tool storage, electrical service, and specialized equipment.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of workshopFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+ @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section
+    class="save-success"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="save-success__message">
+      <i
+        class="fa-solid fa-circle-check"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <h2>Parking &amp; Storage saved</h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="returnToEnhancements()"
+      >
+        Return to Enhancements
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="viewListing()"
+      >
+        View Listing
+      </button>
+    </div>
+  </section>
+} @else {
+  <footer class="section-footer">
+    <div class="save-status" aria-live="polite">
+      @if (isLoading() || isSaving()) {
+        <i
+          class="fa-solid fa-spinner fa-spin"
+          aria-hidden="true"
+        ></i>
+      } @else if (saveError()) {
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
+      }
+
+      <span>{{ saveStatusText() }}</span>
+    </div>
+
+    <div class="section-footer__actions">
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()"
+      >
+        Return to Enhancements
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()"
+      >
+        @if (isSaving()) {
+          <i
+            class="fa-solid fa-spinner fa-spin"
+            aria-hidden="true"
+          ></i>
+
+          <span>Saving...</span>
+        } @else {
+          <i
+            class="fa-solid fa-floppy-disk"
+            aria-hidden="true"
+          ></i>
+
+          <span>Save Parking &amp; Storage</span>
+        }
+      </button>
+    </div>
+  </footer>
+}
+</section>

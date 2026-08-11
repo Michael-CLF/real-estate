@@ -26,7 +26,8 @@ import {
   InitialListingDraft,
   InitialPublishedListing,
   ListingDraftChanges,
-  ListingRepository
+  ListingRepository,
+  PublishedListingChanges
 } from '../../../domains/listings/repositories/listing.repository';
 
 @Injectable({
@@ -63,6 +64,28 @@ export class FirebaseListingRepository extends ListingRepository {
 
     return documentReference.id;
   }
+
+  async updatePublishedListing(
+  listingUid: string,
+  changes: PublishedListingChanges
+): Promise<void> {
+  const listingReference = doc(
+    firestore,
+    this.publishedCollectionName,
+    listingUid
+  );
+
+  const sanitizedChanges =
+    this.removeUndefinedValues(changes);
+
+  await updateDoc(
+    listingReference,
+    {
+      ...sanitizedChanges,
+      updatedAt: serverTimestamp()
+    }
+  );
+}
 
   async updateDraft(
     listingUid: string,

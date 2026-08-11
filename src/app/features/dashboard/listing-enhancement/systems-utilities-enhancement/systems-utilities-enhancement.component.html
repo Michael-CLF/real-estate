@@ -1,0 +1,577 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button type="button" class="back-button" (click)="returnToEnhancements()">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      <span>All enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div class="section-header__icon" aria-hidden="true">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Systems &amp; Utilities</h1>
+
+        <p class="section-header__description">
+          Describe the property’s heating, cooling, electrical, plumbing,
+          water, sewer, fuel, renewable-energy, and backup utility systems.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="selection-summary">
+    <div class="selection-summary__content">
+      <strong>
+        {{ selectedFeatureCount() }}
+        {{ selectedFeatureCount() === 1 ? 'feature' : 'features' }}
+        selected
+      </strong>
+
+      <span>
+        Select only systems and utilities that are currently installed,
+        available, and accurately describe this property.
+      </span>
+    </div>
+
+    @if (selectedFeatureCount() > 0) {
+    <button type="button" class="clear-button" [disabled]="isLoading() || isSaving()" (click)="clearSelections()">
+      Clear selections
+    </button>
+    }
+  </div>
+
+  <section class="feature-group" aria-labelledby="heating-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-fire-flame-simple"></i>
+      </div>
+
+      <div>
+        <h2 id="heating-heading">Heating</h2>
+
+        <p>
+          Identify the property’s heating equipment, energy source, zoning,
+          distribution system, and indoor-humidity equipment.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of heatingFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="cooling-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-snowflake"></i>
+      </div>
+
+      <div>
+        <h2 id="cooling-heading">Cooling and Air Quality</h2>
+
+        <p>
+          Select air-conditioning, ventilation, zoning, dehumidification,
+          filtration, and indoor-air-quality systems.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of coolingFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="electrical-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+
+      <div>
+        <h2 id="electrical-heading">Electrical System</h2>
+
+        <p>
+          Describe the electrical-service capacity, panels, wiring,
+          protection equipment, dedicated circuits, and installed outlets.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of electricalFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="plumbing-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-faucet-drip"></i>
+      </div>
+
+      <div>
+        <h2 id="plumbing-heading">Plumbing and Hot Water</h2>
+
+        <p>
+          Select plumbing materials, water-control equipment, pumps,
+          drainage features, and water-heating systems.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of plumbingFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="water-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-droplet"></i>
+      </div>
+
+      <div>
+        <h2 id="water-heading">Water Supply and Treatment</h2>
+
+        <p>
+          Identify the property’s water source, well equipment, water
+          filtration, conditioning, collection, and irrigation supply.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of waterFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="sewer-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-water"></i>
+      </div>
+
+      <div>
+        <h2 id="sewer-heading">Sewer and Septic</h2>
+
+        <p>
+          Describe the sewer connection or septic-system type, pumps,
+          recent service, drain fields, and protective equipment.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of sewerFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="fuel-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-gas-pump"></i>
+      </div>
+
+      <div>
+        <h2 id="fuel-heading">Fuel Sources</h2>
+
+        <p>
+          Identify available fuel sources, storage tanks, appliance
+          connections, and all-electric or multi-fuel configurations.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of fuelFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="renewable-energy-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-solar-panel"></i>
+      </div>
+
+      <div>
+        <h2 id="renewable-energy-heading">
+          Renewable Energy and Efficiency
+        </h2>
+
+        <p>
+          Select solar, geothermal, wind, battery, net-metering, and
+          energy-monitoring equipment installed at the property.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of renewableEnergyFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="backup-systems-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-car-battery"></i>
+      </div>
+
+      <div>
+        <h2 id="backup-systems-heading">
+          Backup Power and Emergency Systems
+        </h2>
+
+        <p>
+          Identify generators, batteries, transfer equipment, emergency
+          water storage, and dedicated backup power for critical systems.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of backupSystemFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="smart-utilities-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-gauge-high"></i>
+      </div>
+
+      <div>
+        <h2 id="smart-utilities-heading">
+          Smart Utility Controls
+        </h2>
+
+        <p>
+          Select connected controls and monitoring for HVAC, electricity,
+          water, wells, septic systems, generators, and renewable energy.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of smartUtilityFeatures; track feature.id) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+ @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section
+    class="save-success"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="save-success__message">
+      <i
+        class="fa-solid fa-circle-check"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <h2>Systems &amp; Utilities saved</h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="returnToEnhancements()"
+      >
+        Return to Enhancements
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="viewListing()"
+      >
+        View Listing
+      </button>
+    </div>
+  </section>
+} @else {
+  <footer class="section-footer">
+    <div class="save-status" aria-live="polite">
+      @if (isLoading() || isSaving()) {
+        <i
+          class="fa-solid fa-spinner fa-spin"
+          aria-hidden="true"
+        ></i>
+      } @else if (saveError()) {
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
+      }
+
+      <span>{{ saveStatusText() }}</span>
+    </div>
+
+    <div class="section-footer__actions">
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()"
+      >
+        Return to Enhancements
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()"
+      >
+        @if (isSaving()) {
+          <i
+            class="fa-solid fa-spinner fa-spin"
+            aria-hidden="true"
+          ></i>
+
+          <span>Saving...</span>
+        } @else {
+          <i
+            class="fa-solid fa-floppy-disk"
+            aria-hidden="true"
+          ></i>
+
+          <span>Save Systems &amp; Utilities</span>
+        }
+      </button>
+    </div>
+  </footer>
+}
+</section>

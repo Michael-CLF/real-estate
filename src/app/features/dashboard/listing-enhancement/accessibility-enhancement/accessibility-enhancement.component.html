@@ -1,0 +1,468 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button
+      type="button"
+      class="back-button"
+      (click)="returnToEnhancements()"
+    >
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      <span>All enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div class="section-header__icon" aria-hidden="true">
+        <i class="fa-solid fa-universal-access"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Accessibility</h1>
+
+        <p class="section-header__description">
+          Identify accessibility features that support mobility, aging in place,
+          independent living, and sensory needs.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="selection-summary">
+    <div class="selection-summary__content">
+      <strong>
+        {{ selectedFeatureCount() }}
+        {{ selectedFeatureCount() === 1 ? 'feature' : 'features' }}
+        selected
+      </strong>
+
+      <span>
+        Select only features that are currently installed and accurately
+        describe this property.
+      </span>
+    </div>
+
+    @if (selectedFeatureCount() > 0) {
+      <button
+        type="button"
+        class="clear-button"
+        [disabled]="isLoading() || isSaving()"
+        (click)="clearSelections()"
+      >
+        Clear selections
+      </button>
+    }
+  </div>
+
+  <section
+    class="feature-group"
+    aria-labelledby="accessible-entrances-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-door-open"></i>
+      </div>
+
+      <div>
+        <h2 id="accessible-entrances-heading">
+          Entrances and Exterior Access
+        </h2>
+
+        <p>
+          Identify step-free entrances, ramps, wide entry doors, and accessible
+          routes into the home.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of entranceFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isLoading() || isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="interior-access-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-house-user"></i>
+      </div>
+
+      <div>
+        <h2 id="interior-access-heading">
+          Interior Access
+        </h2>
+
+        <p>
+          Describe accessible living areas, doorways, hallways, controls, and
+          flooring throughout the home.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of interiorFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isLoading() || isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="accessible-bathrooms-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-bath"></i>
+      </div>
+
+      <div>
+        <h2 id="accessible-bathrooms-heading">
+          Accessible Bathrooms
+        </h2>
+
+        <p>
+          Select bathroom features designed to improve safety, access, and
+          independent use.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of bathroomFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isLoading() || isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="accessible-kitchen-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-kitchen-set"></i>
+      </div>
+
+      <div>
+        <h2 id="accessible-kitchen-heading">
+          Accessible Kitchen
+        </h2>
+
+        <p>
+          Identify counters, appliances, storage, fixtures, and clearances
+          designed for easier access.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of kitchenFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isLoading() || isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="mobility-features-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-wheelchair-move"></i>
+      </div>
+
+      <div>
+        <h2 id="mobility-features-heading">
+          Mobility and Aging in Place
+        </h2>
+
+        <p>
+          Highlight elevators, lifts, accessible outdoor areas, and other
+          features that support mobility and long-term use.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of mobilityFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isLoading() || isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section
+    class="feature-group"
+    aria-labelledby="sensory-features-heading"
+  >
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-eye"></i>
+      </div>
+
+      <div>
+        <h2 id="sensory-features-heading">
+          Sensory and Smart-Home Features
+        </h2>
+
+        <p>
+          Select visual, audible, lighting, and smart-home features that improve
+          awareness and control.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (feature of sensoryFeatures; track feature.id) {
+        <button
+          type="button"
+          class="feature-card"
+          [class.feature-card--selected]="isSelected(feature.id)"
+          [attr.aria-pressed]="isSelected(feature.id)"
+          [disabled]="isLoading() || isSaving()"
+          (click)="toggleFeature(feature.id)"
+        >
+          <span class="feature-card__checkbox" aria-hidden="true">
+            @if (isSelected(feature.id)) {
+              <i class="fa-solid fa-check"></i>
+            }
+          </span>
+
+          <span class="feature-card__content">
+            <span class="feature-card__label">
+              {{ feature.label }}
+            </span>
+
+            @if (feature.description) {
+              <span class="feature-card__description">
+                {{ feature.description }}
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (lastSavedAt() && !hasChanges() && !saveError()) {
+    <section
+      class="save-success"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="save-success__message">
+        <i
+          class="fa-solid fa-circle-check"
+          aria-hidden="true"
+        ></i>
+
+        <div>
+          <h2>Accessibility saved</h2>
+
+          <p>
+            Your selections have been added to your listing.
+          </p>
+        </div>
+      </div>
+
+      <div class="save-success__actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="returnToEnhancements()"
+        >
+          Return to Enhancements
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="viewListing()"
+        >
+          View Listing
+        </button>
+      </div>
+    </section>
+  } @else {
+    <footer class="section-footer">
+      <div class="save-status" aria-live="polite">
+        @if (isLoading() || isSaving()) {
+          <i
+            class="fa-solid fa-spinner fa-spin"
+            aria-hidden="true"
+          ></i>
+        } @else if (saveError()) {
+          <i
+            class="fa-solid fa-circle-exclamation"
+            aria-hidden="true"
+          ></i>
+        }
+
+        <span>{{ saveStatusText() }}</span>
+      </div>
+
+      <div class="section-footer__actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="isLoading() || isSaving()"
+          (click)="returnToEnhancements()"
+        >
+          Return to Enhancements
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="isLoading() || isSaving() || !hasChanges()"
+          (click)="saveSection()"
+        >
+          @if (isSaving()) {
+            <i
+              class="fa-solid fa-spinner fa-spin"
+              aria-hidden="true"
+            ></i>
+
+            <span>Saving...</span>
+          } @else {
+            <i
+              class="fa-solid fa-floppy-disk"
+              aria-hidden="true"
+            ></i>
+
+            <span>Save Accessibility</span>
+          }
+        </button>
+      </div>
+    </footer>
+  }
+</section>

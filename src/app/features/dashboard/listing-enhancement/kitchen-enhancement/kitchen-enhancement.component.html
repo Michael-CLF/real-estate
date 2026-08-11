@@ -1,0 +1,195 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button type="button" class="back-button" (click)="returnToEnhancements()">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+      <span>Return to Enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div class="section-header__icon" aria-hidden="true">
+        <i class="fa-solid fa-kitchen-set"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Kitchen</h1>
+
+        <p class="section-header__description">
+          Select any features that apply to this property. You may add as many
+          or as few details as you want, and you can return later to make
+          changes.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="selection-summary">
+    <div>
+      <strong>
+        {{ selectedFeatureCount() }}
+        {{ selectedFeatureCount() === 1 ? 'feature' : 'features' }}
+        selected
+      </strong>
+
+      <span>
+        Only select features that are currently present in the home.
+      </span>
+    </div>
+
+    @if (selectedFeatureCount() > 0) {
+    <button type="button" class="clear-button" [disabled]="isLoading() || isSaving()" (click)="clearSelections()">
+      Clear selections
+    </button>
+    }
+  </div>
+
+  <div class="feature-grid" aria-label="Kitchen features">
+    @for (
+    feature of kitchenFeatures;
+    track feature.id
+    ) {
+    <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+      [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+      (click)="toggleFeature(feature.id)">
+      <span class="feature-card__checkbox" aria-hidden="true">
+        @if (isSelected(feature.id)) {
+        <i class="fa-solid fa-check"></i>
+        }
+      </span>
+
+      <span class="feature-card__content">
+        <span class="feature-card__label">
+          {{ feature.label }}
+        </span>
+
+        @if (feature.description) {
+        <span class="feature-card__description">
+          {{ feature.description }}
+        </span>
+        }
+      </span>
+    </button>
+    }
+  </div>
+
+  @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section class="save-success" role="status" aria-live="polite">
+    <div class="save-success__message">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      <div>
+        <h2>Kitchen saved</h2>
+        <p>Your selections have been added to your listing.</p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" (click)="viewListing()">
+        View Listing
+      </button>
+    </div>
+  </section>
+  } @else {
+
+ @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section
+    class="save-success"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="save-success__message">
+      <i
+        class="fa-solid fa-circle-check"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <h2>Kitchen saved</h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="returnToEnhancements()"
+      >
+        Return to Enhancements
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="viewListing()"
+      >
+        View Listing
+      </button>
+    </div>
+  </section>
+} @else {
+  <footer class="section-footer">
+    <div class="save-status" aria-live="polite">
+      @if (isLoading() || isSaving()) {
+        <i
+          class="fa-solid fa-spinner fa-spin"
+          aria-hidden="true"
+        ></i>
+      } @else if (saveError()) {
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
+      }
+
+      <span>{{ saveStatusText() }}</span>
+    </div>
+
+    <div class="section-footer__actions">
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()"
+      >
+        Return to Enhancements
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()"
+      >
+        @if (isSaving()) {
+          <i
+            class="fa-solid fa-spinner fa-spin"
+            aria-hidden="true"
+          ></i>
+
+          <span>Saving...</span>
+        } @else {
+          <i
+            class="fa-solid fa-floppy-disk"
+            aria-hidden="true"
+          ></i>
+
+          <span>Save Kitchen</span>
+        }
+      </button>
+    </div>
+  </footer>
+}
+  }
+</section>

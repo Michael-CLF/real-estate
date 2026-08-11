@@ -28,7 +28,6 @@ export const routes: Routes = [
             component => component.HomeComponent
           )
       },
-
       {
         path: 'about',
         loadComponent: () =>
@@ -36,7 +35,6 @@ export const routes: Routes = [
             component => component.AboutComponent
           )
       },
-
       {
         path: 'buy',
         loadComponent: () =>
@@ -44,7 +42,6 @@ export const routes: Routes = [
             component => component.BuyComponent
           )
       },
-
       {
         path: 'contact',
         loadComponent: () =>
@@ -52,7 +49,6 @@ export const routes: Routes = [
             component => component.ContactComponent
           )
       },
-
       {
         path: 'mortgage',
         loadComponent: () =>
@@ -60,7 +56,6 @@ export const routes: Routes = [
             component => component.MortgageComponent
           )
       },
-
       {
         path: 'resources',
         loadComponent: () =>
@@ -71,14 +66,6 @@ export const routes: Routes = [
 
       /*
        * Account Dashboard
-       *
-       * The user must have both:
-       * 1. A valid Firebase authentication session.
-       * 2. An active NavStreet user profile.
-       *
-       * Because this route is inside PublicLayoutComponent,
-       * the dashboard receives the standard NavStreet
-       * header and footer.
        */
       {
         path: 'dashboard',
@@ -96,8 +83,6 @@ export const routes: Routes = [
 
       /*
        * My Listings
-       *
-       * This is authenticated NavStreet account functionality.
        */
       {
         path: 'sell',
@@ -113,9 +98,6 @@ export const routes: Routes = [
 
       /*
        * Create Listing
-       *
-       * A valid NavStreet account is required before
-       * a listing can be created.
        */
       {
         path: 'sell/new',
@@ -130,6 +112,10 @@ export const routes: Routes = [
             component => component.ListingWizardComponent
           )
       },
+
+      /*
+       * Resume/Edit Draft
+       */
       {
         path: 'sell/listings/:listingUid/edit',
         canActivate: [
@@ -145,7 +131,175 @@ export const routes: Routes = [
       },
 
       /*
-       * Registration / account completion.
+       * Published Listing Management
+       */
+      {
+        path: 'sell/listings/:listingUid/manage',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-management/listing-management.component'
+          ).then(
+            component => component.ListingManagementComponent
+          )
+      },
+
+      /*
+       * Listing Enhancement Hub
+       */
+      {
+        path: 'sell/listings/:listingUid/enhancements',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/listing-enhancement/listing-enhancement.component'
+          ).then(
+            component => component.ListingEnhancementComponent
+          )
+      },
+
+      /*
+       * Individual Enhancement Sections
+       */
+      {
+        path: 'sell/listings/:listingUid/enhancements/construction',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/construction-enhancement/construction-enhancement.component'
+          ).then(
+            component => component.ConstructionEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/interior',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/interior-enhancement/interior-enhancement.component'
+          ).then(
+            component => component.LivingSpacesEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/kitchen',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/kitchen-enhancement/kitchen-enhancement.component'
+          ).then(
+            component => component.KitchenEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/bedrooms-bathrooms',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/bedrooms-bathrooms-enhancement/bedrooms-bathrooms-enhancement.component'
+          ).then(
+            component => component.BedroomsBathroomsEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/parking-storage',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/parking-storage-enhancement/parking-storage-enhancement.component'
+          ).then(
+            component => component.ParkingStorageEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/outdoor-living',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/outdoor-living-enhancement/outdoor-living-enhancement.component'
+          ).then(
+            component => component.OutdoorLivingEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/systems-utilities',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/systems-utilities-enhancement/systems-utilities-enhancement.component'
+          ).then(
+            component => component.SystemUtilitiesEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/technology-security',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/technology-security-enhancement/technology-security-enhancement.component'
+          ).then(
+            component => component.TechnologySecurityEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/accessibility',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/accessibility-enhancement/accessibility-enhancement.component'
+          ).then(
+            component => component.AccessibilityEnhancementComponent
+          )
+      },
+      {
+        path: 'sell/listings/:listingUid/enhancements/community-amenities',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/community-amenities-enhancement/community-amenities-enhancement.component'
+          ).then(
+            component => component.CommunityAmenitiesEnhancementComponent
+          )
+      },
+
+      /*
+       * Registration
        */
       {
         path: 'register',
@@ -161,7 +315,7 @@ export const routes: Routes = [
       },
 
       /*
-       * Sign-in.
+       * Sign In
        */
       {
         path: 'sign-in',
@@ -177,7 +331,7 @@ export const routes: Routes = [
       },
 
       /*
-       * Marketplace browsing remains public.
+       * Marketplace
        */
       {
         path: 'homes',
@@ -188,7 +342,6 @@ export const routes: Routes = [
             routes => routes.MARKETPLACE_ROUTES
           )
       },
-
       {
         path: 'listings/:listingId',
         loadComponent: () =>
@@ -198,7 +351,6 @@ export const routes: Routes = [
             component => component.ListingDetailsComponent
           )
       },
-
       {
         path: 'states/:stateSlug',
         loadComponent: () =>
@@ -210,13 +362,14 @@ export const routes: Routes = [
       }
     ]
   },
+
   {
     path: 'sell/listings/:listingUid/verification-return',
     loadComponent: () =>
       import(
         './features/sell/verification-return/verification-return.component'
-      ).then(component =>
-        component.VerificationReturnComponent
+      ).then(
+        component => component.VerificationReturnComponent
       )
   },
   {
@@ -224,8 +377,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import(
         './features/sell/payment/payment.component'
-      ).then(component =>
-        component.PaymentComponent
+      ).then(
+        component => component.PaymentComponent
       )
   },
   {
@@ -233,8 +386,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import(
         './features/sell/payment-return/payment-return.component'
-      ).then(component =>
-        component.PaymentReturnComponent
+      ).then(
+        component => component.PaymentReturnComponent
       )
   },
   {

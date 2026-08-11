@@ -1,0 +1,386 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button type="button" class="back-button" (click)="returnToEnhancements()">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+      <span>Return to Enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div class="section-header__icon" aria-hidden="true">
+        <i class="fa-solid fa-people-roof"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Community Amenities</h1>
+
+        <p class="section-header__description">
+          Highlight the recreational facilities, outdoor spaces,
+          neighborhood features, water access, and services
+          available to residents.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="selection-summary">
+    <div class="selection-summary__content">
+      <strong>
+        {{ selectedAmenityCount() }}
+        {{
+        selectedAmenityCount() === 1
+        ? 'amenity'
+        : 'amenities'
+        }}
+        selected
+      </strong>
+
+      <span>
+        Select only amenities available to residents of this
+        community.
+      </span>
+    </div>
+
+    @if (selectedAmenityCount() > 0) {
+    <button type="button" class="clear-button" [disabled]="isLoading() || isSaving()" (click)="clearSelections()">
+      Clear selections
+    </button>
+    }
+  </div>
+
+  <section class="amenity-group" aria-labelledby="recreation-amenities-heading">
+    <div class="amenity-group__heading">
+      <div class="amenity-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-dumbbell"></i>
+      </div>
+
+      <div>
+        <h2 id="recreation-amenities-heading">
+          Recreation
+        </h2>
+
+        <p>
+          Pools, fitness facilities, courts, gathering spaces,
+          and other recreational amenities.
+        </p>
+      </div>
+    </div>
+
+    <div class="amenity-grid">
+      @for (
+      amenity of recreationAmenities;
+      track amenity.id
+      ) {
+      <button type="button" class="amenity-card" [class.amenity-card--selected]="isSelected(amenity.id)"
+        [attr.aria-pressed]="isSelected(amenity.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleAmenity(amenity.id)">
+        <span class="amenity-card__checkbox" aria-hidden="true">
+          @if (isSelected(amenity.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="amenity-card__content">
+          <span class="amenity-card__label">
+            {{ amenity.label }}
+          </span>
+
+          @if (amenity.description) {
+          <span class="amenity-card__description">
+            {{ amenity.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="amenity-group" aria-labelledby="outdoor-amenities-heading">
+    <div class="amenity-group__heading">
+      <div class="amenity-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-tree"></i>
+      </div>
+
+      <div>
+        <h2 id="outdoor-amenities-heading">
+          Outdoor Amenities
+        </h2>
+
+        <p>
+          Trails, parks, green spaces, sports areas, and other
+          shared outdoor features.
+        </p>
+      </div>
+    </div>
+
+    <div class="amenity-grid">
+      @for (
+      amenity of outdoorAmenities;
+      track amenity.id
+      ) {
+      <button type="button" class="amenity-card" [class.amenity-card--selected]="isSelected(amenity.id)"
+        [attr.aria-pressed]="isSelected(amenity.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleAmenity(amenity.id)">
+        <span class="amenity-card__checkbox" aria-hidden="true">
+          @if (isSelected(amenity.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="amenity-card__content">
+          <span class="amenity-card__label">
+            {{ amenity.label }}
+          </span>
+
+          @if (amenity.description) {
+          <span class="amenity-card__description">
+            {{ amenity.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="amenity-group" aria-labelledby="neighborhood-amenities-heading">
+    <div class="amenity-group__heading">
+      <div class="amenity-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-house-flag"></i>
+      </div>
+
+      <div>
+        <h2 id="neighborhood-amenities-heading">
+          Neighborhood Features
+        </h2>
+
+        <p>
+          Entrance, security, streetscape, and shared
+          neighborhood features.
+        </p>
+      </div>
+    </div>
+
+    <div class="amenity-grid">
+      @for (
+      amenity of neighborhoodAmenities;
+      track amenity.id
+      ) {
+      <button type="button" class="amenity-card" [class.amenity-card--selected]="isSelected(amenity.id)"
+        [attr.aria-pressed]="isSelected(amenity.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleAmenity(amenity.id)">
+        <span class="amenity-card__checkbox" aria-hidden="true">
+          @if (isSelected(amenity.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="amenity-card__content">
+          <span class="amenity-card__label">
+            {{ amenity.label }}
+          </span>
+
+          @if (amenity.description) {
+          <span class="amenity-card__description">
+            {{ amenity.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="amenity-group" aria-labelledby="water-amenities-heading">
+    <div class="amenity-group__heading">
+      <div class="amenity-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-water"></i>
+      </div>
+
+      <div>
+        <h2 id="water-amenities-heading">
+          Water Access
+        </h2>
+
+        <p>
+          Community access to lakes, beaches, rivers, docks,
+          ramps, marinas, and boat storage.
+        </p>
+      </div>
+    </div>
+
+    <div class="amenity-grid">
+      @for (
+      amenity of waterAmenities;
+      track amenity.id
+      ) {
+      <button type="button" class="amenity-card" [class.amenity-card--selected]="isSelected(amenity.id)"
+        [attr.aria-pressed]="isSelected(amenity.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleAmenity(amenity.id)">
+        <span class="amenity-card__checkbox" aria-hidden="true">
+          @if (isSelected(amenity.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="amenity-card__content">
+          <span class="amenity-card__label">
+            {{ amenity.label }}
+          </span>
+
+          @if (amenity.description) {
+          <span class="amenity-card__description">
+            {{ amenity.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="amenity-group" aria-labelledby="community-services-heading">
+    <div class="amenity-group__heading">
+      <div class="amenity-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-handshake-angle"></i>
+      </div>
+
+      <div>
+        <h2 id="community-services-heading">
+          Community Services
+        </h2>
+
+        <p>
+          Maintenance, security, management, and other services
+          provided by the community.
+        </p>
+      </div>
+    </div>
+
+    <div class="amenity-grid">
+      @for (
+      amenity of communityServices;
+      track amenity.id
+      ) {
+      <button type="button" class="amenity-card" [class.amenity-card--selected]="isSelected(amenity.id)"
+        [attr.aria-pressed]="isSelected(amenity.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleAmenity(amenity.id)">
+        <span class="amenity-card__checkbox" aria-hidden="true">
+          @if (isSelected(amenity.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="amenity-card__content">
+          <span class="amenity-card__label">
+            {{ amenity.label }}
+          </span>
+
+          @if (amenity.description) {
+          <span class="amenity-card__description">
+            {{ amenity.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  @if (
+  lastSavedAt() &&
+  !hasChanges() &&
+  !saveError()
+  ) {
+  <section class="save-success" aria-live="polite" aria-labelledby="community-amenities-saved-heading">
+    <div class="save-success__content">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      <div>
+        <h2 id="community-amenities-saved-heading">
+          Community Amenities saved
+        </h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" (click)="viewListing()">
+        View Listing
+      </button>
+    </div>
+  </section>
+  } @else {
+
+
+  @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section class="save-success" role="status" aria-live="polite">
+    <div class="save-success__message">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      <div>
+        <h2>Community Amenities saved</h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" (click)="viewListing()">
+        View Listing
+      </button>
+    </div>
+  </section>
+  } @else {
+  <footer class="section-footer">
+    <div class="save-status" aria-live="polite">
+      @if (isLoading() || isSaving()) {
+      <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+      } @else if (saveError()) {
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+      }
+
+      <span>{{ saveStatusText() }}</span>
+    </div>
+
+    <div class="section-footer__actions">
+      <button type="button" class="secondary-button" [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()">
+        @if (isSaving()) {
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+        <span>Saving...</span>
+        } @else {
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+
+        <span>Save Community Amenities</span>
+        }
+      </button>
+    </div>
+  </footer>
+  }
+  }
+</section>

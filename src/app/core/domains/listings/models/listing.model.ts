@@ -37,6 +37,7 @@ export interface Listing {
   accessibility?: ListingAccessibility;
   schools?: ListingSchools;
   parcelAndTaxes?: ListingParcelAndTaxes;
+  enhancements?: ListingEnhancements;
 
   // Features and amenities
   features: ListingFeatures;
@@ -505,6 +506,19 @@ export interface ListingWorkflow {
   published: boolean;
 }
 
+export interface ListingEnhancements {
+  construction?: string[];
+  interior?: string[];
+  kitchen?: string[];
+  bedroomsBathrooms?: string[];
+  parkingStorage?: string[];
+  outdoorLiving?: string[];
+  systemsUtilities?: string[];
+  technologySecurity?: string[];
+  accessibility?: string[];
+  communityAmenities?: string[];
+}
+
 /*
  * A listing draft remains in the listingDrafts collection until
  * identity verification, payment, and publication requirements
@@ -530,6 +544,7 @@ export interface ListingDraft {
   accessibility?: ListingAccessibility;
   schools?: ListingSchools;
   parcelAndTaxes?: ListingParcelAndTaxes;
+  enhancements?: ListingEnhancements;
 
   features?: ListingFeatures;
   photos?: ListingPhotoReference[];
@@ -597,8 +612,8 @@ export interface ListingDraftProgress {
   completionPercent: number;
 
   contentStatus:
-    | 'in_progress'
-    | 'complete';
+  | 'in_progress'
+  | 'complete';
 }
 
 export interface ListingPublicationWorkflow {

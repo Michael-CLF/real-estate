@@ -29,7 +29,8 @@ import {
 
 import {
   ListingDraftChanges,
-  ListingRepository
+  ListingRepository,
+  PublishedListingChanges
 } from '../repositories/listing.repository';
 
 export type SaveAddressStepInput =
@@ -182,34 +183,34 @@ export class ListingService {
   }
 
   async savePropertyDetailsStep(
-  listingUid: string,
-  sellerUid: string,
-  propertyDetails:
-    SavePropertyDetailsStepInput,
-  hoa: ListingHoa,
-  existingCompletedSteps:
-    ListingDraftStep[] = []
-): Promise<void> {
-  await this.saveSection(
-    listingUid,
-    sellerUid,
-    {
-      propertyDetails: {
-        ...propertyDetails,
+    listingUid: string,
+    sellerUid: string,
+    propertyDetails:
+      SavePropertyDetailsStepInput,
+    hoa: ListingHoa,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      {
+        propertyDetails: {
+          ...propertyDetails,
 
-        description:
-          propertyDetails.description
-            ?.trim() ||
-          undefined
+          description:
+            propertyDetails.description
+              ?.trim() ||
+            undefined
+        },
+
+        hoa
       },
-
-      hoa
-    },
-    'property_details',
-    'property_features',
-    existingCompletedSteps
-  );
-}
+      'property_details',
+      'property_features',
+      existingCompletedSteps
+    );
+  }
 
   async saveConstructionStep(
     listingUid: string,
@@ -587,6 +588,46 @@ export class ListingService {
       );
   }
 
+  async updatePublishedListing(
+    listingUid: string,
+    sellerUid: string,
+    changes: PublishedListingChanges
+  ): Promise<void> {
+    if (!listingUid) {
+      throw new Error(
+        'A listing identifier is required.'
+      );
+    }
+
+    if (!sellerUid) {
+      throw new Error(
+        'An authenticated seller is required to update a published listing.'
+      );
+    }
+
+    const listing =
+      await this.repository.getPublishedListingByUid(
+        listingUid
+      );
+
+    if (!listing) {
+      throw new Error(
+        'The published listing could not be found.'
+      );
+    }
+
+    if (listing.sellerUid !== sellerUid) {
+      throw new Error(
+        'You do not have permission to update this listing.'
+      );
+    }
+
+    await this.repository.updatePublishedListing(
+      listingUid,
+      changes
+    );
+  }
+
   async getListing(
     listingUid: string
   ): Promise<Listing | null> {
@@ -702,22 +743,22 @@ export class ListingService {
       value: unknown;
       message: string;
     }> = [
-      {
-        value: draft.address,
-        message:
-          'The listing address is incomplete.'
-      },
-      {
-        value: draft.propertyDetails,
-        message:
-          'The property details are incomplete.'
-      },
-           {
-        value: draft.features,
-        message:
-          'The property features are incomplete.'
-      }
-    ];
+        {
+          value: draft.address,
+          message:
+            'The listing address is incomplete.'
+        },
+        {
+          value: draft.propertyDetails,
+          message:
+            'The property details are incomplete.'
+        },
+        {
+          value: draft.features,
+          message:
+            'The property features are incomplete.'
+        }
+      ];
 
     const missingSection =
       requiredSections.find(

@@ -1,0 +1,438 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button type="button" class="back-button" (click)="returnToEnhancements()">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+      <span>Return to Enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div class="section-header__icon" aria-hidden="true">
+        <i class="fa-solid fa-umbrella-beach"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Outdoor Living</h1>
+
+        <p class="section-header__description">
+          Showcase the property’s patios, decks, porches,
+          outdoor entertaining areas, pools, landscaping,
+          and recreational amenities.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="selection-summary">
+    <div class="selection-summary__content">
+      <strong>
+        {{ selectedFeatureCount() }}
+        {{
+        selectedFeatureCount() === 1
+        ? 'feature'
+        : 'features'
+        }}
+        selected
+      </strong>
+
+      <span>
+        Select only features that are currently installed
+        and accurately describe this property.
+      </span>
+    </div>
+
+    @if (selectedFeatureCount() > 0) {
+    <button type="button" class="clear-button" [disabled]="isLoading() || isSaving()" (click)="clearSelections()">
+      Clear selections
+    </button>
+    }
+  </div>
+
+  <section class="feature-group" aria-labelledby="patios-decks-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-table-cells-large"></i>
+      </div>
+
+      <div>
+        <h2 id="patios-decks-heading">
+          Patios, Decks and Terraces
+        </h2>
+
+        <p>
+          Identify the property’s finished outdoor surfaces,
+          decks, balconies, pergolas, and other exterior
+          gathering areas.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (
+      feature of patioDeckFeatures;
+      track feature.id
+      ) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="porches-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-house-chimney-window"></i>
+      </div>
+
+      <div>
+        <h2 id="porches-heading">
+          Porches and Sunrooms
+        </h2>
+
+        <p>
+          Select covered, screened, enclosed, or conditioned
+          spaces that connect the home’s interior and exterior
+          living areas.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (
+      feature of porchFeatures;
+      track feature.id
+      ) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="outdoor-entertaining-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-fire-burner"></i>
+      </div>
+
+      <div>
+        <h2 id="outdoor-entertaining-heading">
+          Outdoor Cooking and Entertaining
+        </h2>
+
+        <p>
+          Highlight outdoor kitchens, cooking equipment,
+          dining areas, fireplaces, lighting, and
+          entertainment features.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (
+      feature of entertainingFeatures;
+      track feature.id
+      ) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="pools-spas-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-person-swimming"></i>
+      </div>
+
+      <div>
+        <h2 id="pools-spas-heading">
+          Pools, Spas and Water Features
+        </h2>
+
+        <p>
+          Describe pools, spas, pool equipment, safety
+          features, and other outdoor water amenities.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (
+      feature of poolSpaFeatures;
+      track feature.id
+      ) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="landscaping-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-seedling"></i>
+      </div>
+
+      <div>
+        <h2 id="landscaping-heading">
+          Landscaping and Gardens
+        </h2>
+
+        <p>
+          Identify established landscaping, gardens,
+          irrigation, lighting, privacy plantings, and
+          sustainable landscape features.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (
+      feature of landscapingFeatures;
+      track feature.id
+      ) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  <section class="feature-group" aria-labelledby="recreation-heading">
+    <div class="feature-group__heading">
+      <div class="feature-group__icon" aria-hidden="true">
+        <i class="fa-solid fa-basketball"></i>
+      </div>
+
+      <div>
+        <h2 id="recreation-heading">
+          Recreation, Yard and Storage
+        </h2>
+
+        <p>
+          Highlight fenced areas, courts, play spaces,
+          private trails, storage, workshops, parking,
+          and waterfront access.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      @for (
+      feature of recreationFeatures;
+      track feature.id
+      ) {
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()"
+        (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
+          </span>
+
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
+          </span>
+          }
+        </span>
+      </button>
+      }
+    </div>
+  </section>
+
+  @if (
+  lastSavedAt() &&
+  !hasChanges() &&
+  !saveError()
+  ) {
+  <section class="save-success" aria-live="polite" aria-labelledby="outdoor-living-saved-heading">
+    <div class="save-success__content">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      <div>
+        <h2 id="outdoor-living-saved-heading">
+          Outdoor Living saved
+        </h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" (click)="viewListing()">
+        View Listing
+      </button>
+    </div>
+  </section>
+  } @else {
+
+  @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section class="save-success" role="status" aria-live="polite">
+    <div class="save-success__message">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      <div>
+        <h2>Outdoor Living saved</h2>
+
+        <p>
+          Your selections have been added to your listing.
+        </p>
+      </div>
+    </div>
+
+    <div class="save-success__actions">
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" (click)="viewListing()">
+        View Listing
+      </button>
+    </div>
+  </section>
+  } @else {
+  <footer class="section-footer">
+    <div class="save-status" aria-live="polite">
+      @if (isLoading() || isSaving()) {
+      <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+      } @else if (saveError()) {
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+      }
+
+      <span>{{ saveStatusText() }}</span>
+    </div>
+
+    <div class="section-footer__actions">
+      <button type="button" class="secondary-button" [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()">
+        Return to Enhancements
+      </button>
+
+      <button type="button" class="primary-button" [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()">
+        @if (isSaving()) {
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+        <span>Saving...</span>
+        } @else {
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+
+        <span>Save Outdoor Living</span>
+        }
+      </button>
+    </div>
+  </footer>
+  }
+  }
+</section>
