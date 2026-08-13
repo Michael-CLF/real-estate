@@ -1,0 +1,487 @@
+<section class="enhancement-section">
+  <header class="section-header">
+    <button
+      type="button"
+      class="back-button"
+      (click)="returnToEnhancements()"
+    >
+      <i
+        class="fa-solid fa-arrow-left"
+        aria-hidden="true"
+      ></i>
+
+      <span>Return to Enhancements</span>
+    </button>
+
+    <div class="section-header__content">
+      <div
+        class="section-header__icon"
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-school"></i>
+      </div>
+
+      <div>
+        <p class="section-header__eyebrow">
+          Optional listing enhancement
+        </p>
+
+        <h1>Nearby Schools</h1>
+
+        <p class="section-header__description">
+          Add the schools currently assigned to this
+          property. Buyers will see this information in
+          a dedicated Nearby Schools section on the
+          public listing.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <form
+    class="schools-form"
+    [formGroup]="schoolsForm"
+    (ngSubmit)="saveSection()"
+  >
+    <section class="district-card">
+      <div class="section-heading">
+        <div>
+          <p class="section-heading__eyebrow">
+            School district
+          </p>
+
+          <h2>District information</h2>
+        </div>
+
+        <span class="optional-label">
+          Optional
+        </span>
+      </div>
+
+      <label class="form-field">
+        <span>School district name</span>
+
+        <input
+          type="text"
+          formControlName="districtName"
+          autocomplete="off"
+          placeholder="Example: Wake County Public School System"
+        />
+      </label>
+    </section>
+
+    <div class="school-grid">
+      <section
+        class="school-card"
+        formGroupName="elementarySchool"
+      >
+        <div class="school-card__header">
+          <span
+            class="school-card__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-child-reaching"></i>
+          </span>
+
+          <div>
+            <p>Assigned school</p>
+            <h2>Elementary School</h2>
+          </div>
+        </div>
+
+        <div class="school-card__fields">
+          <label class="form-field form-field--wide">
+            <span>School name</span>
+
+            <input
+              type="text"
+              formControlName="name"
+              autocomplete="off"
+              placeholder="Elementary school name"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>School type</span>
+
+            <select formControlName="schoolType">
+              @for (
+                schoolType of schoolTypes;
+                track schoolType.value
+              ) {
+                <option [value]="schoolType.value">
+                  {{ schoolType.label }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Grades served</span>
+
+            <input
+              type="text"
+              formControlName="grades"
+              autocomplete="off"
+              placeholder="Example: K–5"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>Distance from property</span>
+
+            <div class="input-with-suffix">
+              <input
+                type="number"
+                formControlName="distanceMiles"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+                placeholder="0.0"
+              />
+
+              <span>miles</span>
+            </div>
+          </label>
+
+          <label class="form-field">
+            <span>District, if different</span>
+
+            <input
+              type="text"
+              formControlName="district"
+              autocomplete="off"
+              placeholder="Optional"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section
+        class="school-card"
+        formGroupName="middleSchool"
+      >
+        <div class="school-card__header">
+          <span
+            class="school-card__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-book-open"></i>
+          </span>
+
+          <div>
+            <p>Assigned school</p>
+            <h2>Middle School</h2>
+          </div>
+        </div>
+
+        <div class="school-card__fields">
+          <label class="form-field form-field--wide">
+            <span>School name</span>
+
+            <input
+              type="text"
+              formControlName="name"
+              autocomplete="off"
+              placeholder="Middle school name"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>School type</span>
+
+            <select formControlName="schoolType">
+              @for (
+                schoolType of schoolTypes;
+                track schoolType.value
+              ) {
+                <option [value]="schoolType.value">
+                  {{ schoolType.label }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Grades served</span>
+
+            <input
+              type="text"
+              formControlName="grades"
+              autocomplete="off"
+              placeholder="Example: 6–8"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>Distance from property</span>
+
+            <div class="input-with-suffix">
+              <input
+                type="number"
+                formControlName="distanceMiles"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+                placeholder="0.0"
+              />
+
+              <span>miles</span>
+            </div>
+          </label>
+
+          <label class="form-field">
+            <span>District, if different</span>
+
+            <input
+              type="text"
+              formControlName="district"
+              autocomplete="off"
+              placeholder="Optional"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section
+        class="school-card"
+        formGroupName="highSchool"
+      >
+        <div class="school-card__header">
+          <span
+            class="school-card__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-graduation-cap"></i>
+          </span>
+
+          <div>
+            <p>Assigned school</p>
+            <h2>High School</h2>
+          </div>
+        </div>
+
+        <div class="school-card__fields">
+          <label class="form-field form-field--wide">
+            <span>School name</span>
+
+            <input
+              type="text"
+              formControlName="name"
+              autocomplete="off"
+              placeholder="High school name"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>School type</span>
+
+            <select formControlName="schoolType">
+              @for (
+                schoolType of schoolTypes;
+                track schoolType.value
+              ) {
+                <option [value]="schoolType.value">
+                  {{ schoolType.label }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Grades served</span>
+
+            <input
+              type="text"
+              formControlName="grades"
+              autocomplete="off"
+              placeholder="Example: 9–12"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>Distance from property</span>
+
+            <div class="input-with-suffix">
+              <input
+                type="number"
+                formControlName="distanceMiles"
+                min="0"
+                step="0.1"
+                inputmode="decimal"
+                placeholder="0.0"
+              />
+
+              <span>miles</span>
+            </div>
+          </label>
+
+          <label class="form-field">
+            <span>District, if different</span>
+
+            <input
+              type="text"
+              formControlName="district"
+              autocomplete="off"
+              placeholder="Optional"
+            />
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <section class="verification-card">
+      <label class="verification-checkbox">
+        <input
+          type="checkbox"
+          formControlName="assignedSchoolsVerified"
+        />
+
+        <span
+          class="verification-checkbox__control"
+          aria-hidden="true"
+        >
+          <i class="fa-solid fa-check"></i>
+        </span>
+
+        <span>
+          <strong>
+            I verified these school assignments.
+          </strong>
+
+          <small>
+            I confirmed the information with the
+            applicable school district or another
+            current authoritative source.
+          </small>
+        </span>
+      </label>
+
+      <p>
+        School assignments and boundaries can change.
+        Buyers will be advised to independently verify
+        current assignments with the school district.
+      </p>
+    </section>
+
+    @if (
+      lastSavedAt() &&
+      !hasChanges() &&
+      !saveError()
+    ) {
+      <section
+        class="save-success"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="save-success__message">
+          <i
+            class="fa-solid fa-circle-check"
+            aria-hidden="true"
+          ></i>
+
+          <div>
+            <h2>Nearby Schools saved</h2>
+
+            <p>
+              The school information has been added
+              to your listing.
+            </p>
+          </div>
+        </div>
+
+        <div class="save-success__actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="returnToEnhancements()"
+          >
+            Return to Enhancements
+          </button>
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="viewListing()"
+          >
+            View Listing
+          </button>
+        </div>
+      </section>
+    } @else {
+      <footer class="section-footer">
+        <div
+          class="save-status"
+          aria-live="polite"
+        >
+          @if (
+            isLoading() ||
+            isSaving()
+          ) {
+            <i
+              class="fa-solid fa-spinner fa-spin"
+              aria-hidden="true"
+            ></i>
+          } @else if (saveError()) {
+            <i
+              class="fa-solid fa-circle-exclamation"
+              aria-hidden="true"
+            ></i>
+          }
+
+          <span>
+            @if (isLoading()) {
+              Loading saved details...
+            } @else if (isSaving()) {
+              Saving...
+            } @else if (saveError()) {
+              {{ saveError() }}
+            } @else if (hasChanges()) {
+              Unsaved changes
+            }
+          </span>
+        </div>
+
+        <div class="section-footer__actions">
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="
+              isLoading() ||
+              isSaving()
+            "
+            (click)="returnToEnhancements()"
+          >
+            Return to Enhancements
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="
+              isLoading() ||
+              isSaving() ||
+              !hasChanges()
+            "
+          >
+            @if (isSaving()) {
+              <i
+                class="fa-solid fa-spinner fa-spin"
+                aria-hidden="true"
+              ></i>
+
+              <span>Saving...</span>
+            } @else {
+              <i
+                class="fa-solid fa-floppy-disk"
+                aria-hidden="true"
+              ></i>
+
+              <span>Save Nearby Schools</span>
+            }
+          </button>
+        </div>
+      </footer>
+    }
+  </form>
+</section>

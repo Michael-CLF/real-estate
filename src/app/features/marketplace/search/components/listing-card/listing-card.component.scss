@@ -79,6 +79,15 @@
   font-weight: 600;
 }
 
+.listing-card__badges {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+
+  max-width: calc(100% - 78px);
+}
+
 .listing-card__favorite {
   position: absolute;
   top: 12px;

@@ -1,0 +1,72 @@
+:host {
+  display: block;
+}
+
+.listing-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.listing-badges__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 30px;
+  padding: 6px 11px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.listing-badges__badge--gold {
+  background: #fff3cd;
+  border-color: #e5c55b;
+  color: #725400;
+}
+
+.listing-badges__badge--teal {
+  background: #e7f8f6;
+  border-color: #7fcfc5;
+  color: #0b6259;
+}
+
+.listing-badges__badge--navy {
+  background: #eaf1f6;
+  border-color: #9db6c7;
+  color: #154360;
+}
+
+.listing-badges__badge--coral {
+  background: #fff0ed;
+  border-color: #efaa9e;
+  color: #a93226;
+}
+
+.listing-badges__badge--green {
+  background: #eaf7ee;
+  border-color: #92c9a3;
+  color: #216b38;
+}
+
+@media (max-width: 430px) {
+  .listing-badges {
+    gap: 6px;
+  }
+
+  .listing-badges__badge {
+    min-height: 28px;
+    padding: 5px 9px;
+
+    font-size: 0.7rem;
+  }
+}

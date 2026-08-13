@@ -90,13 +90,40 @@
           <span class="optional">(optional)</span>
         </label>
 
-        <div class="input-with-suffix">
-          <input id="lotSize" type="number" formControlName="lotSize" min="0" step="0.01">
-          <span>acres</span>
+        <div class="lot-size-input">
+          <input id="lotSize" type="number" formControlName="lotSize" min="0" [step]="
+        form.controls.lotSizeUnit.value === 'acres'
+          ? 0.01
+          : 1
+      ">
+
+          <select id="lotSizeUnit" formControlName="lotSizeUnit" aria-label="Lot size unit">
+            <option value="square_feet">
+              Square feet
+            </option>
+
+            <option value="acres">
+              Acres
+            </option>
+          </select>
         </div>
 
-        @if (form.controls.lotSize.touched && form.controls.lotSize.hasError('min')) {
-        <p class="field-error">Lot size cannot be negative.</p>
+        @if (
+        form.controls.lotSize.touched &&
+        form.controls.lotSize.hasError('min')
+        ) {
+        <p class="field-error">
+          Lot size cannot be negative.
+        </p>
+        }
+
+        @if (
+        form.controls.lotSizeUnit.touched &&
+        form.controls.lotSizeUnit.hasError('required')
+        ) {
+        <p class="field-error">
+          Select a lot-size unit.
+        </p>
         }
       </div>
     </div>

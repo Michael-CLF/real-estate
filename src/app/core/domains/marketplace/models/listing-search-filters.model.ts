@@ -48,8 +48,11 @@ export interface MarketplaceListingSummary {
 
   title: string;
   propertyType: PropertyType;
+  status: ListingStatus;
 
   price: number;
+  originalPrice?: number;
+  featuredListing: boolean;
 
   bedrooms?: number;
   bathrooms?: number;
@@ -62,6 +65,8 @@ export interface MarketplaceListingSummary {
   featuredPhotoUrl?: string;
 
   favoriteCount: number;
+  viewCount: number;
+  inquiryCount: number;
 
   publishedAt?: Date;
 }

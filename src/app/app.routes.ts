@@ -297,6 +297,19 @@ export const routes: Routes = [
             component => component.CommunityAmenitiesEnhancementComponent
           )
       },
+      {
+        path: 'sell/listings/:listingUid/enhancements/schools',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-enhancement/schools-enhancement/schools-enhancement.component'
+          ).then(
+            component => component.SchoolsEnhancementComponent
+          )
+      },
 
       /*
        * Registration

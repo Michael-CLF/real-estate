@@ -327,6 +327,16 @@ export class FirestoreMarketplaceListingRepository
                 data['hoa']
             );
 
+        const enhancements =
+            this.readEnhancements(
+                data['enhancements']
+            );
+
+        const schools =
+            this.readSchools(
+                data['schools']
+            );
+
         const city = this.readString(
             data['city']
         );
@@ -384,6 +394,24 @@ export class FirestoreMarketplaceListingRepository
                 data['longitude']
             ) ?? 0;
 
+        const lotSize =
+            this.readNumber(
+                data['lotSize']
+            );
+
+        const storedLotSizeUnit =
+            this.readString(
+                data['lotSizeUnit']
+            );
+
+        const lotSizeUnit:
+            NonNullable<
+                MarketplaceListing['lotSizeUnit']
+            > =
+            storedLotSizeUnit === 'square_feet'
+                ? 'square_feet'
+                : 'acres';
+
         return {
             uid:
                 this.readString(data['Uid']) ||
@@ -418,11 +446,13 @@ export class FirestoreMarketplaceListingRepository
                     data['listPrice']
                 ) ?? 0,
 
+            featuredListing:
+                data['featuredListing'] === true,
+
             bedrooms:
                 this.readNumber(
                     data['bedrooms']
                 ),
-
             bathrooms:
                 this.readNumber(
                     data['bathrooms']
@@ -433,10 +463,18 @@ export class FirestoreMarketplaceListingRepository
                     data['squareFeet']
                 ),
 
+            lotSize,
+
+            lotSizeUnit:
+                lotSize !== undefined
+                    ? lotSizeUnit
+                    : undefined,
+
             lotSizeAcres:
-                this.readNumber(
-                    data['lotSize']
-                ),
+                lotSize !== undefined &&
+                    lotSizeUnit === 'acres'
+                    ? lotSize
+                    : undefined,
 
             yearBuilt:
                 this.readNumber(
@@ -471,9 +509,13 @@ export class FirestoreMarketplaceListingRepository
                     }
                     : {
                         hasHoa: false,
-                        includedItems:[]
+                        includedItems: []
                     }
                 : undefined,
+
+            enhancements,
+
+            schools,
 
             address: {
                 addressLine1,
@@ -565,6 +607,203 @@ export class FirestoreMarketplaceListingRepository
         };
     }
 
+    private readSchools(
+        value: unknown
+    ): MarketplaceListing['schools'] {
+        const data =
+            this.readRecord(value);
+
+        if (!data) {
+            return undefined;
+        }
+
+        const readSchool = (
+            key:
+                | 'elementarySchool'
+                | 'middleSchool'
+                | 'highSchool'
+        ) => {
+            const schoolData =
+                this.readRecord(
+                    data[key]
+                );
+
+            if (!schoolData) {
+                return undefined;
+            }
+
+            const name =
+                this.readString(
+                    schoolData['name']
+                );
+
+            if (!name) {
+                return undefined;
+            }
+
+            const district =
+                this.readString(
+                    schoolData['district']
+                );
+
+            const grades =
+                this.readString(
+                    schoolData['grades']
+                );
+
+            const schoolType =
+                this.readString(
+                    schoolData['schoolType']
+                ) as NonNullable<
+                    NonNullable<
+                        MarketplaceListing['schools']
+                    >['elementarySchool']
+                >['schoolType'];
+
+            const distanceMiles =
+                this.readNumber(
+                    schoolData['distanceMiles']
+                );
+
+            return {
+                name,
+
+                schoolType:
+                    schoolType || 'public',
+
+                ...(district
+                    ? {
+                        district
+                    }
+                    : {}),
+
+                ...(grades
+                    ? {
+                        grades
+                    }
+                    : {}),
+
+                ...(distanceMiles !== undefined
+                    ? {
+                        distanceMiles
+                    }
+                    : {})
+            };
+        };
+
+        const districtName =
+            this.readString(
+                data['districtName']
+            );
+
+        const elementarySchool =
+            readSchool(
+                'elementarySchool'
+            );
+
+        const middleSchool =
+            readSchool(
+                'middleSchool'
+            );
+
+        const highSchool =
+            readSchool(
+                'highSchool'
+            );
+
+        if (
+            !districtName &&
+            !elementarySchool &&
+            !middleSchool &&
+            !highSchool
+        ) {
+            return undefined;
+        }
+
+        return {
+            ...(districtName
+                ? {
+                    districtName
+                }
+                : {}),
+
+            ...(elementarySchool
+                ? {
+                    elementarySchool
+                }
+                : {}),
+
+            ...(middleSchool
+                ? {
+                    middleSchool
+                }
+                : {}),
+
+            ...(highSchool
+                ? {
+                    highSchool
+                }
+                : {}),
+
+            assignedSchoolsVerified:
+                data['assignedSchoolsVerified'] === true
+        };
+    }
+
+    private readEnhancements(
+        value: unknown
+    ): MarketplaceListing['enhancements'] {
+        const data = this.readRecord(value);
+
+        if (!data) {
+            return undefined;
+        }
+
+        const readStringArray = (
+            key: string
+        ): string[] | undefined => {
+            const candidate = data[key];
+
+            if (!Array.isArray(candidate)) {
+                return undefined;
+            }
+
+            const values = candidate.filter(
+                (item): item is string =>
+                    typeof item === 'string' &&
+                    item.trim().length > 0
+            );
+
+            return values.length > 0
+                ? values
+                : undefined;
+        };
+
+        const enhancements = {
+            construction: readStringArray('construction'),
+            interior: readStringArray('interior'),
+            kitchen: readStringArray('kitchen'),
+            bedroomsBathrooms:
+                readStringArray('bedroomsBathrooms'),
+            parkingStorage:
+                readStringArray('parkingStorage'),
+            outdoorLiving:
+                readStringArray('outdoorLiving'),
+            systemsUtilities:
+                readStringArray('systemsUtilities'),
+            technologySecurity:
+                readStringArray('technologySecurity'),
+            accessibility:
+                readStringArray('accessibility'),
+            communityAmenities:
+                readStringArray('communityAmenities')
+        };
+
+        return Object.values(enhancements).some(Boolean)
+            ? enhancements
+            : undefined;
+    }
+
     private sortListings(
         listings: MarketplaceListing[],
         sort: ListingSearchFilters['sort']
@@ -625,8 +864,11 @@ export class FirestoreMarketplaceListingRepository
 
             title: listing.title,
             propertyType: listing.propertyType,
+            status: listing.status,
 
             price: listing.price,
+            originalPrice: listing.originalPrice,
+            featuredListing: listing.featuredListing,
 
             bedrooms: listing.bedrooms,
             bathrooms: listing.bathrooms,
@@ -646,11 +888,16 @@ export class FirestoreMarketplaceListingRepository
             favoriteCount:
                 listing.favoriteCount,
 
+            viewCount:
+                listing.viewCount,
+
+            inquiryCount:
+                listing.inquiryCount,
+
             publishedAt:
                 listing.publishedAt
         };
     }
-
     private isFeaturedListing(
         listing: MarketplaceListing
     ): boolean {

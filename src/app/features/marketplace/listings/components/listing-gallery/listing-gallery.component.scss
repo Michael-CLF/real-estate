@@ -85,6 +85,19 @@
   right: 16px;
 }
 
+.listing-gallery__badges {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+
+  max-width: calc(100% - 32px);
+
+  ::ng-deep .listing-badges {
+    justify-content: flex-start;
+  }
+}
+
 .listing-gallery__counter {
   position: absolute;
   right: 16px;
@@ -190,6 +203,13 @@
   .listing-gallery__navigation--next {
     right: 10px;
   }
+
+.listing-gallery__badges {
+  top: 10px;
+  left: 10px;
+
+  max-width: calc(100% - 20px);
+}
 
   .listing-gallery__counter {
     right: 10px;

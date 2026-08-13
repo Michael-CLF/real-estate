@@ -1,0 +1,22 @@
+@if (visibleBadges().length > 0) {
+  <div
+    class="listing-badges"
+    aria-label="Listing highlights"
+  >
+    @for (
+      badge of visibleBadges();
+      track badge.type
+    ) {
+      <span
+        class="listing-badges__badge"
+        [class]="
+          'listing-badges__badge ' +
+          'listing-badges__badge--' +
+          badge.tone
+        "
+      >
+        {{ badge.label }}
+      </span>
+    }
+  </div>
+}

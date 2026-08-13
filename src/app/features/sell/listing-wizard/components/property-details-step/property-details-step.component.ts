@@ -10,6 +10,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import {
   ListingHoaFeeFrequency,
+  LotSizeUnit,
   PropertyType
 } from '../../../../../core/domains/listings/models/listing.model';
 
@@ -25,6 +26,7 @@ export interface PropertyDetailsFormValue {
   squareFeet: number | null;
   yearBuilt: number | null;
   lotSize: number | null;
+  lotSizeUnit: LotSizeUnit;
   description: string;
   hoa?: PropertyDetailsHoaFormValue;
 }
@@ -120,6 +122,10 @@ export class PropertyDetailsStepComponent {
     lotSize: [
       null as number | null,
       Validators.min(0)
+    ],
+    lotSizeUnit: [
+      'square_feet' as LotSizeUnit,
+      Validators.required
     ],
     description: [
       '',

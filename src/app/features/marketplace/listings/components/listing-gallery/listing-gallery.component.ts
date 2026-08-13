@@ -10,9 +10,18 @@ import {
   ListingPhoto
 } from '../../../../../core/domains/listings/models/listing-photo.model';
 
+import {
+  ListingBadge
+} from '../../../../../core/domains/listings/models/listing-badge.model';
+
+import {
+  ListingBadgesComponent
+} from '../listing-badges/listing-badges.component';
+
 @Component({
   selector: 'app-listing-gallery',
   standalone: true,
+  imports: [ListingBadgesComponent],
   templateUrl: './listing-gallery.component.html',
   styleUrl: './listing-gallery.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,6 +29,9 @@ import {
 export class ListingGalleryComponent {
   readonly photos =
     input.required<readonly ListingPhoto[]>();
+
+  readonly badges =
+    input<readonly ListingBadge[]>([]);
 
   readonly fallbackImageUrl =
     input<string | undefined>();

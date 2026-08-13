@@ -612,8 +612,8 @@ export interface ListingDraftProgress {
   completionPercent: number;
 
   contentStatus:
-  | 'in_progress'
-  | 'complete';
+    | 'in_progress'
+    | 'complete';
 }
 
 export interface ListingPublicationWorkflow {

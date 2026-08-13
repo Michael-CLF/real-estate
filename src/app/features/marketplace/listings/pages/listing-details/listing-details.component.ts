@@ -49,19 +49,85 @@ import {
 } from '../../../../../core/domains/marketplace/services/saved-listing.service';
 
 import {
+  ListingEnhancements,
+  ListingSchool,
+  ListingSchools
+} from '../../../../../core/domains/listings/models/listing.model';
+
+import {
   ListingGalleryComponent
 } from '../../components/listing-gallery/listing-gallery.component';
+
+import {
+  ListingMortgageCalculatorComponent
+} from '../../components/listing-mortgage-calculator/listing-mortgage-calculator.component';
+
+import {
+  ListingBadge
+} from '../../../../../core/domains/listings/models/listing-badge.model';
+
+import {
+  ListingBadgeService
+} from '../../../../../core/domains/listings/services/listing-badge.service';
+
 
 interface ListingFact {
   label: string;
   value: string;
+  icon: string;
+}
+
+interface EnhancementGroup {
+  id: keyof ListingEnhancements;
+  title: string;
+  icon: string;
+  features: string[];
+}
+
+interface NearbySchoolCard {
+  id:
+  | 'elementary'
+  | 'middle'
+  | 'high';
+
+  level: string;
+  icon: string;
+  name: string;
+  schoolType: string;
+  grades?: string;
+  distance?: string;
+  district?: string;
+}
+
+interface NearbySchoolsViewModel {
+  districtName?: string;
+  assignedSchoolsVerified: boolean;
+  schools: NearbySchoolCard[];
 }
 
 interface ListingDetailsViewModel {
   listing: MarketplaceListing | null;
   facts: ListingFact[];
+  enhancementGroups: EnhancementGroup[];
+  nearbySchools: NearbySchoolsViewModel | null;
+  badges: ListingBadge[];
   hasError: boolean;
 }
+
+const ENHANCEMENT_SECTIONS: ReadonlyArray<
+  Omit<EnhancementGroup, 'features'>
+> = [
+    { id: 'construction', title: 'Construction & Exterior', icon: 'fa-solid fa-house-chimney' },
+    { id: 'interior', title: 'Interior & Living Spaces', icon: 'fa-solid fa-couch' },
+    { id: 'kitchen', title: 'Kitchen', icon: 'fa-solid fa-kitchen-set' },
+    { id: 'bedroomsBathrooms', title: 'Bedrooms & Bathrooms', icon: 'fa-solid fa-bed' },
+    { id: 'parkingStorage', title: 'Parking & Storage', icon: 'fa-solid fa-car' },
+    { id: 'outdoorLiving', title: 'Outdoor Living', icon: 'fa-solid fa-umbrella-beach' },
+    { id: 'systemsUtilities', title: 'Systems, Utilities & Efficiency', icon: 'fa-solid fa-bolt' },
+    { id: 'technologySecurity', title: 'Technology & Security', icon: 'fa-solid fa-house-signal' },
+    { id: 'accessibility', title: 'Accessibility', icon: 'fa-solid fa-universal-access' },
+    { id: 'communityAmenities', title: 'Community Amenities', icon: 'fa-solid fa-people-roof' }
+  ];
 
 @Component({
   selector: 'app-listing-details',
@@ -71,7 +137,8 @@ interface ListingDetailsViewModel {
     CurrencyPipe,
     DecimalPipe,
     RouterLink,
-    ListingGalleryComponent
+    ListingGalleryComponent,
+    ListingMortgageCalculatorComponent
   ],
   providers: [
     {
@@ -84,7 +151,7 @@ interface ListingDetailsViewModel {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListingDetailsComponent
-implements OnInit {
+  implements OnInit {
 
   private readonly route =
     inject(ActivatedRoute);
@@ -101,6 +168,9 @@ implements OnInit {
   private readonly savedListingService =
     inject(SavedListingService);
 
+  private readonly listingBadgeService =
+    inject(ListingBadgeService);
+
   readonly isSaved =
     signal(false);
 
@@ -112,48 +182,72 @@ implements OnInit {
 
   readonly viewModel$:
     Observable<ListingDetailsViewModel> =
-      this.route.paramMap.pipe(
-        map(
-          params =>
-            params.get('listingId') ?? ''
-        ),
+    this.route.paramMap.pipe(
+      map(
+        params =>
+          params.get('listingId') ?? ''
+      ),
 
-        switchMap(
-          listingId =>
-            this.listingRepository
-              .getListingById(listingId)
-              .pipe(
-                map(
-                  listing => ({
-                    listing,
+      switchMap(
+        listingId =>
+          this.listingRepository
+            .getListingById(listingId)
+            .pipe(
+              map(
+                listing => ({
+                  listing,
 
-                    facts:
-                      listing
-                        ? this.createListingFacts(
-                            listing
-                          )
-                        : [],
+                  facts:
+                    listing
+                      ? this.createListingFacts(
+                        listing
+                      )
+                      : [],
 
-                    hasError: false
+                  enhancementGroups:
+                    listing
+                      ? this.createEnhancementGroups(
+                        listing.enhancements
+                      )
+                      : [],
+
+                  nearbySchools:
+                    listing
+                      ? this.createNearbySchools(
+                        listing.schools
+                      )
+                      : null,
+
+                  badges:
+                    listing
+                      ? this.listingBadgeService
+                        .getBadges(listing)
+                      : [],
+
+
+                  hasError: false
+                })
+              ),
+
+              catchError(
+                () =>
+                  of({
+                    listing: null,
+                    facts: [],
+                    enhancementGroups: [],
+                    nearbySchools: null,
+                    badges: [],
+                    hasError: true
                   })
-                ),
-
-                catchError(
-                  () =>
-                    of({
-                      listing: null,
-                      facts: [],
-                      hasError: true
-                    })
-                )
               )
-        ),
+            )
+      ),
 
-        shareReplay({
-          bufferSize: 1,
-          refCount: true
-        })
-      );
+      shareReplay({
+        bufferSize: 1,
+        refCount: true
+      })
+    );
 
   async ngOnInit(): Promise<void> {
     const userUid =
@@ -314,11 +408,21 @@ implements OnInit {
   ): ListingFact[] {
     const facts: ListingFact[] = [];
 
+      facts.push({
+      label: 'Property type',
+      value:
+        this.formatPropertyType(
+          listing.propertyType
+        ),
+      icon: 'fa-solid fa-house'
+    });
+
     if (listing.bedrooms !== undefined) {
       facts.push({
         label: 'Bedrooms',
         value:
-          listing.bedrooms.toString()
+          listing.bedrooms.toString(),
+        icon: 'fa-solid fa-bed'
       });
     }
 
@@ -326,7 +430,8 @@ implements OnInit {
       facts.push({
         label: 'Bathrooms',
         value:
-          listing.bathrooms.toString()
+          listing.bathrooms.toString(),
+        icon: 'fa-solid fa-bath'
       });
     }
 
@@ -334,15 +439,25 @@ implements OnInit {
       facts.push({
         label: 'Square feet',
         value:
-          listing.squareFeet.toLocaleString()
+          listing.squareFeet.toLocaleString(),
+        icon: 'fa-solid fa-ruler-combined'
       });
     }
 
-    if (listing.lotSizeAcres !== undefined) {
+    const lotSize =
+      listing.lotSize ??
+      listing.lotSizeAcres;
+
+    if (lotSize !== undefined) {
       facts.push({
         label: 'Lot size',
         value:
-          `${listing.lotSizeAcres} acres`
+          this.formatLotSize(
+            lotSize,
+            listing.lotSizeUnit ??
+            'acres'
+          ),
+        icon: 'fa-solid fa-map'
       });
     }
 
@@ -350,7 +465,8 @@ implements OnInit {
       facts.push({
         label: 'Year built',
         value:
-          listing.yearBuilt.toString()
+          listing.yearBuilt.toString(),
+        icon: 'fa-solid fa-calendar'
       });
     }
 
@@ -360,7 +476,8 @@ implements OnInit {
         value:
           listing.hoa.hasHoa
             ? 'Yes'
-            : 'No'
+            : 'No',
+        icon: 'fa-solid fa-people-roof'
       });
 
       if (
@@ -375,20 +492,210 @@ implements OnInit {
               listing.hoa.feeAmount
             )} ${this.formatHoaFrequency(
               listing.hoa.feeFrequency
-            )}`
+            )}`,
+          icon: 'fa-solid fa-dollar-sign'
         });
       }
     }
 
-    facts.push({
-      label: 'Property type',
-      value:
-        this.formatPropertyType(
-          listing.propertyType
-        )
-    });
+  
 
     return facts;
+  }
+
+  private createNearbySchools(
+    schools?: ListingSchools
+  ): NearbySchoolsViewModel | null {
+    if (!schools) {
+      return null;
+    }
+
+    const schoolCards: NearbySchoolCard[] = [];
+
+    this.addNearbySchool(
+      schoolCards,
+      'elementary',
+      'Elementary School',
+      'fa-solid fa-child-reaching',
+      schools.elementarySchool
+    );
+
+    this.addNearbySchool(
+      schoolCards,
+      'middle',
+      'Middle School',
+      'fa-solid fa-book-open',
+      schools.middleSchool
+    );
+
+    this.addNearbySchool(
+      schoolCards,
+      'high',
+      'High School',
+      'fa-solid fa-graduation-cap',
+      schools.highSchool
+    );
+
+    if (schoolCards.length === 0) {
+      return null;
+    }
+
+    return {
+      districtName:
+        schools.districtName,
+
+      assignedSchoolsVerified:
+        schools.assignedSchoolsVerified,
+
+      schools:
+        schoolCards
+    };
+  }
+
+  private addNearbySchool(
+    schoolCards: NearbySchoolCard[],
+    id: NearbySchoolCard['id'],
+    level: string,
+    icon: string,
+    school?: ListingSchool
+  ): void {
+    if (!school?.name) {
+      return;
+    }
+
+    schoolCards.push({
+      id,
+      level,
+      icon,
+      name: school.name,
+
+      schoolType:
+        this.formatSchoolType(
+          school.schoolType
+        ),
+
+      grades:
+        school.grades,
+
+      distance:
+        school.distanceMiles !== undefined
+          ? this.formatSchoolDistance(
+            school.distanceMiles
+          )
+          : undefined,
+
+      district:
+        school.district
+    });
+  }
+
+  private formatSchoolType(
+    schoolType: ListingSchool['schoolType']
+  ): string {
+    switch (schoolType) {
+      case 'charter':
+        return 'Charter school';
+
+      case 'magnet':
+        return 'Magnet school';
+
+      case 'private':
+        return 'Private school';
+
+      case 'public':
+      default:
+        return 'Public school';
+    }
+  }
+
+  private formatSchoolDistance(
+    distanceMiles: number
+  ): string {
+    const formattedDistance =
+      new Intl.NumberFormat(
+        'en-US',
+        {
+          maximumFractionDigits: 1
+        }
+      ).format(distanceMiles);
+
+    return distanceMiles === 1
+      ? `${formattedDistance} mile away`
+      : `${formattedDistance} miles away`;
+  }
+
+  private createEnhancementGroups(
+    enhancements?: ListingEnhancements
+  ): EnhancementGroup[] {
+    if (!enhancements) {
+      return [];
+    }
+
+    return ENHANCEMENT_SECTIONS
+      .map(section => ({
+        ...section,
+        features: (
+          enhancements[section.id] ?? []
+        ).map(featureId =>
+          this.formatFeatureLabel(featureId)
+        )
+      }))
+      .filter(group => group.features.length > 0);
+  }
+
+  private formatFeatureLabel(
+    featureId: string
+  ): string {
+    const label = featureId
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, character =>
+        character.toUpperCase()
+      );
+
+    return label
+      .replace(/\bHoa\b/g, 'HOA')
+      .replace(/\bHvac\b/g, 'HVAC')
+      .replace(/\bEv\b/g, 'EV')
+      .replace(/\bRv\b/g, 'RV')
+      .replace(/\bWifi\b/g, 'Wi-Fi')
+      .replace(/\bLed\b/g, 'LED')
+      .replace(/\bUsb\b/g, 'USB');
+  }
+
+  private formatLotSize(
+    lotSize: number,
+    lotSizeUnit:
+      NonNullable<
+        MarketplaceListing['lotSizeUnit']
+      >
+  ): string {
+    if (lotSizeUnit === 'square_feet') {
+      const formattedSquareFeet =
+        new Intl.NumberFormat(
+          'en-US',
+          {
+            maximumFractionDigits: 0
+          }
+        ).format(lotSize);
+
+      return `${formattedSquareFeet} sq. ft.`;
+    }
+
+    const formattedAcres =
+      new Intl.NumberFormat(
+        'en-US',
+        {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        }
+      ).format(lotSize);
+
+    return formattedAcres === '1'
+      ? '1 acre'
+      : `${formattedAcres} acres`;
   }
 
   private formatCurrency(
@@ -403,6 +710,34 @@ implements OnInit {
         maximumFractionDigits: 2
       }
     ).format(amount);
+  }
+
+  protected getMonthlyHoaFee(
+    hoa: MarketplaceListing['hoa']
+  ): number {
+    if (
+      !hoa?.hasHoa ||
+      hoa.feeAmount === undefined
+    ) {
+      return 0;
+    }
+
+    switch (hoa.feeFrequency) {
+      case 'monthly':
+        return hoa.feeAmount;
+
+      case 'quarterly':
+        return hoa.feeAmount / 3;
+
+      case 'semi_annually':
+        return hoa.feeAmount / 6;
+
+      case 'annually':
+        return hoa.feeAmount / 12;
+
+      default:
+        return 0;
+    }
   }
 
   private formatHoaFrequency(

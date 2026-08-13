@@ -1,74 +1,51 @@
-<section
-  class="listing-gallery"
-  aria-label="Property photos"
->
+<section class="listing-gallery" aria-label="Property photos">
   @if (selectedPhoto(); as photo) {
-    <div class="listing-gallery__main">
-      <img
-        [src]="photo.url"
-        [alt]="photo.altText || listingTitle()"
-      />
-
-      @if (availablePhotos().length > 1) {
-        <button
-          class="listing-gallery__navigation listing-gallery__navigation--previous"
-          type="button"
-          aria-label="Show previous property photo"
-          (click)="showPreviousPhoto()"
-        >
-          <span aria-hidden="true">‹</span>
-        </button>
-
-        <button
-          class="listing-gallery__navigation listing-gallery__navigation--next"
-          type="button"
-          aria-label="Show next property photo"
-          (click)="showNextPhoto()"
-        >
-          <span aria-hidden="true">›</span>
-        </button>
-
-        <div class="listing-gallery__counter">
-          {{ selectedIndex() + 1 }}
-          /
-          {{ availablePhotos().length }}
-        </div>
-      }
-    </div>
+  <div class="listing-gallery__main">
+    <img [src]="photo.url" [alt]="photo.altText || listingTitle()" />
+    
+    <app-listing-badges class="listing-gallery__badges" [badges]="badges()" />
 
     @if (availablePhotos().length > 1) {
-      <div class="listing-gallery__thumbnails">
-        @for (
-          galleryPhoto of availablePhotos();
-          track galleryPhoto.id;
-          let photoIndex = $index
-        ) {
-          <button
-            type="button"
-            class="listing-gallery__thumbnail"
-            [class.listing-gallery__thumbnail--selected]="
-              photoIndex === selectedIndex()
-            "
-            [attr.aria-label]="
-              'Show property photo ' + (photoIndex + 1)
-            "
-            [attr.aria-pressed]="
-              photoIndex === selectedIndex()
-            "
-            (click)="selectPhoto(photoIndex)"
-          >
-            <img
-              [src]="galleryPhoto.url"
-              [alt]="galleryPhoto.altText || listingTitle()"
-              loading="lazy"
-            />
-          </button>
-        }
-      </div>
-    }
-  } @else {
-    <div class="listing-gallery__empty">
-      <span>No property photos are available.</span>
+    <button class="listing-gallery__navigation listing-gallery__navigation--previous" type="button"
+      aria-label="Show previous property photo" (click)="showPreviousPhoto()">
+      <span aria-hidden="true">‹</span>
+    </button>
+
+    <button class="listing-gallery__navigation listing-gallery__navigation--next" type="button"
+      aria-label="Show next property photo" (click)="showNextPhoto()">
+      <span aria-hidden="true">›</span>
+    </button>
+
+    <div class="listing-gallery__counter">
+      {{ selectedIndex() + 1 }}
+      /
+      {{ availablePhotos().length }}
     </div>
+    }
+  </div>
+
+  @if (availablePhotos().length > 1) {
+  <div class="listing-gallery__thumbnails">
+    @for (
+    galleryPhoto of availablePhotos();
+    track galleryPhoto.id;
+    let photoIndex = $index
+    ) {
+    <button type="button" class="listing-gallery__thumbnail" [class.listing-gallery__thumbnail--selected]="
+              photoIndex === selectedIndex()
+            " [attr.aria-label]="
+              'Show property photo ' + (photoIndex + 1)
+            " [attr.aria-pressed]="
+              photoIndex === selectedIndex()
+            " (click)="selectPhoto(photoIndex)">
+      <img [src]="galleryPhoto.url" [alt]="galleryPhoto.altText || listingTitle()" loading="lazy" />
+    </button>
+    }
+  </div>
+  }
+  } @else {
+  <div class="listing-gallery__empty">
+    <span>No property photos are available.</span>
+  </div>
   }
 </section>

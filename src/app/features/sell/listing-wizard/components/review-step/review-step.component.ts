@@ -5,8 +5,12 @@ import {
   inject,
   input,
   output,
-  signal
+  signal,
 } from '@angular/core';
+
+import {
+  DecimalPipe
+} from '@angular/common';
 
 import {
   AddressFormValue
@@ -39,7 +43,7 @@ import {
 @Component({
   selector: 'app-review-step',
   standalone: true,
-  imports: [],
+  imports: [DecimalPipe],
   templateUrl: './review-step.component.html',
   styleUrl: './review-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -45,7 +45,7 @@ export class ListingEnhancementComponent {
       icon: 'fa-solid fa-bed',
       status: 'not-started',
     },
-     {
+    {
       id: 'community-amenities',
       title: 'Community Amenities',
       description:
@@ -91,6 +91,14 @@ export class ListingEnhancementComponent {
       description:
         'Describe the garage, carport, driveway, EV charging, workshop, and storage options.',
       icon: 'fa-solid fa-car',
+      status: 'not-started',
+    },
+    {
+      id: 'schools',
+      title: 'Nearby Schools',
+      description:
+        'Add assigned elementary, middle, and high school information for buyers to review.',
+      icon: 'fa-solid fa-school',
       status: 'not-started',
     },
     {

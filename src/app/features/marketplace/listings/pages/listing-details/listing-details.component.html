@@ -22,9 +22,17 @@
     } @else if (viewModel.listing; as listing) {
     <header class="listing-details__header">
       <div>
+
         <p class="listing-details__eyebrow">
           Property for sale
         </p>
+
+         <p class="listing-details__price">
+            {{
+            listing.price
+            | currency:'USD':'symbol':'1.0-0'
+            }}
+          </p>
 
         <h1>{{ listing.title }}</h1>
 
@@ -39,45 +47,29 @@
 
     <div class="listing-details__layout">
       <div class="listing-details__primary">
-        <app-listing-gallery [photos]="listing.photos" [fallbackImageUrl]="
-                listing.featuredPhotoUrl
-              " [listingTitle]="listing.title" />
+        <app-listing-gallery [photos]="listing.photos" [fallbackImageUrl]="listing.featuredPhotoUrl"
+          [listingTitle]="listing.title" [badges]="viewModel.badges" />
 
-        <section class="listing-details__summary">
-          <p class="listing-details__price">
-            {{
-            listing.price
-            | currency:'USD':'symbol':'1.0-0'
-            }}
-          </p>
+        <section class="listing-details__section">
+          <h2>Property details</h2>
 
-          <div class="listing-details__headline-facts">
-            @if (listing.bedrooms !== undefined) {
-            <span>
-              <strong>{{ listing.bedrooms }}</strong>
-              beds
-            </span>
+          <dl class="listing-details__facts">
+            @for (
+            fact of viewModel.facts;
+            track fact.label
+            ) {
+            <div class="listing-details__fact">
+              <span class="listing-details__fact-icon" aria-hidden="true">
+                <i [class]="fact.icon"></i>
+              </span>
+
+              <span class="listing-details__fact-content">
+                <dt>{{ fact.label }}</dt>
+                <dd>{{ fact.value }}</dd>
+              </span>
+            </div>
             }
-
-            @if (listing.bathrooms !== undefined) {
-            <span>
-              <strong>{{ listing.bathrooms }}</strong>
-              baths
-            </span>
-            }
-
-            @if (listing.squareFeet !== undefined) {
-            <span>
-              <strong>
-                {{
-                listing.squareFeet
-                | number:'1.0-0'
-                }}
-              </strong>
-              sq. ft.
-            </span>
-            }
-          </div>
+          </dl>
         </section>
 
         <section class="listing-details__section">
@@ -88,21 +80,133 @@
           </p>
         </section>
 
-        <section class="listing-details__section">
-          <h2>Property details</h2>
+        @if (viewModel.enhancementGroups.length > 0) {
+        <section class="listing-details__features">
+          <h2 class="features">Features and amenities</h2>
 
-          <dl class="listing-details__facts">
+          <div class="listing-details__enhancement-groups">
             @for (
-            fact of viewModel.facts;
-            track fact.label
+            group of viewModel.enhancementGroups;
+            track group.id
             ) {
-            <div>
-              <dt>{{ fact.label }}</dt>
-              <dd>{{ fact.value }}</dd>
-            </div>
+            <article class="listing-details__enhancement-group">
+              <h3>
+                <i [class]="group.icon" aria-hidden="true"></i>
+                {{ group.title }}
+              </h3>
+
+              <ul>
+                @for (
+                feature of group.features;
+                track feature
+                ) {
+                <li>
+                  <i class="fa-solid fa-check" aria-hidden="true"></i>
+                  <span>{{ feature }}</span>
+                </li>
+                }
+              </ul>
+            </article>
             }
-          </dl>
+          </div>
         </section>
+
+        <section class="listing-details__calculator-section">
+          <app-listing-mortgage-calculator [listingPrice]="listing.price" [monthlyHoaFee]="
+      getMonthlyHoaFee(listing.hoa)
+    " />
+        </section>
+
+
+        }
+        @if (viewModel.nearbySchools; as nearbySchools) {
+        <section class="listing-details__section listing-details__schools">
+          <div class="listing-details__schools-heading">
+            <div>
+              <p class="listing-details__schools-eyebrow">
+                Education
+              </p>
+
+              <h2>Nearby Schools</h2>
+
+              @if (nearbySchools.districtName) {
+              <p class="listing-details__school-district">
+                {{ nearbySchools.districtName }}
+              </p>
+              }
+            </div>
+
+            @if (nearbySchools.assignedSchoolsVerified) {
+            <span class="listing-details__schools-verified">
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+              Seller verified
+            </span>
+            }
+          </div>
+
+          <div class="listing-details__school-grid">
+            @for (
+            school of nearbySchools.schools;
+            track school.id
+            ) {
+            <article class="listing-details__school-card">
+              <div class="listing-details__school-card-header">
+                <span class="listing-details__school-icon" aria-hidden="true">
+                  <i [class]="school.icon"></i>
+                </span>
+
+                <div>
+                  <p class="listing-details__school-level">
+                    {{ school.level }}
+                  </p>
+
+                  <h3>{{ school.name }}</h3>
+                </div>
+              </div>
+
+              <dl class="listing-details__school-facts">
+                <div>
+                  <dt>School type</dt>
+                  <dd>{{ school.schoolType }}</dd>
+                </div>
+
+                @if (school.grades) {
+                <div>
+                  <dt>Grades</dt>
+                  <dd>{{ school.grades }}</dd>
+                </div>
+                }
+
+                @if (school.distance) {
+                <div>
+                  <dt>Distance</dt>
+                  <dd>{{ school.distance }}</dd>
+                </div>
+                }
+
+                @if (school.district) {
+                <div>
+                  <dt>District</dt>
+                  <dd>{{ school.district }}</dd>
+                </div>
+                }
+              </dl>
+            </article>
+            }
+          </div>
+
+          <div class="listing-details__schools-disclaimer">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+            <p>
+              School assignments, attendance boundaries, and availability
+              can change. Buyers should independently verify current school
+              assignments with the applicable school district.
+            </p>
+          </div>
+        </section>
+        }
       </div>
 
       <aside class="listing-details__sidebar">

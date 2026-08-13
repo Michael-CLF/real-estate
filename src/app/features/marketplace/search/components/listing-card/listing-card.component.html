@@ -1,29 +1,18 @@
 <article class="listing-card">
-  <a
-    class="listing-card__image-link"
-    [routerLink]="['/listings', listing().id]"
-    [attr.aria-label]="'View ' + listing().title"
-  >
+  <a class="listing-card__image-link" [routerLink]="['/listings', listing().id]"
+    [attr.aria-label]="'View ' + listing().title">
     @if (listing().featuredPhotoUrl) {
-      <img
-        class="listing-card__image"
-        [src]="listing().featuredPhotoUrl"
-        [alt]="accessibleImageText()"
-        loading="lazy"
-      />
+    <img class="listing-card__image" [src]="listing().featuredPhotoUrl" [alt]="accessibleImageText()" loading="lazy" />
     } @else {
-      <div class="listing-card__image-placeholder">
-        <span>No photo available</span>
-      </div>
+    <div class="listing-card__image-placeholder">
+      <span>No photo available</span>
+    </div>
     }
 
-    <button
-      class="listing-card__favorite"
-      type="button"
-      aria-label="Save this listing"
-      title="Save listing"
-      (click)="$event.preventDefault(); $event.stopPropagation()"
-    >
+    <app-listing-badges class="listing-card__badges" [badges]="badges()" [maximumVisible]="2" />
+
+    <button class="listing-card__favorite" type="button" aria-label="Save this listing" title="Save listing"
+      (click)="$event.preventDefault(); $event.stopPropagation()">
       <span aria-hidden="true">♡</span>
     </button>
   </a>
@@ -34,24 +23,21 @@
     </p>
 
     @if (propertyFacts().length) {
-      <p class="listing-card__facts">
-        @for (
-          fact of propertyFacts();
-          track fact;
-          let isLast = $last
-        ) {
-          <span>{{ fact }}</span>
+    <p class="listing-card__facts">
+      @for (
+      fact of propertyFacts();
+      track fact;
+      let isLast = $last
+      ) {
+      <span>{{ fact }}</span>
 
-          @if (!isLast) {
-            <span
-              class="listing-card__separator"
-              aria-hidden="true"
-            >
-              •
-            </span>
-          }
-        }
-      </p>
+      @if (!isLast) {
+      <span class="listing-card__separator" aria-hidden="true">
+        •
+      </span>
+      }
+      }
+    </p>
     }
 
     <h2 class="listing-card__title">

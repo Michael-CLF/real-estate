@@ -96,6 +96,41 @@ form {
   color: #475569;
 }
 
+.lot-size-input {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) minmax(125px, auto);
+
+  input {
+    min-width: 0;
+
+    border-radius:
+      8px 0 0 8px;
+  }
+
+  select {
+    min-width: 125px;
+
+    border-left: 0;
+    border-radius:
+      0 8px 8px 0;
+
+    background-color: #f8fafc;
+
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    cursor: pointer;
+  }
+
+  input:focus,
+  select:focus {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 .description-field {
   margin-top: .25rem;
 }
@@ -126,6 +161,11 @@ form {
     grid-template-columns: 1fr;
   }
 
+  .lot-size-input {
+    grid-template-columns:
+      minmax(0, 1fr) minmax(120px, auto);
+  }
+
   .description-footer {
     flex-direction: column;
   }
@@ -133,5 +173,23 @@ form {
   .character-count {
     margin-left: 0;
     align-self: flex-end;
+  }
+
+  @media (max-width: 420px) {
+    .lot-size-input {
+      grid-template-columns:
+        minmax(0, 1fr);
+      gap: 0.5rem;
+
+      input,
+      select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+      }
+
+      select {
+        width: 100%;
+      }
+    }
   }
 }

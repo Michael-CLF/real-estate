@@ -371,6 +371,10 @@ export class ListingWizardComponent
           draft.propertyDetails.lotSize ??
           null,
 
+        lotSizeUnit:
+          draft.propertyDetails.lotSizeUnit ??
+          'acres',
+
         description:
           draft.propertyDetails.description ??
           '',
@@ -790,7 +794,7 @@ export class ListingWizardComponent
   protected isCurrentStepValid(): boolean {
     return (
       this.stepValidity()[
-        this.currentStep()
+      this.currentStep()
       ] ?? false
     );
   }
@@ -956,14 +960,14 @@ export class ListingWizardComponent
           includedItems: [],
 
           ...(hoa.hasHoa &&
-          hoa.feeAmount !== null
+            hoa.feeAmount !== null
             ? {
               feeAmount: hoa.feeAmount
             }
             : {}),
 
           ...(hoa.hasHoa &&
-          hoa.feeFrequency
+            hoa.feeFrequency
             ? {
               feeFrequency: hoa.feeFrequency
             }
@@ -1001,6 +1005,11 @@ export class ListingWizardComponent
                 propertyDetails.lotSize ??
                 undefined,
 
+              lotSizeUnit:
+                propertyDetails.lotSize !== null
+                  ? propertyDetails.lotSizeUnit
+                  : undefined,
+
               description:
                 propertyDetails.description
             },
@@ -1022,7 +1031,7 @@ export class ListingWizardComponent
         if (
           !propertyFeatures ||
           propertyFeatures.mode ===
-            'unselected'
+          'unselected'
         ) {
           throw new Error(
             'Please complete the property features step.'
@@ -1034,7 +1043,7 @@ export class ListingWizardComponent
             ? this.emptyFeatures()
             : this.toListingFeatures(
               propertyFeatures.features as
-                PropertyFeaturesFormValue
+              PropertyFeaturesFormValue
             );
 
         await this.listingService

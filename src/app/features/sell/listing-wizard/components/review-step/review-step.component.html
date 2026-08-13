@@ -77,10 +77,28 @@
                 </div>
 
                 <div class="review-detail">
-                    <span class="review-detail__label">Lot Size</span>
+                    <span class="review-detail__label">
+                        Lot Size
+                    </span>
+
                     <span class="review-detail__value">
-                        @if (propertyDetails()?.lotSize !== null && propertyDetails()?.lotSize !== undefined) {
-                        {{ propertyDetails()?.lotSize }} acres
+                        @if (
+                        propertyDetails()?.lotSize !== null &&
+                        propertyDetails()?.lotSize !== undefined
+                        ) {
+                        {{
+                        propertyDetails()!.lotSize
+                        | number:'1.0-2'
+                        }}
+
+                        @if (
+                        propertyDetails()!.lotSizeUnit ===
+                        'square_feet'
+                        ) {
+                        sq. ft.
+                        } @else {
+                        acres
+                        }
                         } @else {
                         —
                         }
