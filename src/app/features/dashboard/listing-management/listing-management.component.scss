@@ -150,6 +150,15 @@
       font-size: 0.9rem;
       line-height: 1.55;
     }
+    &--showings {
+  border-color: #b8d8e8;
+  background: #f5fafd;
+
+  .management-card__icon {
+    color: #154360;
+    background: #e4f0f6;
+  }
+}
   }
 }
 
@@ -238,6 +247,6 @@
 
 @media (min-width: 1024px) {
   .management-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

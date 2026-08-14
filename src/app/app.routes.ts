@@ -310,6 +310,20 @@ export const routes: Routes = [
             component => component.SchoolsEnhancementComponent
           )
       },
+      {
+        path: 'sell/listings/:listingUid/showing-availability',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/showings/showing-availability/showing-availability.component'
+          ).then(
+            component =>
+              component.ShowingAvailabilityComponent
+          )
+      },
 
       /*
        * Registration

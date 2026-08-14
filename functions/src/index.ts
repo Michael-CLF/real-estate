@@ -11,3 +11,4 @@ export * from './identity';
 export * from './listings';
 export * from './payments';
 export * from './sellers';
+export * from './showings';

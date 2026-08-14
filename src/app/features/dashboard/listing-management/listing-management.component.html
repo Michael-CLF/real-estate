@@ -1,158 +1,138 @@
 <section class="listing-management">
   <a routerLink="/dashboard" class="back-link">
-    <i
-      class="fa-solid fa-arrow-left"
-      aria-hidden="true"
-    ></i>
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 
     <span>Return to dashboard</span>
   </a>
 
   @if (isLoading()) {
-    <div
-      class="state-card"
-      aria-live="polite"
-    >
-      <i
-        class="fa-solid fa-spinner fa-spin"
-        aria-hidden="true"
-      ></i>
+  <div class="state-card" aria-live="polite">
+    <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
-      <p>Loading listing...</p>
-    </div>
+    <p>Loading listing...</p>
+  </div>
   } @else if (loadError()) {
-    <div
-      class="state-card state-card--error"
-      role="alert"
-    >
-      <i
-        class="fa-solid fa-circle-exclamation"
-        aria-hidden="true"
-      ></i>
+  <div class="state-card state-card--error" role="alert">
+    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
 
-      <p>{{ loadError() }}</p>
+    <p>{{ loadError() }}</p>
 
-      <a
-        routerLink="/dashboard"
-        class="primary-button"
-      >
-        Return to dashboard
-      </a>
-    </div>
+    <a routerLink="/dashboard" class="primary-button">
+      Return to dashboard
+    </a>
+  </div>
   } @else if (listing(); as currentListing) {
-    <header class="management-header">
-      <div>
-        <p class="management-header__eyebrow">
-          Manage listing
-        </p>
+  <header class="management-header">
+    <div>
+      <p class="management-header__eyebrow">
+        Manage listing
+      </p>
 
-        <h1>{{ currentListing.addressLine1 }}</h1>
+      <h1>{{ currentListing.addressLine1 }}</h1>
 
-        <p class="management-header__location">
-          {{ currentListing.city }},
-          {{ currentListing.state }}
-          {{ currentListing.zipCode }}
-        </p>
-      </div>
-
-      <div class="management-header__summary">
-        <span>Listing price</span>
-
-        <strong>
-          {{
-            currentListing.listPrice
-              | currency:'USD':'symbol':'1.0-0'
-          }}
-        </strong>
-
-        <span class="status-badge">
-          {{ currentListing.status }}
-        </span>
-      </div>
-    </header>
-
-    <div class="management-grid">
-      <article
-        class="management-card management-card--featured"
-      >
-        <div
-          class="management-card__icon"
-          aria-hidden="true"
-        >
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </div>
-
-        <div class="management-card__content">
-          <h2>Enhance Listing</h2>
-
-          <p>
-            Add detailed construction, interior, kitchen,
-            outdoor, technology, accessibility, and
-            community features.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="primary-button"
-          (click)="openEnhancements()"
-        >
-          Manage enhancements
-
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
-        </button>
-      </article>
-
-      <article class="management-card">
-        <div
-          class="management-card__icon"
-          aria-hidden="true"
-        >
-          <i class="fa-solid fa-eye"></i>
-        </div>
-
-        <div class="management-card__content">
-          <h2>Preview Listing</h2>
-
-          <p>
-            View the public marketplace page exactly as
-            buyers see it.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="secondary-button"
-          (click)="previewListing()"
-        >
-          Preview listing
-        </button>
-      </article>
-
-      <article
-        class="management-card management-card--disabled"
-      >
-        <div
-          class="management-card__icon"
-          aria-hidden="true"
-        >
-          <i class="fa-solid fa-pen-to-square"></i>
-        </div>
-
-        <div class="management-card__content">
-          <h2>Edit Core Listing</h2>
-
-          <p>
-            Update the main property details, pricing,
-            description, and photos.
-          </p>
-        </div>
-
-        <span class="coming-soon">Coming next</span>
-      </article>
+      <p class="management-header__location">
+        {{ currentListing.city }},
+        {{ currentListing.state }}
+        {{ currentListing.zipCode }}
+      </p>
     </div>
+
+    <div class="management-header__summary">
+      <span>Listing price</span>
+
+      <strong>
+        {{
+        currentListing.listPrice
+        | currency:'USD':'symbol':'1.0-0'
+        }}
+      </strong>
+
+      <span class="status-badge">
+        {{ currentListing.status }}
+      </span>
+    </div>
+  </header>
+
+  <div class="management-grid">
+    <article class="management-card management-card--featured">
+      <div class="management-card__icon" aria-hidden="true">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </div>
+
+      <div class="management-card__content">
+        <h2>Enhance Listing</h2>
+
+        <p>
+          Add detailed construction, interior, kitchen,
+          outdoor, technology, accessibility, and
+          community features.
+        </p>
+      </div>
+
+      <button type="button" class="primary-button" (click)="openEnhancements()">
+        Manage enhancements
+
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </button>
+    </article>
+
+    <article class="management-card management-card--showings">
+      <div class="management-card__icon" aria-hidden="true">
+        <i class="fa-regular fa-calendar-check"></i>
+      </div>
+
+      <div class="management-card__content">
+        <h2>Showing Availability</h2>
+
+        <p>
+          Set the days and times when buyers may request an
+          in-person showing of this property.
+        </p>
+      </div>
+
+      <button type="button" class="primary-button" (click)="openShowingAvailability()">
+        Manage availability
+
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </button>
+    </article>
+
+    <article class="management-card">
+      <div class="management-card__icon" aria-hidden="true">
+        <i class="fa-solid fa-eye"></i>
+      </div>
+
+
+      <div class="management-card__content">
+        <h2>Preview Listing</h2>
+
+        <p>
+          View the public marketplace page exactly as
+          buyers see it.
+        </p>
+      </div>
+
+      <button type="button" class="secondary-button" (click)="previewListing()">
+        Preview listing
+      </button>
+    </article>
+
+    <article class="management-card management-card--disabled">
+      <div class="management-card__icon" aria-hidden="true">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </div>
+
+      <div class="management-card__content">
+        <h2>Edit Core Listing</h2>
+
+        <p>
+          Update the main property details, pricing,
+          description, and photos.
+        </p>
+      </div>
+
+      <span class="coming-soon">Coming next</span>
+    </article>
+  </div>
   }
 </section>

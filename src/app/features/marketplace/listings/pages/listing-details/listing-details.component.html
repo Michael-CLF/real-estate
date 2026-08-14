@@ -117,7 +117,6 @@
     " />
         </section>
 
-
         }
         @if (viewModel.nearbySchools; as nearbySchools) {
         <section class="listing-details__section listing-details__schools">
@@ -207,6 +206,23 @@
           </div>
         </section>
         }
+        <section class="listing-details__showing-section">
+  <app-request-showing
+    [listingUid]="listing.uid"
+    [sellerUid]="listing.sellerUid"
+    [propertyAddress]="listing.address.addressLine1"
+    [propertyCity]="listing.address.city"
+    [propertyState]="
+      listing.address.stateAbbreviation
+    "
+    [propertyZipCode]="
+      listing.address.postalCode
+    "
+    [primaryPhotoUrl]="
+      listing.featuredPhotoUrl ?? null
+    "
+  />
+</section>
       </div>
 
       <aside class="listing-details__sidebar">

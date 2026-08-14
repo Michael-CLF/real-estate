@@ -19,6 +19,10 @@ import {
 } from '@angular/router';
 
 import {
+  RequestShowingComponent
+} from '../../components/request-showing/request-showing.component';
+
+import {
   catchError,
   firstValueFrom,
   map,
@@ -138,7 +142,8 @@ const ENHANCEMENT_SECTIONS: ReadonlyArray<
     DecimalPipe,
     RouterLink,
     ListingGalleryComponent,
-    ListingMortgageCalculatorComponent
+    ListingMortgageCalculatorComponent,
+    RequestShowingComponent
   ],
   providers: [
     {

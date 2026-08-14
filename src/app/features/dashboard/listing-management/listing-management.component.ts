@@ -17,6 +17,10 @@ import {
 } from '@angular/router';
 
 import {
+  AuthService
+} from '../../../core/authentication/services/auth.service';
+
+import {
   Listing
 } from '../../../core/domains/listings/models/listing.model';
 
@@ -38,19 +42,39 @@ import {
 export class ListingManagementComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
-  protected readonly listing = signal<Listing | null>(null);
-  protected readonly isLoading = signal(true);
-  protected readonly loadError = signal('');
+  protected readonly listing =
+    signal<Listing | null>(null);
+
+  protected readonly isLoading =
+    signal(true);
+
+  protected readonly loadError =
+    signal('');
 
   protected readonly listingUid =
-    this.route.snapshot.paramMap.get('listingUid') ?? '';
+    this.route.snapshot.paramMap.get(
+      'listingUid'
+    ) ?? '';
 
   async ngOnInit(): Promise<void> {
     if (!this.listingUid) {
       this.loadError.set(
         'The selected listing could not be identified.'
+      );
+
+      this.isLoading.set(false);
+      return;
+    }
+
+    const currentUserUid =
+      this.authService.currentUserUid;
+
+    if (!currentUserUid) {
+      this.loadError.set(
+        'You must be signed in to manage this listing.'
       );
 
       this.isLoading.set(false);
@@ -71,6 +95,17 @@ export class ListingManagementComponent implements OnInit {
         return;
       }
 
+      if (
+        listing.sellerUid !==
+        currentUserUid
+      ) {
+        this.loadError.set(
+          'You do not have permission to manage this listing.'
+        );
+
+        return;
+      }
+
       this.listing.set(listing);
     } catch (error: unknown) {
       console.error(
@@ -86,7 +121,8 @@ export class ListingManagementComponent implements OnInit {
     }
   }
 
-  protected async openEnhancements(): Promise<void> {
+  protected async openEnhancements():
+  Promise<void> {
     await this.router.navigate([
       '/sell/listings',
       this.listingUid,
@@ -94,7 +130,17 @@ export class ListingManagementComponent implements OnInit {
     ]);
   }
 
-  protected async previewListing(): Promise<void> {
+  protected async openShowingAvailability():
+  Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'showing-availability'
+    ]);
+  }
+
+  protected async previewListing():
+  Promise<void> {
     await this.router.navigate([
       '/listings',
       this.listingUid

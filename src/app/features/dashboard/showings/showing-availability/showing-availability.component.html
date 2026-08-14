@@ -1,0 +1,505 @@
+<section class="availability-page">
+  <header class="page-header">
+    <button type="button" class="back-button" (click)="returnToListing()">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+      <span>Return to Listing Management</span>
+    </button>
+
+    <div class="header-content">
+      <div class="header-icon" aria-hidden="true">
+        <i class="fa-regular fa-calendar-check"></i>
+      </div>
+
+      <div>
+        <p class="eyebrow">Showing scheduler</p>
+
+        <h1>Showing Availability</h1>
+
+        <p class="header-description">
+          Choose when buyers may request an in-person
+          showing of this property.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+  <div class="state-card" role="status" aria-live="polite">
+    <span class="loading-spinner" aria-hidden="true"></span>
+
+    <p>Loading showing availability...</p>
+  </div>
+  } @else if (!availability()) {
+  <div class="state-card error-state">
+    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+    <h2>Showing availability is unavailable</h2>
+
+    <p>
+      {{
+      pageError() ||
+      'We could not load the showing schedule.'
+      }}
+    </p>
+
+    <button type="button" class="secondary-button" (click)="returnToListing()">
+      Return to Listing Management
+    </button>
+  </div>
+  } @else if (availability(); as schedule) {
+  <div class="availability-layout">
+    <main class="availability-content">
+      <section class="settings-card">
+        <div class="section-heading">
+          <div>
+            <p class="section-eyebrow">
+              Request status
+            </p>
+
+            <h2>Accept showing requests</h2>
+
+            <p>
+              Turn this off temporarily if the property
+              is not available for buyer showings.
+            </p>
+          </div>
+
+          <label class="toggle-control">
+            <input type="checkbox" [checked]="schedule.acceptingRequests" (change)="setAcceptingRequests($event)" />
+
+            <span class="toggle-track" aria-hidden="true">
+              <span class="toggle-thumb"></span>
+            </span>
+
+            <span class="toggle-label">
+              {{
+              schedule.acceptingRequests
+              ? 'Accepting requests'
+              : 'Requests paused'
+              }}
+            </span>
+          </label>
+        </div>
+
+        @if (!schedule.acceptingRequests) {
+        <div class="paused-notice">
+          <i class="fa-solid fa-pause" aria-hidden="true"></i>
+
+          <div>
+            <strong>Showing requests are paused</strong>
+
+            <p>
+              Buyers will be told that online showing
+              requests are currently unavailable.
+            </p>
+          </div>
+        </div>
+        }
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <div>
+            <p class="section-eyebrow">
+              Appointment settings
+            </p>
+
+            <h2>Scheduling preferences</h2>
+
+            <p>
+              These settings control the appointment
+              choices buyers will see.
+            </p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <label class="form-field">
+            <span>Appointment length</span>
+
+            <select [value]="
+                  schedule.appointmentDurationMinutes
+                " (change)="
+                  setAppointmentDuration($event)
+                ">
+              @for (
+              option of durationOptions;
+              track option.value
+              ) {
+              <option [value]="option.value">
+                {{ option.label }}
+              </option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Time between appointments</span>
+
+            <select [value]="schedule.bufferMinutes" (change)="setBufferMinutes($event)">
+              @for (
+              option of bufferOptions;
+              track option.value
+              ) {
+              <option [value]="option.value">
+                {{ option.label }}
+              </option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Minimum advance notice</span>
+
+            <div class="input-suffix">
+              <input type="number" min="0" step="1" [value]="
+                    schedule.minimumNoticeHours
+                  " (change)="
+                    setMinimumNoticeHours($event)
+                  " />
+
+              <span>hours</span>
+            </div>
+          </label>
+
+          <label class="form-field">
+            <span>How far buyers can book</span>
+
+            <div class="input-suffix">
+              <input type="number" min="1" max="365" step="1" [value]="
+                    schedule.bookingWindowDays
+                  " (change)="
+                    setBookingWindowDays($event)
+                  " />
+
+              <span>days</span>
+            </div>
+          </label>
+
+          <label class="form-field full-width">
+            <span>Property timezone</span>
+
+            <select [value]="schedule.timeZone" (change)="setTimeZone($event)">
+              @for (
+              option of timeZoneOptions;
+              track option.value
+              ) {
+              <option [value]="option.value">
+                {{ option.label }}
+              </option>
+              }
+            </select>
+
+            <small>
+              All showing times will be displayed using
+              this timezone.
+            </small>
+          </label>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <div>
+            <p class="section-eyebrow">
+              Weekly schedule
+            </p>
+
+            <h2>Regular availability</h2>
+
+            <p>
+              Set the days and hours when the property
+              is normally available for showings.
+            </p>
+          </div>
+        </div>
+
+        <div class="weekly-schedule">
+          @for (
+          day of schedule.weeklyAvailability;
+          track day.dayOfWeek
+          ) {
+          <article class="day-row" [class.day-disabled]="!day.enabled">
+            <div class="day-control">
+              <button type="button" class="day-toggle" [class.active]="day.enabled" [attr.aria-pressed]="day.enabled"
+                (click)="toggleDay(day.dayOfWeek)">
+                <span class="day-checkbox" aria-hidden="true">
+                  @if (day.enabled) {
+                  <i class="fa-solid fa-check"></i>
+                  }
+                </span>
+
+                <span>
+                  {{
+                  getDayLabel(day.dayOfWeek)
+                  }}
+                </span>
+              </button>
+            </div>
+
+            <div class="day-times">
+              @if (!day.enabled) {
+              <span class="unavailable-label">
+                Unavailable
+              </span>
+              } @else {
+              @for (
+              timeWindow of day.timeWindows;
+              track $index;
+              let timeWindowIndex = $index
+              ) {
+              <div class="time-window">
+                <label>
+                  <span class="visually-hidden">
+                    {{
+                    getDayLabel(
+                    day.dayOfWeek
+                    )
+                    }}
+                    start time
+                  </span>
+
+                  <input type="time" [value]="
+                              timeWindow.startTime
+                            " (change)="
+                              updateTimeWindow(
+                                day.dayOfWeek,
+                                timeWindowIndex,
+                                'startTime',
+                                $event
+                              )
+                            " />
+                </label>
+
+                <span class="time-separator">
+                  to
+                </span>
+
+                <label>
+                  <span class="visually-hidden">
+                    {{
+                    getDayLabel(
+                    day.dayOfWeek
+                    )
+                    }}
+                    end time
+                  </span>
+
+                  <input type="time" [value]="
+                              timeWindow.endTime
+                            " (change)="
+                              updateTimeWindow(
+                                day.dayOfWeek,
+                                timeWindowIndex,
+                                'endTime',
+                                $event
+                              )
+                            " />
+                </label>
+
+                <button type="button" class="icon-button remove-time" aria-label="Remove this time period" (click)="
+                            removeTimeWindow(
+                              day.dayOfWeek,
+                              timeWindowIndex
+                            )
+                          ">
+                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                </button>
+              </div>
+              }
+
+              <button type="button" class="add-time-button" (click)="
+                        addTimeWindow(
+                          day.dayOfWeek
+                        )
+                      ">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+
+                Add another time period
+              </button>
+              }
+            </div>
+          </article>
+          }
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading">
+          <div>
+            <p class="section-eyebrow">
+              Schedule exceptions
+            </p>
+
+            <h2>Unavailable dates</h2>
+
+            <p>
+              Block holidays, vacations, or any date
+              when the property cannot be shown.
+            </p>
+          </div>
+        </div>
+
+        <div class="date-exception-form">
+          <label class="form-field">
+            <span>Select a date</span>
+
+            <input type="date" [value]="unavailableDate()" (change)="setUnavailableDate($event)" />
+          </label>
+
+          <button type="button" class="secondary-button add-date-button" [disabled]="!unavailableDate()"
+            (click)="addUnavailableDate()">
+            <i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i>
+
+            Block this date
+          </button>
+        </div>
+
+        @if (schedule.exceptions.length) {
+        <div class="exception-list">
+          @for (
+          exception of schedule.exceptions;
+          track exception.date
+          ) {
+          <div class="exception-item">
+            <div class="exception-icon">
+              <i class="fa-solid fa-calendar-xmark" aria-hidden="true"></i>
+            </div>
+
+            <div class="exception-content">
+              <strong>
+                {{
+                formatUnavailableDate(
+                exception.date
+                )
+                }}
+              </strong>
+
+              <span>
+                No showing requests will be
+                accepted.
+              </span>
+            </div>
+
+            <button type="button" class="icon-button" [attr.aria-label]="
+                      'Remove unavailable date ' +
+                      exception.date
+                    " (click)="
+                      removeUnavailableDate(
+                        exception.date
+                      )
+                    ">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+          }
+        </div>
+        } @else {
+        <div class="empty-exceptions">
+          <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+
+          <p>
+            No unavailable dates have been added.
+          </p>
+        </div>
+        }
+      </section>
+    </main>
+
+    <aside class="availability-sidebar">
+      <section class="summary-card">
+        <div class="summary-icon">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        </div>
+
+        <h2>Conflict protection</h2>
+
+        <p>
+          Pending and confirmed showing times are
+          automatically removed from the buyer’s
+          available choices.
+        </p>
+
+        <ul>
+          <li>
+            Overlapping requests are blocked.
+          </li>
+
+          <li>
+            Final availability is checked again when
+            the buyer submits.
+          </li>
+
+          <li>
+            Cancelled or declined appointments release
+            the time.
+          </li>
+        </ul>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-icon">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+        </div>
+
+        <h2>What happens next?</h2>
+
+        <p>
+          New requests will appear in your dashboard.
+          You will be able to confirm, suggest another
+          time, or decline the request.
+        </p>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="save-bar">
+    <div class="save-status">
+      @if (pageError()) {
+      <p class="status-message error-message" role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        {{ pageError() }}
+      </p>
+      } @else if (saveMessage()) {
+      <p class="status-message success-message" role="status">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+        {{ saveMessage() }}
+      </p>
+      } @else if (hasChanges()) {
+      <p class="status-message pending-message">
+        <i class="fa-solid fa-pen" aria-hidden="true"></i>
+
+        You have unsaved changes.
+      </p>
+      } @else {
+      <p class="status-message">
+        Your showing schedule is up to date.
+      </p>
+      }
+    </div>
+
+    <div class="save-actions">
+      <button type="button" class="secondary-button" (click)="returnToListing()">
+        Cancel
+      </button>
+
+      <button type="button" class="primary-button" [disabled]="
+            !hasChanges() || isSaving()
+          " (click)="saveAvailability()">
+        @if (isSaving()) {
+        <span class="button-spinner" aria-hidden="true"></span>
+
+        Saving...
+        } @else {
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+
+        Save Availability
+        }
+      </button>
+    </div>
+  </footer>
+  }
+</section>
