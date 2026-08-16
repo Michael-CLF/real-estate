@@ -9,6 +9,7 @@ import {
 import {
   CreateShowingRequestInput,
   ProposeAlternateShowingTimeInput,
+  RespondToAlternateShowingTimeInput,
   RespondToShowingRequestInput,
   ShowingRequest
 } from '../models/showing-request.model';
@@ -68,6 +69,14 @@ export abstract class ShowingRepository {
 
   abstract proposeAlternateTimeIfAvailable(
     input: ProposeAlternateShowingTimeInput
+  ): Promise<void>;
+
+  abstract acceptAlternateShowingTimeIfAvailable(
+    input: RespondToAlternateShowingTimeInput
+  ): Promise<void>;
+
+  abstract declineAlternateShowingTime(
+    input: RespondToAlternateShowingTimeInput
   ): Promise<void>;
 
   abstract getShowingRequestByUid(

@@ -324,7 +324,40 @@ export const routes: Routes = [
               component.ShowingAvailabilityComponent
           )
       },
-
+      /*
+ * Listing Showing Requests
+ */
+      {
+        path: 'sell/listings/:listingUid/showing-requests',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/showings/showing-requests/showing-requests.component'
+          ).then(
+            component =>
+              component.ShowingRequestsComponent
+          )
+      },
+      /*
+ * Showing Request Details
+ */
+      {
+        path: 'sell/listings/:listingUid/showing-requests/:showingRequestUid',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/showings/showing-request-details/showing-request-details.component'
+          ).then(
+            component =>
+              component.ShowingRequestDetailsComponent
+          )
+      },
       /*
        * Registration
        */
@@ -415,6 +448,20 @@ export const routes: Routes = [
         './features/sell/payment-return/payment-return.component'
       ).then(
         component => component.PaymentReturnComponent
+      )
+  },
+  {
+    path: 'dashboard/showings',
+    canActivate: [
+      authGuard,
+      accountGuard
+    ],
+    loadComponent: () =>
+      import(
+        './features/dashboard/showings/my-showing-requests/my-showing-requests.component'
+      ).then(
+        component =>
+          component.MyShowingRequestsComponent
       )
   },
   {

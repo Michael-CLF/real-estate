@@ -119,7 +119,9 @@ export class RequestShowingComponent
         '',
         [
           Validators.required,
-          Validators.maxLength(30)
+          Validators.pattern(
+            /^\(\d{3}\) \d{3}-\d{4}$/
+          )
         ]
       ],
 
@@ -439,6 +441,42 @@ export class RequestShowingComponent
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+
+  protected formatPhoneNumber(
+    event: Event
+  ): void {
+    const inputElement =
+      event.target as HTMLInputElement;
+
+    const digits =
+      inputElement.value
+        .replace(/\D/g, '')
+        .slice(0, 10);
+
+    let formattedValue = digits;
+
+    if (digits.length > 6) {
+      formattedValue =
+        `(${digits.slice(0, 3)}) ` +
+        `${digits.slice(3, 6)}-` +
+        digits.slice(6);
+    } else if (digits.length > 3) {
+      formattedValue =
+        `(${digits.slice(0, 3)}) ` +
+        digits.slice(3);
+    }
+
+    this.requestForm.controls.phone.setValue(
+      formattedValue,
+      {
+        emitEvent: false
+      }
+    );
+
+    inputElement.value =
+      formattedValue;
   }
 
   protected formatSubmittedDate(

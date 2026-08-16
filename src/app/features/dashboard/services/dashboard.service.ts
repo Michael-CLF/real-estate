@@ -1,5 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import {
+  httpsCallable
+} from 'firebase/functions';
+
+import {
   collection,
   doc,
   deleteDoc,
@@ -11,7 +15,7 @@ import {
 } from 'firebase/firestore';
 
 import { AuthState } from '../../../core/authentication/state/auth.state';
-import { firestore } from '../../../core/infrastructure/firebase/firebase';
+import { firestore, functions } from '../../../core/infrastructure/firebase/firebase';
 import {
   Listing,
   ListingDraft,
@@ -19,6 +23,7 @@ import {
 } from '../../../core/domains/listings/models/listing.model';
 
 import {
+  DashboardUserProfile,
   SavedPropertyStatus,
   SavedPropertySummary
 } from '../models/dashboard-state.model';
@@ -26,6 +31,10 @@ import {
 import {
   ListingService
 } from '../../../core/domains/listings/services/listing.service';
+
+interface EnsureUserAccountNumberResponse {
+  accountNumber: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +44,15 @@ export class DashboardService {
   private readonly authState = inject(AuthState);
   private readonly listingService =
     inject(ListingService);
+
+  private readonly ensureUserAccountNumberFunction =
+    httpsCallable<
+      Record<string, never>,
+      EnsureUserAccountNumberResponse
+    >(
+      functions,
+      'ensureUserAccountNumber'
+    );
 
   get currentUserId(): string {
     const uid = this.authState.uid();
@@ -98,6 +116,84 @@ export class DashboardService {
     return snapshot.docs.map(doc => doc.data() as Listing);
 
   }
+
+  async getCurrentUserProfile():
+  Promise<DashboardUserProfile | null> {
+
+  const accountNumberResult =
+    await this.ensureUserAccountNumberFunction({});
+
+  const assignedAccountNumber =
+    accountNumberResult.data.accountNumber;
+
+  const userRef = doc(
+    firestore,
+    'users',
+    this.currentUserId
+  );
+
+  const snapshot = await getDoc(userRef);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  const data = snapshot.data();
+
+  const firstName =
+    typeof data['firstName'] === 'string'
+      ? data['firstName'].trim()
+      : '';
+
+  const lastName =
+    typeof data['lastName'] === 'string'
+      ? data['lastName'].trim()
+      : '';
+
+  const displayName =
+    typeof data['displayName'] === 'string'
+      ? data['displayName'].trim()
+      : '';
+
+  const fullName =
+    [firstName, lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    displayName;
+
+  const email =
+    typeof data['email'] === 'string'
+      ? data['email'].trim()
+      : '';
+
+  const phone =
+    typeof data['phone'] === 'string'
+      ? this.formatPhoneNumber(
+          data['phone']
+        )
+      : '';
+
+  const storedAccountNumber =
+    typeof data['accountNumber'] === 'string'
+      ? data['accountNumber'].trim()
+      : '';
+
+  return {
+    accountNumber:
+      storedAccountNumber ||
+      assignedAccountNumber,
+
+    firstName,
+    lastName,
+    fullName,
+    email,
+    phone,
+
+    emailVerified:
+      data['emailVerified'] === true
+  };
+}
 
   async getSavedHomes():
     Promise<SavedPropertySummary[]> {
@@ -422,101 +518,117 @@ export class DashboardService {
 
 
   private createEmptyFeatures():
-ListingFeatures {
+    ListingFeatures {
 
-  return {
-    // Kitchen
-    kitchenIsland: false,
-    pantry: false,
-    stoneCountertops: false,
-    softCloseCabinetry: false,
-    stainlessAppliances: false,
-    gasRange: false,
-    doubleOven: false,
-    butlersPantry: false,
+    return {
+      // Kitchen
+      kitchenIsland: false,
+      pantry: false,
+      stoneCountertops: false,
+      softCloseCabinetry: false,
+      stainlessAppliances: false,
+      gasRange: false,
+      doubleOven: false,
+      butlersPantry: false,
 
-    // Interior
-    fireplace: false,
-    hardwoodFloors: false,
-    vaultedCeilings: false,
-    homeOffice: false,
-    bonusRoom: false,
-    finishedBasement: false,
-    mudroom: false,
-    homeGym: false,
-    walkInCloset: false,
-    customClosets: false,
-    builtInShelving: false,
-    crownMolding: false,
-    wetBar: false,
-    mediaRoom: false,
-    soundproofing: false,
+      // Interior
+      fireplace: false,
+      hardwoodFloors: false,
+      vaultedCeilings: false,
+      homeOffice: false,
+      bonusRoom: false,
+      finishedBasement: false,
+      mudroom: false,
+      homeGym: false,
+      walkInCloset: false,
+      customClosets: false,
+      builtInShelving: false,
+      crownMolding: false,
+      wetBar: false,
+      mediaRoom: false,
+      soundproofing: false,
 
-    // Primary bathroom
-    ensuiteBath: false,
-    doubleVanity: false,
-    soakingTub: false,
-    separateTubAndShower: false,
-    largeWalkInShower: false,
+      // Primary bathroom
+      ensuiteBath: false,
+      doubleVanity: false,
+      soakingTub: false,
+      separateTubAndShower: false,
+      largeWalkInShower: false,
 
-    // Exterior and outdoor living
-    deck: false,
-    patio: false,
-    porch: false,
-    balcony: false,
-    fencedYard: false,
-    irrigationSystem: false,
-    matureLandscaping: false,
-    landscapeLighting: false,
+      // Exterior and outdoor living
+      deck: false,
+      patio: false,
+      porch: false,
+      balcony: false,
+      fencedYard: false,
+      irrigationSystem: false,
+      matureLandscaping: false,
+      landscapeLighting: false,
 
-    pool: false,
-    spaHotTub: false,
-    coveredOutdoorLiving: false,
-    outdoorCeilingFans: false,
-    outdoorHeaters: false,
-    outdoorKitchen: false,
-    builtInGrill: false,
-    firePit: false,
-    outdoorFireplace: false,
+      pool: false,
+      spaHotTub: false,
+      coveredOutdoorLiving: false,
+      outdoorCeilingFans: false,
+      outdoorHeaters: false,
+      outdoorKitchen: false,
+      builtInGrill: false,
+      firePit: false,
+      outdoorFireplace: false,
 
-    shed: false,
-    barn: false,
-    workshop: false,
-    guestHouse: false,
-    aduReady: false,
-    greenhouse: false,
-    gardenArea: false,
+      shed: false,
+      barn: false,
+      workshop: false,
+      guestHouse: false,
+      aduReady: false,
+      greenhouse: false,
+      gardenArea: false,
 
-    // Parking
-    attachedGarage: false,
-    detachedGarage: false,
-    carport: false,
-    garageWorkshop: false,
-    rvParking: false,
-    boatParking: false,
-    evChargingStatus: 'none',
+      // Parking
+      attachedGarage: false,
+      detachedGarage: false,
+      carport: false,
+      garageWorkshop: false,
+      rvParking: false,
+      boatParking: false,
+      evChargingStatus: 'none',
 
-    // Technology and systems
-    centralHvac: false,
-    heatPump: false,
-    gasHeat: false,
-    centralAir: false,
-    multiZoneHvac: false,
+      // Technology and systems
+      centralHvac: false,
+      heatPump: false,
+      gasHeat: false,
+      centralAir: false,
+      multiZoneHvac: false,
 
-    solarPanels: false,
-    generator: false,
-    smartThermostat: false,
-    smartLighting: false,
-    smartLocks: false,
-    securitySystem: false,
-    securityCameras: false,
-    videoDoorbell: false,
-    hardwiredEthernet: false,
-    builtInSpeakers: false,
+      solarPanels: false,
+      generator: false,
+      smartThermostat: false,
+      smartLighting: false,
+      smartLocks: false,
+      securitySystem: false,
+      securityCameras: false,
+      videoDoorbell: false,
+      hardwiredEthernet: false,
+      builtInSpeakers: false,
 
-    wholeHomeAirFiltration: false,
-    waterFiltrationSystem: false,
-    waterSenseFixtures: false
-  };
-}
+      wholeHomeAirFiltration: false,
+      waterFiltrationSystem: false,
+      waterSenseFixtures: false
+    };
+  }
+  private formatPhoneNumber(
+    value: string
+  ): string {
+    const digits =
+      value.replace(/\D/g, '').slice(0, 10);
+
+    if (digits.length !== 10) {
+      return value.trim();
+    }
+
+    return (
+      `(${digits.slice(0, 3)}) ` +
+      `${digits.slice(3, 6)}-` +
+      digits.slice(6)
+    );
+  }
 }

@@ -33,6 +33,35 @@ export interface CreateShowingRequestResponse {
   status: 'pending';
 }
 
+export type ShowingRequestResponseAction =
+  | 'confirm'
+  | 'decline'
+  | 'propose_alternate'
+  | 'accept_alternate'
+  | 'decline_alternate';
+
+export interface ShowingAlternateTimeData {
+  date: string;
+  startTime: string;
+  endTime: string;
+  timeZone: string;
+  message?: string;
+}
+
+export interface RespondToShowingRequestData {
+  showingRequestUid: string;
+  action: ShowingRequestResponseAction;
+  responseMessage?: string;
+  alternateTime?: ShowingAlternateTimeData;
+}
+
+export interface RespondToShowingRequestResponse {
+  success: true;
+  showingRequestUid: string;
+  listingUid: string;
+  status: ShowingRequestStatus;
+}
+
 export interface ShowingTimeWindow {
   startTime: string;
   endTime: string;

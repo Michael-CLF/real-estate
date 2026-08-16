@@ -1,1 +1,344 @@
-<p>my-showing-requests works!</p>
+<section class="my-showing-requests">
+  <a
+    routerLink="/dashboard"
+    class="back-link"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>Return to dashboard</span>
+  </a>
+
+  <header class="page-header">
+    <div class="page-header__icon">
+      <i
+        class="fa-regular fa-calendar-check"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <div>
+      <p class="page-header__eyebrow">
+        Property tours
+      </p>
+
+      <h1>My Showing Requests</h1>
+
+      <p>
+        Review requested appointments, seller responses,
+        and confirmed property tours.
+      </p>
+    </div>
+  </header>
+
+  @if (responseError()) {
+    <div
+      class="page-alert page-alert--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <span>{{ responseError() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>Loading your showing requests...</p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <h2>Showing requests unavailable</h2>
+
+      <p>{{ loadError() }}</p>
+    </div>
+  } @else if (requests().length === 0) {
+    <div class="state-card">
+      <div class="state-card__icon">
+        <i
+          class="fa-regular fa-calendar"
+          aria-hidden="true"
+        ></i>
+      </div>
+
+      <h2>No showing requests yet</h2>
+
+      <p>
+        When you request an in-person property tour, its
+        status will appear here.
+      </p>
+
+      <a
+        routerLink="/buy"
+        class="primary-button"
+      >
+        Browse properties
+      </a>
+    </div>
+  } @else {
+    <div class="requests-list">
+      @for (
+        request of requests();
+        track request.showingRequestUid
+      ) {
+        <article class="request-card">
+          <div class="request-card__media">
+            @if (request.primaryPhotoUrl) {
+              <img
+                [src]="request.primaryPhotoUrl"
+                [alt]="
+                  'Property at ' +
+                  request.propertyAddress
+                "
+              >
+            } @else {
+              <div
+                class="request-card__placeholder"
+                aria-hidden="true"
+              >
+                <i class="fa-solid fa-house"></i>
+              </div>
+            }
+          </div>
+
+          <div class="request-card__body">
+            <div class="request-card__heading">
+              <div>
+                <p class="card-eyebrow">
+                  Showing request
+                </p>
+
+                <h2>{{ request.propertyAddress }}</h2>
+
+                <p class="request-card__location">
+                  {{ propertyLocation(request) }}
+                </p>
+              </div>
+
+              <span
+                [class]="
+                  'status-badge status-badge--' +
+                  request.status
+                "
+              >
+                {{ statusLabel(request.status) }}
+              </span>
+            </div>
+
+            <div class="request-reference">
+              Reference:
+              <strong>
+                {{ referenceNumber(request) }}
+              </strong>
+            </div>
+
+            <section class="appointment-card">
+              <div class="appointment-card__heading">
+                <i
+                  class="fa-regular fa-calendar"
+                  aria-hidden="true"
+                ></i>
+
+                <div>
+                  <span>Originally requested</span>
+
+                  <strong>
+                    {{
+                      formatDate(
+                        request.requestedTime.date
+                      )
+                    }}
+                  </strong>
+                </div>
+              </div>
+
+              <p>
+                {{
+                  formatTime(
+                    request.requestedTime.startTime
+                  )
+                }}
+                –
+                {{
+                  formatTime(
+                    request.requestedTime.endTime
+                  )
+                }}
+              </p>
+            </section>
+
+            @if (
+              request.alternateTime;
+              as alternateTime
+            ) {
+              <section
+                class="
+                  appointment-card
+                  appointment-card--alternate
+                "
+              >
+                <div class="appointment-card__heading">
+                  <i
+                    class="fa-solid fa-calendar-plus"
+                    aria-hidden="true"
+                  ></i>
+
+                  <div>
+                    <span>
+                      @if (
+                        request.status === 'confirmed'
+                      ) {
+                        Confirmed appointment
+                      } @else {
+                        Seller’s proposed appointment
+                      }
+                    </span>
+
+                    <strong>
+                      {{
+                        formatDate(
+                          alternateTime.date
+                        )
+                      }}
+                    </strong>
+                  </div>
+                </div>
+
+                <p>
+                  {{
+                    formatTime(
+                      alternateTime.startTime
+                    )
+                  }}
+                  –
+                  {{
+                    formatTime(
+                      alternateTime.endTime
+                    )
+                  }}
+                </p>
+
+                @if (alternateTime.message) {
+                  <div class="seller-message">
+                    <span>Message from the seller</span>
+
+                    <p>{{ alternateTime.message }}</p>
+                  </div>
+                }
+              </section>
+            }
+
+            @if (
+              request.status ===
+                'alternate_proposed' &&
+              request.alternateTime
+            ) {
+              <div class="buyer-response">
+                <div class="buyer-response__heading">
+                  <i
+                    class="fa-solid fa-circle-info"
+                    aria-hidden="true"
+                  ></i>
+
+                  <div>
+                    <strong>Your response is needed</strong>
+
+                    <p>
+                      Accept the seller’s proposed time or
+                      decline this showing request.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="buyer-response__actions">
+                  <button
+                    type="button"
+                    class="primary-button"
+                    [disabled]="
+                      !!respondingRequestUid()
+                    "
+                    (click)="
+                      acceptAlternateTime(request)
+                    "
+                  >
+                    @if (isResponding(request)) {
+                      <i
+                        class="fa-solid fa-spinner fa-spin"
+                        aria-hidden="true"
+                      ></i>
+
+                      Accepting...
+                    } @else {
+                      <i
+                        class="fa-solid fa-check"
+                        aria-hidden="true"
+                      ></i>
+
+                      Accept proposed time
+                    }
+                  </button>
+
+                  <button
+                    type="button"
+                    class="danger-button"
+                    [disabled]="
+                      !!respondingRequestUid()
+                    "
+                    (click)="
+                      declineAlternateTime(request)
+                    "
+                  >
+                    <i
+                      class="fa-solid fa-xmark"
+                      aria-hidden="true"
+                    ></i>
+
+                    Decline proposed time
+                  </button>
+                </div>
+              </div>
+            }
+
+            <div class="request-card__footer">
+              <a
+                class="secondary-button"
+                [routerLink]="[
+                  '/listings',
+                  request.listingUid
+                ]"
+              >
+                View property
+
+                <i
+                  class="fa-solid fa-arrow-up-right-from-square"
+                  aria-hidden="true"
+                ></i>
+              </a>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

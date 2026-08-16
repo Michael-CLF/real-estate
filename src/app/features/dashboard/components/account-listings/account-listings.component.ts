@@ -37,7 +37,7 @@ export class AccountListingsComponent {
     input('No listings found.');
 
   readonly actionLabel =
-    input('Enhance Listing');
+    input('Manage Listing');
 
   readonly actionSelected =
     output<Listing>();

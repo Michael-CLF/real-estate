@@ -41,6 +41,7 @@ import {
 import {
   CreateShowingRequestInput,
   ProposeAlternateShowingTimeInput,
+  RespondToAlternateShowingTimeInput,
   RespondToShowingRequestInput,
   ShowingRequest,
   ShowingRequestStatus,
@@ -69,6 +70,34 @@ interface CreateShowingRequestFunctionResponse {
   success: true;
   showingRequestUid: string;
   status: 'pending';
+}
+
+type ShowingRequestResponseAction =
+  | 'confirm'
+  | 'decline'
+  | 'propose_alternate'
+  | 'accept_alternate'
+  | 'decline_alternate';
+
+interface RespondToShowingRequestFunctionData {
+  showingRequestUid: string;
+  action: ShowingRequestResponseAction;
+  responseMessage: string;
+
+  alternateTime?: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    timeZone: string;
+    message?: string;
+  };
+}
+
+interface RespondToShowingRequestFunctionResponse {
+  success: true;
+  showingRequestUid: string;
+  listingUid: string;
+  status: ShowingRequestStatus;
 }
 
 interface ShowingScheduleReservation {
@@ -106,6 +135,15 @@ export class FirebaseShowingRepository
     >(
       functions,
       'createShowingRequest'
+    );
+
+  private readonly respondToShowingRequestFunction =
+    httpsCallable<
+      RespondToShowingRequestFunctionData,
+      RespondToShowingRequestFunctionResponse
+    >(
+      functions,
+      'respondToShowingRequest'
     );
 
   /*
@@ -346,156 +384,26 @@ export class FirebaseShowingRepository
   override async confirmShowingRequestIfAvailable(
     input: RespondToShowingRequestInput
   ): Promise<void> {
-    const requestReference = doc(
-      firestore,
-      this.requestCollectionName,
-      input.showingRequestUid
-    );
+    const result =
+      await this.respondToShowingRequestFunction({
+        showingRequestUid:
+          input.showingRequestUid,
 
-    await runTransaction(
-      firestore,
-      async transaction => {
-        const requestSnapshot =
-          await transaction.get(
-            requestReference
-          );
+        action:
+          'confirm',
 
-        const request =
-          this.requireShowingRequest(
-            requestSnapshot
-          );
+        responseMessage:
+          input.responseMessage.trim()
+      });
 
-        if (
-          request.sellerUid !==
-          input.sellerUid
-        ) {
-          throw new Error(
-            'Only the listing seller may confirm this showing.'
-          );
-        }
-
-        if (
-          request.status !== 'pending' &&
-          request.status !==
-          'alternate_proposed'
-        ) {
-          throw new Error(
-            `This showing cannot be confirmed while it is ${request.status}.`
-          );
-        }
-
-        const confirmedTime =
-          request.status ===
-            'alternate_proposed' &&
-            request.alternateTime
-            ? {
-              date:
-                request.alternateTime.date,
-              startTime:
-                request.alternateTime.startTime,
-              endTime:
-                request.alternateTime.endTime,
-              timeZone:
-                request.alternateTime.timeZone
-            }
-            : request.requestedTime;
-
-        const scheduleReference =
-          this.getScheduleDateReference(
-            request.listingUid,
-            confirmedTime.date
-          );
-
-        const scheduleSnapshot =
-          await transaction.get(
-            scheduleReference
-          );
-
-        const schedule =
-          this.readScheduleDate(
-            scheduleSnapshot,
-            request.listingUid,
-            confirmedTime.date
-          );
-
-        this.assertNoConflict(
-          confirmedTime,
-          schedule.reservations,
-          request.showingRequestUid
-        );
-
-        const now = new Date();
-
-        const historyEntry:
-          ShowingStatusHistoryEntry = {
-          status: 'confirmed',
-          changedBy: 'seller',
-          changedByUid:
-            input.sellerUid,
-          note:
-            input.responseMessage.trim() ||
-            'Showing request confirmed.',
-          changedAt: now
-        };
-
-        const reservations =
-          this.upsertReservation(
-            schedule.reservations,
-            {
-              showingRequestUid:
-                request.showingRequestUid,
-
-              startTime:
-                confirmedTime.startTime,
-
-              endTime:
-                confirmedTime.endTime,
-
-              status: 'confirmed'
-            }
-          );
-
-        transaction.update(
-          requestReference,
-          {
-            status: 'confirmed',
-
-            sellerResponseMessage:
-              input.responseMessage.trim(),
-
-            statusHistory: [
-              ...request.statusHistory,
-              historyEntry
-            ],
-
-            confirmedAt:
-              serverTimestamp(),
-
-            updatedAt:
-              serverTimestamp()
-          }
-        );
-
-        transaction.set(
-          scheduleReference,
-          {
-            listingUid:
-              request.listingUid,
-
-            date:
-              confirmedTime.date,
-
-            reservations,
-
-            updatedAt:
-              serverTimestamp()
-          },
-          {
-            merge: true
-          }
-        );
-      }
-    );
+    if (
+      !result.data.success ||
+      result.data.status !== 'confirmed'
+    ) {
+      throw new Error(
+        'The showing request could not be confirmed.'
+      );
+    }
   }
 
   /*
@@ -505,46 +413,20 @@ export class FirebaseShowingRepository
   override async proposeAlternateTimeIfAvailable(
     input: ProposeAlternateShowingTimeInput
   ): Promise<void> {
-    const requestReference = doc(
-      firestore,
-      this.requestCollectionName,
-      input.showingRequestUid
-    );
+    const responseMessage =
+      input.alternateTime.message.trim();
 
-    await runTransaction(
-      firestore,
-      async transaction => {
-        const requestSnapshot =
-          await transaction.get(
-            requestReference
-          );
+    const result =
+      await this.respondToShowingRequestFunction({
+        showingRequestUid:
+          input.showingRequestUid,
 
-        const request =
-          this.requireShowingRequest(
-            requestSnapshot
-          );
+        action:
+          'propose_alternate',
 
-        if (
-          request.sellerUid !==
-          input.sellerUid
-        ) {
-          throw new Error(
-            'Only the listing seller may propose an alternate showing time.'
-          );
-        }
+        responseMessage,
 
-        if (
-          request.status !== 'pending' &&
-          request.status !==
-          'alternate_proposed'
-        ) {
-          throw new Error(
-            `An alternate time cannot be proposed while this request is ${request.status}.`
-          );
-        }
-
-        const alternateRequestedTime:
-          ShowingRequestedTime = {
+        alternateTime: {
           date:
             input.alternateTime.date,
 
@@ -555,123 +437,73 @@ export class FirebaseShowingRepository
             input.alternateTime.endTime,
 
           timeZone:
-            input.alternateTime.timeZone
-        };
+            input.alternateTime.timeZone,
 
-        const alternateScheduleReference =
-          this.getScheduleDateReference(
-            request.listingUid,
-            alternateRequestedTime.date
-          );
+          message:
+            responseMessage
+        }
+      });
 
-        const alternateScheduleSnapshot =
-          await transaction.get(
-            alternateScheduleReference
-          );
+    if (
+      !result.data.success ||
+      result.data.status !==
+      'alternate_proposed'
+    ) {
+      throw new Error(
+        'The alternate showing time could not be proposed.'
+      );
+    }
+  }
 
-        const alternateSchedule =
-          this.readScheduleDate(
-            alternateScheduleSnapshot,
-            request.listingUid,
-            alternateRequestedTime.date
-          );
+  override async acceptAlternateShowingTimeIfAvailable(
+  input: RespondToAlternateShowingTimeInput
+): Promise<void> {
+  const result =
+    await this.respondToShowingRequestFunction({
+      showingRequestUid:
+        input.showingRequestUid,
 
-        this.assertNoConflict(
-          alternateRequestedTime,
-          alternateSchedule.reservations,
-          request.showingRequestUid
-        );
+      action:
+        'accept_alternate',
 
-        const now = new Date();
+      responseMessage:
+        input.responseMessage.trim()
+    });
 
-        const historyEntry:
-          ShowingStatusHistoryEntry = {
-          status:
-            'alternate_proposed',
-
-          changedBy:
-            'seller',
-
-          changedByUid:
-            input.sellerUid,
-
-          note:
-            input.alternateTime.message
-              .trim() ||
-            'The seller proposed an alternate showing time.',
-
-          changedAt:
-            now
-        };
-
-        const reservations =
-          this.upsertReservation(
-            alternateSchedule.reservations,
-            {
-              showingRequestUid:
-                request.showingRequestUid,
-
-              startTime:
-                alternateRequestedTime.startTime,
-
-              endTime:
-                alternateRequestedTime.endTime,
-
-              status:
-                'alternate_proposed'
-            }
-          );
-
-        transaction.update(
-          requestReference,
-          {
-            status:
-              'alternate_proposed',
-
-            alternateTime: {
-              ...input.alternateTime,
-
-              message:
-                input.alternateTime.message.trim(),
-
-              proposedAt:
-                now
-            },
-
-            sellerResponseMessage:
-              input.alternateTime.message.trim(),
-
-            statusHistory: [
-              ...request.statusHistory,
-              historyEntry
-            ],
-
-            updatedAt:
-              serverTimestamp()
-          }
-        );
-
-        transaction.set(
-          alternateScheduleReference,
-          {
-            listingUid:
-              request.listingUid,
-
-            date:
-              alternateRequestedTime.date,
-
-            reservations,
-
-            updatedAt:
-              serverTimestamp()
-          },
-          {
-            merge: true
-          }
-        );
-      }
+  if (
+    !result.data.success ||
+    result.data.status !== 'confirmed'
+  ) {
+    throw new Error(
+      'The alternate showing time could not be accepted.'
     );
   }
+}
+
+override async declineAlternateShowingTime(
+  input: RespondToAlternateShowingTimeInput
+): Promise<void> {
+  const result =
+    await this.respondToShowingRequestFunction({
+      showingRequestUid:
+        input.showingRequestUid,
+
+      action:
+        'decline_alternate',
+
+      responseMessage:
+        input.responseMessage.trim()
+    });
+
+  if (
+    !result.data.success ||
+    result.data.status !== 'cancelled'
+  ) {
+    throw new Error(
+      'The alternate showing time could not be declined.'
+    );
+  }
+}
 
   /*
    * SHOWING REQUEST READS
@@ -746,6 +578,31 @@ export class FirebaseShowingRepository
     showingRequestUid: string,
     changes: ShowingRequestChanges
   ): Promise<void> {
+    if (changes.status === 'declined') {
+      const responseMessage =
+        typeof changes.sellerResponseMessage ===
+          'string'
+          ? changes.sellerResponseMessage.trim()
+          : '';
+
+      const result =
+        await this.respondToShowingRequestFunction({
+          showingRequestUid,
+          action: 'decline',
+          responseMessage
+        });
+
+      if (
+        !result.data.success ||
+        result.data.status !== 'declined'
+      ) {
+        throw new Error(
+          'The showing request could not be declined.'
+        );
+      }
+
+      return;
+    }
     const requestReference = doc(
       firestore,
       this.requestCollectionName,
@@ -755,7 +612,6 @@ export class FirebaseShowingRepository
     const status = changes.status;
 
     const releasesReservation =
-      status === 'declined' ||
       status === 'cancelled' ||
       status === 'completed';
 

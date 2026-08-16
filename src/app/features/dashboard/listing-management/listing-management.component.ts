@@ -122,7 +122,7 @@ export class ListingManagementComponent implements OnInit {
   }
 
   protected async openEnhancements():
-  Promise<void> {
+    Promise<void> {
     await this.router.navigate([
       '/sell/listings',
       this.listingUid,
@@ -131,7 +131,7 @@ export class ListingManagementComponent implements OnInit {
   }
 
   protected async openShowingAvailability():
-  Promise<void> {
+    Promise<void> {
     await this.router.navigate([
       '/sell/listings',
       this.listingUid,
@@ -139,8 +139,17 @@ export class ListingManagementComponent implements OnInit {
     ]);
   }
 
+  protected async openShowingRequests():
+    Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'showing-requests'
+    ]);
+  }
+
   protected async previewListing():
-  Promise<void> {
+    Promise<void> {
     await this.router.navigate([
       '/listings',
       this.listingUid

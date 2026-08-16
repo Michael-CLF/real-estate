@@ -1,1 +1,549 @@
-<p>showing-request-details works!</p>
+<section class="showing-request-details">
+  <a class="back-link" [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'showing-requests'
+    ]">
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+    <span>Return to showing requests</span>
+  </a>
+
+  @if (isLoading()) {
+  <div class="state-card" aria-live="polite">
+    <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+    <p>Loading showing request...</p>
+  </div>
+  } @else if (loadError()) {
+  <div class="state-card state-card--error" role="alert">
+    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+    <h1>Showing request unavailable</h1>
+
+    <p>{{ loadError() }}</p>
+
+    <a class="secondary-button" [routerLink]="[
+          '/sell/listings',
+          listingUid,
+          'showing-requests'
+        ]">
+      Return to showing requests
+    </a>
+  </div>
+  } @else if (request(); as currentRequest) {
+  <header class="page-header">
+    <div>
+      <p class="page-header__eyebrow">
+        Showing request
+      </p>
+
+      <h1>Review Showing Request</h1>
+
+      <p class="page-header__reference">
+        Reference:
+        <strong>
+          {{ referenceNumber(currentRequest) }}
+        </strong>
+      </p>
+    </div>
+
+    <span [class]="
+          'status-badge ' +
+          statusClass(currentRequest.status)
+        ">
+      {{ statusLabel(currentRequest.status) }}
+    </span>
+  </header>
+
+  <div class="details-layout">
+    <main class="details-main">
+      <article class="property-card">
+        <div class="property-card__media">
+          @if (currentRequest.primaryPhotoUrl) {
+          <img [src]="currentRequest.primaryPhotoUrl" [alt]="
+                  'Property at ' +
+                  currentRequest.propertyAddress
+                ">
+          } @else {
+          <div class="property-card__placeholder" aria-hidden="true">
+            <i class="fa-solid fa-house"></i>
+          </div>
+          }
+        </div>
+
+        <div class="property-card__content">
+          <p class="card-eyebrow">
+            Showing requested for
+          </p>
+
+          <h2>
+            {{ currentRequest.propertyAddress }}
+          </h2>
+
+          <p>
+            {{ propertyLocation(currentRequest) }}
+          </p>
+
+          <a class="property-card__link" [routerLink]="[
+                '/listings',
+                currentRequest.listingUid
+              ]">
+            View public listing
+
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+          </a>
+        </div>
+      </article>
+
+      <article class="detail-card">
+        <div class="detail-card__heading">
+          <div class="detail-card__icon" aria-hidden="true">
+            <i class="fa-regular fa-calendar-check"></i>
+          </div>
+
+          <div>
+            <p class="card-eyebrow">
+              Requested appointment
+            </p>
+
+            <h2>Date and time</h2>
+          </div>
+        </div>
+
+        <div class="appointment-grid">
+          <div class="appointment-detail">
+            <span>Date</span>
+
+            <strong>
+              {{
+              formatDate(
+              currentRequest.requestedTime.date
+              )
+              }}
+            </strong>
+          </div>
+
+          <div class="appointment-detail">
+            <span>Time</span>
+
+            <strong>
+              {{
+              formatTime(
+              currentRequest.requestedTime.startTime
+              )
+              }}
+              –
+              {{
+              formatTime(
+              currentRequest.requestedTime.endTime
+              )
+              }}
+            </strong>
+          </div>
+
+          <div class="appointment-detail">
+            <span>Time zone</span>
+
+            <strong>
+              {{
+              currentRequest.requestedTime.timeZone
+              }}
+            </strong>
+          </div>
+
+          <div class="appointment-detail">
+            <span>Submitted</span>
+
+            <strong>
+              {{
+              formatSubmittedAt(
+              currentRequest.createdAt
+              )
+              }}
+            </strong>
+          </div>
+        </div>
+      </article>
+
+      @if (currentRequest.alternateTime) {
+      <article class="
+              detail-card
+              detail-card--alternate
+            ">
+        <div class="detail-card__heading">
+          <div class="detail-card__icon" aria-hidden="true">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+          </div>
+
+          <div>
+            <p class="card-eyebrow">
+              Alternate appointment
+            </p>
+
+            <h2>Proposed time</h2>
+          </div>
+        </div>
+
+        <div class="appointment-grid">
+          <div class="appointment-detail">
+            <span>Date</span>
+
+            <strong>
+              {{
+              formatDate(
+              currentRequest.alternateTime.date
+              )
+              }}
+            </strong>
+          </div>
+
+          <div class="appointment-detail">
+            <span>Time</span>
+
+            <strong>
+              {{
+              formatTime(
+              currentRequest.alternateTime.startTime
+              )
+              }}
+              –
+              {{
+              formatTime(
+              currentRequest.alternateTime.endTime
+              )
+              }}
+            </strong>
+          </div>
+
+          <div class="appointment-detail">
+            <span>Time zone</span>
+
+            <strong>
+              {{
+              currentRequest.alternateTime.timeZone
+              }}
+            </strong>
+          </div>
+        </div>
+
+        @if (currentRequest.alternateTime.message) {
+        <div class="response-message">
+          <span>Message about this time</span>
+
+          <p>
+            {{
+            currentRequest.alternateTime.message
+            }}
+          </p>
+        </div>
+        }
+      </article>
+      }
+
+      <article class="detail-card">
+        <div class="detail-card__heading">
+          <div class="detail-card__icon" aria-hidden="true">
+            <i class="fa-solid fa-user"></i>
+          </div>
+
+          <div>
+            <p class="card-eyebrow">
+              Buyer information
+            </p>
+
+            <h2>
+              {{ buyerName(currentRequest) }}
+            </h2>
+          </div>
+        </div>
+
+        <div class="contact-grid">
+          <a class="contact-item" [href]="
+                'mailto:' +
+                currentRequest.buyerContact.email
+              ">
+            <div class="contact-item__icon" aria-hidden="true">
+              <i class="fa-regular fa-envelope"></i>
+            </div>
+
+            <div>
+              <span>Email address</span>
+
+              <strong>
+                {{
+                currentRequest.buyerContact.email
+                }}
+              </strong>
+            </div>
+          </a>
+
+          <a class="contact-item" [href]="
+                'tel:' +
+                currentRequest.buyerContact.phone
+              ">
+            <div class="contact-item__icon" aria-hidden="true">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+
+            <div>
+              <span>Phone number</span>
+
+              <strong>
+                {{
+                currentRequest.buyerContact.phone
+                }}
+              </strong>
+            </div>
+          </a>
+        </div>
+      </article>
+
+      <article class="detail-card">
+        <div class="detail-card__heading">
+          <div class="detail-card__icon" aria-hidden="true">
+            <i class="fa-regular fa-message"></i>
+          </div>
+
+          <div>
+            <p class="card-eyebrow">
+              Buyer message
+            </p>
+
+            <h2>Message to the seller</h2>
+          </div>
+        </div>
+
+        @if (currentRequest.buyerMessage) {
+        <div class="buyer-message">
+          <p>{{ currentRequest.buyerMessage }}</p>
+        </div>
+        } @else {
+        <p class="empty-message">
+          The buyer did not include an additional
+          message.
+        </p>
+        }
+      </article>
+    </main>
+
+    <aside class="response-panel">
+      <div class="response-panel__heading">
+        <div class="response-panel__icon" aria-hidden="true">
+          <i class="fa-solid fa-reply"></i>
+        </div>
+
+        <div>
+          <p class="card-eyebrow">
+            Seller response
+          </p>
+
+          <h2>
+            {{
+            responsePanelHeading(
+            currentRequest.status
+            )
+            }}
+          </h2>
+        </div>
+      </div>
+
+      @if (canRespond()) {
+      <p class="response-panel__description">
+        Confirm the requested appointment, propose a
+        different available time, or decline the request.
+      </p>
+
+      <div class="response-field">
+        <label for="seller-response-message">
+          Message to the buyer
+          <span>Optional</span>
+        </label>
+
+        <textarea #responseMessageField id="seller-response-message" rows="4" maxlength="1000"
+          placeholder="Add a message about this showing request." [value]="responseMessage()"
+          [disabled]="isResponding()" (input)="
+        updateResponseMessage(
+          responseMessageField.value
+        )
+      "></textarea>
+
+        <small>
+          {{ responseMessage().length }} / 1000
+        </small>
+      </div>
+
+      @if (responseError()) {
+      <div class="response-alert response-alert--error" role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        <span>{{ responseError() }}</span>
+      </div>
+      }
+
+      @if (showAlternateForm()) {
+      <div class="alternate-form">
+        <div class="alternate-form__heading">
+          <div>
+            <p class="card-eyebrow">
+              Alternate appointment
+            </p>
+
+            <h3>Propose another time</h3>
+          </div>
+
+          <button type="button" class="icon-button" aria-label="Close alternate time form" [disabled]="isResponding()"
+            (click)="closeAlternateForm()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="alternate-form__fields">
+          <div class="response-field">
+            <label for="alternate-date">
+              Date
+            </label>
+
+            <input #alternateDateField id="alternate-date" type="date" [value]="alternateDate()"
+              [disabled]="isResponding()" (input)="
+              updateAlternateDate(
+                alternateDateField.value
+              )
+            ">
+          </div>
+
+          <div class="response-field">
+            <label for="alternate-start-time">
+              Start time
+            </label>
+
+            <input #alternateStartTimeField id="alternate-start-time" type="time" [value]="alternateStartTime()"
+              [disabled]="isResponding()" (input)="
+              updateAlternateStartTime(
+                alternateStartTimeField.value
+              )
+            ">
+          </div>
+        </div>
+
+        <div class="response-field">
+          <label for="alternate-message">
+            Message about this time
+            <span>Optional</span>
+          </label>
+
+          <textarea #alternateMessageField id="alternate-message" rows="3" maxlength="1000"
+            placeholder="Explain why you are suggesting another time." [value]="alternateMessage()"
+            [disabled]="isResponding()" (input)="
+            updateAlternateMessage(
+              alternateMessageField.value
+            )
+          "></textarea>
+
+          <small>
+            {{ alternateMessage().length }} / 1000
+          </small>
+        </div>
+
+        <div class="alternate-form__actions">
+          <button type="button" class="secondary-button" [disabled]="isResponding()" (click)="closeAlternateForm()">
+            Cancel
+          </button>
+
+          <button type="button" class="primary-button" [disabled]="
+            isResponding() ||
+            !alternateDate() ||
+            !alternateStartTime()
+          " (click)="proposeAlternateTime()">
+            @if (isResponding()) {
+            <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+            Sending...
+            } @else {
+            <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>
+
+            Send alternate time
+            }
+          </button>
+        </div>
+      </div>
+      } @else {
+      <div class="response-panel__actions">
+        <button type="button" class="primary-button" [disabled]="isResponding()" (click)="acceptShowing()">
+          @if (isResponding()) {
+          <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+          Processing...
+          } @else {
+          <i class="fa-solid fa-check" aria-hidden="true"></i>
+
+          Accept showing
+          }
+        </button>
+
+        <button type="button" class="secondary-button" [disabled]="isResponding()" (click)="openAlternateForm()">
+          <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>
+
+          Propose another time
+        </button>
+
+        <button type="button" class="danger-button" [disabled]="isResponding()" (click)="declineShowing()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+
+          Decline request
+        </button>
+      </div>
+      }
+
+      <p class="response-panel__notice">
+        The buyer will be notified after your response is
+        processed.
+      </p>
+      } @else {
+      <div class="completed-response">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+        <div>
+          <strong>
+            {{
+            statusLabel(
+            currentRequest.status
+            )
+            }}
+          </strong>
+
+          <p>
+            {{
+            sellerStatusDescription(
+            currentRequest.status
+            )
+            }}
+          </p>
+        </div>
+      </div>
+
+      @if (currentRequest.sellerResponseMessage) {
+      <div class="response-message">
+        <span>Seller response</span>
+
+        <p>
+          {{
+          currentRequest.sellerResponseMessage
+          }}
+        </p>
+      </div>
+      }
+      }
+
+      <div class="response-panel__reminder">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+
+        <p>
+          Appointment times remain protected while a
+          request is pending or confirmed.
+        </p>
+      </div>
+    </aside>
+  </div>
+  }
+</section>

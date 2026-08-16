@@ -23,18 +23,47 @@
   </div>
   } @else if (listing(); as currentListing) {
   <header class="management-header">
-    <div>
-      <p class="management-header__eyebrow">
-        Manage listing
-      </p>
+    <div class="management-header__property">
+      @if (currentListing.primaryPhotoUrl) {
+      <img class="management-header__photo" [src]="currentListing.primaryPhotoUrl" [alt]="
+              'Primary listing photo for ' +
+              currentListing.addressLine1
+            ">
+      } @else {
+      <div class="management-header__photo-placeholder" aria-hidden="true">
+        <i class="fa-solid fa-house"></i>
+      </div>
+      }
 
-      <h1>{{ currentListing.addressLine1 }}</h1>
+      <div class="management-header__details">
+        <p class="management-header__eyebrow">
+          Manage listing
+        </p>
 
-      <p class="management-header__location">
-        {{ currentListing.city }},
-        {{ currentListing.state }}
-        {{ currentListing.zipCode }}
-      </p>
+        <h1>{{ currentListing.addressLine1 }}</h1>
+
+        <p class="management-header__location">
+          {{ currentListing.city }},
+          {{ currentListing.state }}
+          {{ currentListing.zipCode }}
+        </p>
+
+        <div class="management-header__status-row">
+          <span class="status-badge">
+            {{ currentListing.status }}
+          </span>
+
+          <span>
+            {{ currentListing.daysOnMarket }}
+            @if (currentListing.daysOnMarket === 1) {
+            day
+            } @else {
+            days
+            }
+            on NavStreet
+          </span>
+        </div>
+      </div>
     </div>
 
     <div class="management-header__summary">
@@ -47,92 +76,319 @@
         }}
       </strong>
 
-      <span class="status-badge">
-        {{ currentListing.status }}
-      </span>
+      <button type="button" class="header-button" (click)="previewListing()">
+        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+
+        View public listing
+      </button>
     </div>
   </header>
 
-  <div class="management-grid">
-    <article class="management-card management-card--featured">
-      <div class="management-card__icon" aria-hidden="true">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-      </div>
-
-      <div class="management-card__content">
-        <h2>Enhance Listing</h2>
-
-        <p>
-          Add detailed construction, interior, kitchen,
-          outdoor, technology, accessibility, and
-          community features.
+  <section class="activity-summary" aria-labelledby="activity-summary-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-heading__eyebrow">
+          Listing performance
         </p>
+
+        <h2 id="activity-summary-heading">
+          Activity at a glance
+        </h2>
       </div>
 
-      <button type="button" class="primary-button" (click)="openEnhancements()">
-        Manage enhancements
+      <span class="activity-summary__note">
+        Updated with your listing activity
+      </span>
+    </div>
 
-        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-      </button>
-    </article>
+    <div class="activity-summary__grid">
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-solid fa-eye"></i>
+        </div>
 
-    <article class="management-card management-card--showings">
-      <div class="management-card__icon" aria-hidden="true">
-        <i class="fa-regular fa-calendar-check"></i>
-      </div>
+        <div>
+          <strong>{{ currentListing.views }}</strong>
+          <span>Views</span>
+        </div>
+      </article>
 
-      <div class="management-card__content">
-        <h2>Showing Availability</h2>
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-solid fa-heart"></i>
+        </div>
 
-        <p>
-          Set the days and times when buyers may request an
-          in-person showing of this property.
+        <div>
+          <strong>{{ currentListing.favorites }}</strong>
+          <span>Saves</span>
+        </div>
+      </article>
+
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-regular fa-calendar"></i>
+        </div>
+
+        <div>
+          <strong>
+            {{ currentListing.daysOnMarket }}
+          </strong>
+
+          <span>Days listed</span>
+        </div>
+      </article>
+
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-solid fa-house-circle-check"></i>
+        </div>
+
+        <div>
+          <strong class="activity-stat__status">
+            {{ currentListing.status }}
+          </strong>
+
+          <span>Listing status</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="management-tools" aria-labelledby="management-tools-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-heading__eyebrow">
+          Property controls
         </p>
+
+        <h2 id="management-tools-heading">
+          Manage this listing
+        </h2>
       </div>
+    </div>
 
-      <button type="button" class="primary-button" (click)="openShowingAvailability()">
-        Manage availability
+    <div class="management-grid">
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
 
-        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-      </button>
-    </article>
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Edit Listing</h3>
 
-    <article class="management-card">
-      <div class="management-card__icon" aria-hidden="true">
-        <i class="fa-solid fa-eye"></i>
-      </div>
+            <span class="coming-soon">
+              Coming next
+            </span>
+          </div>
 
+          <p>
+            Update the listing price, property details,
+            description, photographs, and seller-provided
+            information.
+          </p>
+        </div>
 
-      <div class="management-card__content">
-        <h2>Preview Listing</h2>
+        <button type="button" class="secondary-button" disabled>
+          Edit listing
+        </button>
+      </article>
 
-        <p>
-          View the public marketplace page exactly as
-          buyers see it.
-        </p>
-      </div>
+      <article class="
+            management-card
+            management-card--featured
+          ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
 
-      <button type="button" class="secondary-button" (click)="previewListing()">
-        Preview listing
-      </button>
-    </article>
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Listing Enhancements</h3>
 
-    <article class="management-card management-card--disabled">
-      <div class="management-card__icon" aria-hidden="true">
-        <i class="fa-solid fa-pen-to-square"></i>
-      </div>
+            <span class="available-badge">
+              Available
+            </span>
+          </div>
 
-      <div class="management-card__content">
-        <h2>Edit Core Listing</h2>
+          <p>
+            Add detailed features, amenities, systems,
+            accessibility information, and nearby schools.
+          </p>
+        </div>
 
-        <p>
-          Update the main property details, pricing,
-          description, and photos.
-        </p>
-      </div>
+        <button type="button" class="primary-button" (click)="openEnhancements()">
+          Manage enhancements
 
-      <span class="coming-soon">Coming next</span>
-    </article>
-  </div>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="
+            management-card
+            management-card--attention
+          ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-regular fa-calendar-check"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Showing Requests</h3>
+
+            <span class="available-badge">
+              Available
+            </span>
+          </div>
+
+          <p>
+            Review pending requests, confirm appointments,
+            propose another time, and manage upcoming
+            property showings.
+          </p>
+        </div>
+
+        <button type="button" class="primary-button" (click)="openShowingRequests()">
+          View showing requests
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="
+            management-card
+            management-card--showings
+          ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-calendar-days"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Showing Availability</h3>
+
+            <span class="available-badge">
+              Available
+            </span>
+          </div>
+
+          <p>
+            Set the days, times, appointment length, and
+            advance notice buyers see when requesting a
+            showing.
+          </p>
+        </div>
+
+        <button type="button" class="primary-button" (click)="openShowingAvailability()">
+          Manage availability
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-file-signature"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Offers</h3>
+
+            <span class="coming-soon">
+              Coming soon
+            </span>
+          </div>
+
+          <p>
+            Review purchase offers, important terms,
+            expiration dates, counteroffers, and offer
+            history for this property.
+          </p>
+        </div>
+
+        <button type="button" class="secondary-button" disabled>
+          View offers
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-message"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Buyer Inquiries</h3>
+
+            <span class="coming-soon">
+              Coming soon
+            </span>
+          </div>
+
+          <p>
+            Review questions and contact requests submitted
+            by buyers interested in this property.
+          </p>
+        </div>
+
+        <button type="button" class="secondary-button" disabled>
+          View inquiries
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Listing Activity</h3>
+
+            <span class="coming-soon">
+              Coming soon
+            </span>
+          </div>
+
+          <p>
+            Review views, saves, inquiries, showing activity,
+            offers, price changes, and important listing
+            events.
+          </p>
+        </div>
+
+        <button type="button" class="secondary-button" disabled>
+          View activity
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-toggle-on"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>Listing Status</h3>
+
+            <span class="coming-soon">
+              Coming soon
+            </span>
+          </div>
+
+          <p>
+            Pause, reactivate, withdraw, mark under contract,
+            or complete this listing while preserving its
+            status history.
+          </p>
+        </div>
+
+        <button type="button" class="secondary-button" disabled>
+          Manage status
+        </button>
+      </article>
+    </div>
+  </section>
   }
 </section>

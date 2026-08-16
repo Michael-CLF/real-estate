@@ -12,6 +12,16 @@ export const SHOWING_REQUEST_SENDGRID_TEMPLATE_ID =
   );
 
 /**
+* SendGrid Dynamic Template used to notify a buyer
+* when the seller responds to a showing request.
+*/
+export const SHOWING_RESPONSE_SENDGRID_TEMPLATE_ID =
+  defineString(
+    'SHOWING_RESPONSE_SENDGRID_TEMPLATE_ID'
+  );
+
+
+/**
  * Public NavStreet application URL used to build links
  * back to the seller dashboard.
  *

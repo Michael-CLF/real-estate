@@ -1,17 +1,28 @@
-import { Injectable, inject, signal } from '@angular/core';
+import {
+  Injectable,
+  inject,
+  signal
+} from '@angular/core';
 
-import { DashboardState } from '../models/dashboard-state.model';
-import { DashboardService } from './dashboard.service';
+import {
+  DashboardState
+} from '../models/dashboard-state.model';
+
+import {
+  DashboardService
+} from './dashboard.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardStateService {
 
-  private readonly dashboardService = inject(DashboardService);
+  private readonly dashboardService =
+    inject(DashboardService);
 
   readonly state = signal<DashboardState>({
     firstName: '',
+    userProfile: null,
 
     hasListings: false,
     hasDraftListings: false,
@@ -30,21 +41,31 @@ export class DashboardStateService {
   async load(): Promise<void> {
 
     const [
-      firstName,
+      userProfile,
       draftListings,
       activeListings,
       savedProperties
     ] = await Promise.all([
-      this.dashboardService.getCurrentUserFirstName(),
-      this.dashboardService.getDraftListings(),
-      this.dashboardService.getActiveListings(),
-      this.dashboardService.getSavedHomes()
+      this.dashboardService
+        .getCurrentUserProfile(),
+
+      this.dashboardService
+        .getDraftListings(),
+
+      this.dashboardService
+        .getActiveListings(),
+
+      this.dashboardService
+        .getSavedHomes()
     ]);
 
     this.state.update(state => ({
       ...state,
 
-      firstName,
+      firstName:
+        userProfile?.firstName ?? '',
+
+      userProfile,
       draftListings,
       activeListings,
       savedProperties,
@@ -65,6 +86,7 @@ export class DashboardStateService {
         savedProperties.length === 0
     }));
   }
+
   async removeSavedProperty(
     listingUid: string
   ): Promise<void> {

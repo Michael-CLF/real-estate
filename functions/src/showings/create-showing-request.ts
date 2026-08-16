@@ -215,6 +215,22 @@ export const createShowingRequest = onCall<
             );
           }
 
+          logger.info(
+            'Showing request identity comparison.',
+            {
+              listingUid:
+                data.listingUid,
+
+              authenticatedBuyerUid:
+                buyerUid,
+
+              listingSellerUid:
+                sellerUid,
+
+              authenticatedEmail,
+            },
+          );
+
           if (sellerUid === buyerUid) {
             throw new HttpsError(
               'failed-precondition',
@@ -233,13 +249,13 @@ export const createShowingRequest = onCall<
 
           const availability =
             availabilitySnapshot.data() as
-              ShowingAvailabilityDocument;
+            ShowingAvailabilityDocument;
 
           if (
             availability.listingUid !==
-              data.listingUid ||
+            data.listingUid ||
             availability.sellerUid !==
-              sellerUid
+            sellerUid
           ) {
             throw new HttpsError(
               'failed-precondition',
@@ -283,19 +299,19 @@ export const createShowingRequest = onCall<
 
           const reservation:
             ShowingScheduleReservation = {
-              showingRequestUid:
-                requestReference.id,
+            showingRequestUid:
+              requestReference.id,
 
-              startTime:
-                data.requestedTime
-                  .startTime,
+            startTime:
+              data.requestedTime
+                .startTime,
 
-              endTime:
-                data.requestedTime
-                  .endTime,
+            endTime:
+              data.requestedTime
+                .endTime,
 
-              status: 'pending',
-            };
+            status: 'pending',
+          };
 
           const listingAddress =
             getListingAddress(
@@ -507,7 +523,7 @@ function validateRequestData(
   const firstName =
     requireString(
       buyerContactValue[
-        'firstName'
+      'firstName'
       ],
       'First name is required.',
       60,
@@ -516,7 +532,7 @@ function validateRequestData(
   const lastName =
     requireString(
       buyerContactValue[
-        'lastName'
+      'lastName'
       ],
       'Last name is required.',
       60,
@@ -539,10 +555,12 @@ function validateRequestData(
   }
 
   const phone =
-    requireString(
-      buyerContactValue['phone'],
-      'Phone number is required.',
-      30,
+    formatUsPhoneNumber(
+      requireString(
+        buyerContactValue['phone'],
+        'Phone number is required.',
+        30,
+      ),
     );
 
   const requestedTimeValue =
@@ -557,40 +575,40 @@ function validateRequestData(
 
   const requestedTime:
     ShowingRequestedTime = {
-      date:
-        requireString(
-          requestedTimeValue['date'],
-          'A showing date is required.',
-          10,
-        ),
+    date:
+      requireString(
+        requestedTimeValue['date'],
+        'A showing date is required.',
+        10,
+      ),
 
-      startTime:
-        requireString(
-          requestedTimeValue[
-            'startTime'
-          ],
-          'A showing start time is required.',
-          5,
-        ),
+    startTime:
+      requireString(
+        requestedTimeValue[
+        'startTime'
+        ],
+        'A showing start time is required.',
+        5,
+      ),
 
-      endTime:
-        requireString(
-          requestedTimeValue[
-            'endTime'
-          ],
-          'A showing end time is required.',
-          5,
-        ),
+    endTime:
+      requireString(
+        requestedTimeValue[
+        'endTime'
+        ],
+        'A showing end time is required.',
+        5,
+      ),
 
-      timeZone:
-        requireString(
-          requestedTimeValue[
-            'timeZone'
-          ],
-          'A showing timezone is required.',
-          100,
-        ),
-    };
+    timeZone:
+      requireString(
+        requestedTimeValue[
+        'timeZone'
+        ],
+        'A showing timezone is required.',
+        100,
+      ),
+  };
 
   if (
     !DATE_PATTERN.test(
@@ -679,9 +697,9 @@ function validateRequestedAppointment(
 
   if (
     requestedTime.date <
-      currentDate ||
+    currentDate ||
     requestedTime.date >
-      finalBookingDate
+    finalBookingDate
   ) {
     throw new HttpsError(
       'failed-precondition',
@@ -707,9 +725,9 @@ function validateRequestedAppointment(
     exception
       ? exception.timeWindows
       : getWeeklyTimeWindows(
-          requestedTime.date,
-          availability,
-        );
+        requestedTime.date,
+        availability,
+      );
 
   if (!timeWindows.length) {
     throw new HttpsError(
@@ -775,9 +793,9 @@ function validateRequestedAppointment(
     Date.now() +
     availability
       .minimumNoticeHours *
-      60 *
-      60 *
-      1000;
+    60 *
+    60 *
+    1000;
 
   if (
     appointmentDate.getTime() <
@@ -870,7 +888,7 @@ function isSlotInWindow(
       requestedStart -
       windowStart
     ) %
-      interval ===
+    interval ===
     0
   );
 }
@@ -914,9 +932,9 @@ function assertNoConflict(
 
         return (
           requestedStart <
-            existingEnd &&
+          existingEnd &&
           requestedEnd >
-            existingStart
+          existingStart
         );
       },
     );
@@ -935,7 +953,7 @@ function enforceRateLimit(
 ): void {
   const lastRequestAt =
     rateLimitData?.[
-      'lastRequestAt'
+    'lastRequestAt'
     ];
 
   if (
@@ -975,13 +993,13 @@ function readSchedule(
   return {
     listingUid:
       typeof value['listingUid'] ===
-      'string'
+        'string'
         ? value['listingUid']
         : listingUid,
 
     date:
       typeof value['date'] ===
-      'string'
+        'string'
         ? value['date']
         : date,
 
@@ -990,9 +1008,9 @@ function readSchedule(
         value['reservations'],
       )
         ? value[
-          'reservations'
+        'reservations'
         ] as
-          ShowingScheduleReservation[]
+        ShowingScheduleReservation[]
         : [],
   };
 }
@@ -1058,6 +1076,8 @@ function getListingAddress(
       ),
   };
 }
+
+
 
 function getPrimaryPhotoUrl(
   listingData: DocumentData,
@@ -1149,15 +1169,15 @@ function zonedDateTimeToDate(
 
   if (
     convertedParts.year !==
-      dateParts.year ||
+    dateParts.year ||
     convertedParts.month !==
-      dateParts.month ||
+    dateParts.month ||
     convertedParts.day !==
-      dateParts.day ||
+    dateParts.day ||
     convertedParts.hour !==
-      hour ||
+    hour ||
     convertedParts.minute !==
-      minute
+    minute
   ) {
     throw new HttpsError(
       'invalid-argument',
@@ -1276,11 +1296,11 @@ function isRealCalendarDate(
 
   return (
     date.getUTCFullYear() ===
-      parts.year &&
+    parts.year &&
     date.getUTCMonth() + 1 ===
-      parts.month &&
+    parts.month &&
     date.getUTCDate() ===
-      parts.day
+    parts.day
   );
 }
 
@@ -1361,7 +1381,7 @@ function requireString(
   if (
     !normalizedValue ||
     normalizedValue.length >
-      maximumLength
+    maximumLength
   ) {
     throw new HttpsError(
       'invalid-argument',
@@ -1410,5 +1430,29 @@ function isRecord(
     typeof value === 'object' &&
     value !== null &&
     !Array.isArray(value)
+  );
+}
+
+/**
+ * Validates and formats a ten-digit United States
+ * telephone number for consistent storage.
+ */
+function formatUsPhoneNumber(
+  value: string,
+): string {
+  const digits =
+    value.replace(/\D/g, '');
+
+  if (digits.length !== 10) {
+    throw new HttpsError(
+      'invalid-argument',
+      'Enter a valid ten-digit phone number.',
+    );
+  }
+
+  return (
+    `(${digits.slice(0, 3)}) ` +
+    `${digits.slice(3, 6)}-` +
+    digits.slice(6)
   );
 }

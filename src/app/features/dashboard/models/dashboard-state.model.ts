@@ -30,7 +30,7 @@ export interface SavedPropertySummary {
 
 export interface DashboardState {
   firstName: string;
-
+  userProfile: DashboardUserProfile | null;
   hasListings: boolean;
   hasDraftListings: boolean;
   hasSavedProperties: boolean;
@@ -43,4 +43,14 @@ export interface DashboardState {
   draftListings: Listing[];
   activeListings: Listing[];
   savedProperties: SavedPropertySummary[];
+}
+
+export interface DashboardUserProfile {
+  accountNumber: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  emailVerified: boolean;
 }

@@ -1,1 +1,425 @@
-<p>showing-requests works!</p>
+<section class="showing-requests">
+  <a
+    class="back-link"
+    [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>Return to listing management</span>
+  </a>
+
+  <header class="page-header">
+    <div class="page-header__icon" aria-hidden="true">
+      <i class="fa-regular fa-calendar-check"></i>
+    </div>
+
+    <div>
+      <p class="page-header__eyebrow">
+        Showing management
+      </p>
+
+      <h1>Showing Requests</h1>
+
+      <p class="page-header__description">
+        Review and respond to buyer requests for this
+        property.
+      </p>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>Loading showing requests...</p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <h2>Showing requests are unavailable</h2>
+
+      <p>{{ loadError() }}</p>
+
+      <a
+        class="secondary-button"
+        [routerLink]="[
+          '/sell/listings',
+          listingUid,
+          'manage'
+        ]"
+      >
+        Return to listing management
+      </a>
+    </div>
+  } @else {
+    <section
+      class="request-summary"
+      aria-labelledby="request-summary-heading"
+    >
+      <div class="section-heading">
+        <div>
+          <p class="section-heading__eyebrow">
+            Request overview
+          </p>
+
+          <h2 id="request-summary-heading">
+            Showing activity
+          </h2>
+        </div>
+
+        <span class="request-summary__total">
+          {{ requests().length }}
+          @if (requests().length === 1) {
+            request
+          } @else {
+            requests
+          }
+        </span>
+      </div>
+
+      <div class="request-summary__grid">
+        <article
+          class="
+            summary-stat
+            summary-stat--pending
+          "
+        >
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-clock"></i>
+          </div>
+
+          <div>
+            <strong>{{ pendingCount() }}</strong>
+            <span>Pending review</span>
+          </div>
+        </article>
+
+        <article
+          class="
+            summary-stat
+            summary-stat--confirmed
+          "
+        >
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+
+          <div>
+            <strong>{{ confirmedCount() }}</strong>
+            <span>Confirmed</span>
+          </div>
+        </article>
+
+        <article
+          class="
+            summary-stat
+            summary-stat--alternate
+          "
+        >
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+          </div>
+
+          <div>
+            <strong>{{ alternateCount() }}</strong>
+            <span>Alternate proposed</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    @if (requests().length === 0) {
+      <div class="state-card state-card--empty">
+        <div
+          class="state-card__icon"
+          aria-hidden="true"
+        >
+          <i class="fa-regular fa-calendar"></i>
+        </div>
+
+        <h2>No showing requests yet</h2>
+
+        <p>
+          Buyer requests for this property will appear
+          here after they are submitted.
+        </p>
+
+        <a
+          class="secondary-button"
+          [routerLink]="[
+            '/sell/listings',
+            listingUid,
+            'manage'
+          ]"
+        >
+          Return to listing management
+        </a>
+      </div>
+    } @else {
+      <section
+        class="request-list-section"
+        aria-labelledby="request-list-heading"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="section-heading__eyebrow">
+              Buyer requests
+            </p>
+
+            <h2 id="request-list-heading">
+              Requests for this listing
+            </h2>
+          </div>
+        </div>
+
+        <div class="request-list">
+          @for (
+            request of requests();
+            track request.showingRequestUid
+          ) {
+            <article
+              class="request-card"
+              [class.request-card--pending]="
+                request.status === 'pending'
+              "
+            >
+              <div class="request-card__property">
+                @if (request.primaryPhotoUrl) {
+                  <img
+                    class="request-card__photo"
+                    [src]="request.primaryPhotoUrl"
+                    [alt]="
+                      'Property at ' +
+                      request.propertyAddress
+                    "
+                  >
+                } @else {
+                  <div
+                    class="
+                      request-card__photo
+                      request-card__photo--placeholder
+                    "
+                    aria-hidden="true"
+                  >
+                    <i class="fa-solid fa-house"></i>
+                  </div>
+                }
+
+                <div class="request-card__property-details">
+                  <p class="request-card__label">
+                    Showing request for
+                  </p>
+
+                  <h3>{{ request.propertyAddress }}</h3>
+
+                  <p>
+                    {{ propertyLocation(request) }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="request-card__status">
+                <span
+                  [class]="
+                    'status-badge ' +
+                    statusClass(request.status)
+                  "
+                >
+                  {{ statusLabel(request.status) }}
+                </span>
+              </div>
+
+              <div class="request-card__information">
+                <div class="request-detail">
+                  <div
+                    class="request-detail__icon"
+                    aria-hidden="true"
+                  >
+                    <i class="fa-regular fa-calendar"></i>
+                  </div>
+
+                  <div>
+                    <span>Requested date</span>
+
+                    <strong>
+                      {{
+                        formatDate(
+                          request.requestedTime.date
+                        )
+                      }}
+                    </strong>
+                  </div>
+                </div>
+
+                <div class="request-detail">
+                  <div
+                    class="request-detail__icon"
+                    aria-hidden="true"
+                  >
+                    <i class="fa-regular fa-clock"></i>
+                  </div>
+
+                  <div>
+                    <span>Requested time</span>
+
+                    <strong>
+                      {{
+                        formatTime(
+                          request.requestedTime.startTime
+                        )
+                      }}
+                      –
+                      {{
+                        formatTime(
+                          request.requestedTime.endTime
+                        )
+                      }}
+                    </strong>
+                  </div>
+                </div>
+
+                <div class="request-detail">
+                  <div
+                    class="request-detail__icon"
+                    aria-hidden="true"
+                  >
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+
+                  <div>
+                    <span>Requested by</span>
+
+                    <strong>
+                      {{ buyerName(request) }}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              @if (
+                request.status ===
+                  'alternate_proposed' &&
+                request.alternateTime
+              ) {
+                <div class="alternate-time">
+                  <div
+                    class="alternate-time__icon"
+                    aria-hidden="true"
+                  >
+                    <i
+                      class="fa-solid fa-arrow-right-arrow-left"
+                    ></i>
+                  </div>
+
+                  <div>
+                    <span>Alternate time proposed</span>
+
+                    <strong>
+                      {{
+                        formatDate(
+                          request.alternateTime.date
+                        )
+                      }}
+                      at
+                      {{
+                        formatTime(
+                          request.alternateTime.startTime
+                        )
+                      }}
+                    </strong>
+                  </div>
+                </div>
+              }
+
+              @if (request.buyerMessage) {
+                <div class="buyer-message">
+                  <span>Buyer message</span>
+
+                  <p>{{ request.buyerMessage }}</p>
+                </div>
+              }
+
+              <div class="request-card__footer">
+                <div class="request-card__contact">
+                  <a
+                    [href]="
+                      'mailto:' +
+                      request.buyerContact.email
+                    "
+                  >
+                    <i
+                      class="fa-regular fa-envelope"
+                      aria-hidden="true"
+                    ></i>
+
+                    {{ request.buyerContact.email }}
+                  </a>
+
+                  <a
+                    [href]="
+                      'tel:' +
+                      request.buyerContact.phone
+                    "
+                  >
+                    <i
+                      class="fa-solid fa-phone"
+                      aria-hidden="true"
+                    ></i>
+
+                    {{ request.buyerContact.phone }}
+                  </a>
+                </div>
+
+                <button
+                  type="button"
+                  class="primary-button"
+                  (click)="
+                    openRequest(
+                      request.showingRequestUid
+                    )
+                  "
+                >
+                  Review request
+
+                  <i
+                    class="fa-solid fa-arrow-right"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

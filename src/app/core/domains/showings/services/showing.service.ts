@@ -22,6 +22,7 @@ import {
   CreateShowingRequestInput,
   ProposeAlternateShowingTimeInput,
   RespondToShowingRequestInput,
+  RespondToAlternateShowingTimeInput,
   ShowingRequest,
   ShowingRequestStatus,
   ShowingRequestedTime,
@@ -209,6 +210,54 @@ export class ShowingService {
         }
       });
   }
+
+  acceptAlternateShowingTime(
+  input: RespondToAlternateShowingTimeInput
+): Promise<void> {
+  if (!input.showingRequestUid.trim()) {
+    throw new Error(
+      'A showing request UID is required.'
+    );
+  }
+
+  if (!input.buyerUid.trim()) {
+    throw new Error(
+      'A buyer UID is required.'
+    );
+  }
+
+  return this.showingRepository
+    .acceptAlternateShowingTimeIfAvailable({
+      ...input,
+
+      responseMessage:
+        input.responseMessage.trim()
+    });
+}
+
+declineAlternateShowingTime(
+  input: RespondToAlternateShowingTimeInput
+): Promise<void> {
+  if (!input.showingRequestUid.trim()) {
+    throw new Error(
+      'A showing request UID is required.'
+    );
+  }
+
+  if (!input.buyerUid.trim()) {
+    throw new Error(
+      'A buyer UID is required.'
+    );
+  }
+
+  return this.showingRepository
+    .declineAlternateShowingTime({
+      ...input,
+
+      responseMessage:
+        input.responseMessage.trim()
+    });
+}
 
   async declineShowingRequest(
     input: RespondToShowingRequestInput

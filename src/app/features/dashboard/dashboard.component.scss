@@ -4,6 +4,130 @@
   padding: 3rem 2rem 5rem;
 }
 
+.account-profile {
+  margin: 2rem 0 3rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #d7e1e8;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(21, 67, 96, 0.08);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #e2e8ee;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    h2 {
+      margin: 0.25rem 0 0;
+      color: #0f3550;
+      font-size: clamp(1.35rem, 2vw, 1.65rem);
+      line-height: 1.2;
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    color: #ffffff;
+    background: #154360;
+    border-radius: 13px;
+    font-size: 1.15rem;
+  }
+
+  &__eyebrow {
+    margin: 0;
+    color: #008c87;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  &__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 0 0 auto;
+    padding: 0.55rem 0.8rem;
+    color: #087443;
+    background: #e5f7ec;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+
+    &--pending {
+      color: #9a5b00;
+      background: #fff2d2;
+    }
+  }
+
+  &__details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  &__detail {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+    padding: 1rem;
+    background: #f5f8fa;
+    border: 1px solid #e0e8ed;
+    border-radius: 12px;
+
+    > div {
+      min-width: 0;
+    }
+
+    strong {
+      display: block;
+      margin-top: 0.25rem;
+      overflow-wrap: anywhere;
+      color: #102f45;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+  }
+
+  &__detail-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    color: #008c87;
+    background: #e2f5f3;
+    border-radius: 10px;
+  }
+
+  &__label {
+    display: block;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
 .dashboard__header {
   margin-bottom: 3rem;
 
@@ -187,7 +311,20 @@
   .dashboard {
     padding: 2rem 1rem 3rem;
   }
+  
+  .account-profile {
+  margin: 1.5rem 0 2rem;
+  padding: 1.15rem;
 
+  &__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  &__verified {
+    margin-left: 64px;
+  }
+}
   .dashboard__welcome-actions {
     grid-template-columns: 1fr;
   }
@@ -215,6 +352,20 @@
   .dashboard__listing-tabs {
     grid-template-columns: 1fr;
   }
+
+  .account-profile {
+  &__heading {
+    align-items: flex-start;
+  }
+
+  &__verified {
+    margin-left: 0;
+  }
+
+  &__detail {
+    align-items: flex-start;
+  }
+}
 
   .dashboard__secondary-grid {
     gap: 1rem;

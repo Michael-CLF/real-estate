@@ -1,182 +1,388 @@
 <section class="dashboard">
 
-  <app-dashboard-welcome [firstName]="dashboardState.state().firstName" />
+  <app-dashboard-welcome
+    [firstName]="dashboardState.state().firstName"
+  />
+
+  @if (
+    dashboardState.state().userProfile;
+    as userProfile
+  ) {
+    <section
+      class="account-profile"
+      aria-labelledby="account-profile-title"
+    >
+      <header class="account-profile__header">
+        <div class="account-profile__heading">
+          <span
+            class="account-profile__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-user"></i>
+          </span>
+
+          <div>
+            <p class="account-profile__eyebrow">
+              NavStreet account
+            </p>
+
+            <h2 id="account-profile-title">
+              {{
+                userProfile.fullName ||
+                'Account holder'
+              }}
+            </h2>
+          </div>
+        </div>
+
+        @if (userProfile.emailVerified) {
+          <span class="account-profile__verified">
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
+
+            Email verified
+          </span>
+        } @else {
+          <span
+            class="
+              account-profile__verified
+              account-profile__verified--pending
+            "
+          >
+            <i
+              class="fa-solid fa-circle-exclamation"
+              aria-hidden="true"
+            ></i>
+
+            Verification pending
+          </span>
+        }
+      </header>
+
+      <div class="account-profile__details">
+        <div class="account-profile__detail">
+          <span
+            class="account-profile__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-id-card"></i>
+          </span>
+
+          <div>
+            <span class="account-profile__label">
+              Account number
+            </span>
+
+            <strong>
+              {{
+                userProfile.accountNumber ||
+                'Pending assignment'
+              }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="account-profile__detail">
+          <span
+            class="account-profile__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+
+          <div>
+            <span class="account-profile__label">
+              Email address
+            </span>
+
+            <strong>
+              {{
+                userProfile.email ||
+                'Not provided'
+              }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="account-profile__detail">
+          <span
+            class="account-profile__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-phone"></i>
+          </span>
+
+          <div>
+            <span class="account-profile__label">
+              Phone number
+            </span>
+
+            <strong>
+              {{
+                userProfile.phone ||
+                'Not provided'
+              }}
+            </strong>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
 
   @if (dashboardState.state().showWelcome) {
-
-  <header class="dashboard__header">
-
-    <h1>Welcome to Your NavStreet Dashboard</h1>
-
-    <p>
-      Buy or sell real estate with confidence. What would you like to do today?
-    </p>
-
-  </header>
-
-  <section class="dashboard__welcome-actions">
-
-    <a class="action-card" routerLink="/homes">
-
-      <div class="action-card__icon">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </div>
-
-      <h2 class="card-title">
-        Browse Properties
-      </h2>
+    <header class="dashboard__header">
+      <h1>
+        Welcome to Your NavStreet Dashboard
+      </h1>
 
       <p>
-        Search homes, save favorites, and begin your home search.
+        Buy or sell real estate with confidence.
+        What would you like to do today?
       </p>
+    </header>
 
-    </a>
+    <section class="dashboard__welcome-actions">
+      <a
+        class="action-card"
+        routerLink="/homes"
+      >
+        <div class="action-card__icon">
+          <i
+            class="fa-solid fa-magnifying-glass"
+            aria-hidden="true"
+          ></i>
+        </div>
 
-    <a class="action-card" routerLink="/sell/new">
+        <h2 class="card-title">
+          Browse Properties
+        </h2>
 
-      <div class="action-card__icon">
-        <i class="fa-solid fa-house-circle-plus"></i>
-      </div>
+        <p>
+          Search homes, save favorites, and begin your
+          home search.
+        </p>
+      </a>
 
-      <h2 class="card-title">
-        List a Property
-      </h2>
+      <a
+        class="action-card"
+        routerLink="/sell/new"
+      >
+        <div class="action-card__icon">
+          <i
+            class="fa-solid fa-house-circle-plus"
+            aria-hidden="true"
+          ></i>
+        </div>
+
+        <h2 class="card-title">
+          List a Property
+        </h2>
+
+        <p>
+          Create your first property listing and start
+          selling today.
+        </p>
+      </a>
+    </section>
+
+    <section class="dashboard-placeholder">
+      <h3 class="info">
+        Your Activity
+      </h3>
 
       <p>
-        Create your first property listing and start selling today.
+        As you begin using NavStreet, this dashboard
+        will automatically display:
       </p>
 
-    </a>
-
-  </section>
-
-  <section class="dashboard-placeholder">
-
-    <h3 class="info">
-      Your Activity
-    </h3>
-
-    <p>
-      As you begin using NavStreet, this dashboard will automatically display:
-    </p>
-
-    <ul>
-      <li>Draft Listings</li>
-      <li>Active Listings</li>
-      <li>Saved Homes</li>
-      <li>Messages</li>
-      <li>Offers</li>
-      <li>Upcoming Showings</li>
-      <li>Recent Activity</li>
-      <li>Property Metrics</li>
-    </ul>
-
-  </section>
-
+      <ul>
+        <li>Draft Listings</li>
+        <li>Active Listings</li>
+        <li>Saved Homes</li>
+        <li>Messages</li>
+        <li>Offers</li>
+        <li>Upcoming Showings</li>
+        <li>Recent Activity</li>
+        <li>Property Metrics</li>
+      </ul>
+    </section>
   }
 
   @if (dashboardState.state().hasListings) {
+    <section class="dashboard__listings">
+      <div class="dashboard__section-header">
+        <div>
+          <h2>My Listings</h2>
 
-  <section class="dashboard__listings">
+          <p>
+            Manage your draft, active, under contract
+            and sold listings.
+          </p>
+        </div>
 
-    <div class="dashboard__section-header">
-
-      <div>
-
-        <h2>My Listings</h2>
-
-        <p>
-          Manage your draft, active, under contract and sold listings.
-        </p>
-
+        <a
+          class="dashboard__new-listing"
+          routerLink="/sell/new"
+        >
+          + New Listing
+        </a>
       </div>
 
-      <a class="dashboard__new-listing" routerLink="/sell/new">
-        + New Listing
-      </a>
+      <nav
+        class="dashboard__listing-tabs"
+        aria-label="Listing status"
+      >
+        <button
+          type="button"
+          [class.active]="
+            selectedListingTab() === 'draft'
+          "
+          (click)="selectListingTab('draft')"
+        >
+          Draft
+        </button>
 
-    </div>
+        <button
+          type="button"
+          [class.active]="
+            selectedListingTab() === 'active'
+          "
+          (click)="selectListingTab('active')"
+        >
+          Active
+        </button>
 
-    <nav class="dashboard__listing-tabs" aria-label="Listing status">
+        <button
+          type="button"
+          [class.active]="
+            selectedListingTab() ===
+            'under-contract'
+          "
+          (click)="
+            selectListingTab('under-contract')
+          "
+        >
+          Under Contract
+        </button>
 
-      <button type="button" [class.active]="selectedListingTab() === 'draft'" (click)="selectListingTab('draft')">
-        Draft
-      </button>
+        <button
+          type="button"
+          [class.active]="
+            selectedListingTab() === 'sold'
+          "
+          (click)="selectListingTab('sold')"
+        >
+          Sold
+        </button>
+      </nav>
 
-      <button type="button" [class.active]="selectedListingTab() === 'active'" (click)="selectListingTab('active')">
-        Active
-      </button>
+      @if (selectedListingTab() === 'draft') {
+        <app-account-listings
+          title="Draft Listings"
+          subtitle="
+            Continue working on unfinished listings.
+          "
+          emptyMessage="
+            You do not have any draft listings.
+          "
+          [listings]="
+            dashboardState.state().draftListings
+          "
+          (actionSelected)="manageListing($event)"
+        />
+      }
 
-      <button type="button" [class.active]="selectedListingTab() === 'under-contract'"
-        (click)="selectListingTab('under-contract')">
-        Under Contract
-      </button>
+      @if (selectedListingTab() === 'active') {
+        <app-account-listings
+          title="Active Listings"
+          subtitle="
+            Manage your properties currently listed
+            for sale.
+          "
+          emptyMessage="
+            You do not have any active listings.
+          "
+          [listings]="
+            dashboardState.state().activeListings
+          "
+          (actionSelected)="manageListing($event)"
+        />
+      }
 
-      <button type="button" [class.active]="selectedListingTab() === 'sold'" (click)="selectListingTab('sold')">
-        Sold
-      </button>
+      @if (
+        selectedListingTab() === 'under-contract'
+      ) {
+        <app-account-listings
+          title="Under Contract"
+          subtitle="
+            Properties currently under contract.
+          "
+          emptyMessage="
+            You do not have any properties under
+            contract.
+          "
+          [listings]="[]"
+          (actionSelected)="manageListing($event)"
+        />
+      }
 
-    </nav>
-
-    @if (selectedListingTab() === 'draft') {
-
-    <app-account-listings title="Draft Listings" subtitle="Continue working on unfinished listings."
-      emptyMessage="You do not have any draft listings." [listings]="dashboardState.state().draftListings"
-      (actionSelected)="manageListing($event)" />
-
-    }
-
-    @if (selectedListingTab() === 'active') {
-
-    <app-account-listings title="Active Listings" subtitle="Manage your properties currently listed for sale."
-      emptyMessage="You do not have any active listings." [listings]="dashboardState.state().activeListings"
-      (actionSelected)="manageListing($event)" />
-
-    }
-
-    @if (selectedListingTab() === 'under-contract') {
-
-    <app-account-listings title="Under Contract" subtitle="Properties currently under contract."
-      emptyMessage="You do not have any properties under contract." [listings]="[]"
-      (actionSelected)="manageListing($event)" />
-
-    }
-
-    @if (selectedListingTab() === 'sold') {
-
-    <app-account-listings title="Sold Listings" subtitle="Review properties you have sold through NavStreet."
-      emptyMessage="You do not have any sold listings." [listings]="[]" (actionSelected)="manageListing($event)" />
-
-    }
-
-  </section>
-
+      @if (selectedListingTab() === 'sold') {
+        <app-account-listings
+          title="Sold Listings"
+          subtitle="
+            Review properties you have sold through
+            NavStreet.
+          "
+          emptyMessage="
+            You do not have any sold listings.
+          "
+          [listings]="[]"
+          (actionSelected)="manageListing($event)"
+        />
+      }
+    </section>
   }
 
-  <section class="dashboard__secondary-grid" aria-label="Saved properties and recent activity">
-
+  <section
+    class="dashboard__secondary-grid"
+    aria-label="Saved properties and recent activity"
+  >
     @if (savedPropertyError()) {
+      <div
+        class="
+          dashboard__saved-message
+          dashboard__saved-message--error
+        "
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
 
-    <div class="dashboard__saved-message dashboard__saved-message--error" role="alert">
-      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-
-      <span>
-        {{ savedPropertyError() }}
-      </span>
-    </div>
-
+        <span>
+          {{ savedPropertyError() }}
+        </span>
+      </div>
     }
 
-    <app-saved-homes [savedHomes]="
-    dashboardState.state().savedProperties
-  " [removingListingUid]="
-    removingSavedListingUid()
-  " (removeRequested)="
-    removeSavedProperty($event)
-  " />
+    <app-saved-homes
+      [savedHomes]="
+        dashboardState.state().savedProperties
+      "
+      [removingListingUid]="
+        removingSavedListingUid()
+      "
+      (removeRequested)="
+        removeSavedProperty($event)
+      "
+    />
 
-    <app-activity-card [activities]="recentActivities" />
-
+    <app-activity-card
+      [activities]="recentActivities"
+    />
   </section>
 
 </section>
