@@ -187,27 +187,33 @@
       </a>
     </section>
 
-    <section class="dashboard-placeholder">
-      <h3 class="info">
-        Your Activity
-      </h3>
+       @if (
+      !dashboardState.state().hasListings &&
+      dashboardState.state().savedProperties.length === 0 &&
+      recentActivities().length === 0
+    ) {
+      <section class="dashboard-placeholder">
+        <h3 class="info">
+          Your Activity
+        </h3>
 
-      <p>
-        As you begin using NavStreet, this dashboard
-        will automatically display:
-      </p>
+        <p>
+          As you begin using NavStreet, this dashboard
+          will automatically display:
+        </p>
 
-      <ul>
-        <li>Draft Listings</li>
-        <li>Active Listings</li>
-        <li>Saved Homes</li>
-        <li>Messages</li>
-        <li>Offers</li>
-        <li>Upcoming Showings</li>
-        <li>Recent Activity</li>
-        <li>Property Metrics</li>
-      </ul>
-    </section>
+        <ul>
+          <li>Draft Listings</li>
+          <li>Active Listings</li>
+          <li>Saved Homes</li>
+          <li>Messages</li>
+          <li>Offers</li>
+          <li>Upcoming Showings</li>
+          <li>Recent Activity</li>
+          <li>Property Metrics</li>
+        </ul>
+      </section>
+    }
   }
 
   @if (dashboardState.state().hasListings) {
@@ -380,8 +386,8 @@
       "
     />
 
-    <app-activity-card
-      [activities]="recentActivities"
+       <app-activity-card
+      [activities]="recentActivities()"
     />
   </section>
 

@@ -416,6 +416,66 @@
 }
 
 /*
+ * Activity loading warning
+ */
+
+.activity-summary__error {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f1d59a;
+  border-radius: 0.7rem;
+  background: #fff9e8;
+  color: #7a5310;
+  font-size: 0.8rem;
+  line-height: 1.45;
+
+  i {
+    flex: 0 0 auto;
+    margin-top: 0.15rem;
+    color: #a66b00;
+  }
+
+  span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/*
+ * Management card availability and action badges
+ */
+
+.management-card__badges {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.pending-count-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #f0c76b;
+  border-radius: 999px;
+  background: #fff4d6;
+  color: #7a5100;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/*
  * Buttons
  */
 

@@ -14,6 +14,7 @@ import {
   CreateListingInquiryRequest,
   CreateListingInquiryResponse,
   GetListingInquiriesRequest,
+  GetUserInquiryActivityResponse,
   GetListingInquiriesResponse,
   MarkListingInquiryReadRequest,
   MarkListingInquiryReadResponse
@@ -40,6 +41,23 @@ export class ListingInquiryService {
       functions,
       'getListingInquiries'
     );
+
+  private readonly getUserInquiryActivityFunction =
+    httpsCallable<
+      Record<string, never>,
+      GetUserInquiryActivityResponse
+    >(
+      functions,
+      'getUserInquiryActivity'
+    );
+
+  async getUserInquiryActivity():
+    Promise<GetUserInquiryActivityResponse> {
+    const result =
+      await this.getUserInquiryActivityFunction({});
+
+    return result.data;
+  }
 
   private readonly markListingInquiryReadFunction =
     httpsCallable<

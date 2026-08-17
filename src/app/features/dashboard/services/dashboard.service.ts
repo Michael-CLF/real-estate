@@ -6,13 +6,16 @@ import {
 import {
   collection,
   doc,
-  deleteDoc,
   getDoc,
   getDocs,
   orderBy,
   query,
   where
 } from 'firebase/firestore';
+
+import {
+  SavedListingService
+} from '../../../core/domains/marketplace/services/saved-listing.service';
 
 import { AuthState } from '../../../core/authentication/state/auth.state';
 import { firestore, functions } from '../../../core/infrastructure/firebase/firebase';
@@ -48,6 +51,9 @@ export class DashboardService {
   private readonly authState = inject(AuthState);
   private readonly listingService =
     inject(ListingService);
+
+  private readonly savedListingService =
+    inject(SavedListingService);
 
   private readonly ensureUserAccountNumberFunction =
     httpsCallable<
@@ -419,17 +425,12 @@ export class DashboardService {
       );
     }
 
-    const savedListingRef = doc(
-      firestore,
-      'users',
-      this.currentUserId,
-      'savedListings',
-      normalizedListingUid
-    );
-
-    await deleteDoc(savedListingRef);
+    await this.savedListingService
+      .removeSavedListing(
+        this.currentUserId,
+        normalizedListingUid
+      );
   }
-
   private mapDraftToDashboardListing(
     draft: ListingDraft
   ): Listing {

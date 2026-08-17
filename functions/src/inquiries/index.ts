@@ -13,3 +13,7 @@ export {
 export {
   notifySellerOfListingInquiry,
 } from './notify-seller-of-listing-inquiry';
+
+export {
+  getUserInquiryActivity,
+} from './get-user-inquiry-activity';

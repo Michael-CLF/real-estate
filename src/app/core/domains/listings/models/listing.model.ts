@@ -636,6 +636,7 @@ export type ListingStatus =
   | 'draft'
   | 'coming_soon'
   | 'active'
+  | 'paused'
   | 'under_contract'
   | 'pending'
   | 'sold'

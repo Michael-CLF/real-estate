@@ -1,0 +1,358 @@
+<section class="listing-activity">
+  <a
+    class="back-link"
+    [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>
+      Return to listing management
+    </span>
+  </a>
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        Loading listing activity...
+      </p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        {{ loadError() }}
+      </p>
+
+      <a
+        class="primary-button"
+        [routerLink]="[
+          '/sell/listings',
+          listingUid,
+          'manage'
+        ]"
+      >
+        Return to listing management
+      </a>
+    </div>
+  } @else if (listing(); as currentListing) {
+    <header class="activity-header">
+      <div class="activity-header__property">
+        @if (currentListing.primaryPhotoUrl) {
+          <img
+            class="activity-header__photo"
+            [src]="currentListing.primaryPhotoUrl"
+            [alt]="
+              'Primary listing photo for ' +
+              currentListing.addressLine1
+            "
+          >
+        } @else {
+          <div
+            class="activity-header__photo-placeholder"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-house"></i>
+          </div>
+        }
+
+        <div class="activity-header__details">
+          <p class="activity-header__eyebrow">
+            Listing activity
+          </p>
+
+          <h1>
+            {{ currentListing.addressLine1 }}
+          </h1>
+
+          <p class="activity-header__location">
+            {{ currentListing.city }},
+            {{ currentListing.state }}
+            {{ currentListing.zipCode }}
+          </p>
+        </div>
+      </div>
+
+      <div class="activity-header__price">
+        <span>
+          Listing price
+        </span>
+
+        <strong>
+          {{
+            currentListing.listPrice
+              | currency:'USD':'symbol':'1.0-0'
+          }}
+        </strong>
+      </div>
+    </header>
+
+    <section
+      class="activity-summary"
+      aria-labelledby="listing-activity-summary-heading"
+    >
+      <div class="section-heading">
+        <div>
+          <p class="section-heading__eyebrow">
+            Property performance
+          </p>
+
+          <h2 id="listing-activity-summary-heading">
+            Activity summary
+          </h2>
+        </div>
+      </div>
+
+      <div class="activity-summary__grid">
+        <article class="summary-stat">
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-eye"></i>
+          </div>
+
+          <div>
+            <strong>
+              {{ summary().views }}
+            </strong>
+
+            <span>
+              Views
+            </span>
+          </div>
+        </article>
+
+        <article class="summary-stat">
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-heart"></i>
+          </div>
+
+          <div>
+            <strong>
+              {{ summary().saves }}
+            </strong>
+
+            <span>
+              Saves
+            </span>
+          </div>
+        </article>
+
+        <article class="summary-stat">
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-message"></i>
+          </div>
+
+          <div>
+            <strong>
+              {{ summary().inquiries }}
+            </strong>
+
+            <span>
+              Inquiries
+            </span>
+
+            @if (
+              summary().unreadInquiries > 0
+            ) {
+              <small class="summary-stat__attention">
+                {{ summary().unreadInquiries }}
+                unread
+              </small>
+            }
+          </div>
+        </article>
+
+        <article class="summary-stat">
+          <div
+            class="summary-stat__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-regular fa-calendar-check"></i>
+          </div>
+
+          <div>
+            <strong>
+              {{ summary().showingRequests }}
+            </strong>
+
+            <span>
+              Showing requests
+            </span>
+
+            @if (
+              summary().pendingShowingRequests > 0
+            ) {
+              <small class="summary-stat__attention">
+                {{
+                  summary()
+                    .pendingShowingRequests
+                }}
+                pending
+              </small>
+            }
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section
+      class="activity-history"
+      aria-labelledby="listing-activity-history-heading"
+    >
+      <div class="section-heading">
+        <div>
+          <p class="section-heading__eyebrow">
+            Property timeline
+          </p>
+
+          <h2 id="listing-activity-history-heading">
+            Listing history
+          </h2>
+        </div>
+
+        <span class="activity-history__count">
+          {{ activities().length }}
+
+          @if (activities().length === 1) {
+            event
+          } @else {
+            events
+          }
+        </span>
+      </div>
+
+      @if (activities().length === 0) {
+        <div class="empty-activity">
+          <div
+            class="empty-activity__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-regular fa-clock"></i>
+          </div>
+
+          <div>
+            <h3>
+              No listing history yet
+            </h3>
+
+            <p>
+              Price changes, inquiries, showing activity,
+              status changes, and other important listing
+              events will appear here.
+            </p>
+          </div>
+        </div>
+      } @else {
+        <div class="activity-timeline">
+          @for (
+            activity of activities();
+            track activity.activityUid
+          ) {
+            <article
+              class="activity-entry"
+              [class]="
+                'activity-entry ' +
+                activityClass(
+                  activity.activityType
+                )
+              "
+            >
+              <div
+                class="activity-entry__marker"
+                aria-hidden="true"
+              >
+                <i
+                  [class]="
+                    activityIcon(
+                      activity.activityType
+                    )
+                  "
+                ></i>
+              </div>
+
+              <div class="activity-entry__content">
+                <div class="activity-entry__heading">
+                  <div>
+                    <h3>
+                      {{ activity.title }}
+                    </h3>
+
+                    <time
+                      [attr.datetime]="
+                        activity.occurredAt
+                      "
+                    >
+                      {{
+                        formatDateTime(
+                          activity.occurredAt
+                        )
+                      }}
+                    </time>
+                  </div>
+
+                  @if (activity.referenceNumber) {
+                    <span class="reference-badge">
+                      {{
+                        activity.referenceNumber
+                      }}
+                    </span>
+                  }
+                </div>
+
+                <p>
+                  {{ activity.description }}
+                </p>
+
+                @if (isActionable(activity)) {
+                  <button
+                    type="button"
+                    class="activity-entry__button"
+                    (click)="
+                      openActivity(activity)
+                    "
+                  >
+                    View details
+
+                    <i
+                      class="fa-solid fa-arrow-right"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

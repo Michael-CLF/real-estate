@@ -587,8 +587,12 @@ export class FirestoreMarketplaceListingRepository
 
             inquiryCount:
                 this.readNumber(
+                    data['inquiries']
+                ) ??
+                this.readNumber(
                     data['inquiryCount']
-                ) ?? 0,
+                ) ??
+                0,
 
             publishedAt:
                 this.toDate(

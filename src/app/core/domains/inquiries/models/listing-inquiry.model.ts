@@ -55,3 +55,29 @@ export interface MarkListingInquiryReadResponse {
   isRead: boolean;
   readAt: string;
 }
+
+export type ListingInquiryActivityPerspective =
+  | 'sent'
+  | 'received';
+
+export interface ListingInquiryActivity {
+  inquiryUid: string;
+  inquiryReferenceNumber: string;
+  listingUid: string;
+
+  perspective:
+    ListingInquiryActivityPerspective;
+
+  status:
+    ListingInquiryStatus;
+
+  buyerName: string;
+  propertyAddress: string;
+
+  createdAt: string;
+  readAt: string | null;
+}
+
+export interface GetUserInquiryActivityResponse {
+  activities: ListingInquiryActivity[];
+}

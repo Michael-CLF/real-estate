@@ -183,6 +183,40 @@ export const routes: Routes = [
             component => component.ListingManagementComponent
           )
       },
+      /*
+ * Published Listing Status
+ */
+      {
+        path: 'sell/listings/:listingUid/manage/status',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-status/listing-status.component'
+          ).then(
+            component =>
+              component.ListingStatusComponent
+          )
+      },
+      /*
+ * Published Listing Activity
+ */
+      {
+        path: 'sell/listings/:listingUid/manage/activity',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-activity/listing-activity.component'
+          ).then(
+            component =>
+              component.ListingActivityComponent
+          )
+      },
 
       /*
        * Listing Enhancement Hub

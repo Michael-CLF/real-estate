@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   inject,
   signal
@@ -17,8 +18,16 @@ import {
 } from '@angular/router';
 
 import {
+  takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
   AuthService
 } from '../../../core/authentication/services/auth.service';
+
+import {
+  ListingInquiryService
+} from '../../../core/domains/inquiries/services/listing-inquiry.service';
 
 import {
   Listing
@@ -32,6 +41,10 @@ import {
   calculateDaysOnMarket
 } from '../../../core/domains/listings/utils/listing-days-on-market.util';
 
+import {
+  ShowingService
+} from '../../../core/domains/showings/services/showing.service';
+
 @Component({
   selector: 'app-listing-management',
   standalone: true,
@@ -44,10 +57,26 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListingManagementComponent implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
-  private readonly listingService = inject(ListingService);
+  private readonly route =
+    inject(ActivatedRoute);
+
+  private readonly router =
+    inject(Router);
+
+  private readonly destroyRef =
+    inject(DestroyRef);
+
+  private readonly authService =
+    inject(AuthService);
+
+  private readonly listingService =
+    inject(ListingService);
+
+  private readonly listingInquiryService =
+    inject(ListingInquiryService);
+
+  private readonly showingService =
+    inject(ShowingService);
 
   protected readonly listing =
     signal<Listing | null>(null);
@@ -57,6 +86,21 @@ export class ListingManagementComponent implements OnInit {
 
   protected readonly loadError =
     signal('');
+
+  protected readonly activityLoadError =
+    signal('');
+
+  protected readonly inquiryCount =
+    signal(0);
+
+  protected readonly unreadInquiryCount =
+    signal(0);
+
+  protected readonly showingRequestCount =
+    signal(0);
+
+  protected readonly pendingShowingRequestCount =
+    signal(0);
 
   protected readonly listingUid =
     this.route.snapshot.paramMap.get(
@@ -118,6 +162,12 @@ export class ListingManagementComponent implements OnInit {
             listing.publishedAt
           )
       });
+
+      this.loadShowingActivity(
+        currentUserUid
+      );
+
+      void this.loadInquiryActivity();
     } catch (error: unknown) {
       console.error(
         'Unable to load listing management:',
@@ -179,11 +229,125 @@ export class ListingManagementComponent implements OnInit {
     ]);
   }
 
+  protected async openListingActivity():
+    Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'manage',
+      'activity'
+    ]);
+  }
+
+  protected async openListingStatus():
+    Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'manage',
+      'status'
+    ]);
+  }
+
   protected async previewListing():
     Promise<void> {
     await this.router.navigate([
       '/listings',
       this.listingUid
     ]);
+  }
+
+  private loadShowingActivity(
+    currentUserUid: string
+  ): void {
+    this.showingService
+      .getListingShowingRequests(
+        this.listingUid
+      )
+      .pipe(
+        takeUntilDestroyed(
+          this.destroyRef
+        )
+      )
+      .subscribe({
+        next: requests => {
+          const ownedRequests =
+            requests.filter(
+              request =>
+                request.sellerUid ===
+                currentUserUid
+            );
+
+          if (
+            ownedRequests.length !==
+            requests.length
+          ) {
+            console.error(
+              'Showing request ownership mismatch detected while loading listing activity.'
+            );
+
+            this.activityLoadError.set(
+              'Some listing activity could not be verified.'
+            );
+          }
+
+          this.showingRequestCount.set(
+            ownedRequests.length
+          );
+
+          this.pendingShowingRequestCount.set(
+            ownedRequests.filter(
+              request =>
+                request.status ===
+                'pending'
+            ).length
+          );
+        },
+
+        error: (error: unknown) => {
+          console.error(
+            'Unable to load showing activity:',
+            error
+          );
+
+          this.showingRequestCount.set(0);
+          this.pendingShowingRequestCount.set(0);
+
+          this.activityLoadError.set(
+            'Some listing activity could not be loaded.'
+          );
+        }
+      });
+  }
+
+  private async loadInquiryActivity():
+    Promise<void> {
+    try {
+      const response =
+        await this.listingInquiryService
+          .getListingInquiries(
+            this.listingUid
+          );
+
+      this.inquiryCount.set(
+        response.inquiries.length
+      );
+
+      this.unreadInquiryCount.set(
+        response.unreadCount
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to load inquiry activity:',
+        error
+      );
+
+      this.inquiryCount.set(0);
+      this.unreadInquiryCount.set(0);
+
+      this.activityLoadError.set(
+        'Some listing activity could not be loaded.'
+      );
+    }
   }
 }

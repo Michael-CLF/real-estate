@@ -3,41 +3,82 @@ import {
 } from '@angular/core';
 
 import {
-  deleteDoc,
+  httpsCallable
+} from 'firebase/functions';
+
+import {
   doc,
-  getDoc,
-  serverTimestamp,
-  setDoc
+  getDoc
 } from 'firebase/firestore';
 
 import {
-  firestore
+  firestore,
+  functions
 } from '../../../infrastructure/firebase/firebase';
 
 import {
   MarketplaceListing
 } from '../models/marketplace-listing.model';
 
+interface SaveMarketplaceListingRequest {
+  listingUid: string;
+}
+
+interface SaveMarketplaceListingResponse {
+  listingUid: string;
+  isSaved: true;
+  favoriteCount: number;
+}
+
+interface RemoveSavedMarketplaceListingRequest {
+  listingUid: string;
+}
+
+interface RemoveSavedMarketplaceListingResponse {
+  listingUid: string;
+  isSaved: false;
+  favoriteCount: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class SavedListingService {
+  private readonly saveMarketplaceListingFunction =
+    httpsCallable<
+      SaveMarketplaceListingRequest,
+      SaveMarketplaceListingResponse
+    >(
+      functions,
+      'saveMarketplaceListing'
+    );
+
+  private readonly removeSavedMarketplaceListingFunction =
+    httpsCallable<
+      RemoveSavedMarketplaceListingRequest,
+      RemoveSavedMarketplaceListingResponse
+    >(
+      functions,
+      'removeSavedMarketplaceListing'
+    );
 
   async isListingSaved(
     userUid: string,
     listingUid: string
   ): Promise<boolean> {
-
-    const savedListingRef = doc(
-      firestore,
-      'users',
-      userUid,
-      'savedListings',
-      listingUid
-    );
+    const savedListingRef =
+      doc(
+        firestore,
+        'users',
+        userUid,
+        'savedListings',
+        listingUid
+      );
 
     const snapshot =
-      await getDoc(savedListingRef);
+      await getDoc(
+        savedListingRef
+      );
 
     return snapshot.exists();
   }
@@ -46,86 +87,60 @@ export class SavedListingService {
     userUid: string,
     listing: MarketplaceListing
   ): Promise<void> {
+    this.validateUserUid(
+      userUid
+    );
 
-    const savedListingRef = doc(
-      firestore,
-      'users',
-      userUid,
-      'savedListings',
+    const result =
+      await this
+        .saveMarketplaceListingFunction({
+          listingUid:
+            listing.uid
+        });
+
+    if (
+      !result.data.isSaved ||
+      result.data.listingUid !==
       listing.uid
-    );
-
-    await setDoc(
-      savedListingRef,
-      {
-        listingUid:
-          listing.uid,
-
-        sellerUid:
-          listing.sellerUid,
-
-        address:
-          listing.address.addressLine1,
-
-        city:
-          listing.address.city,
-
-        state:
-          listing.address.stateAbbreviation,
-
-        price:
-          listing.price,
-
-        primaryPhotoUrl:
-          listing.featuredPhotoUrl ?? null,
-
-        daysOnMarket:
-          this.calculateDaysOnMarket(
-            listing.publishedAt
-          ),
-
-        createdAt:
-          serverTimestamp()
-      }
-    );
+    ) {
+      throw new Error(
+        'The listing could not be confirmed as saved.'
+      );
+    }
   }
 
   async removeSavedListing(
     userUid: string,
     listingUid: string
   ): Promise<void> {
-
-    const savedListingRef = doc(
-      firestore,
-      'users',
-      userUid,
-      'savedListings',
-      listingUid
+    this.validateUserUid(
+      userUid
     );
 
-    await deleteDoc(savedListingRef);
+    const result =
+      await this
+        .removeSavedMarketplaceListingFunction({
+          listingUid
+        });
+
+    if (
+      result.data.isSaved ||
+      result.data.listingUid !==
+      listingUid
+    ) {
+      throw new Error(
+        'The listing could not be confirmed as removed.'
+      );
+    }
   }
 
-  private calculateDaysOnMarket(
-    publishedAt?: Date
-  ): number {
-
-    if (!publishedAt) {
-      return 0;
+  private validateUserUid(
+    userUid: string
+  ): void {
+    if (!userUid.trim()) {
+      throw new Error(
+        'An authenticated user is required.'
+      );
     }
-
-    const millisecondsPerDay =
-      1000 * 60 * 60 * 24;
-
-    const elapsedMilliseconds =
-      Date.now() - publishedAt.getTime();
-
-    return Math.max(
-      0,
-      Math.floor(
-        elapsedMilliseconds /
-        millisecondsPerDay
-      )
-    );
   }
 }

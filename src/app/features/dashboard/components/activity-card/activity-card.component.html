@@ -1,73 +1,80 @@
 <section class="recent-activity">
-
   <header class="recent-activity__header">
-
     <h2>Recent Activity</h2>
 
     <p>
       Your latest listing activity.
     </p>
-
   </header>
 
   @if (activities.length === 0) {
-
     <div class="recent-activity__empty">
-
-      <div class="recent-activity__empty-icon">
+      <div
+        class="recent-activity__empty-icon"
+        aria-hidden="true"
+      >
         <i class="fa-regular fa-clock"></i>
       </div>
 
       <div class="recent-activity__empty-content">
-
         <h3>No recent activity yet</h3>
 
         <p>
-          Listing updates, offers, showings, and important events
-          will appear here.
+          Listing updates, offers, showings, and important
+          events will appear here.
         </p>
-
       </div>
-
     </div>
-
   } @else {
-
     <div class="recent-activity__list">
-
       @for (
         activity of activities;
-        track activity.timestamp.getTime()
+        track activity.activityUid
       ) {
-
-        <article class="activity-item">
-
-          <div class="activity-item__icon">
-            <i class="fa-solid fa-bolt"></i>
+        <a
+          class="activity-item"
+          [routerLink]="activity.route"
+        >
+          <div
+            class="activity-item__icon"
+            aria-hidden="true"
+          >
+            <i [class]="activity.icon"></i>
           </div>
 
           <div class="activity-item__content">
+            <div class="activity-item__heading">
+              <h3>{{ activity.title }}</h3>
 
-            <h3>
-              {{ activity.title }}
-            </h3>
+              @if (activity.statusLabel) {
+                <span class="activity-item__status">
+                  {{ activity.statusLabel }}
+                </span>
+              }
+            </div>
 
             <p>
               {{ activity.description }}
             </p>
 
-            <time [attr.datetime]="activity.timestamp.toISOString()">
-              {{ activity.timestamp | date:'MMM d, y • h:mm a' }}
+            <time
+              [attr.datetime]="
+                activity.timestamp.toISOString()
+              "
+            >
+              {{
+                activity.timestamp
+                | date:'MMM d, y • h:mm a'
+              }}
             </time>
-
           </div>
 
-        </article>
-
+          <i
+            class="activity-item__arrow fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+        </a>
       }
-
     </div>
-
   }
-
 </section>

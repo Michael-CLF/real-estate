@@ -1,0 +1,626 @@
+<section class="listing-status">
+  <a
+    class="back-link"
+    [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>
+      Return to listing management
+    </span>
+  </a>
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        Loading listing status...
+      </p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        {{ loadError() }}
+      </p>
+
+      <a
+        class="primary-button"
+        [routerLink]="[
+          '/sell/listings',
+          listingUid,
+          'manage'
+        ]"
+      >
+        Return to listing management
+      </a>
+    </div>
+  } @else if (listing(); as currentListing) {
+    <header class="status-header">
+      <div class="status-header__property">
+        @if (currentListing.primaryPhotoUrl) {
+          <img
+            class="status-header__photo"
+            [src]="currentListing.primaryPhotoUrl"
+            [alt]="
+              'Primary listing photo for ' +
+              currentListing.addressLine1
+            "
+          >
+        } @else {
+          <div
+            class="status-header__photo-placeholder"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-house"></i>
+          </div>
+        }
+
+        <div class="status-header__details">
+          <p class="status-header__eyebrow">
+            Listing status
+          </p>
+
+          <h1>
+            {{ currentListing.addressLine1 }}
+          </h1>
+
+          <p class="status-header__location">
+            {{ currentListing.city }},
+            {{ currentListing.state }}
+            {{ currentListing.zipCode }}
+          </p>
+
+          <span
+            [class]="
+              'status-badge status-badge--' +
+              currentListing.status
+            "
+          >
+            {{
+              statusLabel(
+                currentListing.status
+              )
+            }}
+          </span>
+        </div>
+      </div>
+
+      <div class="status-header__price">
+        <span>
+          Listing price
+        </span>
+
+        <strong>
+          {{
+            currentListing.listPrice
+              | currency:'USD':'symbol':'1.0-0'
+          }}
+        </strong>
+      </div>
+    </header>
+
+    @if (successMessage()) {
+      <div
+        class="message-banner message-banner--success"
+        role="status"
+      >
+        <i
+          class="fa-solid fa-circle-check"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          {{ successMessage() }}
+        </span>
+      </div>
+    }
+
+    @if (saveError()) {
+      <div
+        class="message-banner message-banner--error"
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          {{ saveError() }}
+        </span>
+      </div>
+    }
+
+    <section
+      class="status-overview"
+      aria-labelledby="status-overview-heading"
+    >
+      <div class="section-heading">
+        <p class="section-heading__eyebrow">
+          Marketplace availability
+        </p>
+
+        <h2 id="status-overview-heading">
+          Manage listing status
+        </h2>
+
+        <p>
+          Choose how this property appears on NavStreet.
+          Status changes are recorded in the listing’s
+          permanent history.
+        </p>
+      </div>
+
+      @if (
+        isTerminalStatus(
+          currentListing.status
+        )
+      ) {
+        <div class="terminal-status">
+          <div
+            class="terminal-status__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-lock"></i>
+          </div>
+
+          <div>
+            <h3>
+              This listing is
+              {{
+                statusLabel(
+                  currentListing.status
+                ).toLowerCase()
+              }}
+            </h3>
+
+            <p>
+              This is a final listing status. Additional
+              seller status changes are no longer available.
+              Contact NavStreet if a documented correction
+              is required.
+            </p>
+          </div>
+        </div>
+      } @else {
+        <div class="status-actions">
+          @if (
+            canPause(
+              currentListing.status
+            )
+          ) {
+            <article class="status-action">
+              <div
+                class="status-action__icon"
+                aria-hidden="true"
+              >
+                <i class="fa-solid fa-pause"></i>
+              </div>
+
+              <div class="status-action__content">
+                <h3>
+                  Pause listing
+                </h3>
+
+                <p>
+                  Temporarily remove this property from
+                  active marketplace results. You can
+                  reactivate it later.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="
+                  beginStatusChange(
+                    'paused'
+                  )
+                "
+              >
+                Pause listing
+              </button>
+            </article>
+          }
+
+          @if (
+            canReactivate(
+              currentListing.status
+            )
+          ) {
+            <article class="status-action">
+              <div
+                class="status-action__icon"
+                aria-hidden="true"
+              >
+                <i class="fa-solid fa-play"></i>
+              </div>
+
+              <div class="status-action__content">
+                <h3>
+                  Reactivate listing
+                </h3>
+
+                <p>
+                  Return this property to active NavStreet
+                  marketplace results.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="primary-button"
+                (click)="
+                  beginStatusChange(
+                    'active'
+                  )
+                "
+              >
+                Reactivate listing
+              </button>
+            </article>
+          }
+
+          @if (
+            canMarkUnderContract(
+              currentListing.status
+            )
+          ) {
+            <article class="status-action">
+              <div
+                class="status-action__icon"
+                aria-hidden="true"
+              >
+                <i
+                  class="fa-solid fa-file-signature"
+                ></i>
+              </div>
+
+              <div class="status-action__content">
+                <h3>
+                  Mark under contract
+                </h3>
+
+                <p>
+                  Indicate that the seller has accepted an
+                  offer and the transaction is progressing
+                  toward closing.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="
+                  beginStatusChange(
+                    'under_contract'
+                  )
+                "
+              >
+                Mark under contract
+              </button>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    @if (
+      !isTerminalStatus(
+        currentListing.status
+      )
+    ) {
+      <section
+        class="danger-zone"
+        aria-labelledby="danger-zone-heading"
+      >
+        <div class="section-heading">
+          <p class="section-heading__eyebrow">
+            Permanent changes
+          </p>
+
+          <h2 id="danger-zone-heading">
+            Danger Zone
+          </h2>
+
+          <p>
+            These actions permanently remove the listing
+            from active marketplace use and cannot be
+            reversed by the seller.
+          </p>
+        </div>
+
+        <div class="danger-zone__actions">
+          @if (
+            canMarkSold(
+              currentListing.status
+            )
+          ) {
+            <article class="danger-action">
+              <div>
+                <h3>
+                  Mark listing sold
+                </h3>
+
+                <p>
+                  Use this after the real estate transaction
+                  has closed. The listing will be preserved
+                  as a sold property.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="sold-button"
+                (click)="
+                  beginStatusChange(
+                    'sold'
+                  )
+                "
+              >
+                Mark sold
+              </button>
+            </article>
+          }
+
+          @if (
+            canWithdraw(
+              currentListing.status
+            )
+          ) {
+            <article class="danger-action">
+              <div>
+                <h3>
+                  Withdraw listing
+                </h3>
+
+                <p>
+                  Permanently remove this property from
+                  NavStreet without marking it sold. Please be sure you want to withdraw the listing.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="danger-button danger-button--outline"
+                (click)="
+                  beginStatusChange(
+                    'withdrawn'
+                  )
+                "
+              >
+                Withdraw listing
+              </button>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
+    @if (selectedStatus(); as pendingStatus) {
+      <section
+        class="confirmation-panel"
+        [class.confirmation-panel--danger]="
+          isDangerousSelection()
+        "
+        aria-labelledby="status-confirmation-heading"
+      >
+        <div class="confirmation-panel__heading">
+          <div
+            class="confirmation-panel__icon"
+            aria-hidden="true"
+          >
+            @if (isDangerousSelection()) {
+              <i
+                class="fa-solid fa-triangle-exclamation"
+              ></i>
+            } @else {
+              <i
+                class="fa-solid fa-circle-question"
+              ></i>
+            }
+          </div>
+
+          <div>
+            <p class="confirmation-panel__eyebrow">
+              Confirm status change
+            </p>
+
+            <h2 id="status-confirmation-heading">
+              Change listing to
+              {{ selectedStatusLabel() }}?
+            </h2>
+          </div>
+        </div>
+
+        <form
+          class="confirmation-form"
+          [formGroup]="statusForm"
+          (ngSubmit)="confirmStatusChange()"
+        >
+          @if (pendingStatus === 'paused') {
+            <p class="confirmation-form__explanation">
+              This property will be removed from active
+              marketplace results until you reactivate it.
+            </p>
+          }
+
+          @if (
+            pendingStatus ===
+            'under_contract'
+          ) {
+            <p class="confirmation-form__explanation">
+              This property will be marked under contract
+              and removed from active marketplace search
+              results. You may reactivate it if the
+              transaction does not close.
+            </p>
+          }
+
+          @if (pendingStatus === 'active') {
+            <p class="confirmation-form__explanation">
+              This property will return to active NavStreet
+              marketplace results.
+            </p>
+          }
+
+          @if (pendingStatus === 'sold') {
+            <p class="confirmation-form__explanation">
+              Marking a listing sold is permanent and cannot
+              be reversed from the seller dashboard.
+            </p>
+          }
+
+          @if (pendingStatus === 'withdrawn') {
+            <div class="form-field">
+              <label for="withdrawalReason">
+                Withdrawal reason
+              </label>
+
+              <textarea
+                id="withdrawalReason"
+                rows="4"
+                maxlength="500"
+                formControlName="reason"
+                placeholder="Explain why this listing is being withdrawn."
+              ></textarea>
+
+              <div class="form-field__meta">
+                <span>
+                  Required
+                </span>
+
+                <span>
+                  {{
+                    statusForm.controls
+                      .reason.value.length
+                  }}
+                  / 500
+                </span>
+              </div>
+
+              @if (
+                statusForm.controls
+                  .reason.touched &&
+                statusForm.controls
+                  .reason.hasError(
+                    'required'
+                  )
+              ) {
+                <p class="field-error">
+                  Enter a withdrawal reason.
+                </p>
+              }
+
+              @if (
+                statusForm.controls
+                  .reason.touched &&
+                statusForm.controls
+                  .reason.hasError(
+                    'maxlength'
+                  )
+              ) {
+                <p class="field-error">
+                  The withdrawal reason cannot exceed
+                  500 characters.
+                </p>
+              }
+            </div>
+          }
+
+          @if (selectedConfirmationText()) {
+            <div class="form-field">
+              <label for="statusConfirmation">
+                Enter
+                <strong>
+                  {{ selectedConfirmationText() }}
+                </strong>
+                to confirm
+              </label>
+
+              <input
+                id="statusConfirmation"
+                type="text"
+                formControlName="confirmation"
+                [placeholder]="
+                  selectedConfirmationText()
+                "
+                autocomplete="off"
+              >
+
+              @if (
+                statusForm.controls
+                  .confirmation.touched &&
+                statusForm.controls
+                  .confirmation.hasError(
+                    'confirmationMismatch'
+                  )
+              ) {
+                <p class="field-error">
+                  Enter
+                  {{ selectedConfirmationText() }}
+                  exactly as shown.
+                </p>
+              }
+            </div>
+          }
+
+          <div class="confirmation-form__actions">
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="isSaving()"
+              (click)="cancelStatusChange()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              [class]="
+                isDangerousSelection()
+                  ? 'danger-button'
+                  : 'primary-button'
+              "
+              [disabled]="isSaving()"
+            >
+              @if (isSaving()) {
+                <i
+                  class="fa-solid fa-spinner fa-spin"
+                  aria-hidden="true"
+                ></i>
+
+                Saving...
+              } @else {
+                Confirm
+                {{ selectedStatusLabel() }}
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+</section>

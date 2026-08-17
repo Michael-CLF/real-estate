@@ -78,6 +78,10 @@ import {
   ContactSellerComponent
 } from '../../components/contact-seller/contact-seller.component';
 
+import {
+  ListingViewService
+} from '../../../../../core/domains/marketplace/services/listing-view.service';
+
 
 interface ListingFact {
   label: string;
@@ -178,6 +182,9 @@ export class ListingDetailsComponent
   private readonly savedListingService =
     inject(SavedListingService);
 
+  private readonly listingViewService =
+    inject(ListingViewService);
+
   private readonly listingBadgeService =
     inject(ListingBadgeService);
 
@@ -189,6 +196,9 @@ export class ListingDetailsComponent
 
   readonly saveError =
     signal('');
+
+  readonly displayedViewCount =
+    signal(0);
 
   readonly viewModel$:
     Observable<ListingDetailsViewModel> =
@@ -259,20 +269,49 @@ export class ListingDetailsComponent
       })
     );
 
-  async ngOnInit(): Promise<void> {
-    const userUid =
-      this.authState.uid();
-
-    if (!userUid) {
-      return;
-    }
-
+      async ngOnInit(): Promise<void> {
     const viewModel =
       await firstValueFrom(
         this.viewModel$
       );
 
     if (!viewModel.listing) {
+      return;
+    }
+
+    this.displayedViewCount.set(
+      viewModel.listing.viewCount
+    );
+
+    /*
+     * View recording is independent of saved-listing
+     * state and also supports anonymous visitors.
+     */
+    try {
+      const viewResult =
+        await this.listingViewService
+          .recordListingView(
+            viewModel.listing.uid
+          );
+
+      this.displayedViewCount.set(
+        viewResult.viewCount
+      );
+    } catch (error: unknown) {
+      /*
+       * Metrics must never prevent the public listing
+       * from loading or displaying normally.
+       */
+      console.error(
+        'Unable to record listing view:',
+        error
+      );
+    }
+
+    const userUid =
+      this.authState.uid();
+
+    if (!userUid) {
       return;
     }
 
@@ -287,9 +326,11 @@ export class ListingDetailsComponent
       this.isSaved.set(saved);
 
       const shouldSave =
-        this.route.snapshot.queryParamMap.get(
-          'saveListing'
-        ) === 'true';
+        this.route.snapshot
+          .queryParamMap
+          .get(
+            'saveListing'
+          ) === 'true';
 
       if (
         shouldSave &&
@@ -305,19 +346,21 @@ export class ListingDetailsComponent
         await this.router.navigate(
           [],
           {
-            relativeTo: this.route,
+            relativeTo:
+              this.route,
 
             queryParams: {
               saveListing: null
             },
 
-            queryParamsHandling: 'merge',
+            queryParamsHandling:
+              'merge',
+
             replaceUrl: true
           }
         );
       }
-
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(
         'Unable to load saved-listing status.',
         error
@@ -328,6 +371,7 @@ export class ListingDetailsComponent
       );
     }
   }
+ 
 
   async toggleSavedListing(
     listing: MarketplaceListing
@@ -418,7 +462,7 @@ export class ListingDetailsComponent
   ): ListingFact[] {
     const facts: ListingFact[] = [];
 
-      facts.push({
+    facts.push({
       label: 'Property type',
       value:
         this.formatPropertyType(
@@ -508,7 +552,7 @@ export class ListingDetailsComponent
       }
     }
 
-  
+
 
     return facts;
   }
