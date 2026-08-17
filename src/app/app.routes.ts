@@ -129,6 +129,43 @@ export const routes: Routes = [
             component => component.ListingWizardComponent
           )
       },
+      /*
+ * Published Listing Editor
+ */
+      {
+        path: 'sell/listings/:listingUid/manage/edit',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-edit/listing-edit.component'
+          ).then(
+            component => component.ListingEditComponent
+          )
+      },
+
+      /*
+ * Published Listing Buyer Inquiries
+ */
+      {
+        path:
+          'sell/listings/:listingUid/manage/inquiries',
+
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-inquiries/listing-inquiries.component'
+          ).then(
+            component =>
+              component.ListingInquiriesComponent
+          )
+      },
 
       /*
        * Published Listing Management

@@ -13,3 +13,4 @@ export * from './payments';
 export * from './sellers';
 export * from './showings';
 export * from './users';
+export * from './inquiries';

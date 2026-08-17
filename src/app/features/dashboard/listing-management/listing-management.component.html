@@ -177,20 +177,20 @@
           <div class="management-card__heading">
             <h3>Edit Listing</h3>
 
-            <span class="coming-soon">
-              Coming next
+            <span class="available-badge">
+              Available
             </span>
           </div>
 
           <p>
-            Update the listing price, property details,
-            description, photographs, and seller-provided
-            information.
+            Update the listing price, description, HOA
+            status, HOA fee, and HOA payment frequency.
           </p>
         </div>
 
-        <button type="button" class="secondary-button" disabled>
+        <button type="button" class="primary-button" (click)="openListingEditor()">
           Edit listing
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </button>
       </article>
 
@@ -321,8 +321,8 @@
           <div class="management-card__heading">
             <h3>Buyer Inquiries</h3>
 
-            <span class="coming-soon">
-              Coming soon
+            <span class="available-badge">
+              Available
             </span>
           </div>
 
@@ -332,8 +332,10 @@
           </p>
         </div>
 
-        <button type="button" class="secondary-button" disabled>
+        <button type="button" class="primary-button" (click)="openBuyerInquiries()">
           View inquiries
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </button>
       </article>
 

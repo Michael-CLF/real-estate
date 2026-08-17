@@ -1,0 +1,548 @@
+<section class="listing-edit">
+  <a
+    class="back-link"
+    [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>Return to listing management</span>
+  </a>
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>Loading listing information...</p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <h1>Listing editor unavailable</h1>
+
+      <p>{{ loadError() }}</p>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="returnToManagement()"
+      >
+        Return to listing management
+      </button>
+    </div>
+  } @else if (listing(); as currentListing) {
+    <header class="edit-header">
+      <div class="edit-header__icon">
+        <i
+          class="fa-solid fa-pen-to-square"
+          aria-hidden="true"
+        ></i>
+      </div>
+
+      <div class="edit-header__content">
+        <p class="edit-header__eyebrow">
+          Manage listing
+        </p>
+
+        <h1>Edit Listing</h1>
+
+        <p class="edit-header__property">
+          {{ currentListing.addressLine1 }}
+        </p>
+
+        <p class="edit-header__location">
+          {{ currentListing.city }},
+          {{ currentListing.state }}
+          {{ currentListing.zipCode }}
+        </p>
+      </div>
+    </header>
+
+    <div class="editor-layout">
+      <main class="editor-main">
+        <form
+          class="listing-form"
+          [formGroup]="form"
+          (ngSubmit)="saveChanges()"
+        >
+          <section
+            class="form-card"
+            aria-labelledby="pricing-heading"
+          >
+            <header class="form-card__header">
+              <div class="form-card__heading">
+                <span
+                  class="form-card__icon"
+                  aria-hidden="true"
+                >
+                  <i class="fa-solid fa-dollar-sign"></i>
+                </span>
+
+                <div>
+                  <p class="form-card__eyebrow">
+                    Pricing
+                  </p>
+
+                  <h2 id="pricing-heading">
+                    Listing price
+                  </h2>
+                </div>
+              </div>
+            </header>
+
+            <div class="form-card__body">
+              <div class="form-field">
+                <label for="listPrice">
+                  List price
+                </label>
+
+                <div class="currency-input">
+                  <span
+                    class="currency-input__symbol"
+                    aria-hidden="true"
+                  >
+                    $
+                  </span>
+
+                  <input
+                    id="listPrice"
+                    type="number"
+                    min="1"
+                    max="1000000000"
+                    step="1"
+                    inputmode="numeric"
+                    formControlName="listPrice"
+                    autocomplete="off"
+                  >
+                </div>
+
+                @if (
+                  form.controls.listPrice.touched &&
+                  form.controls.listPrice.hasError(
+                    'required'
+                  )
+                ) {
+                  <p class="field-error">
+                    Enter a listing price.
+                  </p>
+                } @else if (
+                  form.controls.listPrice.touched &&
+                  (
+                    form.controls.listPrice.hasError(
+                      'min'
+                    ) ||
+                    form.controls.listPrice.hasError(
+                      'max'
+                    )
+                  )
+                ) {
+                  <p class="field-error">
+                    Enter a valid listing price.
+                  </p>
+                }
+
+                <div class="field-notice">
+                  <i
+                    class="fa-solid fa-clock-rotate-left"
+                    aria-hidden="true"
+                  ></i>
+
+                  <p>
+                    If the price changes, NavStreet will
+                    preserve the previous price and the
+                    date of the change in the listing’s
+                    price history.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="form-card"
+            aria-labelledby="description-heading"
+          >
+            <header class="form-card__header">
+              <div class="form-card__heading">
+                <span
+                  class="form-card__icon"
+                  aria-hidden="true"
+                >
+                  <i class="fa-solid fa-align-left"></i>
+                </span>
+
+                <div>
+                  <p class="form-card__eyebrow">
+                    Property presentation
+                  </p>
+
+                  <h2 id="description-heading">
+                    Property description
+                  </h2>
+                </div>
+              </div>
+            </header>
+
+            <div class="form-card__body">
+              <div class="form-field">
+                <label for="description">
+                  Description
+                </label>
+
+                <textarea
+                  id="description"
+                  rows="10"
+                  maxlength="5000"
+                  formControlName="description"
+                  placeholder="Describe the property, including its layout, updates, features, location, and anything else buyers should know."
+                ></textarea>
+
+                <div class="field-meta">
+                  <span>
+                    Minimum 20 characters
+                  </span>
+
+                  <span>
+                    {{ descriptionLength }} / 5000
+                  </span>
+                </div>
+
+                @if (
+                  form.controls.description.touched &&
+                  form.controls.description.hasError(
+                    'required'
+                  )
+                ) {
+                  <p class="field-error">
+                    Enter a property description.
+                  </p>
+                } @else if (
+                  form.controls.description.touched &&
+                  form.controls.description.hasError(
+                    'minlength'
+                  )
+                ) {
+                  <p class="field-error">
+                    The description must contain at
+                    least 20 characters.
+                  </p>
+                } @else if (
+                  form.controls.description.touched &&
+                  form.controls.description.hasError(
+                    'maxlength'
+                  )
+                ) {
+                  <p class="field-error">
+                    The description cannot exceed
+                    5,000 characters.
+                  </p>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="form-card"
+            formGroupName="hoa"
+            aria-labelledby="hoa-heading"
+          >
+            <header class="form-card__header">
+              <div class="form-card__heading">
+                <span
+                  class="form-card__icon"
+                  aria-hidden="true"
+                >
+                  <i class="fa-solid fa-building"></i>
+                </span>
+
+                <div>
+                  <p class="form-card__eyebrow">
+                    Association information
+                  </p>
+
+                  <h2 id="hoa-heading">
+                    Homeowners association
+                  </h2>
+                </div>
+              </div>
+            </header>
+
+            <div class="form-card__body">
+              <div class="hoa-grid">
+                <div class="form-field">
+                  <label for="hasHoa">
+                    Does this property have an HOA?
+                  </label>
+
+                  <select
+                    id="hasHoa"
+                    formControlName="hasHoa"
+                  >
+                    <option [ngValue]="false">
+                      No
+                    </option>
+
+                    <option [ngValue]="true">
+                      Yes
+                    </option>
+                  </select>
+                </div>
+
+                @if (hasHoa) {
+                  <div class="form-field">
+                    <label for="hoaFeeAmount">
+                      HOA fee
+                    </label>
+
+                    <div class="currency-input">
+                      <span
+                        class="currency-input__symbol"
+                        aria-hidden="true"
+                      >
+                        $
+                      </span>
+
+                      <input
+                        id="hoaFeeAmount"
+                        type="number"
+                        min="0"
+                        max="1000000"
+                        step="0.01"
+                        inputmode="decimal"
+                        formControlName="feeAmount"
+                        autocomplete="off"
+                      >
+                    </div>
+
+                    @if (
+                      form.controls.hoa.controls
+                        .feeAmount.touched &&
+                      form.controls.hoa.controls
+                        .feeAmount.hasError(
+                          'required'
+                        )
+                    ) {
+                      <p class="field-error">
+                        Enter the HOA fee.
+                      </p>
+                    } @else if (
+                      form.controls.hoa.controls
+                        .feeAmount.touched &&
+                      (
+                        form.controls.hoa.controls
+                          .feeAmount.hasError(
+                            'min'
+                          ) ||
+                        form.controls.hoa.controls
+                          .feeAmount.hasError(
+                            'max'
+                          )
+                      )
+                    ) {
+                      <p class="field-error">
+                        Enter a valid HOA fee.
+                      </p>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label for="hoaFeeFrequency">
+                      Fee frequency
+                    </label>
+
+                    <select
+                      id="hoaFeeFrequency"
+                      formControlName="feeFrequency"
+                    >
+                      <option value="">
+                        Select frequency
+                      </option>
+
+                      @for (
+                        frequency of
+                        hoaFeeFrequencies;
+                        track frequency.value
+                      ) {
+                        <option
+                          [value]="frequency.value"
+                        >
+                          {{ frequency.label }}
+                        </option>
+                      }
+                    </select>
+
+                    @if (
+                      form.controls.hoa.controls
+                        .feeFrequency.touched &&
+                      form.controls.hoa.controls
+                        .feeFrequency.hasError(
+                          'required'
+                        )
+                    ) {
+                      <p class="field-error">
+                        Select how frequently the HOA
+                        fee is charged.
+                      </p>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="field-notice">
+                <i
+                  class="fa-solid fa-circle-info"
+                  aria-hidden="true"
+                ></i>
+
+                <p>
+                  HOA fees are converted to an estimated
+                  monthly amount when calculating the
+                  property’s estimated mortgage payment.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          @if (saveError()) {
+            <div
+              class="form-message form-message--error"
+              role="alert"
+            >
+              <i
+                class="fa-solid fa-circle-exclamation"
+                aria-hidden="true"
+              ></i>
+
+              <span>{{ saveError() }}</span>
+            </div>
+          }
+
+          @if (saveMessage()) {
+            <div
+              class="form-message form-message--success"
+              aria-live="polite"
+            >
+              <i
+                class="fa-solid fa-circle-check"
+                aria-hidden="true"
+              ></i>
+
+              <span>{{ saveMessage() }}</span>
+            </div>
+          }
+
+          <footer class="form-actions">
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="
+                isSaving() ||
+                !hasChanges()
+              "
+              (click)="resetChanges()"
+            >
+              Discard changes
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="
+                form.invalid ||
+                isSaving() ||
+                !hasChanges()
+              "
+            >
+              @if (isSaving()) {
+                <i
+                  class="fa-solid fa-spinner fa-spin"
+                  aria-hidden="true"
+                ></i>
+
+                <span>Saving changes...</span>
+              } @else {
+                <i
+                  class="fa-solid fa-floppy-disk"
+                  aria-hidden="true"
+                ></i>
+
+                <span>Save listing changes</span>
+              }
+            </button>
+          </footer>
+        </form>
+      </main>
+
+      <aside class="editor-sidebar">
+        <section class="sidebar-card">
+          <span
+            class="sidebar-card__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-lock"></i>
+          </span>
+
+          <h2>Protected property details</h2>
+
+          <p>
+            Core property facts cannot be changed after
+            publication through this editor.
+          </p>
+
+          <ul>
+            <li>Property address</li>
+            <li>Property type</li>
+            <li>Bedrooms and bathrooms</li>
+            <li>Square footage and lot size</li>
+            <li>Year built</li>
+          </ul>
+
+          <p class="sidebar-card__note">
+            Contact NavStreet support if a material
+            property fact must be corrected.
+          </p>
+        </section>
+
+        <section class="sidebar-card">
+          <span
+            class="sidebar-card__icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-images"></i>
+          </span>
+
+          <h2>Listing photographs</h2>
+
+          <p>
+            Photograph management will be handled
+            separately so image files and Firebase
+            Storage records remain synchronized.
+          </p>
+
+          <span class="coming-soon">
+            Coming next
+          </span>
+        </section>
+      </aside>
+    </div>
+  }
+</section>

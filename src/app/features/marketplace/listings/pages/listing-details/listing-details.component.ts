@@ -74,6 +74,10 @@ import {
   ListingBadgeService
 } from '../../../../../core/domains/listings/services/listing-badge.service';
 
+import {
+  ContactSellerComponent
+} from '../../components/contact-seller/contact-seller.component';
+
 
 interface ListingFact {
   label: string;
@@ -143,7 +147,8 @@ const ENHANCEMENT_SECTIONS: ReadonlyArray<
     RouterLink,
     ListingGalleryComponent,
     ListingMortgageCalculatorComponent,
-    RequestShowingComponent
+    RequestShowingComponent,
+    ContactSellerComponent
   ],
   providers: [
     {

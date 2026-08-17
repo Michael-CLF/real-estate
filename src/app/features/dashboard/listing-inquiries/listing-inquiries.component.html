@@ -1,0 +1,384 @@
+<section class="listing-inquiries">
+  <a
+    class="back-link"
+    [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>Return to listing management</span>
+  </a>
+
+  <header class="inquiries-header">
+    <div class="inquiries-header__icon">
+      <i
+        class="fa-solid fa-message"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <div class="inquiries-header__content">
+      <p class="inquiries-header__eyebrow">
+        Buyer communication
+      </p>
+
+      <h1>Buyer Inquiries</h1>
+
+      <p>
+        Review questions and contact requests submitted
+        by buyers interested in this property.
+      </p>
+    </div>
+
+    @if (!isLoading() && !loadError()) {
+      <div class="inquiries-header__summary">
+        <strong>{{ unreadCount() }}</strong>
+
+        <span>
+          @if (unreadCount() === 1) {
+            unread inquiry
+          } @else {
+            unread inquiries
+          }
+        </span>
+      </div>
+    }
+  </header>
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>Loading buyer inquiries...</p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <h2>Unable to load inquiries</h2>
+
+      <p>{{ loadError() }}</p>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="retryLoading()"
+      >
+        Try again
+      </button>
+    </div>
+  } @else if (inquiries().length === 0) {
+    <div class="state-card">
+      <span
+        class="state-card__icon"
+        aria-hidden="true"
+      >
+        <i class="fa-regular fa-comments"></i>
+      </span>
+
+      <h2>No buyer inquiries yet</h2>
+
+      <p>
+        Messages submitted through the public listing
+        page will appear here.
+      </p>
+    </div>
+  } @else {
+    <div class="inquiries-layout">
+      <section
+        class="inquiry-list"
+        aria-labelledby="inquiry-list-heading"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="section-heading__eyebrow">
+              Inbox
+            </p>
+
+            <h2 id="inquiry-list-heading">
+              Property inquiries
+            </h2>
+          </div>
+
+          <span class="inquiry-list__count">
+            {{ inquiries().length }}
+            @if (inquiries().length === 1) {
+              inquiry
+            } @else {
+              inquiries
+            }
+          </span>
+        </div>
+
+        <div class="inquiry-list__items">
+          @for (
+            inquiry of inquiries();
+            track inquiry.inquiryUid
+          ) {
+            <button
+              type="button"
+              class="inquiry-preview"
+              [class.inquiry-preview--unread]="
+                !inquiry.isRead
+              "
+              [class.inquiry-preview--selected]="
+                selectedInquiryUid() ===
+                inquiry.inquiryUid
+              "
+              [attr.aria-pressed]="
+                selectedInquiryUid() ===
+                inquiry.inquiryUid
+              "
+              (click)="selectInquiry(inquiry)"
+            >
+              <span
+                class="inquiry-preview__status"
+                aria-hidden="true"
+              ></span>
+
+              <span class="inquiry-preview__content">
+                <span class="inquiry-preview__heading">
+                  <strong>{{ inquiry.buyerName }}</strong>
+
+                  @if (!inquiry.isRead) {
+                    <span class="unread-badge">
+                      New
+                    </span>
+                  }
+                </span>
+
+                <span class="inquiry-preview__message">
+                  {{ inquiry.message }}
+                </span>
+
+                <span class="inquiry-preview__meta">
+                  <span>
+                    {{
+                      inquiry.createdAt
+                      | date:'MMM d, y'
+                    }}
+                  </span>
+
+                  <span>
+                    {{
+                      inquiry.createdAt
+                      | date:'h:mm a'
+                    }}
+                  </span>
+                </span>
+              </span>
+
+              @if (
+                markingReadInquiryUid() ===
+                inquiry.inquiryUid
+              ) {
+                <i
+                  class="fa-solid fa-spinner fa-spin"
+                  aria-label="Marking inquiry as read"
+                ></i>
+              } @else {
+                <i
+                  class="fa-solid fa-chevron-right"
+                  aria-hidden="true"
+                ></i>
+              }
+            </button>
+          }
+        </div>
+      </section>
+
+      <section
+        class="inquiry-detail"
+        aria-live="polite"
+      >
+        @if (selectedInquiry; as inquiry) {
+          <header class="inquiry-detail__header">
+            <div>
+              <p class="section-heading__eyebrow">
+                Inquiry details
+              </p>
+
+              <h2>{{ inquiry.buyerName }}</h2>
+
+              <p class="inquiry-detail__reference">
+                {{ inquiry.inquiryReferenceNumber }}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="close-button"
+              aria-label="Close inquiry details"
+              (click)="closeInquiry()"
+            >
+              <i
+                class="fa-solid fa-xmark"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </header>
+
+          @if (updateError()) {
+            <div
+              class="inline-error"
+              role="alert"
+            >
+              <i
+                class="fa-solid fa-circle-exclamation"
+                aria-hidden="true"
+              ></i>
+
+              <span>{{ updateError() }}</span>
+            </div>
+          }
+
+          <div class="inquiry-detail__property">
+            @if (inquiry.primaryPhotoUrl) {
+              <img
+                [src]="inquiry.primaryPhotoUrl"
+                [alt]="
+                  'Listing photo for ' +
+                  inquiry.propertyAddress
+                "
+              >
+            } @else {
+              <span
+                class="inquiry-detail__photo-placeholder"
+                aria-hidden="true"
+              >
+                <i class="fa-solid fa-house"></i>
+              </span>
+            }
+
+            <div>
+              <span>Property</span>
+              <strong>{{ inquiry.propertyAddress }}</strong>
+            </div>
+          </div>
+
+          <section class="inquiry-detail__message">
+            <h3>Buyer’s message</h3>
+
+            <p>{{ inquiry.message }}</p>
+          </section>
+
+          <dl class="inquiry-detail__facts">
+            <div>
+              <dt>Received</dt>
+
+              <dd>
+                {{
+                  inquiry.createdAt
+                  | date:'MMMM d, y, h:mm a'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Status</dt>
+
+              <dd>
+                @if (inquiry.isRead) {
+                  Read
+                } @else {
+                  New
+                }
+              </dd>
+            </div>
+          </dl>
+
+          <section class="buyer-contact">
+            <div class="buyer-contact__heading">
+              <span
+                class="buyer-contact__icon"
+                aria-hidden="true"
+              >
+                <i class="fa-solid fa-address-card"></i>
+              </span>
+
+              <div>
+                <p class="section-heading__eyebrow">
+                  Buyer information
+                </p>
+
+                <h3>Contact {{ inquiry.buyerName }}</h3>
+              </div>
+            </div>
+
+            <div class="buyer-contact__actions">
+              <a
+                class="contact-action"
+                [href]="
+                  createEmailLink(
+                    inquiry.buyerEmail,
+                    inquiry
+                  )
+                "
+              >
+                <i
+                  class="fa-solid fa-envelope"
+                  aria-hidden="true"
+                ></i>
+
+                <span>
+                  <small>Email</small>
+                  <strong>{{ inquiry.buyerEmail }}</strong>
+                </span>
+              </a>
+
+              <a
+                class="contact-action"
+                [href]="
+                  createTelephoneLink(
+                    inquiry.buyerPhone
+                  )
+                "
+              >
+                <i
+                  class="fa-solid fa-phone"
+                  aria-hidden="true"
+                ></i>
+
+                <span>
+                  <small>Telephone</small>
+                  <strong>{{ inquiry.buyerPhone }}</strong>
+                </span>
+              </a>
+            </div>
+          </section>
+        } @else {
+          <div class="inquiry-detail__empty">
+            <span aria-hidden="true">
+              <i class="fa-regular fa-envelope-open"></i>
+            </span>
+
+            <h2>Select an inquiry</h2>
+
+            <p>
+              Choose a buyer inquiry to read the message
+              and view the buyer’s contact information.
+            </p>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</section>

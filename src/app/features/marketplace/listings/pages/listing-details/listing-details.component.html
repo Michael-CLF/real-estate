@@ -27,12 +27,12 @@
           Property for sale
         </p>
 
-         <p class="listing-details__price">
-            {{
-            listing.price
-            | currency:'USD':'symbol':'1.0-0'
-            }}
-          </p>
+        <p class="listing-details__price">
+          {{
+          listing.price
+          | currency:'USD':'symbol':'1.0-0'
+          }}
+        </p>
 
         <h1>{{ listing.title }}</h1>
 
@@ -207,46 +207,20 @@
         </section>
         }
         <section class="listing-details__showing-section">
-  <app-request-showing
-    [listingUid]="listing.uid"
-    [sellerUid]="listing.sellerUid"
-    [propertyAddress]="listing.address.addressLine1"
-    [propertyCity]="listing.address.city"
-    [propertyState]="
+          <app-request-showing [listingUid]="listing.uid" [sellerUid]="listing.sellerUid"
+            [propertyAddress]="listing.address.addressLine1" [propertyCity]="listing.address.city" [propertyState]="
       listing.address.stateAbbreviation
-    "
-    [propertyZipCode]="
+    " [propertyZipCode]="
       listing.address.postalCode
-    "
-    [primaryPhotoUrl]="
+    " [primaryPhotoUrl]="
       listing.featuredPhotoUrl ?? null
-    "
-  />
-</section>
+    " />
+        </section>
       </div>
 
       <aside class="listing-details__sidebar">
         <div class="listing-details__contact-card">
-          <p class="listing-details__contact-eyebrow">
-            Interested in this property?
-          </p>
-
-          <h2>Contact the seller</h2>
-
-          <p>
-            Ask a question, request more information,
-            or arrange a property showing.
-          </p>
-
-          <button type="button">
-            Contact seller
-          </button>
-
-          <p class="listing-details__contact-note">
-            Seller contact and inquiry submission will
-            be connected when buyer accounts and
-            Firebase inquiries are added.
-          </p>
+          <app-contact-seller [listingUid]="listing.uid" />
         </div>
 
         <div class="listing-details__activity-card">

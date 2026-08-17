@@ -23,6 +23,10 @@ import {
 } from '../../../core/domains/listings/models/listing.model';
 
 import {
+  calculateDaysOnMarket
+} from '../../../core/domains/listings/utils/listing-days-on-market.util';
+
+import {
   DashboardUserProfile,
   SavedPropertyStatus,
   SavedPropertySummary
@@ -101,99 +105,135 @@ export class DashboardService {
       );
   }
 
-  async getActiveListings(): Promise<Listing[]> {
+  async getActiveListings():
+    Promise<Listing[]> {
 
-    const listingsRef = collection(firestore, 'listings');
+    const listingsRef =
+      collection(
+        firestore,
+        'listings'
+      );
 
-    const listingsQuery = query(
-      listingsRef,
-      where('sellerUid', '==', this.currentUserId),
-      where('status', '==', 'active')
+    const listingsQuery =
+      query(
+        listingsRef,
+
+        where(
+          'sellerUid',
+          '==',
+          this.currentUserId
+        ),
+
+        where(
+          'status',
+          '==',
+          'active'
+        )
+      );
+
+    const snapshot =
+      await getDocs(
+        listingsQuery
+      );
+
+    return snapshot.docs.map(
+      listingDocument => {
+        const listing =
+          listingDocument.data() as Listing;
+
+        return {
+          ...listing,
+
+          Uid:
+            listing.Uid ||
+            listingDocument.id,
+
+          daysOnMarket:
+            calculateDaysOnMarket(
+              listing.publishedAt
+            )
+        };
+      }
     );
-
-    const snapshot = await getDocs(listingsQuery);
-
-    return snapshot.docs.map(doc => doc.data() as Listing);
-
   }
 
   async getCurrentUserProfile():
-  Promise<DashboardUserProfile | null> {
+    Promise<DashboardUserProfile | null> {
 
-  const accountNumberResult =
-    await this.ensureUserAccountNumberFunction({});
+    const accountNumberResult =
+      await this.ensureUserAccountNumberFunction({});
 
-  const assignedAccountNumber =
-    accountNumberResult.data.accountNumber;
+    const assignedAccountNumber =
+      accountNumberResult.data.accountNumber;
 
-  const userRef = doc(
-    firestore,
-    'users',
-    this.currentUserId
-  );
+    const userRef = doc(
+      firestore,
+      'users',
+      this.currentUserId
+    );
 
-  const snapshot = await getDoc(userRef);
+    const snapshot = await getDoc(userRef);
 
-  if (!snapshot.exists()) {
-    return null;
-  }
+    if (!snapshot.exists()) {
+      return null;
+    }
 
-  const data = snapshot.data();
+    const data = snapshot.data();
 
-  const firstName =
-    typeof data['firstName'] === 'string'
-      ? data['firstName'].trim()
-      : '';
+    const firstName =
+      typeof data['firstName'] === 'string'
+        ? data['firstName'].trim()
+        : '';
 
-  const lastName =
-    typeof data['lastName'] === 'string'
-      ? data['lastName'].trim()
-      : '';
+    const lastName =
+      typeof data['lastName'] === 'string'
+        ? data['lastName'].trim()
+        : '';
 
-  const displayName =
-    typeof data['displayName'] === 'string'
-      ? data['displayName'].trim()
-      : '';
+    const displayName =
+      typeof data['displayName'] === 'string'
+        ? data['displayName'].trim()
+        : '';
 
-  const fullName =
-    [firstName, lastName]
-      .filter(Boolean)
-      .join(' ')
-      .trim() ||
-    displayName;
+    const fullName =
+      [firstName, lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() ||
+      displayName;
 
-  const email =
-    typeof data['email'] === 'string'
-      ? data['email'].trim()
-      : '';
+    const email =
+      typeof data['email'] === 'string'
+        ? data['email'].trim()
+        : '';
 
-  const phone =
-    typeof data['phone'] === 'string'
-      ? this.formatPhoneNumber(
+    const phone =
+      typeof data['phone'] === 'string'
+        ? this.formatPhoneNumber(
           data['phone']
         )
-      : '';
+        : '';
 
-  const storedAccountNumber =
-    typeof data['accountNumber'] === 'string'
-      ? data['accountNumber'].trim()
-      : '';
+    const storedAccountNumber =
+      typeof data['accountNumber'] === 'string'
+        ? data['accountNumber'].trim()
+        : '';
 
-  return {
-    accountNumber:
-      storedAccountNumber ||
-      assignedAccountNumber,
+    return {
+      accountNumber:
+        storedAccountNumber ||
+        assignedAccountNumber,
 
-    firstName,
-    lastName,
-    fullName,
-    email,
-    phone,
+      firstName,
+      lastName,
+      fullName,
+      email,
+      phone,
 
-    emailVerified:
-      data['emailVerified'] === true
-  };
-}
+      emailVerified:
+        data['emailVerified'] === true
+    };
+  }
 
   async getSavedHomes():
     Promise<SavedPropertySummary[]> {

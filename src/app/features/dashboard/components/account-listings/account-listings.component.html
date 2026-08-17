@@ -86,7 +86,15 @@
         </span>
         } @else {
         <span>
-          Listing is live
+          {{ listing.daysOnMarket }}
+
+          @if (listing.daysOnMarket === 1) {
+          day
+          } @else {
+          days
+          }
+
+          on NavStreet
         </span>
         }
 

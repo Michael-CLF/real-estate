@@ -28,6 +28,10 @@ import {
   ListingService
 } from '../../../core/domains/listings/services/listing.service';
 
+import {
+  calculateDaysOnMarket
+} from '../../../core/domains/listings/utils/listing-days-on-market.util';
+
 @Component({
   selector: 'app-listing-management',
   standalone: true,
@@ -106,7 +110,14 @@ export class ListingManagementComponent implements OnInit {
         return;
       }
 
-      this.listing.set(listing);
+      this.listing.set({
+        ...listing,
+
+        daysOnMarket:
+          calculateDaysOnMarket(
+            listing.publishedAt
+          )
+      });
     } catch (error: unknown) {
       console.error(
         'Unable to load listing management:',
@@ -119,6 +130,26 @@ export class ListingManagementComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  protected async openListingEditor():
+    Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'manage',
+      'edit'
+    ]);
+  }
+
+  protected async openBuyerInquiries():
+    Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'manage',
+      'inquiries'
+    ]);
   }
 
   protected async openEnhancements():

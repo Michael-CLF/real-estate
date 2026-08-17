@@ -1,0 +1,209 @@
+<section class="contact-seller">
+  @if (successMessage()) {
+    <div
+      class="contact-seller__success"
+      role="status"
+    >
+      <span
+        class="contact-seller__success-icon"
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-circle-check"></i>
+      </span>
+
+      <div>
+        <h2>Message sent</h2>
+
+        <p>{{ successMessage() }}</p>
+
+        @if (inquiryReferenceNumber()) {
+          <p class="contact-seller__reference">
+            Inquiry reference:
+            <strong>
+              {{ inquiryReferenceNumber() }}
+            </strong>
+          </p>
+        }
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="contact-seller__secondary-button"
+      (click)="startAnotherInquiry()"
+    >
+      Send another message
+    </button>
+  } @else if (isFormOpen()) {
+    <header class="contact-seller__header">
+      <div>
+        <p class="contact-seller__eyebrow">
+          Contact the seller
+        </p>
+
+        <h2>Ask about this property</h2>
+      </div>
+
+      <button
+        type="button"
+        class="contact-seller__close-button"
+        aria-label="Close contact form"
+        [disabled]="isSubmitting()"
+        (click)="closeForm()"
+      >
+        <i
+          class="fa-solid fa-xmark"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </header>
+
+    <p class="contact-seller__introduction">
+      Send the seller a question or request additional
+      information. Your account contact information will
+      be included so the seller can respond directly.
+    </p>
+
+    <form
+      class="contact-seller__form"
+      [formGroup]="form"
+      (ngSubmit)="submitInquiry()"
+    >
+      <div class="contact-seller__field">
+        <label for="listingInquiryMessage">
+          Message
+        </label>
+
+        <textarea
+          id="listingInquiryMessage"
+          formControlName="message"
+          rows="7"
+          maxlength="2000"
+          autocomplete="off"
+          placeholder="What would you like to ask the seller?"
+        ></textarea>
+
+        <div class="contact-seller__field-meta">
+          <span>Minimum 20 characters</span>
+
+          <span>
+            {{ messageLength }} / 2000
+          </span>
+        </div>
+
+        @if (
+          form.controls.message.touched &&
+          form.controls.message.hasError('required')
+        ) {
+          <p
+            class="contact-seller__field-error"
+            role="alert"
+          >
+            Enter a message for the seller.
+          </p>
+        } @else if (
+          form.controls.message.touched &&
+          form.controls.message.hasError('minlength')
+        ) {
+          <p
+            class="contact-seller__field-error"
+            role="alert"
+          >
+            Your message must contain at least
+            20 characters.
+          </p>
+        } @else if (
+          form.controls.message.touched &&
+          form.controls.message.hasError('maxlength')
+        ) {
+          <p
+            class="contact-seller__field-error"
+            role="alert"
+          >
+            Your message cannot exceed
+            2,000 characters.
+          </p>
+        }
+      </div>
+
+      @if (submitError()) {
+        <div
+          class="contact-seller__error"
+          role="alert"
+        >
+          <i
+            class="fa-solid fa-circle-exclamation"
+            aria-hidden="true"
+          ></i>
+
+          <span>{{ submitError() }}</span>
+        </div>
+      }
+
+      <div class="contact-seller__actions">
+        <button
+          type="button"
+          class="contact-seller__secondary-button"
+          [disabled]="isSubmitting()"
+          (click)="closeForm()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="contact-seller__primary-button"
+          [disabled]="
+            form.invalid ||
+            isSubmitting()
+          "
+        >
+          @if (isSubmitting()) {
+            <i
+              class="fa-solid fa-spinner fa-spin"
+              aria-hidden="true"
+            ></i>
+
+            <span>Sending...</span>
+          } @else {
+            <span>Send message</span>
+
+            <i
+              class="fa-solid fa-paper-plane"
+              aria-hidden="true"
+            ></i>
+          }
+        </button>
+      </div>
+    </form>
+  } @else {
+    <p class="contact-seller__eyebrow">
+      Interested in this property?
+    </p>
+
+    <h2>Contact the seller</h2>
+
+    <p class="contact-seller__introduction">
+      Ask a question or request more information directly
+      from the property seller.
+    </p>
+
+    <button
+      type="button"
+      class="contact-seller__primary-button contact-seller__open-button"
+      (click)="openForm()"
+    >
+      <span>Contact seller</span>
+
+      <i
+        class="fa-solid fa-message"
+        aria-hidden="true"
+      ></i>
+    </button>
+
+    <p class="contact-seller__privacy-note">
+      Your name, email address, and telephone number will
+      be shared with the seller so they can respond.
+    </p>
+  }
+</section>
