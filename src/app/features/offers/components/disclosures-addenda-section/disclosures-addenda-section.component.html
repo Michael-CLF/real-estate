@@ -1,1 +1,394 @@
-<p>disclosures-addenda-section works!</p>
+<div
+  class="disclosures-addenda-section"
+  formGroupName="disclosuresAddenda"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        Disclosures and addenda must match the property
+      </strong>
+
+      <p>
+        Identify the documents received and the addenda that
+        may apply. The final document package must be
+        reviewed before either party signs.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="disclosures-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Seller disclosures
+      </p>
+
+      <h3 id="disclosures-heading">
+        Documents received from the seller
+      </h3>
+
+      <p>
+        Confirm which disclosure documents the buyer has
+        received or reviewed.
+      </p>
+    </header>
+
+    <div class="option-grid">
+      <label
+        class="option-card"
+        [class.option-card--selected]="
+          isSelected(
+            'propertyDisclosureReceived'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="propertyDisclosureReceived"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Residential property disclosure
+          </strong>
+
+          <small>
+            The buyer has received or reviewed the
+            applicable residential property disclosure
+            document.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="option-card"
+        [class.option-card--selected]="
+          isSelected(
+            'mineralOilGasDisclosureReceived'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="mineralOilGasDisclosureReceived"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Mineral, oil and gas rights disclosure
+          </strong>
+
+          <small>
+            The buyer has received or reviewed the
+            applicable mineral, oil and gas rights
+            disclosure.
+          </small>
+        </span>
+      </label>
+    </div>
+
+    <aside class="status-notice">
+      <strong>
+        An unchecked item means “not confirmed”
+      </strong>
+
+      <p>
+        It does not necessarily mean the document is
+        legally required or that the seller failed to
+        provide it. Applicability depends on the property
+        and transaction.
+      </p>
+    </aside>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="addenda-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Addenda
+      </p>
+
+      <h3 id="addenda-heading">
+        Potentially applicable addenda
+      </h3>
+
+      <p>
+        Select the subjects that should be addressed by an
+        appropriate approved or attorney-prepared addendum.
+      </p>
+    </header>
+
+    <div class="option-grid">
+      <label
+        class="option-card"
+        [class.option-card--selected]="
+          isSelected(
+            'leadBasedPaintAddendumRequired'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="leadBasedPaintAddendumRequired"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Lead-based paint
+          </strong>
+
+          <small>
+            Select when a lead-based-paint disclosure or
+            addendum may apply to the property.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="option-card"
+        [class.option-card--selected]="
+          isSelected(
+            'ownersAssociationAddendumRequired'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="ownersAssociationAddendumRequired"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Owners’ association
+          </strong>
+
+          <small>
+            Select when the property is subject to an HOA,
+            condominium association or similar organization.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="option-card"
+        [class.option-card--selected]="
+          isSelected(
+            'septicOrWellAddendumRequired'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="septicOrWellAddendumRequired"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Septic system or private well
+          </strong>
+
+          <small>
+            Select when the property uses a septic system,
+            private well or both.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="option-card"
+        [class.option-card--selected]="
+          isSelected(
+            'saleOfExistingPropertyAddendumRequired'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="saleOfExistingPropertyAddendumRequired"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Sale of buyer’s existing property
+          </strong>
+
+          <small>
+            Select when this purchase depends on the sale or
+            closing of another property.
+          </small>
+        </span>
+      </label>
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="other-addenda-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Other documents
+      </p>
+
+      <h3 id="other-addenda-heading">
+        Other requested addenda
+      </h3>
+
+      <p>
+        Identify another addendum or transaction document
+        that may be needed. Do not draft the document’s legal
+        language here.
+      </p>
+    </header>
+
+    <div class="form-field">
+      <label for="otherAddenda">
+        Other addenda
+        <span class="optional-marker">
+          Optional
+        </span>
+      </label>
+
+      <textarea
+        id="otherAddenda"
+        formControlName="otherAddenda"
+        rows="5"
+        maxlength="1000"
+        placeholder="Identify the requested addendum or document, or leave blank if not applicable."
+        [class.input-invalid]="
+          isInvalid('otherAddenda')
+        "
+        [attr.aria-invalid]="
+          isInvalid('otherAddenda')
+        "
+        [attr.aria-describedby]="
+          isInvalid('otherAddenda')
+            ? 'otherAddenda-error'
+            : 'otherAddenda-help'
+        "
+      ></textarea>
+
+      <div class="field-meta">
+        <p
+          id="otherAddenda-help"
+          class="field-help"
+        >
+          NavStreet will require an approved document or
+          attorney-prepared language when appropriate.
+        </p>
+
+        <span>
+          {{
+            control(
+              'otherAddenda'
+            )?.value?.length || 0
+          }}
+          / 1000
+        </span>
+      </div>
+
+      @if (isInvalid('otherAddenda')) {
+        <p
+          id="otherAddenda-error"
+          class="field-error"
+        >
+          {{ errorMessage('otherAddenda') }}
+        </p>
+      }
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="supporting-documents-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Attachments
+      </p>
+
+      <h3 id="supporting-documents-heading">
+        Supporting documents
+      </h3>
+
+      <p>
+        Supporting documents will be linked to this offer
+        and preserved with the applicable offer version.
+      </p>
+    </header>
+
+    <div class="document-summary">
+      <span
+        class="document-summary__icon"
+        aria-hidden="true"
+      >
+        ▤
+      </span>
+
+      <div>
+        <strong>
+          {{ supportingDocumentCount }}
+          {{
+            supportingDocumentCount === 1
+              ? 'document'
+              : 'documents'
+          }}
+          attached
+        </strong>
+
+        <p>
+          The document upload control will be connected to
+          the offer-document service after all form sections
+          are complete.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="attorney-notice">
+    <strong>
+      NavStreet does not create special legal language
+    </strong>
+
+    <p>
+      If an appropriate approved addendum does not exist,
+      the parties should obtain the required document or
+      language from a qualified North Carolina attorney.
+    </p>
+  </aside>
+</div>

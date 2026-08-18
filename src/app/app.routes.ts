@@ -16,6 +16,10 @@ import {
   guestGuard
 } from './core/authentication/guards/guest.guard';
 
+import {
+  offerAccessGuard
+} from './core/domains/offers/guards/offer-access.guard';
+
 export const routes: Routes = [
   {
     path: '',
@@ -482,6 +486,26 @@ export const routes: Routes = [
             component => component.ListingDetailsComponent
           )
       },
+      /*
+ * Create or resume an offer
+ */
+{
+  path: 'listings/:listingUid/offer',
+
+  canActivate: [
+    authGuard,
+    accountGuard
+  ],
+
+  loadComponent: () =>
+    import(
+      './features/offers/offer-wizard/offer-wizard.component'
+    ).then(
+      component =>
+        component.OfferWizardComponent
+    )
+},
+     
       {
         path: 'states/:stateSlug',
         loadComponent: () =>

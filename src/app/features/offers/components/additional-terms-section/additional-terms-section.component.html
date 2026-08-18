@@ -1,1 +1,286 @@
-<p>additional-terms-section works!</p>
+<div
+  class="additional-terms-section"
+  formGroupName="additionalTerms"
+>
+  <aside class="legal-boundary-notice">
+    <span
+      class="legal-boundary-notice__icon"
+      aria-hidden="true"
+    >
+      !
+    </span>
+
+    <div>
+      <strong>
+        Describe the request—do not draft contract language
+      </strong>
+
+      <p>
+        NavStreet does not draft special provisions or
+        other language defining a party’s legal rights. If
+        an appropriate approved provision does not exist,
+        attorney-prepared language must be obtained before
+        the offer can be finalized.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="additional-terms-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Additional requests
+      </p>
+
+      <h3 id="additional-terms-heading">
+        Does the buyer have additional requested terms?
+      </h3>
+
+      <p>
+        Standard offer terms are addressed in the previous
+        sections. Use this section only for another business
+        request that has not already been captured.
+      </p>
+    </header>
+
+    <label
+      class="request-card"
+      [class.request-card--selected]="
+        hasAdditionalTerms
+      "
+    >
+      <input
+        type="checkbox"
+        formControlName="hasAdditionalTerms"
+      />
+
+      <span class="request-card__indicator">
+        <span aria-hidden="true">✓</span>
+      </span>
+
+      <span class="request-card__content">
+        <strong>
+          The buyer has an additional requested term
+        </strong>
+
+        <small>
+          Select this option to describe another requested
+          business term for review.
+        </small>
+      </span>
+    </label>
+  </section>
+
+  @if (hasAdditionalTerms) {
+    <section
+      class="conditional-panel"
+      aria-labelledby="requested-term-heading"
+    >
+      <header class="conditional-panel__header">
+        <p class="form-section__eyebrow">
+          Requested business term
+        </p>
+
+        <h3 id="requested-term-heading">
+          Describe what the buyer is requesting
+        </h3>
+
+        <p>
+          State the requested outcome in ordinary factual
+          language. Do not attempt to write a legal clause,
+          waiver, remedy or contingency.
+        </p>
+      </header>
+
+      <div class="form-field">
+        <label for="standardRequestedTerms">
+          Requested term
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <textarea
+          id="standardRequestedTerms"
+          formControlName="standardRequestedTerms"
+          rows="7"
+          maxlength="1500"
+          placeholder="Example: Buyer requests that the detached storage shed remain with the property."
+          [class.input-invalid]="
+            isInvalid('standardRequestedTerms')
+          "
+          [attr.aria-invalid]="
+            isInvalid('standardRequestedTerms')
+          "
+          [attr.aria-describedby]="
+            isInvalid('standardRequestedTerms')
+              ? 'standardRequestedTerms-error'
+              : 'standardRequestedTerms-help'
+          "
+        ></textarea>
+
+        <div class="field-meta">
+          <p
+            id="standardRequestedTerms-help"
+            class="field-help"
+          >
+            Describe the business request only. NavStreet
+            will determine whether approved or
+            attorney-prepared language is required.
+          </p>
+
+          <span>
+            {{
+              control(
+                'standardRequestedTerms'
+              )?.value?.length || 0
+            }}
+            / 1500
+          </span>
+        </div>
+
+        @if (
+          isInvalid('standardRequestedTerms')
+        ) {
+          <p
+            id="standardRequestedTerms-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'standardRequestedTerms'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <label
+        class="attorney-review-card"
+        [class.attorney-review-card--selected]="
+          attorneyDraftedLanguageRequired
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="attorneyDraftedLanguageRequired"
+        />
+
+        <span class="attorney-review-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="attorney-review-card__content">
+          <strong>
+            This request needs attorney-prepared language
+          </strong>
+
+          <small>
+            Select this when the request requires a custom
+            condition, obligation, waiver, remedy or other
+            language affecting the parties’ legal rights.
+          </small>
+        </span>
+      </label>
+    </section>
+  }
+
+  @if (
+    hasAdditionalTerms &&
+    attorneyDraftedLanguageRequired
+  ) {
+    <section
+      class="attorney-workflow"
+      aria-labelledby="attorney-workflow-heading"
+    >
+      <div class="attorney-workflow__header">
+        <span
+          class="attorney-workflow__icon"
+          aria-hidden="true"
+        >
+          §
+        </span>
+
+        <div>
+          <p class="form-section__eyebrow">
+            Attorney workflow
+          </p>
+
+          <h3 id="attorney-workflow-heading">
+            Attorney-prepared language required
+          </h3>
+        </div>
+      </div>
+
+      <p>
+        This offer can remain saved as a draft, but it
+        cannot be finalized with unfinished special
+        language. The buyer may use a qualified North
+        Carolina attorney of their choice.
+      </p>
+
+      <div class="attorney-status">
+        <span>Status</span>
+
+        <strong>
+          @switch (attorneyReviewStatus) {
+            @case ('required') {
+              Attorney required
+            }
+
+            @case ('requested') {
+              Attorney requested
+            }
+
+            @case ('in_review') {
+              Attorney reviewing
+            }
+
+            @case ('completed') {
+              Attorney language completed
+            }
+
+            @default {
+              Attorney required
+            }
+          }
+        </strong>
+      </div>
+
+      <aside class="directory-notice">
+        <strong>
+          Attorney directory integration
+        </strong>
+
+        <p>
+          The attorney-selection and document-delivery
+          controls will be connected after the core offer
+          form and attorney directory are complete.
+        </p>
+      </aside>
+    </section>
+  }
+
+  @if (!hasAdditionalTerms) {
+    <aside class="no-additional-terms">
+      <span aria-hidden="true">✓</span>
+
+      <div>
+        <strong>
+          No additional requested terms
+        </strong>
+
+        <p>
+          Continue to the offer-expiration section. You can
+          return here before submission if another request
+          needs to be added.
+        </p>
+      </div>
+    </aside>
+  }
+</div>

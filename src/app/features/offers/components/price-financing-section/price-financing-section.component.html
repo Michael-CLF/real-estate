@@ -1,1 +1,703 @@
-<p>price-financing-section works!</p>
+<div
+  class="price-financing-section"
+  formGroupName="priceFinancing"
+>
+  <section
+    class="form-section"
+    aria-labelledby="purchase-price-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Purchase price
+      </p>
+
+      <h3 id="purchase-price-heading">
+        Proposed purchase price
+      </h3>
+
+      <p>
+        Enter the total amount you are offering to pay for
+        the property.
+      </p>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="purchasePrice">
+          Purchase price
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <div
+          class="input-with-prefix"
+          [class.input-with-prefix--invalid]="
+            isInvalid('purchasePrice')
+          "
+        >
+          <span aria-hidden="true">$</span>
+
+          <input
+            id="purchasePrice"
+            type="number"
+            formControlName="purchasePrice"
+            min="1"
+            step="1000"
+            inputmode="decimal"
+            placeholder="0"
+            [attr.aria-invalid]="
+              isInvalid('purchasePrice')
+            "
+            [attr.aria-describedby]="
+              isInvalid('purchasePrice')
+                ? 'purchasePrice-error'
+                : 'purchasePrice-help'
+            "
+          />
+        </div>
+
+        <p
+          id="purchasePrice-help"
+          class="field-help"
+        >
+          Enter the full proposed price before deposits,
+          credits or financing.
+        </p>
+
+        @if (isInvalid('purchasePrice')) {
+          <p
+            id="purchasePrice-error"
+            class="field-error"
+          >
+            {{ errorMessage('purchasePrice') }}
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="funding-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Funding
+      </p>
+
+      <h3 id="funding-heading">
+        How will you purchase the property?
+      </h3>
+
+      <p>
+        Select the option that best describes how the
+        purchase price will be paid.
+      </p>
+    </header>
+
+    <fieldset class="choice-group">
+      <legend class="sr-only">
+        Purchase funding method
+      </legend>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          financingMethod === 'cash'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="financingMethod"
+          value="cash"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            Cash purchase
+          </strong>
+
+          <small>
+            No loan proceeds will be used to complete the
+            purchase.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          financingMethod === 'financing'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="financingMethod"
+          value="financing"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            Financing
+          </strong>
+
+          <small>
+            The purchase will primarily be completed using
+            mortgage financing.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          financingMethod ===
+            'cash_and_financing'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="financingMethod"
+          value="cash_and_financing"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            Cash and financing
+          </strong>
+
+          <small>
+            The purchase will use a combination of buyer
+            funds and loan proceeds.
+          </small>
+        </span>
+      </label>
+    </fieldset>
+
+    @if (
+      isInvalid('financingMethod')
+    ) {
+      <p class="field-error">
+        Select how the purchase will be funded.
+      </p>
+    }
+  </section>
+
+  @if (isCashPurchase) {
+    <section
+      class="conditional-panel"
+      aria-labelledby="cash-purchase-heading"
+    >
+      <header class="conditional-panel__header">
+        <h3 id="cash-purchase-heading">
+          Cash purchase documentation
+        </h3>
+
+        <p>
+          The seller may consider evidence that sufficient
+          funds are available when reviewing the offer.
+        </p>
+      </header>
+
+      <label class="checkbox-card">
+        <input
+          type="checkbox"
+          formControlName="proofOfFundsProvided"
+        />
+
+        <span class="checkbox-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="checkbox-card__content">
+          <strong>
+            Proof of funds will be provided
+          </strong>
+
+          <small>
+            Confirm that proof of funds is available for
+            submission with or shortly after this offer.
+          </small>
+        </span>
+      </label>
+    </section>
+  }
+
+  @if (usesFinancing) {
+    <section
+      class="conditional-panel"
+      aria-labelledby="financing-details-heading"
+    >
+      <header class="conditional-panel__header">
+        <h3 id="financing-details-heading">
+          Financing details
+        </h3>
+
+        <p>
+          Enter the proposed loan and down-payment
+          information.
+        </p>
+      </header>
+
+      <div class="form-grid form-grid--two">
+        <div class="form-field">
+          <label for="loanType">
+            Loan type
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <select
+            id="loanType"
+            formControlName="loanType"
+            [class.input-invalid]="
+              isInvalid('loanType')
+            "
+            [attr.aria-invalid]="
+              isInvalid('loanType')
+            "
+            [attr.aria-describedby]="
+              isInvalid('loanType')
+                ? 'loanType-error'
+                : null
+            "
+          >
+            <option value="">
+              Select loan type
+            </option>
+
+            <option value="conventional">
+              Conventional
+            </option>
+
+            <option value="fha">
+              FHA
+            </option>
+
+            <option value="va">
+              VA
+            </option>
+
+            <option value="usda">
+              USDA
+            </option>
+
+            <option value="jumbo">
+              Jumbo
+            </option>
+
+            <option value="other">
+              Other
+            </option>
+          </select>
+
+          @if (isInvalid('loanType')) {
+            <p
+              id="loanType-error"
+              class="field-error"
+            >
+              {{ errorMessage('loanType') }}
+            </p>
+          }
+        </div>
+
+        @if (requiresOtherLoanType) {
+          <div class="form-field">
+            <label for="otherLoanType">
+              Describe the loan type
+              <span
+                class="required-marker"
+                aria-hidden="true"
+              >
+                *
+              </span>
+            </label>
+
+            <input
+              id="otherLoanType"
+              type="text"
+              formControlName="otherLoanType"
+              maxlength="100"
+              placeholder="Enter the proposed loan type"
+              [class.input-invalid]="
+                isInvalid('otherLoanType')
+              "
+              [attr.aria-invalid]="
+                isInvalid('otherLoanType')
+              "
+              [attr.aria-describedby]="
+                isInvalid('otherLoanType')
+                  ? 'otherLoanType-error'
+                  : null
+              "
+            />
+
+            @if (
+              isInvalid('otherLoanType')
+            ) {
+              <p
+                id="otherLoanType-error"
+                class="field-error"
+              >
+                {{ errorMessage('otherLoanType') }}
+              </p>
+            }
+          </div>
+        }
+
+        <div class="form-field">
+          <label for="loanAmount">
+            Proposed loan amount
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <div
+            class="input-with-prefix"
+            [class.input-with-prefix--invalid]="
+              isInvalid('loanAmount')
+            "
+          >
+            <span aria-hidden="true">$</span>
+
+            <input
+              id="loanAmount"
+              type="number"
+              formControlName="loanAmount"
+              min="1"
+              step="1000"
+              inputmode="decimal"
+              placeholder="0"
+              [attr.aria-invalid]="
+                isInvalid('loanAmount')
+              "
+              [attr.aria-describedby]="
+                isInvalid('loanAmount')
+                  ? 'loanAmount-error'
+                  : null
+              "
+            />
+          </div>
+
+          @if (isInvalid('loanAmount')) {
+            <p
+              id="loanAmount-error"
+              class="field-error"
+            >
+              {{ errorMessage('loanAmount') }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="downPaymentAmount">
+            Proposed down payment
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <div
+            class="input-with-prefix"
+            [class.input-with-prefix--invalid]="
+              isInvalid('downPaymentAmount')
+            "
+          >
+            <span aria-hidden="true">$</span>
+
+            <input
+              id="downPaymentAmount"
+              type="number"
+              formControlName="downPaymentAmount"
+              min="0"
+              step="1000"
+              inputmode="decimal"
+              placeholder="0"
+              [attr.aria-invalid]="
+                isInvalid('downPaymentAmount')
+              "
+              [attr.aria-describedby]="
+                isInvalid('downPaymentAmount')
+                  ? 'downPaymentAmount-error'
+                  : null
+              "
+            />
+          </div>
+
+          @if (
+            isInvalid('downPaymentAmount')
+          ) {
+            <p
+              id="downPaymentAmount-error"
+              class="field-error"
+            >
+              {{ errorMessage('downPaymentAmount') }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="downPaymentPercentage">
+            Down payment percentage
+            <span class="optional-marker">
+              Optional
+            </span>
+          </label>
+
+          <div
+            class="input-with-suffix"
+            [class.input-with-suffix--invalid]="
+              isInvalid(
+                'downPaymentPercentage'
+              )
+            "
+          >
+            <input
+              id="downPaymentPercentage"
+              type="number"
+              formControlName="downPaymentPercentage"
+              min="0"
+              max="100"
+              step="0.01"
+              inputmode="decimal"
+              placeholder="0"
+              [attr.aria-invalid]="
+                isInvalid(
+                  'downPaymentPercentage'
+                )
+              "
+              [attr.aria-describedby]="
+                isInvalid(
+                  'downPaymentPercentage'
+                )
+                  ? 'downPaymentPercentage-error'
+                  : null
+              "
+            />
+
+            <span aria-hidden="true">%</span>
+          </div>
+
+          @if (
+            isInvalid(
+              'downPaymentPercentage'
+            )
+          ) {
+            <p
+              id="downPaymentPercentage-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'downPaymentPercentage'
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="financingApplicationDays">
+            Financing application deadline
+            <span class="optional-marker">
+              Optional
+            </span>
+          </label>
+
+          <div
+            class="input-with-suffix"
+            [class.input-with-suffix--invalid]="
+              isInvalid(
+                'financingApplicationDays'
+              )
+            "
+          >
+            <input
+              id="financingApplicationDays"
+              type="number"
+              formControlName="financingApplicationDays"
+              min="0"
+              max="365"
+              step="1"
+              inputmode="numeric"
+              placeholder="0"
+              [attr.aria-invalid]="
+                isInvalid(
+                  'financingApplicationDays'
+                )
+              "
+              [attr.aria-describedby]="
+                isInvalid(
+                  'financingApplicationDays'
+                )
+                  ? 'financingApplicationDays-error'
+                  : 'financingApplicationDays-help'
+              "
+            />
+
+            <span>days</span>
+          </div>
+
+          <p
+            id="financingApplicationDays-help"
+            class="field-help"
+          >
+            Enter the number of calendar days after the
+            effective date, or leave blank if not specified.
+          </p>
+
+          @if (
+            isInvalid(
+              'financingApplicationDays'
+            )
+          ) {
+            <p
+              id="financingApplicationDays-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'financingApplicationDays'
+                )
+              }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <div class="document-options">
+        <label class="checkbox-card">
+          <input
+            type="checkbox"
+            formControlName="preapprovalProvided"
+          />
+
+          <span class="checkbox-card__indicator">
+            <span aria-hidden="true">✓</span>
+          </span>
+
+          <span class="checkbox-card__content">
+            <strong>
+              Preapproval will be provided
+            </strong>
+
+            <small>
+              Confirm that a lender preapproval is available
+              for this offer.
+            </small>
+          </span>
+        </label>
+
+        <label class="checkbox-card">
+          <input
+            type="checkbox"
+            formControlName="proofOfFundsProvided"
+          />
+
+          <span class="checkbox-card__indicator">
+            <span aria-hidden="true">✓</span>
+          </span>
+
+          <span class="checkbox-card__content">
+            <strong>
+              Proof of buyer funds will be provided
+            </strong>
+
+            <small>
+              Confirm that evidence of the proposed down
+              payment or closing funds is available.
+            </small>
+          </span>
+        </label>
+
+        <label class="checkbox-card">
+          <input
+            type="checkbox"
+            formControlName="financingContingencyRequested"
+          />
+
+          <span class="checkbox-card__indicator">
+            <span aria-hidden="true">✓</span>
+          </span>
+
+          <span class="checkbox-card__content">
+            <strong>
+              Financing condition requested
+            </strong>
+
+            <small>
+              Select this if the offer requests a financing
+              condition. The exact effect must be stated in
+              the final attorney-approved agreement.
+            </small>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-field form-field--notes">
+        <label for="financingNotes">
+          Financing notes
+          <span class="optional-marker">
+            Optional
+          </span>
+        </label>
+
+        <textarea
+          id="financingNotes"
+          formControlName="financingNotes"
+          rows="4"
+          maxlength="1000"
+          placeholder="Enter relevant financing information, or leave blank if not applicable."
+          [class.input-invalid]="
+            isInvalid('financingNotes')
+          "
+          [attr.aria-invalid]="
+            isInvalid('financingNotes')
+          "
+          [attr.aria-describedby]="
+            isInvalid('financingNotes')
+              ? 'financingNotes-error'
+              : 'financingNotes-help'
+          "
+        ></textarea>
+
+        <p
+          id="financingNotes-help"
+          class="field-help"
+        >
+          Do not use this field to draft legal provisions.
+        </p>
+
+        @if (isInvalid('financingNotes')) {
+          <p
+            id="financingNotes-error"
+            class="field-error"
+          >
+            {{ errorMessage('financingNotes') }}
+          </p>
+        }
+      </div>
+    </section>
+  }
+</div>

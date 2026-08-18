@@ -1,1 +1,520 @@
-<p>settlement-possession-section works!</p>
+<div
+  class="settlement-possession-section"
+  formGroupName="settlementPossession"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        Settlement and possession are separate events
+      </strong>
+
+      <p>
+        Settlement, recording and delivery of possession
+        may not occur at the same moment. Enter the buyer’s
+        proposed dates and possession arrangement carefully.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="settlement-date-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Settlement
+      </p>
+
+      <h3 id="settlement-date-heading">
+        Proposed settlement date
+      </h3>
+
+      <p>
+        Enter the date on which the buyer proposes to
+        complete settlement.
+      </p>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="proposedSettlementDate">
+          Settlement date
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <input
+          id="proposedSettlementDate"
+          type="date"
+          formControlName="proposedSettlementDate"
+          [class.input-invalid]="
+            isInvalid('proposedSettlementDate')
+          "
+          [attr.aria-invalid]="
+            isInvalid('proposedSettlementDate')
+          "
+          [attr.aria-describedby]="
+            isInvalid('proposedSettlementDate')
+              ? 'proposedSettlementDate-error'
+              : 'proposedSettlementDate-help'
+          "
+        />
+
+        <p
+          id="proposedSettlementDate-help"
+          class="field-help"
+        >
+          The seller may accept this date or propose a
+          different settlement date.
+        </p>
+
+        @if (
+          isInvalid('proposedSettlementDate')
+        ) {
+          <p
+            id="proposedSettlementDate-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'proposedSettlementDate'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="proposedPossessionDate">
+          Possession date
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <input
+          id="proposedPossessionDate"
+          type="date"
+          formControlName="proposedPossessionDate"
+          [class.input-invalid]="
+            isInvalid('proposedPossessionDate') ||
+            hasPossessionDateError
+          "
+          [attr.aria-invalid]="
+            isInvalid('proposedPossessionDate') ||
+            hasPossessionDateError
+          "
+          [attr.aria-describedby]="
+            hasPossessionDateError
+              ? 'possession-date-order-error'
+              : isInvalid(
+                  'proposedPossessionDate'
+                )
+                ? 'proposedPossessionDate-error'
+                : 'proposedPossessionDate-help'
+          "
+        />
+
+        <p
+          id="proposedPossessionDate-help"
+          class="field-help"
+        >
+          Enter the date the buyer proposes to receive
+          possession of the property.
+        </p>
+
+        @if (
+          isInvalid('proposedPossessionDate')
+        ) {
+          <p
+            id="proposedPossessionDate-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'proposedPossessionDate'
+              )
+            }}
+          </p>
+        }
+
+        @if (hasPossessionDateError) {
+          <p
+            id="possession-date-order-error"
+            class="field-error"
+          >
+            The proposed possession date cannot be before
+            the proposed settlement date.
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="possession-timing-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Possession
+      </p>
+
+      <h3 id="possession-timing-heading">
+        Proposed possession arrangement
+      </h3>
+
+      <p>
+        Select when the buyer proposes to receive possession
+        of the property.
+      </p>
+    </header>
+
+    <fieldset class="choice-group">
+      <legend class="sr-only">
+        Proposed possession arrangement
+      </legend>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          possessionTiming === 'at_closing'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="possessionTiming"
+          value="at_closing"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            At closing
+          </strong>
+
+          <small>
+            The buyer proposes to receive possession when
+            the transaction closes under the final
+            agreement.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          possessionTiming ===
+            'after_recording'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="possessionTiming"
+          value="after_recording"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            After deed recording
+          </strong>
+
+          <small>
+            The buyer proposes to receive possession after
+            the deed has been recorded.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          possessionTiming ===
+            'seller_possession_after_closing'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="possessionTiming"
+          value="seller_possession_after_closing"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            Seller possession after closing
+          </strong>
+
+          <small>
+            The seller will temporarily remain in possession
+            after closing under separately stated terms.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="choice-card"
+        [class.choice-card--selected]="
+          possessionTiming === 'other'
+        "
+      >
+        <input
+          type="radio"
+          formControlName="possessionTiming"
+          value="other"
+        />
+
+        <span class="choice-card__indicator"></span>
+
+        <span class="choice-card__content">
+          <strong>
+            Other arrangement
+          </strong>
+
+          <small>
+            A different possession arrangement is requested
+            and must be described.
+          </small>
+        </span>
+      </label>
+    </fieldset>
+
+    @if (isInvalid('possessionTiming')) {
+      <p class="field-error">
+        Select the proposed possession arrangement.
+      </p>
+    }
+
+    @if (requiresPossessionNotes) {
+      <div class="conditional-panel">
+        <div class="form-field">
+          <label for="possessionNotes">
+            Possession details
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <textarea
+            id="possessionNotes"
+            formControlName="possessionNotes"
+            rows="5"
+            maxlength="1000"
+            placeholder="Describe the requested possession timing and factual arrangement."
+            [class.input-invalid]="
+              isInvalid('possessionNotes')
+            "
+            [attr.aria-invalid]="
+              isInvalid('possessionNotes')
+            "
+            [attr.aria-describedby]="
+              isInvalid('possessionNotes')
+                ? 'possessionNotes-error'
+                : 'possessionNotes-help'
+            "
+          ></textarea>
+
+          <div class="field-meta">
+            <p
+              id="possessionNotes-help"
+              class="field-help"
+            >
+              Nonstandard possession provisions must be
+              prepared or approved by a qualified North
+              Carolina attorney.
+            </p>
+
+            <span>
+              {{
+                control(
+                  'possessionNotes'
+                )?.value?.length || 0
+              }}
+              / 1000
+            </span>
+          </div>
+
+          @if (
+            isInvalid('possessionNotes')
+          ) {
+            <p
+              id="possessionNotes-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'possessionNotes'
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        @if (
+          possessionTiming ===
+            'seller_possession_after_closing'
+        ) {
+          <aside class="attorney-notice">
+            <strong>
+              Separate possession terms are required
+            </strong>
+
+            <p>
+              Post-closing seller possession can create
+              substantial rights, duties and risks for both
+              parties. NavStreet will not draft those
+              provisions; attorney-prepared language must be
+              used.
+            </p>
+          </aside>
+        }
+      </div>
+    }
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="settlement-preferences-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Preferences
+      </p>
+
+      <h3 id="settlement-preferences-heading">
+        Settlement preferences
+      </h3>
+
+      <p>
+        Identify a preferred settlement agent or location.
+        These are proposals and remain subject to agreement
+        and applicable requirements.
+      </p>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="settlementAgentPreference">
+          Preferred settlement attorney or firm
+          <span class="optional-marker">
+            Optional
+          </span>
+        </label>
+
+        <input
+          id="settlementAgentPreference"
+          type="text"
+          formControlName="settlementAgentPreference"
+          maxlength="200"
+          placeholder="Attorney or law firm name"
+          [class.input-invalid]="
+            isInvalid(
+              'settlementAgentPreference'
+            )
+          "
+          [attr.aria-invalid]="
+            isInvalid(
+              'settlementAgentPreference'
+            )
+          "
+          [attr.aria-describedby]="
+            isInvalid(
+              'settlementAgentPreference'
+            )
+              ? 'settlementAgentPreference-error'
+              : null
+          "
+        />
+
+        @if (
+          isInvalid(
+            'settlementAgentPreference'
+          )
+        ) {
+          <p
+            id="settlementAgentPreference-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'settlementAgentPreference'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="settlementLocationPreference">
+          Preferred settlement location
+          <span class="optional-marker">
+            Optional
+          </span>
+        </label>
+
+        <textarea
+          id="settlementLocationPreference"
+          formControlName="settlementLocationPreference"
+          rows="3"
+          maxlength="300"
+          placeholder="City, office or address"
+          [class.input-invalid]="
+            isInvalid(
+              'settlementLocationPreference'
+            )
+          "
+          [attr.aria-invalid]="
+            isInvalid(
+              'settlementLocationPreference'
+            )
+          "
+          [attr.aria-describedby]="
+            isInvalid(
+              'settlementLocationPreference'
+            )
+              ? 'settlementLocationPreference-error'
+              : null
+          "
+        ></textarea>
+
+        @if (
+          isInvalid(
+            'settlementLocationPreference'
+          )
+        ) {
+          <p
+            id="settlementLocationPreference-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'settlementLocationPreference'
+              )
+            }}
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+</div>

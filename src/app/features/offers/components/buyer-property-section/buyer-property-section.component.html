@@ -1,1 +1,280 @@
-<p>buyer-property-section works!</p>
+<div class="buyer-property-section" formGroupName="buyerProperty">
+  <section class="form-section" aria-labelledby="buyer-information-heading">
+    <header class="form-section__header">
+      <div>
+        <p class="form-section__eyebrow">
+          Buyer
+        </p>
+
+        <h3 id="buyer-information-heading">
+          Buyer information
+        </h3>
+
+        <p>
+          Your account information is shown below. Your
+          signature must match your verified legal name
+          before the offer can be submitted.
+        </p>
+      </div>
+
+      <span class="identity-status">
+        Identity verification required
+      </span>
+    </header>
+
+    <div class="form-grid form-grid--name">
+      <div class="form-field">
+        <label for="buyerFirstName">
+          Legal first name
+          <span class="required-marker" aria-hidden="true">
+            *
+          </span>
+        </label>
+
+        <input id="buyerFirstName" type="text" formControlName="buyerFirstName" autocomplete="given-name"
+          maxlength="100" [class.input-invalid]="
+            isInvalid('buyerFirstName')
+          " [attr.aria-invalid]="
+            isInvalid('buyerFirstName')
+          " [attr.aria-describedby]="
+            isInvalid('buyerFirstName')
+              ? 'buyerFirstName-error'
+              : null
+          " />
+
+        @if (isInvalid('buyerFirstName')) {
+        <p id="buyerFirstName-error" class="field-error">
+          {{ errorMessage('buyerFirstName') }}
+        </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="buyerMiddleName">
+          Middle name
+          <span class="optional-marker">
+            Optional
+          </span>
+        </label>
+
+        <input id="buyerMiddleName" type="text" formControlName="buyerMiddleName" autocomplete="additional-name"
+          maxlength="100" [class.input-invalid]="
+            isInvalid('buyerMiddleName')
+          " [attr.aria-invalid]="
+            isInvalid('buyerMiddleName')
+          " [attr.aria-describedby]="
+            isInvalid('buyerMiddleName')
+              ? 'buyerMiddleName-error'
+              : null
+          " />
+
+        @if (isInvalid('buyerMiddleName')) {
+        <p id="buyerMiddleName-error" class="field-error">
+          {{ errorMessage('buyerMiddleName') }}
+        </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="buyerLastName">
+          Legal last name
+          <span class="required-marker" aria-hidden="true">
+            *
+          </span>
+        </label>
+
+        <input id="buyerLastName" type="text" formControlName="buyerLastName" autocomplete="family-name" maxlength="100"
+          [class.input-invalid]="
+            isInvalid('buyerLastName')
+          " [attr.aria-invalid]="
+            isInvalid('buyerLastName')
+          " [attr.aria-describedby]="
+            isInvalid('buyerLastName')
+              ? 'buyerLastName-error'
+              : null
+          " />
+
+        @if (isInvalid('buyerLastName')) {
+        <p id="buyerLastName-error" class="field-error">
+          {{ errorMessage('buyerLastName') }}
+        </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="buyerSuffix">
+          Suffix
+          <span class="optional-marker">
+            Optional
+          </span>
+        </label>
+
+        <input id="buyerSuffix" type="text" formControlName="buyerSuffix" autocomplete="honorific-suffix" maxlength="20"
+          placeholder="Jr., Sr., III" [class.input-invalid]="
+            isInvalid('buyerSuffix')
+          " [attr.aria-invalid]="
+            isInvalid('buyerSuffix')
+          " [attr.aria-describedby]="
+            isInvalid('buyerSuffix')
+              ? 'buyerSuffix-error'
+              : null
+          " />
+
+        @if (isInvalid('buyerSuffix')) {
+        <p id="buyerSuffix-error" class="field-error">
+          {{ errorMessage('buyerSuffix') }}
+        </p>
+        }
+      </div>
+    </div>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="buyerEmail">
+          Email address
+          <span class="required-marker" aria-hidden="true">
+            *
+          </span>
+        </label>
+
+        <input id="buyerEmail" type="email" formControlName="buyerEmail" autocomplete="email" inputmode="email"
+          maxlength="254" [class.input-invalid]="
+            isInvalid('buyerEmail')
+          " [attr.aria-invalid]="
+            isInvalid('buyerEmail')
+          " [attr.aria-describedby]="
+            isInvalid('buyerEmail')
+              ? 'buyerEmail-error'
+              : 'buyerEmail-help'
+          " />
+
+        <p id="buyerEmail-help" class="field-help">
+          Offer notices and signature requests will be
+          delivered to this address.
+        </p>
+
+        @if (isInvalid('buyerEmail')) {
+        <p id="buyerEmail-error" class="field-error">
+          {{ errorMessage('buyerEmail') }}
+        </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="buyerPhone">
+          Phone number
+          <span class="required-marker" aria-hidden="true">
+            *
+          </span>
+        </label>
+
+        <input id="buyerPhone" type="tel" formControlName="buyerPhone" autocomplete="tel" inputmode="numeric"
+          maxlength="14" placeholder="(919) 555-0123" (keydown)="preventAdditionalPhoneDigit($event)"
+          (input)="formatPhoneInput($event)" [class.input-invalid]="
+    isInvalid('buyerPhone')
+  " [attr.aria-invalid]="
+    isInvalid('buyerPhone')
+  " [attr.aria-describedby]="
+    isInvalid('buyerPhone')
+      ? 'buyerPhone-error'
+      : null
+  " />
+
+        @if (isInvalid('buyerPhone')) {
+        <p id="buyerPhone-error" class="field-error">
+          {{ errorMessage('buyerPhone') }}
+        </p>
+        }
+      </div>
+    </div>
+
+
+    <aside class="identity-notice">
+      <span class="identity-notice__icon" aria-hidden="true">
+        ✓
+      </span>
+
+      <div>
+        <strong>
+          Legal identity verification
+        </strong>
+
+        <p>
+          Before signing, NavStreet will verify the buyer's
+          identity and legal name. After verification, the
+          verified name will be used on the final offer and
+          cannot be changed without completing verification
+          again.
+        </p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="form-section form-section--property" aria-labelledby="property-information-heading">
+    <header class="form-section__header">
+      <div>
+        <p class="form-section__eyebrow">
+          Property
+        </p>
+
+        <h3 id="property-information-heading">
+          Property being purchased
+        </h3>
+
+        <p>
+          This information comes from the listing and cannot
+          be changed from the offer form.
+        </p>
+      </div>
+
+      <span class="locked-status">
+        <span aria-hidden="true">🔒</span>
+        Listing information
+      </span>
+    </header>
+
+    <div class="property-card">
+      <div class="form-field form-field--full">
+        <label for="propertyAddress">
+          Property address
+        </label>
+
+        <input id="propertyAddress" type="text" formControlName="propertyAddress" />
+      </div>
+
+      <div class="form-grid form-grid--property">
+        <div class="form-field">
+          <label for="propertyCounty">
+            County
+          </label>
+
+          <input id="propertyCounty" type="text" formControlName="propertyCounty" />
+        </div>
+
+        <div class="form-field">
+          <label for="propertyState">
+            State
+          </label>
+
+          <input id="propertyState" type="text" formControlName="propertyState" />
+        </div>
+
+        <div class="form-field">
+          <label for="propertyPostalCode">
+            ZIP code
+          </label>
+
+          <input id="propertyPostalCode" type="text" formControlName="propertyPostalCode" />
+        </div>
+
+        <div class="form-field">
+          <label for="propertyParcelId">
+            Parcel identification
+          </label>
+
+          <input id="propertyParcelId" type="text" formControlName="propertyParcelId" placeholder="Not provided" />
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

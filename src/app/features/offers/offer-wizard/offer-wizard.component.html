@@ -1,1 +1,237 @@
-<p>offer-wizard works!</p>
+<main class="offer-wizard">
+  <header class="wizard-header">
+    <div class="wizard-header__content">
+      <button type="button" class="back-to-listing" (click)="returnToListing()"
+        aria-label="Return to the property listing">
+        <span aria-hidden="true">←</span>
+        Property details
+      </button>
+
+      <div class="wizard-heading">
+        <p class="wizard-heading__eyebrow">
+          North Carolina offer
+        </p>
+
+        <h1>Make an offer</h1>
+
+        <p class="wizard-heading__description">
+          Complete each section carefully. Your progress
+          will be saved as an offer draft before the offer
+          is submitted to the seller.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <section class="wizard-progress" aria-label="Offer progress">
+    <div class="wizard-progress__summary">
+      <span>
+        Section
+        {{ currentSectionIndex() + 1 }}
+        of
+        {{ sections.length }}
+      </span>
+
+      <strong>
+        {{ currentSection().shortTitle }}
+      </strong>
+    </div>
+
+    <div class="wizard-progress__track" role="progressbar" aria-label="Offer completion" aria-valuemin="0"
+      aria-valuemax="100" [attr.aria-valuenow]="progressPercentage()">
+      <div class="wizard-progress__value" [style.width.%]="progressPercentage()"></div>
+    </div>
+  </section>
+
+  <div class="wizard-layout">
+    <aside class="wizard-navigation" aria-label="Offer sections">
+      <ol>
+        @for (
+        section of sections;
+        track section.key;
+        let sectionIndex = $index
+        ) {
+        <li>
+          <button type="button" class="section-link" [class.section-link--active]="
+                sectionIndex === currentSectionIndex()
+              " [class.section-link--complete]="
+                sectionIndex < currentSectionIndex()
+              " [attr.aria-current]="
+                sectionIndex === currentSectionIndex()
+                  ? 'step'
+                  : null
+              " (click)="goToSection(sectionIndex)">
+            <span class="section-link__number">
+              @if (
+              sectionIndex < currentSectionIndex() ) { <span aria-hidden="true">✓</span>
+            } @else {
+            {{ sectionIndex + 1 }}
+            }
+            </span>
+
+            <span class="section-link__content">
+              <strong>
+                {{ section.shortTitle }}
+              </strong>
+
+              <small>
+                {{ section.title }}
+              </small>
+            </span>
+          </button>
+        </li>
+        }
+      </ol>
+    </aside>
+
+    <section class="wizard-workspace">
+      @if (loading()) {
+      <div class="wizard-state" role="status" aria-live="polite">
+        <div class="loading-indicator" aria-hidden="true"></div>
+
+        <p>Loading your offer…</p>
+      </div>
+      } @else {
+      <form class="offer-form" [formGroup]="offerForm" (ngSubmit)="continue()" novalidate>
+        <header class="section-header">
+          <div>
+            <p class="section-header__step">
+              Section
+              {{ currentSectionIndex() + 1 }}
+            </p>
+
+            <h2>
+              {{ currentSection().title }}
+            </h2>
+
+            <p>
+              {{ currentSection().description }}
+            </p>
+          </div>
+
+          @if (saving()) {
+          <span class="saving-status" role="status" aria-live="polite">
+            Saving…
+          </span>
+          } @else if (saveMessage()) {
+          <span class="saving-status saving-status--saved" role="status" aria-live="polite">
+            {{ saveMessage() }}
+          </span>
+          }
+        </header>
+
+        @if (errorMessage()) {
+        <div class="form-alert form-alert--error" role="alert">
+          <span class="form-alert__icon" aria-hidden="true">
+            !
+          </span>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+        </div>
+        }
+
+        <div class="section-content">
+          @switch (currentSection().key) {
+          @case ('buyerProperty') {
+          <app-buyer-property-section />
+          }
+
+          @case ('priceFinancing') {
+          <app-price-financing-section />
+          }
+
+          @case ('depositsDueDiligence') {
+          <app-deposits-due-diligence-section />
+          }
+
+          @case ('investigations') {
+          <app-investigations-section />
+          }
+
+          @case ('concessions') {
+          <app-concessions-section />
+          }
+
+          @case ('propertyInclusions') {
+          <app-property-inclusions-section />
+          }
+
+          @case ('settlementPossession') {
+          <app-settlement-possession-section />
+          }
+
+          @case ('disclosuresAddenda') {
+          <app-disclosures-addenda-section />
+          }
+
+          @case ('additionalTerms') {
+          <app-additional-terms-section />
+          }
+
+          @case ('offerExpiration') {
+          <app-offer-expiration-section />
+          }
+
+          @case ('offerReview') {
+          <app-offer-review-section />
+          }
+          }
+        </div>
+
+        <footer class="wizard-actions">
+          <button type="button" class="button button--secondary" [disabled]="
+                saving() ||
+                submitting()
+              " (click)="previous()">
+            @if (isFirstSection()) {
+            Return to listing
+            } @else {
+            Previous
+            }
+          </button>
+
+          <div class="wizard-actions__primary">
+            @if (!isLastSection()) {
+            <button type="submit" class="button button--primary" [disabled]="
+                    saving() ||
+                    submitting()
+                  ">
+              Continue
+              <span aria-hidden="true">→</span>
+            </button>
+            } @else {
+            <button type="submit" class="button button--primary" [disabled]="
+                    saving() ||
+                    submitting()
+                  ">
+              @if (submitting()) {
+              Preparing offer…
+              } @else {
+              Review complete offer
+              }
+            </button>
+            }
+          </div>
+        </footer>
+      </form>
+      }
+    </section>
+  </div>
+
+  <aside class="legal-notice">
+    <strong>Important notice</strong>
+
+    <p>
+      NavStreet is a technology platform. NavStreet is not a
+      law firm, does not act as an attorney, and does not
+      provide legal advice or legal representation. NavStreet
+      does not draft contracts, special provisions, or other
+      language defining a party's legal rights. If an
+      appropriate attorney-approved form or provision does not
+      exist, the party should obtain advice and language from a
+      qualified North Carolina attorney.
+    </p>
+  </aside>
+</main>

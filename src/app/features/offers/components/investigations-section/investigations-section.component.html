@@ -1,1 +1,433 @@
-<p>investigations-section works!</p>
+<div
+  class="investigations-section"
+  formGroupName="investigations"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        Investigations and contract conditions
+      </strong>
+
+      <p>
+        Selecting an item records the buyer’s requested
+        terms. The final attorney-approved agreement
+        determines the deadlines, procedures and legal
+        effect of each condition.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="investigations-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Property review
+      </p>
+
+      <h3 id="investigations-heading">
+        Buyer’s investigation intentions
+      </h3>
+
+      <p>
+        Select the investigations and conditions the buyer
+        expects to request.
+      </p>
+    </header>
+
+    <div class="option-grid">
+      <label class="option-card">
+        <input
+          type="checkbox"
+          formControlName="inspectionIntended"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Property inspections intended
+          </strong>
+
+          <small>
+            The buyer expects to conduct inspections or
+            other property investigations during the
+            applicable period.
+          </small>
+        </span>
+      </label>
+
+      <label class="option-card">
+        <input
+          type="checkbox"
+          formControlName="appraisalContingencyRequested"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Appraisal condition requested
+          </strong>
+
+          <small>
+            The buyer requests terms addressing the
+            property’s appraised value.
+          </small>
+        </span>
+      </label>
+
+      <label class="option-card">
+        <input
+          type="checkbox"
+          formControlName="financingContingencyRequested"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Financing condition requested
+          </strong>
+
+          <small>
+            The buyer requests terms addressing the
+            availability or approval of financing.
+          </small>
+        </span>
+      </label>
+
+      <label class="option-card">
+        <input
+          type="checkbox"
+          formControlName="saleOfExistingHomeRequired"
+        />
+
+        <span class="option-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="option-card__content">
+          <strong>
+            Sale of existing home required
+          </strong>
+
+          <small>
+            The buyer’s purchase depends on the sale or
+            closing of another property.
+          </small>
+        </span>
+      </label>
+    </div>
+  </section>
+
+  @if (saleOfExistingHomeRequired) {
+    <section
+      class="conditional-panel"
+      aria-labelledby="existing-home-heading"
+    >
+      <header class="conditional-panel__header">
+        <p class="form-section__eyebrow">
+          Existing property
+        </p>
+
+        <h3 id="existing-home-heading">
+          Sale-of-existing-home information
+        </h3>
+
+        <p>
+          Provide information about the property that must
+          be sold or closed before this purchase can proceed.
+        </p>
+      </header>
+
+      <div class="form-field">
+        <label for="existingHomeAddress">
+          Existing property address
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <textarea
+          id="existingHomeAddress"
+          formControlName="existingHomeAddress"
+          rows="3"
+          maxlength="300"
+          placeholder="Street address, city, state and ZIP code"
+          [class.input-invalid]="
+            isInvalid('existingHomeAddress')
+          "
+          [attr.aria-invalid]="
+            isInvalid('existingHomeAddress')
+          "
+          [attr.aria-describedby]="
+            isInvalid('existingHomeAddress')
+              ? 'existingHomeAddress-error'
+              : null
+          "
+        ></textarea>
+
+        @if (
+          isInvalid('existingHomeAddress')
+        ) {
+          <p
+            id="existingHomeAddress-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'existingHomeAddress'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="form-grid form-grid--two">
+        <div class="form-field">
+          <label for="existingHomeStatus">
+            Current sale status
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <select
+            id="existingHomeStatus"
+            formControlName="existingHomeStatus"
+            [class.input-invalid]="
+              isInvalid('existingHomeStatus')
+            "
+            [attr.aria-invalid]="
+              isInvalid('existingHomeStatus')
+            "
+            [attr.aria-describedby]="
+              isInvalid('existingHomeStatus')
+                ? 'existingHomeStatus-error'
+                : null
+            "
+          >
+            <option value="">
+              Select current status
+            </option>
+
+            <option value="not_listed">
+              Not yet listed
+            </option>
+
+            <option value="active">
+              Listed for sale
+            </option>
+
+            <option value="offer_received">
+              Offer received
+            </option>
+
+            <option value="under_contract">
+              Under contract
+            </option>
+
+            <option value="scheduled_to_close">
+              Scheduled to close
+            </option>
+          </select>
+
+          @if (
+            isInvalid('existingHomeStatus')
+          ) {
+            <p
+              id="existingHomeStatus-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'existingHomeStatus'
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="existingHomeDeadline">
+            Required sale or closing date
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <input
+            id="existingHomeDeadline"
+            type="date"
+            formControlName="existingHomeDeadline"
+            [class.input-invalid]="
+              isInvalid(
+                'existingHomeDeadline'
+              )
+            "
+            [attr.aria-invalid]="
+              isInvalid(
+                'existingHomeDeadline'
+              )
+            "
+            [attr.aria-describedby]="
+              isInvalid(
+                'existingHomeDeadline'
+              )
+                ? 'existingHomeDeadline-error'
+                : 'existingHomeDeadline-help'
+            "
+          />
+
+          <p
+            id="existingHomeDeadline-help"
+            class="field-help"
+          >
+            Enter the proposed deadline for satisfying this
+            condition.
+          </p>
+
+          @if (
+            isInvalid(
+              'existingHomeDeadline'
+            )
+          ) {
+            <p
+              id="existingHomeDeadline-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'existingHomeDeadline'
+                )
+              }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <aside class="attorney-notice">
+        <strong>
+          Attorney-prepared language may be required
+        </strong>
+
+        <p>
+          A sale-of-existing-home condition can materially
+          affect both parties’ rights and deadlines.
+          NavStreet will route nonstandard language to a
+          qualified North Carolina attorney instead of
+          drafting the provision.
+        </p>
+      </aside>
+    </section>
+  }
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="investigation-notes-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Additional information
+      </p>
+
+      <h3 id="investigation-notes-heading">
+        Investigation notes
+      </h3>
+
+      <p>
+        Add factual information about the buyer’s intended
+        investigations. Do not use this field to create
+        legal provisions.
+      </p>
+    </header>
+
+    <div class="form-field">
+      <label for="buyerInvestigationNotes">
+        Buyer investigation notes
+        <span class="optional-marker">
+          Optional
+        </span>
+      </label>
+
+      <textarea
+        id="buyerInvestigationNotes"
+        formControlName="buyerInvestigationNotes"
+        rows="5"
+        maxlength="1500"
+        placeholder="Enter relevant investigation information, or leave blank if not applicable."
+        [class.input-invalid]="
+          isInvalid('buyerInvestigationNotes')
+        "
+        [attr.aria-invalid]="
+          isInvalid('buyerInvestigationNotes')
+        "
+        [attr.aria-describedby]="
+          isInvalid('buyerInvestigationNotes')
+            ? 'buyerInvestigationNotes-error'
+            : 'buyerInvestigationNotes-help'
+        "
+      ></textarea>
+
+      <div class="field-meta">
+        <p
+          id="buyerInvestigationNotes-help"
+          class="field-help"
+        >
+          Factual notes only. Special legal language must be
+          prepared or approved by an attorney.
+        </p>
+
+        <span>
+          {{
+            control(
+              'buyerInvestigationNotes'
+            )?.value?.length || 0
+          }}
+          / 1500
+        </span>
+      </div>
+
+      @if (
+        isInvalid(
+          'buyerInvestigationNotes'
+        )
+      ) {
+        <p
+          id="buyerInvestigationNotes-error"
+          class="field-error"
+        >
+          {{
+            errorMessage(
+              'buyerInvestigationNotes'
+            )
+          }}
+        </p>
+      }
+    </div>
+  </section>
+</div>

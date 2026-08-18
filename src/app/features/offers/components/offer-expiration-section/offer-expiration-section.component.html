@@ -1,1 +1,300 @@
-<p>offer-expiration-section works!</p>
+<div
+  class="offer-expiration-section"
+  formGroupName="offerExpiration"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        The expiration controls how long the offer remains
+        available for acceptance
+      </strong>
+
+      <p>
+        Select a future date and time that gives the seller
+        a reasonable opportunity to review the complete
+        offer and any supporting documents.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="expiration-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Offer deadline
+      </p>
+
+      <h3 id="expiration-heading">
+        When should this offer expire?
+      </h3>
+
+      <p>
+        If the offer has not been accepted by the stated
+        deadline, its status will change to expired and it
+        can no longer be accepted.
+      </p>
+    </header>
+
+    <div class="expiration-card">
+      <div class="form-grid form-grid--expiration">
+        <div class="form-field">
+          <label for="expirationDate">
+            Expiration date
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <input
+            id="expirationDate"
+            type="date"
+            formControlName="expirationDate"
+            [min]="minimumDate"
+            [class.input-invalid]="
+              isInvalid('expirationDate') ||
+              expirationDateTimeInvalid
+            "
+            [attr.aria-invalid]="
+              isInvalid('expirationDate') ||
+              expirationDateTimeInvalid
+            "
+            [attr.aria-describedby]="
+              isInvalid('expirationDate')
+                ? 'expirationDate-error'
+                : expirationDateTimeInvalid
+                  ? 'expirationDateTime-error'
+                  : 'expirationDate-help'
+            "
+          />
+
+          <p
+            id="expirationDate-help"
+            class="field-help"
+          >
+            Select the calendar date on which the offer
+            should expire.
+          </p>
+
+          @if (
+            isInvalid('expirationDate')
+          ) {
+            <p
+              id="expirationDate-error"
+              class="field-error"
+            >
+              {{ errorMessage('expirationDate') }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="expirationTime">
+            Expiration time
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <input
+            id="expirationTime"
+            type="time"
+            formControlName="expirationTime"
+            step="60"
+            [class.input-invalid]="
+              isInvalid('expirationTime') ||
+              expirationDateTimeInvalid
+            "
+            [attr.aria-invalid]="
+              isInvalid('expirationTime') ||
+              expirationDateTimeInvalid
+            "
+            [attr.aria-describedby]="
+              isInvalid('expirationTime')
+                ? 'expirationTime-error'
+                : expirationDateTimeInvalid
+                  ? 'expirationDateTime-error'
+                  : 'expirationTime-help'
+            "
+          />
+
+          <p
+            id="expirationTime-help"
+            class="field-help"
+          >
+            Select the exact time the offer should expire.
+          </p>
+
+          @if (
+            isInvalid('expirationTime')
+          ) {
+            <p
+              id="expirationTime-error"
+              class="field-error"
+            >
+              {{ errorMessage('expirationTime') }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="timeZone">
+            Time zone
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <select
+            id="timeZone"
+            formControlName="timeZone"
+            [class.input-invalid]="
+              isInvalid('timeZone')
+            "
+            [attr.aria-invalid]="
+              isInvalid('timeZone')
+            "
+            [attr.aria-describedby]="
+              isInvalid('timeZone')
+                ? 'timeZone-error'
+                : 'timeZone-help'
+            "
+          >
+            <option value="America/New_York">
+              Eastern Time
+            </option>
+          </select>
+
+          <p
+            id="timeZone-help"
+            class="field-help"
+          >
+            North Carolina offers currently use Eastern
+            Time.
+          </p>
+
+          @if (isInvalid('timeZone')) {
+            <p
+              id="timeZone-error"
+              class="field-error"
+            >
+              {{ errorMessage('timeZone') }}
+            </p>
+          }
+        </div>
+      </div>
+
+      @if (expirationDateTimeInvalid) {
+        <div
+          id="expirationDateTime-error"
+          class="expiration-error"
+          role="alert"
+        >
+          <span aria-hidden="true">!</span>
+
+          <p>
+            {{ expirationErrorMessage }}
+          </p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="expiration-behavior-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        What happens next
+      </p>
+
+      <h3 id="expiration-behavior-heading">
+        Offer-expiration behavior
+      </h3>
+    </header>
+
+    <ol class="expiration-timeline">
+      <li>
+        <span class="expiration-timeline__number">
+          1
+        </span>
+
+        <div>
+          <strong>
+            Offer submitted
+          </strong>
+
+          <p>
+            The seller receives the complete offer and its
+            expiration deadline.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <span class="expiration-timeline__number">
+          2
+        </span>
+
+        <div>
+          <strong>
+            Seller reviews
+          </strong>
+
+          <p>
+            The seller may accept, reject or create a
+            counteroffer while the offer remains available.
+          </p>
+        </div>
+      </li>
+
+      <li>
+        <span class="expiration-timeline__number">
+          3
+        </span>
+
+        <div>
+          <strong>
+            Deadline reached
+          </strong>
+
+          <p>
+            If no acceptance has been completed, NavStreet
+            records the offer as expired and preserves it in
+            the historical record.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <aside class="final-notice">
+    <strong>
+      Expiration does not delete the offer
+    </strong>
+
+    <p>
+      The offer and every related version remain available
+      to the buyer and seller as part of the permanent offer
+      history.
+    </p>
+  </aside>
+</div>

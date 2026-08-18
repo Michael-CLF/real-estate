@@ -1,1 +1,567 @@
-<p>deposits-due-diligence-section works!</p>
+<div
+  class="deposits-section"
+  formGroupName="depositsDueDiligence"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        Review these amounts carefully
+      </strong>
+
+      <p>
+        Earnest money and due-diligence fees can have
+        different purposes, payment requirements and refund
+        consequences. The final attorney-approved agreement
+        will control the parties’ rights and obligations.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="earnest-money-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Earnest money
+      </p>
+
+      <h3 id="earnest-money-heading">
+        Proposed earnest-money deposit
+      </h3>
+
+      <p>
+        Enter the earnest money the buyer proposes to
+        deliver and the proposed delivery period.
+      </p>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="earnestMoneyAmount">
+          Initial earnest money
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <div
+          class="input-with-prefix"
+          [class.input-with-prefix--invalid]="
+            isInvalid('earnestMoneyAmount')
+          "
+        >
+          <span aria-hidden="true">$</span>
+
+          <input
+            id="earnestMoneyAmount"
+            type="number"
+            formControlName="earnestMoneyAmount"
+            min="0"
+            step="100"
+            inputmode="decimal"
+            placeholder="0"
+            [attr.aria-invalid]="
+              isInvalid('earnestMoneyAmount')
+            "
+            [attr.aria-describedby]="
+              isInvalid('earnestMoneyAmount')
+                ? 'earnestMoneyAmount-error'
+                : 'earnestMoneyAmount-help'
+            "
+          />
+        </div>
+
+        <p
+          id="earnestMoneyAmount-help"
+          class="field-help"
+        >
+          Enter 0 if no initial earnest money is proposed.
+        </p>
+
+        @if (
+          isInvalid('earnestMoneyAmount')
+        ) {
+          <p
+            id="earnestMoneyAmount-error"
+            class="field-error"
+          >
+            {{ errorMessage('earnestMoneyAmount') }}
+          </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="earnestMoneyDeliveryDays">
+          Delivery period
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <div
+          class="input-with-suffix"
+          [class.input-with-suffix--invalid]="
+            isInvalid(
+              'earnestMoneyDeliveryDays'
+            )
+          "
+        >
+          <input
+            id="earnestMoneyDeliveryDays"
+            type="number"
+            formControlName="earnestMoneyDeliveryDays"
+            min="0"
+            max="365"
+            step="1"
+            inputmode="numeric"
+            placeholder="0"
+            [attr.aria-invalid]="
+              isInvalid(
+                'earnestMoneyDeliveryDays'
+              )
+            "
+            [attr.aria-describedby]="
+              isInvalid(
+                'earnestMoneyDeliveryDays'
+              )
+                ? 'earnestMoneyDeliveryDays-error'
+                : 'earnestMoneyDeliveryDays-help'
+            "
+          />
+
+          <span>days</span>
+        </div>
+
+        <p
+          id="earnestMoneyDeliveryDays-help"
+          class="field-help"
+        >
+          Proposed number of calendar days after the
+          agreement becomes effective.
+        </p>
+
+        @if (
+          isInvalid(
+            'earnestMoneyDeliveryDays'
+          )
+        ) {
+          <p
+            id="earnestMoneyDeliveryDays-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'earnestMoneyDeliveryDays'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="additionalEarnestMoneyAmount">
+          Additional earnest money
+          <span class="optional-marker">
+            Optional
+          </span>
+        </label>
+
+        <div
+          class="input-with-prefix"
+          [class.input-with-prefix--invalid]="
+            isInvalid(
+              'additionalEarnestMoneyAmount'
+            )
+          "
+        >
+          <span aria-hidden="true">$</span>
+
+          <input
+            id="additionalEarnestMoneyAmount"
+            type="number"
+            formControlName="additionalEarnestMoneyAmount"
+            min="0"
+            step="100"
+            inputmode="decimal"
+            placeholder="0"
+            [attr.aria-invalid]="
+              isInvalid(
+                'additionalEarnestMoneyAmount'
+              )
+            "
+            [attr.aria-describedby]="
+              isInvalid(
+                'additionalEarnestMoneyAmount'
+              )
+                ? 'additionalEarnestMoneyAmount-error'
+                : 'additionalEarnestMoneyAmount-help'
+            "
+          />
+        </div>
+
+        <p
+          id="additionalEarnestMoneyAmount-help"
+          class="field-help"
+        >
+          Leave blank or enter 0 if no additional deposit is
+          proposed.
+        </p>
+
+        @if (
+          isInvalid(
+            'additionalEarnestMoneyAmount'
+          )
+        ) {
+          <p
+            id="additionalEarnestMoneyAmount-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'additionalEarnestMoneyAmount'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      @if (hasAdditionalEarnestMoney) {
+        <div class="form-field">
+          <label for="additionalEarnestMoneyDueDate">
+            Additional deposit due date
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <input
+            id="additionalEarnestMoneyDueDate"
+            type="date"
+            formControlName="additionalEarnestMoneyDueDate"
+            [class.input-invalid]="
+              isInvalid(
+                'additionalEarnestMoneyDueDate'
+              )
+            "
+            [attr.aria-invalid]="
+              isInvalid(
+                'additionalEarnestMoneyDueDate'
+              )
+            "
+            [attr.aria-describedby]="
+              isInvalid(
+                'additionalEarnestMoneyDueDate'
+              )
+                ? 'additionalEarnestMoneyDueDate-error'
+                : null
+            "
+          />
+
+          @if (
+            isInvalid(
+              'additionalEarnestMoneyDueDate'
+            )
+          ) {
+            <p
+              id="additionalEarnestMoneyDueDate-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'additionalEarnestMoneyDueDate'
+                )
+              }}
+            </p>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="due-diligence-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Due diligence
+      </p>
+
+      <h3 id="due-diligence-heading">
+        Proposed due-diligence terms
+      </h3>
+
+      <p>
+        Enter the proposed due-diligence fee and the date
+        and time when the due-diligence period will end.
+      </p>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="dueDiligenceFeeAmount">
+          Due-diligence fee
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <div
+          class="input-with-prefix"
+          [class.input-with-prefix--invalid]="
+            isInvalid(
+              'dueDiligenceFeeAmount'
+            )
+          "
+        >
+          <span aria-hidden="true">$</span>
+
+          <input
+            id="dueDiligenceFeeAmount"
+            type="number"
+            formControlName="dueDiligenceFeeAmount"
+            min="0"
+            step="100"
+            inputmode="decimal"
+            placeholder="0"
+            [attr.aria-invalid]="
+              isInvalid(
+                'dueDiligenceFeeAmount'
+              )
+            "
+            [attr.aria-describedby]="
+              isInvalid(
+                'dueDiligenceFeeAmount'
+              )
+                ? 'dueDiligenceFeeAmount-error'
+                : 'dueDiligenceFeeAmount-help'
+            "
+          />
+        </div>
+
+        <p
+          id="dueDiligenceFeeAmount-help"
+          class="field-help"
+        >
+          Enter 0 if no due-diligence fee is proposed.
+        </p>
+
+        @if (
+          isInvalid(
+            'dueDiligenceFeeAmount'
+          )
+        ) {
+          <p
+            id="dueDiligenceFeeAmount-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'dueDiligenceFeeAmount'
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="dueDiligenceExpirationDate">
+          Due-diligence expiration
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <input
+          id="dueDiligenceExpirationDate"
+          type="date"
+          formControlName="dueDiligenceExpirationDate"
+          [class.input-invalid]="
+            isInvalid(
+              'dueDiligenceExpirationDate'
+            )
+          "
+          [attr.aria-invalid]="
+            isInvalid(
+              'dueDiligenceExpirationDate'
+            )
+          "
+          [attr.aria-describedby]="
+            isInvalid(
+              'dueDiligenceExpirationDate'
+            )
+              ? 'dueDiligenceExpirationDate-error'
+              : 'dueDiligenceExpirationDate-help'
+          "
+        />
+
+        <p
+          id="dueDiligenceExpirationDate-help"
+          class="field-help"
+        >
+          The final agreement will specify the controlling
+          expiration time and other requirements.
+        </p>
+
+        @if (
+          isInvalid(
+            'dueDiligenceExpirationDate'
+          )
+        ) {
+          <p
+            id="dueDiligenceExpirationDate-error"
+            class="field-error"
+          >
+            {{
+              errorMessage(
+                'dueDiligenceExpirationDate'
+              )
+            }}
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="escrow-agent-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Escrow
+      </p>
+
+      <h3 id="escrow-agent-heading">
+        Proposed escrow agent
+      </h3>
+
+      <p>
+        Identify the attorney, law firm or other authorized
+        escrow agent proposed to hold the deposit.
+      </p>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="form-field">
+        <label for="escrowAgentName">
+          Escrow agent or firm
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <input
+          id="escrowAgentName"
+          type="text"
+          formControlName="escrowAgentName"
+          maxlength="200"
+          placeholder="Attorney or law firm name"
+          [class.input-invalid]="
+            isInvalid('escrowAgentName')
+          "
+          [attr.aria-invalid]="
+            isInvalid('escrowAgentName')
+          "
+          [attr.aria-describedby]="
+            isInvalid('escrowAgentName')
+              ? 'escrowAgentName-error'
+              : null
+          "
+        />
+
+        @if (
+          isInvalid('escrowAgentName')
+        ) {
+          <p
+            id="escrowAgentName-error"
+            class="field-error"
+          >
+            {{ errorMessage('escrowAgentName') }}
+          </p>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="escrowAgentAddress">
+          Escrow agent address
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
+        </label>
+
+        <textarea
+          id="escrowAgentAddress"
+          formControlName="escrowAgentAddress"
+          rows="3"
+          maxlength="300"
+          placeholder="Street address, city, state and ZIP code"
+          [class.input-invalid]="
+            isInvalid('escrowAgentAddress')
+          "
+          [attr.aria-invalid]="
+            isInvalid('escrowAgentAddress')
+          "
+          [attr.aria-describedby]="
+            isInvalid('escrowAgentAddress')
+              ? 'escrowAgentAddress-error'
+              : null
+          "
+        ></textarea>
+
+        @if (
+          isInvalid('escrowAgentAddress')
+        ) {
+          <p
+            id="escrowAgentAddress-error"
+            class="field-error"
+          >
+            {{ errorMessage('escrowAgentAddress') }}
+          </p>
+        }
+      </div>
+    </div>
+
+    <aside class="escrow-notice">
+      <strong>
+        Do not send money through this form
+      </strong>
+
+      <p>
+        NavStreet does not receive or hold earnest money or
+        due-diligence fees. Payment instructions must be
+        confirmed directly with the authorized escrow agent
+        using independently verified contact information.
+      </p>
+    </aside>
+  </section>
+</div>

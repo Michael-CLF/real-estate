@@ -1,1 +1,421 @@
-<p>concessions-section works!</p>
+<div
+  class="concessions-section"
+  formGroupName="concessions"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        Seller concessions affect the seller’s proceeds
+      </strong>
+
+      <p>
+        Any requested credit, payment or concession will be
+        presented to the seller as part of the offer. Actual
+        amounts may also be limited by the buyer’s loan
+        program, lender or applicable law.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="closing-costs-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Closing costs
+      </p>
+
+      <h3 id="closing-costs-heading">
+        Seller-paid closing costs
+      </h3>
+
+      <p>
+        Indicate whether the buyer is requesting the seller
+        to pay a specified amount toward permitted buyer
+        expenses.
+      </p>
+    </header>
+
+    <label
+      class="request-card"
+      [class.request-card--selected]="
+        closingCostsRequested
+      "
+    >
+      <input
+        type="checkbox"
+        formControlName="sellerPaidClosingCostsRequested"
+      />
+
+      <span class="request-card__indicator">
+        <span aria-hidden="true">✓</span>
+      </span>
+
+      <span class="request-card__content">
+        <strong>
+          Request seller-paid closing costs
+        </strong>
+
+        <small>
+          Select this option to include a seller-paid
+          closing-cost request in the offer.
+        </small>
+      </span>
+    </label>
+
+    @if (closingCostsRequested) {
+      <div class="conditional-panel">
+        <div class="form-grid form-grid--two">
+          <div class="form-field">
+            <label for="sellerPaidClosingCostsAmount">
+              Requested amount
+              <span
+                class="required-marker"
+                aria-hidden="true"
+              >
+                *
+              </span>
+            </label>
+
+            <div
+              class="input-with-prefix"
+              [class.input-with-prefix--invalid]="
+                isInvalid(
+                  'sellerPaidClosingCostsAmount'
+                )
+              "
+            >
+              <span aria-hidden="true">$</span>
+
+              <input
+                id="sellerPaidClosingCostsAmount"
+                type="number"
+                formControlName="sellerPaidClosingCostsAmount"
+                min="1"
+                step="100"
+                inputmode="decimal"
+                placeholder="0"
+                [attr.aria-invalid]="
+                  isInvalid(
+                    'sellerPaidClosingCostsAmount'
+                  )
+                "
+                [attr.aria-describedby]="
+                  isInvalid(
+                    'sellerPaidClosingCostsAmount'
+                  )
+                    ? 'sellerPaidClosingCostsAmount-error'
+                    : 'sellerPaidClosingCostsAmount-help'
+                "
+              />
+            </div>
+
+            <p
+              id="sellerPaidClosingCostsAmount-help"
+              class="field-help"
+            >
+              Enter the maximum dollar amount requested.
+            </p>
+
+            @if (
+              isInvalid(
+                'sellerPaidClosingCostsAmount'
+              )
+            ) {
+              <p
+                id="sellerPaidClosingCostsAmount-error"
+                class="field-error"
+              >
+                {{
+                  errorMessage(
+                    'sellerPaidClosingCostsAmount'
+                  )
+                }}
+              </p>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="sellerPaidClosingCostsPercentage">
+              Equivalent percentage
+              <span class="optional-marker">
+                Optional
+              </span>
+            </label>
+
+            <div
+              class="input-with-suffix"
+              [class.input-with-suffix--invalid]="
+                isInvalid(
+                  'sellerPaidClosingCostsPercentage'
+                )
+              "
+            >
+              <input
+                id="sellerPaidClosingCostsPercentage"
+                type="number"
+                formControlName="sellerPaidClosingCostsPercentage"
+                min="0"
+                max="100"
+                step="0.01"
+                inputmode="decimal"
+                placeholder="0"
+                [attr.aria-invalid]="
+                  isInvalid(
+                    'sellerPaidClosingCostsPercentage'
+                  )
+                "
+                [attr.aria-describedby]="
+                  isInvalid(
+                    'sellerPaidClosingCostsPercentage'
+                  )
+                    ? 'sellerPaidClosingCostsPercentage-error'
+                    : 'sellerPaidClosingCostsPercentage-help'
+                "
+              />
+
+              <span aria-hidden="true">%</span>
+            </div>
+
+            <p
+              id="sellerPaidClosingCostsPercentage-help"
+              class="field-help"
+            >
+              This percentage is informational; the stated
+              dollar amount controls this request.
+            </p>
+
+            @if (
+              isInvalid(
+                'sellerPaidClosingCostsPercentage'
+              )
+            ) {
+              <p
+                id="sellerPaidClosingCostsPercentage-error"
+                class="field-error"
+              >
+                {{
+                  errorMessage(
+                    'sellerPaidClosingCostsPercentage'
+                  )
+                }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <aside class="lender-notice">
+          <strong>
+            Financing limits may apply
+          </strong>
+
+          <p>
+            If the purchase is financed, the lender must
+            confirm whether the requested concession is
+            permitted by the loan program.
+          </p>
+        </aside>
+      </div>
+    }
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="repair-credit-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Property credit
+      </p>
+
+      <h3 id="repair-credit-heading">
+        Repair or property-condition credit
+      </h3>
+
+      <p>
+        Indicate whether the buyer is presently requesting a
+        specific credit related to known property conditions.
+      </p>
+    </header>
+
+    <label
+      class="request-card"
+      [class.request-card--selected]="
+        repairCreditRequested
+      "
+    >
+      <input
+        type="checkbox"
+        formControlName="repairCreditRequested"
+      />
+
+      <span class="request-card__indicator">
+        <span aria-hidden="true">✓</span>
+      </span>
+
+      <span class="request-card__content">
+        <strong>
+          Request a repair or property-condition credit
+        </strong>
+
+        <small>
+          Select this only when the offer includes a current
+          request for a specific credit.
+        </small>
+      </span>
+    </label>
+
+    @if (repairCreditRequested) {
+      <div class="conditional-panel">
+        <div class="form-field form-field--amount">
+          <label for="repairCreditAmount">
+            Requested credit amount
+            <span
+              class="required-marker"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          </label>
+
+          <div
+            class="input-with-prefix"
+            [class.input-with-prefix--invalid]="
+              isInvalid('repairCreditAmount')
+            "
+          >
+            <span aria-hidden="true">$</span>
+
+            <input
+              id="repairCreditAmount"
+              type="number"
+              formControlName="repairCreditAmount"
+              min="1"
+              step="100"
+              inputmode="decimal"
+              placeholder="0"
+              [attr.aria-invalid]="
+                isInvalid('repairCreditAmount')
+              "
+              [attr.aria-describedby]="
+                isInvalid('repairCreditAmount')
+                  ? 'repairCreditAmount-error'
+                  : 'repairCreditAmount-help'
+              "
+            />
+          </div>
+
+          <p
+            id="repairCreditAmount-help"
+            class="field-help"
+          >
+            Enter the total property-condition credit
+            requested from the seller.
+          </p>
+
+          @if (
+            isInvalid('repairCreditAmount')
+          ) {
+            <p
+              id="repairCreditAmount-error"
+              class="field-error"
+            >
+              {{
+                errorMessage(
+                  'repairCreditAmount'
+                )
+              }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="other-concessions-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Other requests
+      </p>
+
+      <h3 id="other-concessions-heading">
+        Other seller concessions
+      </h3>
+
+      <p>
+        Enter factual information about any other requested
+        seller payment or credit. Do not draft legal
+        provisions in this field.
+      </p>
+    </header>
+
+    <div class="form-field">
+      <label for="otherConcessions">
+        Other requested concessions
+        <span class="optional-marker">
+          Optional
+        </span>
+      </label>
+
+      <textarea
+        id="otherConcessions"
+        formControlName="otherConcessions"
+        rows="5"
+        maxlength="1000"
+        placeholder="Describe the requested payment or credit, or leave blank if not applicable."
+        [class.input-invalid]="
+          isInvalid('otherConcessions')
+        "
+        [attr.aria-invalid]="
+          isInvalid('otherConcessions')
+        "
+        [attr.aria-describedby]="
+          isInvalid('otherConcessions')
+            ? 'otherConcessions-error'
+            : 'otherConcessions-help'
+        "
+      ></textarea>
+
+      <div class="field-meta">
+        <p
+          id="otherConcessions-help"
+          class="field-help"
+        >
+          Requests requiring nonstandard legal language
+          must be prepared or approved by an attorney.
+        </p>
+
+        <span>
+          {{
+            control(
+              'otherConcessions'
+            )?.value?.length || 0
+          }}
+          / 1000
+        </span>
+      </div>
+
+      @if (
+        isInvalid('otherConcessions')
+      ) {
+        <p
+          id="otherConcessions-error"
+          class="field-error"
+        >
+          {{ errorMessage('otherConcessions') }}
+        </p>
+      }
+    </div>
+  </section>
+</div>

@@ -1,1 +1,415 @@
-<p>property-inclusions-section works!</p>
+<div
+  class="property-inclusions-section"
+  formGroupName="propertyInclusions"
+>
+  <aside class="information-notice">
+    <span
+      class="information-notice__icon"
+      aria-hidden="true"
+    >
+      i
+    </span>
+
+    <div>
+      <strong>
+        Clearly identify requested items
+      </strong>
+
+      <p>
+        Fixtures and personal property can be treated
+        differently. Select the items requested with the
+        property and review the final agreement carefully to
+        confirm what will remain at settlement.
+      </p>
+    </div>
+  </aside>
+
+  <section
+    class="form-section"
+    aria-labelledby="included-items-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Requested inclusions
+      </p>
+
+      <h3 id="included-items-heading">
+        Items requested with the property
+      </h3>
+
+      <p>
+        Select each item the buyer requests to be included
+        in the purchase.
+      </p>
+    </header>
+
+    <div class="inclusion-grid">
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected(
+            'builtInAppliancesIncluded'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="builtInAppliancesIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Built-in appliances
+          </strong>
+
+          <small>
+            Permanently installed cooking, ventilation or
+            similar built-in appliances.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected('refrigeratorIncluded')
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="refrigeratorIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Refrigerator
+          </strong>
+
+          <small>
+            Existing refrigerator located at the property.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected('washerIncluded')
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="washerIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Clothes washer
+          </strong>
+
+          <small>
+            Existing clothes washer located at the
+            property.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected('dryerIncluded')
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="dryerIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Clothes dryer
+          </strong>
+
+          <small>
+            Existing clothes dryer located at the
+            property.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected(
+            'windowTreatmentsIncluded'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="windowTreatmentsIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Window treatments
+          </strong>
+
+          <small>
+            Existing blinds, shades, rods, curtains or
+            related window treatments.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected(
+            'securitySystemsIncluded'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="securitySystemsIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Security equipment
+          </strong>
+
+          <small>
+            Existing owned alarms, cameras, doorbells or
+            other security equipment.
+          </small>
+        </span>
+      </label>
+
+      <label
+        class="inclusion-card"
+        [class.inclusion-card--selected]="
+          isSelected(
+            'fuelOrPropaneIncluded'
+          )
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="fuelOrPropaneIncluded"
+        />
+
+        <span class="inclusion-card__indicator">
+          <span aria-hidden="true">✓</span>
+        </span>
+
+        <span class="inclusion-card__content">
+          <strong>
+            Fuel or propane
+          </strong>
+
+          <small>
+            Existing fuel remaining in an owned storage
+            tank, subject to the final agreement.
+          </small>
+        </span>
+      </label>
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="other-property-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Other personal property
+      </p>
+
+      <h3 id="other-property-heading">
+        Additional items requested
+      </h3>
+
+      <p>
+        Identify other specific personal-property items the
+        buyer requests to receive with the property.
+      </p>
+    </header>
+
+    <div class="form-field">
+      <label for="otherPersonalProperty">
+        Other requested personal property
+        <span class="optional-marker">
+          Optional
+        </span>
+      </label>
+
+      <textarea
+        id="otherPersonalProperty"
+        formControlName="otherPersonalProperty"
+        rows="5"
+        maxlength="1500"
+        placeholder="Describe each requested item specifically, including its location when helpful. Leave blank if not applicable."
+        [class.input-invalid]="
+          isInvalid('otherPersonalProperty')
+        "
+        [attr.aria-invalid]="
+          isInvalid('otherPersonalProperty')
+        "
+        [attr.aria-describedby]="
+          isInvalid('otherPersonalProperty')
+            ? 'otherPersonalProperty-error'
+            : 'otherPersonalProperty-help'
+        "
+      ></textarea>
+
+      <div class="field-meta">
+        <p
+          id="otherPersonalProperty-help"
+          class="field-help"
+        >
+          Avoid general descriptions when a particular item
+          can be identified.
+        </p>
+
+        <span>
+          {{
+            control(
+              'otherPersonalProperty'
+            )?.value?.length || 0
+          }}
+          / 1500
+        </span>
+      </div>
+
+      @if (
+        isInvalid('otherPersonalProperty')
+      ) {
+        <p
+          id="otherPersonalProperty-error"
+          class="field-error"
+        >
+          {{
+            errorMessage(
+              'otherPersonalProperty'
+            )
+          }}
+        </p>
+      }
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="excluded-items-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Exclusions
+      </p>
+
+      <h3 id="excluded-items-heading">
+        Items not included
+      </h3>
+
+      <p>
+        Record any known item that will not remain with the
+        property so the exclusion is clearly visible during
+        review.
+      </p>
+    </header>
+
+    <div class="form-field">
+      <label for="excludedItems">
+        Excluded items
+        <span class="optional-marker">
+          Optional
+        </span>
+      </label>
+
+      <textarea
+        id="excludedItems"
+        formControlName="excludedItems"
+        rows="5"
+        maxlength="1500"
+        placeholder="Identify excluded items, or leave blank if no exclusions are known."
+        [class.input-invalid]="
+          isInvalid('excludedItems')
+        "
+        [attr.aria-invalid]="
+          isInvalid('excludedItems')
+        "
+        [attr.aria-describedby]="
+          isInvalid('excludedItems')
+            ? 'excludedItems-error'
+            : 'excludedItems-help'
+        "
+      ></textarea>
+
+      <div class="field-meta">
+        <p
+          id="excludedItems-help"
+          class="field-help"
+        >
+          The seller will have an opportunity to review and
+          respond to all requested inclusions and exclusions.
+        </p>
+
+        <span>
+          {{
+            control(
+              'excludedItems'
+            )?.value?.length || 0
+          }}
+          / 1500
+        </span>
+      </div>
+
+      @if (isInvalid('excludedItems')) {
+        <p
+          id="excludedItems-error"
+          class="field-error"
+        >
+          {{ errorMessage('excludedItems') }}
+        </p>
+      }
+    </div>
+  </section>
+
+  <aside class="final-review-notice">
+    <strong>
+      Final agreement controls
+    </strong>
+
+    <p>
+      These selections capture the buyer’s proposal. Only
+      the inclusions and exclusions stated in the final
+      signed agreement will control.
+    </p>
+  </aside>
+</div>

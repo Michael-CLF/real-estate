@@ -219,6 +219,39 @@
       </div>
 
       <aside class="listing-details__sidebar">
+        <section class="listing-details__offer-card">
+          <div class="listing-details__offer-card-heading">
+            <span class="listing-details__offer-icon" aria-hidden="true">
+              <i class="fa-solid fa-file-signature"></i>
+            </span>
+
+            <div>
+              <p>Interested in this property?</p>
+              <h2>Submit an offer</h2>
+            </div>
+          </div>
+
+          <p class="listing-details__offer-description">
+            Create a private offer, review all proposed terms and
+            submit the completed offer directly to the seller.
+          </p>
+
+          <a class="listing-details__offer-button" [routerLink]="[
+        '/listings',
+        listing.uid,
+        'offer'
+      ]">
+            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+
+            Make an offer
+          </a>
+
+          <p class="listing-details__offer-note">
+            You must sign in or create a NavStreet account before
+            submitting an offer.
+          </p>
+        </section>
+
         <div class="listing-details__contact-card">
           <app-contact-seller [listingUid]="listing.uid" />
         </div>

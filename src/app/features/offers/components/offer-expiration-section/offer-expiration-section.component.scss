@@ -1,0 +1,437 @@
+:host {
+  display: block;
+
+  --section-blue: #154360;
+  --section-blue-light: #eaf2f7;
+  --section-green: #25745a;
+  --section-red: #b42318;
+  --section-text: #1d2939;
+  --section-muted: #667085;
+  --section-border: #d0d5dd;
+  --section-focus: rgba(21, 67, 96, 0.18);
+}
+
+.offer-expiration-section {
+  display: grid;
+  gap: 2rem;
+}
+
+.form-section {
+  min-width: 0;
+}
+
+.form-section--divided {
+  padding-top: 2rem;
+
+  border-top: 1px solid #e4e7ec;
+}
+
+.form-section__header {
+  margin-bottom: 1.25rem;
+
+  h3 {
+    margin: 0;
+
+    color:
+      var(--section-text);
+
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  p:not(
+    .form-section__eyebrow
+  ) {
+    max-width: 44rem;
+    margin: 0.5rem 0 0;
+
+    color:
+      var(--section-muted);
+
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+}
+
+.form-section__eyebrow {
+  margin: 0 0 0.25rem;
+
+  color:
+    var(--section-blue);
+
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.information-notice,
+.final-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+
+  padding: 1rem;
+
+  border-radius: 0.625rem;
+
+  strong {
+    display: block;
+
+    margin-bottom: 0.25rem;
+
+    font-size: 0.875rem;
+  }
+
+  p {
+    margin: 0;
+
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+}
+
+.information-notice {
+  border: 1px solid #b8d5e5;
+
+  color:
+    var(--section-blue);
+
+  background:
+    var(--section-blue-light);
+}
+
+.information-notice__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+
+  width: 1.625rem;
+  height: 1.625rem;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+  background:
+    var(--section-blue);
+
+  font-family: Georgia, serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.final-notice {
+  border: 1px solid #b7dfcf;
+  border-left: 0.25rem solid
+    var(--section-green);
+
+  color: #175b46;
+  background: #eaf6f1;
+}
+
+.expiration-card {
+  padding: 1.25rem;
+
+  border: 1px solid #cbdce6;
+  border-radius: 0.75rem;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fafdff,
+      var(--section-blue-light)
+    );
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-grid--expiration {
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+}
+
+.form-field {
+  display: grid;
+  align-content: start;
+  gap: 0.4375rem;
+
+  min-width: 0;
+
+  label {
+    color:
+      var(--section-text);
+
+    font-size: 0.875rem;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.875rem;
+    padding: 0.6875rem 0.75rem;
+
+    border: 1px solid
+      var(--section-border);
+
+    border-radius: 0.5rem;
+
+    color:
+      var(--section-text);
+
+    background: #ffffff;
+
+    font: inherit;
+    font-size: 0.9375rem;
+
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
+
+    &:hover:not(:disabled) {
+      border-color: #98a2b3;
+    }
+
+    &:focus {
+      border-color:
+        var(--section-blue);
+
+      outline: none;
+
+      box-shadow:
+        0 0 0 0.25rem
+        var(--section-focus);
+    }
+  }
+
+  .input-invalid {
+    border-color:
+      var(--section-red);
+
+    background: #fffafa;
+
+    &:focus {
+      border-color:
+        var(--section-red);
+
+      box-shadow:
+        0 0 0 0.25rem
+        rgba(
+          180,
+          35,
+          24,
+          0.13
+        );
+    }
+  }
+}
+
+.required-marker {
+  margin-left: 0.125rem;
+
+  color:
+    var(--section-red);
+}
+
+.field-help,
+.field-error {
+  margin: 0;
+
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.field-help {
+  color:
+    var(--section-muted);
+}
+
+.field-error {
+  color:
+    var(--section-red);
+
+  font-weight: 600;
+}
+
+.expiration-error {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+
+  margin-top: 1rem;
+  padding: 0.75rem 0.875rem;
+
+  border: 1px solid #fecdca;
+  border-radius: 0.5rem;
+
+  color:
+    var(--section-red);
+
+  background: #fef3f2;
+
+  > span {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+
+    width: 1.375rem;
+    height: 1.375rem;
+
+    border-radius: 50%;
+
+    color: #ffffff;
+    background:
+      var(--section-red);
+
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+}
+
+.expiration-timeline {
+  display: grid;
+  gap: 0;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns:
+      2rem
+      minmax(0, 1fr);
+    gap: 0.875rem;
+
+    position: relative;
+
+    &:not(:last-child) {
+      padding-bottom: 1.5rem;
+
+      &::after {
+        width: 2px;
+
+        background: #d8e4eb;
+
+        content: '';
+
+        position: absolute;
+        top: 2rem;
+        bottom: 0;
+        left: calc(1rem - 1px);
+      }
+    }
+  }
+
+  strong {
+    display: block;
+
+    color:
+      var(--section-text);
+
+    font-size: 0.875rem;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+
+    color:
+      var(--section-muted);
+
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+}
+
+.expiration-timeline__number {
+  display: grid;
+  place-items: center;
+
+  width: 2rem;
+  height: 2rem;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+  background:
+    var(--section-blue);
+
+  font-size: 0.75rem;
+  font-weight: 800;
+
+  position: relative;
+  z-index: 1;
+}
+
+@media (
+  max-width: 760px
+) {
+  .form-grid--expiration {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    .form-field:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (
+  max-width: 640px
+) {
+  .offer-expiration-section {
+    gap: 1.5rem;
+  }
+
+  .form-section--divided {
+    padding-top: 1.5rem;
+  }
+
+  .form-grid--expiration {
+    grid-template-columns: 1fr;
+
+    .form-field:last-child {
+      grid-column: auto;
+    }
+  }
+
+  .expiration-card {
+    padding: 1rem;
+  }
+
+  .information-notice,
+  .final-notice {
+    padding: 0.875rem;
+  }
+}
+
+@media (
+  prefers-reduced-motion: reduce
+) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
