@@ -1,0 +1,581 @@
+<main class="interest-only-calculator">
+  <div class="interest-only-calculator__container">
+
+    <a
+      class="interest-only-calculator__back-link"
+      routerLink="/calculators"
+    >
+      <span aria-hidden="true">←</span>
+      All calculators
+    </a>
+
+    <header class="interest-only-calculator__header">
+      <p class="interest-only-calculator__eyebrow">
+        Residential calculator
+      </p>
+
+      <h1>Interest-Only Mortgage Calculator</h1>
+
+      <p>
+        Estimate the payment during an interest-only period
+        and the potentially higher principal-and-interest
+        payment after the loan begins amortizing.
+      </p>
+    </header>
+
+    <div class="interest-only-calculator__layout">
+
+      <section
+        class="calculator-card"
+        aria-labelledby="interest-only-details-heading"
+      >
+        <div class="calculator-card__heading">
+          <h2 id="interest-only-details-heading">
+            Loan details
+          </h2>
+
+          <p>
+            Enter the proposed loan terms and estimated
+            monthly property expenses.
+          </p>
+        </div>
+
+        <form
+          class="calculator-form"
+          [formGroup]="calculatorForm"
+          (ngSubmit)="calculatePayment()"
+        >
+          <div class="calculator-form__section">
+            <h3>Interest-only loan terms</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="loanAmount">
+                  Loan amount
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('loanAmount')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="loanAmount"
+                    type="number"
+                    formControlName="loanAmount"
+                    inputmode="decimal"
+                    min="1"
+                    step="1000"
+                  >
+                </div>
+
+                @if (isInvalid('loanAmount')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('loanAmount') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="interestRate">
+                  Interest rate
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('interestRate')
+                  "
+                >
+                  <input
+                    id="interestRate"
+                    type="number"
+                    formControlName="interestRate"
+                    inputmode="decimal"
+                    min="0"
+                    max="100"
+                    step="0.125"
+                  >
+
+                  <span class="input-group__suffix">
+                    %
+                  </span>
+                </div>
+
+                @if (isInvalid('interestRate')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('interestRate') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="totalLoanTermYears">
+                  Total loan term
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'totalLoanTermYears'
+                    )
+                  "
+                >
+                  <input
+                    id="totalLoanTermYears"
+                    type="number"
+                    formControlName="totalLoanTermYears"
+                    inputmode="numeric"
+                    min="2"
+                    max="50"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    years
+                  </span>
+                </div>
+
+                @if (
+                  isInvalid(
+                    'totalLoanTermYears'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'totalLoanTermYears'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="interestOnlyPeriodYears">
+                  Interest-only period
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'interestOnlyPeriodYears'
+                    )
+                  "
+                >
+                  <input
+                    id="interestOnlyPeriodYears"
+                    type="number"
+                    formControlName="interestOnlyPeriodYears"
+                    inputmode="numeric"
+                    min="1"
+                    max="49"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    years
+                  </span>
+                </div>
+
+                <p class="form-field__help">
+                  This period must be shorter than the total
+                  loan term.
+                </p>
+
+                @if (
+                  isInvalid(
+                    'interestOnlyPeriodYears'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'interestOnlyPeriodYears'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__section">
+            <h3>Estimated property expenses</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="annualPropertyTaxes">
+                  Annual property taxes
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'annualPropertyTaxes'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="annualPropertyTaxes"
+                    type="number"
+                    formControlName="annualPropertyTaxes"
+                    inputmode="decimal"
+                    min="0"
+                    step="100"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'annualPropertyTaxes'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualPropertyTaxes'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="annualHomeownersInsurance">
+                  Annual homeowners insurance
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'annualHomeownersInsurance'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="annualHomeownersInsurance"
+                    type="number"
+                    formControlName="annualHomeownersInsurance"
+                    inputmode="decimal"
+                    min="0"
+                    step="100"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'annualHomeownersInsurance'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualHomeownersInsurance'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="monthlyHoa">
+                  Monthly HOA dues
+                  <span class="form-field__optional">
+                    Optional
+                  </span>
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('monthlyHoa')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="monthlyHoa"
+                    type="number"
+                    formControlName="monthlyHoa"
+                    inputmode="decimal"
+                    min="0"
+                    step="10"
+                  >
+                </div>
+
+                @if (isInvalid('monthlyHoa')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('monthlyHoa') }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__actions">
+            <button
+              class="calculator-form__reset"
+              type="button"
+              (click)="resetCalculator()"
+            >
+              Reset
+            </button>
+
+            <button
+              class="calculator-form__submit"
+              type="submit"
+            >
+              Calculate payments
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside
+        class="results-card"
+        aria-labelledby="interest-only-result-heading"
+        aria-live="polite"
+      >
+        @if (result(); as calculation) {
+
+          <div class="results-card__primary">
+            <p>Interest-only monthly payment</p>
+
+            <h2 id="interest-only-result-heading">
+              {{
+                calculation.interestOnlyTotalPayment
+                  | currency:'USD':'symbol':'1.2-2'
+              }}
+            </h2>
+
+            <span>
+              Includes estimated principal and interest,
+              taxes, insurance and HOA dues
+            </span>
+          </div>
+
+          <div class="results-card__comparison">
+            <article>
+              <p>
+                During interest-only period
+              </p>
+
+              <strong>
+                {{
+                  calculation.interestOnlyPayment
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </strong>
+
+              <span>
+                Monthly interest payment
+              </span>
+            </article>
+
+            <article>
+              <p>
+                After interest-only period
+              </p>
+
+              <strong>
+                {{
+                  calculation.postInterestOnlyPayment
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </strong>
+
+              <span>
+                Monthly principal and interest
+              </span>
+            </article>
+          </div>
+
+          <div class="results-card__section">
+            <h3>
+              Interest-only payment breakdown
+            </h3>
+
+            <dl class="payment-breakdown">
+              <div>
+                <dt>Interest payment</dt>
+
+                <dd>
+                  {{
+                    calculation.interestOnlyPayment
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Property taxes</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyPropertyTaxes
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Homeowners insurance</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyHomeownersInsurance
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>HOA dues</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyHoa
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="results-card__section">
+            <h3>Loan transition</h3>
+
+            <dl class="loan-summary">
+              <div>
+                <dt>
+                  Interest-only period
+                </dt>
+
+                <dd>
+                  {{ calculation.interestOnlyMonths }}
+                  months
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Remaining amortization period
+                </dt>
+
+                <dd>
+                  {{ calculation.amortizationMonths }}
+                  months
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Remaining principal
+                </dt>
+
+                <dd>
+                  {{
+                    calculation.remainingPrincipalBalance
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Interest paid during initial period
+                </dt>
+
+                <dd>
+                  {{
+                    calculation
+                      .interestPaidDuringInterestOnlyPeriod
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Estimated later total payment
+                </dt>
+
+                <dd>
+                  {{
+                    calculation.postInterestOnlyTotalPayment
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+        } @else {
+
+          <div class="results-card__empty">
+            <span aria-hidden="true">%</span>
+
+            <h2 id="interest-only-result-heading">
+              Enter the loan terms
+            </h2>
+
+            <p>
+              Complete the calculator to compare the
+              interest-only payment with the later
+              amortizing payment.
+            </p>
+          </div>
+
+        }
+      </aside>
+    </div>
+
+    <aside class="calculator-warning">
+      <strong>
+        Interest-only payments do not reduce principal
+      </strong>
+
+      <p>
+        Unless additional principal is paid, the scheduled
+        loan balance generally remains unchanged during the
+        interest-only period. The required payment may
+        increase substantially when principal repayment
+        begins.
+      </p>
+    </aside>
+
+    <aside class="calculator-disclaimer">
+      <strong>Important information</strong>
+
+      <p>
+        This calculator provides an estimate for educational
+        purposes only. It is not a loan offer, approval,
+        commitment to lend or financial advice. Actual
+        interest-only products, payment adjustments,
+        qualification requirements, rates, terms and property
+        expenses vary by lender and loan program.
+      </p>
+    </aside>
+
+  </div>
+</main>

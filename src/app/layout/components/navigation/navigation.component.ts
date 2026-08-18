@@ -4,6 +4,7 @@ import {
   input,
   output
 } from '@angular/core';
+
 import {
   RouterLink,
   RouterLinkActive
@@ -15,45 +16,59 @@ interface NavigationItem {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection:
+    ChangeDetectionStrategy.OnPush,
+
   imports: [
     RouterLink,
     RouterLinkActive
   ],
-  selector: 'app-navigation',
+
+  selector:
+    'app-navigation',
+
   standalone: true,
-  styleUrl: './navigation.component.scss',
-  templateUrl: './navigation.component.html'
+
+  styleUrl:
+    './navigation.component.scss',
+
+  templateUrl:
+    './navigation.component.html'
 })
 export class NavigationComponent {
-  readonly isMobileMenuOpen = input(false);
 
-  readonly navigationSelected = output<void>();
+  readonly isMobileMenuOpen =
+    input(false);
 
-  protected readonly navigationItems: NavigationItem[] = [
-    {
-      label: 'Buy',
-      route: '/buy'
-    },
-    {
-      label: 'Sell',
-      route: '/sell'
-    },
-    {
-      label: 'Mortgage',
-      route: '/mortgage'
-    },
-    {
-      label: 'Resources',
-      route: '/resources'
-    },
-    {
-      label: 'About',
-      route: '/about'
-    }
-  ];
+  readonly navigationSelected =
+    output<void>();
 
-  protected handleNavigationSelected(): void {
+  protected readonly navigationItems:
+    readonly NavigationItem[] = [
+      {
+        label: 'Homes',
+        route: '/homes'
+      },
+      {
+        label: 'Sell Your Home',
+        route: '/sell'
+      },
+      {
+        label: 'Calculators',
+        route: '/calculators'
+      },
+      {
+        label: 'Find a Pro',
+        route: '/professionals'
+      },
+      {
+        label: 'FAQ',
+        route: '/faq'
+      }
+    ];
+
+  protected handleNavigationSelected():
+    void {
     this.navigationSelected.emit();
   }
 }

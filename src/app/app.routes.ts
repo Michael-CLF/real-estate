@@ -16,10 +16,6 @@ import {
   guestGuard
 } from './core/authentication/guards/guest.guard';
 
-import {
-  offerAccessGuard
-} from './core/domains/offers/guards/offer-access.guard';
-
 export const routes: Routes = [
   {
     path: '',
@@ -33,17 +29,121 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'about',
+        path: 'faq',
         loadComponent: () =>
-          import('./features/about/about.component').then(
-            component => component.AboutComponent
+          import(
+            './features/faq/faq.component'
+          ).then(
+            component =>
+              component.FaqComponent
           )
       },
       {
-        path: 'buy',
+        path: 'calculators',
+
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+
+        children: [
+          {
+            path: '',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/calculators.component'
+              ).then(
+                component =>
+                  component.CalculatorsComponent
+              )
+          },
+          {
+            path: 'mortgage-payment',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/components/mortgage-payment-calculator/mortgage-payment-calculator.component'
+              ).then(
+                component =>
+                  component
+                    .MortgagePaymentCalculatorComponent
+              )
+          },
+          {
+            path: 'affordability',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/components/affordability-calculator/affordability-calculator.component'
+              ).then(
+                component =>
+                  component
+                    .AffordabilityCalculatorComponent
+              )
+          },
+          {
+            path: 'interest-only',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/components/interest-only-calculator/interest-only-calculator.component'
+              ).then(
+                component =>
+                  component
+                    .InterestOnlyCalculatorComponent
+              )
+          },
+          {
+            path: 'balloon-payment',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/components/balloon-payment-calculator/balloon-payment-calculator.component'
+              ).then(
+                component =>
+                  component
+                    .BalloonPaymentCalculatorComponent
+              )
+          },
+          {
+            path: 'loan-to-value',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/components/loan-to-value-calculator/loan-to-value-calculator.component'
+              ).then(
+                component =>
+                  component
+                    .LoanToValueCalculatorComponent
+              )
+          },
+          {
+            path: 'extra-payment',
+
+            loadComponent: () =>
+              import(
+                './features/calculators/components/extra-payment-calculator/extra-payment-calculator.component'
+              ).then(
+                component =>
+                  component
+                    .ExtraPaymentCalculatorComponent
+              )
+          }
+        ]
+      },
+      {
+        path: 'professionals',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
         loadComponent: () =>
-          import('./features/buy/buy.component').then(
-            component => component.BuyComponent
+          import(
+            './features/professionals/professionals.component'
+          ).then(
+            component =>
+              component.ProfessionalsComponent
           )
       },
       {
@@ -54,18 +154,24 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'buy',
+        redirectTo: 'homes',
+        pathMatch: 'full'
+      },
+      {
+        path: 'about',
+        redirectTo: 'faq',
+        pathMatch: 'full'
+      },
+      {
         path: 'mortgage',
-        loadComponent: () =>
-          import('./features/mortgage/mortgage.component').then(
-            component => component.MortgageComponent
-          )
+        redirectTo: 'calculators',
+        pathMatch: 'full'
       },
       {
         path: 'resources',
-        loadComponent: () =>
-          import('./features/resources/resources.component').then(
-            component => component.ResourcesComponent
-          )
+        redirectTo: 'professionals',
+        pathMatch: 'full'
       },
 
       /*
@@ -487,25 +593,23 @@ export const routes: Routes = [
           )
       },
       /*
- * Create or resume an offer
- */
-{
-  path: 'listings/:listingUid/offer',
+       * Create or resume an offer
+       */
+      {
+        path: 'listings/:listingUid/offer',
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+        loadComponent: () =>
+          import(
+            './features/offers/offer-wizard/offer-wizard.component'
+          ).then(
+            component =>
+              component.OfferWizardComponent
+          )
+      },
 
-  canActivate: [
-    authGuard,
-    accountGuard
-  ],
-
-  loadComponent: () =>
-    import(
-      './features/offers/offer-wizard/offer-wizard.component'
-    ).then(
-      component =>
-        component.OfferWizardComponent
-    )
-},
-     
       {
         path: 'states/:stateSlug',
         loadComponent: () =>

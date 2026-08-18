@@ -230,6 +230,15 @@ export interface OfferVersion {
    * countering party.
    */
   terms: OfferTerms;
+    /*
+   * Draft-only snapshot of the Angular offer wizard.
+   *
+   * This preserves every field exactly as entered while
+   * the buyer completes the offer. Final contract terms
+   * are validated and assembled separately before
+   * submission.
+   */
+  wizardData?: Record<string, unknown>;
 
   /*
    * Complete party snapshots for document generation.
@@ -328,8 +337,6 @@ export interface InitialCounterofferVersion {
 
   expiresAt: string;
 }
-
-
 /*
  * Restricted set of editable values for an existing draft.
  *
@@ -340,6 +347,7 @@ export type OfferVersionDraftChanges = Partial<
   Pick<
     OfferVersion,
     | 'terms'
+    | 'wizardData'
     | 'buyers'
     | 'sellers'
     | 'expiresAt'

@@ -192,6 +192,106 @@
   </section>
 
   <!-- =========================================================
+       FEATURED HOMES
+       ========================================================= -->
+  <section
+    class="section featured-homes"
+    aria-labelledby="featured-homes-title"
+  >
+    <div class="page-shell">
+      <div class="section-heading-row">
+        <div class="section-heading">
+          <p class="section-eyebrow">
+            Explore the marketplace
+          </p>
+
+          <h2 id="featured-homes-title">
+            Featured homes
+          </h2>
+
+          <p>
+            Discover properties and connect directly with the
+            information needed to make your next decision.
+          </p>
+        </div>
+
+        <a
+          class="button button--outline"
+          routerLink="/buy"
+        >
+          View all homes
+          <span class="button__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <div class="featured-homes__grid">
+        @for (
+          home of featuredHomes;
+          track home.location
+        ) {
+          <article class="featured-home-card">
+            <div
+              class="featured-home-card__image"
+              [class]="home.imageClass"
+            >
+              <span class="featured-home-card__badge">
+                Featured
+              </span>
+
+              <button
+                class="featured-home-card__favorite"
+                type="button"
+                aria-label="Save property"
+              >
+                ♡
+              </button>
+
+              <div class="featured-home-card__house" aria-hidden="true">
+                <span class="featured-home-card__roof"></span>
+                <span class="featured-home-card__building"></span>
+                <span class="featured-home-card__garage"></span>
+              </div>
+            </div>
+
+            <div class="featured-home-card__content">
+              <strong class="featured-home-card__price">
+                {{ home.price }}
+              </strong>
+
+              <p class="featured-home-card__location">
+                {{ home.location }}
+              </p>
+
+              <div class="featured-home-card__details">
+                <span>
+                  <strong>{{ home.beds }}</strong>
+                  beds
+                </span>
+
+                <span>
+                  <strong>{{ home.baths }}</strong>
+                  baths
+                </span>
+
+                <span>
+                  <strong>{{ home.squareFeet }}</strong>
+                  sq. ft.
+                </span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <p class="prototype-note">
+        These property cards are visual placeholders. They can later
+        be replaced by your existing Firestore-connected listing-card
+        component.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========================================================
        PLATFORM INTRODUCTION
        ========================================================= -->
   <section
@@ -339,105 +439,6 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       FEATURED HOMES
-       ========================================================= -->
-  <section
-    class="section featured-homes"
-    aria-labelledby="featured-homes-title"
-  >
-    <div class="page-shell">
-      <div class="section-heading-row">
-        <div class="section-heading">
-          <p class="section-eyebrow">
-            Explore the marketplace
-          </p>
-
-          <h2 id="featured-homes-title">
-            Featured homes
-          </h2>
-
-          <p>
-            Discover properties and connect directly with the
-            information needed to make your next decision.
-          </p>
-        </div>
-
-        <a
-          class="button button--outline"
-          routerLink="/buy"
-        >
-          View all homes
-          <span class="button__arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-
-      <div class="featured-homes__grid">
-        @for (
-          home of featuredHomes;
-          track home.location
-        ) {
-          <article class="featured-home-card">
-            <div
-              class="featured-home-card__image"
-              [class]="home.imageClass"
-            >
-              <span class="featured-home-card__badge">
-                Featured
-              </span>
-
-              <button
-                class="featured-home-card__favorite"
-                type="button"
-                aria-label="Save property"
-              >
-                ♡
-              </button>
-
-              <div class="featured-home-card__house" aria-hidden="true">
-                <span class="featured-home-card__roof"></span>
-                <span class="featured-home-card__building"></span>
-                <span class="featured-home-card__garage"></span>
-              </div>
-            </div>
-
-            <div class="featured-home-card__content">
-              <strong class="featured-home-card__price">
-                {{ home.price }}
-              </strong>
-
-              <p class="featured-home-card__location">
-                {{ home.location }}
-              </p>
-
-              <div class="featured-home-card__details">
-                <span>
-                  <strong>{{ home.beds }}</strong>
-                  beds
-                </span>
-
-                <span>
-                  <strong>{{ home.baths }}</strong>
-                  baths
-                </span>
-
-                <span>
-                  <strong>{{ home.squareFeet }}</strong>
-                  sq. ft.
-                </span>
-              </div>
-            </div>
-          </article>
-        }
-      </div>
-
-      <p class="prototype-note">
-        These property cards are visual placeholders. They can later
-        be replaced by your existing Firestore-connected listing-card
-        component.
-      </p>
-    </div>
-  </section>
 
   <!-- =========================================================
        STATE EXPLORER

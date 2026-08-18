@@ -1,0 +1,627 @@
+<main class="affordability-calculator">
+  <div class="affordability-calculator__container">
+
+    <a
+      class="affordability-calculator__back-link"
+      routerLink="/calculators"
+    >
+      <span aria-hidden="true">←</span>
+      All calculators
+    </a>
+
+    <header class="affordability-calculator__header">
+      <p class="affordability-calculator__eyebrow">
+        Residential calculator
+      </p>
+
+      <h1>Home Affordability Calculator</h1>
+
+      <p>
+        Estimate a potential home price and monthly housing
+        payment based on income, existing monthly debts,
+        financing terms and selected debt-to-income ratios.
+      </p>
+    </header>
+
+    <div class="affordability-calculator__layout">
+
+      <section
+        class="calculator-card"
+        aria-labelledby="affordability-details-heading"
+      >
+        <div class="calculator-card__heading">
+          <h2 id="affordability-details-heading">
+            Financial information
+          </h2>
+
+          <p>
+            Enter the income, debt and financing information
+            you want to evaluate.
+          </p>
+        </div>
+
+        <form
+          class="calculator-form"
+          [formGroup]="calculatorForm"
+          (ngSubmit)="calculateAffordability()"
+        >
+          <div class="calculator-form__section">
+            <h3>Income and monthly obligations</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="annualGrossIncome">
+                  Annual gross income
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('annualGrossIncome')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="annualGrossIncome"
+                    type="number"
+                    formControlName="annualGrossIncome"
+                    inputmode="decimal"
+                    min="1"
+                    step="1000"
+                  >
+                </div>
+
+                @if (isInvalid('annualGrossIncome')) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualGrossIncome'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="monthlyDebtPayments">
+                  Monthly debt payments
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('monthlyDebtPayments')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="monthlyDebtPayments"
+                    type="number"
+                    formControlName="monthlyDebtPayments"
+                    inputmode="decimal"
+                    min="0"
+                    step="50"
+                  >
+                </div>
+
+                <p class="form-field__help">
+                  Include recurring obligations such as auto
+                  loans, student loans, credit cards and
+                  support payments.
+                </p>
+
+                @if (isInvalid('monthlyDebtPayments')) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'monthlyDebtPayments'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__section">
+            <h3>Purchase and loan details</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="downPayment">
+                  Available down payment
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('downPayment')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="downPayment"
+                    type="number"
+                    formControlName="downPayment"
+                    inputmode="decimal"
+                    min="0"
+                    step="1000"
+                  >
+                </div>
+
+                @if (isInvalid('downPayment')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('downPayment') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="interestRate">
+                  Interest rate
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('interestRate')
+                  "
+                >
+                  <input
+                    id="interestRate"
+                    type="number"
+                    formControlName="interestRate"
+                    inputmode="decimal"
+                    min="0"
+                    max="100"
+                    step="0.125"
+                  >
+
+                  <span class="input-group__suffix">
+                    %
+                  </span>
+                </div>
+
+                @if (isInvalid('interestRate')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('interestRate') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="loanTermYears">
+                  Loan term
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('loanTermYears')
+                  "
+                >
+                  <input
+                    id="loanTermYears"
+                    type="number"
+                    formControlName="loanTermYears"
+                    inputmode="numeric"
+                    min="1"
+                    max="50"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    years
+                  </span>
+                </div>
+
+                @if (isInvalid('loanTermYears')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('loanTermYears') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="annualPropertyTaxRate">
+                  Estimated property-tax rate
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'annualPropertyTaxRate'
+                    )
+                  "
+                >
+                  <input
+                    id="annualPropertyTaxRate"
+                    type="number"
+                    formControlName="annualPropertyTaxRate"
+                    inputmode="decimal"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                  >
+
+                  <span class="input-group__suffix">
+                    %
+                  </span>
+                </div>
+
+                <p class="form-field__help">
+                  Enter the estimated annual tax rate as a
+                  percentage of the property value.
+                </p>
+
+                @if (
+                  isInvalid(
+                    'annualPropertyTaxRate'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualPropertyTaxRate'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="annualHomeownersInsurance">
+                  Annual homeowners insurance
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'annualHomeownersInsurance'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="annualHomeownersInsurance"
+                    type="number"
+                    formControlName="annualHomeownersInsurance"
+                    inputmode="decimal"
+                    min="0"
+                    step="100"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'annualHomeownersInsurance'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualHomeownersInsurance'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="monthlyHoa">
+                  Monthly HOA dues
+                  <span class="form-field__optional">
+                    Optional
+                  </span>
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('monthlyHoa')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="monthlyHoa"
+                    type="number"
+                    formControlName="monthlyHoa"
+                    inputmode="decimal"
+                    min="0"
+                    step="10"
+                  >
+                </div>
+
+                @if (isInvalid('monthlyHoa')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('monthlyHoa') }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__section">
+            <div class="calculator-form__section-heading">
+              <div>
+                <h3>Qualification assumptions</h3>
+
+                <p>
+                  These ratios are adjustable because loan
+                  programs and underwriting requirements vary.
+                </p>
+              </div>
+            </div>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="frontEndRatio">
+                  Housing ratio
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('frontEndRatio')
+                  "
+                >
+                  <input
+                    id="frontEndRatio"
+                    type="number"
+                    formControlName="frontEndRatio"
+                    inputmode="decimal"
+                    min="1"
+                    max="100"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    %
+                  </span>
+                </div>
+
+                @if (isInvalid('frontEndRatio')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('frontEndRatio') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="backEndRatio">
+                  Total debt ratio
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('backEndRatio')
+                  "
+                >
+                  <input
+                    id="backEndRatio"
+                    type="number"
+                    formControlName="backEndRatio"
+                    inputmode="decimal"
+                    min="1"
+                    max="100"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    %
+                  </span>
+                </div>
+
+                @if (isInvalid('backEndRatio')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('backEndRatio') }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__actions">
+            <button
+              class="calculator-form__reset"
+              type="button"
+              (click)="resetCalculator()"
+            >
+              Reset
+            </button>
+
+            <button
+              class="calculator-form__submit"
+              type="submit"
+            >
+              Estimate affordability
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside
+        class="results-card"
+        aria-labelledby="affordability-result-heading"
+        aria-live="polite"
+      >
+        @if (result(); as calculation) {
+          <div class="results-card__primary">
+            <p>Estimated affordable home price</p>
+
+            <h2 id="affordability-result-heading">
+              {{
+                calculation.estimatedHomePrice
+                  | currency:'USD':'symbol':'1.0-0'
+              }}
+            </h2>
+
+            <span>
+              Based on the information and qualification
+              assumptions entered
+            </span>
+          </div>
+
+          <dl class="result-summary">
+            <div>
+              <dt>Estimated loan amount</dt>
+
+              <dd>
+                {{
+                  calculation.estimatedLoanAmount
+                    | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Maximum housing payment</dt>
+
+              <dd>
+                {{
+                  calculation.maximumMonthlyHousingPayment
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+          </dl>
+
+          <div class="results-card__section">
+            <h3>Estimated monthly payment</h3>
+
+            <dl class="payment-breakdown">
+              <div>
+                <dt>Principal and interest</dt>
+
+                <dd>
+                  {{
+                    calculation.estimatedPrincipalAndInterest
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Property taxes</dt>
+
+                <dd>
+                  {{
+                    calculation.estimatedPropertyTaxes
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Homeowners insurance</dt>
+
+                <dd>
+                  {{
+                    calculation.estimatedHomeownersInsurance
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>HOA dues</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyHoa
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="results-card__section">
+            <h3>Ratio analysis</h3>
+
+            <dl class="ratio-summary">
+              <div>
+                <dt>Monthly gross income</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyGrossIncome
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Estimated housing ratio</dt>
+
+                <dd>
+                  {{
+                    calculation.estimatedFrontEndRatio
+                      | number:'1.0-2'
+                  }}%
+                </dd>
+              </div>
+
+              <div>
+                <dt>Estimated total debt ratio</dt>
+
+                <dd>
+                  {{
+                    calculation.estimatedBackEndRatio
+                      | number:'1.0-2'
+                  }}%
+                </dd>
+              </div>
+            </dl>
+          </div>
+        } @else {
+          <div class="results-card__empty">
+            <span aria-hidden="true">⌂</span>
+
+            <h2 id="affordability-result-heading">
+              Enter your financial information
+            </h2>
+
+            <p>
+              Complete the calculator to receive an estimated
+              home price and monthly housing payment.
+            </p>
+          </div>
+        }
+      </aside>
+    </div>
+
+    <aside class="calculator-disclaimer">
+      <strong>Important information</strong>
+
+      <p>
+        This calculator provides an estimate for educational
+        purposes only. It is not a loan approval, loan offer,
+        prequalification, commitment to lend or financial
+        advice. Actual affordability depends on credit,
+        income documentation, assets, loan program,
+        underwriting requirements, interest rates, property
+        expenses and other factors.
+      </p>
+    </aside>
+
+  </div>
+</main>

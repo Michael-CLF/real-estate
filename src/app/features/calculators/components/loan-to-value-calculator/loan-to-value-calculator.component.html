@@ -1,0 +1,440 @@
+<main class="ltv-calculator">
+  <div class="ltv-calculator__container">
+
+    <a
+      class="ltv-calculator__back-link"
+      routerLink="/calculators"
+    >
+      <span aria-hidden="true">←</span>
+      All calculators
+    </a>
+
+    <header class="ltv-calculator__header">
+      <p class="ltv-calculator__eyebrow">
+        Residential calculator
+      </p>
+
+      <h1>Loan-to-Value Calculator</h1>
+
+      <p>
+        Estimate the first-mortgage loan-to-value ratio,
+        combined loan-to-value ratio and buyer equity for a
+        residential purchase.
+      </p>
+    </header>
+
+    <div class="ltv-calculator__layout">
+
+      <section
+        class="calculator-card"
+        aria-labelledby="ltv-details-heading"
+      >
+        <div class="calculator-card__heading">
+          <h2 id="ltv-details-heading">
+            Property and financing details
+          </h2>
+
+          <p>
+            Enter the purchase price, appraised value and
+            proposed financing amounts.
+          </p>
+        </div>
+
+        <form
+          class="calculator-form"
+          [formGroup]="calculatorForm"
+          (ngSubmit)="calculateLoanToValue()"
+        >
+          <div class="calculator-form__section">
+            <h3>Property values</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="purchasePrice">
+                  Purchase price
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('purchasePrice')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="purchasePrice"
+                    type="number"
+                    formControlName="purchasePrice"
+                    inputmode="decimal"
+                    min="1"
+                    step="1000"
+                  >
+                </div>
+
+                @if (isInvalid('purchasePrice')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('purchasePrice') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="appraisedValue">
+                  Appraised value
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('appraisedValue')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="appraisedValue"
+                    type="number"
+                    formControlName="appraisedValue"
+                    inputmode="decimal"
+                    min="1"
+                    step="1000"
+                  >
+                </div>
+
+                @if (isInvalid('appraisedValue')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('appraisedValue') }}
+                  </p>
+                }
+              </div>
+            </div>
+
+            <p class="calculator-form__notice">
+              For this purchase estimate, the calculator uses
+              the lower of the purchase price or appraised
+              value. Actual lender calculations may vary by
+              transaction and loan program.
+            </p>
+          </div>
+
+          <div class="calculator-form__section">
+            <h3>Proposed financing</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="firstMortgageAmount">
+                  First mortgage amount
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'firstMortgageAmount'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="firstMortgageAmount"
+                    type="number"
+                    formControlName="firstMortgageAmount"
+                    inputmode="decimal"
+                    min="0"
+                    step="1000"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'firstMortgageAmount'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'firstMortgageAmount'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="subordinateFinancingAmount">
+                  Second mortgage or subordinate financing
+
+                  <span class="form-field__optional">
+                    Optional
+                  </span>
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'subordinateFinancingAmount'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="subordinateFinancingAmount"
+                    type="number"
+                    formControlName="subordinateFinancingAmount"
+                    inputmode="decimal"
+                    min="0"
+                    step="1000"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'subordinateFinancingAmount'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'subordinateFinancingAmount'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__actions">
+            <button
+              class="calculator-form__reset"
+              type="button"
+              (click)="resetCalculator()"
+            >
+              Reset
+            </button>
+
+            <button
+              class="calculator-form__submit"
+              type="submit"
+            >
+              Calculate LTV
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside
+        class="results-card"
+        aria-labelledby="ltv-result-heading"
+        aria-live="polite"
+      >
+        @if (result(); as calculation) {
+
+          <div class="results-card__primary">
+            <p>Combined loan-to-value</p>
+
+            <h2 id="ltv-result-heading">
+              {{
+                calculation.combinedLtv
+                  | number:'1.0-2'
+              }}%
+            </h2>
+
+            <span>
+              Total proposed financing divided by the
+              calculation value
+            </span>
+          </div>
+
+          <div class="ratio-cards">
+            <article>
+              <p>First-mortgage LTV</p>
+
+              <strong>
+                {{
+                  calculation.firstMortgageLtv
+                    | number:'1.0-2'
+                }}%
+              </strong>
+            </article>
+
+            <article>
+              <p>Buyer equity</p>
+
+              <strong>
+                {{
+                  calculation.equityPercentage
+                    | number:'1.0-2'
+                }}%
+              </strong>
+            </article>
+          </div>
+
+          <div class="equity-bar">
+            <div class="equity-bar__labels">
+              <span>Financing</span>
+              <span>Equity</span>
+            </div>
+
+            <div
+              class="equity-bar__track"
+              role="img"
+              [attr.aria-label]="
+                'Financing is ' +
+                calculation.combinedLtv +
+                ' percent and equity is ' +
+                calculation.equityPercentage +
+                ' percent.'
+              "
+            >
+              <span
+                class="equity-bar__financing"
+                [style.width.%]="
+                  calculation.combinedLtv
+                "
+              ></span>
+
+              <span
+                class="equity-bar__equity"
+                [style.width.%]="
+                  calculation.equityPercentage
+                "
+              ></span>
+            </div>
+          </div>
+
+          <div class="results-card__section">
+            <h3>Property value</h3>
+
+            <dl class="result-summary">
+              <div>
+                <dt>Purchase price</dt>
+
+                <dd>
+                  {{
+                    calculation.purchasePrice
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Appraised value</dt>
+
+                <dd>
+                  {{
+                    calculation.appraisedValue
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Calculation value</dt>
+
+                <dd>
+                  {{
+                    calculation.calculationValue
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="results-card__section">
+            <h3>Financing and equity</h3>
+
+            <dl class="result-summary">
+              <div>
+                <dt>First mortgage</dt>
+
+                <dd>
+                  {{
+                    calculation.firstMortgageAmount
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Subordinate financing</dt>
+
+                <dd>
+                  {{
+                    calculation.subordinateFinancingAmount
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Total financing</dt>
+
+                <dd>
+                  {{
+                    calculation.totalFinancingAmount
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Estimated buyer equity</dt>
+
+                <dd>
+                  {{
+                    calculation.buyerEquity
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+        } @else {
+
+          <div class="results-card__empty">
+            <span aria-hidden="true">%</span>
+
+            <h2 id="ltv-result-heading">
+              Enter the property and loan amounts
+            </h2>
+
+            <p>
+              Complete the calculator to estimate the first
+              mortgage LTV, combined LTV and buyer equity.
+            </p>
+          </div>
+
+        }
+      </aside>
+    </div>
+
+    <aside class="calculator-disclaimer">
+      <strong>Important information</strong>
+
+      <p>
+        This calculator provides an estimate for educational
+        purposes only. It is not a loan offer, approval,
+        commitment to lend or financial advice. Lenders may
+        calculate loan-to-value differently depending on the
+        transaction, loan program, property type, occupancy,
+        appraisal and underwriting requirements.
+      </p>
+    </aside>
+
+  </div>
+</main>

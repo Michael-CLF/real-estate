@@ -114,11 +114,11 @@ export const saveOfferDraft =
 
           const offer =
             offerSnapshot.data() as
-              OfferDocument;
+            OfferDocument;
 
           const version =
             versionSnapshot.data() as
-              OfferVersionDocument;
+            OfferVersionDocument;
 
           verifyDraftOwnership(
             offer,
@@ -292,6 +292,18 @@ function sanitizeDraftChanges(
   if (
     Object.prototype.hasOwnProperty.call(
       changes,
+      'wizardData'
+    )
+  ) {
+    sanitized['wizardData'] =
+      sanitizeWizardData(
+        changes['wizardData']
+      );
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      changes,
       'expiresAt'
     )
   ) {
@@ -375,7 +387,7 @@ function sanitizeTerms(
   const terms =
     structuredCloneSafe(
       requestedTerms as
-        Record<string, unknown>
+      Record<string, unknown>
     );
 
   /*
@@ -394,6 +406,36 @@ function sanitizeTerms(
 
   return removeUndefinedValues(
     terms
+  );
+}
+
+function sanitizeWizardData(
+  requestedWizardData: unknown
+): Record<string, unknown> {
+  if (
+    requestedWizardData === null ||
+    typeof requestedWizardData !==
+    'object' ||
+    Array.isArray(requestedWizardData)
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      'Offer wizard data must be an object.'
+    );
+  }
+
+  const wizardData =
+    structuredCloneSafe(
+      requestedWizardData as
+      Record<string, unknown>
+    );
+
+  rejectUnsafeObjectKeys(
+    wizardData
+  );
+
+  return removeUndefinedValues(
+    wizardData
   );
 }
 
@@ -493,7 +535,7 @@ function sanitizeInitiatingParty(
 
             return (
               party as
-                Record<string, unknown>
+              Record<string, unknown>
             )['partyUid'] ===
               existingParty.partyUid;
           }
@@ -508,7 +550,7 @@ function sanitizeInitiatingParty(
 
       const requested =
         requestedParty as
-          Record<string, unknown>;
+        Record<string, unknown>;
 
       if (
         existingParty.role !==
@@ -586,7 +628,7 @@ function sanitizeInitiatingParty(
                 namePart
               ): namePart is string =>
                 typeof namePart ===
-                  'string' &&
+                'string' &&
                 namePart.length > 0
             )
             .join(' ');
@@ -594,7 +636,7 @@ function sanitizeInitiatingParty(
       const requestedAddress =
         requireObject(
           requested[
-            'mailingAddress'
+          'mailingAddress'
           ],
           'A mailing address is required.'
         );
@@ -742,6 +784,7 @@ function requireChanges(
   const allowedKeys =
     new Set([
       'terms',
+      'wizardData',
       'buyers',
       'sellers',
       'expiresAt',
@@ -968,7 +1011,7 @@ function rejectUnsafeObjectKeys(
           childValue,
         ] of Object.entries(
           nestedValue as
-            Record<string, unknown>
+          Record<string, unknown>
         )
       ) {
         if (unsafeKeys.has(key)) {

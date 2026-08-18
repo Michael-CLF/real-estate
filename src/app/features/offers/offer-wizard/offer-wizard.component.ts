@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   computed,
   inject,
@@ -17,8 +18,13 @@ import {
 } from '@angular/forms';
 
 import {
+  debounceTime,
   firstValueFrom
 } from 'rxjs';
+
+import {
+  takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
 
 import {
   ActivatedRoute,
@@ -81,6 +87,10 @@ import {
   FirestoreMarketplaceListingRepository
 } from '../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
 
+import {
+  OfferService
+} from '../../../core/domains/offers/services/offer.service';
+
 export interface OfferWizardSection {
   key: string;
   title: string;
@@ -129,6 +139,22 @@ export class OfferWizardComponent
 
   private readonly formBuilder =
     inject(FormBuilder);
+
+  private readonly destroyRef =
+    inject(DestroyRef);
+
+  private readonly offerService =
+    inject(OfferService);
+
+  private offerUid = '';
+
+  private offerVersionUid = '';
+
+  private lastSavedSnapshot = '';
+
+  private saveChain:
+    Promise<void> =
+    Promise.resolve();
 
   private readonly route =
     inject(ActivatedRoute);
@@ -574,22 +600,6 @@ export class OfferWizardComponent
               Validators.required
             ]
           ],
-
-          escrowAgentName: [
-            '',
-            [
-              Validators.required,
-              Validators.maxLength(200)
-            ]
-          ],
-
-          escrowAgentAddress: [
-            '',
-            [
-              Validators.required,
-              Validators.maxLength(300)
-            ]
-          ]
         }),
 
       investigations:
@@ -912,6 +922,7 @@ export class OfferWizardComponent
   async ngOnInit(): Promise<void> {
     this.loading.set(true);
     this.errorMessage.set('');
+    this.saveMessage.set('');
 
     try {
       if (!this.listingUid) {
@@ -929,17 +940,49 @@ export class OfferWizardComponent
         );
       }
 
-      const listing =
-        await firstValueFrom(
-          this.listingRepository
-            .getListingById(
-              this.listingUid
-            )
-        );
+      /*
+       * Create the buyer's offer draft or return the
+       * existing editable draft for this listing.
+       */
+      const draftResult =
+        await this.offerService
+          .createOrResumeDraft(
+            this.listingUid
+          );
+
+      this.offerUid =
+        draftResult.offerUid;
+
+      this.offerVersionUid =
+        draftResult.offerVersionUid;
+
+      const [
+        listing,
+        offerVersion
+      ] =
+        await Promise.all([
+          firstValueFrom(
+            this.listingRepository
+              .getListingById(
+                this.listingUid
+              )
+          ),
+
+          this.offerService.getVersion(
+            this.offerUid,
+            this.offerVersionUid
+          )
+        ]);
 
       if (!listing) {
         throw new Error(
           'The selected property listing could not be found.'
+        );
+      }
+
+      if (!offerVersion) {
+        throw new Error(
+          'The offer draft could not be loaded.'
         );
       }
 
@@ -950,6 +993,10 @@ export class OfferWizardComponent
         .filter(Boolean)
         .join(', ');
 
+      /*
+       * Establish the initial values from the authenticated
+       * account and published listing.
+       */
       this.offerForm.patchValue(
         {
           buyerProperty: {
@@ -986,18 +1033,96 @@ export class OfferWizardComponent
             propertyPostalCode:
               listing.address.postalCode,
 
-            /*
-             * MarketplaceListing does not currently
-             * contain a parcel identifier.
-             */
             propertyParcelId:
               'Not provided'
+          },
+
+          priceFinancing: {
+            purchasePrice:
+              listing.price
           }
         },
         {
           emitEvent: false
         }
       );
+
+      const savedWizardData =
+        offerVersion.wizardData;
+
+      const savedForm =
+        savedWizardData?.['form'];
+
+      const savedSectionIndex =
+        savedWizardData?.[
+          'currentSectionIndex'
+        ];
+
+      const hasSavedForm =
+        savedForm !== null &&
+        typeof savedForm === 'object' &&
+        !Array.isArray(savedForm) &&
+        Object.keys(
+          savedForm as
+            Record<string, unknown>
+        ).length > 0;
+
+      /*
+       * Saved wizard values take precedence over profile
+       * and listing defaults. Disabled property controls
+       * are included because getRawValue() is used when
+       * the draft is saved.
+       */
+      if (hasSavedForm) {
+        this.offerForm.patchValue(
+          savedForm as
+            ReturnType<
+              typeof this.offerForm.getRawValue
+            >,
+          {
+            emitEvent: false
+          }
+        );
+      }
+
+      if (
+        typeof savedSectionIndex ===
+          'number' &&
+        Number.isInteger(
+          savedSectionIndex
+        ) &&
+        savedSectionIndex >= 0 &&
+        savedSectionIndex <
+          this.sections.length
+      ) {
+        this.currentSectionIndex.set(
+          savedSectionIndex
+        );
+      }
+
+      this.startAutosave();
+
+      if (hasSavedForm) {
+        this.lastSavedSnapshot =
+          JSON.stringify(
+            this.createWizardData()
+          );
+
+        this.saveMessage.set(
+          'Draft restored'
+        );
+      }
+
+      this.loading.set(false);
+
+      /*
+       * A new draft is saved immediately so the populated
+       * account, property and purchase-price values are
+       * preserved even if the buyer leaves without typing.
+       */
+      if (!hasSavedForm) {
+        await this.queueDraftSave();
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to initialize the offer wizard.',
@@ -1009,8 +1134,121 @@ export class OfferWizardComponent
           ? error.message
           : 'The offer form could not be loaded.'
       );
-    } finally {
+
       this.loading.set(false);
+    }
+  }
+
+  private startAutosave(): void {
+    this.offerForm.valueChanges
+      .pipe(
+        debounceTime(800),
+
+        takeUntilDestroyed(
+          this.destroyRef
+        )
+      )
+      .subscribe(
+        () => {
+          void this.queueDraftSave();
+        }
+      );
+  }
+
+  private createWizardData():
+    Record<string, unknown> {
+    return {
+      currentSectionIndex:
+        this.currentSectionIndex(),
+
+      /*
+       * getRawValue() includes the disabled property
+       * fields copied from the published listing.
+       */
+      form:
+        this.offerForm.getRawValue()
+    };
+  }
+
+  private queueDraftSave():
+    Promise<void> {
+    this.saveChain =
+      this.saveChain
+        .catch(
+          () => undefined
+        )
+        .then(
+          () =>
+            this.saveCurrentDraft()
+        );
+
+    return this.saveChain;
+  }
+
+  private async saveCurrentDraft():
+    Promise<void> {
+    if (
+      !this.offerUid ||
+      !this.offerVersionUid ||
+      this.loading()
+    ) {
+      return;
+    }
+
+    const wizardData =
+      this.createWizardData();
+
+    const serializedSnapshot =
+      JSON.stringify(
+        wizardData
+      );
+
+    /*
+     * Navigation and autosave can request the same save.
+     * Avoid writing an identical snapshot twice.
+     */
+    if (
+      serializedSnapshot ===
+      this.lastSavedSnapshot
+    ) {
+      return;
+    }
+
+    this.saving.set(true);
+    this.saveMessage.set('');
+
+    try {
+      await this.offerService.saveDraft(
+        this.offerUid,
+        this.offerVersionUid,
+        {
+          wizardData
+        }
+      );
+
+      this.lastSavedSnapshot =
+        serializedSnapshot;
+
+      this.saveMessage.set(
+        'Draft saved'
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to save the offer draft.',
+        error
+      );
+
+      this.saveMessage.set('');
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Your offer draft could not be saved. Please try again.'
+      );
+
+      throw error;
+    } finally {
+      this.saving.set(false);
     }
   }
 
@@ -1030,13 +1268,13 @@ export class OfferWizardComponent
     return section;
   }
 
-  goToSection(
+  async goToSection(
     sectionIndex: number
-  ): void {
+  ): Promise<void> {
     if (
       sectionIndex < 0 ||
       sectionIndex >=
-      this.sections.length
+        this.sections.length
     ) {
       return;
     }
@@ -1060,14 +1298,17 @@ export class OfferWizardComponent
     }
 
     this.errorMessage.set('');
+
     this.currentSectionIndex.set(
       sectionIndex
     );
 
+    await this.queueDraftSave();
+
     this.scrollToTop();
   }
 
-  continue(): void {
+  async continue(): Promise<void> {
     this.currentSectionGroup
       .markAllAsTouched();
 
@@ -1084,6 +1325,8 @@ export class OfferWizardComponent
     this.errorMessage.set('');
 
     if (this.isLastSection()) {
+      await this.queueDraftSave();
+
       this.prepareForSubmission();
       return;
     }
@@ -1092,12 +1335,14 @@ export class OfferWizardComponent
       index => index + 1
     );
 
+    await this.queueDraftSave();
+
     this.scrollToTop();
   }
 
-  previous(): void {
+  async previous(): Promise<void> {
     if (this.isFirstSection()) {
-      this.returnToListing();
+      await this.returnToListing();
       return;
     }
 
@@ -1107,12 +1352,30 @@ export class OfferWizardComponent
       index => index - 1
     );
 
+    await this.queueDraftSave();
+
     this.scrollToTop();
   }
 
-  returnToListing(): void {
+  async returnToListing():
+    Promise<void> {
+    if (
+      this.offerUid &&
+      this.offerVersionUid
+    ) {
+      try {
+        await this.queueDraftSave();
+      } catch {
+        /*
+         * The save error is already displayed. Do not
+         * silently navigate away after a failed final save.
+         */
+        return;
+      }
+    }
+
     if (this.listingUid) {
-      void this.router.navigate([
+      await this.router.navigate([
         '/listings',
         this.listingUid
       ]);
@@ -1120,7 +1383,7 @@ export class OfferWizardComponent
       return;
     }
 
-    void this.router.navigate([
+    await this.router.navigate([
       '/buy'
     ]);
   }

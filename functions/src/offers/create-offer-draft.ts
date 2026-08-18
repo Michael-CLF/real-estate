@@ -174,7 +174,7 @@ export const createOfferDraft =
             if (
               currentStatus !== 'active' ||
               currentListingData[
-                'acceptingOffers'
+              'acceptingOffers'
               ] === false
             ) {
               throw new HttpsError(
@@ -384,10 +384,17 @@ export const createOfferDraft =
 
                 terms: initialTerms,
 
+                /*
+                 * The browser saves its complete form
+                 * snapshot here while the buyer works.
+                 */
+                wizardData: {},
+
                 buyers: [
                   buyerParty,
                 ],
 
+                
                 sellers: [
                   sellerParty,
                 ],
@@ -533,7 +540,7 @@ function createPartySnapshot(
 
   const identityVerified =
     input.profile?.identityStatus ===
-      'verified' ||
+    'verified' ||
     (
       Boolean(verifiedFirstName) &&
       Boolean(verifiedLastName)
@@ -694,7 +701,7 @@ function createInitialOfferTerms(
       'listPriceInCents'
     ] === 'number'
       ? property[
-        'listPriceInCents'
+      'listPriceInCents'
       ]
       : 0;
 

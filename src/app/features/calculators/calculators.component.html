@@ -1,0 +1,109 @@
+<main class="calculators-page">
+  <section
+    class="calculators-hero"
+    aria-labelledby="calculators-title"
+  >
+    <div class="calculators-shell">
+      <p class="calculators-hero__eyebrow">
+        NavStreet tools
+      </p>
+
+      <h1 id="calculators-title">
+        Residential mortgage calculators
+      </h1>
+
+      <p class="calculators-hero__description">
+        Explore common home-financing scenarios with
+        practical calculators designed to help you better
+        understand payments, affordability and loan
+        structure.
+      </p>
+    </div>
+  </section>
+
+  <section
+    class="calculators-directory"
+    aria-labelledby="calculator-directory-title"
+  >
+    <div class="calculators-shell">
+      <header class="calculators-directory__header">
+        <div>
+          <p class="calculators-directory__eyebrow">
+            Select a calculator
+          </p>
+
+          <h2 id="calculator-directory-title">
+            What would you like to calculate?
+          </h2>
+        </div>
+
+        <p>
+          Choose a calculator below. Each tool opens on its
+          own page with detailed inputs and results.
+        </p>
+      </header>
+
+      <div class="calculator-grid">
+        @for (
+          calculator of calculators;
+          track calculator.route
+        ) {
+          <article class="calculator-card">
+            <div class="calculator-card__icon">
+              <i
+                [class]="calculator.icon"
+                aria-hidden="true"
+              ></i>
+            </div>
+
+            <p class="calculator-card__category">
+              {{ calculator.category }}
+            </p>
+
+            <h3 class="calc-title">
+              {{ calculator.title }}
+            </h3>
+
+            <p class="calculator-card__description">
+              {{ calculator.description }}
+            </p>
+
+            <button
+              class="calculator-card__button"
+              type="button"
+              [routerLink]="calculator.route"
+              [attr.aria-label]="
+                'Open ' + calculator.title
+              "
+            >
+              <span>
+                Open calculator
+              </span>
+
+              <span aria-hidden="true">
+                →
+              </span>
+            </button>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <aside class="calculator-disclaimer">
+    <div class="calculators-shell">
+      <strong>
+        Estimates only
+      </strong>
+
+      <p>
+        NavStreet calculators provide general estimates for
+        educational purposes. Results are not a loan offer,
+        approval, rate quote or financial advice. Actual
+        payments and qualification requirements depend on
+        the lender, loan program, property and borrower
+        information.
+      </p>
+    </div>
+  </aside>
+</main>

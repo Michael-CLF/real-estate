@@ -1,0 +1,550 @@
+<main class="balloon-calculator">
+  <div class="balloon-calculator__container">
+
+    <a
+      class="balloon-calculator__back-link"
+      routerLink="/calculators"
+    >
+      <span aria-hidden="true">←</span>
+      All calculators
+    </a>
+
+    <header class="balloon-calculator__header">
+      <p class="balloon-calculator__eyebrow">
+        Residential calculator
+      </p>
+
+      <h1>Balloon Payment Calculator</h1>
+
+      <p>
+        Estimate the regular monthly payment and the
+        remaining loan balance that would become due when a
+        balloon payment is required.
+      </p>
+    </header>
+
+    <div class="balloon-calculator__layout">
+
+      <section
+        class="calculator-card"
+        aria-labelledby="balloon-details-heading"
+      >
+        <div class="calculator-card__heading">
+          <h2 id="balloon-details-heading">
+            Loan details
+          </h2>
+
+          <p>
+            Enter the loan’s amortization schedule and the
+            earlier date when the remaining balance becomes
+            due.
+          </p>
+        </div>
+
+        <form
+          class="calculator-form"
+          [formGroup]="calculatorForm"
+          (ngSubmit)="calculateBalloonPayment()"
+        >
+          <div class="calculator-form__section">
+            <h3>Balloon loan terms</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="loanAmount">
+                  Loan amount
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('loanAmount')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="loanAmount"
+                    type="number"
+                    formControlName="loanAmount"
+                    inputmode="decimal"
+                    min="1"
+                    step="1000"
+                  >
+                </div>
+
+                @if (isInvalid('loanAmount')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('loanAmount') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="interestRate">
+                  Interest rate
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('interestRate')
+                  "
+                >
+                  <input
+                    id="interestRate"
+                    type="number"
+                    formControlName="interestRate"
+                    inputmode="decimal"
+                    min="0"
+                    max="100"
+                    step="0.125"
+                  >
+
+                  <span class="input-group__suffix">
+                    %
+                  </span>
+                </div>
+
+                @if (isInvalid('interestRate')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('interestRate') }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="amortizationTermYears">
+                  Amortization term
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'amortizationTermYears'
+                    )
+                  "
+                >
+                  <input
+                    id="amortizationTermYears"
+                    type="number"
+                    formControlName="amortizationTermYears"
+                    inputmode="numeric"
+                    min="2"
+                    max="50"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    years
+                  </span>
+                </div>
+
+                <p class="form-field__help">
+                  The monthly payment is calculated as though
+                  the loan continued for this entire period.
+                </p>
+
+                @if (
+                  isInvalid(
+                    'amortizationTermYears'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'amortizationTermYears'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="balloonDueYears">
+                  Balloon payment due
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('balloonDueYears')
+                  "
+                >
+                  <input
+                    id="balloonDueYears"
+                    type="number"
+                    formControlName="balloonDueYears"
+                    inputmode="numeric"
+                    min="1"
+                    max="49"
+                    step="1"
+                  >
+
+                  <span class="input-group__suffix">
+                    years
+                  </span>
+                </div>
+
+                <p class="form-field__help">
+                  The remaining scheduled balance becomes due
+                  at the end of this period.
+                </p>
+
+                @if (isInvalid('balloonDueYears')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('balloonDueYears') }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__section">
+            <h3>Estimated property expenses</h3>
+
+            <div class="calculator-form__grid">
+              <div class="form-field">
+                <label for="annualPropertyTaxes">
+                  Annual property taxes
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'annualPropertyTaxes'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="annualPropertyTaxes"
+                    type="number"
+                    formControlName="annualPropertyTaxes"
+                    inputmode="decimal"
+                    min="0"
+                    step="100"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'annualPropertyTaxes'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualPropertyTaxes'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="annualHomeownersInsurance">
+                  Annual homeowners insurance
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid(
+                      'annualHomeownersInsurance'
+                    )
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="annualHomeownersInsurance"
+                    type="number"
+                    formControlName="annualHomeownersInsurance"
+                    inputmode="decimal"
+                    min="0"
+                    step="100"
+                  >
+                </div>
+
+                @if (
+                  isInvalid(
+                    'annualHomeownersInsurance'
+                  )
+                ) {
+                  <p class="form-field__error">
+                    {{
+                      errorMessage(
+                        'annualHomeownersInsurance'
+                      )
+                    }}
+                  </p>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="monthlyHoa">
+                  Monthly HOA dues
+                  <span class="form-field__optional">
+                    Optional
+                  </span>
+                </label>
+
+                <div
+                  class="input-group"
+                  [class.input-group--invalid]="
+                    isInvalid('monthlyHoa')
+                  "
+                >
+                  <span class="input-group__prefix">
+                    $
+                  </span>
+
+                  <input
+                    id="monthlyHoa"
+                    type="number"
+                    formControlName="monthlyHoa"
+                    inputmode="decimal"
+                    min="0"
+                    step="10"
+                  >
+                </div>
+
+                @if (isInvalid('monthlyHoa')) {
+                  <p class="form-field__error">
+                    {{ errorMessage('monthlyHoa') }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator-form__actions">
+            <button
+              class="calculator-form__reset"
+              type="button"
+              (click)="resetCalculator()"
+            >
+              Reset
+            </button>
+
+            <button
+              class="calculator-form__submit"
+              type="submit"
+            >
+              Calculate balloon payment
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside
+        class="results-card"
+        aria-labelledby="balloon-result-heading"
+        aria-live="polite"
+      >
+        @if (result(); as calculation) {
+
+          <div class="results-card__primary">
+            <p>Estimated balloon payment</p>
+
+            <h2 id="balloon-result-heading">
+              {{
+                calculation.balloonBalance
+                  | currency:'USD':'symbol':'1.0-0'
+              }}
+            </h2>
+
+            <span>
+              Estimated remaining principal due after
+              {{ calculation.scheduledPaymentsBeforeBalloon }}
+              scheduled monthly payments
+            </span>
+          </div>
+
+          <div class="results-card__payment">
+            <p>
+              Estimated monthly housing payment
+            </p>
+
+            <strong>
+              {{
+                calculation.totalMonthlyHousingPayment
+                  | currency:'USD':'symbol':'1.2-2'
+              }}
+            </strong>
+          </div>
+
+          <div class="results-card__section">
+            <h3>Monthly payment breakdown</h3>
+
+            <dl class="payment-breakdown">
+              <div>
+                <dt>Principal and interest</dt>
+
+                <dd>
+                  {{
+                    calculation.principalAndInterestPayment
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Property taxes</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyPropertyTaxes
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Homeowners insurance</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyHomeownersInsurance
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>HOA dues</dt>
+
+                <dd>
+                  {{
+                    calculation.monthlyHoa
+                      | currency:'USD':'symbol':'1.2-2'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="results-card__section">
+            <h3>Balance before balloon date</h3>
+
+            <dl class="loan-summary">
+              <div>
+                <dt>Original loan amount</dt>
+
+                <dd>
+                  {{
+                    calculation.loanAmount
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Principal repaid</dt>
+
+                <dd>
+                  {{
+                    calculation.principalPaidBeforeBalloon
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Interest paid</dt>
+
+                <dd>
+                  {{
+                    calculation.interestPaidBeforeBalloon
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Monthly payments and property expenses
+                </dt>
+
+                <dd>
+                  {{
+                    calculation.totalCashPaidBeforeBalloon
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Payments plus balloon balance
+                </dt>
+
+                <dd>
+                  {{
+                    calculation.totalIncludingBalloon
+                      | currency:'USD':'symbol':'1.0-0'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+        } @else {
+
+          <div class="results-card__empty">
+            <span aria-hidden="true">◷</span>
+
+            <h2 id="balloon-result-heading">
+              Enter the balloon loan terms
+            </h2>
+
+            <p>
+              Complete the calculator to estimate the monthly
+              payment and remaining balance due at the balloon
+              date.
+            </p>
+          </div>
+
+        }
+      </aside>
+    </div>
+
+    <aside class="calculator-warning">
+      <strong>
+        A large balance may become due at one time
+      </strong>
+
+      <p>
+        A balloon loan may require the remaining principal to
+        be paid in a single payment before the loan would
+        otherwise be fully amortized. Refinancing or selling
+        the property may not be available when that payment
+        becomes due.
+      </p>
+    </aside>
+
+    <aside class="calculator-disclaimer">
+      <strong>Important information</strong>
+
+      <p>
+        This calculator provides an estimate for educational
+        purposes only. It is not a loan offer, approval,
+        commitment to lend or financial advice. Actual
+        balloon balances, payment schedules, loan terms,
+        taxes, insurance and other property expenses may
+        differ.
+      </p>
+    </aside>
+
+  </div>
+</main>

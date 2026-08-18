@@ -199,7 +199,7 @@ export interface OfferUserProfile {
   identityStatus?: string;
 
   stripeIdentityVerificationSessionId?:
-    string;
+  string;
 
   verifiedFirstName?: string;
   verifiedMiddleName?: string;
@@ -251,18 +251,18 @@ export interface OfferPartyDocument {
   Uid: string;
 
   role:
-    | 'buyer'
-    | 'seller';
+  | 'buyer'
+  | 'seller';
 
   capacity:
-    | 'individual'
-    | 'joint'
-    | 'trust'
-    | 'estate'
-    | 'corporation'
-    | 'limited_liability_company'
-    | 'partnership'
-    | 'other';
+  | 'individual'
+  | 'joint'
+  | 'trust'
+  | 'estate'
+  | 'corporation'
+  | 'limited_liability_company'
+  | 'partnership'
+  | 'other';
 
   userUid?: string;
 
@@ -277,15 +277,15 @@ export interface OfferPartyDocument {
   phone: string;
 
   mailingAddress:
-    OfferPartyAddressDocument;
+  OfferPartyAddressDocument;
 
   identityVerification: {
     status:
-      | 'not_started'
-      | 'pending'
-      | 'verified'
-      | 'requires_input'
-      | 'failed';
+    | 'not_started'
+    | 'pending'
+    | 'verified'
+    | 'requires_input'
+    | 'failed';
 
     provider: 'stripe_identity';
 
@@ -304,11 +304,11 @@ export interface OfferPartyDocument {
     required: boolean;
 
     status:
-      | 'not_invited'
-      | 'invited'
-      | 'viewed'
-      | 'signed'
-      | 'declined';
+    | 'not_invited'
+    | 'invited'
+    | 'viewed'
+    | 'signed'
+    | 'declined';
 
     providerEnvelopeUid?: string;
     providerSignerUid?: string;
@@ -320,10 +320,10 @@ export interface OfferPartyDocument {
   };
 
   electronicTransactionsConsentAccepted:
-    boolean;
+  boolean;
 
   electronicTransactionsConsentAcceptedAt?:
-    Timestamp;
+  Timestamp;
 
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -344,7 +344,7 @@ export interface OfferDocument {
   stateCode: string;
 
   property:
-    OfferPropertySnapshotDocument;
+  OfferPropertySnapshotDocument;
 
   primaryBuyerUid: string;
   buyerUids: string[];
@@ -384,11 +384,11 @@ export interface OfferDocument {
   statusHistory: OfferStatusHistoryDocument[];
 
   closedReason?:
-    | 'declined'
-    | 'withdrawn'
-    | 'expired'
-    | 'property_under_contract'
-    | 'converted_to_contract';
+  | 'declined'
+  | 'withdrawn'
+  | 'expired'
+  | 'property_under_contract'
+  | 'converted_to_contract';
 
   closedAt?: Timestamp;
 
@@ -406,25 +406,25 @@ export interface OfferStatusHistoryDocument {
   toStatus: OfferStatus;
 
   action:
-    | 'draft_created'
-    | 'draft_saved'
-    | 'submitted'
-    | 'viewed'
-    | 'countered'
-    | 'accepted'
-    | 'declined'
-    | 'withdrawn'
-    | 'expired'
-    | 'closed_due_to_contract'
-    | 'converted_to_contract';
+  | 'draft_created'
+  | 'draft_saved'
+  | 'submitted'
+  | 'viewed'
+  | 'countered'
+  | 'accepted'
+  | 'declined'
+  | 'withdrawn'
+  | 'expired'
+  | 'closed_due_to_contract'
+  | 'converted_to_contract';
 
   actorUid: string;
 
   actorRole:
-    | 'buyer'
-    | 'seller'
-    | 'system'
-    | 'administrator';
+  | 'buyer'
+  | 'seller'
+  | 'system'
+  | 'administrator';
 
   offerVersionUid?: string;
   offerVersionNumber?: number;
@@ -450,31 +450,35 @@ export interface OfferVersionDocument {
   parentVersionUid?: string;
 
   initiatedBy:
-    OfferInitiatingParty;
+  OfferInitiatingParty;
 
   initiatedByUid: string;
 
   status:
-    OfferVersionStatus;
+  OfferVersionStatus;
 
   stateCode: string;
 
   terms: Record<string, unknown>;
+  /*
+ * Draft-only snapshot of the Angular offer wizard.
+ */
+  wizardData?: Record<string, unknown>;
 
   buyers:
-    OfferVersionPartySnapshotDocument[];
+  OfferVersionPartySnapshotDocument[];
 
   sellers:
-    OfferVersionPartySnapshotDocument[];
+  OfferVersionPartySnapshotDocument[];
 
   changesFromPreviousVersion:
-    OfferVersionChangeDocument[];
+  OfferVersionChangeDocument[];
 
   documents:
-    Record<string, unknown>[];
+  Record<string, unknown>[];
 
   statusHistory:
-    OfferVersionStatusHistoryDocument[];
+  OfferVersionStatusHistoryDocument[];
 
   immutable: boolean;
 
@@ -503,18 +507,18 @@ export interface OfferVersionPartySnapshotDocument {
   userUid?: string;
 
   role:
-    | 'buyer'
-    | 'seller';
+  | 'buyer'
+  | 'seller';
 
   capacity:
-    | 'individual'
-    | 'joint'
-    | 'trust'
-    | 'estate'
-    | 'corporation'
-    | 'limited_liability_company'
-    | 'partnership'
-    | 'other';
+  | 'individual'
+  | 'joint'
+  | 'trust'
+  | 'estate'
+  | 'corporation'
+  | 'limited_liability_company'
+  | 'partnership'
+  | 'other';
 
   firstName: string;
   middleName?: string;
@@ -540,10 +544,10 @@ export interface OfferVersionPartySnapshotDocument {
   primaryParty: boolean;
 
   intendedUse?:
-    | 'primary_residence'
-    | 'second_home'
-    | 'investment_property'
-    | 'other';
+  | 'primary_residence'
+  | 'second_home'
+  | 'investment_property'
+  | 'other';
 
   proposedDeedName?: string;
 
@@ -551,11 +555,11 @@ export interface OfferVersionPartySnapshotDocument {
 
   identityVerification: {
     status:
-      | 'not_started'
-      | 'pending'
-      | 'verified'
-      | 'requires_input'
-      | 'failed';
+    | 'not_started'
+    | 'pending'
+    | 'verified'
+    | 'requires_input'
+    | 'failed';
 
     provider: 'stripe_identity';
 
@@ -572,11 +576,11 @@ export interface OfferVersionPartySnapshotDocument {
 
   signature: {
     status:
-      | 'not_started'
-      | 'invited'
-      | 'viewed'
-      | 'signed'
-      | 'declined';
+    | 'not_started'
+    | 'invited'
+    | 'viewed'
+    | 'signed'
+    | 'declined';
 
     providerEnvelopeUid?: string;
     providerSignerUid?: string;
@@ -588,10 +592,10 @@ export interface OfferVersionPartySnapshotDocument {
   };
 
   electronicTransactionsConsentAccepted:
-    boolean;
+  boolean;
 
   electronicTransactionsConsentAcceptedAt?:
-    Timestamp;
+  Timestamp;
 }
 
 
@@ -601,19 +605,19 @@ export interface OfferVersionChangeDocument {
   label: string;
 
   previousValue:
-    | string
-    | number
-    | boolean
-    | null;
+  | string
+  | number
+  | boolean
+  | null;
 
   newValue:
-    | string
-    | number
-    | boolean
-    | null;
+  | string
+  | number
+  | boolean
+  | null;
 
   changedByParty:
-    OfferInitiatingParty;
+  OfferInitiatingParty;
 
   changedByUid: string;
 
@@ -625,30 +629,30 @@ export interface OfferVersionStatusHistoryDocument {
   fromStatus?: OfferVersionStatus;
 
   toStatus:
-    OfferVersionStatus;
+  OfferVersionStatus;
 
   action:
-    | 'created'
-    | 'saved'
-    | 'submitted'
-    | 'signature_requested'
-    | 'partially_signed'
-    | 'signed'
-    | 'delivered'
-    | 'viewed'
-    | 'accepted'
-    | 'declined'
-    | 'withdrawn'
-    | 'expired'
-    | 'superseded';
+  | 'created'
+  | 'saved'
+  | 'submitted'
+  | 'signature_requested'
+  | 'partially_signed'
+  | 'signed'
+  | 'delivered'
+  | 'viewed'
+  | 'accepted'
+  | 'declined'
+  | 'withdrawn'
+  | 'expired'
+  | 'superseded';
 
   actorUid: string;
 
   actorRole:
-    | 'buyer'
-    | 'seller'
-    | 'system'
-    | 'administrator';
+  | 'buyer'
+  | 'seller'
+  | 'system'
+  | 'administrator';
 
   note?: string;
 

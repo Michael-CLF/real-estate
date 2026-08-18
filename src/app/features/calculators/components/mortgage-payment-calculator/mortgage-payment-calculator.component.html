@@ -1,0 +1,504 @@
+<main class="mortgage-calculator">
+  <div class="mortgage-calculator__container">
+
+    <a
+      class="mortgage-calculator__back-link"
+      routerLink="/calculators"
+    >
+      <span aria-hidden="true">←</span>
+      All calculators
+    </a>
+
+    <header class="mortgage-calculator__header">
+      <p class="mortgage-calculator__eyebrow">
+        Residential calculator
+      </p>
+
+      <h1>Mortgage Payment Calculator</h1>
+
+      <p>
+        Estimate the monthly cost of a residential mortgage,
+        including principal, interest, property taxes,
+        homeowners insurance, HOA dues and mortgage insurance.
+      </p>
+    </header>
+
+    <div class="mortgage-calculator__layout">
+
+      <section
+        class="calculator-card"
+        aria-labelledby="mortgage-details-heading"
+      >
+        <div class="calculator-card__heading">
+          <h2 id="mortgage-details-heading">
+            Mortgage details
+          </h2>
+
+          <p>
+            Enter the proposed purchase and financing
+            information.
+          </p>
+        </div>
+
+        <form
+          class="calculator-form"
+          [formGroup]="calculatorForm"
+          (ngSubmit)="calculateMortgage()"
+        >
+          <div class="calculator-form__grid">
+
+            <div class="form-field">
+              <label for="purchasePrice">
+                Purchase price
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid('purchasePrice')
+                "
+              >
+                <span class="input-group__prefix">
+                  $
+                </span>
+
+                <input
+                  id="purchasePrice"
+                  type="number"
+                  formControlName="purchasePrice"
+                  inputmode="decimal"
+                  min="1"
+                  step="1000"
+                >
+              </div>
+
+              @if (isInvalid('purchasePrice')) {
+                <p class="form-field__error">
+                  {{ errorMessage('purchasePrice') }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="downPayment">
+                Down payment
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid('downPayment')
+                "
+              >
+                <span class="input-group__prefix">
+                  $
+                </span>
+
+                <input
+                  id="downPayment"
+                  type="number"
+                  formControlName="downPayment"
+                  inputmode="decimal"
+                  min="0"
+                  step="1000"
+                >
+              </div>
+
+              @if (isInvalid('downPayment')) {
+                <p class="form-field__error">
+                  {{ errorMessage('downPayment') }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="interestRate">
+                Interest rate
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid('interestRate')
+                "
+              >
+                <input
+                  id="interestRate"
+                  type="number"
+                  formControlName="interestRate"
+                  inputmode="decimal"
+                  min="0"
+                  max="100"
+                  step="0.125"
+                >
+
+                <span class="input-group__suffix">
+                  %
+                </span>
+              </div>
+
+              @if (isInvalid('interestRate')) {
+                <p class="form-field__error">
+                  {{ errorMessage('interestRate') }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="loanTermYears">
+                Loan term
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid('loanTermYears')
+                "
+              >
+                <input
+                  id="loanTermYears"
+                  type="number"
+                  formControlName="loanTermYears"
+                  inputmode="numeric"
+                  min="1"
+                  max="50"
+                  step="1"
+                >
+
+                <span class="input-group__suffix">
+                  years
+                </span>
+              </div>
+
+              @if (isInvalid('loanTermYears')) {
+                <p class="form-field__error">
+                  {{ errorMessage('loanTermYears') }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="annualPropertyTaxes">
+                Annual property taxes
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid('annualPropertyTaxes')
+                "
+              >
+                <span class="input-group__prefix">
+                  $
+                </span>
+
+                <input
+                  id="annualPropertyTaxes"
+                  type="number"
+                  formControlName="annualPropertyTaxes"
+                  inputmode="decimal"
+                  min="0"
+                  step="100"
+                >
+              </div>
+
+              @if (isInvalid('annualPropertyTaxes')) {
+                <p class="form-field__error">
+                  {{ errorMessage('annualPropertyTaxes') }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="annualHomeownersInsurance">
+                Annual homeowners insurance
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid(
+                    'annualHomeownersInsurance'
+                  )
+                "
+              >
+                <span class="input-group__prefix">
+                  $
+                </span>
+
+                <input
+                  id="annualHomeownersInsurance"
+                  type="number"
+                  formControlName="annualHomeownersInsurance"
+                  inputmode="decimal"
+                  min="0"
+                  step="100"
+                >
+              </div>
+
+              @if (
+                isInvalid(
+                  'annualHomeownersInsurance'
+                )
+              ) {
+                <p class="form-field__error">
+                  {{
+                    errorMessage(
+                      'annualHomeownersInsurance'
+                    )
+                  }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="monthlyHoa">
+                Monthly HOA dues
+                <span class="form-field__optional">
+                  Optional
+                </span>
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid('monthlyHoa')
+                "
+              >
+                <span class="input-group__prefix">
+                  $
+                </span>
+
+                <input
+                  id="monthlyHoa"
+                  type="number"
+                  formControlName="monthlyHoa"
+                  inputmode="decimal"
+                  min="0"
+                  step="10"
+                >
+              </div>
+
+              @if (isInvalid('monthlyHoa')) {
+                <p class="form-field__error">
+                  {{ errorMessage('monthlyHoa') }}
+                </p>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="monthlyMortgageInsurance">
+                Monthly mortgage insurance
+                <span class="form-field__optional">
+                  Optional
+                </span>
+              </label>
+
+              <div
+                class="input-group"
+                [class.input-group--invalid]="
+                  isInvalid(
+                    'monthlyMortgageInsurance'
+                  )
+                "
+              >
+                <span class="input-group__prefix">
+                  $
+                </span>
+
+                <input
+                  id="monthlyMortgageInsurance"
+                  type="number"
+                  formControlName="monthlyMortgageInsurance"
+                  inputmode="decimal"
+                  min="0"
+                  step="10"
+                >
+              </div>
+
+              @if (
+                isInvalid(
+                  'monthlyMortgageInsurance'
+                )
+              ) {
+                <p class="form-field__error">
+                  {{
+                    errorMessage(
+                      'monthlyMortgageInsurance'
+                    )
+                  }}
+                </p>
+              }
+            </div>
+
+          </div>
+
+          <div class="calculator-form__actions">
+            <button
+              class="calculator-form__reset"
+              type="button"
+              (click)="resetCalculator()"
+            >
+              Reset
+            </button>
+
+            <button
+              class="calculator-form__submit"
+              type="submit"
+            >
+              Calculate payment
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside
+        class="results-card"
+        aria-labelledby="estimated-payment-heading"
+        aria-live="polite"
+      >
+        @if (result(); as calculation) {
+
+          <div class="results-card__primary">
+            <p>Estimated monthly payment</p>
+
+            <h2 id="estimated-payment-heading">
+              {{
+                calculation.totalMonthlyPayment
+                  | currency:'USD':'symbol':'1.2-2'
+              }}
+            </h2>
+
+            <span>
+              Estimated principal, interest, taxes,
+              insurance and applicable monthly expenses
+            </span>
+          </div>
+
+          <dl class="payment-breakdown">
+            <div>
+              <dt>Principal and interest</dt>
+              <dd>
+                {{
+                  calculation.principalAndInterest
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Property taxes</dt>
+              <dd>
+                {{
+                  calculation.monthlyPropertyTaxes
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Homeowners insurance</dt>
+              <dd>
+                {{
+                  calculation.monthlyHomeownersInsurance
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>HOA dues</dt>
+              <dd>
+                {{
+                  calculation.monthlyHoa
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Mortgage insurance</dt>
+              <dd>
+                {{
+                  calculation.monthlyMortgageInsurance
+                    | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+          </dl>
+
+          <dl class="loan-summary">
+            <div>
+              <dt>Estimated loan amount</dt>
+              <dd>
+                {{
+                  calculation.loanAmount
+                    | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Down payment</dt>
+              <dd>
+                {{
+                  calculation.downPaymentPercentage
+                    | number:'1.0-2'
+                }}%
+              </dd>
+            </div>
+
+            <div>
+              <dt>Total principal and interest</dt>
+              <dd>
+                {{
+                  calculation.totalPrincipalAndInterest
+                    | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Estimated total interest</dt>
+              <dd>
+                {{
+                  calculation.totalInterest
+                    | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+          </dl>
+
+        } @else {
+
+          <div class="results-card__empty">
+            <span aria-hidden="true">⌂</span>
+
+            <h2 id="estimated-payment-heading">
+              Enter your mortgage details
+            </h2>
+
+            <p>
+              Complete the calculator to see an estimated
+              monthly payment and payment breakdown.
+            </p>
+          </div>
+
+        }
+      </aside>
+    </div>
+
+    <aside class="calculator-disclaimer">
+      <strong>Important information</strong>
+
+      <p>
+        This calculator provides an estimate for educational
+        purposes only. It is not a loan offer, approval,
+        commitment to lend or financial advice. Actual
+        payments, interest rates, taxes, insurance, mortgage
+        insurance, HOA dues and closing costs may differ.
+      </p>
+    </aside>
+
+  </div>
+</main>
