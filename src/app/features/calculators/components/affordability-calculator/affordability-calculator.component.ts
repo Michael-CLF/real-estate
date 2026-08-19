@@ -72,35 +72,30 @@ export class AffordabilityCalculatorComponent
   protected readonly calculatorForm =
     this.formBuilder.nonNullable.group({
       annualGrossIncome: [
-        120000,
+        '120,000.00',
         [
-          Validators.required,
-          Validators.min(1)
+          Validators.required
         ]
       ],
 
       monthlyDebtPayments: [
-        750,
+        '750.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       downPayment: [
-        60000,
+        '60,000.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       interestRate: [
-        6.5,
+        '6.5',
         [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(100)
+          Validators.required
         ]
       ],
 
@@ -123,18 +118,16 @@ export class AffordabilityCalculatorComponent
       ],
 
       annualHomeownersInsurance: [
-        1800,
+        '1,800.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       monthlyHoa: [
-        0,
+        '0.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
@@ -158,10 +151,12 @@ export class AffordabilityCalculatorComponent
     });
 
   ngOnInit(): void {
+    this.formatAllDisplayFields();
     this.calculateAffordability();
   }
 
   protected calculateAffordability(): void {
+    this.formatAllDisplayFields();
     if (this.calculatorForm.invalid) {
       this.calculatorForm.markAllAsTouched();
       this.result.set(null);
@@ -341,20 +336,20 @@ export class AffordabilityCalculatorComponent
     const estimatedFrontEndRatio =
       monthlyGrossIncome > 0
         ? (
-            maximumMonthlyHousingPayment /
-            monthlyGrossIncome
-          ) * 100
+          maximumMonthlyHousingPayment /
+          monthlyGrossIncome
+        ) * 100
         : 0;
 
     const estimatedBackEndRatio =
       monthlyGrossIncome > 0
         ? (
-            (
-              maximumMonthlyHousingPayment +
-              monthlyDebtPayments
-            ) /
-            monthlyGrossIncome
-          ) * 100
+          (
+            maximumMonthlyHousingPayment +
+            monthlyDebtPayments
+          ) /
+          monthlyGrossIncome
+        ) * 100
         : 0;
 
     this.result.set({
@@ -422,18 +417,19 @@ export class AffordabilityCalculatorComponent
 
   protected resetCalculator(): void {
     this.calculatorForm.reset({
-      annualGrossIncome: 120000,
-      monthlyDebtPayments: 750,
-      downPayment: 60000,
-      interestRate: 6.5,
+      annualGrossIncome: '120,000.00',
+      monthlyDebtPayments: '750.00',
+      downPayment: '60,000.00',
+      interestRate: '6.5',
       loanTermYears: 30,
       annualPropertyTaxRate: 1.1,
-      annualHomeownersInsurance: 1800,
-      monthlyHoa: 0,
+      annualHomeownersInsurance: '1,800.00',
+      monthlyHoa: '0.00',
       frontEndRatio: 28,
       backEndRatio: 36
     });
 
+    this.formatAllDisplayFields();
     this.calculateAffordability();
   }
 
@@ -443,7 +439,7 @@ export class AffordabilityCalculatorComponent
   ): boolean {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     return (
@@ -461,7 +457,7 @@ export class AffordabilityCalculatorComponent
   ): string {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     if (control.hasError('required')) {
@@ -510,17 +506,112 @@ export class AffordabilityCalculatorComponent
         paymentFactor - 1
       )
     ) /
-    (
-      monthlyInterestRate *
-      paymentFactor
+      (
+        monthlyInterestRate *
+        paymentFactor
+      );
+  }
+
+  private formatAllDisplayFields(): void {
+    this.formatCurrencyField(
+      'annualGrossIncome'
+    );
+
+    this.formatCurrencyField(
+      'monthlyDebtPayments'
+    );
+
+    this.formatCurrencyField(
+      'downPayment'
+    );
+
+    this.formatInterestRate();
+
+    this.formatCurrencyField(
+      'annualHomeownersInsurance'
+    );
+
+    this.formatCurrencyField(
+      'monthlyHoa'
     );
   }
 
+  protected formatCurrencyField(
+    controlName:
+      | 'annualGrossIncome'
+      | 'monthlyDebtPayments'
+      | 'downPayment'
+      | 'annualHomeownersInsurance'
+      | 'monthlyHoa'
+  ): void {
+    const control =
+      this.calculatorForm.controls[
+      controlName
+      ];
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+          useGrouping: true
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected formatInterestRate(): void {
+    const control =
+      this.calculatorForm.controls
+        .interestRate;
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 3,
+          useGrouping: false
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected prepareNumericInput(
+    event: FocusEvent
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
+
+    input.select();
+  }
+
   private toFiniteNumber(
-    value: number
+    value: string | number
   ): number {
+    const normalizedValue =
+      typeof value === 'string'
+        ? value.replace(
+          /[$,%\s]/g,
+          ''
+        )
+        : value;
+
     const convertedValue =
-      Number(value);
+      Number(normalizedValue);
 
     return Number.isFinite(
       convertedValue

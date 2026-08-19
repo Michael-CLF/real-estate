@@ -87,31 +87,47 @@ export class FirestoreMarketplaceListingRepository
         );
     }
 
-    override getFeaturedListings(
-        limit: number
-    ): Observable<MarketplaceListing[]> {
-        return this.loadActiveListings().pipe(
-            map(listings =>
-                listings
-                    .filter(listing =>
-                        this.isFeaturedListing(listing)
-                    )
-                    .sort(
-                        (firstListing, secondListing) =>
-                            (
-                                secondListing.publishedAt?.getTime() ??
-                                0
-                            ) -
-                            (
-                                firstListing.publishedAt?.getTime() ??
-                                0
-                            )
-                    )
-                    .slice(0, Math.max(limit, 0))
+   override getFeaturedListings(
+  limit: number
+): Observable<MarketplaceListingSummary[]> {
+  return this.loadActiveListings().pipe(
+    map(listings =>
+      listings
+        .filter(listing =>
+          this.isFeaturedListing(listing)
+        )
+        .sort(
+          (
+            firstListing,
+            secondListing
+          ) =>
+            (
+              secondListing
+                .publishedAt
+                ?.getTime() ??
+              secondListing
+                .createdAt
+                .getTime()
+            ) -
+            (
+              firstListing
+                .publishedAt
+                ?.getTime() ??
+              firstListing
+                .createdAt
+                .getTime()
             )
-        );
-    }
-
+        )
+        .slice(
+          0,
+          Math.max(limit, 0)
+        )
+        .map(listing =>
+          this.toListingSummary(listing)
+        )
+    )
+  );
+}
     private loadActiveListings():
         Observable<MarketplaceListing[]> {
         const listingsReference = collection(
@@ -902,17 +918,15 @@ export class FirestoreMarketplaceListingRepository
                 listing.publishedAt
         };
     }
-    private isFeaturedListing(
-        listing: MarketplaceListing
-    ): boolean {
-        return Boolean(
-            (
-                listing as MarketplaceListing & {
-                    featuredListing?: boolean;
-                }
-            ).featuredListing
-        );
-    }
+    
+   private isFeaturedListing(
+  listing: MarketplaceListing
+): boolean {
+  return (
+    listing.status === 'active' &&
+    listing.featuredListing === true
+  );
+}
 
     private readRecord(
         value: unknown

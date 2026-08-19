@@ -2,9 +2,13 @@ import { Observable } from 'rxjs';
 
 import {
   ListingSearchFilters,
-  ListingSearchResult
+  ListingSearchResult,
+  MarketplaceListingSummary
 } from '../models/listing-search-filters.model';
-import { MarketplaceListing } from '../models/marketplace-listing.model';
+
+import {
+  MarketplaceListing
+} from '../models/marketplace-listing.model';
 
 export abstract class MarketplaceListingRepository {
   abstract searchListings(
@@ -21,5 +25,5 @@ export abstract class MarketplaceListingRepository {
 
   abstract getFeaturedListings(
     limit: number
-  ): Observable<MarketplaceListing[]>;
+  ): Observable<MarketplaceListingSummary[]>;
 }

@@ -1,10 +1,41 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+
+import {
+  AsyncPipe
+} from '@angular/common';
+
+import {
+  RouterLink
+} from '@angular/router';
+
+import {
+  catchError,
+  Observable,
+  of,
+  shareReplay
+} from 'rxjs';
 
 import { StateExplorerComponent } from './state-explorer/state-explorer.component';
+
+import {
+  MarketplaceListingSummary
+} from '../../core/domains/marketplace/models/listing-search-filters.model';
+
+import {
+  MarketplaceListingRepository
+} from '../../core/domains/marketplace/repositories/marketplace-listing.repository';
+
+import {
+  FirestoreMarketplaceListingRepository
+} from '../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
+
+import {
+  ListingCardComponent
+} from '../marketplace/search/components/listing-card/listing-card.component';
 
 interface PlatformBenefit {
   readonly number: string;
@@ -12,14 +43,6 @@ interface PlatformBenefit {
   readonly description: string;
 }
 
-interface FeaturedHome {
-  readonly location: string;
-  readonly price: string;
-  readonly beds: number;
-  readonly baths: number;
-  readonly squareFeet: string;
-  readonly imageClass: string;
-}
 
 interface MortgageTool {
   readonly eyebrow: string;
@@ -38,14 +61,45 @@ interface ProcessStep {
   selector: 'app-home',
   standalone: true,
   imports: [
+    AsyncPipe,
     RouterLink,
-    StateExplorerComponent,
+    ListingCardComponent,
+    StateExplorerComponent
+  ],
+  providers: [
+    {
+      provide: MarketplaceListingRepository,
+      useClass:
+        FirestoreMarketplaceListingRepository
+    }
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
+
 export class HomeComponent {
+  private readonly listingRepository =
+    inject(MarketplaceListingRepository);
+
+  protected readonly featuredListings$:
+    Observable<MarketplaceListingSummary[]> =
+    this.listingRepository
+      .getFeaturedListings(3)
+      .pipe(
+        catchError(() =>
+          of(
+            [] as MarketplaceListingSummary[]
+          )
+        ),
+
+        shareReplay({
+          bufferSize: 1,
+          refCount: true
+        })
+      );
+
   protected readonly benefits: readonly PlatformBenefit[] = [
     {
       number: '01',
@@ -70,33 +124,6 @@ export class HomeComponent {
       title: 'Stay in control',
       description:
         'Manage your property, communications, and transaction from your own account.',
-    },
-  ];
-
-  protected readonly featuredHomes: readonly FeaturedHome[] = [
-    {
-      location: 'Wake Forest, North Carolina',
-      price: '$489,000',
-      beds: 4,
-      baths: 3,
-      squareFeet: '2,641',
-      imageClass: 'featured-home-card__image--one',
-    },
-    {
-      location: 'Raleigh, North Carolina',
-      price: '$625,000',
-      beds: 4,
-      baths: 3,
-      squareFeet: '3,105',
-      imageClass: 'featured-home-card__image--two',
-    },
-    {
-      location: 'Cary, North Carolina',
-      price: '$549,900',
-      beds: 3,
-      baths: 3,
-      squareFeet: '2,384',
-      imageClass: 'featured-home-card__image--three',
     },
   ];
 

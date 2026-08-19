@@ -1,10 +1,7 @@
 <main class="ltv-calculator">
   <div class="ltv-calculator__container">
 
-    <a
-      class="ltv-calculator__back-link"
-      routerLink="/calculators"
-    >
+    <a class="ltv-calculator__back-link" routerLink="/calculators">
       <span aria-hidden="true">←</span>
       All calculators
     </a>
@@ -25,10 +22,7 @@
 
     <div class="ltv-calculator__layout">
 
-      <section
-        class="calculator-card"
-        aria-labelledby="ltv-details-heading"
-      >
+      <section class="calculator-card" aria-labelledby="ltv-details-heading">
         <div class="calculator-card__heading">
           <h2 id="ltv-details-heading">
             Property and financing details
@@ -40,11 +34,7 @@
           </p>
         </div>
 
-        <form
-          class="calculator-form"
-          [formGroup]="calculatorForm"
-          (ngSubmit)="calculateLoanToValue()"
-        >
+        <form class="calculator-form" [formGroup]="calculatorForm" (ngSubmit)="calculateLoanToValue()">
           <div class="calculator-form__section">
             <h3>Property values</h3>
 
@@ -54,30 +44,22 @@
                   Purchase price
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('purchasePrice')
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="purchasePrice"
-                    type="number"
-                    formControlName="purchasePrice"
-                    inputmode="decimal"
-                    min="1"
-                    step="1000"
-                  >
+                  <input id="purchasePrice" type="text" formControlName="purchasePrice" inputmode="decimal"
+                    autocomplete="off" (focus)="prepareNumericInput($event)"
+                    (blur)="formatCurrencyField('purchasePrice')">
                 </div>
 
                 @if (isInvalid('purchasePrice')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('purchasePrice') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('purchasePrice') }}
+                </p>
                 }
               </div>
 
@@ -86,30 +68,22 @@
                   Appraised value
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('appraisedValue')
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="appraisedValue"
-                    type="number"
-                    formControlName="appraisedValue"
-                    inputmode="decimal"
-                    min="1"
-                    step="1000"
-                  >
+                  <input id="appraisedValue" type="text" formControlName="appraisedValue" inputmode="decimal"
+                    autocomplete="off" (focus)="prepareNumericInput($event)"
+                    (blur)="formatCurrencyField('appraisedValue')">
                 </div>
 
                 @if (isInvalid('appraisedValue')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('appraisedValue') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('appraisedValue') }}
+                </p>
                 }
               </div>
             </div>
@@ -131,40 +105,35 @@
                   First mortgage amount
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'firstMortgageAmount'
                     )
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="firstMortgageAmount"
-                    type="number"
-                    formControlName="firstMortgageAmount"
-                    inputmode="decimal"
-                    min="0"
-                    step="1000"
-                  >
+                  <input id="firstMortgageAmount" type="text" formControlName="firstMortgageAmount" inputmode="decimal"
+                    autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="
+    formatCurrencyField(
+      'firstMortgageAmount'
+    )
+  ">
                 </div>
 
                 @if (
-                  isInvalid(
-                    'firstMortgageAmount'
-                  )
+                isInvalid(
+                'firstMortgageAmount'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'firstMortgageAmount'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'firstMortgageAmount'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -177,247 +146,221 @@
                   </span>
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'subordinateFinancingAmount'
                     )
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="subordinateFinancingAmount"
-                    type="number"
-                    formControlName="subordinateFinancingAmount"
-                    inputmode="decimal"
-                    min="0"
-                    step="1000"
-                  >
+                  <input id="subordinateFinancingAmount" type="text" formControlName="subordinateFinancingAmount"
+                    inputmode="decimal" autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="
+    formatCurrencyField(
+      'subordinateFinancingAmount'
+    )
+  ">
                 </div>
 
                 @if (
-                  isInvalid(
-                    'subordinateFinancingAmount'
-                  )
+                isInvalid(
+                'subordinateFinancingAmount'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'subordinateFinancingAmount'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'subordinateFinancingAmount'
+                  )
+                  }}
+                </p>
                 }
               </div>
             </div>
           </div>
 
           <div class="calculator-form__actions">
-            <button
-              class="calculator-form__reset"
-              type="button"
-              (click)="resetCalculator()"
-            >
+            <button class="calculator-form__reset" type="button" (click)="resetCalculator()">
               Reset
             </button>
 
-            <button
-              class="calculator-form__submit"
-              type="submit"
-            >
+            <button class="calculator-form__submit" type="submit">
               Calculate LTV
             </button>
           </div>
         </form>
       </section>
 
-      <aside
-        class="results-card"
-        aria-labelledby="ltv-result-heading"
-        aria-live="polite"
-      >
+      <aside class="results-card" aria-labelledby="ltv-result-heading" aria-live="polite">
         @if (result(); as calculation) {
 
-          <div class="results-card__primary">
-            <p>Combined loan-to-value</p>
+        <div class="results-card__primary">
+          <p>Combined loan-to-value</p>
 
-            <h2 id="ltv-result-heading">
+          <h2 id="ltv-result-heading">
+            {{
+            calculation.combinedLtv
+            | number:'1.0-2'
+            }}%
+          </h2>
+
+          <span>
+            Total proposed financing divided by the
+            calculation value
+          </span>
+        </div>
+
+        <div class="ratio-cards">
+          <article>
+            <p>First-mortgage LTV</p>
+
+            <strong>
               {{
-                calculation.combinedLtv
-                  | number:'1.0-2'
+              calculation.firstMortgageLtv
+              | number:'1.0-2'
               }}%
-            </h2>
+            </strong>
+          </article>
 
-            <span>
-              Total proposed financing divided by the
-              calculation value
-            </span>
+          <article>
+            <p>Buyer equity</p>
+
+            <strong>
+              {{
+              calculation.equityPercentage
+              | number:'1.0-2'
+              }}%
+            </strong>
+          </article>
+        </div>
+
+        <div class="equity-bar">
+          <div class="equity-bar__labels">
+            <span>Financing</span>
+            <span>Equity</span>
           </div>
 
-          <div class="ratio-cards">
-            <article>
-              <p>First-mortgage LTV</p>
-
-              <strong>
-                {{
-                  calculation.firstMortgageLtv
-                    | number:'1.0-2'
-                }}%
-              </strong>
-            </article>
-
-            <article>
-              <p>Buyer equity</p>
-
-              <strong>
-                {{
-                  calculation.equityPercentage
-                    | number:'1.0-2'
-                }}%
-              </strong>
-            </article>
-          </div>
-
-          <div class="equity-bar">
-            <div class="equity-bar__labels">
-              <span>Financing</span>
-              <span>Equity</span>
-            </div>
-
-            <div
-              class="equity-bar__track"
-              role="img"
-              [attr.aria-label]="
+          <div class="equity-bar__track" role="img" [attr.aria-label]="
                 'Financing is ' +
                 calculation.combinedLtv +
                 ' percent and equity is ' +
                 calculation.equityPercentage +
                 ' percent.'
-              "
-            >
-              <span
-                class="equity-bar__financing"
-                [style.width.%]="
+              ">
+            <span class="equity-bar__financing" [style.width.%]="
                   calculation.combinedLtv
-                "
-              ></span>
+                "></span>
 
-              <span
-                class="equity-bar__equity"
-                [style.width.%]="
+            <span class="equity-bar__equity" [style.width.%]="
                   calculation.equityPercentage
-                "
-              ></span>
+                "></span>
+          </div>
+        </div>
+
+        <div class="results-card__section">
+          <h3>Property value</h3>
+
+          <dl class="result-summary">
+            <div>
+              <dt>Purchase price</dt>
+
+              <dd>
+                {{
+                calculation.purchasePrice
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
             </div>
-          </div>
 
-          <div class="results-card__section">
-            <h3>Property value</h3>
+            <div>
+              <dt>Appraised value</dt>
 
-            <dl class="result-summary">
-              <div>
-                <dt>Purchase price</dt>
+              <dd>
+                {{
+                calculation.appraisedValue
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-                <dd>
-                  {{
-                    calculation.purchasePrice
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+            <div>
+              <dt>Calculation value</dt>
 
-              <div>
-                <dt>Appraised value</dt>
+              <dd>
+                {{
+                calculation.calculationValue
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
-                <dd>
-                  {{
-                    calculation.appraisedValue
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+        <div class="results-card__section">
+          <h3>Financing and equity</h3>
 
-              <div>
-                <dt>Calculation value</dt>
+          <dl class="result-summary">
+            <div>
+              <dt>First mortgage</dt>
 
-                <dd>
-                  {{
-                    calculation.calculationValue
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              <dd>
+                {{
+                calculation.firstMortgageAmount
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-          <div class="results-card__section">
-            <h3>Financing and equity</h3>
+            <div>
+              <dt>Subordinate financing</dt>
 
-            <dl class="result-summary">
-              <div>
-                <dt>First mortgage</dt>
+              <dd>
+                {{
+                calculation.subordinateFinancingAmount
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-                <dd>
-                  {{
-                    calculation.firstMortgageAmount
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+            <div>
+              <dt>Total financing</dt>
 
-              <div>
-                <dt>Subordinate financing</dt>
+              <dd>
+                {{
+                calculation.totalFinancingAmount
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-                <dd>
-                  {{
-                    calculation.subordinateFinancingAmount
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+            <div>
+              <dt>Estimated buyer equity</dt>
 
-              <div>
-                <dt>Total financing</dt>
-
-                <dd>
-                  {{
-                    calculation.totalFinancingAmount
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Estimated buyer equity</dt>
-
-                <dd>
-                  {{
-                    calculation.buyerEquity
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              <dd>
+                {{
+                calculation.buyerEquity
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
         } @else {
 
-          <div class="results-card__empty">
-            <span aria-hidden="true">%</span>
+        <div class="results-card__empty">
+          <span aria-hidden="true">%</span>
 
-            <h2 id="ltv-result-heading">
-              Enter the property and loan amounts
-            </h2>
+          <h2 id="ltv-result-heading">
+            Enter the property and loan amounts
+          </h2>
 
-            <p>
-              Complete the calculator to estimate the first
-              mortgage LTV, combined LTV and buyer equity.
-            </p>
-          </div>
+          <p>
+            Complete the calculator to estimate the first
+            mortgage LTV, combined LTV and buyer equity.
+          </p>
+        </div>
 
         }
       </aside>

@@ -1,10 +1,7 @@
 <main class="mortgage-calculator">
   <div class="mortgage-calculator__container">
 
-    <a
-      class="mortgage-calculator__back-link"
-      routerLink="/calculators"
-    >
+    <a class="mortgage-calculator__back-link" routerLink="/calculators">
       <span aria-hidden="true">←</span>
       All calculators
     </a>
@@ -25,10 +22,7 @@
 
     <div class="mortgage-calculator__layout">
 
-      <section
-        class="calculator-card"
-        aria-labelledby="mortgage-details-heading"
-      >
+      <section class="calculator-card" aria-labelledby="mortgage-details-heading">
         <div class="calculator-card__heading">
           <h2 id="mortgage-details-heading">
             Mortgage details
@@ -40,11 +34,7 @@
           </p>
         </div>
 
-        <form
-          class="calculator-form"
-          [formGroup]="calculatorForm"
-          (ngSubmit)="calculateMortgage()"
-        >
+        <form class="calculator-form" [formGroup]="calculatorForm" (ngSubmit)="calculateMortgage()">
           <div class="calculator-form__grid">
 
             <div class="form-field">
@@ -52,30 +42,22 @@
                 Purchase price
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid('purchasePrice')
-                "
-              >
+                ">
                 <span class="input-group__prefix">
                   $
                 </span>
 
-                <input
-                  id="purchasePrice"
-                  type="number"
-                  formControlName="purchasePrice"
-                  inputmode="decimal"
-                  min="1"
-                  step="1000"
-                >
+                <input id="purchasePrice" type="text" formControlName="purchasePrice" inputmode="decimal"
+                  autocomplete="off" (focus)="prepareNumericInput($event)"
+                  (blur)="formatCurrencyField('purchasePrice')">
               </div>
 
               @if (isInvalid('purchasePrice')) {
-                <p class="form-field__error">
-                  {{ errorMessage('purchasePrice') }}
-                </p>
+              <p class="form-field__error">
+                {{ errorMessage('purchasePrice') }}
+              </p>
               }
             </div>
 
@@ -84,30 +66,21 @@
                 Down payment
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid('downPayment')
-                "
-              >
+                ">
                 <span class="input-group__prefix">
                   $
                 </span>
 
-                <input
-                  id="downPayment"
-                  type="number"
-                  formControlName="downPayment"
-                  inputmode="decimal"
-                  min="0"
-                  step="1000"
-                >
+                <input id="downPayment" type="text" formControlName="downPayment" inputmode="decimal" autocomplete="off"
+                  (focus)="prepareNumericInput($event)" (blur)="formatCurrencyField('downPayment')">
               </div>
 
               @if (isInvalid('downPayment')) {
-                <p class="form-field__error">
-                  {{ errorMessage('downPayment') }}
-                </p>
+              <p class="form-field__error">
+                {{ errorMessage('downPayment') }}
+              </p>
               }
             </div>
 
@@ -116,21 +89,11 @@
                 Interest rate
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid('interestRate')
-                "
-              >
-                <input
-                  id="interestRate"
-                  type="number"
-                  formControlName="interestRate"
-                  inputmode="decimal"
-                  min="0"
-                  max="100"
-                  step="0.125"
-                >
+                ">
+                <input id="interestRate" type="text" formControlName="interestRate" inputmode="decimal"
+                  autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="formatInterestRate()">
 
                 <span class="input-group__suffix">
                   %
@@ -138,9 +101,9 @@
               </div>
 
               @if (isInvalid('interestRate')) {
-                <p class="form-field__error">
-                  {{ errorMessage('interestRate') }}
-                </p>
+              <p class="form-field__error">
+                {{ errorMessage('interestRate') }}
+              </p>
               }
             </div>
 
@@ -149,21 +112,11 @@
                 Loan term
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid('loanTermYears')
-                "
-              >
-                <input
-                  id="loanTermYears"
-                  type="number"
-                  formControlName="loanTermYears"
-                  inputmode="numeric"
-                  min="1"
-                  max="50"
-                  step="1"
-                >
+                ">
+                <input id="loanTermYears" type="number" formControlName="loanTermYears" inputmode="numeric" min="1"
+                  max="50" step="1">
 
                 <span class="input-group__suffix">
                   years
@@ -171,9 +124,9 @@
               </div>
 
               @if (isInvalid('loanTermYears')) {
-                <p class="form-field__error">
-                  {{ errorMessage('loanTermYears') }}
-                </p>
+              <p class="form-field__error">
+                {{ errorMessage('loanTermYears') }}
+              </p>
               }
             </div>
 
@@ -182,30 +135,25 @@
                 Annual property taxes
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid('annualPropertyTaxes')
-                "
-              >
+                ">
                 <span class="input-group__prefix">
                   $
                 </span>
 
-                <input
-                  id="annualPropertyTaxes"
-                  type="number"
-                  formControlName="annualPropertyTaxes"
-                  inputmode="decimal"
-                  min="0"
-                  step="100"
-                >
+                <input id="annualPropertyTaxes" type="text" formControlName="annualPropertyTaxes" inputmode="decimal"
+                  autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="
+    formatCurrencyField(
+      'annualPropertyTaxes'
+    )
+  ">
               </div>
 
               @if (isInvalid('annualPropertyTaxes')) {
-                <p class="form-field__error">
-                  {{ errorMessage('annualPropertyTaxes') }}
-                </p>
+              <p class="form-field__error">
+                {{ errorMessage('annualPropertyTaxes') }}
+              </p>
               }
             </div>
 
@@ -214,40 +162,35 @@
                 Annual homeowners insurance
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid(
                     'annualHomeownersInsurance'
                   )
-                "
-              >
+                ">
                 <span class="input-group__prefix">
                   $
                 </span>
 
-                <input
-                  id="annualHomeownersInsurance"
-                  type="number"
-                  formControlName="annualHomeownersInsurance"
-                  inputmode="decimal"
-                  min="0"
-                  step="100"
-                >
+                <input id="annualHomeownersInsurance" type="text" formControlName="annualHomeownersInsurance"
+                  inputmode="decimal" autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="
+    formatCurrencyField(
+      'annualHomeownersInsurance'
+    )
+  ">
               </div>
 
               @if (
-                isInvalid(
-                  'annualHomeownersInsurance'
-                )
+              isInvalid(
+              'annualHomeownersInsurance'
+              )
               ) {
-                <p class="form-field__error">
-                  {{
-                    errorMessage(
-                      'annualHomeownersInsurance'
-                    )
-                  }}
-                </p>
+              <p class="form-field__error">
+                {{
+                errorMessage(
+                'annualHomeownersInsurance'
+                )
+                }}
+              </p>
               }
             </div>
 
@@ -259,30 +202,25 @@
                 </span>
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid('monthlyHoa')
-                "
-              >
+                ">
                 <span class="input-group__prefix">
                   $
                 </span>
 
-                <input
-                  id="monthlyHoa"
-                  type="number"
-                  formControlName="monthlyHoa"
-                  inputmode="decimal"
-                  min="0"
-                  step="10"
-                >
+                <input id="monthlyMortgageInsurance" type="text" formControlName="monthlyMortgageInsurance"
+                  inputmode="decimal" autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="
+    formatCurrencyField(
+      'monthlyMortgageInsurance'
+    )
+  ">
               </div>
 
               @if (isInvalid('monthlyHoa')) {
-                <p class="form-field__error">
-                  {{ errorMessage('monthlyHoa') }}
-                </p>
+              <p class="form-field__error">
+                {{ errorMessage('monthlyHoa') }}
+              </p>
               }
             </div>
 
@@ -294,195 +232,175 @@
                 </span>
               </label>
 
-              <div
-                class="input-group"
-                [class.input-group--invalid]="
+              <div class="input-group" [class.input-group--invalid]="
                   isInvalid(
                     'monthlyMortgageInsurance'
                   )
-                "
-              >
+                ">
                 <span class="input-group__prefix">
                   $
                 </span>
 
-                <input
-                  id="monthlyMortgageInsurance"
-                  type="number"
-                  formControlName="monthlyMortgageInsurance"
-                  inputmode="decimal"
-                  min="0"
-                  step="10"
-                >
+                <input id="monthlyMortgageInsurance" type="number" formControlName="monthlyMortgageInsurance"
+                  inputmode="decimal" min="0" step="10">
               </div>
 
               @if (
-                isInvalid(
-                  'monthlyMortgageInsurance'
-                )
+              isInvalid(
+              'monthlyMortgageInsurance'
+              )
               ) {
-                <p class="form-field__error">
-                  {{
-                    errorMessage(
-                      'monthlyMortgageInsurance'
-                    )
-                  }}
-                </p>
+              <p class="form-field__error">
+                {{
+                errorMessage(
+                'monthlyMortgageInsurance'
+                )
+                }}
+              </p>
               }
             </div>
 
           </div>
 
           <div class="calculator-form__actions">
-            <button
-              class="calculator-form__reset"
-              type="button"
-              (click)="resetCalculator()"
-            >
+            <button class="calculator-form__reset" type="button" (click)="resetCalculator()">
               Reset
             </button>
 
-            <button
-              class="calculator-form__submit"
-              type="submit"
-            >
+            <button class="calculator-form__submit" type="submit">
               Calculate payment
             </button>
           </div>
         </form>
       </section>
 
-      <aside
-        class="results-card"
-        aria-labelledby="estimated-payment-heading"
-        aria-live="polite"
-      >
+      <aside class="results-card" aria-labelledby="estimated-payment-heading" aria-live="polite">
         @if (result(); as calculation) {
 
-          <div class="results-card__primary">
-            <p>Estimated monthly payment</p>
+        <div class="results-card__primary">
+          <p>Estimated monthly payment</p>
 
-            <h2 id="estimated-payment-heading">
+          <h2 id="estimated-payment-heading">
+            {{
+            calculation.totalMonthlyPayment
+            | currency:'USD':'symbol':'1.2-2'
+            }}
+          </h2>
+
+          <span>
+            Estimated principal, interest, taxes,
+            insurance and applicable monthly expenses
+          </span>
+        </div>
+
+        <dl class="payment-breakdown">
+          <div>
+            <dt>Principal and interest</dt>
+            <dd>
               {{
-                calculation.totalMonthlyPayment
-                  | currency:'USD':'symbol':'1.2-2'
+              calculation.principalAndInterest
+              | currency:'USD':'symbol':'1.2-2'
               }}
-            </h2>
-
-            <span>
-              Estimated principal, interest, taxes,
-              insurance and applicable monthly expenses
-            </span>
+            </dd>
           </div>
 
-          <dl class="payment-breakdown">
-            <div>
-              <dt>Principal and interest</dt>
-              <dd>
-                {{
-                  calculation.principalAndInterest
-                    | currency:'USD':'symbol':'1.2-2'
-                }}
-              </dd>
-            </div>
+          <div>
+            <dt>Property taxes</dt>
+            <dd>
+              {{
+              calculation.monthlyPropertyTaxes
+              | currency:'USD':'symbol':'1.2-2'
+              }}
+            </dd>
+          </div>
 
-            <div>
-              <dt>Property taxes</dt>
-              <dd>
-                {{
-                  calculation.monthlyPropertyTaxes
-                    | currency:'USD':'symbol':'1.2-2'
-                }}
-              </dd>
-            </div>
+          <div>
+            <dt>Homeowners insurance</dt>
+            <dd>
+              {{
+              calculation.monthlyHomeownersInsurance
+              | currency:'USD':'symbol':'1.2-2'
+              }}
+            </dd>
+          </div>
 
-            <div>
-              <dt>Homeowners insurance</dt>
-              <dd>
-                {{
-                  calculation.monthlyHomeownersInsurance
-                    | currency:'USD':'symbol':'1.2-2'
-                }}
-              </dd>
-            </div>
+          <div>
+            <dt>HOA dues</dt>
+            <dd>
+              {{
+              calculation.monthlyHoa
+              | currency:'USD':'symbol':'1.2-2'
+              }}
+            </dd>
+          </div>
 
-            <div>
-              <dt>HOA dues</dt>
-              <dd>
-                {{
-                  calculation.monthlyHoa
-                    | currency:'USD':'symbol':'1.2-2'
-                }}
-              </dd>
-            </div>
+          <div>
+            <dt>Mortgage insurance</dt>
+            <dd>
+              {{
+              calculation.monthlyMortgageInsurance
+              | currency:'USD':'symbol':'1.2-2'
+              }}
+            </dd>
+          </div>
+        </dl>
 
-            <div>
-              <dt>Mortgage insurance</dt>
-              <dd>
-                {{
-                  calculation.monthlyMortgageInsurance
-                    | currency:'USD':'symbol':'1.2-2'
-                }}
-              </dd>
-            </div>
-          </dl>
+        <dl class="loan-summary">
+          <div>
+            <dt>Estimated loan amount</dt>
+            <dd>
+              {{
+              calculation.loanAmount
+              | currency:'USD':'symbol':'1.0-0'
+              }}
+            </dd>
+          </div>
 
-          <dl class="loan-summary">
-            <div>
-              <dt>Estimated loan amount</dt>
-              <dd>
-                {{
-                  calculation.loanAmount
-                    | currency:'USD':'symbol':'1.0-0'
-                }}
-              </dd>
-            </div>
+          <div>
+            <dt>Down payment</dt>
+            <dd>
+              {{
+              calculation.downPaymentPercentage
+              | number:'1.0-2'
+              }}%
+            </dd>
+          </div>
 
-            <div>
-              <dt>Down payment</dt>
-              <dd>
-                {{
-                  calculation.downPaymentPercentage
-                    | number:'1.0-2'
-                }}%
-              </dd>
-            </div>
+          <div>
+            <dt>Total principal and interest</dt>
+            <dd>
+              {{
+              calculation.totalPrincipalAndInterest
+              | currency:'USD':'symbol':'1.0-0'
+              }}
+            </dd>
+          </div>
 
-            <div>
-              <dt>Total principal and interest</dt>
-              <dd>
-                {{
-                  calculation.totalPrincipalAndInterest
-                    | currency:'USD':'symbol':'1.0-0'
-                }}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Estimated total interest</dt>
-              <dd>
-                {{
-                  calculation.totalInterest
-                    | currency:'USD':'symbol':'1.0-0'
-                }}
-              </dd>
-            </div>
-          </dl>
+          <div>
+            <dt>Estimated total interest</dt>
+            <dd>
+              {{
+              calculation.totalInterest
+              | currency:'USD':'symbol':'1.0-0'
+              }}
+            </dd>
+          </div>
+        </dl>
 
         } @else {
 
-          <div class="results-card__empty">
-            <span aria-hidden="true">⌂</span>
+        <div class="results-card__empty">
+          <span aria-hidden="true">⌂</span>
 
-            <h2 id="estimated-payment-heading">
-              Enter your mortgage details
-            </h2>
+          <h2 id="estimated-payment-heading">
+            Enter your mortgage details
+          </h2>
 
-            <p>
-              Complete the calculator to see an estimated
-              monthly payment and payment breakdown.
-            </p>
-          </div>
+          <p>
+            Complete the calculator to see an estimated
+            monthly payment and payment breakdown.
+          </p>
+        </div>
 
         }
       </aside>

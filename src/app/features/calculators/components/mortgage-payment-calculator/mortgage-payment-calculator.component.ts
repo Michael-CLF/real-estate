@@ -69,27 +69,23 @@ export class MortgagePaymentCalculatorComponent
   protected readonly calculatorForm =
     this.formBuilder.nonNullable.group({
       purchasePrice: [
-        400000,
+        '400,000.00',
         [
-          Validators.required,
-          Validators.min(1)
+          Validators.required
         ]
       ],
 
       downPayment: [
-        80000,
+        '80,000.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       interestRate: [
-        6.5,
+        '6.5',
         [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(100)
+          Validators.required
         ]
       ],
 
@@ -103,44 +99,43 @@ export class MortgagePaymentCalculatorComponent
       ],
 
       annualPropertyTaxes: [
-        4800,
+        '4,800.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       annualHomeownersInsurance: [
-        1800,
+        '1,800.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       monthlyHoa: [
-        0,
+        '0.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       monthlyMortgageInsurance: [
-        0,
+        '0.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ]
     });
 
   ngOnInit(): void {
     this.calculateMortgage();
+    this.formatAllDisplayFields();
   }
 
   protected calculateMortgage(): void {
+    this.formatAllDisplayFields();
     if (this.calculatorForm.invalid) {
+
       this.calculatorForm.markAllAsTouched();
       this.result.set(null);
 
@@ -271,9 +266,9 @@ export class MortgagePaymentCalculatorComponent
     const downPaymentPercentage =
       purchasePrice > 0
         ? (
-            downPayment /
-            purchasePrice
-          ) * 100
+          downPayment /
+          purchasePrice
+        ) * 100
         : 0;
 
     this.result.set({
@@ -331,16 +326,17 @@ export class MortgagePaymentCalculatorComponent
 
   protected resetCalculator(): void {
     this.calculatorForm.reset({
-      purchasePrice: 400000,
-      downPayment: 80000,
-      interestRate: 6.5,
+      purchasePrice: '400,000.00',
+      downPayment: '80,000.00',
+      interestRate: '6.5',
       loanTermYears: 30,
-      annualPropertyTaxes: 4800,
-      annualHomeownersInsurance: 1800,
-      monthlyHoa: 0,
-      monthlyMortgageInsurance: 0
+      annualPropertyTaxes: '4,800.00',
+      annualHomeownersInsurance: '1,800.00',
+      monthlyHoa: '0.00',
+      monthlyMortgageInsurance: '0.00'
     });
 
+    this.formatAllDisplayFields();
     this.calculateMortgage();
   }
 
@@ -350,7 +346,7 @@ export class MortgagePaymentCalculatorComponent
   ): boolean {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     return (
@@ -368,7 +364,7 @@ export class MortgagePaymentCalculatorComponent
   ): string {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     if (control.hasError('required')) {
@@ -394,11 +390,111 @@ export class MortgagePaymentCalculatorComponent
     return 'Enter a valid value.';
   }
 
+  private formatAllDisplayFields(): void {
+    this.formatCurrencyField(
+      'purchasePrice'
+    );
+
+    this.formatCurrencyField(
+      'downPayment'
+    );
+
+    this.formatInterestRate();
+
+    this.formatCurrencyField(
+      'annualPropertyTaxes'
+    );
+
+    this.formatCurrencyField(
+      'annualHomeownersInsurance'
+    );
+
+    this.formatCurrencyField(
+      'monthlyHoa'
+    );
+
+    this.formatCurrencyField(
+      'monthlyMortgageInsurance'
+    );
+  }
+
+  protected formatCurrencyField(
+    controlName:
+      | 'purchasePrice'
+      | 'downPayment'
+      | 'annualPropertyTaxes'
+      | 'annualHomeownersInsurance'
+      | 'monthlyHoa'
+      | 'monthlyMortgageInsurance'
+  ): void {
+    const control =
+      this.calculatorForm.controls[
+      controlName
+      ];
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+          useGrouping: true
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected formatInterestRate(): void {
+    const control =
+      this.calculatorForm.controls
+        .interestRate;
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 3,
+          useGrouping: false
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected prepareNumericInput(
+    event: FocusEvent
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
+
+    input.select();
+  }
+
   private toFiniteNumber(
-    value: number
+    value: string | number
   ): number {
+    const normalizedValue =
+      typeof value === 'string'
+        ? value.replace(
+          /[$,%\s]/g,
+          ''
+        )
+        : value;
+
     const convertedValue =
-      Number(value);
+      Number(normalizedValue);
 
     return Number.isFinite(
       convertedValue

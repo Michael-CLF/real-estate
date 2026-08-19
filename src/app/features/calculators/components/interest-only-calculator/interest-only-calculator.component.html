@@ -1,10 +1,7 @@
 <main class="interest-only-calculator">
   <div class="interest-only-calculator__container">
 
-    <a
-      class="interest-only-calculator__back-link"
-      routerLink="/calculators"
-    >
+    <a class="interest-only-calculator__back-link" routerLink="/calculators">
       <span aria-hidden="true">←</span>
       All calculators
     </a>
@@ -25,10 +22,7 @@
 
     <div class="interest-only-calculator__layout">
 
-      <section
-        class="calculator-card"
-        aria-labelledby="interest-only-details-heading"
-      >
+      <section class="calculator-card" aria-labelledby="interest-only-details-heading">
         <div class="calculator-card__heading">
           <h2 id="interest-only-details-heading">
             Loan details
@@ -40,11 +34,7 @@
           </p>
         </div>
 
-        <form
-          class="calculator-form"
-          [formGroup]="calculatorForm"
-          (ngSubmit)="calculatePayment()"
-        >
+        <form class="calculator-form" [formGroup]="calculatorForm" (ngSubmit)="calculatePayment()">
           <div class="calculator-form__section">
             <h3>Interest-only loan terms</h3>
 
@@ -54,30 +44,21 @@
                   Loan amount
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('loanAmount')
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="loanAmount"
-                    type="number"
-                    formControlName="loanAmount"
-                    inputmode="decimal"
-                    min="1"
-                    step="1000"
-                  >
+                  <input id="loanAmount" type="text" formControlName="loanAmount" inputmode="decimal" autocomplete="off"
+                    (focus)="prepareNumericInput($event)" (blur)="formatCurrencyField('loanAmount')">
                 </div>
 
                 @if (isInvalid('loanAmount')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('loanAmount') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('loanAmount') }}
+                </p>
                 }
               </div>
 
@@ -86,21 +67,11 @@
                   Interest rate
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('interestRate')
-                  "
-                >
-                  <input
-                    id="interestRate"
-                    type="number"
-                    formControlName="interestRate"
-                    inputmode="decimal"
-                    min="0"
-                    max="100"
-                    step="0.125"
-                  >
+                  ">
+                  <input id="interestRate" type="text" formControlName="interestRate" inputmode="decimal"
+                    autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="formatInterestRate()">
 
                   <span class="input-group__suffix">
                     %
@@ -108,9 +79,9 @@
                 </div>
 
                 @if (isInvalid('interestRate')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('interestRate') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('interestRate') }}
+                </p>
                 }
               </div>
 
@@ -119,23 +90,13 @@
                   Total loan term
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'totalLoanTermYears'
                     )
-                  "
-                >
-                  <input
-                    id="totalLoanTermYears"
-                    type="number"
-                    formControlName="totalLoanTermYears"
-                    inputmode="numeric"
-                    min="2"
-                    max="50"
-                    step="1"
-                  >
+                  ">
+                  <input id="totalLoanTermYears" type="number" formControlName="totalLoanTermYears" inputmode="numeric"
+                    min="2" max="50" step="1">
 
                   <span class="input-group__suffix">
                     years
@@ -143,17 +104,17 @@
                 </div>
 
                 @if (
-                  isInvalid(
-                    'totalLoanTermYears'
-                  )
+                isInvalid(
+                'totalLoanTermYears'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'totalLoanTermYears'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'totalLoanTermYears'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -162,23 +123,13 @@
                   Interest-only period
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'interestOnlyPeriodYears'
                     )
-                  "
-                >
-                  <input
-                    id="interestOnlyPeriodYears"
-                    type="number"
-                    formControlName="interestOnlyPeriodYears"
-                    inputmode="numeric"
-                    min="1"
-                    max="49"
-                    step="1"
-                  >
+                  ">
+                  <input id="interestOnlyPeriodYears" type="number" formControlName="interestOnlyPeriodYears"
+                    inputmode="numeric" min="1" max="49" step="1">
 
                   <span class="input-group__suffix">
                     years
@@ -191,17 +142,17 @@
                 </p>
 
                 @if (
-                  isInvalid(
-                    'interestOnlyPeriodYears'
-                  )
+                isInvalid(
+                'interestOnlyPeriodYears'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'interestOnlyPeriodYears'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'interestOnlyPeriodYears'
+                  )
+                  }}
+                </p>
                 }
               </div>
             </div>
@@ -216,40 +167,31 @@
                   Annual property taxes
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'annualPropertyTaxes'
                     )
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="annualPropertyTaxes"
-                    type="number"
-                    formControlName="annualPropertyTaxes"
-                    inputmode="decimal"
-                    min="0"
-                    step="100"
-                  >
+                  <input id="annualPropertyTaxes" type="number" formControlName="annualPropertyTaxes"
+                    inputmode="decimal" min="0" step="100">
                 </div>
 
                 @if (
-                  isInvalid(
-                    'annualPropertyTaxes'
-                  )
+                isInvalid(
+                'annualPropertyTaxes'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'annualPropertyTaxes'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'annualPropertyTaxes'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -258,40 +200,31 @@
                   Annual homeowners insurance
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'annualHomeownersInsurance'
                     )
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="annualHomeownersInsurance"
-                    type="number"
-                    formControlName="annualHomeownersInsurance"
-                    inputmode="decimal"
-                    min="0"
-                    step="100"
-                  >
+                  <input id="annualHomeownersInsurance" type="number" formControlName="annualHomeownersInsurance"
+                    inputmode="decimal" min="0" step="100">
                 </div>
 
                 @if (
-                  isInvalid(
-                    'annualHomeownersInsurance'
-                  )
+                isInvalid(
+                'annualHomeownersInsurance'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'annualHomeownersInsurance'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'annualHomeownersInsurance'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -303,248 +236,228 @@
                   </span>
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('monthlyHoa')
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="monthlyHoa"
-                    type="number"
-                    formControlName="monthlyHoa"
-                    inputmode="decimal"
-                    min="0"
-                    step="10"
-                  >
+                  <input id="monthlyHoa" type="number" formControlName="monthlyHoa" inputmode="decimal" min="0"
+                    step="10">
                 </div>
 
                 @if (isInvalid('monthlyHoa')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('monthlyHoa') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('monthlyHoa') }}
+                </p>
                 }
               </div>
             </div>
           </div>
 
           <div class="calculator-form__actions">
-            <button
-              class="calculator-form__reset"
-              type="button"
-              (click)="resetCalculator()"
-            >
+            <button class="calculator-form__reset" type="button" (click)="resetCalculator()">
               Reset
             </button>
 
-            <button
-              class="calculator-form__submit"
-              type="submit"
-            >
+            <button class="calculator-form__submit" type="submit">
               Calculate payments
             </button>
           </div>
         </form>
       </section>
 
-      <aside
-        class="results-card"
-        aria-labelledby="interest-only-result-heading"
-        aria-live="polite"
-      >
+      <aside class="results-card" aria-labelledby="interest-only-result-heading" aria-live="polite">
         @if (result(); as calculation) {
 
-          <div class="results-card__primary">
-            <p>Interest-only monthly payment</p>
+        <div class="results-card__primary">
+          <p>Interest-only monthly payment</p>
 
-            <h2 id="interest-only-result-heading">
+          <h2 id="interest-only-result-heading">
+            {{
+            calculation.interestOnlyTotalPayment
+            | currency:'USD':'symbol':'1.2-2'
+            }}
+          </h2>
+
+          <span>
+            Includes estimated principal and interest,
+            taxes, insurance and HOA dues
+          </span>
+        </div>
+
+        <div class="results-card__comparison">
+          <article>
+            <p>
+              During interest-only period
+            </p>
+
+            <strong>
               {{
-                calculation.interestOnlyTotalPayment
-                  | currency:'USD':'symbol':'1.2-2'
+              calculation.interestOnlyPayment
+              | currency:'USD':'symbol':'1.2-2'
               }}
-            </h2>
+            </strong>
 
             <span>
-              Includes estimated principal and interest,
-              taxes, insurance and HOA dues
+              Monthly interest payment
             </span>
-          </div>
+          </article>
 
-          <div class="results-card__comparison">
-            <article>
-              <p>
-                During interest-only period
-              </p>
+          <article>
+            <p>
+              After interest-only period
+            </p>
 
-              <strong>
+            <strong>
+              {{
+              calculation.postInterestOnlyPayment
+              | currency:'USD':'symbol':'1.2-2'
+              }}
+            </strong>
+
+            <span>
+              Monthly principal and interest
+            </span>
+          </article>
+        </div>
+
+        <div class="results-card__section">
+          <h3>
+            Interest-only payment breakdown
+          </h3>
+
+          <dl class="payment-breakdown">
+            <div>
+              <dt>Interest payment</dt>
+
+              <dd>
                 {{
-                  calculation.interestOnlyPayment
-                    | currency:'USD':'symbol':'1.2-2'
+                calculation.interestOnlyPayment
+                | currency:'USD':'symbol':'1.2-2'
                 }}
-              </strong>
+              </dd>
+            </div>
 
-              <span>
-                Monthly interest payment
-              </span>
-            </article>
+            <div>
+              <dt>Property taxes</dt>
 
-            <article>
-              <p>
-                After interest-only period
-              </p>
-
-              <strong>
+              <dd>
                 {{
-                  calculation.postInterestOnlyPayment
-                    | currency:'USD':'symbol':'1.2-2'
+                calculation.monthlyPropertyTaxes
+                | currency:'USD':'symbol':'1.2-2'
                 }}
-              </strong>
+              </dd>
+            </div>
 
-              <span>
-                Monthly principal and interest
-              </span>
-            </article>
-          </div>
+            <div>
+              <dt>Homeowners insurance</dt>
 
-          <div class="results-card__section">
-            <h3>
-              Interest-only payment breakdown
-            </h3>
+              <dd>
+                {{
+                calculation.monthlyHomeownersInsurance
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
 
-            <dl class="payment-breakdown">
-              <div>
-                <dt>Interest payment</dt>
+            <div>
+              <dt>HOA dues</dt>
 
-                <dd>
-                  {{
-                    calculation.interestOnlyPayment
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.monthlyHoa
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
-              <div>
-                <dt>Property taxes</dt>
+        <div class="results-card__section">
+          <h3>Loan transition</h3>
 
-                <dd>
-                  {{
-                    calculation.monthlyPropertyTaxes
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
+          <dl class="loan-summary">
+            <div>
+              <dt>
+                Interest-only period
+              </dt>
 
-              <div>
-                <dt>Homeowners insurance</dt>
+              <dd>
+                {{ calculation.interestOnlyMonths }}
+                months
+              </dd>
+            </div>
 
-                <dd>
-                  {{
-                    calculation.monthlyHomeownersInsurance
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
+            <div>
+              <dt>
+                Remaining amortization period
+              </dt>
 
-              <div>
-                <dt>HOA dues</dt>
+              <dd>
+                {{ calculation.amortizationMonths }}
+                months
+              </dd>
+            </div>
 
-                <dd>
-                  {{
-                    calculation.monthlyHoa
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+            <div>
+              <dt>
+                Remaining principal
+              </dt>
 
-          <div class="results-card__section">
-            <h3>Loan transition</h3>
+              <dd>
+                {{
+                calculation.remainingPrincipalBalance
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-            <dl class="loan-summary">
-              <div>
-                <dt>
-                  Interest-only period
-                </dt>
+            <div>
+              <dt>
+                Interest paid during initial period
+              </dt>
 
-                <dd>
-                  {{ calculation.interestOnlyMonths }}
-                  months
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation
+                .interestPaidDuringInterestOnlyPeriod
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>
-                  Remaining amortization period
-                </dt>
+            <div>
+              <dt>
+                Estimated later total payment
+              </dt>
 
-                <dd>
-                  {{ calculation.amortizationMonths }}
-                  months
-                </dd>
-              </div>
-
-              <div>
-                <dt>
-                  Remaining principal
-                </dt>
-
-                <dd>
-                  {{
-                    calculation.remainingPrincipalBalance
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>
-                  Interest paid during initial period
-                </dt>
-
-                <dd>
-                  {{
-                    calculation
-                      .interestPaidDuringInterestOnlyPeriod
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
-
-              <div>
-                <dt>
-                  Estimated later total payment
-                </dt>
-
-                <dd>
-                  {{
-                    calculation.postInterestOnlyTotalPayment
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              <dd>
+                {{
+                calculation.postInterestOnlyTotalPayment
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
         } @else {
 
-          <div class="results-card__empty">
-            <span aria-hidden="true">%</span>
+        <div class="results-card__empty">
+          <span aria-hidden="true">%</span>
 
-            <h2 id="interest-only-result-heading">
-              Enter the loan terms
-            </h2>
+          <h2 id="interest-only-result-heading">
+            Enter the loan terms
+          </h2>
 
-            <p>
-              Complete the calculator to compare the
-              interest-only payment with the later
-              amortizing payment.
-            </p>
-          </div>
+          <p>
+            Complete the calculator to compare the
+            interest-only payment with the later
+            amortizing payment.
+          </p>
+        </div>
 
         }
       </aside>

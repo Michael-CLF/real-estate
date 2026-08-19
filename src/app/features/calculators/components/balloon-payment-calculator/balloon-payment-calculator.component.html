@@ -1,10 +1,7 @@
 <main class="balloon-calculator">
   <div class="balloon-calculator__container">
 
-    <a
-      class="balloon-calculator__back-link"
-      routerLink="/calculators"
-    >
+    <a class="balloon-calculator__back-link" routerLink="/calculators">
       <span aria-hidden="true">←</span>
       All calculators
     </a>
@@ -25,10 +22,7 @@
 
     <div class="balloon-calculator__layout">
 
-      <section
-        class="calculator-card"
-        aria-labelledby="balloon-details-heading"
-      >
+      <section class="calculator-card" aria-labelledby="balloon-details-heading">
         <div class="calculator-card__heading">
           <h2 id="balloon-details-heading">
             Loan details
@@ -41,11 +35,7 @@
           </p>
         </div>
 
-        <form
-          class="calculator-form"
-          [formGroup]="calculatorForm"
-          (ngSubmit)="calculateBalloonPayment()"
-        >
+        <form class="calculator-form" [formGroup]="calculatorForm" (ngSubmit)="calculateBalloonPayment()">
           <div class="calculator-form__section">
             <h3>Balloon loan terms</h3>
 
@@ -55,30 +45,21 @@
                   Loan amount
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('loanAmount')
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="loanAmount"
-                    type="number"
-                    formControlName="loanAmount"
-                    inputmode="decimal"
-                    min="1"
-                    step="1000"
-                  >
+                  <input id="loanAmount" type="text" formControlName="loanAmount" inputmode="decimal" autocomplete="off"
+                    (focus)="prepareNumericInput($event)" (blur)="formatCurrencyField('loanAmount')">
                 </div>
 
                 @if (isInvalid('loanAmount')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('loanAmount') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('loanAmount') }}
+                </p>
                 }
               </div>
 
@@ -87,21 +68,11 @@
                   Interest rate
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('interestRate')
-                  "
-                >
-                  <input
-                    id="interestRate"
-                    type="number"
-                    formControlName="interestRate"
-                    inputmode="decimal"
-                    min="0"
-                    max="100"
-                    step="0.125"
-                  >
+                  ">
+                  <input id="interestRate" type="text" formControlName="interestRate" inputmode="decimal"
+                    autocomplete="off" (focus)="prepareNumericInput($event)" (blur)="formatInterestRate()">
 
                   <span class="input-group__suffix">
                     %
@@ -109,9 +80,9 @@
                 </div>
 
                 @if (isInvalid('interestRate')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('interestRate') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('interestRate') }}
+                </p>
                 }
               </div>
 
@@ -120,23 +91,13 @@
                   Amortization term
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'amortizationTermYears'
                     )
-                  "
-                >
-                  <input
-                    id="amortizationTermYears"
-                    type="number"
-                    formControlName="amortizationTermYears"
-                    inputmode="numeric"
-                    min="2"
-                    max="50"
-                    step="1"
-                  >
+                  ">
+                  <input id="amortizationTermYears" type="number" formControlName="amortizationTermYears"
+                    inputmode="numeric" min="2" max="50" step="1">
 
                   <span class="input-group__suffix">
                     years
@@ -149,17 +110,17 @@
                 </p>
 
                 @if (
-                  isInvalid(
-                    'amortizationTermYears'
-                  )
+                isInvalid(
+                'amortizationTermYears'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'amortizationTermYears'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'amortizationTermYears'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -168,21 +129,11 @@
                   Balloon payment due
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('balloonDueYears')
-                  "
-                >
-                  <input
-                    id="balloonDueYears"
-                    type="number"
-                    formControlName="balloonDueYears"
-                    inputmode="numeric"
-                    min="1"
-                    max="49"
-                    step="1"
-                  >
+                  ">
+                  <input id="balloonDueYears" type="number" formControlName="balloonDueYears" inputmode="numeric"
+                    min="1" max="49" step="1">
 
                   <span class="input-group__suffix">
                     years
@@ -195,9 +146,9 @@
                 </p>
 
                 @if (isInvalid('balloonDueYears')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('balloonDueYears') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('balloonDueYears') }}
+                </p>
                 }
               </div>
             </div>
@@ -212,40 +163,31 @@
                   Annual property taxes
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'annualPropertyTaxes'
                     )
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="annualPropertyTaxes"
-                    type="number"
-                    formControlName="annualPropertyTaxes"
-                    inputmode="decimal"
-                    min="0"
-                    step="100"
-                  >
+                  <input id="annualPropertyTaxes" type="number" formControlName="annualPropertyTaxes"
+                    inputmode="decimal" min="0" step="100">
                 </div>
 
                 @if (
-                  isInvalid(
-                    'annualPropertyTaxes'
-                  )
+                isInvalid(
+                'annualPropertyTaxes'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'annualPropertyTaxes'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'annualPropertyTaxes'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -254,40 +196,31 @@
                   Annual homeowners insurance
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid(
                       'annualHomeownersInsurance'
                     )
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="annualHomeownersInsurance"
-                    type="number"
-                    formControlName="annualHomeownersInsurance"
-                    inputmode="decimal"
-                    min="0"
-                    step="100"
-                  >
+                  <input id="annualHomeownersInsurance" type="number" formControlName="annualHomeownersInsurance"
+                    inputmode="decimal" min="0" step="100">
                 </div>
 
                 @if (
-                  isInvalid(
-                    'annualHomeownersInsurance'
-                  )
+                isInvalid(
+                'annualHomeownersInsurance'
+                )
                 ) {
-                  <p class="form-field__error">
-                    {{
-                      errorMessage(
-                        'annualHomeownersInsurance'
-                      )
-                    }}
-                  </p>
+                <p class="form-field__error">
+                  {{
+                  errorMessage(
+                  'annualHomeownersInsurance'
+                  )
+                  }}
+                </p>
                 }
               </div>
 
@@ -299,221 +232,201 @@
                   </span>
                 </label>
 
-                <div
-                  class="input-group"
-                  [class.input-group--invalid]="
+                <div class="input-group" [class.input-group--invalid]="
                     isInvalid('monthlyHoa')
-                  "
-                >
+                  ">
                   <span class="input-group__prefix">
                     $
                   </span>
 
-                  <input
-                    id="monthlyHoa"
-                    type="number"
-                    formControlName="monthlyHoa"
-                    inputmode="decimal"
-                    min="0"
-                    step="10"
-                  >
+                  <input id="monthlyHoa" type="number" formControlName="monthlyHoa" inputmode="decimal" min="0"
+                    step="10">
                 </div>
 
                 @if (isInvalid('monthlyHoa')) {
-                  <p class="form-field__error">
-                    {{ errorMessage('monthlyHoa') }}
-                  </p>
+                <p class="form-field__error">
+                  {{ errorMessage('monthlyHoa') }}
+                </p>
                 }
               </div>
             </div>
           </div>
 
           <div class="calculator-form__actions">
-            <button
-              class="calculator-form__reset"
-              type="button"
-              (click)="resetCalculator()"
-            >
+            <button class="calculator-form__reset" type="button" (click)="resetCalculator()">
               Reset
             </button>
 
-            <button
-              class="calculator-form__submit"
-              type="submit"
-            >
+            <button class="calculator-form__submit" type="submit">
               Calculate balloon payment
             </button>
           </div>
         </form>
       </section>
 
-      <aside
-        class="results-card"
-        aria-labelledby="balloon-result-heading"
-        aria-live="polite"
-      >
+      <aside class="results-card" aria-labelledby="balloon-result-heading" aria-live="polite">
         @if (result(); as calculation) {
 
-          <div class="results-card__primary">
-            <p>Estimated balloon payment</p>
+        <div class="results-card__primary">
+          <p>Estimated balloon payment</p>
 
-            <h2 id="balloon-result-heading">
-              {{
-                calculation.balloonBalance
-                  | currency:'USD':'symbol':'1.0-0'
-              }}
-            </h2>
+          <h2 id="balloon-result-heading">
+            {{
+            calculation.balloonBalance
+            | currency:'USD':'symbol':'1.0-0'
+            }}
+          </h2>
 
-            <span>
-              Estimated remaining principal due after
-              {{ calculation.scheduledPaymentsBeforeBalloon }}
-              scheduled monthly payments
-            </span>
-          </div>
+          <span>
+            Estimated remaining principal due after
+            {{ calculation.scheduledPaymentsBeforeBalloon }}
+            scheduled monthly payments
+          </span>
+        </div>
 
-          <div class="results-card__payment">
-            <p>
-              Estimated monthly housing payment
-            </p>
+        <div class="results-card__payment">
+          <p>
+            Estimated monthly housing payment
+          </p>
 
-            <strong>
-              {{
-                calculation.totalMonthlyHousingPayment
-                  | currency:'USD':'symbol':'1.2-2'
-              }}
-            </strong>
-          </div>
+          <strong>
+            {{
+            calculation.totalMonthlyHousingPayment
+            | currency:'USD':'symbol':'1.2-2'
+            }}
+          </strong>
+        </div>
 
-          <div class="results-card__section">
-            <h3>Monthly payment breakdown</h3>
+        <div class="results-card__section">
+          <h3>Monthly payment breakdown</h3>
 
-            <dl class="payment-breakdown">
-              <div>
-                <dt>Principal and interest</dt>
+          <dl class="payment-breakdown">
+            <div>
+              <dt>Principal and interest</dt>
 
-                <dd>
-                  {{
-                    calculation.principalAndInterestPayment
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.principalAndInterestPayment
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>Property taxes</dt>
+            <div>
+              <dt>Property taxes</dt>
 
-                <dd>
-                  {{
-                    calculation.monthlyPropertyTaxes
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.monthlyPropertyTaxes
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>Homeowners insurance</dt>
+            <div>
+              <dt>Homeowners insurance</dt>
 
-                <dd>
-                  {{
-                    calculation.monthlyHomeownersInsurance
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.monthlyHomeownersInsurance
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>HOA dues</dt>
+            <div>
+              <dt>HOA dues</dt>
 
-                <dd>
-                  {{
-                    calculation.monthlyHoa
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              <dd>
+                {{
+                calculation.monthlyHoa
+                | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
-          <div class="results-card__section">
-            <h3>Balance before balloon date</h3>
+        <div class="results-card__section">
+          <h3>Balance before balloon date</h3>
 
-            <dl class="loan-summary">
-              <div>
-                <dt>Original loan amount</dt>
+          <dl class="loan-summary">
+            <div>
+              <dt>Original loan amount</dt>
 
-                <dd>
-                  {{
-                    calculation.loanAmount
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.loanAmount
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>Principal repaid</dt>
+            <div>
+              <dt>Principal repaid</dt>
 
-                <dd>
-                  {{
-                    calculation.principalPaidBeforeBalloon
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.principalPaidBeforeBalloon
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>Interest paid</dt>
+            <div>
+              <dt>Interest paid</dt>
 
-                <dd>
-                  {{
-                    calculation.interestPaidBeforeBalloon
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.interestPaidBeforeBalloon
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>
-                  Monthly payments and property expenses
-                </dt>
+            <div>
+              <dt>
+                Monthly payments and property expenses
+              </dt>
 
-                <dd>
-                  {{
-                    calculation.totalCashPaidBeforeBalloon
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
+              <dd>
+                {{
+                calculation.totalCashPaidBeforeBalloon
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
 
-              <div>
-                <dt>
-                  Payments plus balloon balance
-                </dt>
+            <div>
+              <dt>
+                Payments plus balloon balance
+              </dt>
 
-                <dd>
-                  {{
-                    calculation.totalIncludingBalloon
-                      | currency:'USD':'symbol':'1.0-0'
-                  }}
-                </dd>
-              </div>
-            </dl>
-          </div>
+              <dd>
+                {{
+                calculation.totalIncludingBalloon
+                | currency:'USD':'symbol':'1.0-0'
+                }}
+              </dd>
+            </div>
+          </dl>
+        </div>
 
         } @else {
 
-          <div class="results-card__empty">
-            <span aria-hidden="true">◷</span>
+        <div class="results-card__empty">
+          <span aria-hidden="true">◷</span>
 
-            <h2 id="balloon-result-heading">
-              Enter the balloon loan terms
-            </h2>
+          <h2 id="balloon-result-heading">
+            Enter the balloon loan terms
+          </h2>
 
-            <p>
-              Complete the calculator to estimate the monthly
-              payment and remaining balance due at the balloon
-              date.
-            </p>
-          </div>
+          <p>
+            Complete the calculator to estimate the monthly
+            payment and remaining balance due at the balloon
+            date.
+          </p>
+        </div>
 
         }
       </aside>

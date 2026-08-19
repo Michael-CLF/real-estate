@@ -33,8 +33,18 @@ import {
 
 import {
   Listing,
-  ListingHoaFeeFrequency
+  ListingHoaFeeFrequency,
+  ListingPhotoReference
 } from '../../../core/domains/listings/models/listing.model';
+
+import {
+  ListingPhotoStorageService
+} from '../../../core/infrastructure/listings/listing-photo-storage.service';
+
+import {
+  EditableListingPhoto,
+  ListingPhotoEditorComponent
+} from '../../../shared/components/listings/listing-photo-editor/listing-photo-editor.component';
 
 import {
   ListingService
@@ -48,7 +58,7 @@ interface ListingEditHoaValue {
   hasHoa: boolean;
   feeAmount: number | null;
   feeFrequency:
-    ListingHoaFeeFrequency | '';
+  ListingHoaFeeFrequency | '';
 }
 
 interface ListingEditFormValue {
@@ -65,14 +75,14 @@ interface UpdatePublishedListingChanges {
     hasHoa: boolean;
     feeAmount: number | null;
     feeFrequency:
-      ListingHoaFeeFrequency | null;
+    ListingHoaFeeFrequency | null;
   };
 }
 
 interface UpdatePublishedListingRequest {
   listingUid: string;
   changes:
-    UpdatePublishedListingChanges;
+  UpdatePublishedListingChanges;
 }
 
 interface UpdatePublishedListingResponse {
@@ -86,7 +96,8 @@ interface UpdatePublishedListingResponse {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    ListingPhotoEditorComponent
   ],
   templateUrl:
     './listing-edit.component.html',
@@ -96,7 +107,7 @@ interface UpdatePublishedListingResponse {
     ChangeDetectionStrategy.OnPush
 })
 export class ListingEditComponent
-implements OnInit {
+  implements OnInit {
   private readonly fb =
     inject(FormBuilder);
 
@@ -114,6 +125,9 @@ implements OnInit {
 
   private readonly listingService =
     inject(ListingService);
+
+  private readonly listingPhotoStorageService =
+    inject(ListingPhotoStorageService);
 
   private readonly updatePublishedListingFunction =
     httpsCallable<
@@ -148,6 +162,27 @@ implements OnInit {
   protected readonly priceChanged =
     signal(false);
 
+  protected readonly photoEditorInitialPhotos =
+    signal<EditableListingPhoto[]>([]);
+
+  protected readonly pendingPhotos =
+    signal<EditableListingPhoto[]>([]);
+
+  protected readonly isSavingPhotos =
+    signal(false);
+
+  protected readonly photoHasChanges =
+    signal(false);
+
+  protected readonly photosAreValid =
+    signal(false);
+
+  protected readonly photoSaveError =
+    signal('');
+
+  protected readonly photoSaveMessage =
+    signal('');
+
   protected readonly listingUid =
     this.route.snapshot.paramMap.get(
       'listingUid'
@@ -157,23 +192,23 @@ implements OnInit {
     value: ListingHoaFeeFrequency;
     label: string;
   }[] = [
-    {
-      value: 'monthly',
-      label: 'Monthly'
-    },
-    {
-      value: 'quarterly',
-      label: 'Quarterly'
-    },
-    {
-      value: 'semi_annually',
-      label: 'Semi-Annually'
-    },
-    {
-      value: 'annually',
-      label: 'Annually'
-    }
-  ];
+      {
+        value: 'monthly',
+        label: 'Monthly'
+      },
+      {
+        value: 'quarterly',
+        label: 'Quarterly'
+      },
+      {
+        value: 'semi_annually',
+        label: 'Semi-Annually'
+      },
+      {
+        value: 'annually',
+        label: 'Annually'
+      }
+    ];
 
   protected readonly form =
     this.fb.nonNullable.group({
@@ -216,8 +251,8 @@ implements OnInit {
 
           feeFrequency: [
             '' as
-              ListingHoaFeeFrequency |
-              ''
+            ListingHoaFeeFrequency |
+            ''
           ]
         })
     });
@@ -276,6 +311,7 @@ implements OnInit {
       this.listing.set(listing);
 
       this.populateForm(listing);
+      this.populatePhotos(listing);
     } catch (error: unknown) {
       console.error(
         'Unable to load listing editor:',
@@ -313,14 +349,14 @@ implements OnInit {
 
       const request:
         UpdatePublishedListingRequest = {
-          listingUid:
-            this.listingUid,
+        listingUid:
+          this.listingUid,
 
-          changes:
-            this.createUpdateChanges(
-              formValue
-            )
-        };
+        changes:
+          this.createUpdateChanges(
+            formValue
+          )
+      };
 
       const result =
         await this
@@ -385,6 +421,262 @@ implements OnInit {
     this.saveMessage.set('');
     this.priceChanged.set(false);
   }
+
+  protected onPhotoChanges(
+  photos: EditableListingPhoto[]
+): void {
+  this.pendingPhotos.set(photos);
+  this.photoHasChanges.set(true);
+
+  this.photoSaveError.set('');
+  this.photoSaveMessage.set('');
+}
+
+protected onPhotoValidityChange(
+  isValid: boolean
+): void {
+  this.photosAreValid.set(isValid);
+}
+
+protected resetPhotoChanges(): void {
+  const listing =
+    this.listing();
+
+  if (!listing) {
+    return;
+  }
+
+  this.revokeUnsavedPhotoUrls(
+    this.pendingPhotos()
+  );
+
+  this.populatePhotos(listing);
+
+  this.photoSaveError.set('');
+  this.photoSaveMessage.set('');
+}
+
+protected async savePhotoChanges():
+  Promise<void> {
+  const listing =
+    this.listing();
+
+  const sellerUid =
+    this.authService.currentUserUid;
+
+  const photos =
+    this.pendingPhotos();
+
+  this.photoSaveError.set('');
+  this.photoSaveMessage.set('');
+
+  if (
+    !listing ||
+    !sellerUid
+  ) {
+    this.photoSaveError.set(
+      'You must be signed in to update listing photographs.'
+    );
+
+    return;
+  }
+
+  if (
+    photos.length === 0 ||
+    !this.photosAreValid()
+  ) {
+    this.photoSaveError.set(
+      'A published listing must contain at least one photograph.'
+    );
+
+    return;
+  }
+
+  if (
+    this.isSavingPhotos()
+  ) {
+    return;
+  }
+
+  this.isSavingPhotos.set(true);
+
+  const existingReferences =
+    [...(listing.photos ?? [])];
+
+  const currentPhotoIds =
+    new Set(
+      photos.map(photo => photo.id)
+    );
+
+  const removedReferences =
+    existingReferences.filter(
+      photo =>
+        !currentPhotoIds.has(photo.id)
+    );
+
+  const newPhotoIds =
+    new Set(
+      photos
+        .filter(
+          photo =>
+            !photo.storageReference
+        )
+        .map(photo => photo.id)
+    );
+
+  let uploadedReferences:
+    ListingPhotoReference[] = [];
+
+  let metadataSaved = false;
+
+  try {
+    uploadedReferences =
+      await this.listingPhotoStorageService
+        .uploadPhotos(
+          sellerUid,
+          this.listingUid,
+          photos
+        );
+
+    const orderedReferences =
+      uploadedReferences.map(
+        (photo, index) => ({
+          ...photo,
+          sortOrder: index
+        })
+      );
+
+    const selectedPrimary =
+      orderedReferences.find(
+        photo => photo.isPrimary
+      ) ??
+      orderedReferences[0];
+
+    const normalizedReferences =
+      orderedReferences.map(
+        photo => ({
+          ...photo,
+
+          isPrimary:
+            photo.id ===
+            selectedPrimary.id
+        })
+      );
+
+    const primaryPhoto =
+      normalizedReferences.find(
+        photo => photo.isPrimary
+      )!;
+
+    await this.listingService
+      .updatePublishedListing(
+        this.listingUid,
+        sellerUid,
+        {
+          photos:
+            normalizedReferences,
+
+          photoUrls:
+            normalizedReferences.map(
+              photo =>
+                photo.fullImageUrl
+            ),
+
+          primaryPhotoUrl:
+            primaryPhoto.fullImageUrl
+        }
+      );
+
+    metadataSaved = true;
+
+    const deletionResults =
+      await Promise.allSettled(
+        removedReferences.map(
+          photo =>
+            this.listingPhotoStorageService
+              .deletePhoto(photo)
+        )
+      );
+
+    const deletionFailed =
+      deletionResults.some(
+        result =>
+          result.status === 'rejected'
+      );
+
+    this.revokeTemporaryPhotoUrls(
+      photos
+    );
+
+    this.listing.update(
+      currentListing => {
+        if (!currentListing) {
+          return currentListing;
+        }
+
+        return {
+          ...currentListing,
+
+          photos:
+            normalizedReferences,
+
+          photoUrls:
+            normalizedReferences.map(
+              photo =>
+                photo.fullImageUrl
+            ),
+
+          primaryPhotoUrl:
+            primaryPhoto.fullImageUrl
+        };
+      }
+    );
+
+    this.setPersistedPhotoState(
+      normalizedReferences
+    );
+
+    this.photoHasChanges.set(false);
+
+    this.photoSaveMessage.set(
+      deletionFailed
+        ? 'Your photograph changes were saved, but one or more unused Storage files could not be removed.'
+        : 'Your listing photographs were updated successfully.'
+    );
+  } catch (error: unknown) {
+    /*
+     * If new files uploaded but Firestore rejected the
+     * metadata update, remove those new files so they do
+     * not remain orphaned in Storage.
+     */
+    if (!metadataSaved) {
+      const newlyUploadedReferences =
+        uploadedReferences.filter(
+          photo =>
+            newPhotoIds.has(photo.id)
+        );
+
+      await Promise.allSettled(
+        newlyUploadedReferences.map(
+          photo =>
+            this.listingPhotoStorageService
+              .deletePhoto(photo)
+        )
+      );
+    }
+
+    console.error(
+      'Unable to update listing photographs:',
+      error
+    );
+
+    this.photoSaveError.set(
+      this.getErrorMessage(error)
+    );
+  } finally {
+    this.isSavingPhotos.set(false);
+  }
+}
 
   protected async returnToManagement():
     Promise<void> {
@@ -599,7 +891,7 @@ implements OnInit {
           hasHoa
             ? formValue.hoa
               .feeFrequency as
-                ListingHoaFeeFrequency
+            ListingHoaFeeFrequency
             : null
       }
     };
@@ -658,6 +950,157 @@ implements OnInit {
     );
   }
 
+  private populatePhotos(
+  listing: Listing
+): void {
+  const references =
+    [...(listing.photos ?? [])]
+      .sort(
+        (
+          firstPhoto,
+          secondPhoto
+        ) =>
+          firstPhoto.sortOrder -
+          secondPhoto.sortOrder
+      );
+
+  this.setPersistedPhotoState(
+    references
+  );
+
+  this.photoHasChanges.set(false);
+
+  this.photosAreValid.set(
+    references.length > 0
+  );
+}
+
+private setPersistedPhotoState(
+  references:
+    ListingPhotoReference[]
+): void {
+  const editablePhotos =
+    references.map(
+      photo =>
+        this.toEditablePhoto(photo)
+    );
+
+  this.photoEditorInitialPhotos.set(
+    editablePhotos
+  );
+
+  this.pendingPhotos.set([
+    ...editablePhotos
+  ]);
+}
+
+private toEditablePhoto(
+  photo: ListingPhotoReference
+): EditableListingPhoto {
+  return {
+    id:
+      photo.id,
+
+    originalFileName:
+      photo.originalFileName,
+
+    fullImage: {
+      blob: null,
+
+      previewUrl:
+        photo.fullImageUrl,
+
+      width:
+        photo.width,
+
+      height:
+        photo.height,
+
+      size:
+        photo.sizeBytes,
+
+      mimeType:
+        'image/webp'
+    },
+
+    thumbnail: {
+      blob: null,
+
+      previewUrl:
+        photo.thumbnailUrl,
+
+      width:
+        photo.thumbnailWidth,
+
+      height:
+        photo.thumbnailHeight,
+
+      size:
+        photo.thumbnailSizeBytes,
+
+      mimeType:
+        'image/webp'
+    },
+
+    isPrimary:
+      photo.isPrimary,
+
+    storageReference:
+      photo
+  };
+}
+
+private revokeUnsavedPhotoUrls(
+  photos: EditableListingPhoto[]
+): void {
+  photos
+    .filter(
+      photo =>
+        !photo.storageReference
+    )
+    .forEach(
+      photo =>
+        this.revokeTemporaryPhotoUrl(
+          photo
+        )
+    );
+}
+
+private revokeTemporaryPhotoUrls(
+  photos: EditableListingPhoto[]
+): void {
+  photos.forEach(
+    photo =>
+      this.revokeTemporaryPhotoUrl(
+        photo
+      )
+  );
+}
+
+private revokeTemporaryPhotoUrl(
+  photo: EditableListingPhoto
+): void {
+  if (
+    photo.fullImage.blob &&
+    photo.fullImage.previewUrl
+      .startsWith('blob:')
+  ) {
+    URL.revokeObjectURL(
+      photo.fullImage.previewUrl
+    );
+  }
+
+  if (
+    photo.thumbnail.blob &&
+    photo.thumbnail.previewUrl
+      .startsWith('blob:')
+  ) {
+    URL.revokeObjectURL(
+      photo.thumbnail.previewUrl
+    );
+  }
+}
+
   private getErrorMessage(
     error: unknown
   ): string {
@@ -666,7 +1109,7 @@ implements OnInit {
       typeof error === 'object' &&
       'message' in error &&
       typeof error.message ===
-        'string'
+      'string'
     ) {
       const message =
         error.message.trim();

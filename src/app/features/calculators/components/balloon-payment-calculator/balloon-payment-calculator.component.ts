@@ -71,19 +71,16 @@ export class BalloonPaymentCalculatorComponent
   protected readonly calculatorForm =
     this.formBuilder.nonNullable.group({
       loanAmount: [
-        400000,
+        '350,000.00',
         [
-          Validators.required,
-          Validators.min(1)
+          Validators.required
         ]
       ],
 
       interestRate: [
-        6.5,
+        '6.5',
         [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(100)
+          Validators.required
         ]
       ],
 
@@ -130,11 +127,14 @@ export class BalloonPaymentCalculatorComponent
       ]
     });
 
+
   ngOnInit(): void {
+    this.formatAllDisplayFields();
     this.calculateBalloonPayment();
   }
 
   protected calculateBalloonPayment(): void {
+    this.formatAllDisplayFields();
     this.clearBalloonRelationshipError();
 
     if (this.calculatorForm.invalid) {
@@ -329,8 +329,8 @@ export class BalloonPaymentCalculatorComponent
 
   protected resetCalculator(): void {
     this.calculatorForm.reset({
-      loanAmount: 400000,
-      interestRate: 6.5,
+      loanAmount: '350,000.00',
+      interestRate: '6.5',
       amortizationTermYears: 30,
       balloonDueYears: 7,
       annualPropertyTaxes: 4800,
@@ -338,6 +338,7 @@ export class BalloonPaymentCalculatorComponent
       monthlyHoa: 0
     });
 
+    this.formatAllDisplayFields();
     this.calculateBalloonPayment();
   }
 
@@ -347,7 +348,7 @@ export class BalloonPaymentCalculatorComponent
   ): boolean {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     return (
@@ -365,7 +366,7 @@ export class BalloonPaymentCalculatorComponent
   ): string {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     if (control.hasError('required')) {
@@ -423,9 +424,9 @@ export class BalloonPaymentCalculatorComponent
         paymentFactor
       )
     ) /
-    (
-      paymentFactor - 1
-    );
+      (
+        paymentFactor - 1
+      );
   }
 
   private calculateRemainingBalance(
@@ -502,11 +503,85 @@ export class BalloonPaymentCalculatorComponent
     );
   }
 
+  private formatAllDisplayFields(): void {
+    this.formatCurrencyField(
+      'loanAmount'
+    );
+
+    this.formatInterestRate();
+  }
+
+  protected formatCurrencyField(
+    controlName: 'loanAmount'
+  ): void {
+    const control =
+      this.calculatorForm.controls[
+      controlName
+      ];
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+          useGrouping: true
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected formatInterestRate(): void {
+    const control =
+      this.calculatorForm.controls
+        .interestRate;
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 3,
+          useGrouping: false
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected prepareNumericInput(
+    event: FocusEvent
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
+
+    input.select();
+  }
+
   private toFiniteNumber(
-    value: number
+    value: string | number
   ): number {
+    const normalizedValue =
+      typeof value === 'string'
+        ? value.replace(
+          /[$,%\s]/g,
+          ''
+        )
+        : value;
+
     const convertedValue =
-      Number(value);
+      Number(normalizedValue);
 
     return Number.isFinite(
       convertedValue

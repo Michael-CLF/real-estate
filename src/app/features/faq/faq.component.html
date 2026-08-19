@@ -1,1 +1,542 @@
-<p>faq works!</p>
+<main class="faq-page">
+  <section
+    class="faq-hero"
+    aria-labelledby="faq-title"
+  >
+    <div class="faq-shell faq-hero__layout">
+      <div class="faq-hero__content">
+        <p class="faq-eyebrow">
+          Answers for confident home sellers
+        </p>
+
+        <h1 id="faq-title">
+          Selling your home yourself does not mean
+          doing it alone.
+        </h1>
+
+        <p class="faq-hero__description">
+          NavStreet gives homeowners a guided,
+          understandable way to present a property,
+          connect with buyers and move toward closing
+          without automatically surrendering a percentage
+          of their equity to a traditional listing agent.
+        </p>
+
+        <div class="faq-hero__actions">
+          <a
+            class="faq-button faq-button--primary"
+            routerLink="/sell"
+          >
+            Start your listing
+
+            <span aria-hidden="true">
+              →
+            </span>
+          </a>
+
+          <a
+            class="faq-button faq-button--secondary"
+            routerLink="/contact"
+          >
+            Contact NavStreet
+          </a>
+        </div>
+      </div>
+
+      <aside
+        class="faq-hero__summary"
+        aria-label="Why sellers choose NavStreet"
+      >
+        <div class="faq-hero__summary-icon">
+          <i
+            class="fa-solid fa-house-circle-check"
+            aria-hidden="true"
+          ></i>
+        </div>
+
+        <p class="faq-hero__summary-eyebrow">
+          A more direct way to sell
+        </p>
+
+        <h2>
+          Keep control of your sale and more of your
+          equity.
+        </h2>
+
+        <ul>
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            Guided listing process
+          </li>
+
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            Flat $49 NavStreet listing fee
+          </li>
+
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            Direct buyer inquiries
+          </li>
+
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            You decide which professionals to hire
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section
+    class="faq-process"
+    aria-labelledby="faq-process-title"
+  >
+    <div class="faq-shell">
+      <header class="faq-section-heading">
+        <p class="faq-eyebrow">
+          The NavStreet process
+        </p>
+
+        <h2 id="faq-process-title">
+          A clear path from listing to closing
+        </h2>
+
+        <p>
+          NavStreet organizes the sale into manageable
+          stages so you always understand what comes next.
+        </p>
+      </header>
+
+      <ol class="faq-process__steps">
+        <li>
+          <span class="faq-process__number">
+            1
+          </span>
+
+          <div>
+            <h3>Create your listing</h3>
+
+            <p>
+              Enter your property details, asking price,
+              description and photographs through a guided
+              listing process.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <span class="faq-process__number">
+            2
+          </span>
+
+          <div>
+            <h3>Publish your property</h3>
+
+            <p>
+              Complete the required review, verification
+              and listing payment before making your home
+              available in the marketplace.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <span class="faq-process__number">
+            3
+          </span>
+
+          <div>
+            <h3>Connect with buyers</h3>
+
+            <p>
+              Receive inquiries, coordinate appropriate
+              showings and evaluate interested buyers.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <span class="faq-process__number">
+            4
+          </span>
+
+          <div>
+            <h3>Review offers carefully</h3>
+
+            <p>
+              Compare price, financing, contingencies,
+              requested expenses and the proposed closing
+              schedule.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <span class="faq-process__number">
+            5
+          </span>
+
+          <div>
+            <h3>Use the right professionals</h3>
+
+            <p>
+              Engage an attorney, title or escrow company
+              and any other qualified professionals needed
+              for your transaction.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section
+    class="faq-directory"
+    aria-labelledby="faq-directory-title"
+  >
+    <div class="faq-shell faq-directory__layout">
+      <aside class="faq-directory__sidebar">
+        <div class="faq-directory__sidebar-inner">
+          <p class="faq-eyebrow">
+            Find an answer
+          </p>
+
+          <h2 id="faq-directory-title">
+            Frequently asked questions
+          </h2>
+
+          <p>
+            Search the most important questions about
+            selling directly, commissions, offers and
+            closing.
+          </p>
+
+          <label
+            class="faq-search"
+            for="faq-search-input"
+          >
+            <span class="faq-search__label">
+              Search questions
+            </span>
+
+            <span class="faq-search__control">
+              <i
+                class="fa-solid fa-magnifying-glass"
+                aria-hidden="true"
+              ></i>
+
+              <input
+                id="faq-search-input"
+                type="search"
+                placeholder="Search the FAQ"
+                autocomplete="off"
+                [value]="searchTerm()"
+                (input)="updateSearchTerm($event)"
+              />
+
+              @if (searchTerm()) {
+                <button
+                  type="button"
+                  aria-label="Clear FAQ search"
+                  (click)="clearSearch()"
+                >
+                  <i
+                    class="fa-solid fa-xmark"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              }
+            </span>
+          </label>
+
+          <nav
+            class="faq-category-links"
+            aria-label="FAQ categories"
+          >
+            @for (
+              category of categories;
+              track category
+            ) {
+              <a
+                [attr.href]="
+                  '#faq-' +
+                  category
+                    .toLowerCase()
+                    .replaceAll(' ', '-')
+                    .replaceAll('&', 'and')
+                "
+              >
+                {{ category }}
+              </a>
+            }
+          </nav>
+        </div>
+      </aside>
+
+      <div class="faq-directory__content">
+        @if (filteredFaqItems().length) {
+          @for (
+            category of categories;
+            track category
+          ) {
+            @if (
+              getFaqItemsByCategory(category).length
+            ) {
+              <section
+                class="faq-group"
+                [attr.id]="
+                  'faq-' +
+                  category
+                    .toLowerCase()
+                    .replaceAll(' ', '-')
+                    .replaceAll('&', 'and')
+                "
+              >
+                <header class="faq-group__header">
+                  <span class="faq-group__icon">
+                    @switch (category) {
+                      @case ('Getting started') {
+                        <i
+                          class="fa-solid fa-route"
+                          aria-hidden="true"
+                        ></i>
+                      }
+
+                      @case ('Costs and commissions') {
+                        <i
+                          class="fa-solid fa-dollar-sign"
+                          aria-hidden="true"
+                        ></i>
+                      }
+
+                      @case ('Creating your listing') {
+                        <i
+                          class="fa-solid fa-house"
+                          aria-hidden="true"
+                        ></i>
+                      }
+
+                      @case ('Buyers and offers') {
+                        <i
+                          class="fa-solid fa-handshake"
+                          aria-hidden="true"
+                        ></i>
+                      }
+
+                      @case ('Contracts and closing') {
+                        <i
+                          class="fa-solid fa-file-signature"
+                          aria-hidden="true"
+                        ></i>
+                      }
+
+                      @case ('Safety and support') {
+                        <i
+                          class="fa-solid fa-shield-halved"
+                          aria-hidden="true"
+                        ></i>
+                      }
+                    }
+                  </span>
+
+                  <h2>
+                    {{ category }}
+                  </h2>
+                </header>
+
+                <div class="faq-list">
+                  @for (
+                    faq of
+                      getFaqItemsByCategory(category);
+                    track faq.id
+                  ) {
+                    <details
+                      class="faq-item"
+                      [attr.id]="faq.id"
+                    >
+                      <summary>
+                        <span>
+                          {{ faq.question }}
+                        </span>
+
+                        <span
+                          class="faq-item__toggle"
+                          aria-hidden="true"
+                        >
+                          <i
+                            class="fa-solid fa-plus"
+                          ></i>
+                        </span>
+                      </summary>
+
+                      <div class="faq-item__answer">
+                        <p>
+                          {{ faq.answer }}
+                        </p>
+                      </div>
+                    </details>
+                  }
+                </div>
+              </section>
+            }
+          }
+        } @else {
+          <section
+            class="faq-empty-state"
+            aria-live="polite"
+          >
+            <span class="faq-empty-state__icon">
+              <i
+                class="fa-solid fa-magnifying-glass"
+                aria-hidden="true"
+              ></i>
+            </span>
+
+            <h2>No matching questions found</h2>
+
+            <p>
+              Try a broader search or contact NavStreet
+              if you need help with something specific.
+            </p>
+
+            <button
+              type="button"
+              class="faq-button faq-button--primary"
+              (click)="clearSearch()"
+            >
+              Clear search
+            </button>
+          </section>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="faq-open-listing"
+    aria-labelledby="open-listing-title"
+  >
+    <div class="faq-shell">
+      <div class="faq-open-listing__card">
+        <div class="faq-open-listing__icon">
+          <i
+            class="fa-solid fa-scale-balanced"
+            aria-hidden="true"
+          ></i>
+        </div>
+
+        <div class="faq-open-listing__content">
+          <p class="faq-eyebrow">
+            Important commission question
+          </p>
+
+          <h2 id="open-listing-title">
+            What if you find the buyer before your agent
+            does?
+          </h2>
+
+          <p>
+            Under a genuine open listing, a broker is
+            generally compensated when that broker
+            successfully produces the buyer. If you find
+            the buyer independently, you may not owe a
+            listing commission.
+          </p>
+
+          <p>
+            However, an exclusive-right-to-sell agreement,
+            an agent’s prior involvement, a protection
+            period or other contract language may produce
+            a different result. Always review the agreement
+            you signed before assuming that no commission
+            is owed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="faq-cta"
+    aria-labelledby="faq-cta-title"
+  >
+    <div class="faq-shell faq-cta__layout">
+      <div>
+        <p class="faq-eyebrow">
+          Ready to take control?
+        </p>
+
+        <h2 id="faq-cta-title">
+          Your equity belongs to you.
+        </h2>
+
+        <p>
+          Build a professional property listing and
+          connect directly with buyers through NavStreet.
+        </p>
+      </div>
+
+      <div class="faq-cta__actions">
+        <a
+          class="faq-button faq-button--light"
+          routerLink="/sell"
+        >
+          List your property
+
+          <span aria-hidden="true">
+            →
+          </span>
+        </a>
+
+        <a
+          class="faq-button faq-button--outline-light"
+          routerLink="/buy"
+        >
+          Browse homes
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <aside class="faq-disclaimer">
+    <div class="faq-shell">
+      <i
+        class="fa-solid fa-circle-info"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <strong>
+          General educational information
+        </strong>
+
+        <p>
+          NavStreet provides technology and general
+          educational information, not legal, tax,
+          brokerage, lending or financial advice. Real
+          estate requirements and brokerage agreements
+          vary by state and transaction. Consult qualified
+          professionals before making decisions that
+          affect your legal or financial obligations.
+        </p>
+      </div>
+    </div>
+  </aside>
+</main>

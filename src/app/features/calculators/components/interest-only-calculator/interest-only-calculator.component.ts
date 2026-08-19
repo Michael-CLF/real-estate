@@ -71,19 +71,16 @@ export class InterestOnlyCalculatorComponent
   protected readonly calculatorForm =
     this.formBuilder.nonNullable.group({
       loanAmount: [
-        400000,
+        '350,000.00',
         [
-          Validators.required,
-          Validators.min(1)
+          Validators.required
         ]
       ],
 
       interestRate: [
-        6.5,
+        '6.5',
         [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(100)
+          Validators.required
         ]
       ],
 
@@ -132,10 +129,12 @@ export class InterestOnlyCalculatorComponent
 
   ngOnInit(): void {
     this.calculatePayment();
+    this.formatAllDisplayFields();    
   }
 
   protected calculatePayment(): void {
     this.clearPeriodRelationshipError();
+    this.formatAllDisplayFields();
 
     if (this.calculatorForm.invalid) {
       this.calculatorForm.markAllAsTouched();
@@ -320,8 +319,8 @@ export class InterestOnlyCalculatorComponent
 
   protected resetCalculator(): void {
     this.calculatorForm.reset({
-      loanAmount: 400000,
-      interestRate: 6.5,
+      loanAmount: '350,000.00',
+      interestRate: '6.5',
       totalLoanTermYears: 30,
       interestOnlyPeriodYears: 10,
       annualPropertyTaxes: 4800,
@@ -330,6 +329,7 @@ export class InterestOnlyCalculatorComponent
     });
 
     this.calculatePayment();
+    this.formatAllDisplayFields();
   }
 
   protected isInvalid(
@@ -338,7 +338,7 @@ export class InterestOnlyCalculatorComponent
   ): boolean {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     return (
@@ -356,7 +356,7 @@ export class InterestOnlyCalculatorComponent
   ): string {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     if (control.hasError('required')) {
@@ -414,9 +414,9 @@ export class InterestOnlyCalculatorComponent
         paymentFactor
       )
     ) /
-    (
-      paymentFactor - 1
-    );
+      (
+        paymentFactor - 1
+      );
   }
 
   private clearPeriodRelationshipError(): void {
@@ -449,18 +449,92 @@ export class InterestOnlyCalculatorComponent
     );
   }
 
-  private toFiniteNumber(
-    value: number
-  ): number {
-    const convertedValue =
-      Number(value);
+  private formatAllDisplayFields(): void {
+  this.formatCurrencyField(
+    'loanAmount'
+  );
 
-    return Number.isFinite(
-      convertedValue
-    )
-      ? convertedValue
-      : 0;
-  }
+  this.formatInterestRate();
+}
+
+protected formatCurrencyField(
+  controlName: 'loanAmount'
+): void {
+  const control =
+    this.calculatorForm.controls[
+      controlName
+    ];
+
+  const numericValue =
+    this.toFiniteNumber(control.value);
+
+  control.setValue(
+    numericValue.toLocaleString(
+      'en-US',
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        useGrouping: true
+      }
+    ),
+    {
+      emitEvent: false
+    }
+  );
+}
+
+protected formatInterestRate(): void {
+  const control =
+    this.calculatorForm.controls
+      .interestRate;
+
+  const numericValue =
+    this.toFiniteNumber(control.value);
+
+  control.setValue(
+    numericValue.toLocaleString(
+      'en-US',
+      {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 3,
+        useGrouping: false
+      }
+    ),
+    {
+      emitEvent: false
+    }
+  );
+}
+
+protected prepareNumericInput(
+  event: FocusEvent
+): void {
+  const input =
+    event.target as HTMLInputElement;
+
+  input.select();
+}
+
+  private toFiniteNumber(
+  value: string | number
+): number {
+  const normalizedValue =
+    typeof value === 'string'
+      ? value.replace(
+          /[$,%\s]/g,
+          ''
+        )
+      : value;
+
+  const convertedValue =
+    Number(normalizedValue);
+
+  return Number.isFinite(
+    convertedValue
+  )
+    ? convertedValue
+    : 0;
+}
 
   private roundCurrency(
     value: number

@@ -56,6 +56,7 @@ interface LoanToValueResult {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
+
 export class LoanToValueCalculatorComponent
   implements OnInit {
 
@@ -70,43 +71,41 @@ export class LoanToValueCalculatorComponent
   protected readonly calculatorForm =
     this.formBuilder.nonNullable.group({
       purchasePrice: [
-        400000,
+        '400,000.00',
         [
-          Validators.required,
-          Validators.min(1)
+          Validators.required
         ]
       ],
 
       appraisedValue: [
-        410000,
+        '410,000.00',
         [
-          Validators.required,
-          Validators.min(1)
+          Validators.required
         ]
       ],
 
       firstMortgageAmount: [
-        320000,
+        '320,000.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ],
 
       subordinateFinancingAmount: [
-        0,
+        '0.00',
         [
-          Validators.required,
-          Validators.min(0)
+          Validators.required
         ]
       ]
     });
 
   ngOnInit(): void {
+    this.formatAllDisplayFields();
     this.calculateLoanToValue();
   }
 
   protected calculateLoanToValue(): void {
+    this.formatAllDisplayFields();
     this.clearFinancingError();
 
     if (this.calculatorForm.invalid) {
@@ -177,17 +176,17 @@ export class LoanToValueCalculatorComponent
     const firstMortgageLtv =
       calculationValue > 0
         ? (
-            firstMortgageAmount /
-            calculationValue
-          ) * 100
+          firstMortgageAmount /
+          calculationValue
+        ) * 100
         : 0;
 
     const combinedLtv =
       calculationValue > 0
         ? (
-            totalFinancingAmount /
-            calculationValue
-          ) * 100
+          totalFinancingAmount /
+          calculationValue
+        ) * 100
         : 0;
 
     const buyerEquity =
@@ -200,9 +199,9 @@ export class LoanToValueCalculatorComponent
     const equityPercentage =
       calculationValue > 0
         ? (
-            buyerEquity /
-            calculationValue
-          ) * 100
+          buyerEquity /
+          calculationValue
+        ) * 100
         : 0;
 
     this.result.set({
@@ -260,22 +259,22 @@ export class LoanToValueCalculatorComponent
 
   protected resetCalculator(): void {
     this.calculatorForm.reset({
-      purchasePrice: 400000,
-      appraisedValue: 410000,
-      firstMortgageAmount: 320000,
-      subordinateFinancingAmount: 0
+      purchasePrice: '400,000.00',
+      appraisedValue: '410,000.00',
+      firstMortgageAmount: '320,000.00',
+      subordinateFinancingAmount: '0.00'
     });
 
+    this.formatAllDisplayFields();
     this.calculateLoanToValue();
   }
-
   protected isInvalid(
     controlName:
       keyof typeof this.calculatorForm.controls
   ): boolean {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     return (
@@ -293,7 +292,7 @@ export class LoanToValueCalculatorComponent
   ): string {
     const control =
       this.calculatorForm.controls[
-        controlName
+      controlName
       ];
 
     if (control.hasError('required')) {
@@ -345,11 +344,76 @@ export class LoanToValueCalculatorComponent
     );
   }
 
+  private formatAllDisplayFields(): void {
+    this.formatCurrencyField(
+      'purchasePrice'
+    );
+
+    this.formatCurrencyField(
+      'appraisedValue'
+    );
+
+    this.formatCurrencyField(
+      'firstMortgageAmount'
+    );
+
+    this.formatCurrencyField(
+      'subordinateFinancingAmount'
+    );
+  }
+
+  protected formatCurrencyField(
+    controlName:
+      | 'purchasePrice'
+      | 'appraisedValue'
+      | 'firstMortgageAmount'
+      | 'subordinateFinancingAmount'
+  ): void {
+    const control =
+      this.calculatorForm.controls[
+      controlName
+      ];
+
+    const numericValue =
+      this.toFiniteNumber(control.value);
+
+    control.setValue(
+      numericValue.toLocaleString(
+        'en-US',
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+          useGrouping: true
+        }
+      ),
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  protected prepareNumericInput(
+    event: FocusEvent
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
+
+    input.select();
+  }
+
   private toFiniteNumber(
-    value: number
+    value: string | number
   ): number {
+    const normalizedValue =
+      typeof value === 'string'
+        ? value.replace(
+          /[$,%\s]/g,
+          ''
+        )
+        : value;
+
     const convertedValue =
-      Number(value);
+      Number(normalizedValue);
 
     return Number.isFinite(
       convertedValue

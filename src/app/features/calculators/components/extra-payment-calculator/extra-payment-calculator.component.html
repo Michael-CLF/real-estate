@@ -1,1 +1,393 @@
-<p>extra-payment-calculator works!</p>
+<main class="extra-payment-calculator">
+    <div class="extra-payment-calculator__container">
+        <a class="extra-payment-calculator__back-link" routerLink="/calculators">
+            <span aria-hidden="true">←</span>
+            All calculators
+        </a>
+
+        <header class="extra-payment-calculator__header">
+            <p class="extra-payment-calculator__eyebrow">
+                Residential calculator
+            </p>
+
+            <h1>
+                Extra Payment Calculator
+            </h1>
+
+            <p>
+                Estimate how additional monthly or annual principal
+                payments could reduce your total interest and help
+                you pay off your mortgage sooner.
+            </p>
+        </header>
+
+        <div class="extra-payment-calculator__layout">
+            <section class="calculator-card" aria-labelledby="loan-details-heading">
+                <div class="calculator-card__heading">
+                    <h2 id="loan-details-heading">
+                        Loan and extra-payment details
+                    </h2>
+
+                    <p>
+                        Enter the current loan terms and the additional
+                        principal payments you plan to make.
+                    </p>
+                </div>
+
+                <form class="calculator-form" [formGroup]="calculatorForm" (ngSubmit)="calculateExtraPayments()">
+                    <div class="calculator-form__section">
+                        <h3>Mortgage information</h3>
+
+                        <div class="calculator-form__grid">
+                            <div class="form-field">
+                                <label for="loanAmount">
+                                    Loan amount
+                                </label>
+
+                                <div class="input-group" [class.input-group--invalid]="
+                    isInvalid('loanAmount')
+                  ">
+                                    <span class="input-group__prefix">
+                                        $
+                                    </span>
+
+                                    <input id="loanAmount" type="text" formControlName="loanAmount" inputmode="decimal"
+                                        autocomplete="off" (focus)="prepareNumericInput($event)"
+                                        (blur)="formatCurrencyField('loanAmount')">
+                                </div>
+
+                                @if (isInvalid('loanAmount')) {
+                                <p class="form-field__error">
+                                    {{ errorMessage('loanAmount') }}
+                                </p>
+                                }
+                            </div>
+
+                            <div class="form-field">
+                                <label for="interestRate">
+                                    Interest rate
+                                </label>
+
+                                <div class="input-group" [class.input-group--invalid]="
+                    isInvalid('interestRate')
+                  ">
+                                    <input id="interestRate" type="text" formControlName="interestRate"
+                                        inputmode="decimal" autocomplete="off" (focus)="prepareNumericInput($event)"
+                                        (blur)="formatInterestRate()">
+
+                                    <span class="input-group__suffix">
+                                        %
+                                    </span>
+                                </div>
+
+                                @if (isInvalid('interestRate')) {
+                                <p class="form-field__error">
+                                    {{ errorMessage('interestRate') }}
+                                </p>
+                                }
+                            </div>
+
+                            <div class="form-field">
+                                <label for="loanTermYears">
+                                    Loan term
+                                </label>
+
+                                <div class="input-group" [class.input-group--invalid]="
+                    isInvalid('loanTermYears')
+                  ">
+                                    <input id="loanTermYears" type="number" formControlName="loanTermYears"
+                                        inputmode="numeric" min="1" max="50" step="1">
+
+                                    <span class="input-group__suffix">
+                                        years
+                                    </span>
+                                </div>
+
+                                @if (isInvalid('loanTermYears')) {
+                                <p class="form-field__error">
+                                    {{ errorMessage('loanTermYears') }}
+                                </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calculator-form__section">
+                        <h3>Additional principal payments</h3>
+
+                        <div class="calculator-form__grid">
+                            <div class="form-field">
+                                <label for="extraMonthlyPayment">
+                                    Additional monthly payment
+                                </label>
+
+                                <div class="input-group" [class.input-group--invalid]="
+                    isInvalid(
+                      'extraMonthlyPayment'
+                    )
+                  ">
+                                    <span class="input-group__prefix">
+                                        $
+                                    </span>
+
+                                    <input id="extraMonthlyPayment" type="number" formControlName="extraMonthlyPayment"
+                                        inputmode="decimal" min="0" step="25">
+                                </div>
+
+                                @if (
+                                isInvalid(
+                                'extraMonthlyPayment'
+                                )
+                                ) {
+                                <p class="form-field__error">
+                                    {{
+                                    errorMessage(
+                                    'extraMonthlyPayment'
+                                    )
+                                    }}
+                                </p>
+                                }
+                            </div>
+
+                            <div class="form-field">
+                                <label for="annualExtraPayment">
+                                    Additional annual payment
+
+                                    <span class="form-field__optional">
+                                        Optional
+                                    </span>
+                                </label>
+
+                                <div class="input-group" [class.input-group--invalid]="
+                    isInvalid(
+                      'annualExtraPayment'
+                    )
+                  ">
+                                    <span class="input-group__prefix">
+                                        $
+                                    </span>
+
+                                    <input id="annualExtraPayment" type="text" formControlName="annualExtraPayment"
+                                        inputmode="decimal" autocomplete="off" (focus)="prepareNumericInput($event)"
+                                        (blur)="
+    formatCurrencyField(
+      'annualExtraPayment'
+    )
+  ">
+                                </div>
+
+                                @if (
+                                isInvalid(
+                                'annualExtraPayment'
+                                )
+                                ) {
+                                <p class="form-field__error">
+                                    {{
+                                    errorMessage(
+                                    'annualExtraPayment'
+                                    )
+                                    }}
+                                </p>
+                                }
+                            </div>
+                        </div>
+
+                        <p class="calculator-form__notice">
+                            Additional amounts are applied directly to
+                            principal. The annual payment is assumed to be
+                            made after every twelfth monthly payment.
+                        </p>
+                    </div>
+
+                    <div class="calculator-form__actions">
+                        <button class="calculator-form__reset" type="button" (click)="resetCalculator()">
+                            Reset
+                        </button>
+
+                        <button class="calculator-form__submit" type="submit">
+                            Calculate savings
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="results-card" aria-labelledby="extra-payment-result-heading" aria-live="polite">
+                @if (result(); as calculation) {
+                <div class="results-card__primary">
+                    <p>Estimated interest savings</p>
+
+                    <h2 id="extra-payment-result-heading">
+                        {{
+                        calculation.interestSavings
+                        | currency:'USD':'symbol':'1.0-0'
+                        }}
+                    </h2>
+
+                    <span>
+                        Estimated savings over the remaining life of
+                        the loan
+                    </span>
+                </div>
+
+                <div class="result-highlights">
+                    <article>
+                        <p>Time saved</p>
+
+                        <strong>
+                            {{
+                            formatTerm(
+                            calculation.monthsSaved
+                            )
+                            }}
+                        </strong>
+                    </article>
+
+                    <article>
+                        <p>New payoff period</p>
+
+                        <strong>
+                            {{
+                            formatTerm(
+                            calculation.acceleratedMonths
+                            )
+                            }}
+                        </strong>
+                    </article>
+                </div>
+
+                <div class="results-card__section">
+                    <h3>Payment plan</h3>
+
+                    <dl class="result-summary">
+                        <div>
+                            <dt>Regular principal and interest</dt>
+
+                            <dd>
+                                {{
+                                calculation.regularMonthlyPayment
+                                | currency:'USD':'symbol':'1.2-2'
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Additional monthly payment</dt>
+
+                            <dd>
+                                {{
+                                calculation.extraMonthlyPayment
+                                | currency:'USD':'symbol':'1.2-2'
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>New monthly payment</dt>
+
+                            <dd>
+                                {{
+                                (
+                                calculation.regularMonthlyPayment +
+                                calculation.extraMonthlyPayment
+                                )
+                                | currency:'USD':'symbol':'1.2-2'
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Additional annual payment</dt>
+
+                            <dd>
+                                {{
+                                calculation.annualExtraPayment
+                                | currency:'USD':'symbol':'1.2-2'
+                                }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="results-card__section">
+                    <h3>Loan comparison</h3>
+
+                    <dl class="result-summary">
+                        <div>
+                            <dt>Original payoff period</dt>
+
+                            <dd>
+                                {{
+                                formatTerm(
+                                calculation.originalMonths
+                                )
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>New payoff period</dt>
+
+                            <dd>
+                                {{
+                                formatTerm(
+                                calculation.acceleratedMonths
+                                )
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Original total interest</dt>
+
+                            <dd>
+                                {{
+                                calculation.originalInterest
+                                | currency:'USD':'symbol':'1.0-0'
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>New total interest</dt>
+
+                            <dd>
+                                {{
+                                calculation.acceleratedInterest
+                                | currency:'USD':'symbol':'1.0-0'
+                                }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+                } @else {
+                <div class="results-card__empty">
+                    <span aria-hidden="true">$</span>
+
+                    <h2 id="extra-payment-result-heading">
+                        Enter your loan details
+                    </h2>
+
+                    <p>
+                        Complete the calculator to estimate potential
+                        interest savings and an earlier payoff date.
+                    </p>
+                </div>
+                }
+            </aside>
+        </div>
+
+        <aside class="calculator-disclaimer">
+            <strong>Important information</strong>
+
+            <p>
+                This calculator provides estimates for educational
+                purposes only. It is not a loan offer, payoff quote
+                or financial advice. Results assume a fixed interest
+                rate and that additional payments are applied
+                directly to principal without prepayment penalties.
+                Confirm payment-processing instructions with your
+                mortgage servicer.
+            </p>
+        </aside>
+    </div>
+</main>

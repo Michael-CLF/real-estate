@@ -333,6 +333,7 @@
   border-color: #a8ddc4;
   background: #effaf4;
   color: #137444;
+  margin-top: 10px;
 }
 
 .form-actions {
@@ -355,6 +356,7 @@
   justify-content: center;
   gap: 0.65rem;
   padding: 0.75rem 1.1rem;
+  margin-top: 10px;
   border: 1px solid transparent;
   border-radius: 0.7rem;
   font: inherit;
@@ -509,6 +511,16 @@
 .state-card--error {
   > i {
     color: #c12735;
+  }
+}
+
+.photo-management {
+  &__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 1rem;
   }
 }
 

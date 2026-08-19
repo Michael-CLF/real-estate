@@ -1,0 +1,338 @@
+<section
+  class="photo-editor"
+  aria-labelledby="photo-editor-title"
+>
+  <header class="photo-editor__header">
+    <div>
+      <p class="photo-editor__eyebrow">
+        Property presentation
+      </p>
+
+      <h2 id="photo-editor-title">
+        Listing photographs
+      </h2>
+
+      <p>
+        Add, remove, rearrange, and select the primary
+        photograph buyers will see first.
+      </p>
+    </div>
+
+    <span class="photo-editor__count">
+      {{ photos().length }} of {{ maxPhotos }}
+    </span>
+  </header>
+
+  <div
+    class="photo-upload"
+    [class.photo-upload--disabled]="disabled()"
+    (dragover)="onUploadDragOver($event)"
+    (drop)="onUploadDrop($event)"
+  >
+    <input
+      #photoInput
+      id="listing-photo-upload"
+      class="photo-upload__input"
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      multiple
+      [disabled]="
+        disabled() ||
+        isProcessing() ||
+        photos().length >= maxPhotos
+      "
+      (change)="onFilesSelected($event)"
+    >
+
+    <span
+      class="photo-upload__icon"
+      aria-hidden="true"
+    >
+      <i class="fa-solid fa-cloud-arrow-up"></i>
+    </span>
+
+    <div class="photo-upload__content">
+      <h3>Add photographs</h3>
+
+      <p>
+        Drag image files here or choose them from your
+        computer. Images will be optimized automatically.
+      </p>
+
+      <p class="photo-upload__requirements">
+        JPEG, PNG, or WebP · Maximum {{ maxPhotos }}
+        photographs
+      </p>
+    </div>
+
+    <label
+      class="photo-upload__button"
+      for="listing-photo-upload"
+      [class.photo-upload__button--disabled]="
+        disabled() ||
+        isProcessing() ||
+        photos().length >= maxPhotos
+      "
+    >
+      @if (isProcessing()) {
+        <i
+          class="fa-solid fa-spinner fa-spin"
+          aria-hidden="true"
+        ></i>
+
+        <span>Optimizing...</span>
+      } @else {
+        <i
+          class="fa-solid fa-plus"
+          aria-hidden="true"
+        ></i>
+
+        <span>Choose photographs</span>
+      }
+    </label>
+  </div>
+
+  @if (errorMessage()) {
+    <div
+      class="photo-editor__message photo-editor__message--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (photos().length > 0) {
+    <div class="photo-editor__instructions">
+      <i
+        class="fa-solid fa-arrows-up-down-left-right"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        Drag photographs into the desired order. The order
+        shown here will be used throughout the marketplace.
+        Selecting a different primary photograph does not
+        change the order.
+      </p>
+    </div>
+
+    <div
+      class="photo-grid"
+      cdkDropList
+      cdkDropListOrientation="mixed"
+      [cdkDropListData]="photos()"
+      [cdkDropListDisabled]="disabled()"
+      (cdkDropListDropped)="reorderPhotos($event)"
+      aria-label="Reorder listing photographs"
+    >
+      @for (
+        photo of photos();
+        track photo.id;
+        let photoIndex = $index
+      ) {
+        <article
+          class="photo-card"
+          cdkDrag
+          [cdkDragData]="photo"
+          [cdkDragDisabled]="disabled()"
+          [class.photo-card--primary]="
+            photo.isPrimary
+          "
+        >
+          <div class="photo-card__image">
+            <img
+              [src]="photo.thumbnail.previewUrl"
+              [alt]="
+                photo.originalFileName ||
+                'Listing photograph'
+              "
+              draggable="false"
+            >
+
+            <span class="photo-card__position">
+              {{ photoIndex + 1 }}
+            </span>
+
+            @if (photo.isPrimary) {
+              <span class="photo-card__primary-badge">
+                <i
+                  class="fa-solid fa-star"
+                  aria-hidden="true"
+                ></i>
+
+                Primary
+              </span>
+            }
+
+            <button
+              class="photo-card__drag-handle"
+              type="button"
+              cdkDragHandle
+              [disabled]="disabled()"
+              [attr.aria-label]="
+                'Drag to reorder ' +
+                photo.originalFileName
+              "
+              title="Drag to reorder"
+            >
+              <i
+                class="fa-solid fa-grip"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </div>
+
+          <div class="photo-card__content">
+            <p
+              class="photo-card__filename"
+              [title]="photo.originalFileName"
+            >
+              {{ photo.originalFileName }}
+            </p>
+
+            <p class="photo-card__details">
+              {{ photo.fullImage.width }}
+              ×
+              {{ photo.fullImage.height }}
+              ·
+              {{
+                formatFileSize(
+                  photo.fullImage.size
+                )
+              }}
+            </p>
+
+            <div class="photo-card__primary-control">
+              @if (photo.isPrimary) {
+                <span>
+                  <i
+                    class="fa-solid fa-circle-check"
+                    aria-hidden="true"
+                  ></i>
+
+                  Primary listing photograph
+                </span>
+              } @else {
+                <button
+                  type="button"
+                  [disabled]="disabled()"
+                  (click)="setPrimary(photo.id)"
+                >
+                  <i
+                    class="fa-regular fa-star"
+                    aria-hidden="true"
+                  ></i>
+
+                  Make primary
+                </button>
+              }
+            </div>
+
+            <div class="photo-card__actions">
+              <div class="photo-card__move-actions">
+                <button
+                  type="button"
+                  [disabled]="
+                    disabled() ||
+                    isFirstPhoto(photo.id)
+                  "
+                  [attr.aria-label]="
+                    'Move ' +
+                    photo.originalFileName +
+                    ' earlier'
+                  "
+                  title="Move earlier"
+                  (click)="
+                    movePhoto(
+                      photo.id,
+                      -1
+                    )
+                  "
+                >
+                  <i
+                    class="fa-solid fa-arrow-left"
+                    aria-hidden="true"
+                  ></i>
+
+                  <span class="visually-hidden">
+                    Move earlier
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="
+                    disabled() ||
+                    isLastPhoto(photo.id)
+                  "
+                  [attr.aria-label]="
+                    'Move ' +
+                    photo.originalFileName +
+                    ' later'
+                  "
+                  title="Move later"
+                  (click)="
+                    movePhoto(
+                      photo.id,
+                      1
+                    )
+                  "
+                >
+                  <i
+                    class="fa-solid fa-arrow-right"
+                    aria-hidden="true"
+                  ></i>
+
+                  <span class="visually-hidden">
+                    Move later
+                  </span>
+                </button>
+              </div>
+
+              <button
+                class="photo-card__remove"
+                type="button"
+                [disabled]="
+                  disabled() ||
+                  photos().length <= 1
+                "
+                [attr.aria-label]="
+                  'Remove ' +
+                  photo.originalFileName
+                "
+                title="Remove photograph"
+                (click)="removePhoto(photo.id)"
+              >
+                <i
+                  class="fa-solid fa-trash-can"
+                  aria-hidden="true"
+                ></i>
+
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="photo-editor__empty">
+      <i
+        class="fa-regular fa-images"
+        aria-hidden="true"
+      ></i>
+
+      <h3>No photographs selected</h3>
+
+      <p>
+        Add at least one photograph before saving the
+        published listing.
+      </p>
+    </div>
+  }
+</section>
