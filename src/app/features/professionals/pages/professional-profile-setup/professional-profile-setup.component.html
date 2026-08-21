@@ -1,0 +1,221 @@
+<main class="professional-profile-setup">
+  <section class="professional-profile-setup__hero">
+    <div class="professional-profile-setup__shell">
+      <p class="professional-profile-setup__eyebrow">
+        Full Business Profile
+      </p>
+
+      <h1>Complete your business profile</h1>
+
+      <p>
+        Add the information customers will see when they
+        open your dedicated professional profile.
+      </p>
+    </div>
+  </section>
+
+  <div class="professional-profile-setup__shell">
+    @if (errorMessage()) {
+    <div class="professional-profile-setup__message professional-profile-setup__message--error" role="alert">
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+      <span>{{ errorMessage() }}</span>
+    </div>
+    }
+
+    @if (successMessage()) {
+    <div class="professional-profile-setup__message professional-profile-setup__message--success" role="status">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      <span>{{ successMessage() }}</span>
+    </div>
+    }
+
+    @if (isLoading()) {
+    <section class="professional-profile-setup__loading" aria-live="polite">
+      <span class="professional-profile-setup__spinner" aria-hidden="true"></span>
+
+      <h2>Confirming your subscription</h2>
+
+      <p>
+        Please wait while NavStreet confirms your
+        Full Business Profile with Stripe.
+      </p>
+    </section>
+    } @else if (professional(); as business) {
+    <form class="professional-profile-setup__form" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+      <section class="professional-profile-setup__card">
+        <header class="professional-profile-setup__card-header">
+          <span>
+            <i class="fa-solid fa-building" aria-hidden="true"></i>
+          </span>
+
+          <div>
+            <p>Business profile</p>
+
+            <h2>{{ business.businessName }}</h2>
+          </div>
+        </header>
+
+        <div class="professional-profile-setup__card-content">
+          <div class="professional-profile-setup__field">
+            <label for="professional-website">
+              Business website
+            </label>
+
+            <input id="professional-website" type="url" formControlName="website"
+              placeholder="https://www.yourbusiness.com" autocomplete="url" />
+
+            <p class="professional-profile-setup__help">
+              Include https:// at the beginning of the
+              website address.
+            </p>
+
+            @if (
+            profileForm.controls.website.touched &&
+            profileForm.controls.website.invalid
+            ) {
+            <p class="professional-profile-setup__field-error">
+              Enter a complete website address beginning
+              with http:// or https://.
+            </p>
+            }
+          </div>
+
+          <div class="professional-profile-setup__field">
+            <div class="professional-profile-setup__label-row">
+              <label for="professional-description">
+                About your business
+              </label>
+
+              <span>
+                {{ descriptionLength() }} / 2000
+              </span>
+            </div>
+
+            <textarea id="professional-description" formControlName="description" rows="8" maxlength="2000"
+              placeholder="Describe your business, experience, services, and what customers can expect when they contact you."></textarea>
+
+            <p class="professional-profile-setup__help">
+              Minimum 40 characters. Do not include license
+              claims or guarantees that cannot be supported.
+            </p>
+
+            @if (
+            profileForm.controls.description.touched &&
+            profileForm.controls.description.invalid
+            ) {
+            <p class="professional-profile-setup__field-error">
+              Enter a business description containing at
+              least 40 characters.
+            </p>
+            }
+          </div>
+        </div>
+      </section>
+
+      <aside class="professional-profile-setup__card">
+        <header class="professional-profile-setup__card-header">
+          <span>
+            <i class="fa-solid fa-image" aria-hidden="true"></i>
+          </span>
+
+          <div>
+            <p>Business identity</p>
+
+            <h2>Business logo</h2>
+          </div>
+        </header>
+
+        <div class="professional-profile-setup__card-content">
+          <div class="professional-profile-setup__logo">
+            @if (business.logoUrl) {
+            <img [src]="business.logoUrl" [alt]="business.businessName + ' logo'" />
+            } @else {
+            <span aria-hidden="true">
+              <i class="fa-solid fa-building"></i>
+            </span>
+
+            <strong>No logo uploaded</strong>
+            }
+          </div>
+
+          <label class="professional-profile-setup__upload" [class.professional-profile-setup__upload--disabled]="
+                isUploadingLogo()
+              ">
+            <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+
+            <span>
+              @if (isUploadingLogo()) {
+              Uploading logo…
+              } @else if (business.logoUrl) {
+              Replace logo
+              } @else {
+              Upload logo
+              }
+            </span>
+
+            <input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+              [disabled]="isUploadingLogo()" (change)="uploadLogo($event)" />
+          </label>
+
+          <p class="professional-profile-setup__upload-help">
+            JPG, PNG, or WebP. Maximum file size: 2 MB.
+          </p>
+
+          <div class="professional-profile-setup__subscription">
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+            <div>
+              <strong>
+                Full Business Profile active
+              </strong>
+
+              <span>
+                Your $49 monthly subscription is active.
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <footer class="professional-profile-setup__actions">
+        <a class="professional-profile-setup__button professional-profile-setup__button--secondary"
+          routerLink="/dashboard">
+          <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+
+          Dashboard
+        </a>
+
+        @if (business.profileSlug) {
+        <a class="professional-profile-setup__button professional-profile-setup__button--secondary" [routerLink]="[
+        '/professionals',
+        business.stateSlug,
+        business.profileSlug
+      ]">
+          <i class="fa-solid fa-eye" aria-hidden="true"></i>
+
+          View profile
+        </a>
+        }
+
+        <button class="professional-profile-setup__button professional-profile-setup__button--primary" type="submit"
+          [disabled]="
+      profileForm.invalid ||
+      !profileForm.dirty ||
+      isSaving() ||
+      isUploadingLogo()
+    ">
+          @if (isSaving()) {
+          Saving profile…
+          } @else {
+          Save business profile
+          }
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </footer>
+    </form>
+    }
+  </div>
+</main>

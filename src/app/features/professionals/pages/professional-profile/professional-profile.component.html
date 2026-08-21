@@ -1,0 +1,312 @@
+<main class="professional-profile" [class]="
+    'professional-profile ' +
+    categoryClass()
+  ">
+  @if (isLoading()) {
+  <section class="professional-profile__not-found">
+    <div class="professional-profile__shell">
+      <span>
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+      </span>
+
+      <h1>Loading business profile</h1>
+
+      <p>
+        Please wait while we retrieve this professional’s
+        information.
+      </p>
+    </div>
+  </section>
+  } @else if (hasLoadError()) {
+  <section class="professional-profile__not-found">
+    <div class="professional-profile__shell">
+      <span>
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      </span>
+
+      <h1>Unable to load business profile</h1>
+
+      <p>
+        There was a problem retrieving this professional’s
+        information. Please refresh the page and try again.
+      </p>
+
+      <a class="professional-profile__not-found-link" [routerLink]="[
+          '/find-a-pro',
+          stateSlug()
+        ]">
+        Return to Find a Pro
+      </a>
+    </div>
+  </section>
+  } @else if (professional(); as business) {
+  <section class="professional-profile__hero" aria-labelledby="professional-profile-title">
+    <div class="professional-profile__shell">
+      <a class="professional-profile__back" [routerLink]="[
+            '/find-a-pro',
+            stateSlug()
+          ]">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+        Back to Find a Pro
+      </a>
+
+      <div class="professional-profile__hero-layout">
+        <div class="professional-profile__identity">
+          <div class="professional-profile__logo">
+            @if (business.logoUrl) {
+            <img [src]="business.logoUrl" [alt]="
+                    business.businessName +
+                    ' logo'
+                  " />
+            } @else {
+            <span aria-hidden="true">
+              {{ initials() }}
+            </span>
+            }
+          </div>
+
+          <div>
+            <div class="professional-profile__labels">
+              @if (
+              business.placement ===
+              'sponsored'
+              ) {
+              <span class="
+                      professional-profile__badge
+                      professional-profile__badge--sponsored
+                    ">
+                Sponsored
+              </span>
+              }
+
+              <span class="professional-profile__badge">
+                Full business profile
+              </span>
+            </div>
+
+            <p class="professional-profile__category">
+              {{ categoryLabel() }}
+            </p>
+
+            <h1 id="professional-profile-title">
+              {{ business.businessName }}
+            </h1>
+
+            <p class="professional-profile__type">
+              {{ professionalTypeLabel() }}
+            </p>
+          </div>
+        </div>
+
+        <div class="professional-profile__contact">
+          <a class="professional-profile__contact-primary" [href]="telephoneHref()">
+            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+
+            Call {{ business.phone }}
+          </a>
+
+          <a [href]="emailHref()">
+            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+
+            Send email
+          </a>
+
+          @if (business.website) {
+          <a [href]="business.website" target="_blank" rel="noopener noreferrer">
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+
+            Visit website
+          </a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="professional-profile__content">
+    <div class="professional-profile__shell">
+      <div class="professional-profile__layout">
+        <div class="professional-profile__main">
+          <article class="professional-profile__card">
+            <p class="professional-profile__eyebrow">
+              About the business
+            </p>
+
+            <h2>
+              {{ business.businessName }}
+            </h2>
+
+            <p>
+              {{
+              business.description ??
+              'Contact this professional for additional information about available services.'
+              }}
+            </p>
+          </article>
+
+          <article class="professional-profile__card">
+            <p class="professional-profile__eyebrow">
+              Professional services
+            </p>
+
+            <h2>
+              Services and specialties
+            </h2>
+
+            <div class="professional-profile__specialties">
+              @for (
+              specialty of business.specialties;
+              track specialty
+              ) {
+              <span>
+                <i class="fa-solid fa-check" aria-hidden="true"></i>
+
+                {{ specialty }}
+              </span>
+              }
+            </div>
+          </article>
+
+          @if (isIndependentAppraiser()) {
+          <aside class="professional-profile__appraisal">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+            <div>
+              <strong>
+                Independent valuation services
+              </strong>
+
+              <p>
+                This provider may offer private
+                valuation services. If you are
+                financing a purchase, your mortgage
+                lender generally orders the appraisal
+                required for the loan and may not
+                accept a privately ordered appraisal.
+              </p>
+            </div>
+          </aside>
+          }
+        </div>
+
+        <aside class="professional-profile__sidebar">
+          <article class="professional-profile__card">
+            <p class="professional-profile__eyebrow">
+              Service area
+            </p>
+
+            <h2>
+              Areas served
+            </h2>
+
+            <p class="professional-profile__location">
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+
+              {{ serviceArea() }}
+            </p>
+          </article>
+
+          <article class="professional-profile__card">
+            <p class="professional-profile__eyebrow">
+              Contact
+            </p>
+
+            <h2>
+              Business information
+            </h2>
+
+            <dl class="professional-profile__details">
+              <div>
+                <dt>Telephone</dt>
+
+                <dd>
+                  <a [href]="telephoneHref()">
+                    {{ business.phone }}
+                  </a>
+                </dd>
+              </div>
+
+              <div>
+                <dt>Email</dt>
+
+                <dd>
+                  <a [href]="emailHref()">
+                    {{ business.email }}
+                  </a>
+                </dd>
+              </div>
+
+              @if (business.website) {
+              <div>
+                <dt>Website</dt>
+
+                <dd>
+                  <a [href]="business.website" target="_blank" rel="noopener noreferrer">
+                    Visit website
+                  </a>
+                </dd>
+              </div>
+              }
+            </dl>
+          </article>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <aside class="professional-profile__disclaimer">
+    <div class="professional-profile__shell">
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+      <div>
+        <strong>
+          Professional directory disclaimer
+        </strong>
+
+        <p>
+          This profile is provided as an
+          informational and advertising resource.
+          NavStreet has not investigated, verified,
+          certified, recommended or endorsed this
+          provider and does not warrant that the
+          provider is licensed, insured, qualified,
+          experienced, reputable or legally
+          authorized to provide a particular service.
+          Users are solely responsible for evaluating
+          the provider and confirming qualifications,
+          insurance, references, fees and service
+          terms. Subscription or sponsored status
+          does not constitute NavStreet verification
+          or endorsement.
+        </p>
+      </div>
+    </div>
+  </aside>
+  } @else {
+  <section class="professional-profile__not-found">
+    <div class="professional-profile__shell">
+      <span>
+        <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+      </span>
+
+      <h1>
+        Professional profile not found
+      </h1>
+
+      <p>
+        This business does not have an active full
+        profile, or the requested profile is no
+        longer available.
+      </p>
+
+      <a class="professional-profile__not-found-link" [routerLink]="[
+            '/find-a-pro',
+            stateSlug()
+          ]">
+        Return to Find a Pro
+      </a>
+    </div>
+  </section>
+  }
+</main>

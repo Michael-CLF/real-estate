@@ -59,7 +59,13 @@ export class NavigationComponent {
       },
       {
         label: 'Find a Pro',
-        route: '/professionals'
+        route:
+          '/professionals/north-carolina'
+      },
+      {
+        label: 'List Your Business',
+        route:
+          '/professionals/register/north-carolina'
       },
       {
         label: 'FAQ',

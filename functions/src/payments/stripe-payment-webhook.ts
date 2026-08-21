@@ -95,6 +95,28 @@ interface ListingDraftDocument {
     createdAt?: unknown;
 }
 
+interface ProfessionalProfileDocument {
+    ownerUid?: string;
+
+    businessName?: string;
+
+    stateSlug?: string;
+
+    status?: string;
+
+    subscriptionStatus?: string;
+
+    placement?: string;
+
+    profileSlug?: string;
+
+    stripe?: {
+        checkoutSessionId?: string;
+        customerId?: string;
+        subscriptionId?: string;
+        subscriptionStatus?: string;
+    };
+}
 
 export const stripePaymentWebhook =
     onRequest(
@@ -153,32 +175,74 @@ export const stripePaymentWebhook =
             }
 
             try {
-                if (
-                    event.type ===
-                    'checkout.session.completed' ||
-                    event.type ===
-                    'checkout.session.async_payment_succeeded'
-                ) {
-                    const checkoutSession =
-                        event.data.object as
-                        Stripe.Checkout.Session;
+                switch (event.type) {
+                    case 'checkout.session.completed':
+                    case 'checkout.session.async_payment_succeeded': {
+                        const checkoutSession =
+                            event.data.object as
+                            Stripe.Checkout.Session;
 
-                    await publishPaidListing(
-                        checkoutSession
-                    );
-                }
+                        if (
+                            isProfessionalProfileCheckout(
+                                checkoutSession
+                            )
+                        ) {
+                            await activateProfessionalProfile(
+                                stripe,
+                                checkoutSession
+                            );
+                        } else {
+                            await publishPaidListing(
+                                checkoutSession
+                            );
+                        }
 
-                if (
-                    event.type ===
-                    'checkout.session.async_payment_failed'
-                ) {
-                    const checkoutSession =
-                        event.data.object as
-                        Stripe.Checkout.Session;
+                        break;
+                    }
 
-                    await markPaymentFailed(
-                        checkoutSession
-                    );
+                    case 'checkout.session.async_payment_failed': {
+                        const checkoutSession =
+                            event.data.object as
+                            Stripe.Checkout.Session;
+
+                        if (
+                            isProfessionalProfileCheckout(
+                                checkoutSession
+                            )
+                        ) {
+                            await markProfessionalCheckoutFailed(
+                                checkoutSession
+                            );
+                        } else {
+                            await markPaymentFailed(
+                                checkoutSession
+                            );
+                        }
+
+                        break;
+                    }
+
+                    case 'customer.subscription.updated':
+                    case 'customer.subscription.deleted': {
+                        const subscription =
+                            event.data.object as
+                            Stripe.Subscription;
+
+                        await synchronizeProfessionalSubscription(
+                            subscription
+                        );
+
+                        break;
+                    }
+
+                    default:
+                        console.log(
+                            'Stripe webhook event did not require processing.',
+                            {
+                                eventId: event.id,
+                                eventType: event.type
+                            }
+                        );
                 }
 
                 response.status(200).json({
@@ -642,4 +706,496 @@ function addOptionalField(
     ) {
         target[fieldName] = value;
     }
+}
+
+function isProfessionalProfileCheckout(
+    checkoutSession: Stripe.Checkout.Session
+): boolean {
+    return (
+        checkoutSession.metadata
+            ?.purchaseType ===
+        'professional_profile'
+    );
+}
+
+
+async function activateProfessionalProfile(
+    stripe: Stripe,
+    checkoutSession: Stripe.Checkout.Session
+): Promise<void> {
+    const professionalUid =
+        checkoutSession.metadata
+            ?.professionalUid
+            ?.trim();
+
+    const ownerUid =
+        checkoutSession.metadata
+            ?.ownerUid
+            ?.trim();
+
+    if (
+        !professionalUid ||
+        !ownerUid
+    ) {
+        throw new Error(
+            'Professional Checkout metadata is missing the professional or owner UID.'
+        );
+    }
+
+    const subscriptionId =
+        getStripeResourceId(
+            checkoutSession.subscription
+        );
+
+    if (!subscriptionId) {
+        throw new Error(
+            'Stripe did not return a professional subscription ID.'
+        );
+    }
+
+    const subscription =
+        await stripe.subscriptions.retrieve(
+            subscriptionId
+        );
+
+    const subscriptionOwnerUid =
+        subscription.metadata
+            ?.ownerUid
+            ?.trim();
+
+    const subscriptionProfessionalUid =
+        subscription.metadata
+            ?.professionalUid
+            ?.trim();
+
+    if (
+        subscriptionOwnerUid !== ownerUid ||
+        subscriptionProfessionalUid !==
+        professionalUid
+    ) {
+        throw new Error(
+            'Stripe subscription metadata does not match the professional Checkout session.'
+        );
+    }
+
+    if (
+        !hasProfessionalProfileAccess(
+            subscription.status
+        )
+    ) {
+        console.log(
+            'Professional Checkout completed without an active subscription.',
+            {
+                professionalUid,
+                ownerUid,
+                subscriptionId,
+                subscriptionStatus:
+                    subscription.status
+            }
+        );
+
+        return;
+    }
+
+    const firestore =
+        getFirestore();
+
+    const professionalReference =
+        firestore
+            .collection(
+                'professionalProfiles'
+            )
+            .doc(professionalUid);
+
+    await firestore.runTransaction(
+        async transaction => {
+            const professionalSnapshot =
+                await transaction.get(
+                    professionalReference
+                );
+
+            if (
+                !professionalSnapshot.exists
+            ) {
+                throw new Error(
+                    `Professional profile ${professionalUid} was not found.`
+                );
+            }
+
+            const professional =
+                professionalSnapshot.data() as
+                ProfessionalProfileDocument;
+
+            if (
+                professional.ownerUid !==
+                ownerUid
+            ) {
+                throw new Error(
+                    'Stripe owner metadata does not match the professional listing owner.'
+                );
+            }
+
+            const storedCheckoutSessionId =
+                professional.stripe
+                    ?.checkoutSessionId;
+
+            if (
+                storedCheckoutSessionId &&
+                storedCheckoutSessionId !==
+                checkoutSession.id
+            ) {
+                throw new Error(
+                    'Stripe Checkout Session does not match the professional listing.'
+                );
+            }
+
+            const profileSlug =
+                professional.profileSlug ||
+                createProfessionalProfileSlug(
+                    professional.businessName ||
+                    'professional',
+
+                    professionalUid
+                );
+
+            const customerId =
+                getStripeResourceId(
+                    checkoutSession.customer
+                ) ||
+                getStripeResourceId(
+                    subscription.customer
+                );
+
+            const now =
+                FieldValue.serverTimestamp();
+
+            const updates:
+                Record<string, unknown> = {
+                subscriptionStatus:
+                    'profile',
+
+                profileSlug,
+
+                'stripe.checkoutSessionId':
+                    checkoutSession.id,
+
+                'stripe.subscriptionId':
+                    subscription.id,
+
+                'stripe.subscriptionStatus':
+                    subscription.status,
+
+                'stripe.cancelAtPeriodEnd':
+                    subscription.cancel_at_period_end,
+
+                'stripe.activatedAt':
+                    now,
+
+                updatedAt:
+                    now
+            };
+
+            if (customerId) {
+                updates[
+                    'stripe.customerId'
+                ] = customerId;
+            }
+
+            transaction.update(
+                professionalReference,
+                updates
+            );
+        }
+    );
+
+    console.log(
+        'Professional Full Business Profile activated.',
+        {
+            professionalUid,
+            ownerUid,
+            checkoutSessionId:
+                checkoutSession.id,
+            subscriptionId,
+            subscriptionStatus:
+                subscription.status
+        }
+    );
+}
+
+
+async function synchronizeProfessionalSubscription(
+    subscription: Stripe.Subscription
+): Promise<void> {
+    if (
+        subscription.metadata
+            ?.purchaseType !==
+        'professional_profile'
+    ) {
+        return;
+    }
+
+    const professionalUid =
+        subscription.metadata
+            ?.professionalUid
+            ?.trim();
+
+    const ownerUid =
+        subscription.metadata
+            ?.ownerUid
+            ?.trim();
+
+    if (
+        !professionalUid ||
+        !ownerUid
+    ) {
+        throw new Error(
+            'Professional subscription metadata is incomplete.'
+        );
+    }
+
+    const firestore =
+        getFirestore();
+
+    const professionalReference =
+        firestore
+            .collection(
+                'professionalProfiles'
+            )
+            .doc(professionalUid);
+
+    const professionalSnapshot =
+        await professionalReference.get();
+
+    if (
+        !professionalSnapshot.exists
+    ) {
+        throw new Error(
+            `Professional profile ${professionalUid} was not found.`
+        );
+    }
+
+    const professional =
+        professionalSnapshot.data() as
+        ProfessionalProfileDocument;
+
+    if (
+        professional.ownerUid !==
+        ownerUid
+    ) {
+        throw new Error(
+            'Stripe subscription owner does not match the professional listing owner.'
+        );
+    }
+
+    const hasProfileAccess =
+        hasProfessionalProfileAccess(
+            subscription.status
+        );
+
+    const customerId =
+        getStripeResourceId(
+            subscription.customer
+        );
+
+    const updates:
+        Record<string, unknown> = {
+        subscriptionStatus:
+            hasProfileAccess
+                ? 'profile'
+                : 'free',
+
+        'stripe.subscriptionId':
+            subscription.id,
+
+        'stripe.subscriptionStatus':
+            subscription.status,
+
+        'stripe.cancelAtPeriodEnd':
+            subscription.cancel_at_period_end,
+
+        updatedAt:
+            FieldValue.serverTimestamp()
+    };
+
+    if (customerId) {
+        updates[
+            'stripe.customerId'
+        ] = customerId;
+    }
+
+    /*
+     * Sponsored placement is separate from a paid
+     * Full Business Profile. Losing the subscription
+     * must not accidentally leave a paid-profile badge
+     * or clickable profile enabled.
+     */
+    if (!hasProfileAccess) {
+        updates['placement'] =
+            professional.placement ===
+                'sponsored'
+                ? 'sponsored'
+                : 'standard';
+    }
+
+    await professionalReference.update(
+        updates
+    );
+
+    console.log(
+        'Professional subscription synchronized.',
+        {
+            professionalUid,
+            ownerUid,
+            subscriptionId:
+                subscription.id,
+            subscriptionStatus:
+                subscription.status,
+            hasProfileAccess
+        }
+    );
+}
+
+
+async function markProfessionalCheckoutFailed(
+    checkoutSession: Stripe.Checkout.Session
+): Promise<void> {
+    const professionalUid =
+        checkoutSession.metadata
+            ?.professionalUid
+            ?.trim();
+
+    const ownerUid =
+        checkoutSession.metadata
+            ?.ownerUid
+            ?.trim();
+
+    if (
+        !professionalUid ||
+        !ownerUid
+    ) {
+        return;
+    }
+
+    const firestore =
+        getFirestore();
+
+    const professionalReference =
+        firestore
+            .collection(
+                'professionalProfiles'
+            )
+            .doc(professionalUid);
+
+    const professionalSnapshot =
+        await professionalReference.get();
+
+    if (
+        !professionalSnapshot.exists
+    ) {
+        return;
+    }
+
+    const professional =
+        professionalSnapshot.data() as
+        ProfessionalProfileDocument;
+
+    if (
+        professional.ownerUid !==
+        ownerUid
+    ) {
+        throw new Error(
+            'Stripe owner metadata does not match the professional listing owner.'
+        );
+    }
+
+    if (
+        professional.stripe
+            ?.checkoutSessionId !==
+        checkoutSession.id
+    ) {
+        return;
+    }
+
+    await professionalReference.update({
+        subscriptionStatus:
+            'free',
+
+        'stripe.subscriptionStatus':
+            'checkout_failed',
+
+        updatedAt:
+            FieldValue.serverTimestamp()
+    });
+}
+
+
+function hasProfessionalProfileAccess(
+    subscriptionStatus:
+        Stripe.Subscription.Status
+): boolean {
+    switch (subscriptionStatus) {
+        case 'active':
+        case 'trialing':
+        case 'past_due':
+            return true;
+
+        case 'canceled':
+        case 'incomplete':
+        case 'incomplete_expired':
+        case 'paused':
+        case 'unpaid':
+        default:
+            return false;
+    }
+}
+
+
+function getStripeResourceId(
+    resource:
+        | string
+        | {
+            id: string;
+        }
+        | null
+        | undefined
+): string {
+    if (
+        typeof resource ===
+        'string'
+    ) {
+        return resource;
+    }
+
+    return resource?.id ?? '';
+}
+
+
+function createProfessionalProfileSlug(
+    businessName: string,
+    professionalUid: string
+): string {
+    const businessSlug =
+        businessName
+            .trim()
+            .toLowerCase()
+            .replace(
+                /[^a-z0-9]+/g,
+                '-'
+            )
+            .replace(
+                /^[-]+|[-]+$/g,
+                ''
+            );
+
+    const uniqueSuffix =
+        professionalUid
+            .slice(0, 8)
+            .toLowerCase();
+
+    return [
+        businessSlug ||
+        'professional',
+
+        uniqueSuffix
+    ].join('-');
 }

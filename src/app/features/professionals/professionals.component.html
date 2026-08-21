@@ -1,1 +1,538 @@
-<p>professionals works!</p>
+<main class="professionals-page">
+  <section
+    class="professionals-hero"
+    aria-labelledby="professionals-title"
+  >
+    <div class="professionals-shell">
+      <div class="professionals-hero__layout">
+        <div class="professionals-hero__content">
+          <p class="professionals-eyebrow">
+            NavStreet professional directory
+          </p>
+
+          <h1 id="professionals-title">
+            Find the right professional for your
+            real estate transaction.
+          </h1>
+
+          <p class="professionals-hero__description">
+            Search {{ stateName() }} professionals by
+            business name, service, specialty, city or
+            county. Hire the services you need while
+            remaining in control of your transaction.
+          </p>
+
+          <div class="professionals-hero__highlights">
+            <span>
+              <i
+                class="fa-solid fa-location-dot"
+                aria-hidden="true"
+              ></i>
+
+              {{ stateName() }}
+            </span>
+
+            <span>
+              <i
+                class="fa-solid fa-layer-group"
+                aria-hidden="true"
+              ></i>
+
+              Eight service categories
+            </span>
+
+            <span>
+              <i
+                class="fa-solid fa-address-card"
+                aria-hidden="true"
+              ></i>
+
+              Direct business contact
+            </span>
+          </div>
+        </div>
+
+        <aside class="professionals-hero__aside">
+          <span class="professionals-hero__aside-icon">
+            <i
+              class="fa-solid fa-handshake"
+              aria-hidden="true"
+            ></i>
+          </span>
+
+          <h2>
+            Are you a North Carolina professional?
+          </h2>
+
+          <p>
+            Add a free business listing or create a
+            complete subscriber profile for greater
+            marketplace exposure.
+          </p>
+
+          <a
+            class="professionals-button professionals-button--light"
+            [routerLink]="[
+              '/professionals/register',
+              stateSlug()
+            ]"
+          >
+            Add your business
+
+            <i
+              class="fa-solid fa-arrow-right"
+              aria-hidden="true"
+            ></i>
+          </a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="professionals-search-section"
+    aria-labelledby="professional-search-title"
+  >
+    <div class="professionals-shell">
+      <div class="professionals-search-panel">
+        <div class="professionals-search-panel__heading">
+          <div>
+            <p class="professionals-eyebrow">
+              Search the directory
+            </p>
+
+            <h2 id="professional-search-title">
+              Who do you need?
+            </h2>
+          </div>
+
+          <p>
+            Enter a service, professional name,
+            city or county.
+          </p>
+        </div>
+
+        <label
+          class="professionals-search"
+          for="professional-search"
+        >
+          <span class="sr-only">
+            Search {{ stateName() }} professionals
+          </span>
+
+          <i
+            class="fa-solid fa-magnifying-glass"
+            aria-hidden="true"
+          ></i>
+
+          <input
+            id="professional-search"
+            type="search"
+            autocomplete="off"
+            [value]="searchTerm()"
+            [placeholder]="
+              'Search ' +
+              stateAbbreviation() +
+              ' professionals, services or locations'
+            "
+            (input)="updateSearchTerm($event)"
+          />
+
+          @if (searchTerm()) {
+            <button
+              type="button"
+              aria-label="Clear professional search"
+              (click)="searchTerm.set('')"
+            >
+              <i
+                class="fa-solid fa-xmark"
+                aria-hidden="true"
+              ></i>
+            </button>
+          }
+        </label>
+
+        <div
+          class="professionals-categories"
+          aria-label="Filter by professional category"
+        >
+          @for (
+            category of categories;
+            track category.value
+          ) {
+            <button
+              type="button"
+              class="professionals-category"
+              [class.professionals-category--active]="
+                selectedCategory() ===
+                category.value
+              "
+              [attr.aria-pressed]="
+                selectedCategory() ===
+                category.value
+              "
+              (click)="
+                selectCategory(category.value)
+              "
+            >
+              <span
+                class="professionals-category__icon"
+              >
+                <i
+                  [class]="category.icon"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <span
+                class="professionals-category__content"
+              >
+                <strong>
+                  {{ category.label }}
+                </strong>
+
+                <small>
+                  {{ category.description }}
+                </small>
+              </span>
+
+              <span
+                class="professionals-category__count"
+              >
+                {{
+                  getCategoryCount(
+                    category.value
+                  )
+                }}
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+  class="professionals-results"
+  aria-labelledby="professional-results-title"
+>
+  <div class="professionals-shell">
+    @if (isLoading()) {
+      <section
+        class="professionals-directory-status"
+        role="status"
+        aria-live="polite"
+      >
+        <span
+          class="
+            professionals-directory-status__icon
+            professionals-directory-status__icon--loading
+          "
+        >
+          <i
+            class="fa-solid fa-spinner"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <h2 id="professional-results-title">
+          Loading professionals
+        </h2>
+
+        <p>
+          Retrieving the {{ stateName() }}
+          professional directory.
+        </p>
+      </section>
+    } @else if (hasLoadError()) {
+      <section
+        class="
+          professionals-directory-status
+          professionals-directory-status--error
+        "
+        role="alert"
+        aria-live="assertive"
+      >
+        <span
+          class="
+            professionals-directory-status__icon
+            professionals-directory-status__icon--error
+          "
+        >
+          <i
+            class="fa-solid fa-triangle-exclamation"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <h2 id="professional-results-title">
+          The directory could not be loaded
+        </h2>
+
+        <p>
+          NavStreet could not retrieve the professional
+          directory. Please refresh the page and try
+          again.
+        </p>
+      </section>
+    } @else {
+      <header class="professionals-results__header">
+        <div>
+          <p class="professionals-eyebrow">
+            {{ stateName() }} directory
+          </p>
+
+          <h2 id="professional-results-title">
+            @if (
+              filteredProfessionals().length === 1
+            ) {
+              1 professional found
+            } @else {
+              {{ filteredProfessionals().length }}
+              professionals found
+            }
+          </h2>
+        </div>
+
+        @if (hasActiveFilters()) {
+          <button
+            type="button"
+            class="professionals-clear"
+            (click)="clearFilters()"
+          >
+            <i
+              class="fa-solid fa-rotate-left"
+              aria-hidden="true"
+            ></i>
+
+            Clear filters
+          </button>
+        }
+      </header>
+
+      @if (filteredProfessionals().length) {
+        <div
+          class="professionals-grid"
+          aria-label="Professional directory results"
+        >
+          @for (
+            professional of
+              filteredProfessionals();
+            track professional.uid
+          ) {
+            <app-professional-directory-card
+              [professional]="professional"
+            />
+          }
+        </div>
+      } @else {
+        <section
+          class="professionals-empty"
+          aria-live="polite"
+        >
+          <span class="professionals-empty__icon">
+            <i
+              class="fa-solid fa-magnifying-glass"
+              aria-hidden="true"
+            ></i>
+          </span>
+
+          @if (hasActiveFilters()) {
+            <h2>
+              No matching professionals found
+            </h2>
+
+            <p>
+              Try a different business name,
+              specialty, city, county or category.
+            </p>
+
+            <button
+              type="button"
+              class="
+                professionals-button
+                professionals-button--primary
+              "
+              (click)="clearFilters()"
+            >
+              Clear search and filters
+            </button>
+          } @else {
+            <h2>
+              No professionals are listed yet
+            </h2>
+
+            <p>
+              The {{ stateName() }} professional
+              directory does not currently contain any
+              active business listings.
+            </p>
+
+            <a
+              class="
+                professionals-button
+                professionals-button--primary
+              "
+              [routerLink]="[
+                '/professionals/register',
+                stateSlug()
+              ]"
+            >
+              Add your business
+
+              <i
+                class="fa-solid fa-arrow-right"
+                aria-hidden="true"
+              ></i>
+            </a>
+          }
+        </section>
+      }
+    }
+  </div>
+</section>
+
+  <section
+    class="professionals-information"
+    aria-labelledby="professional-information-title"
+  >
+    <div class="professionals-shell">
+      <div class="professionals-information__grid">
+        <article class="professionals-information__card">
+          <span>
+            <i
+              class="fa-solid fa-lightbulb"
+              aria-hidden="true"
+            ></i>
+          </span>
+
+          <div>
+            <h2 id="professional-information-title">
+              Build your own professional team
+            </h2>
+
+            <p>
+              Selling directly does not mean performing
+              every part of the transaction yourself.
+              Choose legal, title, inspection, financing
+              and property services when you need them.
+            </p>
+          </div>
+        </article>
+
+        <article class="professionals-information__card">
+          <span>
+            <i
+              class="fa-solid fa-chart-column"
+              aria-hidden="true"
+            ></i>
+          </span>
+
+          <div>
+            <h2>
+              A note about appraisals
+            </h2>
+
+            <p>
+              Independent appraisers in this directory
+              may provide private valuation services.
+              When financing a purchase, the mortgage
+              lender generally orders the appraisal
+              required for the loan.
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="professionals-business-cta"
+    aria-labelledby="professional-cta-title"
+  >
+    <div
+      class="
+        professionals-shell
+        professionals-business-cta__layout
+      "
+    >
+      <div>
+        <p class="professionals-eyebrow">
+          Grow your local visibility
+        </p>
+
+        <h2 id="professional-cta-title">
+          Put your business in front of
+          {{ stateName() }} buyers and sellers.
+        </h2>
+
+        <p>
+          Create a useful free directory card or
+          subscribe for a complete business profile.
+        </p>
+      </div>
+
+      <a
+        class="
+          professionals-button
+          professionals-button--light
+        "
+        [routerLink]="[
+          '/professionals/register',
+          stateSlug()
+        ]"
+      >
+        Register your business
+
+        <i
+          class="fa-solid fa-arrow-right"
+          aria-hidden="true"
+        ></i>
+      </a>
+    </div>
+  </section>
+
+  <aside class="professionals-disclaimer">
+    <div class="professionals-shell">
+      <i
+        class="fa-solid fa-circle-info"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <strong>
+          Professional directory disclaimer
+        </strong>
+
+        <p>
+          The NavStreet Find a Pro directory is provided
+          solely as an informational and advertising
+          resource. NavStreet does not investigate,
+          verify, certify, recommend or endorse any
+          person or business appearing in the directory
+          and does not warrant that any provider is
+          licensed, insured, qualified, experienced,
+          reputable or legally authorized to provide a
+          particular service.
+        </p>
+
+        <p>
+          Directory information is supplied by listed
+          providers and may be incomplete, inaccurate
+          or outdated. Users are solely responsible for
+          evaluating providers and independently
+          confirming licenses, insurance,
+          qualifications, references, fees and service
+          terms. NavStreet is not a party to agreements
+          between users and providers and is not
+          responsible for a provider's acts, omissions,
+          advice, representations, services, fees or
+          work product. Paid, sponsored or enhanced
+          placement indicates advertising or
+          subscription status only and does not
+          constitute verification or endorsement.
+        </p>
+      </div>
+    </div>
+  </aside>
+</main>

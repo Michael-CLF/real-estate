@@ -1,0 +1,208 @@
+<article
+  class="professional-card"
+  [class]="
+    'professional-card ' + categoryClass()
+  "
+  [class.professional-card--profile]="
+    hasFullProfile()
+  "
+  [class.professional-card--sponsored]="
+    professional().placement === 'sponsored'
+  "
+>
+  <header class="professional-card__header">
+    <span class="professional-card__icon">
+      @switch (professional().category) {
+        @case ('financing') {
+          <i
+            class="fa-solid fa-building-columns"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('legal') {
+          <i
+            class="fa-solid fa-scale-balanced"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('title_and_closing') {
+          <i
+            class="fa-solid fa-file-signature"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('inspections') {
+          <i
+            class="fa-solid fa-magnifying-glass"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('property_and_valuation') {
+          <i
+            class="fa-solid fa-chart-column"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('home_preparation') {
+          <i
+            class="fa-solid fa-screwdriver-wrench"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('insurance_and_protection') {
+          <i
+            class="fa-solid fa-shield-halved"
+            aria-hidden="true"
+          ></i>
+        }
+
+        @case ('moving_and_storage') {
+          <i
+            class="fa-solid fa-truck-moving"
+            aria-hidden="true"
+          ></i>
+        }
+      }
+    </span>
+
+    <div class="professional-card__labels">
+      @if (
+        professional().placement ===
+        'sponsored'
+      ) {
+        <span
+          class="
+            professional-card__badge
+            professional-card__badge--sponsored
+          "
+        >
+          Sponsored
+        </span>
+      } @else if (hasFullProfile()) {
+        <span class="professional-card__badge">
+          Full profile
+        </span>
+      }
+    </div>
+  </header>
+
+  <div class="professional-card__identity">
+    <p class="professional-card__category">
+      {{ categoryLabel() }}
+    </p>
+
+    <h3>
+      {{ professional().businessName }}
+    </h3>
+
+    <p class="professional-card__type">
+      {{ professionalTypeLabel() }}
+    </p>
+  </div>
+
+  <div
+    class="professional-card__specialties"
+    aria-label="Professional specialties"
+  >
+    @for (
+      specialty of visibleSpecialties();
+      track specialty
+    ) {
+      <span>
+        {{ specialty }}
+      </span>
+    }
+
+    @if (additionalSpecialtyCount()) {
+      <span
+        class="
+          professional-card__specialty-count
+        "
+      >
+        +{{ additionalSpecialtyCount() }}
+      </span>
+    }
+  </div>
+
+  <p class="professional-card__service-area">
+    <i
+      class="fa-solid fa-location-dot"
+      aria-hidden="true"
+    ></i>
+
+    <span>
+      {{ serviceArea() }}
+    </span>
+  </p>
+
+  <footer class="professional-card__footer">
+    <div class="professional-card__contact">
+      <a
+        [href]="telephoneHref()"
+        [attr.aria-label]="
+          'Call ' +
+          professional().businessName +
+          ' at ' +
+          professional().phone
+        "
+        title="Call business"
+      >
+        <i
+          class="fa-solid fa-phone"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          {{ professional().phone }}
+        </span>
+      </a>
+
+      <a
+        class="professional-card__email"
+        [href]="emailHref()"
+        [attr.aria-label]="
+          'Email ' +
+          professional().businessName
+        "
+        title="Email business"
+      >
+        <i
+          class="fa-solid fa-envelope"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          Email
+        </span>
+      </a>
+    </div>
+
+    @if (hasFullProfile()) {
+      <a
+        class="professional-card__profile-link"
+        [routerLink]="[
+          '/find-a-pro',
+          professional().stateSlug,
+          professional().profileSlug
+        ]"
+        [attr.aria-label]="
+          'View the business profile for ' +
+          professional().businessName
+        "
+      >
+        View profile
+
+        <i
+          class="fa-solid fa-arrow-right"
+          aria-hidden="true"
+        ></i>
+      </a>
+    }
+  </footer>
+</article>

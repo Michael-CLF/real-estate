@@ -29,6 +29,24 @@ export const routes: Routes = [
           )
       },
       {
+        path:
+          'professionals/:stateSlug/profile/setup',
+
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+
+        loadComponent: () =>
+          import(
+            './features/professionals/pages/professional-profile-setup/professional-profile-setup.component'
+          ).then(
+            component =>
+              component
+                .ProfessionalProfileSetupComponent
+          )
+      },
+      {
         path: 'faq',
         loadComponent: () =>
           import(
@@ -132,19 +150,82 @@ export const routes: Routes = [
           }
         ]
       },
+      /*
+  * Professional Registration
+  *
+  * This route is intentionally public because a new
+  * professional will verify their email by OTP during
+  * registration.
+  */
+      {
+        path: 'professionals/register/:stateSlug',
+
+        loadComponent: () =>
+          import(
+            './features/professionals/pages/professional-registration/professional-registration.component'
+          ).then(
+            component =>
+              component
+                .ProfessionalRegistrationComponent
+          )
+      },
+
+      /*
+       * Preserve the previous professionals URL.
+       */
       {
         path: 'professionals',
+
+        redirectTo:
+          'find-a-pro/north-carolina',
+
+        pathMatch: 'full'
+      },
+
+      /*
+       * Authenticated Find a Pro Directory
+       */
+      {
+        path: 'find-a-pro',
+
         canActivate: [
           authGuard,
           accountGuard
         ],
-        loadComponent: () =>
-          import(
-            './features/professionals/professionals.component'
-          ).then(
-            component =>
-              component.ProfessionalsComponent
-          )
+
+        children: [
+          {
+            path: '',
+
+            redirectTo: 'north-carolina',
+
+            pathMatch: 'full'
+          },
+          {
+            path:
+              ':stateSlug/:professionalSlug',
+
+            loadComponent: () =>
+              import(
+                './features/professionals/pages/professional-profile/professional-profile.component'
+              ).then(
+                component =>
+                  component
+                    .ProfessionalProfileComponent
+              )
+          },
+          {
+            path: ':stateSlug',
+
+            loadComponent: () =>
+              import(
+                './features/professionals/professionals.component'
+              ).then(
+                component =>
+                  component.ProfessionalsComponent
+              )
+          }
+        ]
       },
       {
         path: 'contact',
@@ -170,7 +251,8 @@ export const routes: Routes = [
       },
       {
         path: 'resources',
-        redirectTo: 'professionals',
+        redirectTo:
+          'find-a-pro/north-carolina',
         pathMatch: 'full'
       },
 
@@ -661,6 +743,18 @@ export const routes: Routes = [
       ).then(
         component =>
           component.MyShowingRequestsComponent
+      )
+  },
+  {
+    path:
+      'professionals/:stateSlug/:professionalSlug',
+
+    loadComponent: () =>
+      import(
+        './features/professionals/pages/professional-profile/professional-profile.component'
+      ).then(
+        component =>
+          component.ProfessionalProfileComponent
       )
   },
   {

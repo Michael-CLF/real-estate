@@ -1,0 +1,724 @@
+<main class="professional-registration">
+    @if (!isSupportedState()) {
+    <section class="registration-unavailable">
+        <div class="registration-shell">
+            <span class="registration-unavailable__icon">
+                <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+            </span>
+
+            <h1>
+                Professional registration is not yet
+                available in {{ stateName() }}.
+            </h1>
+
+            <p>
+                NavStreet is currently accepting
+                professional-directory listings in North
+                Carolina.
+            </p>
+
+            <a class="registration-button registration-button--primary" routerLink="/">
+                Return home
+            </a>
+        </div>
+    </section>
+    } @else {
+    <section class="registration-hero" aria-labelledby="registration-title">
+        <div class="registration-shell">
+            <p class="registration-eyebrow">
+                NavStreet Find a Pro
+            </p>
+
+            <h1 id="registration-title">
+                Add your business to the
+                {{ stateName() }} directory.
+            </h1>
+
+            <p>
+                Create a useful free directory listing or
+                select a full-profile subscription. You will
+                verify your email before registration is
+                completed.
+            </p>
+        </div>
+    </section>
+
+    <section class="registration-content">
+        <div class="registration-shell">
+            @if (
+            !otpStep() &&
+            !verificationComplete()
+            ) {
+            <form class="registration-form" [formGroup]="registrationForm" (ngSubmit)="prepareRegistration()"
+                novalidate>
+                <section class="registration-card">
+                    <header class="registration-card__header">
+                        <span>
+                            <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+                        </span>
+
+                        <div>
+                            <p class="registration-eyebrow">
+                                Business listing
+                            </p>
+
+                            <h2>Business information</h2>
+
+                            <p>
+                                Enter the business and contact information
+                                that will appear on your directory listing.
+                            </p>
+                        </div>
+                    </header>
+
+                    <div class="registration-card__body">
+                        <div class="registration-field">
+                            <label for="professional-business-name">
+                                Business or professional name
+                            </label>
+
+                            <input id="professional-business-name" type="text" formControlName="businessName"
+                                autocomplete="organization" />
+
+                            @if (
+                            registrationForm.controls
+                            .businessName.touched &&
+                            registrationForm.controls
+                            .businessName.invalid
+                            ) {
+                            <p class="registration-error">
+                                Enter the name displayed on your
+                                business listing.
+                            </p>
+                            }
+                        </div>
+
+                        <div class="registration-fields registration-fields--two">
+                            <div class="registration-field">
+                                <label for="professional-first-name">
+                                    Contact first name
+                                </label>
+
+                                <input id="professional-first-name" type="text" formControlName="firstName"
+                                    autocomplete="given-name" />
+
+                                @if (
+                                registrationForm.controls
+                                .firstName.touched &&
+                                registrationForm.controls
+                                .firstName.invalid
+                                ) {
+                                <p class="registration-error">
+                                    Enter the contact's first name.
+                                </p>
+                                }
+                            </div>
+
+                            <div class="registration-field">
+                                <label for="professional-last-name">
+                                    Contact last name
+                                </label>
+
+                                <input id="professional-last-name" type="text" formControlName="lastName"
+                                    autocomplete="family-name" />
+
+                                @if (
+                                registrationForm.controls
+                                .lastName.touched &&
+                                registrationForm.controls
+                                .lastName.invalid
+                                ) {
+                                <p class="registration-error">
+                                    Enter the contact's last name.
+                                </p>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="registration-fields registration-fields--two">
+                            <div class="registration-field">
+                                <label for="professional-phone">
+                                    Business telephone
+                                </label>
+
+                                <input id="professional-phone" type="tel" formControlName="phone" autocomplete="tel"
+                                    inputmode="numeric" maxlength="14" placeholder="(919) 555-1234"
+                                    (input)="formatPhoneNumber($event)" />
+
+                                @if (
+                                registrationForm.controls
+                                .phone.touched &&
+                                registrationForm.controls
+                                .phone.invalid
+                                ) {
+                                <p class="registration-error">
+                                    Enter a valid business telephone
+                                    number.
+                                </p>
+                                }
+                            </div>
+
+                            <div class="registration-field">
+                                <label for="professional-email">
+                                    Business email
+                                </label>
+
+                                <input id="professional-email" type="email" formControlName="email"
+                                    autocomplete="email" />
+
+                                <p class="registration-help">
+                                    NavStreet will send the verification
+                                    code to this address.
+                                </p>
+
+                                @if (
+                                registrationForm.controls
+                                .email.touched &&
+                                registrationForm.controls
+                                .email.invalid
+                                ) {
+                                <p class="registration-error">
+                                    Enter a valid email address.
+                                </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="registration-card">
+                    <header class="registration-card__header">
+                        <span>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                        </span>
+
+                        <div>
+                            <p class="registration-eyebrow">
+                                Service area
+                            </p>
+
+                            <h2>Business type and service area</h2>
+
+                            <p>
+                                Tell customers what type of professional
+                                you are and where you provide services.
+                            </p>
+                        </div>
+                    </header>
+
+                    <div class="registration-card__body">
+                        <div class="registration-fields registration-fields--two">
+                            <div class="registration-field">
+                                <label for="professional-category">
+                                    Business category
+                                </label>
+
+                                <select id="professional-category" formControlName="category"
+                                    (change)="onCategoryChange($event)">
+                                    <option value="">
+                                        Select a category
+                                    </option>
+
+                                    @for (
+                                    category of categoryOptions;
+                                    track category.value
+                                    ) {
+                                    <option [value]="category.value">
+                                        {{ category.label }}
+                                    </option>
+                                    }
+                                </select>
+
+                                @if (
+                                registrationForm.controls
+                                .category.touched &&
+                                registrationForm.controls
+                                .category.invalid
+                                ) {
+                                <p class="registration-error">
+                                    Select a business category.
+                                </p>
+                                }
+                            </div>
+
+                            <div class="registration-field">
+                                <label for="professional-type">
+                                    Professional type
+                                </label>
+
+                                <select id="professional-type" formControlName="professionalType" [disabled]="
+                      !selectedCategory()
+                    ">
+                                    <option value="">
+                                        Select a professional type
+                                    </option>
+
+                                    @for (
+                                    professionalType of
+                                    professionalTypeOptions();
+                                    track professionalType.value
+                                    ) {
+                                    <option [value]="professionalType.value">
+                                        {{ professionalType.label }}
+                                    </option>
+                                    }
+                                </select>
+
+                                @if (
+                                registrationForm.controls
+                                .professionalType.touched &&
+                                registrationForm.controls
+                                .professionalType.invalid
+                                ) {
+                                <p class="registration-error">
+                                    Select your professional type.
+                                </p>
+                                }
+                            </div>
+                        </div>
+
+                        <fieldset class="registration-options">
+                            <legend class="sr-only">
+                                Select a service-area type
+                            </legend>
+
+                            <label>
+                                <input type="radio" formControlName="serviceAreaType" value="statewide"
+                                    (change)="onServiceAreaChange()" />
+
+                                <span>
+                                    <strong>Statewide</strong>
+
+                                    <small>
+                                        Serve all of North Carolina
+                                    </small>
+                                </span>
+                            </label>
+
+                            <label>
+                                <input type="radio" formControlName="serviceAreaType" value="counties"
+                                    (change)="onServiceAreaChange()" />
+
+                                <span>
+                                    <strong>Selected counties</strong>
+
+                                    <small>
+                                        Enter the counties you serve
+                                    </small>
+                                </span>
+                            </label>
+
+                            <label>
+                                <input type="radio" formControlName="serviceAreaType" value="cities"
+                                    (change)="onServiceAreaChange()" />
+
+                                <span>
+                                    <strong>Selected cities</strong>
+
+                                    <small>
+                                        Enter the cities you serve
+                                    </small>
+                                </span>
+                            </label>
+                        </fieldset>
+
+                        @if (
+                        registrationForm.controls
+                        .serviceAreaType.value !==
+                        'statewide'
+                        ) {
+                        <div class="registration-field">
+                            <label for="professional-service-areas">
+                                {{ getServiceAreaLabel() }}
+                            </label>
+
+                            <input id="professional-service-areas" type="text" formControlName="serviceAreas"
+                                [placeholder]="
+                      registrationForm.controls
+                        .serviceAreaType.value ===
+                      'counties'
+                        ? 'Wake, Durham, Franklin'
+                        : 'Raleigh, Cary, Wake Forest'
+                    " />
+
+                            <p class="registration-help">
+                                Separate each location with a comma.
+                            </p>
+
+                            @if (
+                            registrationForm.controls
+                            .serviceAreas.touched &&
+                            registrationForm.controls
+                            .serviceAreas.invalid
+                            ) {
+                            <p class="registration-error">
+                                Enter at least one service area.
+                            </p>
+                            }
+                        </div>
+                        }
+                    </div>
+                </section>
+
+                @if (selectedCategory()) {
+                <section class="registration-card">
+                    <header class="registration-card__header">
+                        <span>
+                            <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+                        </span>
+
+                        <div>
+                            <p class="registration-eyebrow">
+                                Services
+                            </p>
+
+                            <h2>Select your specialties</h2>
+
+                            <p>
+                                Choose every service that applies
+                                to your business.
+                            </p>
+                        </div>
+                    </header>
+
+                    <div class="registration-card__body">
+                        <div class="registration-specialties">
+                            @for (
+                            specialty of specialtyOptions();
+                            track specialty
+                            ) {
+                            <label class="registration-specialty" [class.registration-specialty--selected]="
+                        isSpecialtySelected(
+                          specialty
+                        )
+                      ">
+                                <input type="checkbox" [checked]="
+                          isSpecialtySelected(
+                            specialty
+                          )
+                        " (change)="
+                          toggleSpecialty(
+                            specialty,
+                            $any($event.target).checked
+                          )
+                        " />
+
+                                <span>
+                                    <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                </span>
+
+                                {{ specialty }}
+                            </label>
+                            }
+                        </div>
+
+                        @if (
+                        registrationForm.controls
+                        .specialties.touched &&
+                        registrationForm.controls
+                        .specialties.invalid
+                        ) {
+                        <p class="registration-error">
+                            Select at least one specialty.
+                        </p>
+                        }
+                    </div>
+                </section>
+                }
+
+                <section class="registration-card">
+                    <header class="registration-card__header">
+                        <span>
+                            <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+                        </span>
+
+                        <div>
+                            <p class="registration-eyebrow">
+                                Directory option
+                            </p>
+
+                            <h2>Choose your listing</h2>
+
+                            <p>
+                                You can change your directory option
+                                later.
+                            </p>
+                        </div>
+                    </header>
+
+                    <div class="registration-card__body">
+                        <fieldset class="registration-plans">
+                            <legend class="sr-only">
+                                Choose a professional-directory plan
+                            </legend>
+
+                            <label [class.registration-plan--selected]="
+                    registrationForm.controls
+                      .subscriptionStatus.value ===
+                    'free'
+                  ">
+                                <input type="radio" formControlName="subscriptionStatus" value="free" />
+
+                                <span class="registration-plan__heading">
+                                    <strong>
+                                        Free directory listing
+                                    </strong>
+
+                                    <span>Free</span>
+                                </span>
+
+                                <ul>
+                                    <li>Business directory card</li>
+                                    <li>Category and specialties</li>
+                                    <li>Telephone and email</li>
+                                    <li>Service area</li>
+                                </ul>
+                            </label>
+
+                            <label [class.registration-plan--selected]="
+                    registrationForm.controls
+                      .subscriptionStatus.value ===
+                    'profile'
+                  ">
+                                <input type="radio" formControlName="subscriptionStatus" value="profile" />
+
+                                <span class="registration-plan__heading">
+                                    <strong>
+                                        Full business profile
+                                    </strong>
+
+                                    <span>Subscription</span>
+                                </span>
+
+                                <ul>
+                                    <li>Everything in the free listing</li>
+                                    <li>Clickable directory card</li>
+                                    <li>Dedicated business profile</li>
+                                    <li>Website and business details</li>
+                                </ul>
+                            </label>
+                        </fieldset>
+                    </div>
+                </section>
+
+                <section class="registration-certification">
+                    <label>
+                        <input type="checkbox" formControlName="submissionCertified" />
+
+                        <span>
+                            I confirm that I own this business or
+                            am authorized to submit this listing,
+                            and that the information provided is
+                            accurate to the best of my knowledge.
+                            I understand that NavStreet may edit,
+                            suspend or remove inaccurate,
+                            misleading or inappropriate listings.
+                        </span>
+                    </label>
+
+                    @if (
+                    registrationForm.controls
+                    .submissionCertified.touched &&
+                    registrationForm.controls
+                    .submissionCertified.invalid
+                    ) {
+                    <p class="registration-error">
+                        You must accept this certification
+                        before continuing.
+                    </p>
+                    }
+                </section>
+
+                <div class="registration-actions">
+                    <a class="registration-button registration-button--secondary" [routerLink]="[
+                '/find-a-pro',
+                stateSlug()
+              ]">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="
+    registration-button
+    registration-button--primary
+  " [disabled]="
+    registrationForm.invalid ||
+    registrationForm.pending ||
+    !registrationForm.controls
+      .submissionCertified.value ||
+    isOtpLoading()
+  " [attr.aria-disabled]="
+    registrationForm.invalid ||
+    registrationForm.pending ||
+    !registrationForm.controls
+      .submissionCertified.value ||
+    isOtpLoading()
+  ">
+                        @if (isOtpLoading()) {
+                        Sending verification code...
+                        } @else {
+                        Continue to email verification
+
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        }
+                    </button>
+                </div>
+            </form>
+            } @else if (otpStep()) {
+            <section class="registration-otp" aria-labelledby="professional-otp-title">
+                <header class="registration-otp__header">
+                    <span>
+                        <i class="fa-solid fa-envelope-circle-check" aria-hidden="true"></i>
+                    </span>
+
+                    <p class="registration-eyebrow">
+                        Verify your email
+                    </p>
+
+                    <h2 id="professional-otp-title">
+                        Enter your verification code
+                    </h2>
+                </header>
+
+                @if (errorMessage()) {
+                <div class="registration-message registration-message--error" role="alert">
+                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+                    {{ errorMessage() }}
+                </div>
+                }
+
+                @if (successMessage()) {
+                <div class="registration-message registration-message--success" role="status">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+                    {{ successMessage() }}
+                </div>
+                }
+
+                <form class="registration-otp__form" [formGroup]="otpForm" (ngSubmit)="verifyCode()">
+                    <div class="registration-field">
+                        <label for="professional-verification-code">
+                            Verification code
+                        </label>
+
+                        <input id="professional-verification-code" class="registration-otp__input" type="text"
+                            formControlName="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                            placeholder="000000" (input)="formatOtpCode($event)" />
+
+                        @if (
+                        otpForm.controls.code.touched &&
+                        otpForm.controls.code.invalid
+                        ) {
+                        <p class="registration-error">
+                            Enter the complete six-digit code.
+                        </p>
+                        }
+                    </div>
+
+                    @if (!isExpired()) {
+                    <p class="registration-otp__timer">
+                        Code expires in
+
+                        <strong>
+                            {{ formattedTimeRemaining() }}
+                        </strong>
+                    </p>
+                    } @else {
+                    <p class="registration-error">
+                        This code has expired. Request a new code.
+                    </p>
+                    }
+
+                    @if (
+                    attemptsRemaining() > 0 &&
+                    attemptsRemaining() < 3 ) { <p class="registration-otp__attempts">
+                        {{ attemptsRemaining() }}
+                        verification attempts remaining
+                        </p>
+                        }
+
+                        <button type="submit" class="registration-button registration-button--primary" [disabled]="
+          otpForm.invalid ||
+          isOtpLoading() ||
+          isExpired() ||
+          attemptsRemaining() <= 0
+        ">
+                            {{
+                            isOtpLoading()
+                            ? 'Verifying...'
+                            : 'Verify and continue'
+                            }}
+                        </button>
+                </form>
+
+                <div class="registration-otp__actions">
+                    <button type="button" [disabled]="
+          !canResend() ||
+          isOtpLoading()
+        " (click)="resendCode()">
+                        @if (canResend()) {
+                        Resend code
+                        } @else {
+                        Resend available in
+                        {{ formattedResendRemaining() }}
+                        }
+                    </button>
+
+                    <button type="button" (click)="changeEmail()">
+                        Change email address
+                    </button>
+                </div>
+            </section>
+            } @else {
+            <section class="registration-complete" aria-labelledby="professional-registration-complete">
+                <span class="registration-complete__icon">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                </span>
+
+                <p class="registration-eyebrow">
+                    Email verified
+                </p>
+
+                <h2 id="professional-registration-complete">
+                    Your NavStreet account is ready.
+                </h2>
+
+                <p>
+                    Your professional information has been
+                    confirmed and is ready for the directory-listing
+                    creation step.
+                </p>
+
+                <div class="registration-complete__actions">
+                    <a class="registration-button registration-button--secondary" [routerLink]="[
+          '/find-a-pro',
+          stateSlug()
+        ]">
+                        Return to Find a Pro
+                    </a>
+
+                    <a class="registration-button registration-button--primary" routerLink="/dashboard">
+                        Continue to dashboard
+                    </a>
+                </div>
+            </section>
+            }
+        </div>
+    </section>
+
+    <aside class="registration-disclaimer">
+        <div class="registration-shell">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+            <p>
+                NavStreet does not investigate, verify,
+                certify, recommend or endorse businesses
+                appearing in the Find a Pro directory.
+                Directory providers are responsible for their
+                own representations, services, qualifications
+                and legal compliance.
+            </p>
+        </div>
+    </aside>
+    }
+</main>
