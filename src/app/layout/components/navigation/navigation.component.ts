@@ -16,27 +16,20 @@ interface NavigationItem {
 }
 
 @Component({
-  changeDetection:
-    ChangeDetectionStrategy.OnPush,
-
+  selector: 'app-navigation',
+  standalone: true,
   imports: [
     RouterLink,
     RouterLinkActive
   ],
-
-  selector:
-    'app-navigation',
-
-  standalone: true,
-
+  templateUrl:
+    './navigation.component.html',
   styleUrl:
     './navigation.component.scss',
-
-  templateUrl:
-    './navigation.component.html'
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
 })
 export class NavigationComponent {
-
   readonly isMobileMenuOpen =
     input(false);
 
@@ -60,7 +53,7 @@ export class NavigationComponent {
       {
         label: 'Find a Pro',
         route:
-          '/professionals/north-carolina'
+          '/find-a-pro/north-carolina'
       },
       {
         label: 'List Your Business',

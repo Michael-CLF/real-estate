@@ -112,11 +112,16 @@
         </section>
 
         <section class="listing-details__calculator-section">
-          <app-listing-mortgage-calculator [listingPrice]="listing.price" [monthlyHoaFee]="
+          <app-listing-mortgage-calculator [listingPrice]="listing.price" [annualPropertyTax]="
+      estimateAnnualPropertyTax(listing)
+    " [annualHomeownersInsurance]="
+      estimateAnnualHomeownersInsurance(
+        listing
+      )
+    " [monthlyHoaFee]="
       getMonthlyHoaFee(listing.hoa)
     " />
         </section>
-
         }
         @if (viewModel.nearbySchools; as nearbySchools) {
         <section class="listing-details__section listing-details__schools">

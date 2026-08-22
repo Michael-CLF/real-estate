@@ -1,0 +1,126 @@
+<section
+  class="saved-page"
+  aria-labelledby="saved-page-title"
+>
+  <header class="saved-page__header">
+    <div>
+      <p class="saved-page__eyebrow">
+        Property collection
+      </p>
+
+      <h1 id="saved-page-title">
+        Saved Properties
+      </h1>
+
+      <p>
+        Review the homes you have saved while
+        searching the NavStreet marketplace.
+      </p>
+    </div>
+
+    <a
+      class="saved-page__browse"
+      routerLink="/homes"
+    >
+      <i
+        class="fa-solid fa-magnifying-glass"
+        aria-hidden="true"
+      ></i>
+
+      Browse Properties
+    </a>
+  </header>
+
+  <section
+    class="saved-page__summary"
+    aria-label="Saved property total"
+  >
+    <span aria-hidden="true">
+      <i class="fa-solid fa-heart"></i>
+    </span>
+
+    <div>
+      <small>Saved properties</small>
+
+      <strong>
+        {{
+          dashboardState.state()
+            .savedProperties.length
+        }}
+      </strong>
+    </div>
+  </section>
+
+  @if (removalError()) {
+    <div
+      class="saved-page__message saved-page__message--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      {{ removalError() }}
+    </div>
+  }
+
+  <section class="saved-page__panel">
+    @if (isLoading()) {
+      <div
+        class="saved-page__loading"
+        role="status"
+      >
+        <span aria-hidden="true"></span>
+
+        <div>
+          <strong>
+            Loading saved properties
+          </strong>
+
+          <p>
+            Your saved homes are being retrieved.
+          </p>
+        </div>
+      </div>
+    } @else if (loadError()) {
+      <div
+        class="saved-page__error"
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <div>
+          <strong>
+            Saved properties unavailable
+          </strong>
+
+          <p>{{ loadError() }}</p>
+
+          <button
+            type="button"
+            (click)="retryLoading()"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    } @else {
+      <app-saved-homes
+        [savedHomes]="
+          dashboardState.state()
+            .savedProperties
+        "
+        [removingListingUid]="
+          removingListingUid()
+        "
+        (removeRequested)="
+          removeSavedProperty($event)
+        "
+      />
+    }
+  </section>
+</section>

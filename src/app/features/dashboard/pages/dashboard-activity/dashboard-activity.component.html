@@ -1,0 +1,250 @@
+<section class="dashboard-activity">
+  <header class="dashboard-activity__header">
+    <div>
+      <p class="dashboard-activity__eyebrow">
+        Account history
+      </p>
+
+      <h1>Recent activity</h1>
+
+      <p class="dashboard-activity__description">
+        Review inquiries and important events associated
+        with your NavStreet account.
+      </p>
+    </div>
+
+    <button
+      class="dashboard-activity__refresh"
+      type="button"
+      [disabled]="isLoading()"
+      (click)="reloadActivity()"
+    >
+      <i
+        class="fa-solid fa-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh
+    </button>
+  </header>
+
+  <div class="dashboard-activity__metrics">
+    <article class="dashboard-activity__metric">
+      <span class="dashboard-activity__metric-icon">
+        <i
+          class="fa-solid fa-clock-rotate-left"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <span>Recorded activities</span>
+        <strong>{{ activities().length }}</strong>
+      </div>
+    </article>
+
+    <article class="dashboard-activity__metric">
+      <span class="dashboard-activity__metric-icon">
+        <i
+          class="fa-solid fa-inbox"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <span>Received inquiries</span>
+        <strong>{{ receivedActivityCount() }}</strong>
+      </div>
+    </article>
+
+    <article class="dashboard-activity__metric">
+      <span class="dashboard-activity__metric-icon">
+        <i
+          class="fa-solid fa-paper-plane"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <span>Sent inquiries</span>
+        <strong>{{ sentActivityCount() }}</strong>
+      </div>
+    </article>
+  </div>
+
+  <section
+    class="dashboard-activity__panel"
+    aria-labelledby="activity-list-title"
+  >
+    <header class="dashboard-activity__panel-header">
+      <div>
+        <p class="dashboard-activity__eyebrow">
+          Timeline
+        </p>
+
+        <h2 id="activity-list-title">
+          Account activity
+        </h2>
+      </div>
+
+      @if (activities().length > 0) {
+        <span class="dashboard-activity__result-count">
+          {{ activities().length }}
+          {{
+            activities().length === 1
+              ? 'event'
+              : 'events'
+          }}
+        </span>
+      }
+    </header>
+
+    @if (isLoading()) {
+      <div
+        class="dashboard-activity__state"
+        aria-live="polite"
+      >
+        <span
+          class="
+            dashboard-activity__state-icon
+            dashboard-activity__state-icon--loading
+          "
+        >
+          <i
+            class="fa-solid fa-spinner fa-spin"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div>
+          <h3>Loading your activity</h3>
+
+          <p>
+            NavStreet is gathering your latest account
+            events.
+          </p>
+        </div>
+      </div>
+    } @else if (loadError()) {
+      <div
+        class="
+          dashboard-activity__state
+          dashboard-activity__state--error
+        "
+        role="alert"
+      >
+        <span class="dashboard-activity__state-icon">
+          <i
+            class="fa-solid fa-triangle-exclamation"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div>
+          <h3>Activity could not be loaded</h3>
+
+          <p>{{ loadError() }}</p>
+
+          <button
+            type="button"
+            (click)="reloadActivity()"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    } @else if (activities().length === 0) {
+      <div class="dashboard-activity__state">
+        <span class="dashboard-activity__state-icon">
+          <i
+            class="fa-regular fa-clock"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div>
+          <h3>No recent activity yet</h3>
+
+          <p>
+            Inquiries, offer updates, showing activity and
+            other important account events will appear
+            here.
+          </p>
+
+          <div class="dashboard-activity__empty-actions">
+            <a routerLink="/dashboard/listings">
+              View listings
+            </a>
+
+            <a
+              class="dashboard-activity__secondary-link"
+              routerLink="/dashboard/saved-properties"
+            >
+              Saved properties
+            </a>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <ol class="dashboard-activity__timeline">
+        @for (
+          activity of activities();
+          track activity.activityUid
+        ) {
+          <li class="dashboard-activity__timeline-item">
+            <span class="dashboard-activity__timeline-icon">
+              <i
+                [class]="activity.icon"
+                aria-hidden="true"
+              ></i>
+            </span>
+
+            <div class="dashboard-activity__timeline-content">
+              <div class="dashboard-activity__timeline-heading">
+                <div>
+                  <h3>{{ activity.title }}</h3>
+
+                  <time
+                    [attr.datetime]="
+                      activity.timestamp.toISOString()
+                    "
+                  >
+                    {{
+                      activity.timestamp
+                        | date: 'MMM d, y, h:mm a'
+                    }}
+                  </time>
+                </div>
+
+                @if (activity.statusLabel) {
+                  <span
+                    class="dashboard-activity__status"
+                    [class.dashboard-activity__status--new]="
+                      activity.statusLabel === 'New'
+                    "
+                  >
+                    {{ activity.statusLabel }}
+                  </span>
+                }
+              </div>
+
+              <p>{{ activity.description }}</p>
+
+              <a
+                class="dashboard-activity__view-link"
+                [routerLink]="activity.route"
+              >
+                View details
+
+                <i
+                  class="fa-solid fa-arrow-right"
+                  aria-hidden="true"
+                ></i>
+              </a>
+            </div>
+          </li>
+        }
+      </ol>
+    }
+  </section>
+</section>

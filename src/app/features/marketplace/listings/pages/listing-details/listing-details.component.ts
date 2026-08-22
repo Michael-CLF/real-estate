@@ -82,6 +82,10 @@ import {
   ListingViewService
 } from '../../../../../core/domains/marketplace/services/listing-view.service';
 
+import {
+  MortgageCostEstimationService
+} from '../../../../../core/domains/marketplace/services/mortgage-cost-estimation.service';
+
 
 interface ListingFact {
   label: string;
@@ -188,6 +192,9 @@ export class ListingDetailsComponent
   private readonly listingBadgeService =
     inject(ListingBadgeService);
 
+  private readonly mortgageCostEstimationService =
+    inject(MortgageCostEstimationService);
+
   readonly isSaved =
     signal(false);
 
@@ -269,7 +276,7 @@ export class ListingDetailsComponent
       })
     );
 
-      async ngOnInit(): Promise<void> {
+  async ngOnInit(): Promise<void> {
     const viewModel =
       await firstValueFrom(
         this.viewModel$
@@ -371,7 +378,7 @@ export class ListingDetailsComponent
       );
     }
   }
- 
+
 
   async toggleSavedListing(
     listing: MarketplaceListing
@@ -769,6 +776,11 @@ export class ListingDetailsComponent
   protected getMonthlyHoaFee(
     hoa: MarketplaceListing['hoa']
   ): number {
+    console.log(
+      'HOA received by listing details:',
+      hoa
+    );
+
     if (
       !hoa?.hasHoa ||
       hoa.feeAmount === undefined
@@ -792,6 +804,26 @@ export class ListingDetailsComponent
       default:
         return 0;
     }
+  }
+
+  protected estimateAnnualPropertyTax(
+    listing: MarketplaceListing
+  ): number {
+    return this.mortgageCostEstimationService
+      .estimateAnnualPropertyTax(
+        listing.price,
+        listing.address.stateSlug
+      );
+  }
+
+  protected estimateAnnualHomeownersInsurance(
+    listing: MarketplaceListing
+  ): number {
+    return this.mortgageCostEstimationService
+      .estimateAnnualHomeownersInsurance(
+        listing.price,
+        listing.address.stateSlug
+      );
   }
 
   private formatHoaFrequency(

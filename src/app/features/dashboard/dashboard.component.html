@@ -1,42 +1,90 @@
-<section class="dashboard">
+<section
+  class="dashboard-overview"
+  aria-labelledby="dashboard-overview-title"
+>
+  <header class="dashboard-overview__header">
+    <div>
+      <p class="dashboard-overview__eyebrow">
+        Account overview
+      </p>
 
-  <app-dashboard-welcome
-    [firstName]="dashboardState.state().firstName"
-  />
+      <h1 id="dashboard-overview-title">
+        Welcome back,
+        {{
+          dashboardState.state().firstName ||
+          'NavStreet member'
+        }}
+      </h1>
+
+      <p class="dashboard-overview__introduction">
+        Here is a quick look at your properties,
+        saved homes, activity and business account.
+      </p>
+    </div>
+
+    <a
+      class="dashboard-overview__primary-action"
+      routerLink="/sell/new"
+    >
+      <i
+        class="fa-solid fa-plus"
+        aria-hidden="true"
+      ></i>
+
+      New Listing
+    </a>
+  </header>
 
   @if (
     dashboardState.state().userProfile;
-    as userProfile
+    as profile
   ) {
     <section
-      class="account-profile"
-      aria-labelledby="account-profile-title"
+      class="dashboard-overview__account-bar"
+      aria-label="NavStreet account summary"
     >
-      <header class="account-profile__header">
-        <div class="account-profile__heading">
-          <span
-            class="account-profile__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-user"></i>
-          </span>
+      <div class="dashboard-overview__account-identity">
+        <span
+          class="dashboard-overview__account-icon"
+          aria-hidden="true"
+        >
+          <i class="fa-solid fa-user"></i>
+        </span>
 
-          <div>
-            <p class="account-profile__eyebrow">
-              NavStreet account
-            </p>
+        <div>
+          <small>NavStreet account</small>
 
-            <h2 id="account-profile-title">
-              {{
-                userProfile.fullName ||
-                'Account holder'
-              }}
-            </h2>
-          </div>
+          <strong>
+            {{ profile.fullName }}
+          </strong>
         </div>
+      </div>
 
-        @if (userProfile.emailVerified) {
-          <span class="account-profile__verified">
+      <div class="dashboard-overview__account-details">
+        <span>
+          <i
+            class="fa-solid fa-envelope"
+            aria-hidden="true"
+          ></i>
+
+          {{ profile.email }}
+        </span>
+
+        <span>
+          <i
+            class="fa-solid fa-phone"
+            aria-hidden="true"
+          ></i>
+
+          {{ formatTelephone(profile.phone) }}
+        </span>
+
+        @if (profile.emailVerified) {
+          <span
+            class="
+              dashboard-overview__verified
+            "
+          >
             <i
               class="fa-solid fa-circle-check"
               aria-hidden="true"
@@ -44,351 +92,503 @@
 
             Email verified
           </span>
-        } @else {
-          <span
-            class="
-              account-profile__verified
-              account-profile__verified--pending
-            "
-          >
-            <i
-              class="fa-solid fa-circle-exclamation"
-              aria-hidden="true"
-            ></i>
-
-            Verification pending
-          </span>
         }
-      </header>
-
-      <div class="account-profile__details">
-        <div class="account-profile__detail">
-          <span
-            class="account-profile__detail-icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-id-card"></i>
-          </span>
-
-          <div>
-            <span class="account-profile__label">
-              Account number
-            </span>
-
-            <strong>
-              {{
-                userProfile.accountNumber ||
-                'Pending assignment'
-              }}
-            </strong>
-          </div>
-        </div>
-
-        <div class="account-profile__detail">
-          <span
-            class="account-profile__detail-icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-envelope"></i>
-          </span>
-
-          <div>
-            <span class="account-profile__label">
-              Email address
-            </span>
-
-            <strong>
-              {{
-                userProfile.email ||
-                'Not provided'
-              }}
-            </strong>
-          </div>
-        </div>
-
-        <div class="account-profile__detail">
-          <span
-            class="account-profile__detail-icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-phone"></i>
-          </span>
-
-          <div>
-            <span class="account-profile__label">
-              Phone number
-            </span>
-
-            <strong>
-              {{
-                userProfile.phone ||
-                'Not provided'
-              }}
-            </strong>
-          </div>
-        </div>
       </div>
-    </section>
-  }
-
-  @if (dashboardState.state().showWelcome) {
-    <header class="dashboard__header">
-      <h1>
-        Welcome to Your NavStreet Dashboard
-      </h1>
-
-      <p>
-        Buy or sell real estate with confidence.
-        What would you like to do today?
-      </p>
-    </header>
-
-    <section class="dashboard__welcome-actions">
-      <a
-        class="action-card"
-        routerLink="/homes"
-      >
-        <div class="action-card__icon">
-          <i
-            class="fa-solid fa-magnifying-glass"
-            aria-hidden="true"
-          ></i>
-        </div>
-
-        <h2 class="card-title">
-          Browse Properties
-        </h2>
-
-        <p>
-          Search homes, save favorites, and begin your
-          home search.
-        </p>
-      </a>
-
-      <a
-        class="action-card"
-        routerLink="/sell/new"
-      >
-        <div class="action-card__icon">
-          <i
-            class="fa-solid fa-house-circle-plus"
-            aria-hidden="true"
-          ></i>
-        </div>
-
-        <h2 class="card-title">
-          List a Property
-        </h2>
-
-        <p>
-          Create your first property listing and start
-          selling today.
-        </p>
-      </a>
-    </section>
-
-       @if (
-      !dashboardState.state().hasListings &&
-      dashboardState.state().savedProperties.length === 0 &&
-      recentActivities().length === 0
-    ) {
-      <section class="dashboard-placeholder">
-        <h3 class="info">
-          Your Activity
-        </h3>
-
-        <p>
-          As you begin using NavStreet, this dashboard
-          will automatically display:
-        </p>
-
-        <ul>
-          <li>Draft Listings</li>
-          <li>Active Listings</li>
-          <li>Saved Homes</li>
-          <li>Messages</li>
-          <li>Offers</li>
-          <li>Upcoming Showings</li>
-          <li>Recent Activity</li>
-          <li>Property Metrics</li>
-        </ul>
-      </section>
-    }
-  }
-
-  @if (dashboardState.state().hasListings) {
-    <section class="dashboard__listings">
-      <div class="dashboard__section-header">
-        <div>
-          <h2>My Listings</h2>
-
-          <p>
-            Manage your draft, active, under contract
-            and sold listings.
-          </p>
-        </div>
-
-        <a
-          class="dashboard__new-listing"
-          routerLink="/sell/new"
-        >
-          + New Listing
-        </a>
-      </div>
-
-      <nav
-        class="dashboard__listing-tabs"
-        aria-label="Listing status"
-      >
-        <button
-          type="button"
-          [class.active]="
-            selectedListingTab() === 'draft'
-          "
-          (click)="selectListingTab('draft')"
-        >
-          Draft
-        </button>
-
-        <button
-          type="button"
-          [class.active]="
-            selectedListingTab() === 'active'
-          "
-          (click)="selectListingTab('active')"
-        >
-          Active
-        </button>
-
-        <button
-          type="button"
-          [class.active]="
-            selectedListingTab() ===
-            'under-contract'
-          "
-          (click)="
-            selectListingTab('under-contract')
-          "
-        >
-          Under Contract
-        </button>
-
-        <button
-          type="button"
-          [class.active]="
-            selectedListingTab() === 'sold'
-          "
-          (click)="selectListingTab('sold')"
-        >
-          Sold
-        </button>
-      </nav>
-
-      @if (selectedListingTab() === 'draft') {
-        <app-account-listings
-          title="Draft Listings"
-          subtitle="
-            Continue working on unfinished listings.
-          "
-          emptyMessage="
-            You do not have any draft listings.
-          "
-          [listings]="
-            dashboardState.state().draftListings
-          "
-          (actionSelected)="manageListing($event)"
-        />
-      }
-
-      @if (selectedListingTab() === 'active') {
-        <app-account-listings
-          title="Active Listings"
-          subtitle="
-            Manage your properties currently listed
-            for sale.
-          "
-          emptyMessage="
-            You do not have any active listings.
-          "
-          [listings]="
-            dashboardState.state().activeListings
-          "
-          (actionSelected)="manageListing($event)"
-        />
-      }
-
-      @if (
-        selectedListingTab() === 'under-contract'
-      ) {
-        <app-account-listings
-          title="Under Contract"
-          subtitle="
-            Properties currently under contract.
-          "
-          emptyMessage="
-            You do not have any properties under
-            contract.
-          "
-          [listings]="[]"
-          (actionSelected)="manageListing($event)"
-        />
-      }
-
-      @if (selectedListingTab() === 'sold') {
-        <app-account-listings
-          title="Sold Listings"
-          subtitle="
-            Review properties you have sold through
-            NavStreet.
-          "
-          emptyMessage="
-            You do not have any sold listings.
-          "
-          [listings]="[]"
-          (actionSelected)="manageListing($event)"
-        />
-      }
     </section>
   }
 
   <section
-    class="dashboard__secondary-grid"
-    aria-label="Saved properties and recent activity"
+    class="dashboard-overview__metrics"
+    aria-label="Dashboard totals"
   >
-    @if (savedPropertyError()) {
-      <div
+    <a
+      class="dashboard-overview__metric"
+      routerLink="/dashboard/listings"
+    >
+      <span
         class="
-          dashboard__saved-message
-          dashboard__saved-message--error
+          dashboard-overview__metric-icon
+          dashboard-overview__metric-icon--active
         "
-        role="alert"
+        aria-hidden="true"
       >
-        <i
-          class="fa-solid fa-circle-exclamation"
-          aria-hidden="true"
-        ></i>
+        <i class="fa-solid fa-house-circle-check"></i>
+      </span>
 
-        <span>
-          {{ savedPropertyError() }}
-        </span>
-      </div>
-    }
+      <span class="dashboard-overview__metric-content">
+        <small>Active listings</small>
 
-    <app-saved-homes
-      [savedHomes]="
-        dashboardState.state().savedProperties
-      "
-      [removingListingUid]="
-        removingSavedListingUid()
-      "
-      (removeRequested)="
-        removeSavedProperty($event)
-      "
-    />
+        <strong>
+          {{
+            dashboardState.state()
+              .activeListings.length
+          }}
+        </strong>
 
-       <app-activity-card
-      [activities]="recentActivities()"
-    />
+        <span>View active properties</span>
+      </span>
+
+      <i
+        class="
+          dashboard-overview__metric-arrow
+          fa-solid fa-arrow-right
+        "
+        aria-hidden="true"
+      ></i>
+    </a>
+
+    <a
+      class="dashboard-overview__metric"
+      routerLink="/dashboard/listings"
+    >
+      <span
+        class="
+          dashboard-overview__metric-icon
+          dashboard-overview__metric-icon--draft
+        "
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-file-pen"></i>
+      </span>
+
+      <span class="dashboard-overview__metric-content">
+        <small>Listing drafts</small>
+
+        <strong>
+          {{
+            dashboardState.state()
+              .draftListings.length
+          }}
+        </strong>
+
+        <span>Continue unfinished listings</span>
+      </span>
+
+      <i
+        class="
+          dashboard-overview__metric-arrow
+          fa-solid fa-arrow-right
+        "
+        aria-hidden="true"
+      ></i>
+    </a>
+
+    <a
+      class="dashboard-overview__metric"
+      routerLink="/dashboard/saved-properties"
+    >
+      <span
+        class="
+          dashboard-overview__metric-icon
+          dashboard-overview__metric-icon--saved
+        "
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-heart"></i>
+      </span>
+
+      <span class="dashboard-overview__metric-content">
+        <small>Saved properties</small>
+
+        <strong>
+          {{
+            dashboardState.state()
+              .savedProperties.length
+          }}
+        </strong>
+
+        <span>Homes you want to revisit</span>
+      </span>
+
+      <i
+        class="
+          dashboard-overview__metric-arrow
+          fa-solid fa-arrow-right
+        "
+        aria-hidden="true"
+      ></i>
+    </a>
+
+    <a
+      class="dashboard-overview__metric"
+      routerLink="/dashboard/activity"
+    >
+      <span
+        class="
+          dashboard-overview__metric-icon
+          dashboard-overview__metric-icon--activity
+        "
+        aria-hidden="true"
+      >
+        <i class="fa-solid fa-clock-rotate-left"></i>
+      </span>
+
+      <span class="dashboard-overview__metric-content">
+        <small>Recent activity</small>
+
+        <strong>
+          {{ recentActivities().length }}
+        </strong>
+
+        <span>Latest account events</span>
+      </span>
+
+      <i
+        class="
+          dashboard-overview__metric-arrow
+          fa-solid fa-arrow-right
+        "
+        aria-hidden="true"
+      ></i>
+    </a>
   </section>
 
+  <div class="dashboard-overview__main-grid">
+    <section class="dashboard-overview__panel">
+      <header class="dashboard-overview__panel-header">
+        <div>
+          <p class="dashboard-overview__panel-eyebrow">
+            Quick access
+          </p>
+
+          <h2>What would you like to do?</h2>
+        </div>
+      </header>
+
+      <div class="dashboard-overview__quick-actions">
+        <a
+          class="dashboard-overview__quick-action"
+          routerLink="/dashboard/listings"
+        >
+          <span aria-hidden="true">
+            <i class="fa-solid fa-house"></i>
+          </span>
+
+          <div>
+            <strong>Manage listings</strong>
+
+            <p>
+              Review drafts and manage your active
+              properties.
+            </p>
+          </div>
+
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+
+        <a
+          class="dashboard-overview__quick-action"
+          routerLink="/sell/new"
+        >
+          <span aria-hidden="true">
+            <i class="fa-solid fa-sign-hanging"></i>
+          </span>
+
+          <div>
+            <strong>List a property</strong>
+
+            <p>
+              Begin a new property listing or save a
+              draft.
+            </p>
+          </div>
+
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+
+        <a
+          class="dashboard-overview__quick-action"
+          routerLink="/homes"
+        >
+          <span aria-hidden="true">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+
+          <div>
+            <strong>Browse properties</strong>
+
+            <p>
+              Search available homes throughout the
+              marketplace.
+            </p>
+          </div>
+
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+
+        <a
+          class="dashboard-overview__quick-action"
+          routerLink="/find-a-pro/north-carolina"
+        >
+          <span aria-hidden="true">
+            <i class="fa-solid fa-address-book"></i>
+          </span>
+
+          <div>
+            <strong>Find a professional</strong>
+
+            <p>
+              Locate transaction professionals and
+              service providers.
+            </p>
+          </div>
+
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="dashboard-overview__panel">
+      <header class="dashboard-overview__panel-header">
+        <div>
+          <p class="dashboard-overview__panel-eyebrow">
+            Property activity
+          </p>
+
+          <h2>Listings snapshot</h2>
+        </div>
+
+        <a routerLink="/dashboard/listings">
+          View all
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+      </header>
+
+      <div class="dashboard-overview__listing-statuses">
+        <div>
+          <span>
+            <i
+              class="fa-solid fa-circle"
+              aria-hidden="true"
+            ></i>
+
+            Active
+          </span>
+
+          <strong>
+            {{
+              dashboardState.state()
+                .activeListings.length
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            <i
+              class="fa-solid fa-circle"
+              aria-hidden="true"
+            ></i>
+
+            Draft
+          </span>
+
+          <strong>
+            {{
+              dashboardState.state()
+                .draftListings.length
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            <i
+              class="fa-solid fa-circle"
+              aria-hidden="true"
+            ></i>
+
+            Saved properties
+          </span>
+
+          <strong>
+            {{
+              dashboardState.state()
+                .savedProperties.length
+            }}
+          </strong>
+        </div>
+      </div>
+
+      @if (
+        dashboardState.state()
+          .activeListings.length === 0 &&
+        dashboardState.state()
+          .draftListings.length === 0
+      ) {
+        <div class="dashboard-overview__empty-listings">
+          <span aria-hidden="true">
+            <i class="fa-solid fa-house-circle-plus"></i>
+          </span>
+
+          <div>
+            <strong>
+              You do not have any listings yet
+            </strong>
+
+            <p>
+              Start a property listing and save your
+              progress at any time.
+            </p>
+          </div>
+
+          <a routerLink="/sell/new">
+            Start a Listing
+          </a>
+        </div>
+      } @else {
+        <a
+          class="dashboard-overview__listing-link"
+          routerLink="/dashboard/listings"
+        >
+          <span>
+            Open My Listings
+          </span>
+
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+      }
+    </section>
+  </div>
+
+  @if (professional(); as business) {
+    <section
+      class="dashboard-overview__business"
+      aria-labelledby="dashboard-business-summary-title"
+    >
+      <div class="dashboard-overview__business-identity">
+        <span
+          class="dashboard-overview__business-icon"
+          aria-hidden="true"
+        >
+          <i class="fa-solid fa-briefcase"></i>
+        </span>
+
+        <div>
+          <p class="dashboard-overview__panel-eyebrow">
+            Business account
+          </p>
+
+          <h2 id="dashboard-business-summary-title">
+            {{ business.businessName }}
+          </h2>
+
+          <p>
+            {{ professionalTypeLabel() }}
+            ·
+            {{ business.stateName }}
+          </p>
+        </div>
+      </div>
+
+      <div class="dashboard-overview__business-status">
+        @if (hasFullBusinessProfile()) {
+          <span
+            class="
+              dashboard-overview__business-badge
+              dashboard-overview__business-badge--active
+            "
+          >
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
+
+            Full Business Profile active
+          </span>
+        } @else {
+          <span class="dashboard-overview__business-badge">
+            <i
+              class="fa-solid fa-address-card"
+              aria-hidden="true"
+            ></i>
+
+            Free directory listing
+          </span>
+        }
+      </div>
+
+      <div class="dashboard-overview__business-actions">
+        <a
+          [routerLink]="[
+            '/find-a-pro',
+            business.stateSlug
+          ]"
+        >
+          View Directory
+        </a>
+
+        @if (publicProfileRoute(); as route) {
+          <a [routerLink]="route">
+            View Public Profile
+          </a>
+        }
+
+        @if (profileSetupRoute(); as route) {
+          <a [routerLink]="route">
+            Edit Business Profile
+          </a>
+        }
+
+        @if (!hasFullBusinessProfile()) {
+          <button
+            type="button"
+            [disabled]="isStartingUpgrade()"
+            (click)="upgradeBusinessProfile()"
+          >
+            @if (isStartingUpgrade()) {
+              Opening Checkout...
+            } @else {
+              Upgrade Profile
+            }
+          </button>
+        } @else {
+          <button
+            type="button"
+            [disabled]="isOpeningBillingPortal()"
+            (click)="openBusinessBillingPortal()"
+          >
+            @if (isOpeningBillingPortal()) {
+              Opening Billing...
+            } @else {
+              Manage Subscription
+            }
+          </button>
+        }
+      </div>
+
+      @if (
+        professionalUpgradeError() ||
+        professionalBillingError()
+      ) {
+        <p
+          class="dashboard-overview__business-error"
+          role="alert"
+        >
+          {{
+            professionalUpgradeError() ||
+            professionalBillingError()
+          }}
+        </p>
+      }
+    </section>
+  }
 </section>

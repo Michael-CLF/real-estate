@@ -1,0 +1,223 @@
+<section
+  class="inquiries-page"
+  aria-labelledby="inquiries-page-title"
+>
+  <header class="inquiries-page__header">
+    <div>
+      <p class="inquiries-page__eyebrow">
+        Account communications
+      </p>
+
+      <h1 id="inquiries-page-title">
+        Inquiries
+      </h1>
+
+      <p>
+        Review inquiries you have sent and inquiries
+        received from potential buyers.
+      </p>
+    </div>
+  </header>
+
+  <section
+    class="inquiries-page__metrics"
+    aria-label="Inquiry totals"
+  >
+    <article>
+      <span aria-hidden="true">
+        <i class="fa-solid fa-message"></i>
+      </span>
+
+      <div>
+        <small>All inquiries</small>
+        <strong>{{ inquiries().length }}</strong>
+      </div>
+    </article>
+
+    <article>
+      <span aria-hidden="true">
+        <i class="fa-solid fa-inbox"></i>
+      </span>
+
+      <div>
+        <small>Received</small>
+        <strong>{{ receivedCount() }}</strong>
+      </div>
+    </article>
+
+    <article>
+      <span aria-hidden="true">
+        <i class="fa-solid fa-paper-plane"></i>
+      </span>
+
+      <div>
+        <small>Sent</small>
+        <strong>{{ sentCount() }}</strong>
+      </div>
+    </article>
+
+    <article>
+      <span aria-hidden="true">
+        <i class="fa-solid fa-circle-exclamation"></i>
+      </span>
+
+      <div>
+        <small>New</small>
+        <strong>{{ unreadCount() }}</strong>
+      </div>
+    </article>
+  </section>
+
+  <section class="inquiries-page__panel">
+    <nav
+      class="inquiries-page__filters"
+      aria-label="Filter inquiries"
+    >
+      <button
+        type="button"
+        [class.active]="
+          selectedFilter() === 'all'
+        "
+        (click)="selectFilter('all')"
+      >
+        All
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          selectedFilter() === 'received'
+        "
+        (click)="selectFilter('received')"
+      >
+        Received
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          selectedFilter() === 'sent'
+        "
+        (click)="selectFilter('sent')"
+      >
+        Sent
+      </button>
+    </nav>
+
+    @if (isLoading()) {
+      <div class="inquiries-page__loading">
+        Loading inquiries...
+      </div>
+    } @else if (loadError()) {
+      <div
+        class="inquiries-page__error"
+        role="alert"
+      >
+        <strong>
+          Inquiries unavailable
+        </strong>
+
+        <p>{{ loadError() }}</p>
+
+        <button
+          type="button"
+          (click)="retryLoading()"
+        >
+          Try Again
+        </button>
+      </div>
+    } @else if (
+      filteredInquiries().length === 0
+    ) {
+      <div class="inquiries-page__empty">
+        <span aria-hidden="true">
+          <i class="fa-regular fa-message"></i>
+        </span>
+
+        <h2>No inquiries found</h2>
+
+        <p>
+          Inquiries matching this filter will appear
+          here.
+        </p>
+      </div>
+    } @else {
+      <div class="inquiries-page__list">
+        @for (
+          inquiry of filteredInquiries();
+          track inquiry.inquiryUid
+        ) {
+          <a
+            class="inquiries-page__item"
+            [routerLink]="
+              inquiryRoute(inquiry)
+            "
+          >
+            <span
+              class="inquiries-page__item-icon"
+              [class.inquiries-page__item-icon--received]="
+                inquiry.perspective ===
+                'received'
+              "
+              aria-hidden="true"
+            >
+              <i
+                [class]="
+                  inquiry.perspective ===
+                    'received'
+                    ? 'fa-solid fa-inbox'
+                    : 'fa-solid fa-paper-plane'
+                "
+              ></i>
+            </span>
+
+            <div class="inquiries-page__item-content">
+              <div class="inquiries-page__item-heading">
+                <strong>
+                  {{
+                    inquiry.perspective ===
+                      'received'
+                      ? inquiry.buyerName
+                      : 'Inquiry sent'
+                  }}
+                </strong>
+
+                <span
+                  [class.inquiries-page__status--new]="
+                    inquiry.status === 'new'
+                  "
+                >
+                  {{ inquiry.status }}
+                </span>
+              </div>
+
+              <p>
+                {{ inquiry.propertyAddress }}
+              </p>
+
+              <small>
+                Reference:
+                {{
+                  inquiry.inquiryReferenceNumber
+                }}
+                ·
+                {{
+                  inquiryDate(inquiry)
+                    | date:'MMM d, y • h:mm a'
+                }}
+              </small>
+            </div>
+
+            <i
+              class="
+                inquiries-page__arrow
+                fa-solid fa-chevron-right
+              "
+              aria-hidden="true"
+            ></i>
+          </a>
+        }
+      </div>
+    }
+  </section>
+</section>

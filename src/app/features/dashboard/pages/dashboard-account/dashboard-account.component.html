@@ -1,0 +1,376 @@
+<section
+  class="dashboard-account"
+  aria-labelledby="dashboard-account-title"
+>
+  <header class="dashboard-account__page-header">
+    <div>
+      <p class="dashboard-account__eyebrow">
+        Account settings
+      </p>
+
+      <h1 id="dashboard-account-title">
+        Your NavStreet account
+      </h1>
+
+      <p class="dashboard-account__introduction">
+        Review the personal information associated
+        with your NavStreet account.
+      </p>
+    </div>
+
+    <a
+      class="dashboard-account__marketplace-link"
+      routerLink="/homes"
+    >
+      <i
+        class="fa-solid fa-magnifying-glass"
+        aria-hidden="true"
+      ></i>
+
+      Browse properties
+    </a>
+  </header>
+
+  @if (isLoading()) {
+    <section
+      class="
+        dashboard-account__state
+        dashboard-account__state--loading
+      "
+      aria-live="polite"
+    >
+      <span
+        class="dashboard-account__state-icon"
+        aria-hidden="true"
+      >
+        <i
+          class="fa-solid fa-spinner fa-spin"
+        ></i>
+      </span>
+
+      <div>
+        <h2>Loading your account</h2>
+
+        <p>
+          We are retrieving your NavStreet account
+          information.
+        </p>
+      </div>
+    </section>
+  } @else if (loadError()) {
+    <section
+      class="
+        dashboard-account__state
+        dashboard-account__state--error
+      "
+      role="alert"
+    >
+      <span
+        class="dashboard-account__state-icon"
+        aria-hidden="true"
+      >
+        <i
+          class="fa-solid fa-circle-exclamation"
+        ></i>
+      </span>
+
+      <div>
+        <h2>Account information unavailable</h2>
+
+        <p>
+          {{ loadError() }}
+        </p>
+
+        <button
+          type="button"
+          (click)="reloadAccount()"
+        >
+          <i
+            class="fa-solid fa-rotate-right"
+            aria-hidden="true"
+          ></i>
+
+          Try again
+        </button>
+      </div>
+    </section>
+  } @else if (userProfile(); as profile) {
+    <article class="dashboard-account__profile">
+      <header class="dashboard-account__profile-header">
+        <div class="dashboard-account__identity">
+          <span
+            class="dashboard-account__avatar"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-user"></i>
+          </span>
+
+          <div>
+            <p class="dashboard-account__section-label">
+              NavStreet account
+            </p>
+
+            <h2>
+              {{ displayName() }}
+            </h2>
+
+            <p>
+              Personal account information
+            </p>
+          </div>
+        </div>
+
+        @if (profile.emailVerified) {
+          <span
+            class="
+              dashboard-account__status
+              dashboard-account__status--verified
+            "
+          >
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
+
+            Email verified
+          </span>
+        } @else {
+          <span
+            class="
+              dashboard-account__status
+              dashboard-account__status--pending
+            "
+          >
+            <i
+              class="fa-solid fa-circle-exclamation"
+              aria-hidden="true"
+            ></i>
+
+            Verification pending
+          </span>
+        }
+      </header>
+
+      <div class="dashboard-account__details">
+        <section class="dashboard-account__detail">
+          <span
+            class="dashboard-account__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-id-card"></i>
+          </span>
+
+          <div>
+            <span class="dashboard-account__detail-label">
+              Account number
+            </span>
+
+            <strong>
+              {{
+                profile.accountNumber ||
+                'Pending assignment'
+              }}
+            </strong>
+
+            <small>
+              Your unique NavStreet account reference
+            </small>
+          </div>
+        </section>
+
+        <section class="dashboard-account__detail">
+          <span
+            class="dashboard-account__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-user"></i>
+          </span>
+
+          <div>
+            <span class="dashboard-account__detail-label">
+              Account holder
+            </span>
+
+            <strong>
+              {{ displayName() }}
+            </strong>
+
+            <small>
+              Name associated with this account
+            </small>
+          </div>
+        </section>
+
+        <section class="dashboard-account__detail">
+          <span
+            class="dashboard-account__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+
+          <div>
+            <span class="dashboard-account__detail-label">
+              Email address
+            </span>
+
+            <strong>
+              {{
+                profile.email ||
+                'Not provided'
+              }}
+            </strong>
+
+            <small>
+              Used for authentication and notifications
+            </small>
+          </div>
+        </section>
+
+        <section class="dashboard-account__detail">
+          <span
+            class="dashboard-account__detail-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-phone"></i>
+          </span>
+
+          <div>
+            <span class="dashboard-account__detail-label">
+              Phone number
+            </span>
+
+            <strong>
+              {{ formattedTelephone() }}
+            </strong>
+
+            <small>
+              Contact telephone associated with your
+              account
+            </small>
+          </div>
+        </section>
+      </div>
+    </article>
+
+    <div class="dashboard-account__information-grid">
+      <article class="dashboard-account__panel">
+        <div class="dashboard-account__panel-heading">
+          <span
+            class="dashboard-account__panel-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-shield-halved"></i>
+          </span>
+
+          <div>
+            <p class="dashboard-account__section-label">
+              Account security
+            </p>
+
+            <h2>
+              Passwordless authentication
+            </h2>
+          </div>
+        </div>
+
+        <p>
+          Your NavStreet account uses a secure
+          one-time verification code instead of a
+          traditional password.
+        </p>
+
+        <ul>
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            Verification codes are sent to your
+            registered email address.
+          </li>
+
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            NavStreet does not store an account
+            password.
+          </li>
+
+          <li>
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+
+            Never provide your verification code to
+            another person.
+          </li>
+        </ul>
+      </article>
+
+      <article class="dashboard-account__panel">
+        <div class="dashboard-account__panel-heading">
+          <span
+            class="dashboard-account__panel-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-briefcase"></i>
+          </span>
+
+          <div>
+            <p class="dashboard-account__section-label">
+              Business services
+            </p>
+
+            <h2>
+              Professional directory account
+            </h2>
+          </div>
+        </div>
+
+        <p>
+          Business directory information and paid
+          professional profile features are managed
+          separately from your personal account.
+        </p>
+
+        <a
+          class="dashboard-account__panel-action"
+          routerLink="/dashboard/business"
+        >
+          Manage business account
+
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+      </article>
+    </div>
+
+    <aside class="dashboard-account__notice">
+      <i
+        class="fa-solid fa-circle-info"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <strong>
+          Need to correct your account information?
+        </strong>
+
+        <p>
+          Account information editing is not currently
+          available in this MVP account screen. This
+          prevents accidental changes to verified
+          identity and authentication information.
+        </p>
+      </div>
+    </aside>
+  }
+</section>

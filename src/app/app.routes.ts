@@ -16,26 +16,188 @@ import {
   guestGuard
 } from './core/authentication/guards/guest.guard';
 
+import {
+  DashboardLayoutComponent
+} from './features/dashboard/layout/dashboard-layout/dashboard-layout.component';
+
 export const routes: Routes = [
+  /*
+   * Authenticated account dashboard
+   *
+   * The dashboard uses its own application layout instead
+   * of the public website header and footer.
+   */
+  {
+    path: 'dashboard',
+    component: DashboardLayoutComponent,
+    canActivate: [
+      authGuard,
+      accountGuard
+    ],
+    children: [
+      /*
+       * Dashboard overview
+       */
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import(
+            './features/dashboard/dashboard.component'
+          ).then(
+            component =>
+              component.DashboardComponent
+          )
+      },
+
+      /*
+       * Account property listings
+       */
+      {
+        path: 'listings',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-listings/dashboard-listings.component'
+          ).then(
+            component =>
+              component.DashboardListingsComponent
+          )
+      },
+
+      /*
+       * Saved marketplace properties
+       */
+      {
+        path: 'saved-properties',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-saved-properties/dashboard-saved-properties.component'
+          ).then(
+            component =>
+              component.DashboardSavedPropertiesComponent
+          )
+      },
+
+      /*
+       * Account-wide inquiry history
+       */
+      {
+        path: 'inquiries',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-inquiries/dashboard-inquiries.component'
+          ).then(
+            component =>
+              component.DashboardInquiriesComponent
+          )
+      },
+
+      /*
+       * Recent account activity
+       */
+      {
+        path: 'activity',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-activity/dashboard-activity.component'
+          ).then(
+            component =>
+              component.DashboardActivityComponent
+          )
+      },
+
+      /*
+       * Account-wide offers
+       */
+      {
+        path: 'offers',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-offers/dashboard-offers.component'
+          ).then(
+            component =>
+              component.DashboardOffersComponent
+          )
+      },
+
+      /*
+       * Existing showing-request page
+       */
+      {
+        path: 'showings',
+        loadComponent: () =>
+          import(
+            './features/dashboard/showings/my-showing-requests/my-showing-requests.component'
+          ).then(
+            component =>
+              component.MyShowingRequestsComponent
+          )
+      },
+
+      /*
+       * Professional business account
+       */
+      {
+        path: 'business',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-business/dashboard-business.component'
+          ).then(
+            component =>
+              component.DashboardBusinessComponent
+          )
+      },
+
+      /*
+       * NavStreet account settings
+       */
+      {
+        path: 'account',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-account/dashboard-account.component'
+          ).then(
+            component =>
+              component.DashboardAccountComponent
+          )
+      },
+
+      /*
+       * Keep unknown dashboard URLs inside the
+       * dashboard instead of sending users home.
+       */
+      {
+        path: '**',
+        redirectTo: ''
+      }
+    ]
+  },
+
+  /*
+   * Public NavStreet website
+   */
   {
     path: '',
     component: PublicLayoutComponent,
     children: [
+      /*
+       * NavStreet homepage
+       */
       {
         path: '',
+        pathMatch: 'full',
         loadComponent: () =>
-          import('./features/home/home.component').then(
-            component => component.HomeComponent
+          import(
+            './features/home/home.component'
+          ).then(
+            component =>
+              component.HomeComponent
           )
       },
+
       {
         path:
           'professionals/:stateSlug/profile/setup',
-
-        canActivate: [
-          authGuard,
-          accountGuard
-        ],
 
         loadComponent: () =>
           import(
@@ -248,29 +410,6 @@ export const routes: Routes = [
         path: 'mortgage',
         redirectTo: 'calculators',
         pathMatch: 'full'
-      },
-      {
-        path: 'resources',
-        redirectTo:
-          'find-a-pro/north-carolina',
-        pathMatch: 'full'
-      },
-
-      /*
-       * Account Dashboard
-       */
-      {
-        path: 'dashboard',
-        canActivate: [
-          authGuard,
-          accountGuard
-        ],
-        loadComponent: () =>
-          import(
-            './features/dashboard/dashboard.component'
-          ).then(
-            component => component.DashboardComponent
-          )
       },
 
       /*
@@ -732,30 +871,13 @@ export const routes: Routes = [
       )
   },
   {
-    path: 'dashboard/showings',
-    canActivate: [
-      authGuard,
-      accountGuard
-    ],
-    loadComponent: () =>
-      import(
-        './features/dashboard/showings/my-showing-requests/my-showing-requests.component'
-      ).then(
-        component =>
-          component.MyShowingRequestsComponent
-      )
-  },
-  {
     path:
       'professionals/:stateSlug/:professionalSlug',
 
-    loadComponent: () =>
-      import(
-        './features/professionals/pages/professional-profile/professional-profile.component'
-      ).then(
-        component =>
-          component.ProfessionalProfileComponent
-      )
+    redirectTo:
+      'find-a-pro/:stateSlug/:professionalSlug',
+
+    pathMatch: 'full'
   },
   {
     path: '**',

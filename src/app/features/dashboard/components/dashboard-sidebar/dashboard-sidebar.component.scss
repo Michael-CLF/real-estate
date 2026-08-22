@@ -1,0 +1,312 @@
+:host {
+  display: contents;
+}
+
+.dashboard-sidebar {
+  --sidebar-navy: #0c1a2b;
+  --sidebar-navy-light: #142a3f;
+  --sidebar-blue: #154360;
+  --sidebar-teal: #00a099;
+  --sidebar-teal-light: #dff7f5;
+  --sidebar-text: #d8e4ec;
+  --sidebar-muted: #8196a7;
+
+  position: fixed;
+  z-index: 50;
+  inset: 0 auto 0 0;
+
+  display: flex;
+  overflow-y: auto;
+  width: min(86vw, 280px);
+  min-height: 100vh;
+  padding: 0;
+  flex-direction: column;
+
+  color: #ffffff;
+  background:
+    linear-gradient(
+      180deg,
+      #0c1a2b 0%,
+      #10263a 100%
+    );
+
+  box-shadow:
+    16px 0 40px rgba(5, 24, 38, 0.22);
+
+  transform: translateX(-105%);
+  transition:
+    transform 180ms ease-in-out;
+}
+
+.dashboard-sidebar--open {
+  transform: translateX(0);
+}
+
+.dashboard-sidebar__brand {
+  display: flex;
+  min-height: 86px;
+  padding: 18px 19px;
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.09);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-sidebar__brand-link {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.dashboard-sidebar__brand-mark {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  place-items: center;
+
+  color: #ffffff;
+  background: var(--sidebar-teal);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-sidebar__brand-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+
+  strong {
+    overflow: hidden;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: var(--sidebar-muted);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+.dashboard-sidebar__close {
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  place-items: center;
+
+  color: var(--sidebar-text);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(0, 160, 153, 0.32);
+    outline-offset: 2px;
+  }
+}
+
+.dashboard-sidebar__navigation {
+  display: grid;
+  padding: 18px 13px 24px;
+  gap: 24px;
+}
+
+.dashboard-sidebar__group {
+  display: grid;
+  gap: 7px;
+}
+
+.dashboard-sidebar__group-label {
+  margin: 0;
+  padding: 0 11px;
+
+  color: var(--sidebar-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.dashboard-sidebar__link {
+  display: flex;
+  min-height: 50px;
+  padding: 0px 16px;
+  border-radius: 9px;
+  align-items: center;
+  margin: 15px 0px 15px 10px;
+  gap: 14px;
+
+  color: #ffffff;
+  background: transparent;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  text-decoration: none;
+
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+
+  /*
+   * Hovered but not currently selected.
+   * This creates a partially transparent teal.
+   */
+  &:hover:not(.dashboard-sidebar__link--active) {
+    color: #000000;
+    background-color: #90E4C1;
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(
+      0,
+      160,
+      153,
+      0.42
+    );
+
+    outline-offset: 2px;
+  }
+}
+
+.dashboard-sidebar__link-icon {
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+
+  color: #008080;
+  font-size: 1rem;
+
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+/*
+ * The routerLinkActive class keeps the solid teal
+ * background applied to the current dashboard section.
+ */
+.dashboard-sidebar__link--active,
+.dashboard-sidebar__link--active:hover {
+  color: #ffffff;
+  background-color: var(--sidebar-teal);
+  transform: none;
+}
+
+.dashboard-sidebar__link--active
+.dashboard-sidebar__link-icon {
+  color: #ffffff;
+}
+
+.dashboard-sidebar__footer {
+  display: grid;
+  padding: 18px 14px;
+  border-top:
+    1px solid rgba(255, 255, 255, 0.09);
+  margin-top: auto;
+  gap: 8px;
+}
+
+.dashboard-sidebar__footer-action {
+  display: flex;
+  min-height: 43px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  align-items: center;
+  gap: 10px;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  i {
+    width: 18px;
+    text-align: center;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(0, 160, 153, 0.32);
+    outline-offset: 2px;
+  }
+}
+
+.dashboard-sidebar__footer-action--marketplace {
+  color: var(--sidebar-text);
+  background: rgba(255, 255, 255, 0.06);
+
+  &:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.11);
+  }
+}
+
+.dashboard-sidebar__footer-action--logout {
+  color: #ffffff;
+  background: var(--sidebar-blue);
+
+  &:hover {
+    background: #1c5678;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-sidebar {
+    position: fixed;
+    width: 280px;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .dashboard-sidebar__close {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-sidebar {
+    width: min(90vw, 280px);
+  }
+
+  .dashboard-sidebar__brand {
+    min-height: 76px;
+    padding:
+      15px 16px;
+  }
+
+  .dashboard-sidebar__navigation {
+    padding:
+      15px 11px 21px;
+    gap: 20px;
+  }
+}

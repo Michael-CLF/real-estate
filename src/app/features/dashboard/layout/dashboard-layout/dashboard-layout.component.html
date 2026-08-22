@@ -1,0 +1,54 @@
+<div class="dashboard-layout">
+
+  <app-dashboard-sidebar
+    [mobileOpen]="isMobileNavigationOpen()"
+    (navigationSelected)="closeMobileNavigation()"
+  />
+
+  @if (isMobileNavigationOpen()) {
+    <button
+      class="dashboard-layout__overlay"
+      type="button"
+      aria-label="Close dashboard navigation"
+      (click)="closeMobileNavigation()"
+    ></button>
+  }
+
+  <div class="dashboard-layout__workspace">
+
+    <header class="dashboard-layout__mobile-header">
+      <button
+        class="dashboard-layout__menu-button"
+        type="button"
+        aria-label="Open dashboard navigation"
+        [attr.aria-expanded]="
+          isMobileNavigationOpen()
+        "
+        (click)="toggleMobileNavigation()"
+      >
+        <i
+          class="fa-solid fa-bars"
+          aria-hidden="true"
+        ></i>
+      </button>
+
+      <a
+        class="dashboard-layout__mobile-brand"
+        href="/"
+        aria-label="NavStreet home"
+      >
+        <span class="dashboard-layout__brand-mark">
+          NS
+        </span>
+
+        <span>NavStreet</span>
+      </a>
+    </header>
+
+    <main class="dashboard-layout__content">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>

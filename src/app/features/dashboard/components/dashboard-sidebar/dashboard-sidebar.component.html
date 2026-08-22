@@ -1,0 +1,131 @@
+<aside
+  class="dashboard-sidebar"
+  [class.dashboard-sidebar--open]="mobileOpen()"
+  aria-label="Dashboard navigation"
+>
+  <div class="dashboard-sidebar__brand">
+    <a
+      class="dashboard-sidebar__brand-link"
+      routerLink="/"
+      aria-label="Return to the NavStreet homepage"
+      (click)="closeNavigation()"
+    >
+      <span
+        class="dashboard-sidebar__brand-mark"
+        aria-hidden="true"
+      >
+        NS
+      </span>
+
+      <span class="dashboard-sidebar__brand-copy">
+        <strong>NavStreet</strong>
+        <small>Account dashboard</small>
+      </span>
+    </a>
+
+    <button
+      class="dashboard-sidebar__close"
+      type="button"
+      aria-label="Close dashboard navigation"
+      (click)="closeNavigation()"
+    >
+      <i
+        class="fa-solid fa-xmark"
+        aria-hidden="true"
+      ></i>
+    </button>
+  </div>
+
+  <nav
+    class="dashboard-sidebar__navigation"
+    aria-label="Account sections"
+  >
+    @for (
+      group of navigationGroups;
+      track group.label
+    ) {
+      <section
+        class="dashboard-sidebar__group"
+        [attr.aria-labelledby]="
+          'dashboard-group-' +
+          $index
+        "
+      >
+        <p
+          class="dashboard-sidebar__group-label"
+          [id]="
+            'dashboard-group-' +
+            $index
+          "
+        >
+          {{ group.label }}
+        </p>
+
+        <div class="dashboard-sidebar__links">
+          @for (
+            item of group.items;
+            track item.route
+          ) {
+            <a
+              class="dashboard-sidebar__link"
+              [routerLink]="item.route"
+              [routerLinkActive]="[
+                'dashboard-sidebar__link--active'
+              ]"
+              [routerLinkActiveOptions]="{
+                exact: item.exact ?? false
+              }"
+              ariaCurrentWhenActive="page"
+              (click)="closeNavigation()"
+            >
+              <span
+                class="dashboard-sidebar__link-icon"
+                aria-hidden="true"
+              >
+                <i [class]="item.icon"></i>
+              </span>
+
+              <span class="dashboard-sidebar__link-label">
+                {{ item.label }}
+              </span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  </nav>
+
+  <div class="dashboard-sidebar__footer">
+    <a
+      class="
+        dashboard-sidebar__footer-action
+        dashboard-sidebar__footer-action--marketplace
+      "
+      routerLink="/homes"
+      (click)="closeNavigation()"
+    >
+      <i
+        class="fa-solid fa-arrow-left"
+        aria-hidden="true"
+      ></i>
+
+      <span>Return to marketplace</span>
+    </a>
+
+    <button
+      class="
+        dashboard-sidebar__footer-action
+        dashboard-sidebar__footer-action--logout
+      "
+      type="button"
+      (click)="signOutUser()"
+    >
+      <i
+        class="fa-solid fa-arrow-right-from-bracket"
+        aria-hidden="true"
+      ></i>
+
+      <span>Sign out</span>
+    </button>
+  </div>
+</aside>

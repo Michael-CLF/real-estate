@@ -1,7 +1,4 @@
-<section
-  class="listing-mortgage-calculator"
-  aria-labelledby="listing-mortgage-calculator-title"
->
+<section class="listing-mortgage-calculator" aria-labelledby="listing-mortgage-calculator-title">
   <header class="calculator-header">
     <div>
       <p class="calculator-header__eyebrow">
@@ -17,43 +14,28 @@
       </p>
     </div>
 
-    <button
-      type="button"
-      class="calculator-reset"
-      (click)="resetCalculator()"
-    >
-      <i
-        class="fa-solid fa-arrow-rotate-left"
-        aria-hidden="true"
-      ></i>
+    <button type="button" class="calculator-reset" (click)="resetCalculator()">
+      <i class="fa-solid fa-arrow-rotate-left" aria-hidden="true"></i>
 
       <span>Reset</span>
     </button>
   </header>
 
-  <form
-    class="calculator-content"
-    [formGroup]="calculatorForm"
-  >
+  <form class="calculator-content" [formGroup]="calculatorForm">
     <div class="payment-overview">
       <div class="payment-chart-column">
-        <div
-          class="payment-chart"
-          role="img"
-          [attr.aria-label]="
+        <div class="payment-chart" role="img" [attr.aria-label]="
             'Estimated monthly payment of ' +
             (
               calculation().estimatedMonthlyPayment
                 | currency:'USD':'symbol':'1.0-0'
             )
-          "
-          [style.background]="paymentChartBackground()"
-        >
+          " [style.background]="paymentChartBackground()">
           <div class="payment-chart__center">
             <strong>
               {{
-                calculation().estimatedMonthlyPayment
-                  | currency:'USD':'symbol':'1.0-0'
+              calculation().estimatedMonthlyPayment
+              | currency:'USD':'symbol':'1.0-0'
               }}
             </strong>
 
@@ -73,33 +55,23 @@
 
             <strong>
               {{
-                calculation().estimatedMonthlyPayment
-                  | currency:'USD':'symbol':'1.0-0'
+              calculation().estimatedMonthlyPayment
+              | currency:'USD':'symbol':'1.0-0'
               }}
               <small>/month</small>
             </strong>
           </div>
 
-          <button
-            type="button"
-            class="text-button"
-            [class.text-button--active]="
+          <button type="button" class="text-button" [class.text-button--active]="
               isEditing('paymentCosts')
-            "
-            [attr.aria-expanded]="
+            " [attr.aria-expanded]="
               isEditing('paymentCosts')
-            "
-            aria-controls="payment-cost-editor"
-            (click)="
+            " aria-controls="payment-cost-editor" (click)="
               toggleEditingSection(
                 'paymentCosts'
               )
-            "
-          >
-            <i
-              class="fa-solid fa-pen"
-              aria-hidden="true"
-            ></i>
+            ">
+            <i class="fa-solid fa-pen" aria-hidden="true"></i>
 
             Edit costs
           </button>
@@ -108,238 +80,173 @@
         <dl class="payment-breakdown">
           <div>
             <dt>
-              <span
-                class="breakdown-marker breakdown-marker--principal"
-                aria-hidden="true"
-              ></span>
+              <span class="breakdown-marker breakdown-marker--principal" aria-hidden="true"></span>
 
               Principal and interest
             </dt>
 
             <dd>
               {{
-                calculation().monthlyPrincipalAndInterest
-                  | currency:'USD':'symbol':'1.0-0'
+              calculation().monthlyPrincipalAndInterest
+              | currency:'USD':'symbol':'1.0-0'
               }}
             </dd>
           </div>
 
           <div>
             <dt>
-              <span
-                class="breakdown-marker breakdown-marker--taxes"
-                aria-hidden="true"
-              ></span>
+              <span class="breakdown-marker breakdown-marker--taxes" aria-hidden="true"></span>
 
-              Property taxes
+              Property taxes (estimated)
             </dt>
 
             <dd>
               {{
-                calculation().monthlyPropertyTax
-                  | currency:'USD':'symbol':'1.0-0'
+              calculation().monthlyPropertyTax
+              | currency:'USD':'symbol':'1.0-0'
               }}
             </dd>
           </div>
 
           <div>
             <dt>
-              <span
-                class="breakdown-marker breakdown-marker--insurance"
-                aria-hidden="true"
-              ></span>
+              <span class="breakdown-marker breakdown-marker--insurance" aria-hidden="true"></span>
 
-              Homeowners insurance
+              Homeowners insurance (estimated)
             </dt>
 
             <dd>
               {{
-                calculation().monthlyHomeownersInsurance
-                  | currency:'USD':'symbol':'1.0-0'
+              calculation().monthlyHomeownersInsurance
+              | currency:'USD':'symbol':'1.0-0'
               }}
             </dd>
           </div>
 
           @if (showMortgageInsurance()) {
-            <div>
-              <dt>
-                <span
-                  class="breakdown-marker breakdown-marker--mortgage-insurance"
-                  aria-hidden="true"
-                ></span>
+          <div>
+            <dt>
+              <span class="breakdown-marker breakdown-marker--mortgage-insurance" aria-hidden="true"></span>
 
-                Mortgage insurance
-              </dt>
+              Mortgage insurance
+            </dt>
 
-              <dd>
-                {{
-                  calculation().monthlyMortgageInsurance
-                    | currency:'USD':'symbol':'1.0-0'
-                }}
-              </dd>
-            </div>
+            <dd>
+              {{
+              calculation().monthlyMortgageInsurance
+              | currency:'USD':'symbol':'1.0-0'
+              }}
+            </dd>
+          </div>
           }
 
           @if (
-            calculation().monthlyHoaFee > 0 ||
-            isEditing('paymentCosts')
+          calculation().monthlyHoaFee > 0 ||
+          isEditing('paymentCosts')
           ) {
-            <div>
-              <dt>
-                <span
-                  class="breakdown-marker breakdown-marker--hoa"
-                  aria-hidden="true"
-                ></span>
+          <div>
+            <dt>
+              <span class="breakdown-marker breakdown-marker--hoa" aria-hidden="true"></span>
 
-                HOA dues
-              </dt>
+              HOA dues
+            </dt>
 
-              <dd>
-                {{
-                  calculation().monthlyHoaFee
-                    | currency:'USD':'symbol':'1.0-0'
-                }}
-              </dd>
-            </div>
+            <dd>
+              {{
+              calculation().monthlyHoaFee
+              | currency:'USD':'symbol':'1.0-0'
+              }}
+            </dd>
+          </div>
           }
         </dl>
       </div>
     </div>
 
     @if (isEditing('paymentCosts')) {
-      <section
-        id="payment-cost-editor"
-        class="calculator-editor"
-        aria-labelledby="payment-cost-editor-title"
-      >
-        <div class="calculator-editor__heading">
-          <div>
-            <p>Payment breakdown</p>
+    <section id="payment-cost-editor" class="calculator-editor" aria-labelledby="payment-cost-editor-title">
+      <div class="calculator-editor__heading">
+        <div>
+          <p>Payment breakdown</p>
 
-            <h3 id="payment-cost-editor-title">
-              Taxes, insurance and HOA
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            class="editor-close"
-            aria-label="Close payment cost editor"
-            (click)="closeEditing()"
-          >
-            <i
-              class="fa-solid fa-xmark"
-              aria-hidden="true"
-            ></i>
-          </button>
+          <h3 id="payment-cost-editor-title">
+            Taxes, insurance and HOA
+          </h3>
         </div>
 
-        <div class="calculator-fields">
-          <label class="calculator-field">
-            <span>Annual property taxes</span>
+        <button type="button" class="editor-close" aria-label="Close payment cost editor" (click)="closeEditing()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
 
-            <span class="currency-input">
-              <span
-                class="currency-input__prefix"
-                aria-hidden="true"
-              >
-                $
-              </span>
+      <div class="calculator-fields">
+        <label class="calculator-field">
+          <span>Annual property taxes</span>
 
-              <input
-                type="number"
-                formControlName="annualPropertyTax"
-                min="0"
-                step="100"
-                inputmode="decimal"
-                aria-label="Annual property taxes"
-              />
+          <span class="currency-input">
+            <span class="currency-input__prefix" aria-hidden="true">
+              $
             </span>
-          </label>
 
-          <label class="calculator-field">
-            <span>Annual homeowners insurance</span>
+            <input type="number" formControlName="annualPropertyTax" min="0" step="100" inputmode="decimal"
+              aria-label="Annual property taxes" />
+          </span>
+        </label>
 
-            <span class="currency-input">
-              <span
-                class="currency-input__prefix"
-                aria-hidden="true"
-              >
-                $
-              </span>
+        <label class="calculator-field">
+          <span>Annual homeowners insurance</span>
 
-              <input
-                type="number"
-                formControlName="annualHomeownersInsurance"
-                min="0"
-                step="100"
-                inputmode="decimal"
-                aria-label="Annual homeowners insurance"
-              />
+          <span class="currency-input">
+            <span class="currency-input__prefix" aria-hidden="true">
+              $
             </span>
-          </label>
 
-          @if (showMortgageInsurance()) {
-            <label class="calculator-field">
-              <span>Monthly mortgage insurance</span>
+            <input type="number" formControlName="annualHomeownersInsurance" min="0" step="100" inputmode="decimal"
+              aria-label="Annual homeowners insurance" />
+          </span>
+        </label>
 
-              <span class="currency-input">
-                <span
-                  class="currency-input__prefix"
-                  aria-hidden="true"
-                >
-                  $
-                </span>
+        @if (showMortgageInsurance()) {
+        <label class="calculator-field">
+          <span>Monthly mortgage insurance</span>
 
-                <input
-                  type="number"
-                  formControlName="monthlyMortgageInsurance"
-                  min="0"
-                  step="10"
-                  inputmode="decimal"
-                  aria-label="Monthly mortgage insurance"
-                />
-              </span>
-            </label>
-          }
-
-          <label class="calculator-field">
-            <span>Monthly HOA dues</span>
-
-            <span class="currency-input">
-              <span
-                class="currency-input__prefix"
-                aria-hidden="true"
-              >
-                $
-              </span>
-
-              <input
-                type="number"
-                formControlName="monthlyHoaFee"
-                min="0"
-                step="25"
-                inputmode="decimal"
-                aria-label="Monthly HOA dues"
-              />
+          <span class="currency-input">
+            <span class="currency-input__prefix" aria-hidden="true">
+              $
             </span>
-          </label>
-        </div>
 
-        <div class="calculator-editor__footer">
-          <p>
-            Changes update the estimated payment immediately.
-          </p>
+            <input type="number" formControlName="monthlyMortgageInsurance" min="0" step="10" inputmode="decimal"
+              aria-label="Monthly mortgage insurance" />
+          </span>
+        </label>
+        }
 
-          <button
-            type="button"
-            class="editor-done"
-            (click)="closeEditing()"
-          >
-            Done
-          </button>
-        </div>
-      </section>
+        <label class="calculator-field">
+          <span>Monthly HOA dues</span>
+
+          <span class="currency-input">
+            <span class="currency-input__prefix" aria-hidden="true">
+              $
+            </span>
+
+            <input type="number" formControlName="monthlyHoaFee" min="0" step="25" inputmode="decimal"
+              aria-label="Monthly HOA dues" />
+          </span>
+        </label>
+      </div>
+
+      <div class="calculator-editor__footer">
+        <p>
+          Initial tax and insurance amounts are estimates
+          based on the property price and location. Changes
+          update the estimated payment immediately.
+        </p>
+
+        <button type="button" class="editor-done" (click)="closeEditing()">
+          Done
+        </button>
+      </div>
+    </section>
     }
 
     <div class="financing-summary">
@@ -349,38 +256,27 @@
 
           <strong>
             {{
-              calculatorForm.controls
-                .downPaymentPercent.value
+            calculatorForm.controls
+            .downPaymentPercent.value
             }}%
             ({{
-              calculatorForm.controls
-                .downPaymentAmount.value
-                | currency:'USD':'symbol':'1.0-0'
+            calculatorForm.controls
+            .downPaymentAmount.value
+            | currency:'USD':'symbol':'1.0-0'
             }})
           </strong>
         </div>
 
-        <button
-          type="button"
-          class="summary-edit"
-          [class.summary-edit--active]="
+        <button type="button" class="summary-edit" [class.summary-edit--active]="
             isEditing('downPayment')
-          "
-          [attr.aria-expanded]="
+          " [attr.aria-expanded]="
             isEditing('downPayment')
-          "
-          aria-controls="down-payment-editor"
-          aria-label="Edit down payment"
-          (click)="
+          " aria-controls="down-payment-editor" aria-label="Edit down payment" (click)="
             toggleEditingSection(
               'downPayment'
             )
-          "
-        >
-          <i
-            class="fa-solid fa-pen"
-            aria-hidden="true"
-          ></i>
+          ">
+          <i class="fa-solid fa-pen" aria-hidden="true"></i>
         </button>
       </section>
 
@@ -390,344 +286,228 @@
 
           <strong>
             {{
-              calculatorForm.controls
-                .homePrice.value
-                | currency:'USD':'symbol':'1.0-0'
+            calculatorForm.controls
+            .homePrice.value
+            | currency:'USD':'symbol':'1.0-0'
             }}
           </strong>
         </div>
 
-        <button
-          type="button"
-          class="summary-edit"
-          [class.summary-edit--active]="
+        <button type="button" class="summary-edit" [class.summary-edit--active]="
             isEditing('homePrice')
-          "
-          [attr.aria-expanded]="
+          " [attr.aria-expanded]="
             isEditing('homePrice')
-          "
-          aria-controls="home-price-editor"
-          aria-label="Edit home price"
-          (click)="
+          " aria-controls="home-price-editor" aria-label="Edit home price" (click)="
             toggleEditingSection(
               'homePrice'
             )
-          "
-        >
-          <i
-            class="fa-solid fa-pen"
-            aria-hidden="true"
-          ></i>
+          ">
+          <i class="fa-solid fa-pen" aria-hidden="true"></i>
         </button>
       </section>
 
-      <section
-        class="financing-summary__item financing-summary__item--wide"
-      >
+      <section class="financing-summary__item financing-summary__item--wide">
         <div>
           <span>Loan details</span>
 
           <strong>
             {{
-              calculatorForm.controls
-                .loanTermYears.value
+            calculatorForm.controls
+            .loanTermYears.value
             }}-year fixed,
             {{
-              calculatorForm.controls
-                .interestRate.value
+            calculatorForm.controls
+            .interestRate.value
             }}%
           </strong>
         </div>
 
-        <button
-          type="button"
-          class="summary-edit"
-          [class.summary-edit--active]="
+        <button type="button" class="summary-edit" [class.summary-edit--active]="
             isEditing('loanDetails')
-          "
-          [attr.aria-expanded]="
+          " [attr.aria-expanded]="
             isEditing('loanDetails')
-          "
-          aria-controls="loan-details-editor"
-          aria-label="Edit loan details"
-          (click)="
+          " aria-controls="loan-details-editor" aria-label="Edit loan details" (click)="
             toggleEditingSection(
               'loanDetails'
             )
-          "
-        >
-          <i
-            class="fa-solid fa-pen"
-            aria-hidden="true"
-          ></i>
+          ">
+          <i class="fa-solid fa-pen" aria-hidden="true"></i>
         </button>
       </section>
     </div>
 
     @if (isEditing('downPayment')) {
-      <section
-        id="down-payment-editor"
-        class="calculator-editor"
-        aria-labelledby="down-payment-editor-title"
-      >
-        <div class="calculator-editor__heading">
-          <div>
-            <p>Financing</p>
+    <section id="down-payment-editor" class="calculator-editor" aria-labelledby="down-payment-editor-title">
+      <div class="calculator-editor__heading">
+        <div>
+          <p>Financing</p>
 
-            <h3 id="down-payment-editor-title">
-              Edit down payment
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            class="editor-close"
-            aria-label="Close down payment editor"
-            (click)="closeEditing()"
-          >
-            <i
-              class="fa-solid fa-xmark"
-              aria-hidden="true"
-            ></i>
-          </button>
+          <h3 id="down-payment-editor-title">
+            Edit down payment
+          </h3>
         </div>
 
-        <div class="calculator-fields">
-          <label class="calculator-field">
-            <span>Down payment amount</span>
+        <button type="button" class="editor-close" aria-label="Close down payment editor" (click)="closeEditing()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
 
-            <span class="currency-input">
-              <span
-                class="currency-input__prefix"
-                aria-hidden="true"
-              >
-                $
-              </span>
-
-              <input
-                type="number"
-                formControlName="downPaymentAmount"
-                min="0"
-                step="1000"
-                inputmode="decimal"
-                aria-label="Down payment amount"
-                (input)="updateDownPaymentFromAmount()"
-              />
-            </span>
-          </label>
-
-          <label class="calculator-field">
-            <span>Down payment percentage</span>
-
-            <span class="suffix-input">
-              <input
-                type="number"
-                formControlName="downPaymentPercent"
-                min="0"
-                max="100"
-                step="0.5"
-                inputmode="decimal"
-                aria-label="Down payment percentage"
-                (input)="updateDownPaymentFromPercent()"
-              />
-
-              <span
-                class="suffix-input__suffix"
-                aria-hidden="true"
-              >
-                %
-              </span>
-            </span>
-          </label>
-        </div>
-
-        <div class="calculator-editor__footer">
-          <p>
-            Estimated loan amount:
-            <strong>
-              {{
-                calculation().loanAmount
-                  | currency:'USD':'symbol':'1.0-0'
-              }}
-            </strong>
-          </p>
-
-          <button
-            type="button"
-            class="editor-done"
-            (click)="closeEditing()"
-          >
-            Done
-          </button>
-        </div>
-      </section>
-    }
-
-    @if (isEditing('homePrice')) {
-      <section
-        id="home-price-editor"
-        class="calculator-editor"
-        aria-labelledby="home-price-editor-title"
-      >
-        <div class="calculator-editor__heading">
-          <div>
-            <p>Purchase scenario</p>
-
-            <h3 id="home-price-editor-title">
-              Edit home price
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            class="editor-close"
-            aria-label="Close home price editor"
-            (click)="closeEditing()"
-          >
-            <i
-              class="fa-solid fa-xmark"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </div>
-
-        <label class="calculator-field calculator-field--single">
-          <span>Home price</span>
+      <div class="calculator-fields">
+        <label class="calculator-field">
+          <span>Down payment amount</span>
 
           <span class="currency-input">
-            <span
-              class="currency-input__prefix"
-              aria-hidden="true"
-            >
+            <span class="currency-input__prefix" aria-hidden="true">
               $
             </span>
 
-            <input
-              type="number"
-              formControlName="homePrice"
-              min="0"
-              step="1000"
-              inputmode="decimal"
-              aria-label="Home price"
-              (change)="updateHomePrice()"
-            />
+            <input type="number" formControlName="downPaymentAmount" min="0" step="1000" inputmode="decimal"
+              aria-label="Down payment amount" (input)="updateDownPaymentFromAmount()" />
           </span>
         </label>
 
-        <div class="calculator-editor__footer">
-          <p>
-            Use the listing price or enter a different purchase scenario.
-          </p>
+        <label class="calculator-field">
+          <span>Down payment percentage</span>
 
-          <button
-            type="button"
-            class="editor-done"
-            (click)="closeEditing()"
-          >
-            Done
-          </button>
+          <span class="suffix-input">
+            <input type="number" formControlName="downPaymentPercent" min="0" max="100" step="0.5" inputmode="decimal"
+              aria-label="Down payment percentage" (input)="updateDownPaymentFromPercent()" />
+
+            <span class="suffix-input__suffix" aria-hidden="true">
+              %
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <div class="calculator-editor__footer">
+        <p>
+          Estimated loan amount:
+          <strong>
+            {{
+            calculation().loanAmount
+            | currency:'USD':'symbol':'1.0-0'
+            }}
+          </strong>
+        </p>
+
+        <button type="button" class="editor-done" (click)="closeEditing()">
+          Done
+        </button>
+      </div>
+    </section>
+    }
+
+    @if (isEditing('homePrice')) {
+    <section id="home-price-editor" class="calculator-editor" aria-labelledby="home-price-editor-title">
+      <div class="calculator-editor__heading">
+        <div>
+          <p>Purchase scenario</p>
+
+          <h3 id="home-price-editor-title">
+            Edit home price
+          </h3>
         </div>
-      </section>
+
+        <button type="button" class="editor-close" aria-label="Close home price editor" (click)="closeEditing()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <label class="calculator-field calculator-field--single">
+        <span>Home price</span>
+
+        <span class="currency-input">
+          <span class="currency-input__prefix" aria-hidden="true">
+            $
+          </span>
+
+          <input type="number" formControlName="homePrice" min="0" step="1000" inputmode="decimal"
+            aria-label="Home price" (change)="updateHomePrice()" />
+        </span>
+      </label>
+
+      <div class="calculator-editor__footer">
+        <p>
+          Use the listing price or enter a different purchase scenario.
+        </p>
+
+        <button type="button" class="editor-done" (click)="closeEditing()">
+          Done
+        </button>
+      </div>
+    </section>
     }
 
     @if (isEditing('loanDetails')) {
-      <section
-        id="loan-details-editor"
-        class="calculator-editor"
-        aria-labelledby="loan-details-editor-title"
-      >
-        <div class="calculator-editor__heading">
-          <div>
-            <p>Financing</p>
+    <section id="loan-details-editor" class="calculator-editor" aria-labelledby="loan-details-editor-title">
+      <div class="calculator-editor__heading">
+        <div>
+          <p>Financing</p>
 
-            <h3 id="loan-details-editor-title">
-              Edit loan details
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            class="editor-close"
-            aria-label="Close loan details editor"
-            (click)="closeEditing()"
-          >
-            <i
-              class="fa-solid fa-xmark"
-              aria-hidden="true"
-            ></i>
-          </button>
+          <h3 id="loan-details-editor-title">
+            Edit loan details
+          </h3>
         </div>
 
-        <div class="calculator-fields">
-          <label class="calculator-field">
-            <span>Interest rate</span>
+        <button type="button" class="editor-close" aria-label="Close loan details editor" (click)="closeEditing()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
 
-            <span class="suffix-input">
-              <input
-                type="number"
-                formControlName="interestRate"
-                min="0"
-                max="30"
-                step="0.125"
-                inputmode="decimal"
-                aria-label="Annual interest rate"
-              />
+      <div class="calculator-fields">
+        <label class="calculator-field">
+          <span>Interest rate</span>
 
-              <span
-                class="suffix-input__suffix"
-                aria-hidden="true"
-              >
-                %
-              </span>
+          <span class="suffix-input">
+            <input type="number" formControlName="interestRate" min="0" max="30" step="0.125" inputmode="decimal"
+              aria-label="Annual interest rate" />
+
+            <span class="suffix-input__suffix" aria-hidden="true">
+              %
             </span>
-          </label>
+          </span>
+        </label>
 
-          <label class="calculator-field">
-            <span>Loan term</span>
+        <label class="calculator-field">
+          <span>Loan term</span>
 
-            <select
-              formControlName="loanTermYears"
-              aria-label="Loan term"
-            >
-              <option [ngValue]="30">
-                30 years
-              </option>
+          <select formControlName="loanTermYears" aria-label="Loan term">
+            <option [ngValue]="30">
+              30 years
+            </option>
 
-              <option [ngValue]="20">
-                20 years
-              </option>
+            <option [ngValue]="20">
+              20 years
+            </option>
 
-              <option [ngValue]="15">
-                15 years
-              </option>
+            <option [ngValue]="15">
+              15 years
+            </option>
 
-              <option [ngValue]="10">
-                10 years
-              </option>
-            </select>
-          </label>
-        </div>
+            <option [ngValue]="10">
+              10 years
+            </option>
+          </select>
+        </label>
+      </div>
 
-        <div class="calculator-editor__footer">
-          <p>
-            Estimated loan amount:
-            <strong>
-              {{
-                calculation().loanAmount
-                  | currency:'USD':'symbol':'1.0-0'
-              }}
-            </strong>
-          </p>
+      <div class="calculator-editor__footer">
+        <p>
+          Estimated loan amount:
+          <strong>
+            {{
+            calculation().loanAmount
+            | currency:'USD':'symbol':'1.0-0'
+            }}
+          </strong>
+        </p>
 
-          <button
-            type="button"
-            class="editor-done"
-            (click)="closeEditing()"
-          >
-            Done
-          </button>
-        </div>
-      </section>
+        <button type="button" class="editor-done" (click)="closeEditing()">
+          Done
+        </button>
+      </div>
+    </section>
     }
   </form>
 
@@ -750,18 +530,12 @@
     <a routerLink="/mortgage">
       Explore mortgage calculators
 
-      <i
-        class="fa-solid fa-arrow-right"
-        aria-hidden="true"
-      ></i>
+      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
     </a>
   </div>
 
   <div class="calculator-disclaimer">
-    <i
-      class="fa-solid fa-circle-info"
-      aria-hidden="true"
-    ></i>
+    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
 
     <p>
       This calculator provides an estimate for informational purposes

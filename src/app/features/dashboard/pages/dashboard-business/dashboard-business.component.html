@@ -1,0 +1,441 @@
+<section
+  class="dashboard-business"
+  aria-labelledby="dashboard-business-title"
+>
+  <header class="dashboard-business__header">
+    <div>
+      <p class="dashboard-business__eyebrow">
+        Professional directory
+      </p>
+
+      <h1 id="dashboard-business-title">
+        Business account
+      </h1>
+
+      <p class="dashboard-business__introduction">
+        Manage your Find a Pro directory listing,
+        business profile and subscription.
+      </p>
+    </div>
+
+    @if (professional()) {
+      <a
+        class="dashboard-business__directory-button"
+        [routerLink]="directoryRoute()"
+      >
+        <i
+          class="fa-solid fa-address-book"
+          aria-hidden="true"
+        ></i>
+
+        View directory
+      </a>
+    }
+  </header>
+
+  @if (isLoading()) {
+    <section
+      class="dashboard-business__state"
+      aria-live="polite"
+    >
+      <span class="dashboard-business__state-icon">
+        <i
+          class="fa-solid fa-spinner fa-spin"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <h2>Loading your business account</h2>
+
+        <p>
+          NavStreet is retrieving your professional
+          directory information.
+        </p>
+      </div>
+    </section>
+  } @else if (loadError()) {
+    <section
+      class="
+        dashboard-business__state
+        dashboard-business__state--error
+      "
+      role="alert"
+    >
+      <span class="dashboard-business__state-icon">
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <h2>Business account unavailable</h2>
+
+        <p>{{ loadError() }}</p>
+
+        <button
+          type="button"
+          (click)="reloadBusinessAccount()"
+        >
+          Try again
+        </button>
+      </div>
+    </section>
+  } @else if (professional(); as business) {
+    <section class="dashboard-business__account">
+      <header class="dashboard-business__account-header">
+        <div class="dashboard-business__identity">
+          <span
+            class="dashboard-business__identity-icon"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-briefcase"></i>
+          </span>
+
+          <div>
+            <p class="dashboard-business__eyebrow">
+              NavStreet business account
+            </p>
+
+            <h2>{{ business.businessName }}</h2>
+
+            <p>
+              {{ professionalTypeLabel() }}
+            </p>
+          </div>
+        </div>
+
+        @if (hasFullBusinessProfile()) {
+          <span
+            class="
+              dashboard-business__subscription
+              dashboard-business__subscription--active
+            "
+          >
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
+
+            Full Business Profile active
+          </span>
+        } @else {
+          <span class="dashboard-business__subscription">
+            <i
+              class="fa-solid fa-address-card"
+              aria-hidden="true"
+            ></i>
+
+            Free directory listing
+          </span>
+        }
+      </header>
+
+      <div class="dashboard-business__details">
+        <article class="dashboard-business__detail">
+          <span aria-hidden="true">
+            <i class="fa-solid fa-location-dot"></i>
+          </span>
+
+          <div>
+            <small>Directory</small>
+
+            <strong>
+              {{ business.stateName }}
+            </strong>
+          </div>
+        </article>
+
+        <article class="dashboard-business__detail">
+          <span aria-hidden="true">
+            <i class="fa-solid fa-map"></i>
+          </span>
+
+          <div>
+            <small>Service area</small>
+
+            <strong>
+              {{ serviceArea() }}
+            </strong>
+          </div>
+        </article>
+
+        <article class="dashboard-business__detail">
+          <span aria-hidden="true">
+            <i class="fa-solid fa-phone"></i>
+          </span>
+
+          <div>
+            <small>Business telephone</small>
+
+            <strong>
+              {{ formattedTelephone() }}
+            </strong>
+          </div>
+        </article>
+
+        <article class="dashboard-business__detail">
+          <span aria-hidden="true">
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+
+          <div>
+            <small>Business email</small>
+
+            <strong>
+              {{ business.email }}
+            </strong>
+          </div>
+        </article>
+      </div>
+
+      <div class="dashboard-business__content-grid">
+        <article class="dashboard-business__panel">
+          <p class="dashboard-business__eyebrow">
+            Professional services
+          </p>
+
+          <h2>Services and specialties</h2>
+
+          @if (business.specialties.length > 0) {
+            <div class="dashboard-business__specialties">
+              @for (
+                specialty of business.specialties;
+                track specialty
+              ) {
+                <span>
+                  <i
+                    class="fa-solid fa-check"
+                    aria-hidden="true"
+                  ></i>
+
+                  {{ specialty }}
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="dashboard-business__muted">
+              No specialties have been added to this
+              directory listing.
+            </p>
+          }
+        </article>
+
+        <article class="dashboard-business__panel">
+          <p class="dashboard-business__eyebrow">
+            Listing status
+          </p>
+
+          <h2>
+            {{
+              hasFullBusinessProfile()
+                ? 'Full Business Profile'
+                : 'Free directory listing'
+            }}
+          </h2>
+
+          @if (hasFullBusinessProfile()) {
+            <p class="dashboard-business__muted">
+              Your directory card links to a dedicated
+              business profile containing your website,
+              business description, logo and complete
+              service information.
+            </p>
+          } @else {
+            <p class="dashboard-business__muted">
+              Your business appears in the directory with
+              its category, services, telephone, email and
+              service area.
+            </p>
+
+            <ul class="dashboard-business__benefits">
+              <li>Clickable directory card</li>
+              <li>Dedicated public business profile</li>
+              <li>Business website and description</li>
+              <li>Business logo</li>
+            </ul>
+          }
+        </article>
+      </div>
+
+      <footer class="dashboard-business__actions">
+        <a
+          class="
+            dashboard-business__button
+            dashboard-business__button--secondary
+          "
+          [routerLink]="directoryRoute()"
+        >
+          <i
+            class="fa-solid fa-address-book"
+            aria-hidden="true"
+          ></i>
+
+          View directory
+        </a>
+
+        @if (
+          publicProfileRoute();
+          as route
+        ) {
+          <a
+            class="
+              dashboard-business__button
+              dashboard-business__button--secondary
+            "
+            [routerLink]="route"
+          >
+            <i
+              class="fa-solid fa-eye"
+              aria-hidden="true"
+            ></i>
+
+            View public profile
+          </a>
+        }
+
+        @if (
+          profileSetupRoute();
+          as route
+        ) {
+          <a
+            class="dashboard-business__button"
+            [routerLink]="route"
+          >
+            <i
+              class="fa-solid fa-pen-to-square"
+              aria-hidden="true"
+            ></i>
+
+            Edit business profile
+          </a>
+        }
+
+        @if (!hasFullBusinessProfile()) {
+          <button
+            class="dashboard-business__button"
+            type="button"
+            [disabled]="isStartingUpgrade()"
+            (click)="upgradeBusinessProfile()"
+          >
+            @if (isStartingUpgrade()) {
+              <i
+                class="fa-solid fa-spinner fa-spin"
+                aria-hidden="true"
+              ></i>
+
+              Opening checkout
+            } @else {
+              <i
+                class="fa-solid fa-arrow-up-right-dots"
+                aria-hidden="true"
+              ></i>
+
+              Upgrade to Full Business Profile
+            }
+          </button>
+        } @else {
+          <button
+            class="dashboard-business__button"
+            type="button"
+            [disabled]="isOpeningBillingPortal()"
+            (click)="openBillingPortal()"
+          >
+            @if (isOpeningBillingPortal()) {
+              <i
+                class="fa-solid fa-spinner fa-spin"
+                aria-hidden="true"
+              ></i>
+
+              Opening billing
+            } @else {
+              <i
+                class="fa-solid fa-credit-card"
+                aria-hidden="true"
+              ></i>
+
+              Manage subscription
+            }
+          </button>
+        }
+      </footer>
+
+      @if (upgradeError()) {
+        <p
+          class="dashboard-business__action-error"
+          role="alert"
+        >
+          <i
+            class="fa-solid fa-circle-exclamation"
+            aria-hidden="true"
+          ></i>
+
+          {{ upgradeError() }}
+        </p>
+      }
+
+      @if (billingError()) {
+        <p
+          class="dashboard-business__action-error"
+          role="alert"
+        >
+          <i
+            class="fa-solid fa-circle-exclamation"
+            aria-hidden="true"
+          ></i>
+
+          {{ billingError() }}
+        </p>
+      }
+    </section>
+  } @else {
+    <section class="dashboard-business__state">
+      <span class="dashboard-business__state-icon">
+        <i
+          class="fa-solid fa-briefcase"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <p class="dashboard-business__eyebrow">
+          Find a Pro
+        </p>
+
+        <h2>No business account registered</h2>
+
+        <p>
+          Add your business to the North Carolina
+          professional directory with a free directory
+          listing. A paid Full Business Profile can be
+          added later.
+        </p>
+
+        <a [routerLink]="registrationRoute()">
+          List your business
+
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
+        </a>
+      </div>
+    </section>
+  }
+
+  <aside class="dashboard-business__disclaimer">
+    <i
+      class="fa-solid fa-circle-info"
+      aria-hidden="true"
+    ></i>
+
+    <p>
+      NavStreet does not investigate, verify, certify,
+      recommend or endorse businesses appearing in the
+      Find a Pro directory. Directory providers are
+      responsible for the accuracy of their information
+      and users are responsible for evaluating providers.
+    </p>
+  </aside>
+</section>

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  OnInit,
   computed,
   inject,
   signal
@@ -20,16 +21,28 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
+
 import {
   ActivatedRoute,
+  Router,
   RouterLink
 } from '@angular/router';
+
 import {
+  toObservable,
   toSignal
 } from '@angular/core/rxjs-interop';
+
 import {
-  map
+  filter,
+  firstValueFrom,
+  map,
+  take
 } from 'rxjs';
+
+import {
+  AuthState
+} from '../../../../core/authentication/state/auth.state';
 
 import {
   PROFESSIONAL_CATEGORY_LABELS,
@@ -40,7 +53,8 @@ import {
 
 import {
   ProfessionalServiceAreaType,
-  ProfessionalSubscriptionStatus
+  ProfessionalSubscriptionStatus,
+  ProfessionalUser
 } from '../../../../core/domains/users/models/professional-user.model';
 
 import {
@@ -104,6 +118,35 @@ interface ProfessionalTypeOption {
 interface ProfessionalProfileCheckoutResult {
   checkoutSessionId: string;
   checkoutUrl: string;
+}
+
+interface CreateProfessionalRegistrationRequest {
+  businessName: string;
+
+  category: ProfessionalCategory;
+  professionalType: ProfessionalType;
+
+  specialties: string[];
+
+  stateName: string;
+  stateAbbreviation: string;
+  stateSlug: string;
+
+  serviceAreaType:
+  ProfessionalServiceAreaType;
+
+  counties: string[];
+  cities: string[];
+
+  phone: string;
+  email: string;
+
+  submissionCertified: boolean;
+}
+
+interface CreateProfessionalRegistrationResult {
+  professionalUid: string;
+  alreadyExists: boolean;
 }
 
 const CATEGORY_TYPES:
@@ -289,10 +332,13 @@ const CATEGORY_SPECIALTIES:
     ChangeDetectionStrategy.OnPush
 })
 export class ProfessionalRegistrationComponent
-  implements OnDestroy {
+  implements OnInit, OnDestroy {
 
   private readonly route =
     inject(ActivatedRoute);
+
+  private readonly router =
+    inject(Router);
 
   private readonly formBuilder =
     inject(FormBuilder);
@@ -302,6 +348,20 @@ export class ProfessionalRegistrationComponent
 
   private readonly authService =
     inject(AuthService);
+
+  private readonly authState =
+    inject(AuthState);
+
+  private readonly authenticationReady$ =
+    toObservable(
+      this.authState.loading
+    ).pipe(
+      filter(
+        isLoading =>
+          !isLoading
+      ),
+      take(1)
+    );
 
   private readonly accountState =
     inject(AccountState);
@@ -321,6 +381,9 @@ export class ProfessionalRegistrationComponent
 
   protected readonly verificationComplete =
     signal(false);
+
+  protected readonly isCheckingExistingProfessional =
+    signal(true);
 
   protected readonly errorMessage =
     signal('');
@@ -665,12 +728,62 @@ export class ProfessionalRegistrationComponent
       .updateValueAndValidity();
   }
 
+  async ngOnInit(): Promise<void> {
+    this.isCheckingExistingProfessional
+      .set(true);
+
+    try {
+      /*
+       * Wait for Firebase to finish restoring the
+       * browser's existing authentication session.
+       */
+      if (this.authState.loading()) {
+        await firstValueFrom(
+          this.authenticationReady$
+        );
+      }
+
+      const ownerUid =
+        this.authState.uid();
+
+      if (!ownerUid) {
+        return;
+      }
+
+      const existingProfessional =
+        await this.professionalRepository
+          .getProfessionalByOwnerUid(
+            ownerUid
+          );
+
+      if (!existingProfessional) {
+        return;
+      }
+
+      await this.redirectExistingProfessional(
+        existingProfessional
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to check for an existing professional account:',
+        error
+      );
+
+      this.errorMessage.set(
+        'We could not check your existing business account. Please try again.'
+      );
+    } finally {
+      this.isCheckingExistingProfessional
+        .set(false);
+    }
+  }
 
   protected async prepareRegistration():
     Promise<void> {
     if (
       this.registrationForm.invalid ||
-      this.isOtpLoading()
+      this.isOtpLoading() ||
+      this.isCheckingExistingProfessional()
     ) {
       this.registrationForm
         .markAllAsTouched();
@@ -684,6 +797,25 @@ export class ProfessionalRegistrationComponent
     this.successMessage.set('');
 
     try {
+      const authenticatedUser =
+        this.authService.currentUser;
+
+      if (authenticatedUser) {
+        const existingProfessional =
+          await this.professionalRepository
+            .getProfessionalByOwnerUid(
+              authenticatedUser.uid
+            );
+
+        if (existingProfessional) {
+          await this.redirectExistingProfessional(
+            existingProfessional
+          );
+
+          return;
+        }
+      }
+
       const values =
         this.registrationForm.getRawValue();
 
@@ -891,10 +1023,13 @@ export class ProfessionalRegistrationComponent
         );
       }
 
-      if (
+      const authenticatedEmail =
         firebaseUser.email
           ?.trim()
-          .toLowerCase() !==
+          .toLowerCase();
+
+      if (
+        authenticatedEmail !==
         pendingRegistration.email
       ) {
         throw new Error(
@@ -931,11 +1066,31 @@ export class ProfessionalRegistrationComponent
         );
       }
 
+      /*
+       * Check again after authentication. This prevents
+       * an existing business owner from creating another
+       * professional listing through a second registration.
+       */
       const existingProfessional =
         await this.professionalRepository
           .getProfessionalByOwnerUid(
             firebaseUser.uid
           );
+
+      if (existingProfessional) {
+        sessionStorage.removeItem(
+          'pendingProfessionalRegistration'
+        );
+
+        this.pendingRegistration.set(null);
+        this.otpService.reset();
+
+        await this.redirectExistingProfessional(
+          existingProfessional
+        );
+
+        return;
+      }
 
       const counties =
         pendingRegistration.serviceAreaType ===
@@ -949,110 +1104,78 @@ export class ProfessionalRegistrationComponent
           ? pendingRegistration.serviceAreas
           : [];
 
-      if (existingProfessional) {
-        await this.professionalRepository
-          .updateProfessional(
-            existingProfessional.uid,
-            {
-              businessName:
-                pendingRegistration.businessName,
+      const createProfessionalRegistration =
+        httpsCallable<
+          CreateProfessionalRegistrationRequest,
+          CreateProfessionalRegistrationResult
+        >(
+          functions,
+          'createProfessionalRegistration'
+        );
 
-              category:
-                pendingRegistration.category,
+      const registrationResult =
+        await createProfessionalRegistration({
+          businessName:
+            pendingRegistration.businessName,
 
-              professionalType:
-                pendingRegistration.professionalType,
+          category:
+            pendingRegistration.category,
 
-              specialties:
-                pendingRegistration.specialties,
+          professionalType:
+            pendingRegistration.professionalType,
 
-              stateName:
-                pendingRegistration.stateName,
+          specialties:
+            pendingRegistration.specialties,
 
-              stateAbbreviation:
-                pendingRegistration.stateAbbreviation,
+          stateName:
+            pendingRegistration.stateName,
 
-              stateSlug:
-                pendingRegistration.stateSlug,
+          stateAbbreviation:
+            pendingRegistration.stateAbbreviation,
 
-              serviceAreaType:
-                pendingRegistration.serviceAreaType,
+          stateSlug:
+            pendingRegistration.stateSlug,
 
-              counties,
-              cities,
+          serviceAreaType:
+            pendingRegistration.serviceAreaType,
 
-              phone:
-                pendingRegistration.phone,
+          counties,
+          cities,
 
-              email:
-                pendingRegistration.email,
+          phone:
+            pendingRegistration.phone,
 
-              submissionCertified: true
-            }
-          );
-      } else {
-        await this.professionalRepository
-          .createProfessional({
-            ownerUid:
-              firebaseUser.uid,
+          email:
+            pendingRegistration.email,
 
-            businessName:
-              pendingRegistration.businessName,
-
-            category:
-              pendingRegistration.category,
-
-            professionalType:
-              pendingRegistration.professionalType,
-
-            specialties:
-              pendingRegistration.specialties,
-
-            stateName:
-              pendingRegistration.stateName,
-
-            stateAbbreviation:
-              pendingRegistration.stateAbbreviation,
-
-            stateSlug:
-              pendingRegistration.stateSlug,
-
-            serviceAreaType:
-              pendingRegistration.serviceAreaType,
-
-            counties,
-            cities,
-
-            phone:
-              pendingRegistration.phone,
-
-            email:
-              pendingRegistration.email,
-
-            /*
-             * All client-created registrations begin with a
-             * free directory listing. Paid profile access will
-             * be activated through the subscription workflow.
-             */
-            subscriptionStatus: 'free',
-
-            placement: 'standard',
-
-            submissionCertified: true,
-
-            status: 'active'
-          });
-      }
+          submissionCertified: true
+        });
 
       if (
-        pendingRegistration.subscriptionStatus ===
-        'profile'
+        registrationResult.data.alreadyExists
       ) {
+        const existingProfessional =
+          await this.professionalRepository
+            .getProfessionalByOwnerUid(
+              firebaseUser.uid
+            );
+
+        if (!existingProfessional) {
+          throw new Error(
+            'Your existing business registration could not be loaded.'
+          );
+        }
+
         sessionStorage.removeItem(
           'pendingProfessionalRegistration'
         );
 
-        await this.openProfessionalProfileCheckout();
+        this.pendingRegistration.set(null);
+        this.otpService.reset();
+
+        await this.redirectExistingProfessional(
+          existingProfessional
+        );
 
         return;
       }
@@ -1061,17 +1184,28 @@ export class ProfessionalRegistrationComponent
         'pendingProfessionalRegistration'
       );
 
+      this.pendingRegistration.set(null);
+
+      if (
+        pendingRegistration.subscriptionStatus ===
+        'profile'
+      ) {
+        await this.openProfessionalProfileCheckout();
+        return;
+      }
+
       this.otpStep.set(false);
       this.verificationComplete.set(true);
 
       this.successMessage.set(
         'Your email has been verified and your professional directory listing is active.'
       );
+
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(
         'Unable to verify professional registration:',
         error
@@ -1112,7 +1246,7 @@ export class ProfessionalRegistrationComponent
       this.successMessage.set(
         'A new verification code has been sent.'
       );
-    } catch (error) {
+    } catch (error: unknown) {
       this.errorMessage.set(
         this.getErrorMessage(
           error,
@@ -1156,6 +1290,34 @@ export class ProfessionalRegistrationComponent
     }
   }
 
+  private async redirectExistingProfessional(
+    professional: ProfessionalUser
+  ): Promise<void> {
+    sessionStorage.removeItem(
+      'pendingProfessionalRegistration'
+    );
+
+    this.pendingRegistration.set(null);
+
+    if (
+      professional.subscriptionStatus ===
+      'profile'
+    ) {
+      await this.router.navigate([
+        '/professionals',
+        professional.stateSlug,
+        'profile',
+        'setup'
+      ]);
+
+      return;
+    }
+
+    await this.router.navigate([
+      '/dashboard'
+    ]);
+  }
+
   private async openProfessionalProfileCheckout():
     Promise<void> {
     const createCheckoutSession =
@@ -1182,10 +1344,6 @@ export class ProfessionalRegistrationComponent
     window.location.assign(
       checkoutUrl
     );
-  }
-
-  ngOnDestroy(): void {
-    this.otpService.reset();
   }
 
   private async createUserProfile(
@@ -1242,15 +1400,18 @@ export class ProfessionalRegistrationComponent
     window.setTimeout(() => {
       const firstInvalidElement =
         document.querySelector<HTMLElement>(
-          `
-            .professional-registration
-            input.ng-invalid,
-            .professional-registration
-            select.ng-invalid
-          `
+          [
+            '.professional-registration input.ng-invalid',
+            '.professional-registration select.ng-invalid',
+            '.professional-registration textarea.ng-invalid'
+          ].join(', ')
         );
 
       firstInvalidElement?.focus();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.otpService.reset();
   }
 }

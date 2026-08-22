@@ -8,28 +8,28 @@
   &__list {
     align-items: center;
     display: flex;
-    gap: 0.25rem;
+    gap: 1rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
   &__link {
-    border-radius: 0.5rem;
-    color: #334155;
+    border-radius: 40px;
+    color: #154360;
     display: block;
     font-family: variables.$font-body;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 600;
-    padding: 0.75rem 0.875rem;
+    padding: 6px 16px;
     text-decoration: none;
     transition:
       background-color 160ms ease,
       color 160ms ease;
 
     &:hover {
-      background: #eff6ff;
-      color: #1d4ed8;
+      background: #154360;
+      color: #ffffff;
     }
 
     &:focus-visible {
@@ -38,8 +38,8 @@
     }
 
     &--active {
-      background: #eff6ff;
-      color: #1d4ed8;
+      background: #008080;
+      color: #ffffff;
     }
   }
 }
@@ -68,6 +68,7 @@
 
     &__link {
       padding: 0.875rem 1rem;
+      width: max-content;
     }
   }
 }

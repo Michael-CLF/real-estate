@@ -71,11 +71,14 @@ interface ListingMortgageCalculation {
     ChangeDetectionStrategy.OnPush,
 })
 export class ListingMortgageCalculatorComponent
-implements OnInit, OnDestroy {
+  implements OnInit, OnDestroy {
   readonly listingPrice =
     input.required<number>();
 
   readonly annualPropertyTax =
+    input<number | undefined>();
+
+  readonly annualHomeownersInsurance =
     input<number | undefined>();
 
   readonly monthlyHoaFee =
@@ -247,8 +250,8 @@ implements OnInit, OnDestroy {
       const monthlyMortgageInsurance =
         values.downPaymentPercent < 20
           ? this.nonNegative(
-              values.monthlyMortgageInsurance,
-            )
+            values.monthlyMortgageInsurance,
+          )
           : 0;
 
       const monthlyHoaFee =
@@ -458,11 +461,11 @@ implements OnInit, OnDestroy {
     const downPaymentPercent =
       homePrice > 0
         ? this.roundPercentage(
-            (
-              downPaymentAmount /
-              homePrice
-            ) * 100,
-          )
+          (
+            downPaymentAmount /
+            homePrice
+          ) * 100,
+        )
         : 0;
 
     this.calculatorForm.controls
@@ -537,12 +540,17 @@ implements OnInit, OnDestroy {
 
         loanTermYears: 30,
 
-        annualPropertyTax:
+        
+                 annualPropertyTax:
           this.nonNegative(
             this.annualPropertyTax() ?? 0,
           ),
 
-        annualHomeownersInsurance: 0,
+        annualHomeownersInsurance:
+          this.nonNegative(
+            this.annualHomeownersInsurance() ??
+            0,
+          ),
 
         monthlyMortgageInsurance: 0,
 

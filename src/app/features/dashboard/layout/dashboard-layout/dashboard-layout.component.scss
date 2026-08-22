@@ -1,0 +1,134 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.dashboard-layout {
+  --dashboard-sidebar-width: 280px;
+  --dashboard-navy: #0d3048;
+  --dashboard-blue: #154360;
+  --dashboard-teal: #008f88;
+  --dashboard-background: #f4f7fa;
+  --dashboard-border: #d3dee6;
+
+  display: grid;
+  min-height: 100vh;
+  background: var(--dashboard-background);
+}
+
+.dashboard-layout__workspace {
+  display: flex;
+  min-width: 0;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.dashboard-layout__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboard-layout__mobile-header {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+
+  display: flex;
+  min-height: 68px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--dashboard-border);
+  align-items: center;
+  gap: 15px;
+
+  background: #ffffff;
+  box-shadow:
+    0 5px 18px rgba(13, 48, 72, 0.07);
+}
+
+.dashboard-layout__menu-button {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 9px;
+  place-items: center;
+
+  color: var(--dashboard-blue);
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 1rem;
+
+  &:hover {
+    border-color: var(--dashboard-teal);
+    color: var(--dashboard-teal);
+    background: #edf9f8;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(0, 143, 136, 0.24);
+    outline-offset: 2px;
+  }
+}
+
+.dashboard-layout__mobile-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  color: var(--dashboard-navy);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.dashboard-layout__brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  place-items: center;
+
+  color: #ffffff;
+  background: var(--dashboard-teal);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-layout__overlay {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+
+  background: rgba(5, 25, 39, 0.58);
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns:
+      var(--dashboard-sidebar-width)
+      minmax(0, 1fr);
+  }
+
+  .dashboard-layout__workspace {
+    grid-column: 2;
+  }
+
+  .dashboard-layout__mobile-header,
+  .dashboard-layout__overlay {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .dashboard-layout {
+    display: block;
+  }
+}
