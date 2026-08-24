@@ -17,10 +17,141 @@ import {
 } from './core/authentication/guards/guest.guard';
 
 import {
+  adminGuard
+} from './core/authentication/guards/admin.guard';
+
+import {
   DashboardLayoutComponent
 } from './features/dashboard/layout/dashboard-layout/dashboard-layout.component';
 
+import {
+  AdministrationLayoutComponent
+} from './features/administration/layout/administration-layout/administration-layout.component';
+
 export const routes: Routes = [
+
+  /*
+ * NavStreet administration
+ *
+ * These pages require an authenticated Firebase user
+ * carrying an administrator custom claim.
+ */
+  {
+    path: 'administration',
+    component: AdministrationLayoutComponent,
+    canActivate: [
+      authGuard,
+      accountGuard,
+      adminGuard
+    ],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/administration-overview/administration-overview.component'
+          ).then(
+            component =>
+              component.AdministrationOverviewComponent
+          )
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/users/users.component'
+          ).then(
+            component =>
+              component.UsersComponent
+          )
+      },
+      {
+        path: 'listings',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/listings/listings.component'
+          ).then(
+            component =>
+              component.ListingsComponent
+          )
+      },
+      {
+        path: 'businesses',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/businesses/businesses.component'
+          ).then(
+            component =>
+              component.BusinessesComponent
+          )
+      },
+      {
+        path: 'payments',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/payments/payments.component'
+          ).then(
+            component =>
+              component.PaymentsComponent
+          )
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/subscriptions/subscriptions.component'
+          ).then(
+            component =>
+              component.SubscriptionsComponent
+          )
+      },
+      {
+        path: 'activity',
+        data: {
+          title: 'Activity',
+          description: 'Review important NavStreet platform and administrator activity.',
+          icon: 'clock-rotate-left'
+        },
+        loadComponent: () =>
+          import(
+            './features/administration/pages/administration-placeholder/administration-placeholder.component'
+          ).then(
+            component =>
+              component.AdministrationPlaceholderComponent
+          )
+      },
+      {
+        path: 'promotion-codes',
+        loadComponent: () =>
+          import(
+            './features/administration/pages/promotion-codes/promotion-codes.component'
+          ).then(
+            component =>
+              component.PromotionCodesComponent
+          )
+      },
+      {
+        path: 'settings',
+        data: {
+          title: 'Settings',
+          description: 'Manage NavStreet administration and platform configuration.',
+          icon: 'gear'
+        },
+        loadComponent: () =>
+          import(
+            './features/administration/pages/administration-placeholder/administration-placeholder.component'
+          ).then(
+            component =>
+              component.AdministrationPlaceholderComponent
+          )
+      },
+      {
+        path: '**',
+        redirectTo: ''
+      }
+    ]
+  },
+
   /*
    * Authenticated account dashboard
    *

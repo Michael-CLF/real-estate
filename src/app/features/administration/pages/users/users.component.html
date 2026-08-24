@@ -1,0 +1,308 @@
+<main class="administration-users">
+  <header class="administration-users__header">
+    <div>
+      <p class="administration-users__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>
+        Users
+      </h1>
+
+      <p>
+        Review NavStreet user accounts, verification,
+        and account status.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="administration-users__refresh"
+      [disabled]="loading()"
+      (click)="refresh()"
+    >
+      <i
+        class="fa-solid fa-arrows-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh
+    </button>
+  </header>
+
+  <section
+    class="administration-users__summary"
+    aria-label="User account summary"
+  >
+    <article>
+      <span>Total users</span>
+      <strong>{{ summary().totalUsers }}</strong>
+    </article>
+
+    <article>
+      <span>Active</span>
+      <strong>{{ summary().activeUsers }}</strong>
+    </article>
+
+    <article>
+      <span>Disabled</span>
+      <strong>{{ summary().disabledUsers }}</strong>
+    </article>
+
+    <article>
+      <span>Email verified</span>
+      <strong>{{ summary().verifiedUsers }}</strong>
+    </article>
+  </section>
+
+  <section class="administration-users__workspace">
+    <div class="administration-users__toolbar">
+      <label class="administration-users__search">
+        <span class="sr-only">
+          Search users
+        </span>
+
+        <i
+          class="fa-solid fa-magnifying-glass"
+          aria-hidden="true"
+        ></i>
+
+        <input
+          type="search"
+          placeholder="
+            Search name, email, phone, or account number
+          "
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </label>
+
+      <div
+        class="administration-users__filters"
+        aria-label="Filter users by status"
+      >
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'all'
+          "
+          (click)="onStatusFilter('all')"
+        >
+          All
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'active'
+          "
+          (click)="onStatusFilter('active')"
+        >
+          Active
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'disabled'
+          "
+          (click)="onStatusFilter('disabled')"
+        >
+          Disabled
+        </button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div
+        class="administration-users__state"
+        role="status"
+      >
+        <span
+          class="administration-users__spinner"
+          aria-hidden="true"
+        ></span>
+
+        Loading NavStreet users...
+      </div>
+
+    } @else if (error()) {
+      <div
+        class="
+          administration-users__state
+          administration-users__state--error
+        "
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          {{ error() }}
+        </p>
+
+        <button
+          type="button"
+          (click)="refresh()"
+        >
+          Try again
+        </button>
+      </div>
+
+    } @else if (
+      filteredUsers().length === 0
+    ) {
+      <div class="administration-users__state">
+        <i
+          class="fa-solid fa-users"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          No users match the selected filters.
+        </p>
+      </div>
+
+    } @else {
+      <div class="administration-users__table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Account number</th>
+              <th>Contact</th>
+              <th>Verification</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Last login</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              user of filteredUsers();
+              track user.uid
+            ) {
+              <tr>
+                <td data-label="User">
+                  <div class="administration-users__identity">
+                    <span
+                      class="administration-users__avatar"
+                    >
+                      {{
+                        user.firstName.charAt(0) ||
+                        user.displayName.charAt(0) ||
+                        '?'
+                      }}
+
+                      {{
+                        user.lastName.charAt(0)
+                      }}
+                    </span>
+
+                    <span>
+                      <strong>
+                        {{
+                          user.displayName ||
+                          'Unnamed user'
+                        }}
+                      </strong>
+
+                      <small>
+                        {{ user.uid }}
+                      </small>
+                    </span>
+                  </div>
+                </td>
+
+                <td data-label="Account number">
+                  {{ user.accountNumber || '—' }}
+                </td>
+
+                <td data-label="Contact">
+                  <span
+                    class="administration-users__contact"
+                  >
+                    <strong>
+                      {{ user.email || 'No email' }}
+                    </strong>
+
+                    <small>
+                      {{ user.phone || 'No phone' }}
+                    </small>
+                  </span>
+                </td>
+
+                <td data-label="Verification">
+                  <span
+                    class="administration-users__badge"
+                    [class.administration-users__badge--verified]="
+                      user.emailVerified
+                    "
+                  >
+                    <i
+                      class="fa-solid"
+                      [class.fa-circle-check]="
+                        user.emailVerified
+                      "
+                      [class.fa-circle-xmark]="
+                        !user.emailVerified
+                      "
+                      aria-hidden="true"
+                    ></i>
+
+                    {{
+                      user.emailVerified
+                        ? 'Verified'
+                        : 'Unverified'
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Status">
+                  <span
+                    class="administration-users__status"
+                    [class.administration-users__status--disabled]="
+                      user.status === 'disabled'
+                    "
+                  >
+                    {{ user.status }}
+                  </span>
+                </td>
+
+                <td data-label="Created">
+                  @if (user.createdAt) {
+                    {{
+                      user.createdAt |
+                        date:'MMM d, y'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+
+                <td data-label="Last login">
+                  @if (user.lastLoginAt) {
+                    {{
+                      user.lastLoginAt |
+                        date:'MMM d, y'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="administration-users__result-count">
+        Showing {{ filteredUsers().length }} of
+        {{ summary().totalUsers }} users
+      </p>
+    }
+  </section>
+</main>

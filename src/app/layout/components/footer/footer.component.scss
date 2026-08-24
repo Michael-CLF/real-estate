@@ -112,6 +112,17 @@
   }
 }
 
+.site-footer-admin__link {
+  color: #008080;
+  font-family: variables.$font-body;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+  .site-footer-admin__link:hover {
+      color: #ffffff;
+}
+
 @media (max-width: 1000px) {
   .site-footer {
     &__container {

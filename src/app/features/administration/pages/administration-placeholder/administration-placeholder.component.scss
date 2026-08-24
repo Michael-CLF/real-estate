@@ -1,0 +1,118 @@
+:host {
+  display: block;
+}
+
+.administration-placeholder {
+  display: grid;
+  min-height: 100%;
+  padding: 36px 20px 70px;
+  place-items: start center;
+}
+
+.administration-placeholder__card {
+  width: min(100%, 720px);
+  padding: 38px 24px;
+  border: 1px solid #cfdae3;
+  border-radius: 16px;
+  margin-top: clamp(20px, 8vh, 90px);
+
+  background: #ffffff;
+  box-shadow:
+    0 14px 35px
+    rgba(15, 50, 73, 0.08);
+  text-align: center;
+
+  h1 {
+    margin: 9px 0 10px;
+    color: #0d3048;
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2rem, 5vw, 2.7rem);
+    letter-spacing: -0.035em;
+  }
+}
+
+.administration-placeholder__icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  margin: 0 auto 18px;
+  place-items: center;
+
+  color: #008f88;
+  background: #e7f7f5;
+  font-size: 1.35rem;
+}
+
+.administration-placeholder__eyebrow {
+  margin: 0;
+  color: #008f88;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.administration-placeholder__description {
+  max-width: 540px;
+  margin: 0 auto;
+  color: #5e7486;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.administration-placeholder__status {
+  display: flex;
+  max-width: 540px;
+  padding: 13px 15px;
+  border: 1px solid #c7dde6;
+  border-radius: 10px;
+  margin: 24px auto 0;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 9px;
+
+  color: #49697c;
+  background: #f5fafc;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+
+  i {
+    flex: 0 0 auto;
+    margin-top: 3px;
+    color: #008f88;
+  }
+}
+
+.administration-placeholder__return {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid #154360;
+  border-radius: 8px;
+  margin-top: 24px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  color: #154360;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover {
+    color: #ffffff;
+    background: #154360;
+  }
+}
+
+@media (min-width: 600px) {
+  .administration-placeholder__card {
+    padding: 48px;
+  }
+}

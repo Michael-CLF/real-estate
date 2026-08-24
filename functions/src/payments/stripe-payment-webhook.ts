@@ -266,11 +266,34 @@ export const stripePaymentWebhook =
     );
 
 
+function readCheckoutAmount(
+    checkoutSession: Stripe.Checkout.Session,
+    metadataKey: string
+): number {
+    const rawValue =
+        checkoutSession.metadata?.[metadataKey];
+
+    if (!rawValue) {
+        return 0;
+    }
+
+    const amount =
+        Number(rawValue);
+
+    return Number.isFinite(amount) &&
+        amount >= 0
+        ? Math.round(amount)
+        : 0;
+}
+
+
 async function publishPaidListing(
     checkoutSession: Stripe.Checkout.Session
 ): Promise<void> {
     if (
-        checkoutSession.payment_status !== 'paid'
+        checkoutSession.payment_status !== 'paid' &&
+        checkoutSession.payment_status !==
+        'no_payment_required'
     ) {
         console.log(
             'Checkout completed without paid status.',
@@ -377,6 +400,52 @@ async function publishPaidListing(
                         .payment_intent
                     : checkoutSession
                         .payment_intent?.id;
+
+            const stripePromotionCodeId =
+                checkoutSession.metadata
+                    ?.stripePromotionCodeId
+                    ?.trim() ?? '';
+
+            const promotionCodeUid =
+                checkoutSession.metadata
+                    ?.promotionCodeUid
+                    ?.trim() ?? '';
+
+            const promotionCode =
+                checkoutSession.metadata
+                    ?.promotionCode
+                    ?.trim() ?? '';
+
+            const listingFee =
+                readCheckoutAmount(
+                    checkoutSession,
+                    'listingFeeCents'
+                );
+
+            const featuredListingFee =
+                readCheckoutAmount(
+                    checkoutSession,
+                    'featuredListingFeeCents'
+                );
+
+            const subtotalAmount =
+                readCheckoutAmount(
+                    checkoutSession,
+                    'subtotalAmountCents'
+                );
+
+            const discountAmount =
+                readCheckoutAmount(
+                    checkoutSession,
+                    'discountAmountCents'
+                );
+
+            const totalAmount =
+                checkoutSession.amount_total ??
+                readCheckoutAmount(
+                    checkoutSession,
+                    'finalAmountCents'
+                );
 
             const listingDocument:
                 Record<string, unknown> = {
@@ -496,6 +565,25 @@ async function publishPaidListing(
                 draft.promotion
             );
 
+            if (stripePromotionCodeId) {
+                listingDocument['promotion'] = {
+                    code:
+                        promotionCode,
+
+                    promotionCodeUid:
+                        promotionCodeUid ||
+                        null,
+
+                    stripePromotionCodeId,
+
+                    discountAmount:
+                        discountAmount / 100,
+
+                    appliedAt:
+                        now
+                };
+            }
+
             transaction.set(
                 listingReference,
                 listingDocument
@@ -513,10 +601,37 @@ async function publishPaidListing(
                     checkoutSession.id,
 
                 'publication.paymentAmount':
-                    (
-                        checkoutSession
-                            .amount_total ?? 0
-                    ) / 100,
+                    totalAmount / 100,
+
+
+                'publication.paymentBreakdown': {
+                    listingFee:
+                        listingFee / 100,
+
+                    featuredListingFee:
+                        featuredListingFee / 100,
+
+                    subtotalAmount:
+                        subtotalAmount / 100,
+
+                    discountAmount:
+                        discountAmount / 100,
+
+                    totalAmount:
+                        totalAmount / 100,
+
+                    promotionCode:
+                        promotionCode || null,
+
+                    promotionCodeUid:
+                        promotionCodeUid || null,
+
+                    stripePromotionCodeId:
+                        stripePromotionCodeId || null
+                },
+
+                'publication.stripePaymentStatus':
+                    checkoutSession.payment_status,
 
                 'publication.paidAt':
                     now,
@@ -548,7 +663,7 @@ async function publishPaidListing(
     );
 
     console.log(
-        'Paid listing published successfully.',
+        'Listing Checkout published successfully.',
         {
             listingUid,
             sellerUid,
@@ -599,6 +714,15 @@ async function markPaymentFailed(
         throw new Error(
             'Stripe seller metadata does not match the listing owner.'
         );
+    }
+
+    if (
+        draft.publication?.status ===
+        'published' ||
+        draft.publication?.paymentStatus ===
+        'paid'
+    ) {
+        return;
     }
 
     if (

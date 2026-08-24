@@ -1,0 +1,44 @@
+<main class="administration-placeholder">
+  <section class="administration-placeholder__card">
+    <span class="administration-placeholder__icon">
+      <i
+        [class]="icon"
+        aria-hidden="true"
+      ></i>
+    </span>
+
+    <p class="administration-placeholder__eyebrow">
+      NavStreet administration
+    </p>
+
+    <h1>
+      {{ title }}
+    </h1>
+
+    <p class="administration-placeholder__description">
+      {{ description }}
+    </p>
+
+    <div class="administration-placeholder__status">
+      <i
+        class="fa-solid fa-circle-info"
+        aria-hidden="true"
+      ></i>
+
+      This section is prepared for future administration
+      functionality.
+    </div>
+
+    <a
+      class="administration-placeholder__return"
+      routerLink="/administration"
+    >
+      <i
+        class="fa-solid fa-arrow-left"
+        aria-hidden="true"
+      ></i>
+
+      Return to administration overview
+    </a>
+  </section>
+</main>

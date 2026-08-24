@@ -1,0 +1,403 @@
+<main class="administration-listings">
+  <header class="administration-listings__header">
+    <div>
+      <p class="administration-listings__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>
+        Listings
+      </h1>
+
+      <p>
+        Review marketplace listings, publication status,
+        seller ownership, and listing activity.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="administration-listings__refresh"
+      [disabled]="loading()"
+      (click)="refresh()"
+    >
+      <i
+        class="fa-solid fa-arrows-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh
+    </button>
+  </header>
+
+  <section
+    class="administration-listings__summary"
+    aria-label="Listing summary"
+  >
+    <article>
+      <span>Total listings</span>
+      <strong>
+        {{ summary().totalListings }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Active</span>
+      <strong>
+        {{ summary().activeListings }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Featured</span>
+      <strong>
+        {{ summary().featuredListings }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Under contract</span>
+      <strong>
+        {{ summary().underContractListings }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Sold</span>
+      <strong>
+        {{ summary().soldListings }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Inactive</span>
+      <strong>
+        {{ summary().inactiveListings }}
+      </strong>
+    </article>
+  </section>
+
+  <section class="administration-listings__workspace">
+    <div class="administration-listings__toolbar">
+      <label class="administration-listings__search">
+        <span class="sr-only">
+          Search listings
+        </span>
+
+        <i
+          class="fa-solid fa-magnifying-glass"
+          aria-hidden="true"
+        ></i>
+
+        <input
+          type="search"
+          placeholder="
+            Search address, listing ID, seller, or property type
+          "
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </label>
+
+      <div class="administration-listings__filters">
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'all'
+          "
+          (click)="onStatusFilter('all')"
+        >
+          All
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'active'
+          "
+          (click)="onStatusFilter('active')"
+        >
+          Active
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'published'
+          "
+          (click)="onStatusFilter('published')"
+        >
+          Published
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'under_contract'
+          "
+          (click)="onStatusFilter('under_contract')"
+        >
+          Under contract
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'sold'
+          "
+          (click)="onStatusFilter('sold')"
+        >
+          Sold
+        </button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div
+        class="administration-listings__state"
+        role="status"
+      >
+        <span
+          class="administration-listings__spinner"
+          aria-hidden="true"
+        ></span>
+
+        Loading NavStreet listings...
+      </div>
+
+    } @else if (error()) {
+      <div
+        class="
+          administration-listings__state
+          administration-listings__state--error
+        "
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          {{ error() }}
+        </p>
+
+        <button
+          type="button"
+          (click)="refresh()"
+        >
+          Try again
+        </button>
+      </div>
+
+    } @else if (
+      filteredListings().length === 0
+    ) {
+      <div class="administration-listings__state">
+        <i
+          class="fa-solid fa-house"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          No listings match the selected filters.
+        </p>
+      </div>
+
+    } @else {
+      <div class="administration-listings__table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Price</th>
+              <th>Details</th>
+              <th>Status</th>
+              <th>Activity</th>
+              <th>Seller</th>
+              <th>Published</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              listing of filteredListings();
+              track listing.uid
+            ) {
+              <tr>
+                <td data-label="Property">
+                  <div class="administration-listings__property">
+                    <span
+                      class="administration-listings__property-icon"
+                    >
+                      <i
+                        class="fa-solid fa-house"
+                        aria-hidden="true"
+                      ></i>
+                    </span>
+
+                    <span>
+                      <strong>
+                        {{
+                          formatAddress(listing) ||
+                          listing.title
+                        }}
+                      </strong>
+
+                      <small>
+                        {{ listing.uid }}
+                      </small>
+
+                      @if (
+                        listing.featuredListing
+                      ) {
+                        <span
+                          class="
+                            administration-listings__featured
+                          "
+                        >
+                          <i
+                            class="fa-solid fa-star"
+                            aria-hidden="true"
+                          ></i>
+
+                          Featured
+                        </span>
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <td data-label="Price">
+                  <strong
+                    class="administration-listings__price"
+                  >
+                    {{
+                      listing.price |
+                        currency:
+                          'USD':
+                          'symbol':
+                          '1.0-0'
+                    }}
+                  </strong>
+                </td>
+
+                <td data-label="Details">
+                  <span
+                    class="administration-listings__details"
+                  >
+                    <strong>
+                      {{ listing.propertyType }}
+                    </strong>
+
+                    <small>
+                      @if (
+                        listing.bedrooms !== null
+                      ) {
+                        {{ listing.bedrooms }} bd
+                      }
+
+                      @if (
+                        listing.bathrooms !== null
+                      ) {
+                        · {{ listing.bathrooms }} ba
+                      }
+
+                      @if (
+                        listing.squareFeet !== null
+                      ) {
+                        ·
+                        {{
+                          listing.squareFeet |
+                            number:'1.0-0'
+                        }}
+                        sq ft
+                      }
+                    </small>
+
+                    <small>
+                      {{ listing.photoCount }}
+                      photos
+                    </small>
+                  </span>
+                </td>
+
+                <td data-label="Status">
+                  <span
+                    class="administration-listings__status"
+                    [attr.data-status]="
+                      listing.status
+                    "
+                  >
+                    {{
+                      formatStatus(
+                        listing.status
+                      )
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Activity">
+                  <span
+                    class="administration-listings__activity"
+                  >
+                    <span>
+                      <i
+                        class="fa-regular fa-eye"
+                        aria-hidden="true"
+                      ></i>
+
+                      {{ listing.viewCount }}
+                    </span>
+
+                    <span>
+                      <i
+                        class="fa-regular fa-heart"
+                        aria-hidden="true"
+                      ></i>
+
+                      {{ listing.favoriteCount }}
+                    </span>
+
+                    <span>
+                      <i
+                        class="fa-regular fa-message"
+                        aria-hidden="true"
+                      ></i>
+
+                      {{ listing.inquiryCount }}
+                    </span>
+                  </span>
+                </td>
+
+                <td data-label="Seller">
+                  <span
+                    class="administration-listings__seller"
+                  >
+                    {{ listing.sellerUid }}
+                  </span>
+                </td>
+
+                <td data-label="Published">
+                  @if (listing.publishedAt) {
+                    {{
+                      listing.publishedAt |
+                        date:'MMM d, y'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="administration-listings__result-count">
+        Showing {{ filteredListings().length }} of
+        {{ summary().totalListings }} listings
+      </p>
+    }
+  </section>
+</main>

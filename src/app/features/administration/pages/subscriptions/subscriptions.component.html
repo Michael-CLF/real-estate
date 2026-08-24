@@ -1,0 +1,409 @@
+<main class="administration-subscriptions">
+  <header class="administration-subscriptions__header">
+    <div>
+      <p class="administration-subscriptions__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>
+        Subscriptions
+      </h1>
+
+      <p>
+        Review Full Business Profile subscriptions,
+        Stripe status, and scheduled cancellations.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="administration-subscriptions__refresh"
+      [disabled]="loading()"
+      (click)="refresh()"
+    >
+      <i
+        class="fa-solid fa-arrows-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh
+    </button>
+  </header>
+
+  <section
+    class="administration-subscriptions__summary"
+    aria-label="Subscription summary"
+  >
+    <article>
+      <span>Total records</span>
+      <strong>
+        {{ summary().totalSubscriptionRecords }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Active</span>
+      <strong>
+        {{ summary().activeSubscriptions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Trialing</span>
+      <strong>
+        {{ summary().trialingSubscriptions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Past due</span>
+      <strong>
+        {{ summary().pastDueSubscriptions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Canceled</span>
+      <strong>
+        {{ summary().canceledSubscriptions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Incomplete</span>
+      <strong>
+        {{ summary().incompleteSubscriptions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Cancellation scheduled</span>
+      <strong>
+        {{ summary().cancelScheduledSubscriptions }}
+      </strong>
+    </article>
+  </section>
+
+  <section class="administration-subscriptions__workspace">
+    <div class="administration-subscriptions__toolbar">
+      <label class="administration-subscriptions__search">
+        <span class="sr-only">
+          Search subscriptions
+        </span>
+
+        <i
+          class="fa-solid fa-magnifying-glass"
+          aria-hidden="true"
+        ></i>
+
+        <input
+          type="search"
+          placeholder="
+            Search business, owner, email, or Stripe ID
+          "
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </label>
+
+      <div class="administration-subscriptions__filters">
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'all'
+          "
+          (click)="setStatusFilter('all')"
+        >
+          All
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'active'
+          "
+          (click)="setStatusFilter('active')"
+        >
+          Active
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'trialing'
+          "
+          (click)="setStatusFilter('trialing')"
+        >
+          Trialing
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'past_due'
+          "
+          (click)="setStatusFilter('past_due')"
+        >
+          Past due
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'canceled'
+          "
+          (click)="setStatusFilter('canceled')"
+        >
+          Canceled
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'incomplete'
+          "
+          (click)="setStatusFilter('incomplete')"
+        >
+          Incomplete
+        </button>
+      </div>
+>
+    </div>
+
+    @if (loading()) {
+      <div
+        class="administration-subscriptions__state"
+        role="status"
+      >
+        <span
+          class="administration-subscriptions__spinner"
+          aria-hidden="true"
+        ></span>
+
+        Loading NavStreet subscriptions...
+      </div>
+
+    } @else if (error()) {
+      <div
+        class="
+          administration-subscriptions__state
+          administration-subscriptions__state--error
+        "
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          {{ error() }}
+        </p>
+
+        <button
+          type="button"
+          (click)="refresh()"
+        >
+          Try again
+        </button>
+      </div>
+
+    } @else if (
+      filteredSubscriptions().length === 0
+    ) {
+      <div class="administration-subscriptions__state">
+        <i
+          class="fa-solid fa-arrows-rotate"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          No subscriptions match the selected filters.
+        </p>
+      </div>
+
+    } @else {
+      <div class="administration-subscriptions__table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Profile access</th>
+              <th>Stripe status</th>
+              <th>Cancellation</th>
+              <th>Stripe customer</th>
+              <th>Subscription ID</th>
+              <th>Activated</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              subscription of filteredSubscriptions();
+              track subscription.professionalUid
+            ) {
+              <tr>
+                <td data-label="Business">
+                  <div class="administration-subscriptions__business">
+                    <span
+                      class="administration-subscriptions__business-icon"
+                    >
+                      <i
+                        class="fa-solid fa-building"
+                        aria-hidden="true"
+                      ></i>
+                    </span>
+
+                    <span>
+                      <strong>
+                        {{
+                          subscription.businessName
+                        }}
+                      </strong>
+
+                      <small>
+                        {{
+                          subscription.email ||
+                          'No email'
+                        }}
+                      </small>
+
+                      <small>
+                        {{
+                          subscription.stateName ||
+                          subscription.stateAbbreviation
+                        }}
+                      </small>
+                    </span>
+                  </div>
+                </td>
+
+                <td data-label="Profile access">
+                  <span
+                    class="administration-subscriptions__profile"
+                    [class.administration-subscriptions__profile--active]="
+                      subscription.profileStatus ===
+                      'profile'
+                    "
+                  >
+                    {{
+                      subscription.profileStatus ===
+                        'profile'
+                        ? 'Full profile'
+                        : 'Free'
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Stripe status">
+                  <span
+                    class="administration-subscriptions__status"
+                    [attr.data-status]="
+                      subscription
+                        .stripeSubscriptionStatus
+                    "
+                  >
+                    {{
+                      formatStatus(
+                        subscription
+                          .stripeSubscriptionStatus
+                      )
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Cancellation">
+                  @if (
+                    subscription.cancelAtPeriodEnd
+                  ) {
+                    <span
+                      class="
+                        administration-subscriptions__cancellation
+                      "
+                    >
+                      <i
+                        class="fa-solid fa-clock"
+                        aria-hidden="true"
+                      ></i>
+
+                      Scheduled
+                    </span>
+                  } @else {
+                    —
+                  }
+                </td>
+
+                <td data-label="Stripe customer">
+                  @if (
+                    subscription.stripeCustomerId
+                  ) {
+                    <span
+                      class="administration-subscriptions__stripe-id"
+                      [title]="
+                        subscription.stripeCustomerId
+                      "
+                    >
+                      {{
+                        subscription.stripeCustomerId
+                      }}
+                    </span>
+                  } @else {
+                    —
+                  }
+                </td>
+
+                <td data-label="Subscription ID">
+                  @if (
+                    subscription.stripeSubscriptionId
+                  ) {
+                    <span
+                      class="administration-subscriptions__stripe-id"
+                      [title]="
+                        subscription.stripeSubscriptionId
+                      "
+                    >
+                      {{
+                        subscription.stripeSubscriptionId
+                      }}
+                    </span>
+                  } @else {
+                    —
+                  }
+                </td>
+
+                <td data-label="Activated">
+                  @if (subscription.activatedAt) {
+                    {{
+                      subscription.activatedAt |
+                        date:'MMM d, y'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+
+                <td data-label="Updated">
+                  @if (subscription.updatedAt) {
+                    {{
+                      subscription.updatedAt |
+                        date:'MMM d, y, h:mm a'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="administration-subscriptions__result-count">
+        Showing {{ filteredSubscriptions().length }} of
+        {{ summary().totalSubscriptionRecords }}
+        subscription records
+      </p>
+    }
+  </section>
+</main>

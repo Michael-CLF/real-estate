@@ -1,0 +1,427 @@
+<main class="administration-businesses">
+  <header class="administration-businesses__header">
+    <div>
+      <p class="administration-businesses__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>
+        Businesses
+      </h1>
+
+      <p>
+        Review professional businesses, subscription levels,
+        placement, service areas, and account status.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="administration-businesses__refresh"
+      [disabled]="loading()"
+      (click)="refresh()"
+    >
+      <i
+        class="fa-solid fa-arrows-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh
+    </button>
+  </header>
+
+  <section
+    class="administration-businesses__summary"
+    aria-label="Business summary"
+  >
+    <article>
+      <span>Total businesses</span>
+      <strong>
+        {{ summary().totalBusinesses }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Active</span>
+      <strong>
+        {{ summary().activeBusinesses }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Suspended</span>
+      <strong>
+        {{ summary().suspendedBusinesses }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Removed</span>
+      <strong>
+        {{ summary().removedBusinesses }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Profile subscribers</span>
+      <strong>
+        {{ summary().profileSubscribers }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Sponsored</span>
+      <strong>
+        {{ summary().sponsoredBusinesses }}
+      </strong>
+    </article>
+  </section>
+
+  <section class="administration-businesses__workspace">
+    <div class="administration-businesses__toolbar">
+      <label class="administration-businesses__search">
+        <span class="sr-only">
+          Search businesses
+        </span>
+
+        <i
+          class="fa-solid fa-magnifying-glass"
+          aria-hidden="true"
+        ></i>
+
+        <input
+          type="search"
+          placeholder="
+            Search business, category, email, phone, or owner
+          "
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </label>
+
+      <div class="administration-businesses__filter-groups">
+        <div class="administration-businesses__filters">
+          <button
+            type="button"
+            [class.active]="
+              statusFilter() === 'all'
+            "
+            (click)="setStatusFilter('all')"
+          >
+            All
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              statusFilter() === 'active'
+            "
+            (click)="setStatusFilter('active')"
+          >
+            Active
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              statusFilter() === 'suspended'
+            "
+            (click)="setStatusFilter('suspended')"
+          >
+            Suspended
+          </button>
+        </div>
+
+        <div class="administration-businesses__filters">
+          <button
+            type="button"
+            [class.active]="
+              subscriptionFilter() === 'all'
+            "
+            (click)="setSubscriptionFilter('all')"
+          >
+            All plans
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              subscriptionFilter() === 'free'
+            "
+            (click)="setSubscriptionFilter('free')"
+          >
+            Free
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              subscriptionFilter() === 'profile'
+            "
+            (click)="setSubscriptionFilter('profile')"
+          >
+            Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div
+        class="administration-businesses__state"
+        role="status"
+      >
+        <span
+          class="administration-businesses__spinner"
+          aria-hidden="true"
+        ></span>
+
+        Loading NavStreet businesses...
+      </div>
+
+    } @else if (error()) {
+      <div
+        class="
+          administration-businesses__state
+          administration-businesses__state--error
+        "
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          {{ error() }}
+        </p>
+
+        <button
+          type="button"
+          (click)="refresh()"
+        >
+          Try again
+        </button>
+      </div>
+
+    } @else if (
+      filteredBusinesses().length === 0
+    ) {
+      <div class="administration-businesses__state">
+        <i
+          class="fa-solid fa-building"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          No businesses match the selected filters.
+        </p>
+      </div>
+
+    } @else {
+      <div class="administration-businesses__table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Category</th>
+              <th>Contact</th>
+              <th>Service area</th>
+              <th>Subscription</th>
+              <th>Placement</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              business of filteredBusinesses();
+              track business.uid
+            ) {
+              <tr>
+                <td data-label="Business">
+                  <div class="administration-businesses__identity">
+                    <span
+                      class="administration-businesses__logo"
+                    >
+                      @if (business.logoUrl) {
+                        <img
+                          [src]="business.logoUrl"
+                          [alt]="
+                            business.businessName +
+                            ' logo'
+                          "
+                        />
+                      } @else {
+                        <i
+                          class="fa-solid fa-building"
+                          aria-hidden="true"
+                        ></i>
+                      }
+                    </span>
+
+                    <span>
+                      <strong>
+                        {{ business.businessName }}
+                      </strong>
+
+                      <small>
+                        {{ business.uid }}
+                      </small>
+
+                      @if (
+                        business.submissionCertified
+                      ) {
+                        <span
+                          class="
+                            administration-businesses__certified
+                          "
+                        >
+                          <i
+                            class="fa-solid fa-circle-check"
+                            aria-hidden="true"
+                          ></i>
+
+                          Certified submission
+                        </span>
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <td data-label="Category">
+                  <span
+                    class="administration-businesses__category"
+                  >
+                    <strong>
+                      {{
+                        formatLabel(
+                          business.category
+                        )
+                      }}
+                    </strong>
+
+                    <small>
+                      {{
+                        formatLabel(
+                          business.professionalType
+                        )
+                      }}
+                    </small>
+                  </span>
+                </td>
+
+                <td data-label="Contact">
+                  <span
+                    class="administration-businesses__contact"
+                  >
+                    <strong>
+                      {{
+                        business.email ||
+                        'No email'
+                      }}
+                    </strong>
+
+                    <small>
+                      {{
+                        business.phone ||
+                        'No phone'
+                      }}
+                    </small>
+                  </span>
+                </td>
+
+                <td data-label="Service area">
+                  <span
+                    class="administration-businesses__service-area"
+                  >
+                    <strong>
+                      {{
+                        formatLabel(
+                          business.serviceAreaType
+                        )
+                      }}
+                    </strong>
+
+                    <small>
+                      {{
+                        formatServiceArea(
+                          business
+                        )
+                      }}
+                    </small>
+                  </span>
+                </td>
+
+                <td data-label="Subscription">
+                  <span
+                    class="administration-businesses__subscription"
+                    [class.administration-businesses__subscription--profile]="
+                      business.subscriptionStatus ===
+                      'profile'
+                    "
+                  >
+                    {{
+                      business.subscriptionStatus ===
+                        'profile'
+                        ? 'Full profile'
+                        : 'Free'
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Placement">
+                  <span
+                    class="administration-businesses__placement"
+                    [class.administration-businesses__placement--sponsored]="
+                      business.placement ===
+                      'sponsored'
+                    "
+                  >
+                    {{
+                      formatLabel(
+                        business.placement
+                      )
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Status">
+                  <span
+                    class="administration-businesses__status"
+                    [attr.data-status]="
+                      business.status
+                    "
+                  >
+                    {{
+                      formatLabel(
+                        business.status
+                      )
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Created">
+                  @if (business.createdAt) {
+                    {{
+                      business.createdAt |
+                        date:'MMM d, y'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="administration-businesses__result-count">
+        Showing {{ filteredBusinesses().length }} of
+        {{ summary().totalBusinesses }} businesses
+      </p>
+    }
+  </section>
+</main>

@@ -60,6 +60,119 @@
       }
 
       <section
+        class="promotion-entry"
+        aria-labelledby="promotion-title"
+      >
+        <div class="promotion-entry__heading">
+          <div>
+            <h2 id="promotion-title">
+              Promotion code
+            </h2>
+
+            <p>
+              Enter your NavStreet promotion code before
+              continuing to Stripe.
+            </p>
+          </div>
+
+          <i
+            class="fa-solid fa-ticket"
+            aria-hidden="true"
+          ></i>
+        </div>
+
+        <label for="listing-promotion-code">
+          Promotion code
+        </label>
+
+        <div class="promotion-entry__controls">
+          <input
+            id="listing-promotion-code"
+            type="text"
+            maxlength="32"
+            autocomplete="off"
+            placeholder="Enter promotion code"
+            [value]="promotionCode()"
+            [disabled]="
+              isValidatingPromotion() ||
+              isOpeningCheckout()
+            "
+            (input)="
+              onPromotionCodeInput(
+                $any($event.target).value
+              )
+            "
+            (keydown.enter)="applyPromotionCode()"
+          />
+
+          @if (promotionIsValid()) {
+            <button
+              class="promotion-entry__remove"
+              type="button"
+              [disabled]="isOpeningCheckout()"
+              (click)="removePromotionCode()"
+            >
+              Remove
+            </button>
+          } @else {
+            <button
+              class="promotion-entry__apply"
+              type="button"
+              [disabled]="
+                !promotionCode().trim() ||
+                isValidatingPromotion() ||
+                isOpeningCheckout()
+              "
+              (click)="applyPromotionCode()"
+            >
+              @if (isValidatingPromotion()) {
+                <span
+                  class="button-spinner"
+                  aria-hidden="true"
+                ></span>
+
+                Checking…
+              } @else {
+                Apply
+              }
+            </button>
+          }
+        </div>
+
+        @if (promotionMessage()) {
+          <div
+            class="promotion-message"
+            [class.promotion-message--success]="
+              promotionIsValid()
+            "
+            [class.promotion-message--error]="
+              !promotionIsValid()
+            "
+            [attr.role]="
+              promotionIsValid()
+                ? 'status'
+                : 'alert'
+            "
+          >
+            <i
+              class="fa-solid"
+              [class.fa-circle-check]="
+                promotionIsValid()
+              "
+              [class.fa-circle-exclamation]="
+                !promotionIsValid()
+              "
+              aria-hidden="true"
+            ></i>
+
+            <span>
+              {{ promotionMessage() }}
+            </span>
+          </div>
+        }
+      </section>
+
+      <section
         class="payment-summary"
         aria-labelledby="payment-summary-title"
       >
@@ -79,7 +192,7 @@
           </div>
 
           <strong>
-            ${{ listingFee.toFixed(2) }}
+            ${{ listingFee().toFixed(2) }}
           </strong>
         </div>
 
@@ -87,7 +200,7 @@
           <div class="fee-row">
             <div class="fee-description">
               <span>
-                Featured Listing upgrade
+                Featured Property upgrade
               </span>
 
               <small>
@@ -101,29 +214,43 @@
           </div>
         }
 
-        @if (discount() > 0) {
-          <div class="fee-row fee-row--discount">
-            <div class="fee-description">
-              <span>
-                Promotion discount
-              </span>
-
-              @if (draft()?.promotion?.code) {
-                <small>
-                  Code: {{ draft()?.promotion?.code }}
-                </small>
-              }
-            </div>
-
-            <strong>
-              −${{ discount().toFixed(2) }}
-            </strong>
+        <div class="fee-row">
+          <div class="fee-description">
+            <span>
+              Subtotal
+            </span>
           </div>
-        }
+
+          <strong>
+            ${{ subtotal().toFixed(2) }}
+          </strong>
+        </div>
+
+        <div class="fee-row fee-row--discount">
+          <div class="fee-description">
+            <span>
+              Promotion discount
+            </span>
+
+            @if (promotionIsValid()) {
+              <small>
+                Code: {{ promotionCode() }}
+              </small>
+            } @else {
+              <small>
+                No promotion applied
+              </small>
+            }
+          </div>
+
+          <strong>
+            −${{ discount().toFixed(2) }}
+          </strong>
+        </div>
 
         <div class="fee-row fee-row--total">
           <span>
-            Total due
+            Final amount due
           </span>
 
           <strong>
@@ -151,7 +278,11 @@
       <button
         class="primary-button"
         type="button"
-        [disabled]="isOpeningCheckout()"
+        [disabled]="
+          isOpeningCheckout() ||
+          isValidatingPromotion() ||
+          hasUnvalidatedCode()
+        "
         (click)="continueToStripe()"
       >
         @if (isOpeningCheckout()) {

@@ -4,36 +4,58 @@
       <a
         class="site-footer__brand-link"
         routerLink="/"
-        aria-label="HomeDirect home"
+        aria-label="NavStreet home"
       >
-
         <span class="site-footer__brand-content">
-          <span class="site-footer__brand-content">
-        <img class="site-footer__logo" src="/assets/images/navstreet-transparent.svg" alt="NavStreet">
-      </span>
+          <img
+            class="site-footer__logo"
+            src="/assets/images/navstreet-transparent.svg"
+            alt="NavStreet"
+          />
         </span>
       </a>
 
       <p class="site-footer__description">
-        A simpler way to search, buy, sell, and finance real estate.
+        A simpler way to search, buy, sell,
+        and finance real estate.
       </p>
     </div>
 
     <div class="site-footer__sections">
-      @for (section of footerSections; track section.title) {
+      @for (
+        section of footerSections;
+        track section.title
+      ) {
         <section class="site-footer__section">
           <h2 class="site-footer__section-title">
             {{ section.title }}
           </h2>
 
           <ul class="site-footer__links">
-            @for (link of section.links; track link.route) {
+            @for (
+              link of section.links;
+              track link.route
+            ) {
               <li>
                 <a
                   class="site-footer__link"
                   [routerLink]="link.route"
                 >
                   {{ link.label }}
+                </a>
+              </li>
+            }
+
+            @if (
+              section.title === 'Company' &&
+              isAdministrator()
+            ) {
+              <li>
+                <a
+                  class="site-footer-admin__link"
+                  routerLink="/administration"
+                >
+                  Administration
                 </a>
               </li>
             }
@@ -46,11 +68,13 @@
   <div class="site-footer__bottom">
     <div class="site-footer__bottom-container">
       <p class="site-footer__copyright">
-        © {{ currentYear }} NavStreet. All rights reserved.
+        © {{ currentYear }} NavStreet.
+        All rights reserved.
       </p>
 
       <p class="site-footer__disclaimer">
-        Real estate information is provided for informational purposes only.
+        Real estate information is provided
+        for informational purposes only.
       </p>
     </div>
   </div>

@@ -31,7 +31,8 @@ import {
 } from '../../../core/domains/listings/models/listing.model';
 
 import {
-  ListingPaymentService
+  ListingPaymentService,
+  ValidateListingPromotionResult
 } from '../../../core/domains/payments/services/listing-payment.service';
 
 
@@ -47,7 +48,8 @@ type PaymentPageState =
   imports: [],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
 })
 export class PaymentComponent
   implements OnInit, OnDestroy {
@@ -62,10 +64,14 @@ export class PaymentComponent
     Unsubscribe | null = null;
 
   protected readonly pageState =
-    signal<PaymentPageState>('loading');
+    signal<PaymentPageState>(
+      'loading'
+    );
 
   protected readonly draft =
-    signal<ListingDraft | null>(null);
+    signal<ListingDraft | null>(
+      null
+    );
 
   protected readonly errorMessage =
     signal('');
@@ -73,64 +79,145 @@ export class PaymentComponent
   protected readonly isOpeningCheckout =
     signal(false);
 
-  protected readonly listingFee = 49;
-  protected readonly featuredListingFee = 10;
+  protected readonly promotionCode =
+    signal('');
 
-  protected readonly featuredFee = computed(() =>
-    this.draft()?.featuredListing
-      ? this.featuredListingFee
-      : 0
-  );
+  protected readonly isValidatingPromotion =
+    signal(false);
 
-  protected readonly subtotal = computed(() =>
-    this.listingFee +
-    this.featuredFee()
-  );
+  protected readonly promotionMessage =
+    signal('');
 
-  protected readonly discount = computed(() =>
-    Math.min(
-      Math.max(
-        this.draft()?.promotion?.discountAmount ?? 0,
+  protected readonly promotionIsValid =
+    signal(false);
+
+  protected readonly validatedPromotion =
+    signal<
+      ValidateListingPromotionResult |
+      null
+    >(
+      null
+    );
+
+  protected readonly listingFee =
+    computed(() =>
+      (
+        this.validatedPromotion()
+          ?.listingFeeCents ??
+        4900
+      ) /
+      100
+    );
+
+  protected readonly featuredFee =
+    computed(() =>
+      (
+        this.validatedPromotion()
+          ?.featuredListingFeeCents ??
+        (
+          this.draft()
+            ?.featuredListing
+            ? 1000
+            : 0
+        )
+      ) /
+      100
+    );
+
+  protected readonly subtotal =
+    computed(() =>
+      (
+        this.validatedPromotion()
+          ?.subtotalAmountCents ??
+        (
+          4900 +
+          (
+            this.draft()
+              ?.featuredListing
+              ? 1000
+              : 0
+          )
+        )
+      ) /
+      100
+    );
+
+  protected readonly discount =
+    computed(() =>
+      (
+        this.validatedPromotion()
+          ?.discountAmountCents ??
         0
-      ),
-      this.subtotal()
-    )
-  );
+      ) /
+      100
+    );
 
-  protected readonly total = computed(() =>
-    this.subtotal() -
-    this.discount()
-  );
+  protected readonly total =
+    computed(() =>
+      (
+        this.validatedPromotion()
+          ?.totalAmountCents ??
+        (
+          4900 +
+          (
+            this.draft()
+              ?.featuredListing
+              ? 1000
+              : 0
+          )
+        )
+      ) /
+      100
+    );
 
-  protected readonly propertyAddress = computed(() => {
-    const address =
-      this.draft()?.address;
+  protected readonly hasUnvalidatedCode =
+    computed(() =>
+      Boolean(
+        this.promotionCode()
+          .trim()
+      ) &&
+      !this.promotionIsValid()
+    );
 
-    if (!address) {
-      return '';
-    }
+  protected readonly propertyAddress =
+    computed(() => {
+      const address =
+        this.draft()?.address;
 
-    return [
-      address.addressLine1,
-      address.city,
-      address.state,
-      address.zipCode
-    ]
-      .filter(Boolean)
-      .join(', ');
-  });
+      if (!address) {
+        return '';
+      }
+
+      return [
+        address.addressLine1,
+        address.city,
+        address.state,
+        address.zipCode
+      ]
+        .filter(Boolean)
+        .join(', ');
+    });
 
 
-  ngOnInit(): void {
+  async ngOnInit():
+    Promise<void> {
+    await auth.authStateReady();
+
     const listingUid =
-      this.route.snapshot.paramMap
-        .get('listingUid')
+      this.route.snapshot
+        .paramMap
+        .get(
+          'listingUid'
+        )
         ?.trim();
 
     const sellerUid =
       auth.currentUser?.uid;
 
-    if (!listingUid || !sellerUid) {
+    if (
+      !listingUid ||
+      !sellerUid
+    ) {
       this.showError(
         'Your listing or authentication session could not be found.'
       );
@@ -138,11 +225,12 @@ export class PaymentComponent
       return;
     }
 
-    const draftReference = doc(
-      firestore,
-      'listingDrafts',
-      listingUid
-    );
+    const draftReference =
+      doc(
+        firestore,
+        'listingDrafts',
+        listingUid
+      );
 
     this.unsubscribeFromDraft =
       onSnapshot(
@@ -158,11 +246,16 @@ export class PaymentComponent
           }
 
           const draft = {
-            Uid: snapshot.id,
+            Uid:
+              snapshot.id,
+
             ...snapshot.data()
           } as ListingDraft;
 
-          if (draft.sellerUid !== sellerUid) {
+          if (
+            draft.sellerUid !==
+            sellerUid
+          ) {
             this.showError(
               'You do not have permission to access this listing.'
             );
@@ -171,7 +264,8 @@ export class PaymentComponent
           }
 
           if (
-            draft.publication.identityStatus !==
+            draft.publication
+              .identityStatus !==
             'verified'
           ) {
             this.showError(
@@ -182,7 +276,8 @@ export class PaymentComponent
           }
 
           if (
-            draft.publication.paymentStatus ===
+            draft.publication
+              .paymentStatus ===
             'paid'
           ) {
             this.showError(
@@ -192,9 +287,35 @@ export class PaymentComponent
             return;
           }
 
-          this.draft.set(draft);
+          const validation =
+            this.validatedPromotion();
+
+          const expectedFeaturedFee =
+            draft.featuredListing
+              ? 1000
+              : 0;
+
+          if (
+            validation &&
+            validation
+              .featuredListingFeeCents !==
+            expectedFeaturedFee
+          ) {
+            this.clearValidatedPromotion();
+
+            this.promotionMessage.set(
+              'Your listing options changed. Apply the promotion code again.'
+            );
+          }
+
+          this.draft.set(
+            draft
+          );
+
           this.errorMessage.set('');
-          this.pageState.set('ready');
+          this.pageState.set(
+            'ready'
+          );
         },
 
         error => {
@@ -216,26 +337,151 @@ export class PaymentComponent
   }
 
 
-  protected async continueToStripe(): Promise<void> {
+  protected onPromotionCodeInput(
+    value: string
+  ): void {
+    const normalizedCode =
+      value
+        .toUpperCase()
+        .replace(
+          /[^A-Z0-9]/g,
+          ''
+        )
+        .slice(
+          0,
+          32
+        );
+
+    this.promotionCode.set(
+      normalizedCode
+    );
+
+    this.clearValidatedPromotion();
+    this.promotionMessage.set('');
+    this.errorMessage.set('');
+  }
+
+
+  protected async applyPromotionCode():
+    Promise<void> {
     const listingUid =
       this.draft()?.Uid;
 
+    const code =
+      this.promotionCode()
+        .trim();
+
     if (
       !listingUid ||
-      this.pageState() !== 'ready' ||
+      !code ||
+      this.isValidatingPromotion() ||
       this.isOpeningCheckout()
     ) {
       return;
     }
 
-    this.isOpeningCheckout.set(true);
+    this.isValidatingPromotion.set(
+      true
+    );
+
+    this.clearValidatedPromotion();
+    this.promotionMessage.set('');
+    this.errorMessage.set('');
+
+    try {
+      const validation =
+        await this
+          .listingPaymentService
+          .validatePromotion(
+            listingUid,
+            code
+          );
+
+      this.validatedPromotion.set(
+        validation
+      );
+
+      this.promotionCode.set(
+        validation.code
+      );
+
+      this.promotionIsValid.set(
+        true
+      );
+
+      this.promotionMessage.set(
+        `Promotion code ${validation.code} was applied.`
+      );
+    } catch (error) {
+      console.error(
+        'The promotion code could not be applied.',
+        error
+      );
+
+      this.promotionMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'The promotion code could not be applied.'
+      );
+    } finally {
+      this.isValidatingPromotion.set(
+        false
+      );
+    }
+  }
+
+
+  protected removePromotionCode():
+    void {
+    this.promotionCode.set('');
+    this.promotionMessage.set('');
+    this.errorMessage.set('');
+
+    this.clearValidatedPromotion();
+  }
+
+
+  protected async continueToStripe():
+    Promise<void> {
+    const listingUid =
+      this.draft()?.Uid;
+
+    if (
+      !listingUid ||
+      this.pageState() !==
+      'ready' ||
+      this.isOpeningCheckout() ||
+      this.isValidatingPromotion()
+    ) {
+      return;
+    }
+
+    if (
+      this.hasUnvalidatedCode()
+    ) {
+      this.promotionMessage.set(
+        'Apply the promotion code or remove it before continuing.'
+      );
+
+      return;
+    }
+
+    this.isOpeningCheckout.set(
+      true
+    );
+
     this.errorMessage.set('');
 
     try {
       const checkout =
-        await this.listingPaymentService.startCheckout(
-          listingUid
-        );
+        await this
+          .listingPaymentService
+          .startCheckout(
+            listingUid,
+            this.validatedPromotion()
+              ?.code ??
+            null
+          );
 
       window.location.assign(
         checkout.checkoutUrl
@@ -250,20 +496,39 @@ export class PaymentComponent
         error instanceof Error
           ? error.message
           : (
-              'The secure payment page could not be opened. ' +
-              'Please try again.'
-            )
+            'The secure payment page could not be opened. ' +
+            'Please try again.'
+          )
       );
 
-      this.isOpeningCheckout.set(false);
+      this.isOpeningCheckout.set(
+        false
+      );
     }
+  }
+
+
+  private clearValidatedPromotion():
+    void {
+    this.validatedPromotion.set(
+      null
+    );
+
+    this.promotionIsValid.set(
+      false
+    );
   }
 
 
   private showError(
     message: string
   ): void {
-    this.errorMessage.set(message);
-    this.pageState.set('error');
+    this.errorMessage.set(
+      message
+    );
+
+    this.pageState.set(
+      'error'
+    );
   }
 }

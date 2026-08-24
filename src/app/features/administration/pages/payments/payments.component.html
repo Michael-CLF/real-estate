@@ -1,0 +1,442 @@
+<main class="administration-payments">
+  <header class="administration-payments__header">
+    <div>
+      <p class="administration-payments__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>
+        Payments
+      </h1>
+
+      <p>
+        Review listing payments, Stripe Checkout sessions,
+        promotion discounts, and payment status.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="administration-payments__refresh"
+      [disabled]="loading()"
+      (click)="refresh()"
+    >
+      <i
+        class="fa-solid fa-arrows-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh
+    </button>
+  </header>
+
+  <section
+    class="administration-payments__summary"
+    aria-label="Payment summary"
+  >
+    <article>
+      <span>Total transactions</span>
+      <strong>
+        {{ summary().totalTransactions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Paid</span>
+      <strong>
+        {{ summary().paidTransactions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Pending</span>
+      <strong>
+        {{ summary().pendingTransactions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Failed</span>
+      <strong>
+        {{ summary().failedTransactions }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Gross charges</span>
+      <strong>
+        {{
+          summary().grossAmount |
+            currency:'USD'
+        }}
+      </strong>
+    </article>
+
+    <article>
+      <span>Discounts</span>
+      <strong>
+        {{
+          summary().discountAmount |
+            currency:'USD'
+        }}
+      </strong>
+    </article>
+
+    <article
+      class="
+        administration-payments__summary-collected
+      "
+    >
+      <span>Collected</span>
+      <strong>
+        {{
+          summary().collectedAmount |
+            currency:'USD'
+        }}
+      </strong>
+    </article>
+  </section>
+
+  <section class="administration-payments__workspace">
+    <div class="administration-payments__toolbar">
+      <label class="administration-payments__search">
+        <span class="sr-only">
+          Search payments
+        </span>
+
+        <i
+          class="fa-solid fa-magnifying-glass"
+          aria-hidden="true"
+        ></i>
+
+        <input
+          type="search"
+          placeholder="
+            Search address, listing, seller, Stripe ID, or code
+          "
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </label>
+
+      <div class="administration-payments__filters">
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'all'
+          "
+          (click)="setStatusFilter('all')"
+        >
+          All
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'paid'
+          "
+          (click)="setStatusFilter('paid')"
+        >
+          Paid
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() ===
+            'no_payment_required'
+          "
+          (click)="
+            setStatusFilter(
+              'no_payment_required'
+            )
+          "
+        >
+          $0 orders
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'pending'
+          "
+          (click)="setStatusFilter('pending')"
+        >
+          Pending
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            statusFilter() === 'failed'
+          "
+          (click)="setStatusFilter('failed')"
+        >
+          Failed
+        </button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div
+        class="administration-payments__state"
+        role="status"
+      >
+        <span
+          class="administration-payments__spinner"
+          aria-hidden="true"
+        ></span>
+
+        Loading NavStreet payments...
+      </div>
+
+    } @else if (error()) {
+      <div
+        class="
+          administration-payments__state
+          administration-payments__state--error
+        "
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          {{ error() }}
+        </p>
+
+        <button
+          type="button"
+          (click)="refresh()"
+        >
+          Try again
+        </button>
+      </div>
+
+    } @else if (
+      filteredPayments().length === 0
+    ) {
+      <div class="administration-payments__state">
+        <i
+          class="fa-solid fa-credit-card"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          No payments match the selected filters.
+        </p>
+      </div>
+
+    } @else {
+      <div class="administration-payments__table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Status</th>
+              <th>Charges</th>
+              <th>Discount</th>
+              <th>Total</th>
+              <th>Promotion</th>
+              <th>Stripe session</th>
+              <th>Completed</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (
+              payment of filteredPayments();
+              track payment.stripeCheckoutSessionId
+            ) {
+              <tr>
+                <td data-label="Property">
+                  <div class="administration-payments__property">
+                    <span
+                      class="administration-payments__property-icon"
+                    >
+                      <i
+                        class="fa-solid fa-house"
+                        aria-hidden="true"
+                      ></i>
+                    </span>
+
+                    <span>
+                      <strong>
+                        {{
+                          payment.propertyAddress
+                        }}
+                      </strong>
+
+                      <small>
+                        {{ payment.listingUid }}
+                      </small>
+
+                      @if (
+                        payment.featuredListing
+                      ) {
+                        <span
+                          class="
+                            administration-payments__featured
+                          "
+                        >
+                          <i
+                            class="fa-solid fa-star"
+                            aria-hidden="true"
+                          ></i>
+
+                          Featured
+                        </span>
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <td data-label="Status">
+                  <span
+                    class="administration-payments__status"
+                    [attr.data-status]="
+                      payment.status
+                    "
+                  >
+                    {{
+                      formatStatus(
+                        payment.status
+                      )
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Charges">
+                  <span
+                    class="administration-payments__amount-details"
+                  >
+                    <strong>
+                      {{
+                        payment.breakdown
+                          .subtotalAmount |
+                          currency:'USD'
+                      }}
+                    </strong>
+
+                    <small>
+                      Listing:
+                      {{
+                        payment.breakdown
+                          .listingFee |
+                          currency:'USD'
+                      }}
+                    </small>
+
+                    @if (
+                      payment.breakdown
+                        .featuredListingFee > 0
+                    ) {
+                      <small>
+                        Featured:
+                        {{
+                          payment.breakdown
+                            .featuredListingFee |
+                            currency:'USD'
+                        }}
+                      </small>
+                    }
+                  </span>
+                </td>
+
+                <td data-label="Discount">
+                  <strong
+                    class="
+                      administration-payments__discount
+                    "
+                  >
+                    −{{
+                      payment.breakdown
+                        .discountAmount |
+                        currency:'USD'
+                    }}
+                  </strong>
+                </td>
+
+                <td data-label="Total">
+                  <strong
+                    class="
+                      administration-payments__total
+                    "
+                  >
+                    {{
+                      payment.breakdown
+                        .totalAmount |
+                        currency:'USD'
+                    }}
+                  </strong>
+                </td>
+
+                <td data-label="Promotion">
+                  @if (
+                    payment.breakdown
+                      .promotionCode
+                  ) {
+                    <span
+                      class="administration-payments__promotion"
+                    >
+                      <i
+                        class="fa-solid fa-ticket"
+                        aria-hidden="true"
+                      ></i>
+
+                      {{
+                        payment.breakdown
+                          .promotionCode
+                      }}
+                    </span>
+                  } @else {
+                    —
+                  }
+                </td>
+
+                <td data-label="Stripe session">
+                  <span
+                    class="administration-payments__stripe-id"
+                    [title]="
+                      payment.stripeCheckoutSessionId
+                    "
+                  >
+                    {{
+                      payment.stripeCheckoutSessionId
+                    }}
+                  </span>
+                </td>
+
+                <td data-label="Completed">
+                  @if (payment.paidAt) {
+                    {{
+                      payment.paidAt |
+                        date:'MMM d, y, h:mm a'
+                    }}
+                  } @else if (
+                    payment.checkoutCreatedAt
+                  ) {
+                    Created
+                    {{
+                      payment.checkoutCreatedAt |
+                        date:'MMM d, y'
+                    }}
+                  } @else {
+                    —
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="administration-payments__result-count">
+        Showing {{ filteredPayments().length }} of
+        {{ summary().totalTransactions }} transactions
+      </p>
+    }
+  </section>
+</main>

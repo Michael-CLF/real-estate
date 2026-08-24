@@ -1,17 +1,17 @@
 export {
-  updatePublishedListing,
+  updatePublishedListing
 } from './update-published-listing';
 
 export {
-  saveMarketplaceListing,
+  saveMarketplaceListing
 } from './save-marketplace-listing';
 
 export {
-  removeSavedMarketplaceListing,
+  removeSavedMarketplaceListing
 } from './remove-saved-marketplace-listing';
 
 export {
-  recordListingView,
+  recordListingView
 } from './record-listing-view';
 
 export {
@@ -21,3 +21,7 @@ export {
 export {
   updateListingStatus
 } from './update-listing-status';
+
+export {
+  getAdministrationListings
+} from './get-administration-listings';

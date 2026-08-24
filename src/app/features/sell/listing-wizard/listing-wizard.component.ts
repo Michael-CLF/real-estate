@@ -31,10 +31,6 @@ import {
 } from '../../../core/domains/listings/models/listing.model';
 
 import {
-  ValidDiscountCodeResult
-} from '../../../core/domains/payments/models/discount-code.model';
-
-import {
   AddressFormValue,
   AddressStepComponent
 } from './components/address-step/address-step.component';
@@ -149,11 +145,6 @@ export class ListingWizardComponent
 
   protected readonly featuredListing =
     signal(false);
-
-  protected readonly appliedPromotion =
-    signal<ValidDiscountCodeResult | null>(
-      null
-    );
 
   protected readonly certificationAccepted =
     signal(false);
@@ -757,25 +748,8 @@ export class ListingWizardComponent
       selected
     );
 
-    this.appliedPromotion.set(
-      null
-    );
-
     this.invalidateCertification();
   }
-
-
-  protected onPromotionApplied(
-    promotion:
-      ValidDiscountCodeResult | null
-  ): void {
-    this.appliedPromotion.set(
-      promotion
-    );
-
-    this.invalidateCertification();
-  }
-
 
   protected onCertificationChange(
     accepted: boolean
@@ -1179,7 +1153,36 @@ export class ListingWizardComponent
     this.saveError.set('');
     this.isSaving.set(true);
 
-    try {
+       try {
+      const pricing =
+        this.pricingData();
+
+      if (
+        !pricing ||
+        pricing.listPrice === null ||
+        pricing.listPrice <= 0
+      ) {
+        throw new Error(
+          'The listing pricing information could not be found.'
+        );
+      }
+
+      /*
+       * Persist the final Featured Listing selection made
+       * on the Review step before identity and payment.
+       */
+      await this.listingService
+        .savePricingStep(
+          listingUid,
+          user.uid,
+          {
+            listPrice:
+              pricing.listPrice
+          },
+          this.featuredListing(),
+          this.completedSteps()
+        );
+
       await this.listingService
         .completeListingContent(
           listingUid,

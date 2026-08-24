@@ -1,0 +1,361 @@
+<main class="administration-overview">
+  <header class="administration-overview__header">
+    <div>
+      <p class="administration-overview__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>
+        Administration overview
+      </h1>
+
+      <p>
+        A current snapshot of NavStreet accounts,
+        marketplace listings, businesses, payments,
+        and subscriptions.
+      </p>
+    </div>
+
+    <div class="administration-overview__header-actions">
+      <span class="administration-overview__admin-badge">
+        <i
+          class="fa-solid fa-shield-halved"
+          aria-hidden="true"
+        ></i>
+
+        Administrator
+      </span>
+
+      <button
+        type="button"
+        class="administration-overview__refresh"
+        [disabled]="loading()"
+        (click)="refresh()"
+      >
+        <i
+          class="fa-solid fa-arrows-rotate"
+          aria-hidden="true"
+        ></i>
+
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div
+      class="administration-overview__notice"
+      role="alert"
+    >
+      <span>
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <strong>
+          Snapshot notice
+        </strong>
+
+        <p>
+          {{ error() }}
+        </p>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <section
+      class="administration-overview__loading"
+      role="status"
+    >
+      <span
+        class="administration-overview__spinner"
+        aria-hidden="true"
+      ></span>
+
+      Loading administration snapshot...
+    </section>
+
+  } @else {
+    <section
+      class="administration-overview__metrics"
+      aria-label="Platform snapshot"
+    >
+      <a
+        class="administration-overview__metric"
+        routerLink="/administration/users"
+      >
+        <span class="administration-overview__metric-icon">
+          <i
+            class="fa-solid fa-users"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span>
+          <small>Users</small>
+          <strong>{{ snapshot().totalUsers }}</strong>
+          <span>
+            {{ snapshot().activeUsers }} active
+          </span>
+        </span>
+      </a>
+
+      <a
+        class="administration-overview__metric"
+        routerLink="/administration/listings"
+      >
+        <span class="administration-overview__metric-icon">
+          <i
+            class="fa-solid fa-house"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span>
+          <small>Listings</small>
+          <strong>{{ snapshot().totalListings }}</strong>
+          <span>
+            {{ snapshot().activeListings }} active
+          </span>
+        </span>
+      </a>
+
+      <a
+        class="administration-overview__metric"
+        routerLink="/administration/businesses"
+      >
+        <span class="administration-overview__metric-icon">
+          <i
+            class="fa-solid fa-building"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span>
+          <small>Businesses</small>
+          <strong>{{ snapshot().totalBusinesses }}</strong>
+          <span>
+            {{ snapshot().profileSubscribers }}
+            profile subscribers
+          </span>
+        </span>
+      </a>
+
+      <a
+        class="administration-overview__metric"
+        routerLink="/administration/payments"
+      >
+        <span class="administration-overview__metric-icon">
+          <i
+            class="fa-solid fa-credit-card"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span>
+          <small>Collected</small>
+          <strong>
+            {{
+              snapshot().collectedAmount |
+                currency:'USD'
+            }}
+          </strong>
+          <span>
+            {{ snapshot().totalTransactions }}
+            transactions
+          </span>
+        </span>
+      </a>
+
+      <a
+        class="administration-overview__metric"
+        routerLink="/administration/subscriptions"
+      >
+        <span class="administration-overview__metric-icon">
+          <i
+            class="fa-solid fa-arrows-rotate"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span>
+          <small>Active subscriptions</small>
+          <strong>
+            {{ snapshot().activeSubscriptions }}
+          </strong>
+          <span>
+            Full Business Profiles
+          </span>
+        </span>
+      </a>
+    </section>
+
+    <section class="administration-overview__content">
+      <article class="administration-overview__panel">
+        <header>
+          <div>
+            <p class="administration-overview__panel-eyebrow">
+              Attention
+            </p>
+
+            <h2>
+              Items requiring review
+            </h2>
+          </div>
+
+          <i
+            class="fa-solid fa-bell"
+            aria-hidden="true"
+          ></i>
+        </header>
+
+        <div class="administration-overview__attention-list">
+          <a routerLink="/administration/users">
+            <span>
+              <i
+                class="fa-solid fa-user-lock"
+                aria-hidden="true"
+              ></i>
+
+              Disabled user accounts
+            </span>
+
+            <strong>
+              {{ snapshot().disabledUsers }}
+            </strong>
+          </a>
+
+          <a routerLink="/administration/listings">
+            <span>
+              <i
+                class="fa-solid fa-house-circle-xmark"
+                aria-hidden="true"
+              ></i>
+
+              Inactive listings
+            </span>
+
+            <strong>
+              {{ snapshot().inactiveListings }}
+            </strong>
+          </a>
+
+          <a routerLink="/administration/businesses">
+            <span>
+              <i
+                class="fa-solid fa-building-circle-exclamation"
+                aria-hidden="true"
+              ></i>
+
+              Suspended businesses
+            </span>
+
+            <strong>
+              {{ snapshot().suspendedBusinesses }}
+            </strong>
+          </a>
+
+          <a routerLink="/administration/payments">
+            <span>
+              <i
+                class="fa-solid fa-clock"
+                aria-hidden="true"
+              ></i>
+
+              Pending payments
+            </span>
+
+            <strong>
+              {{ snapshot().pendingPayments }}
+            </strong>
+          </a>
+
+          <a routerLink="/administration/payments">
+            <span>
+              <i
+                class="fa-solid fa-circle-xmark"
+                aria-hidden="true"
+              ></i>
+
+              Failed payments
+            </span>
+
+            <strong>
+              {{ snapshot().failedPayments }}
+            </strong>
+          </a>
+
+          <a routerLink="/administration/subscriptions">
+            <span>
+              <i
+                class="fa-solid fa-triangle-exclamation"
+                aria-hidden="true"
+              ></i>
+
+              Past-due subscriptions
+            </span>
+
+            <strong>
+              {{ snapshot().pastDueSubscriptions }}
+            </strong>
+          </a>
+        </div>
+      </article>
+
+      <article class="administration-overview__panel">
+        <header>
+          <div>
+            <p class="administration-overview__panel-eyebrow">
+              Marketplace
+            </p>
+
+            <h2>
+              Platform highlights
+            </h2>
+          </div>
+
+          <i
+            class="fa-solid fa-chart-line"
+            aria-hidden="true"
+          ></i>
+        </header>
+
+        <dl class="administration-overview__highlights">
+          <div>
+            <dt>Featured listings</dt>
+            <dd>{{ snapshot().featuredListings }}</dd>
+          </div>
+
+          <div>
+            <dt>Active businesses</dt>
+            <dd>{{ snapshot().activeBusinesses }}</dd>
+          </div>
+
+          <div>
+            <dt>Promotion discounts</dt>
+            <dd>
+              {{
+                snapshot().discountAmount |
+                  currency:'USD'
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Scheduled cancellations</dt>
+            <dd>
+              {{
+                snapshot()
+                  .cancelScheduledSubscriptions
+              }}
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+  }
+</main>

@@ -1,0 +1,112 @@
+<aside
+  class="administration-sidebar"
+  [class.administration-sidebar--mobile-open]="
+    mobileOpen()
+  "
+>
+  <header class="administration-sidebar__header">
+    <a
+      class="administration-sidebar__brand"
+      routerLink="/administration"
+      (click)="selectNavigation()"
+    >
+      <span class="administration-sidebar__brand-mark">
+        NS
+      </span>
+
+      <span class="administration-sidebar__brand-copy">
+        <strong>
+          NavStreet
+        </strong>
+
+        <small>
+          Administration
+        </small>
+      </span>
+    </a>
+  </header>
+
+  <div class="administration-sidebar__administrator">
+    <span
+      class="administration-sidebar__administrator-icon"
+    >
+      <i
+        class="fa-solid fa-shield-halved"
+        aria-hidden="true"
+      ></i>
+    </span>
+
+    <span
+      class="administration-sidebar__administrator-copy"
+    >
+      <small>
+        Secure access
+      </small>
+
+      <strong>
+        Administrator
+      </strong>
+    </span>
+  </div>
+
+  <nav
+    class="administration-sidebar__navigation"
+    aria-label="Administration navigation"
+  >
+    @for (
+      item of navigationItems;
+      track item.route
+    ) {
+      <a
+        class="administration-sidebar__navigation-item"
+        [routerLink]="item.route"
+        routerLinkActive="
+          administration-sidebar__navigation-item--active
+        "
+        [routerLinkActiveOptions]="{
+          exact: item.route === '/administration'
+        }"
+        (click)="selectNavigation()"
+      >
+        <span
+          class="administration-sidebar__navigation-icon"
+        >
+          <i
+            [class]="item.icon"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span
+          class="administration-sidebar__navigation-label"
+        >
+          {{ item.label }}
+        </span>
+
+        <i
+          class="
+            fa-solid
+            fa-chevron-right
+            administration-sidebar__navigation-arrow
+          "
+          aria-hidden="true"
+        ></i>
+      </a>
+    }
+  </nav>
+
+  <footer class="administration-sidebar__footer">
+    <a
+      class="administration-sidebar__return-link"
+      routerLink="/dashboard"
+      (click)="selectNavigation()"
+    >
+      <i
+        class="fa-solid fa-arrow-left"
+        aria-hidden="true"
+      ></i>
+
+      Return to dashboard
+    </a>
+  </footer>
+</aside>

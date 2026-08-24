@@ -13,18 +13,12 @@
       </p>
     </div>
 
-    <button
-      type="button"
-      class="secondary-button"
-    >
+    <button type="button" class="secondary-button" (click)="returnToDashboard()">
       Return to Dashboard
     </button>
   </header>
 
-  <section
-    class="progress-card"
-    aria-labelledby="enhancement-progress-title"
-  >
+  <section class="progress-card" aria-labelledby="enhancement-progress-title">
     <div class="progress-card__heading">
       <div>
         <h2 id="enhancement-progress-title">
@@ -42,18 +36,9 @@
       </span>
     </div>
 
-    <div
-      class="progress-bar"
-      role="progressbar"
-      aria-label="Listing enhancement progress"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      [attr.aria-valuenow]="progressPercentage()"
-    >
-      <div
-        class="progress-bar__fill"
-        [style.width.%]="progressPercentage()"
-      ></div>
+    <div class="progress-bar" role="progressbar" aria-label="Listing enhancement progress" aria-valuemin="0"
+      aria-valuemax="100" [attr.aria-valuenow]="progressPercentage()">
+      <div class="progress-bar__fill" [style.width.%]="progressPercentage()"></div>
     </div>
 
     <p class="progress-card__message">
@@ -74,30 +59,20 @@
   </div>
 
   <div class="enhancement-grid">
-    <article
-      *ngFor="
+    <article *ngFor="
         let section of enhancementSections();
         trackBy: trackSection
-      "
-      class="enhancement-card"
-    >
+      " class="enhancement-card">
       <div class="enhancement-card__top">
-        <div
-          class="enhancement-card__icon"
-          aria-hidden="true"
-        >
+        <div class="enhancement-card__icon" aria-hidden="true">
           <i [class]="section.icon"></i>
         </div>
 
-        <span
-          class="status-badge"
-          [class.status-badge--in-progress]="
+        <span class="status-badge" [class.status-badge--in-progress]="
             section.status === 'in-progress'
-          "
-          [class.status-badge--added]="
+          " [class.status-badge--added]="
             section.status === 'added'
-          "
-        >
+          ">
           {{ statusLabel(section.status) }}
         </span>
       </div>
@@ -107,19 +82,11 @@
         <p>{{ section.description }}</p>
       </div>
 
-      <button
-        type="button"
-        class="card-action"
-        (click)="openSection(section)"
-        [attr.aria-label]="
+      <button type="button" class="card-action" (click)="openSection(section)" [attr.aria-label]="
           sectionActionLabel(section.status) + ': ' + section.title
-        "
-      >
+        ">
         <span>{{ sectionActionLabel(section.status) }}</span>
-        <i
-          class="fa-solid fa-arrow-right"
-          aria-hidden="true"
-        ></i>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
       </button>
     </article>
   </div>

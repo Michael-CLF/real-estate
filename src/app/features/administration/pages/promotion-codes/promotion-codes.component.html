@@ -1,0 +1,773 @@
+<main class="promotion-codes">
+  <header class="promotion-codes__header">
+    <div>
+      <p class="promotion-codes__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1>Promotion codes</h1>
+
+      <p class="promotion-codes__introduction">
+        Create and manage Stripe promotion codes for
+        property listings, Featured Property upgrades,
+        and Full Business Profiles.
+      </p>
+    </div>
+
+    <button
+      class="promotion-codes__refresh-button"
+      type="button"
+      [disabled]="isLoading()"
+      (click)="reloadPromotionCodes()"
+    >
+      <i
+        class="fa-solid fa-rotate"
+        aria-hidden="true"
+      ></i>
+
+      Refresh codes
+    </button>
+  </header>
+
+  <section
+    class="promotion-codes__metrics"
+    aria-label="Promotion-code summary"
+  >
+    <article class="promotion-codes__metric">
+      <span class="promotion-codes__metric-icon">
+        <i
+          class="fa-solid fa-ticket"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <span>Total codes</span>
+
+        <strong>
+          {{ promotionCodes().length }}
+        </strong>
+      </div>
+    </article>
+
+    <article class="promotion-codes__metric">
+      <span class="promotion-codes__metric-icon">
+        <i
+          class="fa-solid fa-circle-check"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <span>Active codes</span>
+
+        <strong>
+          {{ activeCodeCount() }}
+        </strong>
+      </div>
+    </article>
+
+    <article class="promotion-codes__metric">
+      <span class="promotion-codes__metric-icon">
+        <i
+          class="fa-solid fa-chart-column"
+          aria-hidden="true"
+        ></i>
+      </span>
+
+      <div>
+        <span>Total redemptions</span>
+
+        <strong>
+          {{ totalRedemptions() }}
+        </strong>
+      </div>
+    </article>
+  </section>
+
+  @if (loadError()) {
+    <div
+      class="promotion-codes__message promotion-codes__message--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <span>
+        {{ loadError() }}
+      </span>
+
+      <button
+        type="button"
+        (click)="reloadPromotionCodes()"
+      >
+        Try again
+      </button>
+    </div>
+  }
+
+  @if (saveError()) {
+    <div
+      class="promotion-codes__message promotion-codes__message--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <span>
+        {{ saveError() }}
+      </span>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div
+      class="promotion-codes__message promotion-codes__message--success"
+      role="status"
+    >
+      <i
+        class="fa-solid fa-circle-check"
+        aria-hidden="true"
+      ></i>
+
+      <span>
+        {{ successMessage() }}
+      </span>
+    </div>
+  }
+
+  <div class="promotion-codes__layout">
+    <section class="promotion-codes__panel">
+      <header class="promotion-codes__panel-header">
+        <span class="promotion-codes__panel-icon">
+          <i
+            class="fa-solid fa-plus"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div>
+          <p class="promotion-codes__eyebrow">
+            New promotion
+          </p>
+
+          <h2>Create a promotion code</h2>
+
+          <p>
+            The discount will be created in Stripe and
+            synchronized with NavStreet.
+          </p>
+        </div>
+      </header>
+
+      <form
+        class="promotion-codes__form"
+        [formGroup]="form"
+        (ngSubmit)="createPromotionCode()"
+      >
+        <div class="promotion-codes__field">
+          <label for="promotion-name">
+            Internal promotion name
+            <span aria-hidden="true">*</span>
+          </label>
+
+          <input
+            id="promotion-name"
+            type="text"
+            formControlName="name"
+            maxlength="80"
+            autocomplete="off"
+            placeholder="NavStreet MVP Free Listing"
+          />
+
+          <small>
+            This name is used by administrators and
+            appears in Stripe.
+          </small>
+
+          @if (
+            hasControlError(
+              'name',
+              'required'
+            )
+          ) {
+            <p class="promotion-codes__field-error">
+              Enter a promotion name.
+            </p>
+          }
+        </div>
+
+        <div class="promotion-codes__field">
+          <label for="promotion-code">
+            Customer-facing code
+            <span aria-hidden="true">*</span>
+          </label>
+
+          <input
+            id="promotion-code"
+            type="text"
+            formControlName="code"
+            maxlength="32"
+            autocomplete="off"
+            placeholder="NAVSTREETMVP"
+            (blur)="normalizeCode()"
+          />
+
+          <small>
+            Customers enter this code during Stripe
+            Checkout. Letters and numbers only.
+          </small>
+
+          @if (
+            hasControlError(
+              'code',
+              'required'
+            )
+          ) {
+            <p class="promotion-codes__field-error">
+              Enter a customer-facing code.
+            </p>
+          }
+
+          @if (
+            hasControlError(
+              'code',
+              'minlength'
+            ) ||
+            hasControlError(
+              'code',
+              'maxlength'
+            )
+          ) {
+            <p class="promotion-codes__field-error">
+              Use between 4 and 32 characters.
+            </p>
+          }
+
+          @if (
+            hasControlError(
+              'code',
+              'pattern'
+            )
+          ) {
+            <p class="promotion-codes__field-error">
+              Use letters and numbers only.
+            </p>
+          }
+        </div>
+
+        <fieldset class="promotion-codes__fieldset">
+          <legend>
+            Eligible NavStreet product
+          </legend>
+
+          <p class="promotion-codes__fieldset-description">
+            The discount will apply only to the selected
+            product.
+          </p>
+
+          <div class="promotion-codes__product-options">
+            @for (
+              product of productOptions;
+              track product.value
+            ) {
+              <label
+                class="promotion-codes__product-option"
+                [class.promotion-codes__product-option--selected]="
+                  form.controls.eligibleProduct.value ===
+                  product.value
+                "
+              >
+                <input
+                  type="radio"
+                  formControlName="eligibleProduct"
+                  [value]="product.value"
+                />
+
+                <span
+                  class="promotion-codes__radio"
+                  aria-hidden="true"
+                ></span>
+
+                <span class="promotion-codes__product-copy">
+                  <strong>
+                    {{ product.label }}
+                  </strong>
+
+                  <span>
+                    {{ product.description }}
+                  </span>
+                </span>
+
+                <span class="promotion-codes__product-price">
+                  {{ product.priceLabel }}
+                </span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <fieldset class="promotion-codes__fieldset">
+          <legend>
+            Discount
+          </legend>
+
+          <div class="promotion-codes__discount-types">
+            <label
+              class="promotion-codes__discount-type"
+              [class.promotion-codes__discount-type--selected]="
+                form.controls.discountType.value ===
+                'percentage'
+              "
+            >
+              <input
+                type="radio"
+                formControlName="discountType"
+                value="percentage"
+              />
+
+              <span>
+                Percentage
+              </span>
+            </label>
+
+            <label
+              class="promotion-codes__discount-type"
+              [class.promotion-codes__discount-type--selected]="
+                form.controls.discountType.value ===
+                'fixed_amount'
+              "
+            >
+              <input
+                type="radio"
+                formControlName="discountType"
+                value="fixed_amount"
+              />
+
+              <span>
+                Fixed dollar amount
+              </span>
+            </label>
+          </div>
+
+          @if (
+            form.controls.discountType.value ===
+            'percentage'
+          ) {
+            <div class="promotion-codes__field">
+              <label for="percent-off">
+                Percentage off
+                <span aria-hidden="true">*</span>
+              </label>
+
+              <div class="promotion-codes__input-group">
+                <input
+                  id="percent-off"
+                  type="number"
+                  formControlName="percentOff"
+                  min="1"
+                  max="100"
+                  step="1"
+                />
+
+                <span>%</span>
+              </div>
+
+              @if (
+                form.controls.percentOff.touched &&
+                form.controls.percentOff.invalid
+              ) {
+                <p class="promotion-codes__field-error">
+                  Enter a percentage between 1 and 100.
+                </p>
+              }
+            </div>
+          } @else {
+            <div class="promotion-codes__field">
+              <label for="amount-off">
+                Dollar amount off
+                <span aria-hidden="true">*</span>
+              </label>
+
+              <div class="promotion-codes__input-group">
+                <span>$</span>
+
+                <input
+                  id="amount-off"
+                  type="number"
+                  formControlName="amountOffDollars"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="10.00"
+                />
+
+                <span>USD</span>
+              </div>
+
+              @if (
+                form.controls.amountOffDollars.touched &&
+                (
+                  form.controls.amountOffDollars.invalid ||
+                  !form.controls.amountOffDollars.value
+                )
+              ) {
+                <p class="promotion-codes__field-error">
+                  Enter a fixed discount amount.
+                </p>
+              }
+            </div>
+          }
+        </fieldset>
+
+        <fieldset class="promotion-codes__fieldset">
+          <legend>
+            Usage controls
+          </legend>
+
+          <div class="promotion-codes__field-grid">
+            <div class="promotion-codes__field">
+              <label for="promotion-expiration">
+                Expiration
+                <span>Optional</span>
+              </label>
+
+              <input
+                id="promotion-expiration"
+                type="datetime-local"
+                formControlName="expiresAt"
+              />
+
+              <small>
+                Leave blank when the promotion should
+                remain available indefinitely.
+              </small>
+            </div>
+
+            <div class="promotion-codes__field">
+              <label for="maximum-redemptions">
+                Maximum redemptions
+                <span>Optional</span>
+              </label>
+
+              <input
+                id="maximum-redemptions"
+                type="number"
+                formControlName="maxRedemptions"
+                min="1"
+                step="1"
+                placeholder="Unlimited"
+              />
+
+              <small>
+                The total number of times the code may
+                be redeemed.
+              </small>
+
+              @if (
+                form.controls.maxRedemptions.touched &&
+                form.controls.maxRedemptions.invalid
+              ) {
+                <p class="promotion-codes__field-error">
+                  Enter a positive whole number.
+                </p>
+              }
+            </div>
+          </div>
+
+          <label class="promotion-codes__checkbox">
+            <input
+              type="checkbox"
+              formControlName="firstTimeTransactionOnly"
+            />
+
+            <span
+              class="promotion-codes__checkbox-control"
+              aria-hidden="true"
+            >
+              <i class="fa-solid fa-check"></i>
+            </span>
+
+            <span>
+              <strong>
+                First Stripe transaction only
+              </strong>
+
+              <small>
+                Restrict the code to customers who have
+                not completed a previous Stripe
+                transaction.
+              </small>
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="promotion-codes__mvp-note">
+          <i
+            class="fa-solid fa-circle-info"
+            aria-hidden="true"
+          ></i>
+
+          <div>
+            <strong>
+              Recommended MVP configuration
+            </strong>
+
+            <p>
+              Select Property listing and enter a 100%
+              discount. The separate $10 Featured
+              Property upgrade will remain payable.
+            </p>
+          </div>
+        </div>
+
+        <button
+          class="promotion-codes__submit"
+          type="submit"
+          [disabled]="
+            form.invalid ||
+            isSaving()
+          "
+        >
+          @if (isSaving()) {
+            <i
+              class="fa-solid fa-spinner fa-spin"
+              aria-hidden="true"
+            ></i>
+
+            Creating promotion…
+          } @else {
+            <i
+              class="fa-solid fa-plus"
+              aria-hidden="true"
+            ></i>
+
+            Create promotion code
+          }
+        </button>
+      </form>
+    </section>
+
+    <section class="promotion-codes__panel">
+      <header class="promotion-codes__panel-header">
+        <span class="promotion-codes__panel-icon">
+          <i
+            class="fa-solid fa-ticket"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div>
+          <p class="promotion-codes__eyebrow">
+            Stripe promotions
+          </p>
+
+          <h2>Existing codes</h2>
+
+          <p>
+            Redemption totals and current status are
+            synchronized with Stripe.
+          </p>
+        </div>
+      </header>
+
+      @if (
+        isLoading() &&
+        promotionCodes().length === 0
+      ) {
+        <div class="promotion-codes__loading">
+          <i
+            class="fa-solid fa-spinner fa-spin"
+            aria-hidden="true"
+          ></i>
+
+          <p>Loading promotion codes…</p>
+        </div>
+      } @else if (
+        promotionCodes().length === 0
+      ) {
+        <div class="promotion-codes__empty">
+          <span>
+            <i
+              class="fa-solid fa-ticket"
+              aria-hidden="true"
+            ></i>
+          </span>
+
+          <h3>No promotion codes yet</h3>
+
+          <p>
+            Create the first NavStreet promotion using
+            the form on this page.
+          </p>
+        </div>
+      } @else {
+        <div class="promotion-codes__list">
+          @for (
+            promotionCode of promotionCodes();
+            track promotionCode.uid
+          ) {
+            <article class="promotion-codes__code-card">
+              <header>
+                <div>
+                  <div class="promotion-codes__code-heading">
+                    <strong>
+                      {{ promotionCode.code }}
+                    </strong>
+
+                    <span
+                      class="promotion-codes__status"
+                      [class.promotion-codes__status--active]="
+                        promotionCode.status ===
+                        'active'
+                      "
+                      [class.promotion-codes__status--inactive]="
+                        promotionCode.status ===
+                        'inactive'
+                      "
+                      [class.promotion-codes__status--expired]="
+                        promotionCode.status ===
+                        'expired'
+                      "
+                    >
+                      {{ promotionCode.status }}
+                    </span>
+                  </div>
+
+                  <h3>
+                    {{ promotionCode.name }}
+                  </h3>
+                </div>
+
+                <span class="promotion-codes__discount">
+                  {{ formatDiscount(promotionCode) }}
+                  off
+                </span>
+              </header>
+
+              <dl class="promotion-codes__code-details">
+                <div>
+                  <dt>Eligible product</dt>
+
+                  <dd>
+                    {{
+                      getProductLabel(
+                        promotionCode.eligibleProduct
+                      )
+                    }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Redemptions</dt>
+
+                  <dd>
+                    {{ promotionCode.timesRedeemed }}
+
+                    @if (
+                      promotionCode.maxRedemptions
+                    ) {
+                      of
+                      {{
+                        promotionCode.maxRedemptions
+                      }}
+                    } @else {
+                      used
+                    }
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Expiration</dt>
+
+                  <dd>
+                    {{
+                      formatDate(
+                        promotionCode.expiresAt
+                      )
+                    }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Customer restriction</dt>
+
+                  <dd>
+                    {{
+                      promotionCode.firstTimeTransactionOnly
+                        ? 'First transaction only'
+                        : 'Any eligible customer'
+                    }}
+                  </dd>
+                </div>
+              </dl>
+
+              <footer>
+                @if (
+                  isExpired(promotionCode)
+                ) {
+                  <span class="promotion-codes__expired-message">
+                    <i
+                      class="fa-solid fa-clock"
+                      aria-hidden="true"
+                    ></i>
+
+                    This code has expired and cannot be
+                    reactivated.
+                  </span>
+                } @else {
+                  <button
+                    class="promotion-codes__toggle"
+                    [class.promotion-codes__toggle--deactivate]="
+                      promotionCode.active
+                    "
+                    type="button"
+                    [disabled]="
+                      updatingCodeUid() !== null
+                    "
+                    (click)="
+                      togglePromotionCode(
+                        promotionCode
+                      )
+                    "
+                  >
+                    @if (
+                      updatingCodeUid() ===
+                      promotionCode.uid
+                    ) {
+                      <i
+                        class="fa-solid fa-spinner fa-spin"
+                        aria-hidden="true"
+                      ></i>
+
+                      Updating…
+                    } @else if (
+                      promotionCode.active
+                    ) {
+                      <i
+                        class="fa-solid fa-ban"
+                        aria-hidden="true"
+                      ></i>
+
+                      Deactivate code
+                    } @else {
+                      <i
+                        class="fa-solid fa-circle-check"
+                        aria-hidden="true"
+                      ></i>
+
+                      Activate code
+                    }
+                  </button>
+                }
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+</main>

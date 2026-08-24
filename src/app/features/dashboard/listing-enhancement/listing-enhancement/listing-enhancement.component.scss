@@ -222,11 +222,11 @@
   display: inline-flex;
   align-items: center;
   min-height: 1.75rem;
-  padding: 0.25rem 0.625rem;
+  padding: 2px 1rem;
   border-radius: 999px;
   background: #f1f5f9;
-  color: #64748b;
-  font-size: 0.75rem;
+  color: #000000;
+  font-size: 0.85rem;
   font-weight: 700;
   white-space: nowrap;
 
@@ -236,8 +236,8 @@
   }
 
   &--added {
-    background: #dcfce7;
-    color: #166534;
+    background: #008080;
+    color: #ffffff;
   }
 }
 

@@ -1,0 +1,56 @@
+<div class="administration-layout">
+  <app-administration-sidebar
+    [mobileOpen]="
+      isMobileNavigationOpen()
+    "
+    (navigationSelected)="
+      closeMobileNavigation()
+    "
+  />
+
+  @if (isMobileNavigationOpen()) {
+    <button
+      class="administration-layout__overlay"
+      type="button"
+      aria-label="Close administration navigation"
+      (click)="closeMobileNavigation()"
+    ></button>
+  }
+
+  <div class="administration-layout__workspace">
+    <header class="administration-layout__mobile-header">
+      <button
+        class="administration-layout__menu-button"
+        type="button"
+        aria-label="Open administration navigation"
+        [attr.aria-expanded]="
+          isMobileNavigationOpen()
+        "
+        (click)="toggleMobileNavigation()"
+      >
+        <i
+          class="fa-solid fa-bars"
+          aria-hidden="true"
+        ></i>
+      </button>
+
+      <a
+        class="administration-layout__mobile-brand"
+        href="/administration"
+        aria-label="NavStreet administration"
+      >
+        <span class="administration-layout__brand-mark">
+          NS
+        </span>
+
+        <span>
+          Administration
+        </span>
+      </a>
+    </header>
+
+    <main class="administration-layout__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
