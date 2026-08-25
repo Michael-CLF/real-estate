@@ -100,9 +100,22 @@
 
       </div>
 
-      <button type="button" class="listing-card__action" (click)="actionSelected.emit(listing)">
-        {{ actionLabel() }}
-      </button>
+      <div class="listing-card__actions">
+        @if (listing.status !== 'draft') {
+        <button type="button" class="
+        listing-card__action
+        listing-card__action--secondary
+      " (click)="marketingSelected.emit(listing)">
+          <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
+
+          Marketing
+        </button>
+        }
+
+        <button type="button" class="listing-card__action" (click)="actionSelected.emit(listing)">
+          {{ actionLabel() }}
+        </button>
+      </div>
 
     </div>
 

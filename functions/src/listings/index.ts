@@ -25,3 +25,16 @@ export {
 export {
   getAdministrationListings
 } from './get-administration-listings';
+
+export {
+  ensureListingMarketingLink
+} from './ensure-listing-marketing-link';
+
+export {
+  resolveListingMarketingLink
+} from './resolve-listing-marketing-link';
+
+export {
+  getListingMarketingChecklist,
+  updateListingMarketingChecklist
+} from './listing-marketing-checklist';

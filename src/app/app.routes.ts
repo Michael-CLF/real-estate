@@ -628,6 +628,27 @@ export const routes: Routes = [
               component.ListingInquiriesComponent
           )
       },
+      /*
+ * Published Listing Marketing Toolkit
+ */
+      {
+        path:
+          'sell/listings/:listingUid/manage/marketing',
+
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-marketing/marketing-toolkit/marketing-toolkit.component'
+          ).then(
+            component =>
+              component.MarketingToolkitComponent
+          )
+      },
+
 
       /*
        * Published Listing Management
@@ -933,6 +954,16 @@ export const routes: Routes = [
             './features/marketplace/marketplace.routes'
           ).then(
             routes => routes.MARKETPLACE_ROUTES
+          )
+      },
+      {
+        path: 'h/:shareCode',
+        loadComponent: () =>
+          import(
+            './features/marketplace/listing-marketing-link-redirect/listing-marketing-link-redirect.component'
+          ).then(
+            component =>
+              component.ListingMarketingLinkRedirectComponent
           )
       },
       {

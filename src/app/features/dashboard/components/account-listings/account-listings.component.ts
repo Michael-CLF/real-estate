@@ -41,4 +41,7 @@ export class AccountListingsComponent {
 
   readonly actionSelected =
     output<Listing>();
+
+  readonly marketingSelected =
+    output<Listing>();
 }

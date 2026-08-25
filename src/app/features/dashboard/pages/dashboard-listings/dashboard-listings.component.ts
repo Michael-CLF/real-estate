@@ -203,6 +203,23 @@ export class DashboardListingsComponent
     ]);
   }
 
+  protected async openMarketingToolkit(
+    listing: Listing
+  ): Promise<void> {
+    if (
+      String(listing.status) === 'draft'
+    ) {
+      return;
+    }
+
+    await this.router.navigate([
+      '/sell/listings',
+      listing.Uid,
+      'manage',
+      'marketing'
+    ]);
+  }
+
   private async loadListings():
     Promise<void> {
     this.isLoading.set(true);

@@ -1,0 +1,567 @@
+<section class="marketing-toolkit">
+  <a class="marketing-toolkit__back" [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]">
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+    Return to listing management
+  </a>
+
+  @if (isLoading()) {
+  <div class="marketing-toolkit__state" role="status" aria-live="polite">
+    <span class="marketing-toolkit__spinner" aria-hidden="true"></span>
+
+    <strong>
+      Loading Marketing Toolkit
+    </strong>
+
+    <p>
+      Preparing your property marketing tools.
+    </p>
+  </div>
+  } @else if (loadError()) {
+  <div class="
+        marketing-toolkit__state
+        marketing-toolkit__state--error
+      " role="alert">
+    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+    <strong>
+      Marketing Toolkit unavailable
+    </strong>
+
+    <p>
+      {{ loadError() }}
+    </p>
+
+    <a class="marketing-toolkit__primary-button" routerLink="/dashboard/listings">
+      Return to My Listings
+    </a>
+  </div>
+  } @else if (
+  listing();
+  as currentListing
+  ) {
+  <header class="marketing-toolkit__header">
+    <div>
+      <p class="marketing-toolkit__eyebrow">
+        Listing Marketing Toolkit
+      </p>
+
+      <h1>
+        Promote your property
+      </h1>
+
+      <p>
+        Share
+
+        <strong>
+          {{ currentListing.addressLine1 }}
+        </strong>
+
+        with prospective buyers using your
+        NavStreet marketing tools.
+      </p>
+    </div>
+
+    <span class="marketing-toolkit__status">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+      Public listing
+    </span>
+  </header>
+
+  <section class="marketing-toolkit__link-card" aria-labelledby="public-link-heading">
+    <div class="marketing-toolkit__section-heading">
+      <span class="marketing-toolkit__section-icon" aria-hidden="true">
+        <i class="fa-solid fa-link"></i>
+      </span>
+
+      <div>
+        <p>
+          Public property link
+        </p>
+
+        <h2 id="public-link-heading">
+          Share your NavStreet listing
+        </h2>
+
+        <span>
+          Anyone with this link can view the
+          public property listing.
+        </span>
+      </div>
+    </div>
+
+    <div class="marketing-toolkit__url">
+      <span>
+        {{ publicListingUrl() }}
+      </span>
+    </div>
+
+
+
+    <div class="marketing-toolkit__link-actions">
+      <button type="button" class="marketing-toolkit__primary-button" (click)="copyListingLink()">
+        @if (
+        linkCopyStatus() ===
+        'copied'
+        ) {
+        <i class="fa-solid fa-check" aria-hidden="true"></i>
+
+        Copied
+        } @else if (
+        linkCopyStatus() ===
+        'error'
+        ) {
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        Copy failed
+        } @else {
+        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+
+        Copy Listing Link
+        }
+      </button>
+
+      <button type="button" class="marketing-toolkit__secondary-button" (click)="copyEmailLink()">
+        @if (
+        emailLinkCopyStatus() ===
+        'copied'
+        ) {
+        <i class="fa-solid fa-check" aria-hidden="true"></i>
+
+        Copied
+        } @else if (
+        emailLinkCopyStatus() ===
+        'error'
+        ) {
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        Copy failed
+        } @else {
+        <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+
+        Copy Email Link
+        }
+      </button>
+    </div>
+  </section>
+
+  <section class="marketing-toolkit__upcoming">
+    <article class="
+          marketing-toolkit__feature-card
+          marketing-toolkit__feature-card--wide
+        ">
+      <header class="marketing-toolkit__feature-header">
+        <span class="marketing-toolkit__feature-icon" aria-hidden="true">
+          <i class="fa-solid fa-pen"></i>
+        </span>
+
+        <div>
+          <h2>
+            Suggested social captions
+          </h2>
+
+          <p>
+            Choose a caption, customize it if needed,
+            and copy it for your social post.
+          </p>
+        </div>
+
+        <span class="marketing-toolkit__feature-status">
+          Available
+        </span>
+      </header>
+
+      <div class="marketing-toolkit__captions">
+        <section class="marketing-toolkit__caption">
+          <div class="marketing-toolkit__caption-heading">
+            <div>
+              <span>
+                Short caption
+              </span>
+
+              <small>
+                Best for quick social posts
+              </small>
+            </div>
+          </div>
+
+          <textarea #shortCaption class="marketing-toolkit__caption-text" [value]="shortSocialCaption"
+            aria-label="Short social-media caption"></textarea>
+
+          <button type="button" class="marketing-toolkit__caption-button" (click)="
+                copyCaption(
+                  shortCaption.value,
+                  'short'
+                )
+              ">
+            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+
+            @if (
+            copiedCaption() ===
+            'short'
+            ) {
+            Copied
+            } @else {
+            Copy short caption
+            }
+          </button>
+        </section>
+
+        <section class="marketing-toolkit__caption">
+          <div class="marketing-toolkit__caption-heading">
+            <div>
+              <span>
+                Detailed caption
+              </span>
+
+              <small>
+                Includes the principal property details
+              </small>
+            </div>
+          </div>
+
+          <textarea #detailedCaption class="marketing-toolkit__caption-text" [value]="detailedSocialCaption"
+            aria-label="Detailed social-media caption"></textarea>
+
+          <button type="button" class="marketing-toolkit__caption-button" (click)="
+                copyCaption(
+                  detailedCaption.value,
+                  'detailed'
+                )
+              ">
+            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+
+            @if (
+            copiedCaption() ===
+            'detailed'
+            ) {
+            Copied
+            } @else {
+            Copy detailed caption
+            }
+          </button>
+        </section>
+
+        <section class="marketing-toolkit__caption">
+          <div class="marketing-toolkit__caption-heading">
+            <div>
+              <span>
+                Property highlight
+              </span>
+
+              <small>
+                Formatted for a visual property post
+              </small>
+            </div>
+          </div>
+
+          <textarea #featuredCaption class="marketing-toolkit__caption-text" [value]="featuredSocialCaption"
+            aria-label="Property-highlight social-media caption"></textarea>
+
+          <button type="button" class="marketing-toolkit__caption-button" (click)="
+                copyCaption(
+                  featuredCaption.value,
+                  'featured'
+                )
+              ">
+            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+
+            @if (
+            copiedCaption() ===
+            'featured'
+            ) {
+            Copied
+            } @else {
+            Copy property highlight
+            }
+          </button>
+        </section>
+      </div>
+    </article>
+
+    <article class="marketing-toolkit__sharing-card">
+      <header class="marketing-toolkit__sharing-header">
+        <span class="marketing-toolkit__feature-icon" aria-hidden="true">
+          <i class="fa-solid fa-share-nodes"></i>
+        </span>
+
+        <div>
+          <h2>
+            Sharing controls
+          </h2>
+
+          <p>
+            Send this property through your device,
+            Facebook, or email.
+          </p>
+        </div>
+
+        <small>
+          Available
+        </small>
+      </header>
+
+      <div class="marketing-toolkit__sharing-actions">
+        <button type="button" (click)="shareNatively()">
+          <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
+
+          @if (nativeSharingAvailable) {
+          Share
+          } @else {
+          Copy share link
+          }
+        </button>
+
+        <button type="button" (click)="shareOnFacebook()">
+          <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+
+          Share on Facebook
+        </button>
+
+        <button type="button" (click)="shareByEmail()">
+          <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+
+          Share by email
+        </button>
+      </div>
+
+      <div class="marketing-toolkit__sharing-instructions">
+        <div>
+          <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
+
+          <p>
+            <strong>
+              Share
+            </strong>
+
+            Opens your phone, tablet, or computer’s
+            sharing menu. Choose text messaging, email,
+            social media, or another available application.
+          </p>
+        </div>
+
+        <div>
+          <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+
+          <p>
+            <strong>
+              Share on Facebook
+            </strong>
+
+            Opens Facebook’s sharing window with the
+            property link included. Sign in to Facebook,
+            add your own message, and select where the
+            post should appear.
+          </p>
+        </div>
+
+        <div>
+          <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+
+          <p>
+            <strong>
+              Share by email
+            </strong>
+
+            Opens your default email application with
+            the property address and link already included.
+            Add your recipients and send the message.
+          </p>
+        </div>
+      </div>
+
+      @if (shareStatus() !== 'idle') {
+      <p class="marketing-toolkit__sharing-status" [class.marketing-toolkit__sharing-status--error]="
+        shareStatus() === 'error'
+      " role="status">
+        @if (shareStatus() !== 'error') {
+        <i class="fa-solid fa-check" aria-hidden="true"></i>
+        }
+
+        {{ shareStatusMessage() }}
+      </p>
+      }
+    </article>
+
+    <article class="marketing-toolkit__qr-card">
+      <header class="marketing-toolkit__qr-header">
+        <span class="marketing-toolkit__feature-icon" aria-hidden="true">
+          <i class="fa-solid fa-qrcode"></i>
+        </span>
+
+        <div>
+          <h2>
+            Property QR code
+          </h2>
+
+          <p>
+            Download this QR code for signs,
+            flyers, postcards, and printed materials.
+          </p>
+        </div>
+
+        <small>
+          Available
+        </small>
+      </header>
+
+      @if (isGeneratingQrCode()) {
+      <div class="marketing-toolkit__qr-state" role="status">
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+        Generating QR code
+      </div>
+      } @else if (qrCodeError()) {
+      <div class="
+        marketing-toolkit__qr-state
+        marketing-toolkit__qr-state--error
+      " role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        {{ qrCodeError() }}
+      </div>
+      } @else if (qrCodeDataUrl()) {
+      <div class="marketing-toolkit__qr-content">
+        <div class="marketing-toolkit__qr-preview">
+          <img [src]="qrCodeDataUrl()" [alt]="
+            'QR code for ' +
+            currentListing.addressLine1
+          ">
+        </div>
+
+        <div class="marketing-toolkit__qr-details">
+          <strong>
+            Scan to view this property
+          </strong>
+
+          <p>
+            The QR code opens the permanent NavStreet
+            property link:
+          </p>
+
+          <span>
+            {{ publicListingUrl() }}
+          </span>
+
+          <div class="marketing-toolkit__qr-actions">
+            <button type="button" (click)="downloadQrCodePng()">
+              <i class="fa-solid fa-download" aria-hidden="true"></i>
+
+              Download PNG
+            </button>
+
+            <button type="button" (click)="downloadQrCodeSvg()">
+              <i class="fa-regular fa-file-code" aria-hidden="true"></i>
+
+              Download SVG
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+    </article>
+
+    <article class="marketing-toolkit__checklist-card">
+      <header class="marketing-toolkit__checklist-header">
+        <span class="marketing-toolkit__feature-icon" aria-hidden="true">
+          <i class="fa-solid fa-list-check"></i>
+        </span>
+
+        <div>
+          <h2>
+            Marketing checklist
+          </h2>
+
+          <p>
+            Track the steps you have completed while
+            promoting this property.
+          </p>
+        </div>
+
+        <span class="marketing-toolkit__checklist-percent">
+          {{ checklistCompletionPercent }}%
+        </span>
+      </header>
+
+      <div class="marketing-toolkit__checklist-progress" role="progressbar" aria-label="Marketing checklist progress"
+        aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="
+      checklistCompletionPercent
+    ">
+        <span [style.width.%]="
+        checklistCompletionPercent
+      "></span>
+      </div>
+
+      <p class="marketing-toolkit__checklist-summary">
+        {{
+        completedChecklistItems().length
+        }}
+        of
+        {{ checklistItems.length }}
+        marketing steps completed
+      </p>
+
+      @if (checklistLoading()) {
+      <div class="marketing-toolkit__checklist-state" role="status">
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+        Loading checklist
+      </div>
+      } @else {
+      <div class="marketing-toolkit__checklist-items">
+        @for (
+        item of checklistItems;
+        track item.id
+        ) {
+        <label class="marketing-toolkit__checklist-item" [class.marketing-toolkit__checklist-item--complete]="
+            checklistItemCompleted(
+              item.id
+            )
+          ">
+          <input type="checkbox" [checked]="
+              checklistItemCompleted(
+                item.id
+              )
+            " [disabled]="
+              checklistSaving()
+            " (change)="
+              toggleChecklistItem(
+                item.id,
+                $any($event.target).checked
+              )
+            ">
+
+          <span class="marketing-toolkit__checklist-checkbox" aria-hidden="true">
+            <i class="fa-solid fa-check"></i>
+          </span>
+
+          <span class="marketing-toolkit__checklist-copy">
+            <strong>
+              {{ item.label }}
+            </strong>
+
+            <small>
+              {{ item.description }}
+            </small>
+          </span>
+        </label>
+        }
+      </div>
+      }
+
+      @if (checklistError()) {
+      <p class="marketing-toolkit__checklist-error" role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        {{ checklistError() }}
+      </p>
+      }
+    </article>
+  </section>
+  }
+</section>
