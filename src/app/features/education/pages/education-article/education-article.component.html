@@ -1,0 +1,629 @@
+<main class="education-article">
+  <section class="education-article__navigation">
+    <app-education-category-navigation
+      [categories]="categories"
+      [activeCategorySlug]="categorySlug()"
+    />
+  </section>
+
+  @if (
+    article();
+    as currentArticle
+  ) {
+    <div class="education-article__layout">
+      <article class="education-article__content">
+        <nav
+          class="education-article__breadcrumbs"
+          aria-label="Breadcrumb"
+        >
+          <a routerLink="/education">
+            Education Center
+          </a>
+
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+
+          <a
+            [routerLink]="[
+              '/education',
+              currentArticle.categorySlug
+            ]"
+          >
+            {{
+              category()?.title ??
+              currentArticle.eyebrow
+            }}
+          </a>
+
+          <i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            {{ currentArticle.title }}
+          </span>
+        </nav>
+
+        <header class="education-article__header">
+          <div class="education-article__header-top">
+            <span
+              class="education-article__icon"
+              aria-hidden="true"
+            >
+              <i
+                [class]="currentArticle.icon"
+              ></i>
+            </span>
+
+            <div>
+              <p class="education-article__eyebrow">
+                {{ currentArticle.eyebrow }}
+              </p>
+
+              <p class="education-article__reading-time">
+                <i
+                  class="fa-regular fa-clock"
+                  aria-hidden="true"
+                ></i>
+
+                {{
+                  currentArticle
+                    .estimatedMinutes
+                }}
+                minute read
+              </p>
+            </div>
+          </div>
+
+          <h1>
+            {{ currentArticle.title }}
+          </h1>
+
+          <p class="education-article__summary">
+            {{ currentArticle.summary }}
+          </p>
+
+          <div class="education-article__header-actions">
+            <button
+              type="button"
+              (click)="printArticle()"
+            >
+              <i
+                class="fa-solid fa-print"
+                aria-hidden="true"
+              ></i>
+
+              Print article
+            </button>
+
+            <a
+              [routerLink]="[
+                '/education',
+                currentArticle.categorySlug
+              ]"
+            >
+              <i
+                class="fa-solid fa-folder-open"
+                aria-hidden="true"
+              ></i>
+
+              More in
+              {{
+                category()?.title ??
+                'this topic'
+              }}
+            </a>
+          </div>
+        </header>
+
+        <div class="education-article__body">
+          @for (
+            section of currentArticle.sections;
+            track section.heading;
+            let sectionIndex = $index
+          ) {
+            <section
+              class="education-article__section"
+              [attr.aria-labelledby]="
+                'article-section-' +
+                sectionIndex
+              "
+            >
+              <h2
+                [id]="
+                  'article-section-' +
+                  sectionIndex
+                "
+              >
+                {{ section.heading }}
+              </h2>
+
+              @for (
+                paragraph of section.paragraphs;
+                track $index
+              ) {
+                <p>
+                  {{ paragraph }}
+                </p>
+              }
+
+              @if (
+                section.bulletPoints;
+                as bulletPoints
+              ) {
+                <ul class="education-article__bullet-list">
+                  @for (
+                    bulletPoint of bulletPoints;
+                    track $index
+                  ) {
+                    <li>
+                      <span aria-hidden="true">
+                        <i
+                          class="
+                            fa-solid
+                            fa-circle-check
+                          "
+                        ></i>
+                      </span>
+
+                      <span>
+                        {{ bulletPoint }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (
+                section.steps;
+                as steps
+              ) {
+                <div class="education-article__steps">
+                  @for (
+                    step of steps;
+                    track step.title;
+                    let stepIndex = $index
+                  ) {
+                    <article class="education-article__step">
+                      <span
+                        class="education-article__step-number"
+                        aria-hidden="true"
+                      >
+                        {{ stepIndex + 1 }}
+                      </span>
+
+                      <div>
+                        <h3>
+                          {{ step.title }}
+                        </h3>
+
+                        <p>
+                          {{ step.description }}
+                        </p>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+
+              @if (
+                section.checklist;
+                as checklist
+              ) {
+                <div class="education-article__checklist">
+                  @for (
+                    checklistItem of checklist;
+                    track checklistItem.title
+                  ) {
+                    <article
+                      class="education-article__checklist-item"
+                    >
+                      <span aria-hidden="true">
+                        <i
+                          class="
+                            fa-regular
+                            fa-square-check
+                          "
+                        ></i>
+                      </span>
+
+                      <div>
+                        <h3>
+                          {{ checklistItem.title }}
+                        </h3>
+
+                        <p>
+                          {{
+                            checklistItem
+                              .description
+                          }}
+                        </p>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+
+              @if (
+                section.examples;
+                as examples
+              ) {
+                <div class="education-article__examples">
+                  @for (
+                    example of examples;
+                    track example.title
+                  ) {
+                    <article
+                      class="education-article__example"
+                    >
+                      <header>
+                        <span aria-hidden="true">
+                          <i
+                            class="
+                              fa-solid
+                              fa-lightbulb
+                            "
+                          ></i>
+                        </span>
+
+                        <h3>
+                          {{ example.title }}
+                        </h3>
+                      </header>
+
+                      <div>
+                        <strong>
+                          Example
+                        </strong>
+
+                        <p>
+                          {{ example.scenario }}
+                        </p>
+                      </div>
+
+                      <div>
+                        <strong>
+                          What to consider
+                        </strong>
+
+                        <p>
+                          {{ example.explanation }}
+                        </p>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+
+              @if (
+                section.timeline;
+                as timeline
+              ) {
+                <div class="education-article__timeline">
+                  @for (
+                    timelineItem of timeline;
+                    track timelineItem.stage;
+                    let timelineIndex = $index
+                  ) {
+                    <article
+                      class="education-article__timeline-item"
+                    >
+                      <span
+                        class="education-article__timeline-marker"
+                        aria-hidden="true"
+                      >
+                        {{ timelineIndex + 1 }}
+                      </span>
+
+                      <div>
+                        <header>
+                          <h3>
+                            {{ timelineItem.stage }}
+                          </h3>
+
+                          <span>
+                            {{
+                              timelineItem
+                                .typicalTiming
+                            }}
+                          </span>
+                        </header>
+
+                        <p>
+                          {{
+                            timelineItem
+                              .description
+                          }}
+                        </p>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+
+              @if (section.callout) {
+                <aside
+                  class="education-article__callout"
+                >
+                  <span aria-hidden="true">
+                    <i
+                      class="
+                        fa-solid
+                        fa-circle-info
+                      "
+                    ></i>
+                  </span>
+
+                  <p>
+                    {{ section.callout }}
+                  </p>
+                </aside>
+              }
+            </section>
+          }
+
+          @if (
+            currentArticle.navStreetLinks;
+            as navStreetLinks
+          ) {
+            @if (navStreetLinks.length > 0) {
+              <section
+                class="education-article__tools"
+                aria-labelledby="navstreet-tools-title"
+              >
+                <header>
+                  <p>
+                    Put this information to work
+                  </p>
+
+                  <h2 id="navstreet-tools-title">
+                    Related NavStreet tools
+                  </h2>
+                </header>
+
+                <div class="education-article__tool-grid">
+                  @for (
+                    navStreetLink of navStreetLinks;
+                    track navStreetLink.route
+                  ) {
+                    <a
+                      class="education-article__tool"
+                      [routerLink]="
+                        navStreetLink.route
+                      "
+                    >
+                      <span aria-hidden="true">
+                        <i
+                          [class]="
+                            navStreetLink.icon
+                          "
+                        ></i>
+                      </span>
+
+                      <div>
+                        <strong>
+                          {{ navStreetLink.label }}
+                        </strong>
+
+                        <p>
+                          {{
+                            navStreetLink
+                              .description
+                          }}
+                        </p>
+                      </div>
+
+                      <i
+                        class="
+                          fa-solid
+                          fa-arrow-right
+                        "
+                        aria-hidden="true"
+                      ></i>
+                    </a>
+                  }
+                </div>
+              </section>
+            }
+          }
+
+          @if (
+            currentArticle.nextSteps;
+            as nextSteps
+          ) {
+            @if (nextSteps.length > 0) {
+              <section
+                class="education-article__next-steps"
+                aria-labelledby="next-steps-title"
+              >
+                <header>
+                  <span aria-hidden="true">
+                    <i
+                      class="
+                        fa-solid
+                        fa-forward-step
+                      "
+                    ></i>
+                  </span>
+
+                  <div>
+                    <p>
+                      Continue the process
+                    </p>
+
+                    <h2 id="next-steps-title">
+                      What happens next?
+                    </h2>
+                  </div>
+                </header>
+
+                <div>
+                  @for (
+                    nextStep of nextSteps;
+                    track nextStep.title;
+                    let nextStepIndex = $index
+                  ) {
+                    <article>
+                      <span aria-hidden="true">
+                        {{ nextStepIndex + 1 }}
+                      </span>
+
+                      <div>
+                        <h3>
+                          {{ nextStep.title }}
+                        </h3>
+
+                        <p>
+                          {{ nextStep.description }}
+                        </p>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+            }
+          }
+        </div>
+
+        <footer class="education-article__footer">
+          <div>
+            <strong>
+              Continue learning
+            </strong>
+
+            <p>
+              Explore additional NavStreet
+              education about buying, selling,
+              financing, and managing property.
+            </p>
+          </div>
+
+          <a
+            class="education-article__primary-button"
+            routerLink="/education"
+          >
+            View Education Center
+
+            <i
+              class="fa-solid fa-arrow-right"
+              aria-hidden="true"
+            ></i>
+          </a>
+        </footer>
+      </article>
+
+      <aside class="education-article__sidebar">
+        <section>
+          <span
+            class="education-article__sidebar-icon"
+            aria-hidden="true"
+          >
+            <i
+              class="fa-solid fa-compass"
+            ></i>
+          </span>
+
+          <h2>
+            {{ category()?.title }}
+          </h2>
+
+          <p>
+            {{ category()?.description }}
+          </p>
+
+          <a
+            [routerLink]="[
+              '/education',
+              currentArticle.categorySlug
+            ]"
+          >
+            View topic articles
+          </a>
+        </section>
+
+        <section>
+          <span
+            class="education-article__sidebar-icon"
+            aria-hidden="true"
+          >
+            <i
+              class="fa-solid fa-lightbulb"
+            ></i>
+          </span>
+
+          <h2>
+            Important reminder
+          </h2>
+
+          <p>
+            Real estate decisions can create
+            significant legal and financial
+            obligations. Consult qualified
+            professionals when appropriate.
+          </p>
+        </section>
+      </aside>
+    </div>
+
+    @if (
+      relatedArticles().length > 0
+    ) {
+      <section
+        class="education-article__related"
+        aria-labelledby="related-articles-title"
+      >
+        <header>
+          <p>
+            Keep learning
+          </p>
+
+          <h2 id="related-articles-title">
+            Related articles
+          </h2>
+        </header>
+
+        <div class="education-article__related-grid">
+          @for (
+            relatedArticle of relatedArticles();
+            track relatedArticle.slug
+          ) {
+            <app-education-article-card
+              [article]="relatedArticle"
+            />
+          }
+        </div>
+      </section>
+    }
+
+  } @else {
+    <section
+      class="education-article__not-found"
+      role="alert"
+    >
+      <span aria-hidden="true">
+        <i
+          class="fa-solid fa-file-circle-xmark"
+        ></i>
+      </span>
+
+      <h1>
+        Article not found
+      </h1>
+
+      <p>
+        The requested Education Center article
+        could not be found.
+      </p>
+
+      <a
+        class="education-article__primary-button"
+        routerLink="/education"
+      >
+        Return to Education Center
+      </a>
+    </section>
+  }
+</main>

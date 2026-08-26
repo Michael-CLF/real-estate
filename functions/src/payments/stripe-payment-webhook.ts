@@ -18,6 +18,14 @@ import {
     defineSecret
 } from 'firebase-functions/params';
 
+import {
+    SENDGRID_API_KEY
+} from '../authentication/otp/otp-config';
+
+import {
+    sendListingPublishedEmailIfNeeded
+} from '../listings/listing-publication-email.service';
+
 
 if (getApps().length === 0) {
     initializeApp();
@@ -123,7 +131,8 @@ export const stripePaymentWebhook =
         {
             secrets: [
                 stripeSecretKey,
-                stripeWebhookSecret
+                stripeWebhookSecret,
+                SENDGRID_API_KEY
             ]
         },
 
@@ -661,6 +670,54 @@ async function publishPaidListing(
             );
         }
     );
+
+    const publishedListingSnapshot =
+        await listingReference.get();
+
+    if (!publishedListingSnapshot.exists) {
+        throw new Error(
+            `Published listing ${listingUid} could not be loaded for its publication email.`
+        );
+    }
+
+    const publishedListing =
+        publishedListingSnapshot.data();
+
+    const propertyAddress =
+        [
+            publishedListing?.['addressLine1'],
+            publishedListing?.['city'],
+            publishedListing?.['state'],
+            publishedListing?.['zipCode']
+        ]
+            .filter(
+                (
+                    value
+                ): value is string =>
+                    typeof value === 'string' &&
+                    value.trim().length > 0
+            )
+            .map(
+                value =>
+                    value.trim()
+            )
+            .join(', ');
+
+    const primaryPhotoUrl =
+        typeof publishedListing?.[
+            'primaryPhotoUrl'
+        ] === 'string'
+            ? publishedListing[
+                'primaryPhotoUrl'
+            ].trim() || null
+            : null;
+
+    await sendListingPublishedEmailIfNeeded({
+        listingUid,
+        sellerUid,
+        propertyAddress,
+        primaryPhotoUrl
+    });
 
     console.log(
         'Listing Checkout published successfully.',

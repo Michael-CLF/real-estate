@@ -137,6 +137,21 @@ export class DashboardSidebarComponent {
         ]
       },
       {
+        label: 'Resources',
+
+        items: [
+          {
+            label: 'Education Center',
+
+            icon:
+              'fa-solid fa-graduation-cap',
+
+            route:
+              '/education'
+          }
+        ]
+      },
+      {
         label: 'Account',
         items: [
           {

@@ -38,3 +38,7 @@ export {
   getListingMarketingChecklist,
   updateListingMarketingChecklist
 } from './listing-marketing-checklist';
+
+export {
+  listingSharePage
+} from './listing-share-page';

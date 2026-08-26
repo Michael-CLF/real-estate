@@ -1,0 +1,53 @@
+<nav
+  class="education-category-navigation"
+  aria-label="Education Center topics"
+>
+  <a
+    class="education-category-navigation__item"
+    routerLink="/education"
+    routerLinkActive="
+      education-category-navigation__item--active
+    "
+    [routerLinkActiveOptions]="{
+      exact: true
+    }"
+  >
+    <span
+      class="education-category-navigation__icon"
+      aria-hidden="true"
+    >
+      <i class="fa-solid fa-border-all"></i>
+    </span>
+
+    <span>
+      All Topics
+    </span>
+  </a>
+
+  @for (
+    category of categories();
+    track category.slug
+  ) {
+    <a
+      class="education-category-navigation__item"
+      [class.education-category-navigation__item--active]="
+        activeCategorySlug() === category.slug
+      "
+      [routerLink]="[
+        '/education',
+        category.slug
+      ]"
+    >
+      <span
+        class="education-category-navigation__icon"
+        aria-hidden="true"
+      >
+        <i [class]="category.icon"></i>
+      </span>
+
+      <span>
+        {{ category.title }}
+      </span>
+    </a>
+  }
+</nav>

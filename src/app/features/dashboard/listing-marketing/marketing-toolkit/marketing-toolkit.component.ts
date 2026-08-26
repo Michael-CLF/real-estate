@@ -806,6 +806,63 @@ export class MarketingToolkitComponent
     );
   }
 
+  protected shareOnLinkedIn():
+    void {
+    const publicUrl =
+      this.publicListingUrl();
+
+    if (!publicUrl) {
+      this.showShareStatus(
+        'error'
+      );
+
+      return;
+    }
+
+    const linkedInUrl =
+      'https://www.linkedin.com/sharing/share-offsite/' +
+      `?url=${encodeURIComponent(publicUrl)}`;
+
+    this.openSocialShareWindow(
+      linkedInUrl,
+      'navstreet-linkedin-share'
+    );
+  }
+
+  protected shareOnX():
+    void {
+    const listing =
+      this.listing();
+
+    const publicUrl =
+      this.publicListingUrl();
+
+    if (
+      !listing ||
+      !publicUrl
+    ) {
+      this.showShareStatus(
+        'error'
+      );
+
+      return;
+    }
+
+    const text =
+      `View ${listing.addressLine1} in ` +
+      `${listing.city}, ${listing.state} on NavStreet.`;
+
+    const xUrl =
+      'https://twitter.com/intent/tweet' +
+      `?text=${encodeURIComponent(text)}` +
+      `&url=${encodeURIComponent(publicUrl)}`;
+
+    this.openSocialShareWindow(
+      xUrl,
+      'navstreet-x-share'
+    );
+  }
+
   protected shareByEmail():
     void {
     const listing =
@@ -838,6 +895,32 @@ export class MarketingToolkitComponent
     this.document.location.href =
       `mailto:?subject=${encodeURIComponent(subject)}` +
       `&body=${encodeURIComponent(body)}`;
+  }
+
+  private openSocialShareWindow(
+    url: string,
+    windowName: string
+  ): void {
+    const shareWindow =
+      window.open(
+        url,
+        windowName,
+        'popup=yes,width=720,height=640'
+      );
+
+    if (!shareWindow) {
+      this.showShareStatus(
+        'error'
+      );
+
+      return;
+    }
+
+    shareWindow.opener = null;
+
+    this.showShareStatus(
+      'shared'
+    );
   }
 
   protected shareStatusMessage():

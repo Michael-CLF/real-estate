@@ -17,19 +17,25 @@ interface NavigationItem {
 
 @Component({
   selector: 'app-navigation',
+
   standalone: true,
+
   imports: [
     RouterLink,
     RouterLinkActive
   ],
+
   templateUrl:
     './navigation.component.html',
+
   styleUrl:
     './navigation.component.scss',
+
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
 export class NavigationComponent {
+
   readonly isMobileMenuOpen =
     input(false);
 
@@ -49,6 +55,10 @@ export class NavigationComponent {
       {
         label: 'Calculators',
         route: '/calculators'
+      },
+      {
+        label: 'Education Center',
+        route: '/education'
       },
       {
         label: 'Find a Pro',

@@ -19,7 +19,9 @@ import {
   shareReplay
 } from 'rxjs';
 
-import { StateExplorerComponent } from './state-explorer/state-explorer.component';
+import {
+  StateExplorerComponent
+} from './state-explorer/state-explorer.component';
 
 import {
   MarketplaceListingSummary
@@ -37,14 +39,29 @@ import {
   ListingCardComponent
 } from '../marketplace/search/components/listing-card/listing-card.component';
 
-interface PlatformBenefit {
-  readonly number: string;
+interface AudiencePath {
+  readonly icon: string;
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly description: string;
+  readonly route: string;
+  readonly action: string;
+}
+
+interface SellerFeature {
+  readonly icon: string;
   readonly title: string;
   readonly description: string;
 }
 
+interface MarketingFeature {
+  readonly icon: string;
+  readonly title: string;
+  readonly description: string;
+}
 
 interface MortgageTool {
+  readonly icon: string;
   readonly eyebrow: string;
   readonly title: string;
   readonly description: string;
@@ -75,10 +92,9 @@ interface ProcessStep {
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
 })
-
-
 export class HomeComponent {
   private readonly listingRepository =
     inject(MarketplaceListingRepository);
@@ -93,88 +109,179 @@ export class HomeComponent {
             [] as MarketplaceListingSummary[]
           )
         ),
-
         shareReplay({
           bufferSize: 1,
           refCount: true
         })
       );
 
-  protected readonly benefits: readonly PlatformBenefit[] = [
-    {
-      number: '01',
-      title: 'Sell for a flat fee',
-      description:
-        'List your property without automatically giving away a percentage of your equity.',
-    },
-    {
-      number: '02',
-      title: 'Follow a guided process',
-      description:
-        'Move through listing, offers, documents, financing, and closing with clear next steps.',
-    },
-    {
-      number: '03',
-      title: 'Use professional tools',
-      description:
-        'Access practical real estate and mortgage tools in one connected platform.',
-    },
-    {
-      number: '04',
-      title: 'Stay in control',
-      description:
-        'Manage your property, communications, and transaction from your own account.',
-    },
-  ];
+  protected readonly audiencePaths:
+    readonly AudiencePath[] = [
+      {
+        icon: 'fa-solid fa-house-circle-check',
+        eyebrow: 'For homeowners',
+        title: 'Sell your home',
+        description:
+          'Create, publish, market, and manage your property through one guided seller experience.',
+        route: '/sell',
+        action: 'Explore selling'
+      },
+      {
+        icon: 'fa-solid fa-magnifying-glass-location',
+        eyebrow: 'For homebuyers',
+        title: 'Find your next home',
+        description:
+          'Browse detailed listings, save favorites, contact sellers, request showings, and prepare offers.',
+        route: '/buy',
+        action: 'Browse homes'
+      },
+      {
+        icon: 'fa-solid fa-calculator',
+        eyebrow: 'For better decisions',
+        title: 'Understand the numbers',
+        description:
+          'Estimate payments, affordability, closing costs, and financing scenarios with practical calculators.',
+        route: '/mortgage',
+        action: 'Use calculators'
+      },
+      {
+        icon: 'fa-solid fa-user-tie',
+        eyebrow: 'For local expertise',
+        title: 'Connect with professionals',
+        description:
+          'Find real estate service providers and business profiles that can help move the transaction forward.',
+        route: '/professionals',
+        action: 'Find a professional'
+      }
+    ];
 
-  protected readonly mortgageTools: readonly MortgageTool[] = [
-    {
-      eyebrow: 'Monthly payment',
-      title: 'Mortgage Calculator',
-      description:
-        'Estimate principal, interest, taxes, insurance, and your total monthly payment.',
-      route: '/mortgage',
-    },
-    {
-      eyebrow: 'Buying power',
-      title: 'Affordability Calculator',
-      description:
-        'Explore a potential home-buying range based on income, debts, and available funds.',
-      route: '/mortgage',
-    },
-    {
-      eyebrow: 'Loan comparison',
-      title: 'Refinance Calculator',
-      description:
-        'Compare your current mortgage with a potential refinance and estimate the break-even point.',
-      route: '/mortgage',
-    },
-  ];
+  protected readonly sellerFeatures:
+    readonly SellerFeature[] = [
+      {
+        icon: 'fa-solid fa-list-check',
+        title: 'Guided listing creation',
+        description:
+          'A six-step process organizes the address, property details, features, photos, pricing, and final review.'
+      },
+      {
+        icon: 'fa-solid fa-cloud-arrow-up',
+        title: 'Automatic draft saving',
+        description:
+          'Progress is saved securely so sellers can leave, return, and continue from the first incomplete step.'
+      },
+      {
+        icon: 'fa-solid fa-shield-halved',
+        title: 'Verified publication',
+        description:
+          'Seller certification, identity verification, and secure Stripe payment support a trusted publication flow.'
+      },
+      {
+        icon: 'fa-solid fa-sliders',
+        title: 'Property enhancements',
+        description:
+          'Add optional room, construction, accessibility, outdoor, parking, utility, and security details.'
+      },
+      {
+        icon: 'fa-solid fa-comments',
+        title: 'Buyer engagement',
+        description:
+          'Receive inquiries, showing requests, offers, favorites, and listing activity from one seller dashboard.'
+      },
+      {
+        icon: 'fa-solid fa-pen-to-square',
+        title: 'Listing management',
+        description:
+          'Update the price and description, monitor status, and keep the public listing current after publication.'
+      }
+    ];
 
-  protected readonly processSteps: readonly ProcessStep[] = [
-    {
-      number: '1',
-      title: 'Create your account',
-      description:
-        'Build your secure NavStreet profile and choose whether you are buying or selling.',
-    },
-    {
-      number: '2',
-      title: 'Prepare your property',
-      description:
-        'Add the property details, photos, pricing, and information buyers need to evaluate your home.',
-    },
-    {
-      number: '3',
-      title: 'Manage the transaction',
-      description:
-        'Review interest, communicate, organize documents, and follow each step from one dashboard.',
-    },
-    {
-      number: '4',
-      title: 'Move toward closing',
-      description:
-        'Keep the people, financing, documents, and milestones surrounding the transaction organized.',
-    },
-  ];
+  protected readonly marketingFeatures:
+    readonly MarketingFeature[] = [
+      {
+        icon: 'fa-solid fa-link',
+        title: 'Permanent sharing link',
+        description:
+          'Use a short NavStreet URL that takes buyers directly to the public property listing.'
+      },
+      {
+        icon: 'fa-solid fa-pen-nib',
+        title: 'Ready-to-use captions',
+        description:
+          'Customize and copy short, detailed, or property-highlight captions for social posts.'
+      },
+      {
+        icon: 'fa-solid fa-share-nodes',
+        title: 'Social and email sharing',
+        description:
+          'Share through a device, Facebook, LinkedIn, X, or email without rebuilding the listing message.'
+      },
+      {
+        icon: 'fa-solid fa-qrcode',
+        title: 'Downloadable QR code',
+        description:
+          'Create PNG and scalable SVG codes for signs, postcards, documents, and printed materials.'
+      },
+      {
+        icon: 'fa-solid fa-list-check',
+        title: 'Marketing checklist',
+        description:
+          'Track completed promotional steps and keep the seller’s marketing activity organized.'
+      }
+    ];
+
+  protected readonly mortgageTools:
+    readonly MortgageTool[] = [
+      {
+        icon: 'fa-solid fa-house-chimney',
+        eyebrow: 'Monthly payment',
+        title: 'Mortgage Calculator',
+        description:
+          'Estimate principal, interest, taxes, insurance, and the total monthly housing payment.',
+        route: '/mortgage'
+      },
+      {
+        icon: 'fa-solid fa-wallet',
+        eyebrow: 'Buying power',
+        title: 'Affordability Calculator',
+        description:
+          'Explore a potential price range using income, debts, available funds, and financing assumptions.',
+        route: '/mortgage'
+      },
+      {
+        icon: 'fa-solid fa-file-invoice-dollar',
+        eyebrow: 'Transaction planning',
+        title: 'Closing Cost Calculator',
+        description:
+          'Prepare for the expenses that may accompany a purchase, sale, or mortgage transaction.',
+        route: '/mortgage'
+      }
+    ];
+
+  protected readonly processSteps:
+    readonly ProcessStep[] = [
+      {
+        number: '01',
+        title: 'Create your secure account',
+        description:
+          'Use passwordless email verification to establish your NavStreet profile and protected dashboard.'
+      },
+      {
+        number: '02',
+        title: 'Build and publish the listing',
+        description:
+          'Follow the guided wizard, upload photographs, certify the details, verify identity, and publish.'
+      },
+      {
+        number: '03',
+        title: 'Market and manage the property',
+        description:
+          'Enhance the listing, share it across your network, and monitor buyer interest and activity.'
+      },
+      {
+        number: '04',
+        title: 'Move the transaction forward',
+        description:
+          'Coordinate inquiries, showings, offers, professionals, financing tools, and status changes.'
+      }
+    ];
 }

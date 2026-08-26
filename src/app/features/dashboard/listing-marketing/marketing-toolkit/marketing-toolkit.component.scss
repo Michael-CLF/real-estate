@@ -74,14 +74,14 @@
   &__status {
     display: inline-flex;
     min-height: 42px;
-    padding: 9px 14px;
+    padding: 0px 18px;
     border: 1px solid #acdcd8;
     border-radius: 999px;
     align-items: center;
     gap: 8px;
     color: #087268;
     background: #e7f7f5;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 800;
     white-space: nowrap;
   }
@@ -343,13 +343,13 @@
   &__feature-status {
     display: inline-flex;
     min-height: 28px;
-    padding: 5px 9px;
+    padding: 0px 12px;
     border-radius: 999px;
     align-items: center;
     justify-content: center;
     color: #087268;
     background: #e7f7f5;
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     font-weight: 800;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -611,115 +611,6 @@
   }
 }
 
-.marketing-toolkit__upcoming>.marketing-toolkit__sharing-card {
-  display: block;
-  min-height: 0;
-  padding: 20px;
-}
-
-.marketing-toolkit__sharing-header {
-  display: grid;
-  grid-template-columns:
-    45px minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 13px;
-
-  h2 {
-    margin: 2px 0 5px;
-    color: #0d3048;
-    font-size: 0.98rem;
-  }
-
-  p {
-    margin: 0;
-    color: #5d7485;
-    font-size: 0.8rem;
-    line-height: 1.5;
-  }
-
-  small {
-    padding: 5px 8px;
-    border-radius: 999px;
-    color: #087268;
-    background: #e7f7f5;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-}
-
-.marketing-toolkit__sharing-actions {
-  display: grid;
-  margin-top: 18px;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-  gap: 9px;
-
-  button {
-    display: inline-flex;
-    min-height: 43px;
-    padding: 9px 11px;
-    border: 1px solid #154360;
-    border-radius: 8px;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    color: #154360;
-    background: #ffffff;
-    font: inherit;
-    font-size: 0.75rem;
-    font-weight: 800;
-    cursor: pointer;
-
-    &:hover {
-      color: #ffffff;
-      background: #154360;
-    }
-
-    &:focus-visible {
-      outline: 3px solid rgba(0, 143, 136, 0.25);
-      outline-offset: 2px;
-    }
-  }
-}
-
-.marketing-toolkit__sharing-status {
-  display: flex;
-  margin: 12px 0 0;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  color: #087268;
-  font-size: 0.75rem;
-  font-weight: 800;
-  animation:
-    marketing-copy-status 3s ease-in-out forwards;
-
-  &--error {
-    color: #a12626;
-  }
-}
-
-@media (max-width: 760px) {
-  .marketing-toolkit__sharing-header {
-    grid-template-columns:
-      45px minmax(0, 1fr);
-
-    small {
-      grid-column: 1 / -1;
-      justify-self: start;
-    }
-  }
-
-  .marketing-toolkit__sharing-actions {
-    grid-template-columns: 1fr;
-  }
-}
-
-/*
- * Active sharing-controls card
- */
-
 .marketing-toolkit__upcoming>article.marketing-toolkit__sharing-card {
   display: block;
   min-height: 0;
@@ -752,11 +643,11 @@
   }
 
   small {
-    padding: 5px 8px;
+    padding: 5px 12px;
     border-radius: 999px;
     color: #087268;
     background: #e7f7f5;
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
   }
@@ -846,7 +737,7 @@
     border-radius: 999px;
     color: #087268;
     background: #e7f7f5;
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
   }
@@ -1014,139 +905,6 @@
   }
 }
 
-.marketing-toolkit .marketing-toolkit__upcoming>article.marketing-toolkit__qr-card {
-  display: block !important;
-  min-height: 0;
-  padding: 20px;
-  grid-template-columns: none;
-  align-items: initial;
-  gap: 0;
-}
-
-.marketing-toolkit .marketing-toolkit__qr-card .marketing-toolkit__qr-header {
-  display: grid;
-  width: 100%;
-  margin: 0;
-  grid-template-columns:
-    43px minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 13px;
-
-  >span {
-    display: grid;
-    width: 43px;
-    height: 43px;
-    border-radius: 10px;
-    place-items: center;
-    color: var(--teal);
-    background: var(--teal-soft);
-  }
-
-  h2 {
-    margin: 2px 0 6px;
-    color: var(--navy-dark);
-    font-size: 1rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.8rem;
-    line-height: 1.5;
-  }
-
-  small {
-    padding: 5px 8px;
-    border-radius: 999px;
-    color: #087268;
-    background: #e7f7f5;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-}
-
-.marketing-toolkit .marketing-toolkit__qr-card .marketing-toolkit__qr-content {
-  display: grid;
-  width: 100%;
-  margin-top: 18px;
-  grid-template-columns:
-    145px minmax(0, 1fr);
-  align-items: center;
-  gap: 18px;
-}
-
-.marketing-toolkit .marketing-toolkit__qr-preview {
-  display: grid;
-  width: 145px;
-  padding: 9px;
-  border: 1px solid #cfdae3;
-  border-radius: 11px;
-  box-sizing: border-box;
-  place-items: center;
-  background: #ffffff;
-
-  img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-}
-
-.marketing-toolkit .marketing-toolkit__qr-details {
-  min-width: 0;
-
-  strong {
-    display: block;
-    color: var(--navy-dark);
-    font-size: 0.9rem;
-  }
-
-  p {
-    margin: 6px 0;
-    color: var(--muted);
-    font-size: 0.78rem;
-    line-height: 1.45;
-  }
-
-  >span {
-    display: block;
-    overflow: hidden;
-    color: #315a70;
-    font-family: monospace;
-    font-size: 0.72rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.marketing-toolkit .marketing-toolkit__qr-actions {
-  display: flex;
-  margin-top: 13px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-@media (max-width: 760px) {
-  .marketing-toolkit .marketing-toolkit__qr-card .marketing-toolkit__qr-header {
-    grid-template-columns:
-      43px minmax(0, 1fr);
-
-    small {
-      grid-column: 1 / -1;
-      justify-self: start;
-    }
-  }
-
-  .marketing-toolkit .marketing-toolkit__qr-card .marketing-toolkit__qr-content {
-    grid-template-columns: 1fr;
-  }
-
-  .marketing-toolkit .marketing-toolkit__qr-preview {
-    width: min(100%, 220px);
-    margin: 0 auto;
-  }
-}
 .marketing-toolkit
   .marketing-toolkit__upcoming
   > article.marketing-toolkit__checklist-card {
@@ -1331,5 +1089,58 @@
 
   .marketing-toolkit__checklist-items {
     grid-template-columns: 1fr;
+  }
+}
+.marketing-toolkit__qr-instructions {
+  display: grid;
+  margin-top: 18px;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+
+  > div {
+    display: grid;
+    padding: 12px 0;
+    border-top: 1px solid #e0e8ed;
+    grid-template-columns:
+      25px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+  }
+
+  i {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    place-items: center;
+    color: var(--teal);
+    font-size: 0.75rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.73rem;
+    line-height: 1.45;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--navy-dark);
+    font-size: 0.77rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .marketing-toolkit__qr-instructions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1100px) {
+  .marketing-toolkit__sharing-actions {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 }

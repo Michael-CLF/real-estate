@@ -1,0 +1,209 @@
+<main class="education-center">
+  <section class="education-center__hero" aria-labelledby="education-center-title">
+    <div class="education-center__hero-content">
+      <p class="education-center__eyebrow">
+        NavStreet Education Center
+      </p>
+
+      <h1 id="education-center-title">
+        {{ pageTitle() }}
+      </h1>
+
+      <p class="education-center__introduction">
+        {{ pageDescription() }}
+      </p>
+
+      <div class="education-center__search">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+
+        <label class="education-center__search-label" for="education-search">
+          Search Education Center
+        </label>
+
+        <input id="education-search" type="search" placeholder="Search buying, selling, financing, marketing, and more"
+          [value]="searchTerm()" (input)="updateSearchTerm($event)" />
+
+        @if (searchTerm()) {
+        <button type="button" aria-label="Clear Education Center search" (click)="clearSearch()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+        }
+      </div>
+
+      <p class="education-center__search-help">
+        Search articles or browse the topics below.
+      </p>
+    </div>
+
+    <div class="education-center__hero-visual" aria-hidden="true">
+      <span class="education-center__hero-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </span>
+
+      <div>
+        <strong>
+          Learn with confidence
+        </strong>
+
+        <span>
+          Practical real estate information
+          organized around your next step.
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="education-center__navigation">
+    <app-education-category-navigation [categories]="categories" [activeCategorySlug]="
+        activeCategorySlug()
+      " />
+  </section>
+
+  @if (categoryNotFound()) {
+  <section class="
+        education-center__empty
+        education-center__empty--error
+      " role="alert">
+    <span aria-hidden="true">
+      <i class="fa-solid fa-circle-exclamation"></i>
+    </span>
+
+    <h2>
+      Education topic not found
+    </h2>
+
+    <p>
+      The selected Education Center topic
+      could not be found.
+    </p>
+
+    <a class="education-center__button" routerLink="/education">
+      View all topics
+    </a>
+  </section>
+
+  } @else {
+  @if (
+  !activeCategorySlug() &&
+  !searchTerm()
+  ) {
+  <section class="education-center__featured" aria-labelledby="featured-education-title">
+    <header class="education-center__section-header">
+      <div>
+        <p>
+          Start here
+        </p>
+
+        <h2 id="featured-education-title">
+          Featured guides
+        </h2>
+
+        <span>
+          Begin with the most useful guides
+          for navigating NavStreet.
+        </span>
+      </div>
+    </header>
+
+    <div class="education-center__article-grid">
+      @for (
+      article of featuredArticles;
+      track article.slug
+      ) {
+      <app-education-article-card [article]="article" />
+      }
+    </div>
+  </section>
+  }
+
+  <section class="education-center__articles" aria-labelledby="education-articles-title">
+    <header class="education-center__section-header">
+      <div>
+        <p>
+          @if (activeCategory()) {
+          Topic guides
+          } @else if (searchTerm()) {
+          Search results
+          } @else {
+          Explore the library
+          }
+        </p>
+
+        <h2 id="education-articles-title">
+          @if (activeCategory(); as category) {
+          {{ category.title }} articles
+          } @else if (searchTerm()) {
+          Articles matching
+          “{{ searchTerm() }}”
+          } @else {
+          All education articles
+          }
+        </h2>
+
+        <span>
+          {{ visibleArticles().length }}
+
+          @if (
+          visibleArticles().length === 1
+          ) {
+          article
+          } @else {
+          articles
+          }
+        </span>
+      </div>
+    </header>
+
+    @if (visibleArticles().length > 0) {
+    <div class="education-center__article-grid">
+      @for (
+      article of visibleArticles();
+      track article.slug
+      ) {
+      <app-education-article-card [article]="article" />
+      }
+    </div>
+
+    } @else {
+    <div class="education-center__empty">
+      <span aria-hidden="true">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </span>
+
+      <h2>
+        No matching articles
+      </h2>
+
+      <p>
+        Try a different search term or
+        return to all Education Center topics.
+      </p>
+
+      <button type="button" class="education-center__button" (click)="clearSearch()">
+        Clear search
+      </button>
+    </div>
+    }
+  </section>
+  }
+
+  <section class="education-center__notice" aria-label="Educational information notice">
+    <span aria-hidden="true">
+      <i class="fa-solid fa-circle-info"></i>
+    </span>
+
+    <div>
+      <strong>
+        Educational information
+      </strong>
+
+      <p>
+        NavStreet provides general educational
+        information and technology tools. It does
+        not provide legal, tax, appraisal,
+        inspection, mortgage, or real estate
+        brokerage advice.
+      </p>
+    </div>
+  </section>
+</main>

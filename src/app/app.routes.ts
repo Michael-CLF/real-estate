@@ -325,6 +325,72 @@ export const routes: Routes = [
               component.HomeComponent
           )
       },
+      /*
+ * NavStreet Education Center
+ *
+ * Public educational content for buyers,
+ * sellers, and professional users.
+ */
+      {
+        path: 'education',
+
+        children: [
+          /*
+           * Education Center homepage
+           */
+          {
+            path: '',
+
+            pathMatch: 'full',
+
+            loadComponent: () =>
+              import(
+                './features/education/pages/education-center/education-center.component'
+              ).then(
+                component =>
+                  component
+                    .EducationCenterComponent
+              )
+          },
+
+          /*
+           * Individual Education Center article
+           *
+           * This route must remain above the
+           * category route.
+           */
+          {
+            path:
+              ':categorySlug/:articleSlug',
+
+            loadComponent: () =>
+              import(
+                './features/education/pages/education-article/education-article.component'
+              ).then(
+                component =>
+                  component
+                    .EducationArticleComponent
+              )
+          },
+
+          /*
+           * Education Center category
+           */
+          {
+            path:
+              ':categorySlug',
+
+            loadComponent: () =>
+              import(
+                './features/education/pages/education-center/education-center.component'
+              ).then(
+                component =>
+                  component
+                    .EducationCenterComponent
+              )
+          }
+        ]
+      },
 
       {
         path:

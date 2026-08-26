@@ -1,7 +1,4 @@
-<section
-  class="dashboard-overview"
-  aria-labelledby="dashboard-overview-title"
->
+<section class="dashboard-overview" aria-labelledby="dashboard-overview-title">
   <header class="dashboard-overview__header">
     <div>
       <p class="dashboard-overview__eyebrow">
@@ -11,8 +8,8 @@
       <h1 id="dashboard-overview-title">
         Welcome back,
         {{
-          dashboardState.state().firstName ||
-          'NavStreet member'
+        dashboardState.state().firstName ||
+        'NavStreet member'
         }}
       </h1>
 
@@ -22,96 +19,64 @@
       </p>
     </div>
 
-    <a
-      class="dashboard-overview__primary-action"
-      routerLink="/sell/new"
-    >
-      <i
-        class="fa-solid fa-plus"
-        aria-hidden="true"
-      ></i>
+    <a class="dashboard-overview__primary-action" routerLink="/sell/new">
+      <i class="fa-solid fa-plus" aria-hidden="true"></i>
 
       New Listing
     </a>
   </header>
 
   @if (
-    dashboardState.state().userProfile;
-    as profile
+  dashboardState.state().userProfile;
+  as profile
   ) {
-    <section
-      class="dashboard-overview__account-bar"
-      aria-label="NavStreet account summary"
-    >
-      <div class="dashboard-overview__account-identity">
-        <span
-          class="dashboard-overview__account-icon"
-          aria-hidden="true"
-        >
-          <i class="fa-solid fa-user"></i>
-        </span>
+  <section class="dashboard-overview__account-bar" aria-label="NavStreet account summary">
+    <div class="dashboard-overview__account-identity">
+      <span class="dashboard-overview__account-icon" aria-hidden="true">
+        <i class="fa-solid fa-user"></i>
+      </span>
 
-        <div>
-          <small>NavStreet account</small>
+      <div>
+        <small>NavStreet account</small>
 
-          <strong>
-            {{ profile.fullName }}
-          </strong>
-        </div>
+        <strong>
+          {{ profile.fullName }}
+        </strong>
       </div>
+    </div>
 
-      <div class="dashboard-overview__account-details">
-        <span>
-          <i
-            class="fa-solid fa-envelope"
-            aria-hidden="true"
-          ></i>
+    <div class="dashboard-overview__account-details">
+      <span>
+        <i class="fa-solid fa-envelope" aria-hidden="true"></i>
 
-          {{ profile.email }}
-        </span>
+        {{ profile.email }}
+      </span>
 
-        <span>
-          <i
-            class="fa-solid fa-phone"
-            aria-hidden="true"
-          ></i>
+      <span>
+        <i class="fa-solid fa-phone" aria-hidden="true"></i>
 
-          {{ formatTelephone(profile.phone) }}
-        </span>
+        {{ formatTelephone(profile.phone) }}
+      </span>
 
-        @if (profile.emailVerified) {
-          <span
-            class="
+      @if (profile.emailVerified) {
+      <span class="
               dashboard-overview__verified
-            "
-          >
-            <i
-              class="fa-solid fa-circle-check"
-              aria-hidden="true"
-            ></i>
+            ">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
-            Email verified
-          </span>
-        }
-      </div>
-    </section>
+        Email verified
+      </span>
+      }
+    </div>
+  </section>
   }
 
-  <section
-    class="dashboard-overview__metrics"
-    aria-label="Dashboard totals"
-  >
-    <a
-      class="dashboard-overview__metric"
-      routerLink="/dashboard/listings"
-    >
-      <span
-        class="
+  <section class="dashboard-overview__metrics" aria-label="Dashboard totals">
+    <a class="dashboard-overview__metric" routerLink="/dashboard/listings">
+      <span class="
           dashboard-overview__metric-icon
           dashboard-overview__metric-icon--active
-        "
-        aria-hidden="true"
-      >
+        " aria-hidden="true">
         <i class="fa-solid fa-house-circle-check"></i>
       </span>
 
@@ -120,34 +85,25 @@
 
         <strong>
           {{
-            dashboardState.state()
-              .activeListings.length
+          dashboardState.state()
+          .activeListings.length
           }}
         </strong>
 
         <span>View active properties</span>
       </span>
 
-      <i
-        class="
+      <i class="
           dashboard-overview__metric-arrow
           fa-solid fa-arrow-right
-        "
-        aria-hidden="true"
-      ></i>
+        " aria-hidden="true"></i>
     </a>
 
-    <a
-      class="dashboard-overview__metric"
-      routerLink="/dashboard/listings"
-    >
-      <span
-        class="
+    <a class="dashboard-overview__metric" routerLink="/dashboard/listings">
+      <span class="
           dashboard-overview__metric-icon
           dashboard-overview__metric-icon--draft
-        "
-        aria-hidden="true"
-      >
+        " aria-hidden="true">
         <i class="fa-solid fa-file-pen"></i>
       </span>
 
@@ -156,34 +112,25 @@
 
         <strong>
           {{
-            dashboardState.state()
-              .draftListings.length
+          dashboardState.state()
+          .draftListings.length
           }}
         </strong>
 
         <span>Continue unfinished listings</span>
       </span>
 
-      <i
-        class="
+      <i class="
           dashboard-overview__metric-arrow
           fa-solid fa-arrow-right
-        "
-        aria-hidden="true"
-      ></i>
+        " aria-hidden="true"></i>
     </a>
 
-    <a
-      class="dashboard-overview__metric"
-      routerLink="/dashboard/saved-properties"
-    >
-      <span
-        class="
+    <a class="dashboard-overview__metric" routerLink="/dashboard/saved-properties">
+      <span class="
           dashboard-overview__metric-icon
           dashboard-overview__metric-icon--saved
-        "
-        aria-hidden="true"
-      >
+        " aria-hidden="true">
         <i class="fa-solid fa-heart"></i>
       </span>
 
@@ -192,34 +139,25 @@
 
         <strong>
           {{
-            dashboardState.state()
-              .savedProperties.length
+          dashboardState.state()
+          .savedProperties.length
           }}
         </strong>
 
         <span>Homes you want to revisit</span>
       </span>
 
-      <i
-        class="
+      <i class="
           dashboard-overview__metric-arrow
           fa-solid fa-arrow-right
-        "
-        aria-hidden="true"
-      ></i>
+        " aria-hidden="true"></i>
     </a>
 
-    <a
-      class="dashboard-overview__metric"
-      routerLink="/dashboard/activity"
-    >
-      <span
-        class="
+    <a class="dashboard-overview__metric" routerLink="/dashboard/activity">
+      <span class="
           dashboard-overview__metric-icon
           dashboard-overview__metric-icon--activity
-        "
-        aria-hidden="true"
-      >
+        " aria-hidden="true">
         <i class="fa-solid fa-clock-rotate-left"></i>
       </span>
 
@@ -233,13 +171,10 @@
         <span>Latest account events</span>
       </span>
 
-      <i
-        class="
+      <i class="
           dashboard-overview__metric-arrow
           fa-solid fa-arrow-right
-        "
-        aria-hidden="true"
-      ></i>
+        " aria-hidden="true"></i>
     </a>
   </section>
 
@@ -256,10 +191,7 @@
       </header>
 
       <div class="dashboard-overview__quick-actions">
-        <a
-          class="dashboard-overview__quick-action"
-          routerLink="/dashboard/listings"
-        >
+        <a class="dashboard-overview__quick-action" routerLink="/dashboard/listings">
           <span aria-hidden="true">
             <i class="fa-solid fa-house"></i>
           </span>
@@ -273,16 +205,10 @@
             </p>
           </div>
 
-          <i
-            class="fa-solid fa-chevron-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
         </a>
 
-        <a
-          class="dashboard-overview__quick-action"
-          routerLink="/sell/new"
-        >
+        <a class="dashboard-overview__quick-action" routerLink="/sell/new">
           <span aria-hidden="true">
             <i class="fa-solid fa-sign-hanging"></i>
           </span>
@@ -296,16 +222,10 @@
             </p>
           </div>
 
-          <i
-            class="fa-solid fa-chevron-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
         </a>
 
-        <a
-          class="dashboard-overview__quick-action"
-          routerLink="/homes"
-        >
+        <a class="dashboard-overview__quick-action" routerLink="/homes">
           <span aria-hidden="true">
             <i class="fa-solid fa-magnifying-glass"></i>
           </span>
@@ -319,16 +239,10 @@
             </p>
           </div>
 
-          <i
-            class="fa-solid fa-chevron-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
         </a>
 
-        <a
-          class="dashboard-overview__quick-action"
-          routerLink="/find-a-pro/north-carolina"
-        >
+        <a class="dashboard-overview__quick-action" routerLink="/find-a-pro/north-carolina">
           <span aria-hidden="true">
             <i class="fa-solid fa-address-book"></i>
           </span>
@@ -342,10 +256,23 @@
             </p>
           </div>
 
-          <i
-            class="fa-solid fa-chevron-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </a>
+        <a class="dashboard-overview__quick-action" routerLink="/education">
+          <span aria-hidden="true">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </span>
+
+          <div>
+            <strong>Education Center</strong>
+
+            <p>
+              Access step-by-step buying, selling,
+              financing, and closing guides.
+            </p>
+          </div>
+
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
         </a>
       </div>
     </section>
@@ -362,233 +289,188 @@
 
         <a routerLink="/dashboard/listings">
           View all
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </header>
 
       <div class="dashboard-overview__listing-statuses">
         <div>
           <span>
-            <i
-              class="fa-solid fa-circle"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-circle" aria-hidden="true"></i>
 
             Active
           </span>
 
           <strong>
             {{
-              dashboardState.state()
-                .activeListings.length
+            dashboardState.state()
+            .activeListings.length
             }}
           </strong>
         </div>
 
         <div>
           <span>
-            <i
-              class="fa-solid fa-circle"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-circle" aria-hidden="true"></i>
 
             Draft
           </span>
 
           <strong>
             {{
-              dashboardState.state()
-                .draftListings.length
+            dashboardState.state()
+            .draftListings.length
             }}
           </strong>
         </div>
 
         <div>
           <span>
-            <i
-              class="fa-solid fa-circle"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-circle" aria-hidden="true"></i>
 
             Saved properties
           </span>
 
           <strong>
             {{
-              dashboardState.state()
-                .savedProperties.length
+            dashboardState.state()
+            .savedProperties.length
             }}
           </strong>
         </div>
       </div>
 
       @if (
-        dashboardState.state()
-          .activeListings.length === 0 &&
-        dashboardState.state()
-          .draftListings.length === 0
+      dashboardState.state()
+      .activeListings.length === 0 &&
+      dashboardState.state()
+      .draftListings.length === 0
       ) {
-        <div class="dashboard-overview__empty-listings">
-          <span aria-hidden="true">
-            <i class="fa-solid fa-house-circle-plus"></i>
-          </span>
+      <div class="dashboard-overview__empty-listings">
+        <span aria-hidden="true">
+          <i class="fa-solid fa-house-circle-plus"></i>
+        </span>
 
-          <div>
-            <strong>
-              You do not have any listings yet
-            </strong>
+        <div>
+          <strong>
+            You do not have any listings yet
+          </strong>
 
-            <p>
-              Start a property listing and save your
-              progress at any time.
-            </p>
-          </div>
-
-          <a routerLink="/sell/new">
-            Start a Listing
-          </a>
+          <p>
+            Start a property listing and save your
+            progress at any time.
+          </p>
         </div>
-      } @else {
-        <a
-          class="dashboard-overview__listing-link"
-          routerLink="/dashboard/listings"
-        >
-          <span>
-            Open My Listings
-          </span>
 
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+        <a routerLink="/sell/new">
+          Start a Listing
         </a>
+      </div>
+      } @else {
+      <a class="dashboard-overview__listing-link" routerLink="/dashboard/listings">
+        <span>
+          Open My Listings
+        </span>
+
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </a>
       }
     </section>
   </div>
 
   @if (professional(); as business) {
-    <section
-      class="dashboard-overview__business"
-      aria-labelledby="dashboard-business-summary-title"
-    >
-      <div class="dashboard-overview__business-identity">
-        <span
-          class="dashboard-overview__business-icon"
-          aria-hidden="true"
-        >
-          <i class="fa-solid fa-briefcase"></i>
-        </span>
+  <section class="dashboard-overview__business" aria-labelledby="dashboard-business-summary-title">
+    <div class="dashboard-overview__business-identity">
+      <span class="dashboard-overview__business-icon" aria-hidden="true">
+        <i class="fa-solid fa-briefcase"></i>
+      </span>
 
-        <div>
-          <p class="dashboard-overview__panel-eyebrow">
-            Business account
-          </p>
+      <div>
+        <p class="dashboard-overview__panel-eyebrow">
+          Business account
+        </p>
 
-          <h2 id="dashboard-business-summary-title">
-            {{ business.businessName }}
-          </h2>
+        <h2 id="dashboard-business-summary-title">
+          {{ business.businessName }}
+        </h2>
 
-          <p>
-            {{ professionalTypeLabel() }}
-            ·
-            {{ business.stateName }}
-          </p>
-        </div>
+        <p>
+          {{ professionalTypeLabel() }}
+          ·
+          {{ business.stateName }}
+        </p>
       </div>
+    </div>
 
-      <div class="dashboard-overview__business-status">
-        @if (hasFullBusinessProfile()) {
-          <span
-            class="
+    <div class="dashboard-overview__business-status">
+      @if (hasFullBusinessProfile()) {
+      <span class="
               dashboard-overview__business-badge
               dashboard-overview__business-badge--active
-            "
-          >
-            <i
-              class="fa-solid fa-circle-check"
-              aria-hidden="true"
-            ></i>
+            ">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
-            Full Business Profile active
-          </span>
-        } @else {
-          <span class="dashboard-overview__business-badge">
-            <i
-              class="fa-solid fa-address-card"
-              aria-hidden="true"
-            ></i>
+        Full Business Profile active
+      </span>
+      } @else {
+      <span class="dashboard-overview__business-badge">
+        <i class="fa-solid fa-address-card" aria-hidden="true"></i>
 
-            Free directory listing
-          </span>
-        }
-      </div>
+        Free directory listing
+      </span>
+      }
+    </div>
 
-      <div class="dashboard-overview__business-actions">
-        <a
-          [routerLink]="[
+    <div class="dashboard-overview__business-actions">
+      <a [routerLink]="[
             '/find-a-pro',
             business.stateSlug
-          ]"
-        >
-          View Directory
-        </a>
+          ]">
+        View Directory
+      </a>
 
-        @if (publicProfileRoute(); as route) {
-          <a [routerLink]="route">
-            View Public Profile
-          </a>
-        }
-
-        @if (profileSetupRoute(); as route) {
-          <a [routerLink]="route">
-            Edit Business Profile
-          </a>
-        }
-
-        @if (!hasFullBusinessProfile()) {
-          <button
-            type="button"
-            [disabled]="isStartingUpgrade()"
-            (click)="upgradeBusinessProfile()"
-          >
-            @if (isStartingUpgrade()) {
-              Opening Checkout...
-            } @else {
-              Upgrade Profile
-            }
-          </button>
-        } @else {
-          <button
-            type="button"
-            [disabled]="isOpeningBillingPortal()"
-            (click)="openBusinessBillingPortal()"
-          >
-            @if (isOpeningBillingPortal()) {
-              Opening Billing...
-            } @else {
-              Manage Subscription
-            }
-          </button>
-        }
-      </div>
-
-      @if (
-        professionalUpgradeError() ||
-        professionalBillingError()
-      ) {
-        <p
-          class="dashboard-overview__business-error"
-          role="alert"
-        >
-          {{
-            professionalUpgradeError() ||
-            professionalBillingError()
-          }}
-        </p>
+      @if (publicProfileRoute(); as route) {
+      <a [routerLink]="route">
+        View Public Profile
+      </a>
       }
-    </section>
+
+      @if (profileSetupRoute(); as route) {
+      <a [routerLink]="route">
+        Edit Business Profile
+      </a>
+      }
+
+      @if (!hasFullBusinessProfile()) {
+      <button type="button" [disabled]="isStartingUpgrade()" (click)="upgradeBusinessProfile()">
+        @if (isStartingUpgrade()) {
+        Opening Checkout...
+        } @else {
+        Upgrade Profile
+        }
+      </button>
+      } @else {
+      <button type="button" [disabled]="isOpeningBillingPortal()" (click)="openBusinessBillingPortal()">
+        @if (isOpeningBillingPortal()) {
+        Opening Billing...
+        } @else {
+        Manage Subscription
+        }
+      </button>
+      }
+    </div>
+
+    @if (
+    professionalUpgradeError() ||
+    professionalBillingError()
+    ) {
+    <p class="dashboard-overview__business-error" role="alert">
+      {{
+      professionalUpgradeError() ||
+      professionalBillingError()
+      }}
+    </p>
+    }
+  </section>
   }
 </section>

@@ -1,0 +1,49 @@
+<article class="education-article-card">
+  <div class="education-article-card__top">
+    <span
+      class="education-article-card__icon"
+      aria-hidden="true"
+    >
+      <i [class]="article().icon"></i>
+    </span>
+
+    <span class="education-article-card__time">
+      <i
+        class="fa-regular fa-clock"
+        aria-hidden="true"
+      ></i>
+
+      {{ article().estimatedMinutes }} min read
+    </span>
+  </div>
+
+  <div class="education-article-card__content">
+    <p class="education-article-card__eyebrow">
+      {{ article().eyebrow }}
+    </p>
+
+    <h3>
+      {{ article().title }}
+    </h3>
+
+    <p class="education-article-card__summary">
+      {{ article().summary }}
+    </p>
+  </div>
+
+  <a
+    class="education-article-card__link"
+    [routerLink]="[
+      '/education',
+      article().categorySlug,
+      article().slug
+    ]"
+  >
+    Read article
+
+    <i
+      class="fa-solid fa-arrow-right"
+      aria-hidden="true"
+    ></i>
+  </a>
+</article>

@@ -1,182 +1,205 @@
 <main class="home-page">
-  <!-- =========================================================
-       HERO
-       ========================================================= -->
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="hero__background-shape hero__background-shape--one"></div>
-    <div class="hero__background-shape hero__background-shape--two"></div>
+  <section
+    class="hero"
+    aria-labelledby="hero-title"
+  >
+    <div class="hero__glow hero__glow--one"></div>
+    <div class="hero__glow hero__glow--two"></div>
 
     <div class="page-shell hero__layout">
       <div class="hero__content">
         <p class="section-eyebrow section-eyebrow--light">
-          A better real estate journey
+          A complete real estate platform
         </p>
 
-        <h1 id="hero-title" class="hero__title">
+        <h1 id="hero-title">
           Sell your home.
-          <span>Keep more of your equity.</span>
+          <span>Keep more of what is yours.</span>
         </h1>
 
         <p class="hero__description">
-          Buy, sell, finance, and manage your real estate journey
-          through one modern platform built around clarity, control,
-          and transparent pricing.
+          NavStreet gives homeowners the guided tools to create,
+          publish, market, and manage a property listing—while
+          giving buyers the information and resources to move
+          confidently toward their next home.
         </p>
 
-        <div class="hero__actions" aria-label="Primary actions">
-          <a class="button button--primary" routerLink="/sell">
-            Start selling
+        <div class="hero__actions">
+          <a
+            class="button button--primary"
+            routerLink="/sell"
+          >
+            List your home for $49
 
-            <span class="button__arrow" aria-hidden="true">
-              →
-            </span>
+            <i
+              class="fa-solid fa-arrow-right"
+              aria-hidden="true"
+            ></i>
           </a>
 
-          <a class="button button--secondary-light" routerLink="/buy">
+          <a
+            class="button button--secondary-light"
+            routerLink="/buy"
+          >
             Browse homes
           </a>
         </div>
 
-        <div class="hero__search">
-          <div class="hero__search-header">
-            <span class="hero__search-label">
-              Find your next home
-            </span>
+        <div
+          class="hero__trust"
+          aria-label="NavStreet platform highlights"
+        >
+          <span>
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
 
-            <span class="hero__search-hint">
-              Search properties nationwide
-            </span>
-          </div>
+            Flat $49 listing fee
+          </span>
 
-          <form class="property-search" aria-label="Search for properties">
-            <label class="property-search__field">
-              <span>Location</span>
+          <span>
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
 
-              <input type="search" placeholder="City, state, or ZIP" autocomplete="postal-code" />
-            </label>
+            Guided step-by-step process
+          </span>
 
-            <label class="property-search__field">
-              <span>Property type</span>
+          <span>
+            <i
+              class="fa-solid fa-circle-check"
+              aria-hidden="true"
+            ></i>
 
-              <select aria-label="Property type">
-                <option value="">Any type</option>
-                <option value="single-family">Single family</option>
-                <option value="townhome">Townhome</option>
-                <option value="condominium">Condominium</option>
-                <option value="land">Land</option>
-              </select>
-            </label>
-
-            <label class="property-search__field property-search__field--compact">
-              <span>Beds</span>
-
-              <select aria-label="Minimum bedrooms">
-                <option value="">Any</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
-              </select>
-            </label>
-
-            <label class="property-search__field property-search__field--compact">
-              <span>Max price</span>
-
-              <select aria-label="Maximum price">
-                <option value="">No maximum</option>
-                <option value="300000">$300,000</option>
-                <option value="500000">$500,000</option>
-                <option value="750000">$750,000</option>
-                <option value="1000000">$1,000,000</option>
-              </select>
-            </label>
-
-            <button class="property-search__button" type="button" aria-label="Search properties" routerLink="/buy">
-              <span aria-hidden="true">⌕</span>
-              Search
-            </button>
-          </form>
-        </div>
-
-        <div class="hero__proof">
-          <div class="hero__proof-item">
-            <strong>Flat-fee</strong>
-            <span>seller listings</span>
-          </div>
-
-          <div class="hero__proof-divider" aria-hidden="true"></div>
-
-          <div class="hero__proof-item">
-            <strong>Nationwide</strong>
-            <span>platform vision</span>
-          </div>
-
-          <div class="hero__proof-divider" aria-hidden="true"></div>
-
-          <div class="hero__proof-item">
-            <strong>One place</strong>
-            <span>for the entire journey</span>
-          </div>
+            Secure identity verification
+          </span>
         </div>
       </div>
 
-      <div class="hero__visual" aria-hidden="true">
-        <div class="property-visual">
-          <div class="property-visual__sky">
-            <div class="property-visual__sun"></div>
-            <div class="property-visual__cloud property-visual__cloud--one"></div>
-            <div class="property-visual__cloud property-visual__cloud--two"></div>
+      <div
+        class="hero-product"
+        aria-label="NavStreet seller dashboard preview"
+      >
+        <div class="hero-product__topbar">
+          <div>
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
 
-          <div class="property-visual__house">
-            <div class="property-visual__roof"></div>
+          <small>Seller command center</small>
+        </div>
 
-            <div class="property-visual__building">
-              <div class="property-visual__window property-visual__window--one"></div>
-              <div class="property-visual__window property-visual__window--two"></div>
-              <div class="property-visual__door"></div>
+        <div class="hero-product__body">
+          <div class="hero-product__heading">
+            <div>
+              <small>ACTIVE LISTING</small>
+              <strong>13 Songbird Lane</strong>
+              <span>Raleigh, North Carolina</span>
             </div>
 
-            <div class="property-visual__garage">
-              <div class="property-visual__garage-door"></div>
-            </div>
-          </div>
-
-          <div class="property-visual__ground"></div>
-
-          <div class="property-visual__listing-card">
-            <span class="property-visual__listing-label">
-              Featured property
-            </span>
-
-            <strong>$489,000</strong>
-
-            <span>Wake Forest, NC</span>
-
-            <div class="property-visual__listing-details">
-              <span>4 beds</span>
-              <span>3 baths</span>
-              <span>2,641 sq. ft.</span>
-            </div>
-          </div>
-
-          <div class="property-visual__status-card">
-            <span class="property-visual__status-icon">✓</span>
-
-            <span>
-              <strong>Identity verified</strong>
-              Identity protected
+            <span class="hero-product__badge">
+              Featured
             </span>
           </div>
+
+          <div class="hero-product__metrics">
+            <div>
+              <i
+                class="fa-regular fa-eye"
+                aria-hidden="true"
+              ></i>
+              <strong>248</strong>
+              <span>Views</span>
+            </div>
+
+            <div>
+              <i
+                class="fa-regular fa-heart"
+                aria-hidden="true"
+              ></i>
+              <strong>17</strong>
+              <span>Favorites</span>
+            </div>
+
+            <div>
+              <i
+                class="fa-regular fa-message"
+                aria-hidden="true"
+              ></i>
+              <strong>6</strong>
+              <span>Inquiries</span>
+            </div>
+          </div>
+
+          <div class="hero-product__tools">
+            <div>
+              <span>
+                <i
+                  class="fa-solid fa-share-nodes"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <div>
+                <strong>Marketing Toolkit</strong>
+                <small>Links, captions, sharing, and QR code</small>
+              </div>
+
+              <i
+                class="fa-solid fa-chevron-right"
+                aria-hidden="true"
+              ></i>
+            </div>
+
+            <div>
+              <span>
+                <i
+                  class="fa-solid fa-list-check"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <div>
+                <strong>Listing activity</strong>
+                <small>Monitor buyer interest in one place</small>
+              </div>
+
+              <i
+                class="fa-solid fa-chevron-right"
+                aria-hidden="true"
+              ></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-product__verified">
+          <i
+            class="fa-solid fa-shield-halved"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            <strong>Identity verified</strong>
+            Secure publication completed
+          </span>
+        </div>
+
+        <div class="hero-product__price">
+          <span>Listing published</span>
+          <strong>$49</strong>
+          <small>one-time listing fee</small>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       FEATURED HOMES
-       ========================================================= -->
-  <section class="section featured-homes" aria-labelledby="featured-homes-title">
+  <section
+    class="featured-homes"
+    aria-labelledby="featured-homes-title"
+  >
     <div class="page-shell">
       <div class="section-heading-row">
         <div class="section-heading">
@@ -185,221 +208,402 @@
           </p>
 
           <h2 id="featured-homes-title">
-            Featured homes
+           Featured Homes
           </h2>
 
           <p>
-            Discover properties and connect directly with the
-            information needed to make your next decision.
+            Review detailed property information, save favorites,
+            contact sellers, request showings, and begin preparing
+            an offer directly through NavStreet.
           </p>
         </div>
 
-        <a class="button button--outline" routerLink="/buy">
+        <a
+          class="button button--outline"
+          routerLink="/buy"
+        >
           View all homes
-          <span class="button__arrow" aria-hidden="true">→</span>
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
         </a>
       </div>
 
       @if (
-      featuredListings$ | async;
-      as featuredListings
+        featuredListings$ | async;
+        as featuredListings
       ) {
-      @if (featuredListings.length > 0) {
-      <div class="featured-homes__grid" aria-label="Featured property listings">
+        @if (featuredListings.length > 0) {
+          <div
+            class="featured-homes__grid"
+            aria-label="Featured property listings"
+          >
+            @for (
+              listing of featuredListings;
+              track listing.id
+            ) {
+              <app-listing-card [listing]="listing" />
+            }
+          </div>
+        } @else {
+          <div class="featured-homes__empty">
+            <span>
+              <i
+                class="fa-solid fa-house"
+                aria-hidden="true"
+              ></i>
+            </span>
+
+            <div>
+              <h3>Featured homes are coming soon</h3>
+              <p>
+                Explore the marketplace to see all currently
+                available NavStreet properties.
+              </p>
+            </div>
+
+            <a
+              class="button button--outline"
+              routerLink="/buy"
+            >
+              Browse all homes
+            </a>
+          </div>
+        }
+      }
+    </div>
+  </section>
+
+  <section
+    class="audiences"
+    aria-labelledby="audiences-title"
+  >
+    <div class="page-shell">
+      <header class="section-heading section-heading--centered">
+        <p class="section-eyebrow">
+          One platform. Every side of the journey.
+        </p>
+
+        <h2 id="audiences-title">
+          Everything surrounding a real estate decision.
+        </h2>
+
+        <p>
+          NavStreet connects the listing, marketplace, mortgage
+          tools, communications, and professional resources that
+          are normally scattered across separate websites.
+        </p>
+      </header>
+
+      <div class="audiences__grid">
         @for (
-        listing of featuredListings;
-        track listing.id
+          path of audiencePaths;
+          track path.title
         ) {
-        <app-listing-card [listing]="listing" />
+          <a
+            class="audience-card"
+            [routerLink]="path.route"
+          >
+            <span class="audience-card__icon">
+              <i
+                [class]="path.icon"
+                aria-hidden="true"
+              ></i>
+            </span>
+
+            <small>{{ path.eyebrow }}</small>
+            <h3>{{ path.title }}</h3>
+            <p>{{ path.description }}</p>
+
+            <span class="audience-card__action">
+              {{ path.action }}
+              <i
+                class="fa-solid fa-arrow-right"
+                aria-hidden="true"
+              ></i>
+            </span>
+          </a>
         }
       </div>
-      } @else {
-      <section class="featured-homes__empty" aria-labelledby="featured-homes-empty-title">
-        <div class="featured-homes__empty-icon" aria-hidden="true">
-          ⌂
-        </div>
+    </div>
+  </section>
 
-        <div>
-          <h3 id="featured-homes-empty-title">
-            Featured homes are coming soon
-          </h3>
+  <section
+    class="seller-platform"
+    aria-labelledby="seller-platform-title"
+  >
+    <div class="page-shell">
+      <div class="seller-platform__introduction">
+        <div class="section-heading section-heading--light">
+          <p class="section-eyebrow section-eyebrow--light">
+            Built for homeowners—not commissions
+          </p>
+
+          <h2 id="seller-platform-title">
+            More than a listing. A complete seller workspace.
+          </h2>
 
           <p>
-            There are no active featured listings available
-            right now. Explore the marketplace to see all
-            currently available homes.
+            NavStreet guides homeowners from the first property
+            detail through publication, marketing, buyer activity,
+            and listing management—without automatically giving
+            away a percentage of their equity.
           </p>
         </div>
 
-        <a class="button button--outline" routerLink="/buy">
-          Browse all homes
+        <a
+          class="button button--primary"
+          routerLink="/sell"
+        >
+          See how selling works
 
-          <span class="button__arrow" aria-hidden="true">
-            →
-          </span>
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
         </a>
-      </section>
-      }
-      }
-    </div>
-  </section>
-
-  <!-- =========================================================
-       PLATFORM INTRODUCTION
-       ========================================================= -->
-  <section class="section platform-introduction" aria-labelledby="platform-title">
-    <div class="page-shell">
-      <div class="section-heading section-heading--centered">
-        <p class="section-eyebrow">
-          More than a home-search website
-        </p>
-
-        <h2 id="platform-title">
-          Real estate should feel easier to navigate.
-        </h2>
-
-        <p>
-          NavStreet is being built as a connected platform for the
-          decisions, tools, information, and milestones surrounding
-          a real estate transaction.
-        </p>
       </div>
 
-      <div class="benefit-grid">
-        @for (benefit of benefits; track benefit.number) {
-        <article class="benefit-card">
-          <span class="benefit-card__number">
-            {{ benefit.number }}
-          </span>
+      <div class="seller-features">
+        @for (
+          feature of sellerFeatures;
+          track feature.title
+        ) {
+          <article class="seller-feature">
+            <span>
+              <i
+                [class]="feature.icon"
+                aria-hidden="true"
+              ></i>
+            </span>
 
-          <h3>{{ benefit.title }}</h3>
-
-          <p>{{ benefit.description }}</p>
-        </article>
+            <div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
+            </div>
+          </article>
         }
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       SELLER SAVINGS
-       ========================================================= -->
-  <section class="section savings-section" aria-labelledby="savings-title">
-    <div class="page-shell savings-section__layout">
-      <div class="savings-section__content">
+
+  <section
+    class="savings"
+    aria-labelledby="savings-title"
+  >
+    <div class="page-shell savings__layout">
+      <div class="savings__content">
         <p class="section-eyebrow">
-          A different selling model
+          Transparent pricing
         </p>
 
         <h2 id="savings-title">
-          Your home equity should remain yours.
+          Your equity should not disappear into a percentage.
         </h2>
 
         <p>
-          Traditional percentage-based compensation can represent
-          a substantial cost when a property sells. NavStreet is
-          designed around transparent, flat-fee listing options and
-          a guided selling experience.
+          NavStreet’s $49 listing fee gives homeowners a direct,
+          modern way to put a property in front of buyers. An
+          optional Featured Listing adds prominent placement for $10.
         </p>
 
-        <ul class="check-list">
+        <ul>
           <li>
-            <span aria-hidden="true">✓</span>
-            Understand the cost before listing
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+            Know the listing cost before you begin
           </li>
 
           <li>
-            <span aria-hidden="true">✓</span>
-            Build and manage your listing online
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+            Use the same platform after publication
           </li>
 
           <li>
-            <span aria-hidden="true">✓</span>
-            Follow a structured transaction process
+            <i
+              class="fa-solid fa-check"
+              aria-hidden="true"
+            ></i>
+            Choose additional services only when needed
           </li>
         </ul>
 
-        <a class="text-link" routerLink="/sell">
-          Explore selling with NavStreet
-          <span aria-hidden="true">→</span>
+        <a
+          class="text-link"
+          routerLink="/sell"
+        >
+          Start a property listing
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
         </a>
       </div>
 
-      <div class="savings-comparison">
-        <div class="savings-comparison__header">
+      <div class="savings-card">
+        <header>
           <div>
-            <span>Illustrative comparison</span>
+            <small>ILLUSTRATIVE COMPARISON</small>
             <strong>$400,000 home sale</strong>
           </div>
 
-          <span class="savings-comparison__badge">
-            Example
-          </span>
-        </div>
+          <span>Example</span>
+        </header>
 
-        <div class="comparison-row comparison-row--traditional">
+        <div class="savings-card__row savings-card__row--traditional">
           <div>
-            <span class="comparison-row__label">
-              Percentage-based example
-            </span>
-
+            <small>Percentage-based example</small>
             <strong>3% listing-side fee</strong>
           </div>
 
-          <span class="comparison-row__amount">
-            $12,000
-          </span>
+          <strong>$12,000</strong>
         </div>
 
-        <div class="comparison-divider">
+        <div class="savings-card__versus">
           <span>compared with</span>
         </div>
 
-        <div class="comparison-row comparison-row--navstreet">
+        <div class="savings-card__row savings-card__row--navstreet">
           <div>
-            <span class="comparison-row__label">
-              NavStreet
-            </span>
-
-            <strong>Flat listing fee</strong>
+            <small>NavStreet</small>
+            <strong>One-time listing fee</strong>
           </div>
 
-          <span class="comparison-row__amount">
-            $49
-          </span>
+          <strong>$49</strong>
         </div>
 
-        <div class="savings-comparison__result">
+        <footer>
           <span>Illustrative difference</span>
           <strong>$11,951</strong>
-        </div>
+        </footer>
 
-        <p class="savings-comparison__disclosure">
-          This is an illustrative comparison only. Real estate
-          compensation is negotiable, costs vary, and additional
-          services or transaction expenses may apply.
+        <p>
+          Illustration only. Real estate compensation is negotiable,
+          costs vary, and additional transaction or professional-service
+          expenses may apply.
         </p>
       </div>
     </div>
   </section>
 
+  <section
+    class="marketing"
+    aria-labelledby="marketing-title"
+  >
+    <div class="page-shell marketing__layout">
+      <div class="marketing__preview">
+        <div class="marketing__window">
+          <header>
+            <span>
+              <i
+                class="fa-solid fa-share-nodes"
+                aria-hidden="true"
+              ></i>
+            </span>
 
-  <!-- =========================================================
-       STATE EXPLORER
-       ========================================================= -->
-  <section class="state-section" aria-labelledby="state-section-title">
-    <div class="page-shell">
+            <div>
+              <small>LISTING MARKETING TOOLKIT</small>
+              <strong>Promote your property</strong>
+            </div>
+          </header>
 
-      <div class="state-section__explorer">
-        <app-state-explorer />
+          <div class="marketing__link">
+            <span>navstreet.com/h/jzseotez</span>
+            <strong>Copy link</strong>
+          </div>
+
+          <div class="marketing__socials">
+            <span>
+              <i class="fa-brands fa-facebook-f"></i>
+            </span>
+            <span>
+              <i class="fa-brands fa-linkedin-in"></i>
+            </span>
+            <span>
+              <i class="fa-brands fa-x-twitter"></i>
+            </span>
+            <span>
+              <i class="fa-regular fa-envelope"></i>
+            </span>
+          </div>
+
+          <div class="marketing__caption">
+            <small>SUGGESTED SOCIAL CAPTION</small>
+            <p>
+              🏡 Just listed on NavStreet: a beautiful home
+              with the details buyers need to take the next step.
+            </p>
+          </div>
+        </div>
+
+        <div class="marketing__qr">
+          <i
+            class="fa-solid fa-qrcode"
+            aria-hidden="true"
+          ></i>
+          <span>Property QR code</span>
+        </div>
+      </div>
+
+      <div class="marketing__content">
+        <p class="section-eyebrow">
+          Marketing is built in
+        </p>
+
+        <h2 id="marketing-title">
+          Publishing the listing is only the beginning.
+        </h2>
+
+        <p>
+          Every published property receives a dedicated Marketing
+          Toolkit that makes it easier for sellers to promote the
+          home across their personal and professional networks.
+        </p>
+
+        <div class="marketing__features">
+          @for (
+            feature of marketingFeatures;
+            track feature.title
+          ) {
+            <article>
+              <span>
+                <i
+                  [class]="feature.icon"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <div>
+                <h3>{{ feature.title }}</h3>
+                <p>{{ feature.description }}</p>
+              </div>
+            </article>
+          }
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       MORTGAGE TOOLS
-       ========================================================= -->
-  <section class="section mortgage-section" aria-labelledby="mortgage-tools-title">
+  <section
+    class="state-section"
+    aria-label="Explore homes by state"
+  >
+    <div class="page-shell">
+      <app-state-explorer />
+    </div>
+  </section>
+
+  <section
+    class="mortgage"
+    aria-labelledby="mortgage-title"
+  >
     <div class="page-shell">
       <div class="section-heading-row">
         <div class="section-heading">
@@ -407,95 +611,172 @@
             Understand the numbers
           </p>
 
-          <h2 id="mortgage-tools-title">
-            Mortgage tools built for real decisions.
+          <h2 id="mortgage-title">
+            Mortgage tools for real-world decisions.
           </h2>
 
           <p>
-            Estimate payments, buying power, and financing scenarios
+            Explore payments, buying power, and transaction costs
             without leaving the NavStreet experience.
           </p>
         </div>
 
-        <a class="text-link" routerLink="/mortgage">
-          Explore all mortgage tools
-          <span aria-hidden="true">→</span>
+        <a
+          class="text-link"
+          routerLink="/mortgage"
+        >
+          Explore all calculators
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
         </a>
       </div>
 
-      <div class="mortgage-tools-grid">
-        @for (tool of mortgageTools; track tool.title) {
-        <a class="mortgage-tool-card" [routerLink]="tool.route">
-          <div class="mortgage-tool-card__icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+      <div class="mortgage__grid">
+        @for (
+          tool of mortgageTools;
+          track tool.title
+        ) {
+          <a
+            class="mortgage-card"
+            [routerLink]="tool.route"
+          >
+            <span class="mortgage-card__icon">
+              <i
+                [class]="tool.icon"
+                aria-hidden="true"
+              ></i>
+            </span>
 
-          <span class="mortgage-tool-card__eyebrow">
-            {{ tool.eyebrow }}
-          </span>
+            <small>{{ tool.eyebrow }}</small>
+            <h3>{{ tool.title }}</h3>
+            <p>{{ tool.description }}</p>
 
-          <h3>{{ tool.title }}</h3>
-
-          <p>{{ tool.description }}</p>
-
-          <span class="mortgage-tool-card__link">
-            Open calculator
-            <span aria-hidden="true">→</span>
-          </span>
-        </a>
+            <span class="mortgage-card__action">
+              Open calculator
+              <i
+                class="fa-solid fa-arrow-right"
+                aria-hidden="true"
+              ></i>
+            </span>
+          </a>
         }
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       HOW IT WORKS
-       ========================================================= -->
-  <section class="section process-section" aria-labelledby="process-title">
-    <div class="page-shell process-section__layout">
-      <div class="process-section__introduction">
-        <p class="section-eyebrow">
-          From listing to closing
+  <section
+    class="professionals"
+    aria-labelledby="professionals-title"
+  >
+    <div class="page-shell professionals__layout">
+      <div class="professionals__content">
+        <p class="section-eyebrow section-eyebrow--light">
+          Real estate still needs real expertise
         </p>
 
-        <h2 id="process-title">
-          One clear path through the transaction.
+        <h2 id="professionals-title">
+          Find the right professional when you need one.
         </h2>
 
         <p>
-          NavStreet is designed to replace scattered tools and
-          uncertain next steps with a guided digital experience.
+          Browse business profiles and service areas for mortgage,
+          legal, inspection, repair, moving, and other real estate
+          professionals—without surrendering control of the transaction.
         </p>
 
-        <a class="button button--dark" routerLink="/sell">
-          Begin your home-selling journey
-          <span class="button__arrow" aria-hidden="true">→</span>
+        <a
+          class="button button--secondary-light"
+          routerLink="/professionals"
+        >
+          Find a professional
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
         </a>
       </div>
 
-      <div class="process-steps">
-        @for (step of processSteps; track step.number) {
-        <article class="process-step">
-          <span class="process-step__number">
-            {{ step.number }}
-          </span>
+      <div class="professionals__categories">
+        <span>
+          <i class="fa-solid fa-building-columns"></i>
+          Mortgage professionals
+        </span>
+        <span>
+          <i class="fa-solid fa-scale-balanced"></i>
+          Closing attorneys
+        </span>
+        <span>
+          <i class="fa-solid fa-clipboard-check"></i>
+          Home inspectors
+        </span>
+        <span>
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          Home services
+        </span>
+        <span>
+          <i class="fa-solid fa-truck-moving"></i>
+          Moving services
+        </span>
+        <span>
+          <i class="fa-solid fa-camera"></i>
+          Property media
+        </span>
+      </div>
+    </div>
+  </section>
 
-          <div>
-            <h3>{{ step.title }}</h3>
-            <p>{{ step.description }}</p>
-          </div>
-        </article>
+  <section
+    class="process"
+    aria-labelledby="process-title"
+  >
+    <div class="page-shell process__layout">
+      <div class="process__introduction">
+        <p class="section-eyebrow">
+          One clear path forward
+        </p>
+
+        <h2 id="process-title">
+          From property details to buyer interest.
+        </h2>
+
+        <p>
+          NavStreet replaces disconnected tools and uncertain next
+          steps with a guided digital experience that remains useful
+          throughout the life of the listing.
+        </p>
+
+        <a
+          class="button button--dark"
+          routerLink="/sell"
+        >
+          Begin your listing
+        </a>
+      </div>
+
+      <div class="process__steps">
+        @for (
+          step of processSteps;
+          track step.number
+        ) {
+          <article>
+            <span>{{ step.number }}</span>
+
+            <div>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.description }}</p>
+            </div>
+          </article>
         }
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       FINAL CTA
-       ========================================================= -->
-  <section class="final-cta" aria-labelledby="final-cta-title">
+  <section
+    class="final-cta"
+    aria-labelledby="final-cta-title"
+  >
     <div class="page-shell final-cta__layout">
       <div>
         <p class="section-eyebrow section-eyebrow--light">
@@ -503,23 +784,33 @@
         </p>
 
         <h2 id="final-cta-title">
-          Ready for a more direct way to sell?
+          Put the complete NavStreet platform to work.
         </h2>
 
         <p>
-          Create your NavStreet account and begin building your
-          property listing through a clear, guided process.
+          Create your account and begin building a secure,
+          market-ready property listing through a process designed
+          to keep you informed and in control.
         </p>
       </div>
 
       <div class="final-cta__actions">
-        <a class="button button--primary" routerLink="/sell">
-          Start selling
-          <span class="button__arrow" aria-hidden="true">→</span>
+        <a
+          class="button button--primary"
+          routerLink="/sell"
+        >
+          List your home for $49
+          <i
+            class="fa-solid fa-arrow-right"
+            aria-hidden="true"
+          ></i>
         </a>
 
-        <a class="button button--secondary-light" routerLink="/about">
-          Learn about NavStreet
+        <a
+          class="button button--secondary-light"
+          routerLink="/buy"
+        >
+          Explore the marketplace
         </a>
       </div>
     </div>
