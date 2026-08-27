@@ -143,7 +143,7 @@
 }
 
 .feature-group {
-  & + & {
+  &+& {
     margin-top: 2.5rem;
     padding-top: 2rem;
     border-top: 1px solid #dbe4ea;
@@ -343,8 +343,8 @@
 
   &:hover {
     border-color: #94a3b8;
-    background: #F88379;
-    color: #000000;
+    background: #154360;
+    color: #ffffff;
   }
 
   &:focus-visible {
@@ -413,7 +413,7 @@
     align-items: flex-start;
     gap: 0.875rem;
 
-    > .fa-circle-check {
+    >.fa-circle-check {
       margin-top: 0.125rem;
       color: #15803d;
       font-size: 1.5rem;
@@ -451,6 +451,7 @@
     }
   }
 }
+
 /* Responsive additions: component-width aware for phones and tablets. */
 :host {
   container-type: inline-size;
@@ -496,7 +497,7 @@
   }
 
   .feature-group {
-    & + & {
+    &+& {
       margin-top: 2rem;
       padding-top: 1.5rem;
     }

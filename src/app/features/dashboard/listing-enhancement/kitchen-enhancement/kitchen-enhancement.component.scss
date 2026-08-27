@@ -302,8 +302,8 @@
 
   &:hover {
     border-color: #94a3b8;
-    background: #F88379;
-    color: #000000;
+    background: #154360;
+    color: #ffffff;
   }
 
   &:focus-visible {
@@ -361,6 +361,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
 .save-success {
   display: flex;
   flex-direction: column;
@@ -376,7 +377,7 @@
     align-items: flex-start;
     gap: 0.875rem;
 
-    > .fa-circle-check {
+    >.fa-circle-check {
       margin-top: 0.125rem;
       color: #15803d;
       font-size: 1.5rem;
@@ -414,6 +415,7 @@
     }
   }
 }
+
 /* Responsive additions: component-width aware for phones and tablets. */
 :host {
   container-type: inline-size;
@@ -421,34 +423,101 @@
 }
 
 @container (max-width: 760px) {
-  .enhancement-section { padding: 0.75rem 0.75rem 2.5rem; }
+  .enhancement-section {
+    padding: 0.75rem 0.75rem 2.5rem;
+  }
+
   .section-header {
-    margin-bottom: 1rem; padding: 1rem; border-radius: 0.75rem;
-    &__content { gap: 0.75rem; margin-top: 0.875rem; }
-    &__icon { display: none; }
-    h1 { font-size: clamp(1.5rem, 7vw, 1.875rem); }
-    &__description { margin-top: 0.625rem; font-size: 0.875rem; line-height: 1.5; }
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+
+    &__content {
+      gap: 0.75rem;
+      margin-top: 0.875rem;
+    }
+
+    &__icon {
+      display: none;
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 7vw, 1.875rem);
+    }
+
+    &__description {
+      margin-top: 0.625rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
   }
-  .selection-summary { flex-direction: column; align-items: stretch; gap: 0.625rem; margin-bottom: 1.5rem; padding: 0.875rem; }
-  .feature-grid { grid-template-columns: minmax(0, 1fr); gap: 0.75rem; }
-  .feature-card { min-height: 68px; gap: 0.75rem; padding: 0.875rem; }
+
+  .selection-summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+    margin-bottom: 1.5rem;
+    padding: 0.875rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .feature-card {
+    min-height: 68px;
+    gap: 0.75rem;
+    padding: 0.875rem;
+  }
+
   .section-footer {
-    flex-direction: column; align-items: stretch; gap: 0.75rem; margin-top: 2rem;
-    &__actions { width: 100%; flex-direction: column-reverse; }
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 2rem;
+
+    &__actions {
+      width: 100%;
+      flex-direction: column-reverse;
+    }
   }
-  .primary-button, .secondary-button { width: 100%; }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+
   .save-success {
-    flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem;
-    &__message { gap: 0.75rem; }
-    &__actions { width: 100%; flex-direction: column; }
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
+
+    &__message {
+      gap: 0.75rem;
+    }
+
+    &__actions {
+      width: 100%;
+      flex-direction: column;
+    }
   }
 }
 
 @container (min-width: 761px) and (max-width: 999px) {
-  .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .section-footer, .save-success { align-items: center; }
+  .feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-footer,
+  .save-success {
+    align-items: center;
+  }
 }
 
 @container (min-width: 1000px) {
-  .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .feature-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

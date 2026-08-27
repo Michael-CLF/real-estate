@@ -405,6 +405,37 @@ export const routes: Routes = [
                 .ProfessionalProfileSetupComponent
           )
       },
+      /*
+ * NavStreet Terms of Service
+ */
+      {
+        path: 'terms',
+
+        loadComponent: () =>
+          import(
+            './features/legal/terms-of-service/terms-of-service.component'
+          ).then(
+            component =>
+              component
+                .TermsOfServiceComponent
+          )
+      },
+
+      /*
+       * NavStreet Privacy Policy
+       */
+      {
+        path: 'privacy',
+
+        loadComponent: () =>
+          import(
+            './features/legal/privacy-policy/privacy-policy.component'
+          ).then(
+            component =>
+              component
+                .PrivacyPolicyComponent
+          )
+      },
       {
         path: 'faq',
         loadComponent: () =>
@@ -712,6 +743,27 @@ export const routes: Routes = [
           ).then(
             component =>
               component.MarketingToolkitComponent
+          )
+      },
+      /*
+ * Published Listing Contract Timeline
+ */
+      {
+        path:
+          'sell/listings/:listingUid/manage/transaction',
+
+        canActivate: [
+          authGuard,
+          accountGuard
+        ],
+
+        loadComponent: () =>
+          import(
+            './features/dashboard/listing-transaction/listing-transaction.component'
+          ).then(
+            component =>
+              component
+                .ListingTransactionComponent
           )
       },
 

@@ -302,8 +302,21 @@ export class MarketingToolkitComponent
       this.publicListingUrl.set(
         `${this.document.location.origin}${marketingLink.shortPath}`
       );
-      await this.generateQrCode();
-      await this.loadChecklist();
+
+      /*
+       * The listing and public link are ready, so display
+       * the Toolkit without waiting for the secondary tools.
+       */
+      this.isLoading.set(false);
+
+      /*
+       * Generate the QR code and load the checklist
+       * simultaneously in the background.
+       */
+      await Promise.all([
+        this.generateQrCode(),
+        this.loadChecklist()
+      ]);
     } catch (error: unknown) {
       console.error(
         'Unable to load the Listing Marketing Toolkit:',
@@ -1168,118 +1181,118 @@ export class MarketingToolkitComponent
   }
 
   protected checklistItemCompleted(
-  itemId: string
-): boolean {
-  return this.completedChecklistItems()
-    .includes(itemId);
-}
-
-protected get checklistCompletionPercent():
-  number {
-  if (
-    this.checklistItems.length === 0
-  ) {
-    return 0;
+    itemId: string
+  ): boolean {
+    return this.completedChecklistItems()
+      .includes(itemId);
   }
 
-  return Math.round(
-    (
-      this.completedChecklistItems()
-        .length /
-      this.checklistItems.length
-    ) *
-    100
-  );
-}
+  protected get checklistCompletionPercent():
+    number {
+    if (
+      this.checklistItems.length === 0
+    ) {
+      return 0;
+    }
 
-protected async toggleChecklistItem(
-  itemId: string,
-  completed: boolean
-): Promise<void> {
-  if (this.checklistSaving()) {
-    return;
+    return Math.round(
+      (
+        this.completedChecklistItems()
+          .length /
+        this.checklistItems.length
+      ) *
+      100
+    );
   }
 
-  const previousItems = [
-    ...this.completedChecklistItems()
-  ];
+  protected async toggleChecklistItem(
+    itemId: string,
+    completed: boolean
+  ): Promise<void> {
+    if (this.checklistSaving()) {
+      return;
+    }
 
-  const nextItems =
-    completed
-      ? [
+    const previousItems = [
+      ...this.completedChecklistItems()
+    ];
+
+    const nextItems =
+      completed
+        ? [
           ...new Set([
             ...previousItems,
             itemId
           ])
         ]
-      : previousItems.filter(
+        : previousItems.filter(
           existingItem =>
             existingItem !== itemId
         );
 
-  this.completedChecklistItems.set(
-    nextItems
-  );
-
-  this.checklistSaving.set(true);
-  this.checklistError.set('');
-
-  try {
-    const result =
-      await this.listingMarketingService
-        .updateChecklist(
-          this.listingUid,
-          nextItems
-        );
-
     this.completedChecklistItems.set(
-      result.completedItems
-    );
-  } catch (error: unknown) {
-    this.completedChecklistItems.set(
-      previousItems
+      nextItems
     );
 
-    this.checklistError.set(
-      error instanceof Error
-        ? error.message
-        : 'The marketing checklist could not be saved.'
-    );
-  } finally {
-    this.checklistSaving.set(false);
+    this.checklistSaving.set(true);
+    this.checklistError.set('');
+
+    try {
+      const result =
+        await this.listingMarketingService
+          .updateChecklist(
+            this.listingUid,
+            nextItems
+          );
+
+      this.completedChecklistItems.set(
+        result.completedItems
+      );
+    } catch (error: unknown) {
+      this.completedChecklistItems.set(
+        previousItems
+      );
+
+      this.checklistError.set(
+        error instanceof Error
+          ? error.message
+          : 'The marketing checklist could not be saved.'
+      );
+    } finally {
+      this.checklistSaving.set(false);
+    }
   }
-}
 
-private async loadChecklist():
-  Promise<void> {
-  this.checklistLoading.set(true);
-  this.checklistError.set('');
+  private async loadChecklist():
+    Promise<void> {
+    this.checklistLoading.set(true);
+    this.checklistError.set('');
 
-  try {
-    const result =
-      await this.listingMarketingService
-        .getChecklist(
-          this.listingUid
-        );
+    try {
+      const result =
+        await this.listingMarketingService
+          .getChecklist(
+            this.listingUid
+          );
 
-    this.completedChecklistItems.set(
-      result.completedItems
-    );
-  } catch (error: unknown) {
-    console.error(
-      'Unable to load the marketing checklist:',
-      error
-    );
+      this.completedChecklistItems.set(
+        result.completedItems
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to load the marketing checklist:',
+        error
+      );
 
-    this.checklistError.set(
-      error instanceof Error
-        ? error.message
-        : 'The marketing checklist could not be loaded.'
-    );
-  } finally {
-    this.checklistLoading.set(false);
+      this.checklistError.set(
+        error instanceof Error
+          ? error.message
+          : 'The marketing checklist could not be loaded.'
+      );
+    } finally {
+      this.checklistLoading.set(false);
+    }
   }
-}
 
   private async writePlainText(
     value: string

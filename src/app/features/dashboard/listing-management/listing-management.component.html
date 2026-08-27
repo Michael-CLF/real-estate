@@ -1,12 +1,6 @@
 <section class="listing-management">
-  <a
-    routerLink="/dashboard"
-    class="back-link"
-  >
-    <i
-      class="fa-solid fa-arrow-left"
-      aria-hidden="true"
-    ></i>
+  <a routerLink="/dashboard" class="back-link">
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 
     <span>
       Return to dashboard
@@ -14,608 +8,498 @@
   </a>
 
   @if (isLoading()) {
-    <div
-      class="state-card"
-      aria-live="polite"
-    >
-      <i
-        class="fa-solid fa-spinner fa-spin"
-        aria-hidden="true"
-      ></i>
+  <div class="state-card" aria-live="polite">
+    <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
-      <p>
-        Loading listing...
-      </p>
-    </div>
+    <p>
+      Loading listing...
+    </p>
+  </div>
   } @else if (loadError()) {
-    <div
-      class="state-card state-card--error"
-      role="alert"
-    >
-      <i
-        class="fa-solid fa-circle-exclamation"
-        aria-hidden="true"
-      ></i>
+  <div class="state-card state-card--error" role="alert">
+    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
 
-      <p>
-        {{ loadError() }}
-      </p>
+    <p>
+      {{ loadError() }}
+    </p>
 
-      <a
-        routerLink="/dashboard"
-        class="primary-button"
-      >
-        Return to dashboard
-      </a>
-    </div>
+    <a routerLink="/dashboard" class="primary-button">
+      Return to dashboard
+    </a>
+  </div>
   } @else if (listing(); as currentListing) {
-    <header class="management-header">
-      <div class="management-header__property">
-        @if (currentListing.primaryPhotoUrl) {
-          <img
-            class="management-header__photo"
-            [src]="currentListing.primaryPhotoUrl"
-            [alt]="
+  <header class="management-header">
+    <div class="management-header__property">
+      @if (currentListing.primaryPhotoUrl) {
+      <img class="management-header__photo" [src]="currentListing.primaryPhotoUrl" [alt]="
               'Primary listing photo for ' +
               currentListing.addressLine1
-            "
-          >
-        } @else {
-          <div
-            class="management-header__photo-placeholder"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-house"></i>
-          </div>
-        }
-
-        <div class="management-header__details">
-          <p class="management-header__eyebrow">
-            Manage listing
-          </p>
-
-          <h1>
-            {{ currentListing.addressLine1 }}
-          </h1>
-
-          <p class="management-header__location">
-            {{ currentListing.city }},
-            {{ currentListing.state }}
-            {{ currentListing.zipCode }}
-          </p>
-
-          <div class="management-header__status-row">
-            <span class="status-badge">
-              {{ currentListing.status }}
-            </span>
-
-            <span>
-              {{ currentListing.daysOnMarket }}
-
-              @if (
-                currentListing.daysOnMarket === 1
-              ) {
-                day
-              } @else {
-                days
-              }
-
-              on NavStreet
-            </span>
-          </div>
-        </div>
+            ">
+      } @else {
+      <div class="management-header__photo-placeholder" aria-hidden="true">
+        <i class="fa-solid fa-house"></i>
       </div>
+      }
 
-      <div class="management-header__summary">
-        <span>
-          Listing price
-        </span>
+      <div class="management-header__details">
+        <p class="management-header__eyebrow">
+          Manage listing
+        </p>
 
-        <strong>
-          {{
-            currentListing.listPrice
-              | currency:'USD':'symbol':'1.0-0'
-          }}
-        </strong>
+        <h1>
+          {{ currentListing.addressLine1 }}
+        </h1>
 
-        <button
-          type="button"
-          class="header-button"
-          (click)="previewListing()"
-        >
-          <i
-            class="fa-solid fa-arrow-up-right-from-square"
-            aria-hidden="true"
-          ></i>
+        <p class="management-header__location">
+          {{ currentListing.city }},
+          {{ currentListing.state }}
+          {{ currentListing.zipCode }}
+        </p>
 
-          View public listing
-        </button>
-      </div>
-    </header>
-
-    <section
-      class="activity-summary"
-      aria-labelledby="activity-summary-heading"
-    >
-      <div class="section-heading">
-        <div>
-          <p class="section-heading__eyebrow">
-            Listing performance
-          </p>
-
-          <h2 id="activity-summary-heading">
-            Activity at a glance
-          </h2>
-        </div>
-
-        <span class="activity-summary__note">
-          Updated with your listing activity
-        </span>
-      </div>
-
-      <div class="activity-summary__grid">
-        <article class="activity-stat">
-          <div
-            class="activity-stat__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-eye"></i>
-          </div>
-
-          <div>
-            <strong>
-              {{ currentListing.views }}
-            </strong>
-
-            <span>
-              Views
-            </span>
-          </div>
-        </article>
-
-        <article class="activity-stat">
-          <div
-            class="activity-stat__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-heart"></i>
-          </div>
-
-          <div>
-            <strong>
-              {{ currentListing.favorites }}
-            </strong>
-
-            <span>
-              Saves
-            </span>
-          </div>
-        </article>
-
-        <article class="activity-stat">
-          <div
-            class="activity-stat__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-message"></i>
-          </div>
-
-          <div>
-            <strong>
-              {{ inquiryCount() }}
-            </strong>
-
-            <span>
-              Inquiries
-            </span>
-          </div>
-        </article>
-
-        <article class="activity-stat">
-          <div
-            class="activity-stat__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-regular fa-calendar-check"></i>
-          </div>
-
-          <div>
-            <strong>
-              {{ showingRequestCount() }}
-            </strong>
-
-            <span>
-              Showing requests
-            </span>
-          </div>
-        </article>
-      </div>
-
-      @if (activityLoadError()) {
-        <p
-          class="activity-summary__error"
-          role="status"
-        >
-          <i
-            class="fa-solid fa-circle-exclamation"
-            aria-hidden="true"
-          ></i>
+        <div class="management-header__status-row">
+          <span class="status-badge">
+            {{ currentListing.status }}
+          </span>
 
           <span>
-            {{ activityLoadError() }}
+            {{ currentListing.daysOnMarket }}
+
+            @if (
+            currentListing.daysOnMarket === 1
+            ) {
+            day
+            } @else {
+            days
+            }
+
+            on NavStreet
           </span>
-        </p>
-      }
-    </section>
-
-    <section
-      class="management-tools"
-      aria-labelledby="management-tools-heading"
-    >
-      <div class="section-heading">
-        <div>
-          <p class="section-heading__eyebrow">
-            Property controls
-          </p>
-
-          <h2 id="management-tools-heading">
-            Manage this listing
-          </h2>
         </div>
       </div>
+    </div>
 
-      <div class="management-grid">
-        <article class="management-card">
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-pen-to-square"></i>
+    <div class="management-header__summary">
+      <span>
+        Listing price
+      </span>
+
+      <strong>
+        {{
+        currentListing.listPrice
+        | currency:'USD':'symbol':'1.0-0'
+        }}
+      </strong>
+
+      <button type="button" class="header-button" (click)="previewListing()">
+        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+
+        View public listing
+      </button>
+    </div>
+  </header>
+
+  <section class="activity-summary" aria-labelledby="activity-summary-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-heading__eyebrow">
+          Listing performance
+        </p>
+
+        <h2 id="activity-summary-heading">
+          Activity at a glance
+        </h2>
+      </div>
+
+      <span class="activity-summary__note">
+        Updated with your listing activity
+      </span>
+    </div>
+
+    <div class="activity-summary__grid">
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-solid fa-eye"></i>
+        </div>
+
+        <div>
+          <strong>
+            {{ currentListing.views }}
+          </strong>
+
+          <span>
+            Views
+          </span>
+        </div>
+      </article>
+
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+
+        <div>
+          <strong>
+            {{ currentListing.favorites }}
+          </strong>
+
+          <span>
+            Saves
+          </span>
+        </div>
+      </article>
+
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-solid fa-message"></i>
+        </div>
+
+        <div>
+          <strong>
+            {{ inquiryCount() }}
+          </strong>
+
+          <span>
+            Inquiries
+          </span>
+        </div>
+      </article>
+
+      <article class="activity-stat">
+        <div class="activity-stat__icon" aria-hidden="true">
+          <i class="fa-regular fa-calendar-check"></i>
+        </div>
+
+        <div>
+          <strong>
+            {{ showingRequestCount() }}
+          </strong>
+
+          <span>
+            Showing requests
+          </span>
+        </div>
+      </article>
+    </div>
+
+    @if (activityLoadError()) {
+    <p class="activity-summary__error" role="status">
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+      <span>
+        {{ activityLoadError() }}
+      </span>
+    </p>
+    }
+  </section>
+
+  <section class="management-tools" aria-labelledby="management-tools-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-heading__eyebrow">
+          Property controls
+        </p>
+
+        <h2 id="management-tools-heading">
+          Manage this listing
+        </h2>
+      </div>
+    </div>
+
+    <div class="management-grid">
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Edit Listing
+            </h3>
+
+            <span class="available-badge">
+              Available
+            </span>
           </div>
 
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Edit Listing
-              </h3>
+          <p>
+            Update the listing price, description, HOA
+            status, HOA fee, and HOA payment frequency.
+          </p>
+        </div>
 
-              <span class="available-badge">
-                Available
-              </span>
-            </div>
+        <button type="button" class="primary-button" (click)="openListingEditor()">
+          Edit listing
 
-            <p>
-              Update the listing price, description, HOA
-              status, HOA fee, and HOA payment frequency.
-            </p>
-          </div>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
 
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openListingEditor()"
-          >
-            Edit listing
-
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
-
-        <article
-          class="
+      <article class="
             management-card
             management-card--featured
-          "
-        >
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i
-              class="fa-solid fa-wand-magic-sparkles"
-            ></i>
+          ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Listing Enhancements
+            </h3>
+
+            <span class="available-badge">
+              Available
+            </span>
           </div>
 
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Listing Enhancements
-              </h3>
+          <p>
+            Add detailed features, amenities, systems,
+            accessibility information, and nearby schools.
+          </p>
+        </div>
 
-              <span class="available-badge">
-                Available
-              </span>
-            </div>
+        <button type="button" class="primary-button" (click)="openEnhancements()">
+          Manage enhancements
 
-            <p>
-              Add detailed features, amenities, systems,
-              accessibility information, and nearby schools.
-            </p>
-          </div>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
 
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openEnhancements()"
-          >
-            Manage enhancements
-
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
-
-        <article
-          class="
+      <article class="
             management-card
             management-card--attention
-          "
-        >
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i
-              class="fa-regular fa-calendar-check"
-            ></i>
-          </div>
+          ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-regular fa-calendar-check"></i>
+        </div>
 
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Showing Requests
-              </h3>
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Showing Requests
+            </h3>
 
-              <div class="management-card__badges">
-                <span class="available-badge">
-                  Available
-                </span>
+            <div class="management-card__badges">
+              <span class="available-badge">
+                Available
+              </span>
 
-                @if (
-                  pendingShowingRequestCount() > 0
-                ) {
-                  <span class="pending-count-badge">
-                    {{ pendingShowingRequestCount() }}
-                    pending
-                  </span>
-                }
-              </div>
+              @if (
+              pendingShowingRequestCount() > 0
+              ) {
+              <span class="pending-count-badge">
+                {{ pendingShowingRequestCount() }}
+                pending
+              </span>
+              }
             </div>
-
-            <p>
-              Review pending requests, confirm appointments,
-              propose another time, and manage upcoming
-              property showings.
-            </p>
           </div>
 
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openShowingRequests()"
-          >
-            View showing requests
+          <p>
+            Review pending requests, confirm appointments,
+            propose another time, and manage upcoming
+            property showings.
+          </p>
+        </div>
 
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
+        <button type="button" class="primary-button" (click)="openShowingRequests()">
+          View showing requests
 
-        <article
-          class="
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="
             management-card
             management-card--showings
-          "
-        >
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-calendar-days"></i>
+          ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-calendar-days"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Showing Availability
+            </h3>
+
+            <span class="available-badge">
+              Available
+            </span>
           </div>
 
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Showing Availability
-              </h3>
+          <p>
+            Set the days, times, appointment length, and
+            advance notice buyers see when requesting a
+            showing.
+          </p>
+        </div>
 
+        <button type="button" class="primary-button" (click)="openShowingAvailability()">
+          Manage availability
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Contract Timeline
+            </h3>
+
+            <span class="available-badge">
+              Available
+            </span>
+          </div>
+
+          <p>
+            Track important agreement dates,
+            transaction milestones, and closing
+            progress for this property.
+          </p>
+        </div>
+
+        <button type="button" class="primary-button" (click)="openContractTimeline()">
+          View contract timeline
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-file-signature"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Offers
+            </h3>
+
+            <span class="coming-soon">
+              Coming soon
+            </span>
+          </div>
+
+          <p>
+            Review purchase offers, important terms,
+            expiration dates, counteroffers, and offer
+            history for this property.
+          </p>
+        </div>
+
+        <button type="button" class="secondary-button" disabled>
+          View offers
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-message"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Buyer Inquiries
+            </h3>
+
+            <div class="management-card__badges">
               <span class="available-badge">
                 Available
               </span>
-            </div>
 
-            <p>
-              Set the days, times, appointment length, and
-              advance notice buyers see when requesting a
-              showing.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openShowingAvailability()"
-          >
-            Manage availability
-
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
-
-        <article class="management-card">
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-file-signature"></i>
-          </div>
-
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Offers
-              </h3>
-
-              <span class="coming-soon">
-                Coming soon
+              @if (unreadInquiryCount() > 0) {
+              <span class="pending-count-badge">
+                {{ unreadInquiryCount() }}
+                unread
               </span>
+              }
             </div>
-
-            <p>
-              Review purchase offers, important terms,
-              expiration dates, counteroffers, and offer
-              history for this property.
-            </p>
           </div>
 
-          <button
-            type="button"
-            class="secondary-button"
-            disabled
-          >
-            View offers
-          </button>
-        </article>
+          <p>
+            Review questions and contact requests submitted
+            by buyers interested in this property.
+          </p>
+        </div>
 
-        <article class="management-card">
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-message"></i>
+        <button type="button" class="primary-button" (click)="openBuyerInquiries()">
+          View inquiries
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Listing Activity
+            </h3>
+
+            <span class="available-badge">
+              Available
+            </span>
           </div>
 
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Buyer Inquiries
-              </h3>
+          <p>
+            Review views, saves, inquiries, showing
+            activity, price changes, and important events
+            for this property.
+          </p>
+        </div>
 
-              <div class="management-card__badges">
-                <span class="available-badge">
-                  Available
-                </span>
+        <button type="button" class="primary-button" (click)="openListingActivity()">
+          View activity
 
-                @if (unreadInquiryCount() > 0) {
-                  <span class="pending-count-badge">
-                    {{ unreadInquiryCount() }}
-                    unread
-                  </span>
-                }
-              </div>
-            </div>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
 
-            <p>
-              Review questions and contact requests submitted
-              by buyers interested in this property.
-            </p>
+      <article class="management-card">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-toggle-on"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Listing Status
+            </h3>
+
+            <span class="available-badge">
+              Available
+            </span>
           </div>
 
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openBuyerInquiries()"
-          >
-            View inquiries
+          <p>
+            Pause, reactivate, mark under contract, mark
+            sold, or withdraw this property while
+            preserving its permanent status history.
+          </p>
+        </div>
 
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
+        <button type="button" class="primary-button" (click)="openListingStatus()">
+          Manage status
 
-        <article class="management-card">
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-chart-line"></i>
-          </div>
-
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Listing Activity
-              </h3>
-
-              <span class="available-badge">
-                Available
-              </span>
-            </div>
-
-            <p>
-              Review views, saves, inquiries, showing
-              activity, price changes, and important events
-              for this property.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openListingActivity()"
-          >
-            View activity
-
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
-
-        <article class="management-card">
-          <div
-            class="management-card__icon"
-            aria-hidden="true"
-          >
-            <i class="fa-solid fa-toggle-on"></i>
-          </div>
-
-          <div class="management-card__content">
-            <div class="management-card__heading">
-              <h3>
-                Listing Status
-              </h3>
-
-              <span class="available-badge">
-                Available
-              </span>
-            </div>
-
-            <p>
-              Pause, reactivate, mark under contract, mark
-              sold, or withdraw this property while
-              preserving its permanent status history.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            class="primary-button"
-            (click)="openListingStatus()"
-          >
-            Manage status
-
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
-          </button>
-        </article>
-      </div>
-    </section>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+    </div>
+  </section>
   }
 </section>

@@ -1,0 +1,188 @@
+<section class="contract-timeline">
+
+  <a class="contract-timeline__back" [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]">
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+
+    <span>
+      Return to listing management
+    </span>
+  </a>
+
+  @if (isLoading()) {
+  <div class="contract-timeline__state" role="status" aria-live="polite">
+    <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+    <p>
+      Loading contract timeline...
+    </p>
+  </div>
+
+  } @else if (loadError()) {
+  <div class="
+        contract-timeline__state
+        contract-timeline__state--error
+      " role="alert">
+    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+    <p>
+      {{ loadError() }}
+    </p>
+  </div>
+
+  } @else if (
+  transaction();
+  as currentTransaction
+  ) {
+  <header class="contract-timeline__header">
+    <div>
+      <p class="contract-timeline__eyebrow">
+        Transaction progress
+      </p>
+
+      <h1>
+        Contract Timeline
+      </h1>
+
+      <p>
+        Enter the dates established by the agreement
+        and keep the transaction milestones current.
+      </p>
+    </div>
+
+    @if (!currentTransaction.canEdit) {
+    <span class="contract-timeline__read-only">
+      Buyer view — read only
+    </span>
+    }
+  </header>
+
+  <div class="contract-timeline__notice" role="note">
+    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+    <span>
+      This timeline is an organizational tool. It
+      does not modify or replace the executed
+      agreement.
+    </span>
+  </div>
+
+  <div class="contract-timeline__tasks">
+    @for (
+    task of tasks();
+    track task.id
+    ) {
+    <article class="contract-task" [class.contract-task--overdue]="
+            isOverdue(task)
+          ">
+      <div class="contract-task__content">
+        <div class="contract-task__heading">
+          <span class="contract-task__number" aria-hidden="true">
+            {{ $index + 1 }}
+          </span>
+
+          <div>
+            <h2>
+              {{ task.label }}
+            </h2>
+
+            <p>
+              {{ task.description }}
+            </p>
+          </div>
+        </div>
+
+        @if (isOverdue(task)) {
+        <span class="contract-task__overdue">
+          Overdue
+        </span>
+        }
+      </div>
+
+      <label class="contract-task__field">
+        <span>
+          Applicable date
+        </span>
+
+        <input type="date" [value]="task.dueDate ?? ''" [disabled]="
+                !currentTransaction.canEdit
+              " (change)="
+                updateDueDate(
+                  task.id,
+                  $event
+                )
+              ">
+      </label>
+
+      <label class="contract-task__field">
+        <span>
+          Status
+        </span>
+
+        <select [value]="task.status" [disabled]="
+                !currentTransaction.canEdit
+              " (change)="
+                updateStatus(
+                  task.id,
+                  $event
+                )
+              ">
+          <option value="pending">
+            Pending
+          </option>
+
+          <option value="completed">
+            Completed
+          </option>
+
+          <option value="not_applicable">
+            Not applicable
+          </option>
+        </select>
+      </label>
+    </article>
+    }
+  </div>
+
+  @if (saveError()) {
+  <p class="
+          contract-timeline__message
+          contract-timeline__message--error
+        " role="alert">
+    {{ saveError() }}
+  </p>
+  }
+
+  @if (saveMessage()) {
+  <p class="
+          contract-timeline__message
+          contract-timeline__message--success
+        " role="status">
+    {{ saveMessage() }}
+  </p>
+  }
+
+  @if (currentTransaction.canEdit) {
+  <div class="contract-timeline__actions">
+    <button type="button" [disabled]="
+            isSaving() ||
+            !hasChanges()
+          " (click)="saveTimeline()">
+      @if (isSaving()) {
+      <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+      Saving...
+      } @else {
+      <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+
+      Save contract timeline
+      }
+    </button>
+  </div>
+  }
+  }
+
+</section>

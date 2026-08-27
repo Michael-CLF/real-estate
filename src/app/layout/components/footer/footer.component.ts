@@ -126,7 +126,7 @@ export class FooterComponent {
             route: '/privacy'
           },
           {
-            label: 'Terms of Use',
+            label: 'Terms of Service',
             route: '/terms'
           },
           {

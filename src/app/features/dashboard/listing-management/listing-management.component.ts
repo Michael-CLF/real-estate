@@ -249,6 +249,17 @@ export class ListingManagementComponent implements OnInit {
     ]);
   }
 
+  protected async openContractTimeline():
+  Promise<void> {
+
+  await this.router.navigate([
+    '/sell/listings',
+    this.listingUid,
+    'manage',
+    'transaction'
+  ]);
+}
+
   protected async previewListing():
     Promise<void> {
     await this.router.navigate([

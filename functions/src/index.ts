@@ -22,6 +22,8 @@ export * from './sellers';
 
 export * from './showings';
 
+export * from './transactions';
+
 export * from './users';
 
 export * from './inquiries';

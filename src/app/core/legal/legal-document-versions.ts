@@ -1,0 +1,8 @@
+export const NAVSTREET_TERMS_VERSION =
+  '2026-08-27';
+
+export const NAVSTREET_PRIVACY_VERSION =
+  '2026-08-27';
+
+export const NAVSTREET_LEGAL_EFFECTIVE_DATE =
+  'August 27, 2026';

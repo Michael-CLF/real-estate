@@ -51,23 +51,23 @@ export class SchoolsEnhancementComponent implements OnInit {
     value: SchoolType;
     label: string;
   }[] = [
-    {
-      value: 'public',
-      label: 'Public',
-    },
-    {
-      value: 'charter',
-      label: 'Charter',
-    },
-    {
-      value: 'magnet',
-      label: 'Magnet',
-    },
-    {
-      value: 'private',
-      label: 'Private',
-    },
-  ];
+      {
+        value: 'public',
+        label: 'Public',
+      },
+      {
+        value: 'charter',
+        label: 'Charter',
+      },
+      {
+        value: 'magnet',
+        label: 'Magnet',
+      },
+      {
+        value: 'private',
+        label: 'Private',
+      },
+    ];
 
   readonly schoolsForm =
     this.formBuilder.nonNullable.group({
@@ -362,26 +362,26 @@ export class SchoolsEnhancementComponent implements OnInit {
     return {
       ...(districtName
         ? {
-            districtName,
-          }
+          districtName,
+        }
         : {}),
 
       ...(elementarySchool
         ? {
-            elementarySchool,
-          }
+          elementarySchool,
+        }
         : {}),
 
       ...(middleSchool
         ? {
-            middleSchool,
-          }
+          middleSchool,
+        }
         : {}),
 
       ...(highSchool
         ? {
-            highSchool,
-          }
+          highSchool,
+        }
         : {}),
 
       assignedSchoolsVerified:
@@ -396,7 +396,7 @@ export class SchoolsEnhancementComponent implements OnInit {
       district: string;
       schoolType: SchoolType;
       grades: string;
-      distanceMiles: string;
+      distanceMiles: string | number;
     },
   ): ListingSchool | undefined {
     const name =
@@ -424,36 +424,39 @@ export class SchoolsEnhancementComponent implements OnInit {
 
       ...(district
         ? {
-            district,
-          }
+          district,
+        }
         : {}),
 
       ...(grades
         ? {
-            grades,
-          }
+          grades,
+        }
         : {}),
 
       ...(distanceMiles !== undefined
         ? {
-            distanceMiles,
-          }
+          distanceMiles,
+        }
         : {}),
     };
   }
 
   private parseDistance(
-    value: string,
+    value: string | number | null | undefined,
   ): number | undefined {
-    const trimmedValue =
-      value.trim();
-
-    if (!trimmedValue) {
+    if (
+      value === null ||
+      value === undefined ||
+      value === ''
+    ) {
       return undefined;
     }
 
     const distance =
-      Number(trimmedValue);
+      typeof value === 'number'
+        ? value
+        : Number(value.trim());
 
     return (
       Number.isFinite(distance) &&
