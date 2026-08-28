@@ -26,6 +26,10 @@ import {
   ListingInquiryService
 } from '../../../../../core/domains/inquiries/services/listing-inquiry.service';
 
+import {
+  AnalyticsDataLayerService
+} from '../../../../../core/analytics/analytics-data-layer.service';
+
 @Component({
   selector: 'app-contact-seller',
   standalone: true,
@@ -40,7 +44,7 @@ import {
     ChangeDetectionStrategy.OnPush
 })
 export class ContactSellerComponent
-implements OnInit {
+  implements OnInit {
   private readonly fb =
     inject(FormBuilder);
 
@@ -55,6 +59,9 @@ implements OnInit {
 
   private readonly listingInquiryService =
     inject(ListingInquiryService);
+
+  private readonly analytics =
+    inject(AnalyticsDataLayerService);
 
   readonly listingUid =
     input.required<string>();
@@ -190,10 +197,17 @@ implements OnInit {
         response.inquiryReferenceNumber
       );
 
+      this.analytics.track(
+        'contact_seller_submitted',
+        {
+          listing_id:
+            this.listingUid()
+        }
+      );
+
       this.successMessage.set(
         'Your message was sent to the seller.'
       );
-
       this.form.reset({
         message: ''
       });
@@ -266,7 +280,7 @@ implements OnInit {
       typeof error === 'object' &&
       'message' in error &&
       typeof error.message ===
-        'string'
+      'string'
     ) {
       const message =
         error.message.trim();

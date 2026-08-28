@@ -4,7 +4,9 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
@@ -48,8 +50,23 @@ interface ConstructionFeature {
 export class ConstructionEnhancementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
-   private readonly route = inject(ActivatedRoute);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
 
   private currentEnhancements: ListingEnhancements = {};
 
@@ -57,48 +74,8 @@ export class ConstructionEnhancementComponent implements OnInit {
 
   readonly architecturalStyles: readonly ConstructionFeature[] = [
     {
-      id: 'traditional',
-      label: 'Traditional',
-      category: 'architecture',
-    },
-    {
-      id: 'colonial',
-      label: 'Colonial',
-      category: 'architecture',
-    },
-    {
-      id: 'craftsman',
-      label: 'Craftsman',
-      category: 'architecture',
-    },
-    {
-      id: 'ranch',
-      label: 'Ranch',
-      category: 'architecture',
-    },
-    {
-      id: 'contemporary',
-      label: 'Contemporary',
-      category: 'architecture',
-    },
-    {
-      id: 'modern',
-      label: 'Modern',
-      category: 'architecture',
-    },
-    {
-      id: 'midCenturyModern',
-      label: 'Mid-Century Modern',
-      category: 'architecture',
-    },
-    {
-      id: 'farmhouse',
-      label: 'Farmhouse',
-      category: 'architecture',
-    },
-    {
-      id: 'modernFarmhouse',
-      label: 'Modern Farmhouse',
+      id: 'aFrame',
+      label: 'A-Frame',
       category: 'architecture',
     },
     {
@@ -107,33 +84,18 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'architecture',
     },
     {
-      id: 'victorian',
-      label: 'Victorian',
-      category: 'architecture',
-    },
-    {
-      id: 'tudor',
-      label: 'Tudor',
-      category: 'architecture',
-    },
-    {
-      id: 'mediterranean',
-      label: 'Mediterranean',
-      category: 'architecture',
-    },
-    {
-      id: 'spanish',
-      label: 'Spanish',
-      category: 'architecture',
-    },
-    {
-      id: 'frenchCountry',
-      label: 'French Country',
-      category: 'architecture',
-    },
-    {
       id: 'coastal',
       label: 'Coastal',
+      category: 'architecture',
+    },
+    {
+      id: 'colonial',
+      label: 'Colonial',
+      category: 'architecture',
+    },
+    {
+      id: 'contemporary',
+      label: 'Contemporary',
       category: 'architecture',
     },
     {
@@ -142,8 +104,53 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'architecture',
     },
     {
+      id: 'craftsman',
+      label: 'Craftsman',
+      category: 'architecture',
+    },
+    {
+      id: 'farmhouse',
+      label: 'Farmhouse',
+      category: 'architecture',
+    },
+    {
+      id: 'frenchCountry',
+      label: 'French Country',
+      category: 'architecture',
+    },
+    {
       id: 'logHome',
       label: 'Log Home',
+      category: 'architecture',
+    },
+    {
+      id: 'mediterranean',
+      label: 'Mediterranean',
+      category: 'architecture',
+    },
+    {
+      id: 'midCenturyModern',
+      label: 'Mid-Century Modern',
+      category: 'architecture',
+    },
+    {
+      id: 'modern',
+      label: 'Modern',
+      category: 'architecture',
+    },
+    {
+      id: 'modernFarmhouse',
+      label: 'Modern Farmhouse',
+      category: 'architecture',
+    },
+    {
+      id: 'ranch',
+      label: 'Ranch',
+      category: 'architecture',
+    },
+    {
+      id: 'spanish',
+      label: 'Spanish',
       category: 'architecture',
     },
     {
@@ -152,48 +159,23 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'architecture',
     },
     {
-      id: 'aFrame',
-      label: 'A-Frame',
+      id: 'traditional',
+      label: 'Traditional',
+      category: 'architecture',
+    },
+    {
+      id: 'tudor',
+      label: 'Tudor',
+      category: 'architecture',
+    },
+    {
+      id: 'victorian',
+      label: 'Victorian',
       category: 'architecture',
     },
   ];
 
   readonly constructionTypes: readonly ConstructionFeature[] = [
-    {
-      id: 'siteBuilt',
-      label: 'Site-Built Home',
-      category: 'construction',
-    },
-    {
-      id: 'modular',
-      label: 'Modular Construction',
-      category: 'construction',
-    },
-    {
-      id: 'manufactured',
-      label: 'Manufactured Home',
-      category: 'construction',
-    },
-    {
-      id: 'prefabricated',
-      label: 'Prefabricated Construction',
-      category: 'construction',
-    },
-    {
-      id: 'timberFrame',
-      label: 'Timber-Frame Construction',
-      category: 'construction',
-    },
-    {
-      id: 'postAndBeam',
-      label: 'Post-and-Beam Construction',
-      category: 'construction',
-    },
-    {
-      id: 'steelFrame',
-      label: 'Steel-Frame Construction',
-      category: 'construction',
-    },
     {
       id: 'concreteConstruction',
       label: 'Concrete Construction',
@@ -207,16 +189,86 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'construction',
     },
     {
+      id: 'manufactured',
+      label: 'Manufactured Home',
+      category: 'construction',
+    },
+    {
+      id: 'modular',
+      label: 'Modular Construction',
+      category: 'construction',
+    },
+    {
+      id: 'postAndBeam',
+      label: 'Post-and-Beam Construction',
+      category: 'construction',
+    },
+    {
+      id: 'prefabricated',
+      label: 'Prefabricated Construction',
+      category: 'construction',
+    },
+    {
+      id: 'siteBuilt',
+      label: 'Site-Built Home',
+      category: 'construction',
+    },
+    {
+      id: 'steelFrame',
+      label: 'Steel-Frame Construction',
+      category: 'construction',
+    },
+    {
       id: 'structuralInsulatedPanels',
       label: 'Structural Insulated Panels',
+      category: 'construction',
+    },
+    {
+      id: 'timberFrame',
+      label: 'Timber-Frame Construction',
       category: 'construction',
     },
   ];
 
   readonly exteriorMaterials: readonly ConstructionFeature[] = [
     {
+      id: 'boardAndBatten',
+      label: 'Board-and-Batten Siding',
+      category: 'exterior',
+    },
+    {
       id: 'brickExterior',
       label: 'Brick Exterior',
+      category: 'exterior',
+    },
+    {
+      id: 'cedarShingles',
+      label: 'Cedar Shingles or Shakes',
+      category: 'exterior',
+    },
+    {
+      id: 'engineeredWoodSiding',
+      label: 'Engineered-Wood Siding',
+      category: 'exterior',
+    },
+    {
+      id: 'fiberCementSiding',
+      label: 'Fiber-Cement Siding',
+      category: 'exterior',
+    },
+    {
+      id: 'logExterior',
+      label: 'Log Exterior',
+      category: 'exterior',
+    },
+    {
+      id: 'metalSiding',
+      label: 'Metal Siding',
+      category: 'exterior',
+    },
+    {
+      id: 'mixedMaterialExterior',
+      label: 'Mixed-Material Exterior',
       category: 'exterior',
     },
     {
@@ -230,11 +282,6 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'exterior',
     },
     {
-      id: 'fiberCementSiding',
-      label: 'Fiber-Cement Siding',
-      category: 'exterior',
-    },
-    {
       id: 'vinylSiding',
       label: 'Vinyl Siding',
       category: 'exterior',
@@ -242,36 +289,6 @@ export class ConstructionEnhancementComponent implements OnInit {
     {
       id: 'woodSiding',
       label: 'Wood Siding',
-      category: 'exterior',
-    },
-    {
-      id: 'engineeredWoodSiding',
-      label: 'Engineered-Wood Siding',
-      category: 'exterior',
-    },
-    {
-      id: 'metalSiding',
-      label: 'Metal Siding',
-      category: 'exterior',
-    },
-    {
-      id: 'boardAndBatten',
-      label: 'Board-and-Batten Siding',
-      category: 'exterior',
-    },
-    {
-      id: 'cedarShingles',
-      label: 'Cedar Shingles or Shakes',
-      category: 'exterior',
-    },
-    {
-      id: 'logExterior',
-      label: 'Log Exterior',
-      category: 'exterior',
-    },
-    {
-      id: 'mixedMaterialExterior',
-      label: 'Mixed-Material Exterior',
       category: 'exterior',
     },
   ];
@@ -293,6 +310,11 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'foundation',
     },
     {
+      id: 'foundationDrainageSystem',
+      label: 'Foundation Drainage System',
+      category: 'foundation',
+    },
+    {
       id: 'fullBasement',
       label: 'Full Basement',
       category: 'foundation',
@@ -300,11 +322,6 @@ export class ConstructionEnhancementComponent implements OnInit {
     {
       id: 'partialBasement',
       label: 'Partial Basement',
-      category: 'foundation',
-    },
-    {
-      id: 'walkOutFoundation',
-      label: 'Walk-Out Foundation',
       category: 'foundation',
     },
     {
@@ -323,13 +340,13 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'foundation',
     },
     {
-      id: 'foundationDrainageSystem',
-      label: 'Foundation Drainage System',
+      id: 'sumpPump',
+      label: 'Sump Pump',
       category: 'foundation',
     },
     {
-      id: 'sumpPump',
-      label: 'Sump Pump',
+      id: 'walkOutFoundation',
+      label: 'Walk-Out Foundation',
       category: 'foundation',
     },
   ];
@@ -346,8 +363,28 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'roof',
     },
     {
+      id: 'roofVentilation',
+      label: 'Enhanced Roof Ventilation',
+      category: 'roof',
+    },
+    {
+      id: 'flatRoof',
+      label: 'Flat Roof',
+      category: 'roof',
+    },
+    {
+      id: 'impactResistantRoof',
+      label: 'Impact-Resistant Roofing',
+      category: 'roof',
+    },
+    {
       id: 'metalRoof',
       label: 'Metal Roof',
+      category: 'roof',
+    },
+    {
+      id: 'slateRoof',
+      label: 'Slate Roof',
       category: 'roof',
     },
     {
@@ -361,8 +398,8 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'roof',
     },
     {
-      id: 'slateRoof',
-      label: 'Slate Roof',
+      id: 'roofUnderlayment',
+      label: 'Upgraded Roof Underlayment',
       category: 'roof',
     },
     {
@@ -370,29 +407,46 @@ export class ConstructionEnhancementComponent implements OnInit {
       label: 'Wood-Shake Roof',
       category: 'roof',
     },
-    {
-      id: 'flatRoof',
-      label: 'Flat Roof',
-      category: 'roof',
-    },
-    {
-      id: 'roofUnderlayment',
-      label: 'Upgraded Roof Underlayment',
-      category: 'roof',
-    },
-    {
-      id: 'roofVentilation',
-      label: 'Enhanced Roof Ventilation',
-      category: 'roof',
-    },
-    {
-      id: 'impactResistantRoof',
-      label: 'Impact-Resistant Roofing',
-      category: 'roof',
-    },
   ];
 
   readonly structuralImprovements: readonly ConstructionFeature[] = [
+    {
+      id: 'earthquakeReinforcement',
+      label: 'Earthquake Reinforcement',
+      category: 'improvements',
+    },
+    {
+      id: 'energyEfficientConstruction',
+      label: 'Energy-Efficient Construction',
+      category: 'improvements',
+    },
+    {
+      id: 'soundproofing',
+      label: 'Enhanced Soundproofing',
+      category: 'improvements',
+    },
+    {
+      id: 'fireResistantConstruction',
+      label: 'Fire-Resistant Construction',
+      category: 'improvements',
+    },
+    {
+      id: 'highPerformanceInsulation',
+      label: 'High-Performance Insulation',
+      category: 'improvements',
+    },
+    {
+      id: 'hurricaneStraps',
+      label: 'Hurricane Straps or Ties',
+      category: 'improvements',
+    },
+    {
+      id: 'majorAddition',
+      label: 'Major Addition',
+      description:
+        'The home includes a substantial permitted addition to the original structure.',
+      category: 'improvements',
+    },
     {
       id: 'newConstruction',
       label: 'New Construction',
@@ -404,50 +458,13 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'improvements',
     },
     {
-      id: 'majorAddition',
-      label: 'Major Addition',
-      description:
-        'The home includes a substantial permitted addition to the original structure.',
-      category: 'improvements',
-    },
-    {
       id: 'reinforcedStructure',
       label: 'Reinforced Structure',
       category: 'improvements',
     },
     {
-      id: 'hurricaneStraps',
-      label: 'Hurricane Straps or Ties',
-      category: 'improvements',
-    },
-    {
-      id: 'stormResistantConstruction',
-      label: 'Storm-Resistant Construction',
-      category: 'improvements',
-    },
-    {
-      id: 'earthquakeReinforcement',
-      label: 'Earthquake Reinforcement',
-      category: 'improvements',
-    },
-    {
-      id: 'fireResistantConstruction',
-      label: 'Fire-Resistant Construction',
-      category: 'improvements',
-    },
-    {
-      id: 'soundproofing',
-      label: 'Enhanced Soundproofing',
-      category: 'improvements',
-    },
-    {
-      id: 'energyEfficientConstruction',
-      label: 'Energy-Efficient Construction',
-      category: 'improvements',
-    },
-    {
-      id: 'highPerformanceInsulation',
-      label: 'High-Performance Insulation',
+      id: 'sealedBuildingEnvelope',
+      label: 'Sealed Building Envelope',
       category: 'improvements',
     },
     {
@@ -456,8 +473,8 @@ export class ConstructionEnhancementComponent implements OnInit {
       category: 'improvements',
     },
     {
-      id: 'sealedBuildingEnvelope',
-      label: 'Sealed Building Envelope',
+      id: 'stormResistantConstruction',
+      label: 'Storm-Resistant Construction',
       category: 'improvements',
     },
   ];
@@ -493,9 +510,31 @@ export class ConstructionEnhancementComponent implements OnInit {
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .construction ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
@@ -503,14 +542,16 @@ export class ConstructionEnhancementComponent implements OnInit {
       );
 
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(
-          listingUid
-        );
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
         this.saveError.set(
@@ -525,9 +566,12 @@ export class ConstructionEnhancementComponent implements OnInit {
 
       this.selectedFeatureIds.set(
         new Set(
-          this.currentEnhancements.construction ?? []
+          this.currentEnhancements
+            .construction ?? []
         )
       );
+
+      this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
         'Unable to load construction enhancements:',
@@ -570,13 +614,22 @@ export class ConstructionEnhancementComponent implements OnInit {
     this.saveError.set(null);
   }
 
-  async saveSection(): Promise<void> {
-    if (this.isSaving() || this.isLoading()) {
+  async saveSection():
+    Promise<void> {
+    if (
+      this.isSaving() ||
+      this.isLoading() ||
+      !this.hasChanges()
+    ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap
+          .get('listingUid');
 
     const sellerUid =
       this.authService.currentUserUid;
@@ -597,31 +650,64 @@ export class ConstructionEnhancementComponent implements OnInit {
       return;
     }
 
+    const updatedEnhancements:
+      ListingEnhancements = {
+      ...this.currentEnhancements,
+
+      construction:
+        Array.from(
+          this.selectedFeatureIds()
+        ).sort(
+          (
+            firstId,
+            secondId
+          ) =>
+            firstId.localeCompare(
+              secondId
+            )
+        )
+    };
+
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const constructionSelections =
-      Array.from(this.selectedFeatureIds());
-
-    const updatedEnhancements: ListingEnhancements = {
-      ...this.currentEnhancements,
-      construction: constructionSelections
-    };
-
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements
-        }
-      );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
 
       this.currentEnhancements =
         updatedEnhancements;
 
       this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+
+      this.lastSavedAt.set(
+        new Date()
+      );
+
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save construction enhancements:',
@@ -636,40 +722,48 @@ export class ConstructionEnhancementComponent implements OnInit {
     }
   }
 
- async returnToEnhancements(): Promise<void> {
-  const listingUid =
-    this.route.snapshot.paramMap.get('listingUid');
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
 
-  if (!listingUid) {
-    this.saveError.set(
-      'The selected listing could not be identified.'
-    );
+    const listingUid =
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
-    return;
+    if (!listingUid) {
+      this.saveError.set(
+        'The selected listing could not be identified.'
+      );
+
+      return;
+    }
+
+    await this.router.navigate([
+      '/sell/listings',
+      listingUid,
+      'enhancements'
+    ]);
   }
 
-  await this.router.navigate([
-    '/sell/listings',
-    listingUid,
-    'enhancements'
-  ]);
-}
+  async viewListing(): Promise<void> {
+    const listingUid =
+      this.route.snapshot.paramMap.get('listingUid');
 
-async viewListing(): Promise<void> {
-  const listingUid =
-    this.route.snapshot.paramMap.get('listingUid');
+    if (!listingUid) {
+      this.saveError.set(
+        'The selected listing could not be identified.'
+      );
 
-  if (!listingUid) {
-    this.saveError.set(
-      'The selected listing could not be identified.'
-    );
+      return;
+    }
 
-    return;
+    await this.router.navigate([
+      '/listings',
+      listingUid
+    ]);
   }
-
-  await this.router.navigate([
-    '/listings',
-    listingUid
-  ]);
-}
 }

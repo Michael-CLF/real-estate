@@ -14,6 +14,7 @@ import {
   ListingDraftPricing,
   ListingDraftPropertyDetails,
   ListingDraftStep,
+  ListingEnhancements,
   ListingFeatures,
   ListingHoa,
   ListingInterior,
@@ -414,6 +415,25 @@ export class ListingService {
     );
   }
 
+  async saveEnhancementsStep(
+    listingUid: string,
+    sellerUid: string,
+    enhancements: ListingEnhancements,
+    existingCompletedSteps:
+      ListingDraftStep[] = []
+  ): Promise<void> {
+    await this.saveSection(
+      listingUid,
+      sellerUid,
+      {
+        enhancements
+      },
+      'property_features',
+      'photos',
+      existingCompletedSteps
+    );
+  }
+
   async updateDraftPhotos(
     listingUid: string,
     sellerUid: string,
@@ -754,9 +774,11 @@ export class ListingService {
             'The property details are incomplete.'
         },
         {
-          value: draft.features,
+          value:
+            draft.enhancements ??
+            draft.features,
           message:
-            'The property features are incomplete.'
+            'The property enhancements are incomplete.'
         }
       ];
 

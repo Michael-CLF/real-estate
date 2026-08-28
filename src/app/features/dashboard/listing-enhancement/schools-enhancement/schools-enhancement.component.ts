@@ -3,7 +3,9 @@ import {
   Component,
   OnInit,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
@@ -47,14 +49,25 @@ export class SchoolsEnhancementComponent implements OnInit {
   private readonly listingService = inject(ListingService);
   private readonly formBuilder = inject(FormBuilder);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialSchools =
+    input<ListingSchools | null>(null);
+
+  readonly schoolsChange =
+    output<ListingSchools>();
+
+  readonly returnRequested =
+    output<void>();
+
   readonly schoolTypes: readonly {
     value: SchoolType;
     label: string;
   }[] = [
-      {
-        value: 'public',
-        label: 'Public',
-      },
       {
         value: 'charter',
         label: 'Charter',
@@ -62,6 +75,10 @@ export class SchoolsEnhancementComponent implements OnInit {
       {
         value: 'magnet',
         label: 'Magnet',
+      },
+      {
+        value: 'public',
+        label: 'Public',
       },
       {
         value: 'private',
@@ -109,18 +126,35 @@ export class SchoolsEnhancementComponent implements OnInit {
     );
   }
 
-  async ngOnInit(): Promise<void> {
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      const schools =
+        this.initialSchools();
+
+      if (schools) {
+        this.loadSchools(schools);
+      }
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
     const listingUid =
       this.route.snapshot.paramMap.get(
-        'listingUid',
+        'listingUid'
       );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       this.isLoading.set(false);
+
       return;
     }
 
@@ -128,12 +162,12 @@ export class SchoolsEnhancementComponent implements OnInit {
       const listing =
         await this.listingService
           .getPublishedListing(
-            listingUid,
+            listingUid
           );
 
       if (!listing) {
         this.saveError.set(
-          'The selected listing could not be found.',
+          'The selected listing could not be found.'
         );
 
         return;
@@ -141,17 +175,17 @@ export class SchoolsEnhancementComponent implements OnInit {
 
       if (listing.schools) {
         this.loadSchools(
-          listing.schools,
+          listing.schools
         );
       }
     } catch (error: unknown) {
       console.error(
         'Unable to load school information:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved school information.',
+        'We could not load the saved school information.'
       );
     } finally {
       this.hasChanges.set(false);
@@ -159,25 +193,30 @@ export class SchoolsEnhancementComponent implements OnInit {
     }
   }
 
-  async saveSection(): Promise<void> {
+  async saveSection():
+    Promise<void> {
     if (
       this.isSaving() ||
-      this.isLoading()
+      this.isLoading() ||
+      !this.hasChanges()
     ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get(
-        'listingUid',
-      );
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap.get(
+            'listingUid'
+          );
 
     const sellerUid =
       this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -185,7 +224,7 @@ export class SchoolsEnhancementComponent implements OnInit {
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
 
       return;
@@ -194,44 +233,69 @@ export class SchoolsEnhancementComponent implements OnInit {
     this.isSaving.set(true);
     this.saveError.set(null);
 
+    const schools =
+      this.createSchools();
+
     try {
-      await this.listingService
-        .updatePublishedListing(
-          listingUid,
-          sellerUid,
-          {
-            schools:
-              this.createSchools(),
-          },
-        );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              schools
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              schools
+            }
+          );
+      }
 
       this.hasChanges.set(false);
       this.lastSavedAt.set(
-        new Date(),
+        new Date()
       );
+
+      if (this.wizardMode()) {
+        this.schoolsChange.emit(
+          schools
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save school information:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save this school information. Please try again.',
+        'We could not save this school information. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
       this.route.snapshot.paramMap.get(
-        'listingUid',
+        'listingUid'
       );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -240,7 +304,7 @@ export class SchoolsEnhancementComponent implements OnInit {
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

@@ -83,21 +83,6 @@
       }
     </div>
 
-    <div class="wizard-save-success">
-      <h1 class="success">
-        Your listing information is complete
-      </h1>
-
-      <p class="success">
-        Your listing draft has been saved. Identity
-        verification and payment are the remaining
-        steps before publication.
-      </p>
-
-      <a class="button button--secondary" routerLink="/dashboard">
-        Return to Dashboard
-      </a>
-    </div>
     } @else {
     <header class="wizard-header">
       <div>
@@ -198,13 +183,16 @@
       }
 
       @case (3) {
-      <app-property-features-step [initialValue]="
-                propertyFeaturesData()
-              " (valueChange)="
-                onPropertyFeaturesChange($event)
-              " (validityChange)="
-                onStepValidityChange(3, $event)
-              " />
+      <app-property-features-step [listingUid]="listingUid()" [initialValue]="
+      propertyFeaturesData()
+    " (valueChange)="
+      onPropertyFeaturesChange($event)
+    " (validityChange)="
+      onStepValidityChange(
+        3,
+        $event
+      )
+    " />
       }
 
       @case (4) {

@@ -4,7 +4,9 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
@@ -44,275 +46,110 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly featureGroups: readonly TechnologySecurityGroup[] = [
     {
-      id: 'internet-connectivity',
-      heading: 'Internet and Connectivity',
+      id: 'access-entry',
+      heading: 'Access and Entry Controls',
       description:
-        'Identify the property’s available internet services, installed network wiring, wireless equipment, and connectivity infrastructure.',
-      iconClass: 'fa-solid fa-wifi',
+        'Select smart locks, electronic entry systems, controlled gates, intercoms, and visitor-access equipment.',
+      iconClass: 'fa-solid fa-key',
       features: [
         {
-          id: 'fiberInternetAvailable',
-          label: 'Fiber-Optic Internet Available',
+          id: 'automaticDoorLocks',
+          label: 'Automatic Door Locking',
         },
         {
-          id: 'cableInternetAvailable',
-          label: 'Cable Internet Available',
+          id: 'automaticDrivewayGate',
+          label: 'Automatic Driveway Gate',
         },
         {
-          id: 'dslInternetAvailable',
-          label: 'DSL Internet Available',
+          id: 'biometricEntry',
+          label: 'Biometric Entry',
         },
         {
-          id: 'fixedWirelessInternetAvailable',
-          label: 'Fixed Wireless Internet Available',
+          id: 'cardAccessSystem',
+          label: 'Card or Fob Access System',
         },
         {
-          id: 'satelliteInternetAvailable',
-          label: 'Satellite Internet Available',
+          id: 'accessControlSystem',
+          label: 'Electronic Access-Control System',
         },
         {
-          id: 'multipleInternetProviders',
-          label: 'Multiple Internet Providers Available',
+          id: 'electronicDeadbolts',
+          label: 'Electronic Deadbolts',
         },
         {
-          id: 'wholeHomeWifi',
-          label: 'Whole-Home Wi-Fi',
+          id: 'gateIntercom',
+          label: 'Gate Intercom',
         },
         {
-          id: 'meshWifiSystem',
-          label: 'Mesh Wi-Fi System',
+          id: 'gateKeypad',
+          label: 'Gate Keypad',
         },
         {
-          id: 'wifiAccessPoints',
-          label: 'Built-In Wi-Fi Access Points',
+          id: 'gateTelephoneEntry',
+          label: 'Gate Telephone-Entry System',
         },
         {
-          id: 'ethernetWiring',
-          label: 'Ethernet Wiring',
+          id: 'gatedEntry',
+          label: 'Gated Entry',
         },
         {
-          id: 'cat5eWiring',
-          label: 'Cat 5e Network Wiring',
+          id: 'keylessEntry',
+          label: 'Keyless Entry',
         },
         {
-          id: 'cat6Wiring',
-          label: 'Cat 6 Network Wiring',
+          id: 'keypadEntry',
+          label: 'Keypad Entry',
         },
         {
-          id: 'cat6aWiring',
-          label: 'Cat 6a Network Wiring',
+          id: 'remoteDoorUnlock',
+          label: 'Remote Door Unlocking',
         },
         {
-          id: 'networkJacks',
-          label: 'Built-In Network Jacks',
+          id: 'smartGarageAccess',
+          label: 'Remote Garage Access',
         },
         {
-          id: 'centralNetworkPanel',
-          label: 'Central Network Panel',
-          description:
-            'Installed network wiring terminates at a centralized structured-wiring or equipment panel.',
+          id: 'remoteGateControl',
+          label: 'Remote Gate Control',
         },
         {
-          id: 'dedicatedNetworkCloset',
-          label: 'Dedicated Network Closet',
+          id: 'packageDeliveryAccess',
+          label: 'Secure Package-Delivery Access',
         },
         {
-          id: 'coaxialWiring',
-          label: 'Coaxial Cable Wiring',
+          id: 'smartLocks',
+          label: 'Smart Door Locks',
         },
         {
-          id: 'wholeHomeCellularBooster',
-          label: 'Whole-Home Cellular Signal Booster',
+          id: 'videoIntercom',
+          label: 'Video Intercom',
         },
         {
-          id: 'outdoorWifiCoverage',
-          label: 'Outdoor Wi-Fi Coverage',
+          id: 'visitorEntrySystem',
+          label: 'Visitor Entry System',
         },
         {
-          id: 'detachedBuildingConnectivity',
-          label: 'Network Connection to Detached Building',
-        },
-      ],
-    },
-    {
-      id: 'smart-home',
-      heading: 'Smart-Home Systems',
-      description:
-        'Select installed smart-home platforms, hubs, controls, sensors, and connected household equipment.',
-      iconClass: 'fa-solid fa-house-signal',
-      features: [
-        {
-          id: 'integratedSmartHomeSystem',
-          label: 'Integrated Smart-Home System',
-        },
-        {
-          id: 'smartHomeHub',
-          label: 'Smart-Home Hub',
-        },
-        {
-          id: 'professionallyInstalledAutomation',
-          label: 'Professionally Installed Home Automation',
-        },
-        {
-          id: 'voiceControlSystem',
-          label: 'Voice-Control System',
-        },
-        {
-          id: 'smartLighting',
-          label: 'Smart Lighting',
-        },
-        {
-          id: 'wholeHomeLightingControls',
-          label: 'Whole-Home Lighting Controls',
-        },
-        {
-          id: 'smartLightSwitches',
-          label: 'Smart Light Switches',
-        },
-        {
-          id: 'smartDimmers',
-          label: 'Smart Dimmers',
-        },
-        {
-          id: 'automatedWindowShades',
-          label: 'Automated Window Shades',
-        },
-        {
-          id: 'smartBlinds',
-          label: 'Smart Blinds',
-        },
-        {
-          id: 'smartCeilingFans',
-          label: 'Smart Ceiling Fans',
-        },
-        {
-          id: 'smartAppliances',
-          label: 'Smart Appliances',
-        },
-        {
-          id: 'smartRefrigerator',
-          label: 'Smart Refrigerator',
-        },
-        {
-          id: 'smartOven',
-          label: 'Smart Oven or Range',
-        },
-        {
-          id: 'smartWasherDryer',
-          label: 'Smart Washer and Dryer',
-        },
-        {
-          id: 'smartGarageDoor',
-          label: 'Smart Garage-Door Control',
-        },
-        {
-          id: 'smartIrrigation',
-          label: 'Smart Irrigation Controls',
-        },
-        {
-          id: 'smartPoolControls',
-          label: 'Smart Pool or Spa Controls',
-        },
-        {
-          id: 'smartHomeSensors',
-          label: 'Smart-Home Environmental Sensors',
-        },
-        {
-          id: 'remoteHomeMonitoring',
-          label: 'Remote Home Monitoring',
-        },
-      ],
-    },
-    {
-      id: 'security',
-      heading: 'Security Systems',
-      description:
-        'Describe installed alarm equipment, professional monitoring, perimeter protection, and security-control systems.',
-      iconClass: 'fa-solid fa-shield-halved',
-      features: [
-        {
-          id: 'securitySystem',
-          label: 'Security System',
-        },
-        {
-          id: 'professionallyMonitoredSecurity',
-          label: 'Professionally Monitored Security System',
-        },
-        {
-          id: 'selfMonitoredSecurity',
-          label: 'Self-Monitored Security System',
-        },
-        {
-          id: 'wiredSecuritySystem',
-          label: 'Wired Security System',
-        },
-        {
-          id: 'wirelessSecuritySystem',
-          label: 'Wireless Security System',
-        },
-        {
-          id: 'centralSecurityPanel',
-          label: 'Central Security Control Panel',
-        },
-        {
-          id: 'securityKeypads',
-          label: 'Multiple Security Keypads',
-        },
-        {
-          id: 'doorWindowSensors',
-          label: 'Door and Window Sensors',
-        },
-        {
-          id: 'glassBreakSensors',
-          label: 'Glass-Break Sensors',
-        },
-        {
-          id: 'motionDetectors',
-          label: 'Motion Detectors',
-        },
-        {
-          id: 'perimeterAlarm',
-          label: 'Perimeter Alarm System',
-        },
-        {
-          id: 'drivewayAlarm',
-          label: 'Driveway Alarm',
-        },
-        {
-          id: 'panicButtons',
-          label: 'Security Panic Buttons',
-        },
-        {
-          id: 'securitySirens',
-          label: 'Interior or Exterior Security Sirens',
-        },
-        {
-          id: 'securityStrobeLights',
-          label: 'Security Strobe Lights',
-        },
-        {
-          id: 'safeRoom',
-          label: 'Safe Room',
-        },
-        {
-          id: 'stormSafeRoom',
-          label: 'Storm or Security Safe Room',
-        },
-        {
-          id: 'builtInSafe',
-          label: 'Built-In Safe',
-        },
-        {
-          id: 'securityFilm',
-          label: 'Security Window Film',
-        },
-        {
-          id: 'securityScreens',
-          label: 'Security Window Screens',
+          id: 'wholeHomeIntercom',
+          label: 'Whole-Home Intercom',
         },
       ],
     },
@@ -324,24 +161,24 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
       iconClass: 'fa-solid fa-video',
       features: [
         {
-          id: 'securityCameras',
-          label: 'Security Cameras',
+          id: 'cloudVideoRecording',
+          label: 'Cloud Video Recording',
         },
         {
-          id: 'indoorSecurityCameras',
-          label: 'Indoor Security Cameras',
+          id: 'continuousVideoRecording',
+          label: 'Continuous Video Recording',
         },
         {
-          id: 'outdoorSecurityCameras',
-          label: 'Outdoor Security Cameras',
-        },
-        {
-          id: 'doorbellCamera',
-          label: 'Video Doorbell',
+          id: 'cameraMonitoringStation',
+          label: 'Dedicated Camera Monitoring Station',
         },
         {
           id: 'drivewayCamera',
           label: 'Driveway Camera',
+        },
+        {
+          id: 'floodlightCameras',
+          label: 'Floodlight Cameras',
         },
         {
           id: 'garageCamera',
@@ -352,20 +189,8 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
           label: 'Gate or Entrance Camera',
         },
         {
-          id: 'panTiltZoomCameras',
-          label: 'Pan-Tilt-Zoom Cameras',
-        },
-        {
-          id: 'nightVisionCameras',
-          label: 'Night-Vision Cameras',
-        },
-        {
-          id: 'motionActivatedCameras',
-          label: 'Motion-Activated Cameras',
-        },
-        {
-          id: 'floodlightCameras',
-          label: 'Floodlight Cameras',
+          id: 'indoorSecurityCameras',
+          label: 'Indoor Security Cameras',
         },
         {
           id: 'licensePlateCamera',
@@ -376,113 +201,125 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
           label: 'Local Video Recording System',
         },
         {
-          id: 'cloudVideoRecording',
-          label: 'Cloud Video Recording',
+          id: 'motionActivatedCameras',
+          label: 'Motion-Activated Cameras',
         },
         {
-          id: 'continuousVideoRecording',
-          label: 'Continuous Video Recording',
+          id: 'nightVisionCameras',
+          label: 'Night-Vision Cameras',
+        },
+        {
+          id: 'outdoorSecurityCameras',
+          label: 'Outdoor Security Cameras',
+        },
+        {
+          id: 'panTiltZoomCameras',
+          label: 'Pan-Tilt-Zoom Cameras',
+        },
+        {
+          id: 'cameraPrewiring',
+          label: 'Prewired for Security Cameras',
         },
         {
           id: 'remoteCameraAccess',
           label: 'Remote Camera Access',
         },
         {
-          id: 'cameraMonitoringStation',
-          label: 'Dedicated Camera Monitoring Station',
+          id: 'securityCameras',
+          label: 'Security Cameras',
         },
         {
-          id: 'cameraPrewiring',
-          label: 'Prewired for Security Cameras',
+          id: 'doorbellCamera',
+          label: 'Video Doorbell',
         },
       ],
     },
     {
-      id: 'access-entry',
-      heading: 'Access and Entry Controls',
+      id: 'entertainment-audio',
+      heading: 'Entertainment and Audio',
       description:
-        'Select smart locks, electronic entry systems, controlled gates, intercoms, and visitor-access equipment.',
-      iconClass: 'fa-solid fa-key',
+        'Describe installed home-theater, audio, television, media-distribution, and entertainment wiring.',
+      iconClass: 'fa-solid fa-volume-high',
       features: [
         {
-          id: 'smartLocks',
-          label: 'Smart Door Locks',
+          id: 'builtInSpeakers',
+          label: 'Built-In Speakers',
         },
         {
-          id: 'keypadEntry',
-          label: 'Keypad Entry',
+          id: 'centralAudioControls',
+          label: 'Central Audio Controls',
         },
         {
-          id: 'keylessEntry',
-          label: 'Keyless Entry',
+          id: 'centralMediaDistribution',
+          label: 'Central Media-Distribution System',
         },
         {
-          id: 'biometricEntry',
-          label: 'Biometric Entry',
+          id: 'hiddenMediaWiring',
+          label: 'Concealed Media Wiring',
         },
         {
-          id: 'electronicDeadbolts',
-          label: 'Electronic Deadbolts',
+          id: 'gamingNetwork',
+          label: 'Dedicated Gaming Network Connection',
         },
         {
-          id: 'remoteDoorUnlock',
-          label: 'Remote Door Unlocking',
+          id: 'dedicatedMediaRoom',
+          label: 'Dedicated Media Room',
         },
         {
-          id: 'automaticDoorLocks',
-          label: 'Automatic Door Locking',
+          id: 'homeTheater',
+          label: 'Home Theater',
         },
         {
-          id: 'accessControlSystem',
-          label: 'Electronic Access-Control System',
+          id: 'inCeilingSpeakers',
+          label: 'In-Ceiling Speakers',
         },
         {
-          id: 'cardAccessSystem',
-          label: 'Card or Fob Access System',
+          id: 'inWallSpeakers',
+          label: 'In-Wall Speakers',
         },
         {
-          id: 'visitorEntrySystem',
-          label: 'Visitor Entry System',
+          id: 'projectionScreen',
+          label: 'Installed Projection Screen',
         },
         {
-          id: 'videoIntercom',
-          label: 'Video Intercom',
+          id: 'projector',
+          label: 'Installed Projector',
         },
         {
-          id: 'wholeHomeIntercom',
-          label: 'Whole-Home Intercom',
+          id: 'televisionMounts',
+          label: 'Installed Television Mounts',
         },
         {
-          id: 'gatedEntry',
-          label: 'Gated Entry',
+          id: 'motorizedProjectionScreen',
+          label: 'Motorized Projection Screen',
         },
         {
-          id: 'automaticDrivewayGate',
-          label: 'Automatic Driveway Gate',
+          id: 'multiZoneAudio',
+          label: 'Multi-Zone Audio',
         },
         {
-          id: 'remoteGateControl',
-          label: 'Remote Gate Control',
+          id: 'outdoorSpeakers',
+          label: 'Outdoor Speakers',
         },
         {
-          id: 'gateKeypad',
-          label: 'Gate Keypad',
+          id: 'antennaSystem',
+          label: 'Over-the-Air Television Antenna',
         },
         {
-          id: 'gateIntercom',
-          label: 'Gate Intercom',
+          id: 'homeTheaterPrewiring',
+          label: 'Prewired for Home Theater',
         },
         {
-          id: 'gateTelephoneEntry',
-          label: 'Gate Telephone-Entry System',
+          id: 'satelliteTelevisionSystem',
+          label: 'Satellite Television System',
         },
         {
-          id: 'smartGarageAccess',
-          label: 'Remote Garage Access',
+          id: 'surroundSound',
+          label: 'Surround-Sound System',
         },
         {
-          id: 'packageDeliveryAccess',
-          label: 'Secure Package-Delivery Access',
+          id: 'wholeHomeAudio',
+          label: 'Whole-Home Audio',
         },
       ],
     },
@@ -494,32 +331,48 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
       iconClass: 'fa-solid fa-fire-extinguisher',
       features: [
         {
-          id: 'smokeDetectors',
-          label: 'Smoke Detectors',
+          id: 'carbonMonoxideDetectors',
+          label: 'Carbon-Monoxide Detectors',
+        },
+        {
+          id: 'emergencyAlertSystem',
+          label: 'Emergency Alert System',
+        },
+        {
+          id: 'emergencyLighting',
+          label: 'Emergency Lighting',
+        },
+        {
+          id: 'freezeSensors',
+          label: 'Freeze Sensors',
         },
         {
           id: 'hardwiredSmokeDetectors',
           label: 'Hardwired Smoke Detectors',
         },
         {
+          id: 'heatDetectors',
+          label: 'Heat Detectors',
+        },
+        {
+          id: 'fireExtinguishers',
+          label: 'Installed Fire Extinguishers',
+        },
+        {
           id: 'interconnectedSmokeDetectors',
           label: 'Interconnected Smoke Detectors',
         },
         {
-          id: 'smartSmokeDetectors',
-          label: 'Smart Smoke Detectors',
+          id: 'kitchenFireSuppression',
+          label: 'Kitchen Fire-Suppression System',
         },
         {
-          id: 'carbonMonoxideDetectors',
-          label: 'Carbon-Monoxide Detectors',
+          id: 'lightningProtection',
+          label: 'Lightning-Protection System',
         },
         {
-          id: 'smartCarbonMonoxideDetectors',
-          label: 'Smart Carbon-Monoxide Detectors',
-        },
-        {
-          id: 'heatDetectors',
-          label: 'Heat Detectors',
+          id: 'medicalAlertSystem',
+          label: 'Medical Alert System',
         },
         {
           id: 'naturalGasDetectors',
@@ -534,133 +387,297 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
           label: 'Radon Monitoring System',
         },
         {
-          id: 'waterLeakSensors',
-          label: 'Water-Leak Sensors',
-        },
-        {
-          id: 'freezeSensors',
-          label: 'Freeze Sensors',
-        },
-        {
           id: 'residentialFireSprinklers',
           label: 'Residential Fire-Sprinkler System',
         },
         {
-          id: 'fireExtinguishers',
-          label: 'Installed Fire Extinguishers',
+          id: 'smartCarbonMonoxideDetectors',
+          label: 'Smart Carbon-Monoxide Detectors',
         },
         {
-          id: 'kitchenFireSuppression',
-          label: 'Kitchen Fire-Suppression System',
+          id: 'smartSmokeDetectors',
+          label: 'Smart Smoke Detectors',
         },
         {
-          id: 'emergencyLighting',
-          label: 'Emergency Lighting',
+          id: 'smokeDetectors',
+          label: 'Smoke Detectors',
         },
         {
-          id: 'emergencyAlertSystem',
-          label: 'Emergency Alert System',
-        },
-        {
-          id: 'medicalAlertSystem',
-          label: 'Medical Alert System',
+          id: 'waterLeakSensors',
+          label: 'Water-Leak Sensors',
         },
         {
           id: 'wholeHomeEmergencyNotification',
           label: 'Whole-Home Emergency Notification',
         },
+      ],
+    },
+    {
+      id: 'internet-connectivity',
+      heading: 'Internet and Connectivity',
+      description:
+        'Identify the property’s available internet services, installed network wiring, wireless equipment, and connectivity infrastructure.',
+      iconClass: 'fa-solid fa-wifi',
+      features: [
         {
-          id: 'lightningProtection',
-          label: 'Lightning-Protection System',
+          id: 'networkJacks',
+          label: 'Built-In Network Jacks',
+        },
+        {
+          id: 'wifiAccessPoints',
+          label: 'Built-In Wi-Fi Access Points',
+        },
+        {
+          id: 'cableInternetAvailable',
+          label: 'Cable Internet Available',
+        },
+        {
+          id: 'cat5eWiring',
+          label: 'Cat 5e Network Wiring',
+        },
+        {
+          id: 'cat6Wiring',
+          label: 'Cat 6 Network Wiring',
+        },
+        {
+          id: 'cat6aWiring',
+          label: 'Cat 6a Network Wiring',
+        },
+        {
+          id: 'centralNetworkPanel',
+          label: 'Central Network Panel',
+          description:
+            'Installed network wiring terminates at a centralized structured-wiring or equipment panel.',
+        },
+        {
+          id: 'coaxialWiring',
+          label: 'Coaxial Cable Wiring',
+        },
+        {
+          id: 'dedicatedNetworkCloset',
+          label: 'Dedicated Network Closet',
+        },
+        {
+          id: 'dslInternetAvailable',
+          label: 'DSL Internet Available',
+        },
+        {
+          id: 'ethernetWiring',
+          label: 'Ethernet Wiring',
+        },
+        {
+          id: 'fiberInternetAvailable',
+          label: 'Fiber-Optic Internet Available',
+        },
+        {
+          id: 'fixedWirelessInternetAvailable',
+          label: 'Fixed Wireless Internet Available',
+        },
+        {
+          id: 'meshWifiSystem',
+          label: 'Mesh Wi-Fi System',
+        },
+        {
+          id: 'multipleInternetProviders',
+          label: 'Multiple Internet Providers Available',
+        },
+        {
+          id: 'detachedBuildingConnectivity',
+          label: 'Network Connection to Detached Building',
+        },
+        {
+          id: 'outdoorWifiCoverage',
+          label: 'Outdoor Wi-Fi Coverage',
+        },
+        {
+          id: 'satelliteInternetAvailable',
+          label: 'Satellite Internet Available',
+        },
+        {
+          id: 'wholeHomeCellularBooster',
+          label: 'Whole-Home Cellular Signal Booster',
+        },
+        {
+          id: 'wholeHomeWifi',
+          label: 'Whole-Home Wi-Fi',
         },
       ],
     },
     {
-      id: 'entertainment-audio',
-      heading: 'Entertainment and Audio',
+      id: 'security',
+      heading: 'Security Systems',
       description:
-        'Describe installed home-theater, audio, television, media-distribution, and entertainment wiring.',
-      iconClass: 'fa-solid fa-volume-high',
+        'Describe installed alarm equipment, professional monitoring, perimeter protection, and security-control systems.',
+      iconClass: 'fa-solid fa-shield-halved',
       features: [
         {
-          id: 'wholeHomeAudio',
-          label: 'Whole-Home Audio',
+          id: 'builtInSafe',
+          label: 'Built-In Safe',
         },
         {
-          id: 'builtInSpeakers',
-          label: 'Built-In Speakers',
+          id: 'centralSecurityPanel',
+          label: 'Central Security Control Panel',
         },
         {
-          id: 'inCeilingSpeakers',
-          label: 'In-Ceiling Speakers',
+          id: 'doorWindowSensors',
+          label: 'Door and Window Sensors',
         },
         {
-          id: 'inWallSpeakers',
-          label: 'In-Wall Speakers',
+          id: 'drivewayAlarm',
+          label: 'Driveway Alarm',
         },
         {
-          id: 'outdoorSpeakers',
-          label: 'Outdoor Speakers',
+          id: 'glassBreakSensors',
+          label: 'Glass-Break Sensors',
         },
         {
-          id: 'multiZoneAudio',
-          label: 'Multi-Zone Audio',
+          id: 'securitySirens',
+          label: 'Interior or Exterior Security Sirens',
         },
         {
-          id: 'centralAudioControls',
-          label: 'Central Audio Controls',
+          id: 'motionDetectors',
+          label: 'Motion Detectors',
         },
         {
-          id: 'homeTheater',
-          label: 'Home Theater',
+          id: 'securityKeypads',
+          label: 'Multiple Security Keypads',
         },
         {
-          id: 'dedicatedMediaRoom',
-          label: 'Dedicated Media Room',
+          id: 'perimeterAlarm',
+          label: 'Perimeter Alarm System',
         },
         {
-          id: 'surroundSound',
-          label: 'Surround-Sound System',
+          id: 'professionallyMonitoredSecurity',
+          label: 'Professionally Monitored Security System',
         },
         {
-          id: 'projector',
-          label: 'Installed Projector',
+          id: 'safeRoom',
+          label: 'Safe Room',
         },
         {
-          id: 'projectionScreen',
-          label: 'Installed Projection Screen',
+          id: 'panicButtons',
+          label: 'Security Panic Buttons',
         },
         {
-          id: 'motorizedProjectionScreen',
-          label: 'Motorized Projection Screen',
+          id: 'securityStrobeLights',
+          label: 'Security Strobe Lights',
         },
         {
-          id: 'televisionMounts',
-          label: 'Installed Television Mounts',
+          id: 'securitySystem',
+          label: 'Security System',
         },
         {
-          id: 'hiddenMediaWiring',
-          label: 'Concealed Media Wiring',
+          id: 'securityFilm',
+          label: 'Security Window Film',
         },
         {
-          id: 'centralMediaDistribution',
-          label: 'Central Media-Distribution System',
+          id: 'securityScreens',
+          label: 'Security Window Screens',
         },
         {
-          id: 'satelliteTelevisionSystem',
-          label: 'Satellite Television System',
+          id: 'selfMonitoredSecurity',
+          label: 'Self-Monitored Security System',
         },
         {
-          id: 'antennaSystem',
-          label: 'Over-the-Air Television Antenna',
+          id: 'stormSafeRoom',
+          label: 'Storm or Security Safe Room',
         },
         {
-          id: 'gamingNetwork',
-          label: 'Dedicated Gaming Network Connection',
+          id: 'wiredSecuritySystem',
+          label: 'Wired Security System',
         },
         {
-          id: 'homeTheaterPrewiring',
-          label: 'Prewired for Home Theater',
+          id: 'wirelessSecuritySystem',
+          label: 'Wireless Security System',
+        },
+      ],
+    },
+    {
+      id: 'smart-home',
+      heading: 'Smart-Home Systems',
+      description:
+        'Select installed smart-home platforms, hubs, controls, sensors, and connected household equipment.',
+      iconClass: 'fa-solid fa-house-signal',
+      features: [
+        {
+          id: 'automatedWindowShades',
+          label: 'Automated Window Shades',
+        },
+        {
+          id: 'integratedSmartHomeSystem',
+          label: 'Integrated Smart-Home System',
+        },
+        {
+          id: 'professionallyInstalledAutomation',
+          label: 'Professionally Installed Home Automation',
+        },
+        {
+          id: 'remoteHomeMonitoring',
+          label: 'Remote Home Monitoring',
+        },
+        {
+          id: 'smartAppliances',
+          label: 'Smart Appliances',
+        },
+        {
+          id: 'smartBlinds',
+          label: 'Smart Blinds',
+        },
+        {
+          id: 'smartCeilingFans',
+          label: 'Smart Ceiling Fans',
+        },
+        {
+          id: 'smartDimmers',
+          label: 'Smart Dimmers',
+        },
+        {
+          id: 'smartGarageDoor',
+          label: 'Smart Garage-Door Control',
+        },
+        {
+          id: 'smartHomeSensors',
+          label: 'Smart-Home Environmental Sensors',
+        },
+        {
+          id: 'smartHomeHub',
+          label: 'Smart-Home Hub',
+        },
+        {
+          id: 'smartIrrigation',
+          label: 'Smart Irrigation Controls',
+        },
+        {
+          id: 'smartLightSwitches',
+          label: 'Smart Light Switches',
+        },
+        {
+          id: 'smartLighting',
+          label: 'Smart Lighting',
+        },
+        {
+          id: 'smartOven',
+          label: 'Smart Oven or Range',
+        },
+        {
+          id: 'smartPoolControls',
+          label: 'Smart Pool or Spa Controls',
+        },
+        {
+          id: 'smartRefrigerator',
+          label: 'Smart Refrigerator',
+        },
+        {
+          id: 'smartWasherDryer',
+          label: 'Smart Washer and Dryer',
+        },
+        {
+          id: 'voiceControlSystem',
+          label: 'Voice-Control System',
+        },
+        {
+          id: 'wholeHomeLightingControls',
+          label: 'Whole-Home Lighting Controls',
         },
       ],
     },
@@ -672,64 +689,64 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
       iconClass: 'fa-solid fa-laptop-house',
       features: [
         {
-          id: 'dedicatedHomeOfficeNetwork',
-          label: 'Dedicated Home-Office Network',
-        },
-        {
-          id: 'hardwiredHomeOffice',
-          label: 'Hardwired Home Office',
-        },
-        {
-          id: 'multipleHardwiredWorkspaces',
-          label: 'Multiple Hardwired Workspaces',
-        },
-        {
-          id: 'dedicatedOfficeCircuit',
-          label: 'Dedicated Home-Office Electrical Circuit',
-        },
-        {
-          id: 'officeBatteryBackup',
-          label: 'Home-Office Battery Backup',
-        },
-        {
-          id: 'videoConferenceSystem',
-          label: 'Installed Video-Conference System',
-        },
-        {
-          id: 'conferenceRoom',
-          label: 'Home Conference Room',
+          id: 'backupInternetConnection',
+          label: 'Backup Internet Connection',
         },
         {
           id: 'businessPhoneSystem',
           label: 'Business Telephone System',
         },
         {
-          id: 'landlineTelephoneWiring',
-          label: 'Landline Telephone Wiring',
+          id: 'dedicatedOfficeCircuit',
+          label: 'Dedicated Home-Office Electrical Circuit',
         },
         {
-          id: 'soundproofOffice',
-          label: 'Soundproofed Home Office',
-        },
-        {
-          id: 'separateOfficeEntrance',
-          label: 'Separate Home-Office Entrance',
-        },
-        {
-          id: 'studioTechnology',
-          label: 'Installed Studio Technology',
-        },
-        {
-          id: 'podcastRecordingSetup',
-          label: 'Podcast or Recording Setup',
+          id: 'dedicatedHomeOfficeNetwork',
+          label: 'Dedicated Home-Office Network',
         },
         {
           id: 'serverEquipmentArea',
           label: 'Dedicated Server or Equipment Area',
         },
         {
-          id: 'backupInternetConnection',
-          label: 'Backup Internet Connection',
+          id: 'hardwiredHomeOffice',
+          label: 'Hardwired Home Office',
+        },
+        {
+          id: 'conferenceRoom',
+          label: 'Home Conference Room',
+        },
+        {
+          id: 'officeBatteryBackup',
+          label: 'Home-Office Battery Backup',
+        },
+        {
+          id: 'studioTechnology',
+          label: 'Installed Studio Technology',
+        },
+        {
+          id: 'videoConferenceSystem',
+          label: 'Installed Video-Conference System',
+        },
+        {
+          id: 'landlineTelephoneWiring',
+          label: 'Landline Telephone Wiring',
+        },
+        {
+          id: 'multipleHardwiredWorkspaces',
+          label: 'Multiple Hardwired Workspaces',
+        },
+        {
+          id: 'podcastRecordingSetup',
+          label: 'Podcast or Recording Setup',
+        },
+        {
+          id: 'separateOfficeEntrance',
+          label: 'Separate Home-Office Entrance',
+        },
+        {
+          id: 'soundproofOffice',
+          label: 'Soundproofed Home Office',
         },
       ],
     },
@@ -771,39 +788,76 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
-    const listingUid = this.route.snapshot.paramMap.get('listingUid');
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .technologySecurity ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
+    const listingUid =
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
-      this.saveError.set('The selected listing could not be identified.');
+      this.saveError.set(
+        'The selected listing could not be identified.'
+      );
+
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(listingUid);
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
-        this.saveError.set('The selected listing could not be found.');
+        this.saveError.set(
+          'The selected listing could not be found.'
+        );
+
         return;
       }
 
-      this.currentEnhancements = listing.enhancements ?? {};
+      this.currentEnhancements =
+        listing.enhancements ?? {};
 
       this.selectedFeatureIds.set(
-        new Set(this.currentEnhancements.technologySecurity ?? []),
+        new Set(
+          this.currentEnhancements
+            .technologySecurity ?? []
+        )
       );
 
       this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
         'Unable to load technology and security features:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved technology and security features.',
+        'We could not load the saved technology and security features.'
       );
     } finally {
       this.isLoading.set(false);
@@ -848,7 +902,8 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
     this.lastSavedAt.set(null);
   }
 
-  async saveSection(): Promise<void> {
+  async saveSection():
+    Promise<void> {
     if (
       this.isLoading() ||
       this.isSaving() ||
@@ -858,73 +913,121 @@ export class TechnologySecurityEnhancementComponent implements OnInit {
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap.get(
+            'listingUid'
+          );
 
-    const sellerUid = this.authService.currentUserUid;
+    const sellerUid =
+      this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
+
       return;
     }
 
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const updatedEnhancements: ListingEnhancements = {
+    const technologySecuritySelections =
+      Array.from(
+        this.selectedFeatureIds()
+      ).sort();
+
+    const updatedEnhancements:
+      ListingEnhancements = {
       ...this.currentEnhancements,
-      technologySecurity: Array.from(this.selectedFeatureIds()),
+      technologySecurity:
+        technologySecuritySelections
     };
 
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
+
+      this.currentEnhancements =
+        updatedEnhancements;
+
+      this.hasChanges.set(false);
+      this.lastSavedAt.set(
+        new Date()
       );
 
-      this.currentEnhancements = updatedEnhancements;
-      this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save technology and security features:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save these technology and security features. Please try again.',
+        'We could not save these technology and security features. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

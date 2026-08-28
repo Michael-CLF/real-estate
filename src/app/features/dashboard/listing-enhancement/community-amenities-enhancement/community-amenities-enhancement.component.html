@@ -3,7 +3,13 @@
     <button type="button" class="back-button" (click)="returnToEnhancements()">
       <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 
-      <span>Return to Enhancements</span>
+      <span>
+        {{
+        wizardMode()
+        ? 'All property details'
+        : 'Return to Enhancements'
+        }}
+      </span>
     </button>
 
     <div class="section-header__content">
@@ -13,7 +19,11 @@
 
       <div>
         <p class="section-header__eyebrow">
-          Optional listing enhancement
+          {{
+          wizardMode()
+          ? 'Optional property details'
+          : 'Optional listing enhancement'
+          }}
         </p>
 
         <h1>Community Amenities</h1>
@@ -307,19 +317,29 @@
         </h2>
 
         <p>
-          Your selections have been added to your listing.
+          {{
+          wizardMode()
+          ? 'Your selections have been saved to this listing draft.'
+          : 'Your selections have been added to your listing.'
+          }}
         </p>
       </div>
     </div>
 
     <div class="save-success__actions">
       <button type="button" class="secondary-button" (click)="returnToEnhancements()">
-        Return to Enhancements
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
+      @if (!wizardMode()) {
       <button type="button" class="primary-button" (click)="viewListing()">
         View Listing
       </button>
+      }
     </div>
   </section>
   } @else {
@@ -341,12 +361,18 @@
 
     <div class="save-success__actions">
       <button type="button" class="secondary-button" (click)="returnToEnhancements()">
-        Return to Enhancements
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
+      @if (!wizardMode()) {
       <button type="button" class="primary-button" (click)="viewListing()">
         View Listing
       </button>
+      }
     </div>
   </section>
   } @else {
@@ -362,9 +388,12 @@
     </div>
 
     <div class="section-footer__actions">
-      <button type="button" class="secondary-button" [disabled]="isLoading() || isSaving()"
-        (click)="returnToEnhancements()">
-        Return to Enhancements
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
       <button type="button" class="primary-button" [disabled]="isLoading() || isSaving() || !hasChanges()"

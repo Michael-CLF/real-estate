@@ -4,7 +4,9 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
@@ -21,12 +23,12 @@ interface AccessibilityFeature {
   label: string;
   description?: string;
   category:
-    | 'entrance'
-    | 'interior'
-    | 'bathroom'
-    | 'kitchen'
-    | 'mobility'
-    | 'sensory';
+  | 'entrance'
+  | 'interior'
+  | 'bathroom'
+  | 'kitchen'
+  | 'mobility'
+  | 'sensory';
 }
 
 @Component({
@@ -43,9 +45,59 @@ export class AccessibilityEnhancementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly entranceFeatures: readonly AccessibilityFeature[] = [
+    {
+      id: 'accessibleParkingRoute',
+      label: 'Accessible Route from Parking',
+      category: 'entrance',
+    },
+    {
+      id: 'automaticEntryDoor',
+      label: 'Automatic Entry Door',
+      category: 'entrance',
+    },
+    {
+      id: 'coveredAccessibleEntrance',
+      label: 'Covered Accessible Entrance',
+      category: 'entrance',
+    },
+    {
+      id: 'handrailsAtEntrance',
+      label: 'Entrance Handrails',
+      category: 'entrance',
+    },
+    {
+      id: 'entranceRamp',
+      label: 'Entrance Ramp',
+      category: 'entrance',
+    },
+    {
+      id: 'levelEntryFromGarage',
+      label: 'Level Entry from Garage',
+      category: 'entrance',
+    },
+    {
+      id: 'lowThresholdEntrance',
+      label: 'Low-Threshold Entrance',
+      category: 'entrance',
+    },
     {
       id: 'stepFreeEntrance',
       label: 'Step-Free Entrance',
@@ -59,55 +111,23 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'entrance',
     },
     {
-      id: 'entranceRamp',
-      label: 'Entrance Ramp',
-      category: 'entrance',
-    },
-    {
-      id: 'coveredAccessibleEntrance',
-      label: 'Covered Accessible Entrance',
-      category: 'entrance',
-    },
-    {
       id: 'wideEntryDoor',
       label: 'Wide Entry Door',
       description:
         'The primary entry door provides additional clearance for mobility devices.',
       category: 'entrance',
     },
-    {
-      id: 'lowThresholdEntrance',
-      label: 'Low-Threshold Entrance',
-      category: 'entrance',
-    },
-    {
-      id: 'levelEntryFromGarage',
-      label: 'Level Entry from Garage',
-      category: 'entrance',
-    },
-    {
-      id: 'accessibleParkingRoute',
-      label: 'Accessible Route from Parking',
-      category: 'entrance',
-    },
-    {
-      id: 'handrailsAtEntrance',
-      label: 'Entrance Handrails',
-      category: 'entrance',
-    },
-    {
-      id: 'automaticEntryDoor',
-      label: 'Automatic Entry Door',
-      category: 'entrance',
-    },
   ];
 
   readonly interiorFeatures: readonly AccessibilityFeature[] = [
     {
-      id: 'singleLevelLiving',
-      label: 'Single-Level Living',
-      description:
-        'Essential living areas are located on one accessible level.',
+      id: 'accessibleElectricalOutlets',
+      label: 'Accessible Electrical Outlets',
+      category: 'interior',
+    },
+    {
+      id: 'accessibleLightSwitches',
+      label: 'Accessible Light Switches',
       category: 'interior',
     },
     {
@@ -121,35 +141,10 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'interior',
     },
     {
-      id: 'wideInteriorDoorways',
-      label: 'Wide Interior Doorways',
-      category: 'interior',
-    },
-    {
-      id: 'wideHallways',
-      label: 'Wide Hallways',
-      category: 'interior',
-    },
-    {
-      id: 'openFloorPlan',
-      label: 'Open Floor Plan',
-      category: 'interior',
-    },
-    {
       id: 'levelInteriorTransitions',
       label: 'Level Interior Transitions',
       description:
         'Flooring transitions have minimal or no raised thresholds.',
-      category: 'interior',
-    },
-    {
-      id: 'accessibleLightSwitches',
-      label: 'Accessible Light Switches',
-      category: 'interior',
-    },
-    {
-      id: 'accessibleElectricalOutlets',
-      label: 'Accessible Electrical Outlets',
       category: 'interior',
     },
     {
@@ -167,27 +162,49 @@ export class AccessibilityEnhancementComponent implements OnInit {
       label: 'Non-Slip Flooring',
       category: 'interior',
     },
+    {
+      id: 'openFloorPlan',
+      label: 'Open Floor Plan',
+      category: 'interior',
+    },
+    {
+      id: 'singleLevelLiving',
+      label: 'Single-Level Living',
+      description:
+        'Essential living areas are located on one accessible level.',
+      category: 'interior',
+    },
+    {
+      id: 'wideHallways',
+      label: 'Wide Hallways',
+      category: 'interior',
+    },
+    {
+      id: 'wideInteriorDoorways',
+      label: 'Wide Interior Doorways',
+      category: 'interior',
+    },
   ];
 
   readonly bathroomFeatures: readonly AccessibilityFeature[] = [
     {
-      id: 'accessibleBathroom',
-      label: 'Wheelchair-Accessible Bathroom',
+      id: 'accessibleBathroomControls',
+      label: 'Accessible Bathroom Controls',
       category: 'bathroom',
     },
     {
-      id: 'rollInShower',
-      label: 'Roll-In Shower',
+      id: 'accessibleVanity',
+      label: 'Accessible Vanity',
       category: 'bathroom',
     },
     {
-      id: 'curblessShower',
-      label: 'Curbless Shower',
+      id: 'antiScaldFixtures',
+      label: 'Anti-Scald Fixtures',
       category: 'bathroom',
     },
     {
-      id: 'walkInTub',
-      label: 'Walk-In Tub',
+      id: 'bathroomGrabBars',
+      label: 'Bathroom Grab Bars',
       category: 'bathroom',
     },
     {
@@ -196,8 +213,18 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'bathroom',
     },
     {
-      id: 'bathroomGrabBars',
-      label: 'Bathroom Grab Bars',
+      id: 'raisedToilet',
+      label: 'Comfort-Height Toilet',
+      category: 'bathroom',
+    },
+    {
+      id: 'curblessShower',
+      label: 'Curbless Shower',
+      category: 'bathroom',
+    },
+    {
+      id: 'handheldShowerhead',
+      label: 'Handheld Showerhead',
       category: 'bathroom',
     },
     {
@@ -208,46 +235,26 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'bathroom',
     },
     {
-      id: 'handheldShowerhead',
-      label: 'Handheld Showerhead',
+      id: 'rollInShower',
+      label: 'Roll-In Shower',
       category: 'bathroom',
     },
     {
-      id: 'accessibleVanity',
-      label: 'Accessible Vanity',
+      id: 'walkInTub',
+      label: 'Walk-In Tub',
       category: 'bathroom',
     },
     {
-      id: 'raisedToilet',
-      label: 'Comfort-Height Toilet',
-      category: 'bathroom',
-    },
-    {
-      id: 'accessibleBathroomControls',
-      label: 'Accessible Bathroom Controls',
-      category: 'bathroom',
-    },
-    {
-      id: 'antiScaldFixtures',
-      label: 'Anti-Scald Fixtures',
+      id: 'accessibleBathroom',
+      label: 'Wheelchair-Accessible Bathroom',
       category: 'bathroom',
     },
   ];
 
   readonly kitchenFeatures: readonly AccessibilityFeature[] = [
     {
-      id: 'accessibleKitchen',
-      label: 'Wheelchair-Accessible Kitchen',
-      category: 'kitchen',
-    },
-    {
-      id: 'loweredCountertops',
-      label: 'Lowered Countertops',
-      category: 'kitchen',
-    },
-    {
-      id: 'adjustableCountertops',
-      label: 'Adjustable-Height Countertops',
+      id: 'accessibleAppliances',
+      label: 'Accessible Appliances',
       category: 'kitchen',
     },
     {
@@ -256,18 +263,8 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'kitchen',
     },
     {
-      id: 'kneeClearanceAtSink',
-      label: 'Knee Clearance at Sink',
-      category: 'kitchen',
-    },
-    {
-      id: 'accessibleAppliances',
-      label: 'Accessible Appliances',
-      category: 'kitchen',
-    },
-    {
-      id: 'sideOpeningOven',
-      label: 'Side-Opening Oven',
+      id: 'adjustableCountertops',
+      label: 'Adjustable-Height Countertops',
       category: 'kitchen',
     },
     {
@@ -276,13 +273,8 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'kitchen',
     },
     {
-      id: 'pullOutShelving',
-      label: 'Pull-Out Cabinet Shelving',
-      category: 'kitchen',
-    },
-    {
-      id: 'loweredStorage',
-      label: 'Lowered Storage',
+      id: 'kneeClearanceAtSink',
+      label: 'Knee Clearance at Sink',
       category: 'kitchen',
     },
     {
@@ -291,31 +283,61 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'kitchen',
     },
     {
+      id: 'loweredCountertops',
+      label: 'Lowered Countertops',
+      category: 'kitchen',
+    },
+    {
+      id: 'loweredStorage',
+      label: 'Lowered Storage',
+      category: 'kitchen',
+    },
+    {
       id: 'openKitchenTurningSpace',
       label: 'Open Kitchen Turning Space',
+      category: 'kitchen',
+    },
+    {
+      id: 'pullOutShelving',
+      label: 'Pull-Out Cabinet Shelving',
+      category: 'kitchen',
+    },
+    {
+      id: 'sideOpeningOven',
+      label: 'Side-Opening Oven',
+      category: 'kitchen',
+    },
+    {
+      id: 'accessibleKitchen',
+      label: 'Wheelchair-Accessible Kitchen',
       category: 'kitchen',
     },
   ];
 
   readonly mobilityFeatures: readonly AccessibilityFeature[] = [
     {
-      id: 'residentialElevator',
-      label: 'Residential Elevator',
+      id: 'accessibleGarage',
+      label: 'Accessible Garage',
       category: 'mobility',
     },
     {
-      id: 'wheelchairLift',
-      label: 'Wheelchair Lift',
+      id: 'accessibleOutdoorPath',
+      label: 'Accessible Outdoor Path',
       category: 'mobility',
     },
     {
-      id: 'stairLift',
-      label: 'Stair Lift',
+      id: 'accessiblePatio',
+      label: 'Accessible Patio or Deck',
       category: 'mobility',
     },
     {
       id: 'accessibleStaircase',
       label: 'Accessible Staircase',
+      category: 'mobility',
+    },
+    {
+      id: 'agingInPlaceDesign',
+      label: 'Aging-in-Place Design',
       category: 'mobility',
     },
     {
@@ -329,11 +351,6 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'mobility',
     },
     {
-      id: 'accessibleGarage',
-      label: 'Accessible Garage',
-      category: 'mobility',
-    },
-    {
       id: 'oversizedGarageBay',
       label: 'Oversized Garage Bay',
       description:
@@ -341,18 +358,13 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'mobility',
     },
     {
-      id: 'accessiblePatio',
-      label: 'Accessible Patio or Deck',
+      id: 'residentialElevator',
+      label: 'Residential Elevator',
       category: 'mobility',
     },
     {
-      id: 'accessibleOutdoorPath',
-      label: 'Accessible Outdoor Path',
-      category: 'mobility',
-    },
-    {
-      id: 'agingInPlaceDesign',
-      label: 'Aging-in-Place Design',
+      id: 'stairLift',
+      label: 'Stair Lift',
       category: 'mobility',
     },
     {
@@ -362,9 +374,54 @@ export class AccessibilityEnhancementComponent implements OnInit {
         'The home incorporates features intended to serve people with a wide range of abilities.',
       category: 'mobility',
     },
+    {
+      id: 'wheelchairLift',
+      label: 'Wheelchair Lift',
+      category: 'mobility',
+    },
   ];
 
   readonly sensoryFeatures: readonly AccessibilityFeature[] = [
+    {
+      id: 'accessibleSecuritySystem',
+      label: 'Accessible Security System',
+      category: 'sensory',
+    },
+    {
+      id: 'smartHomeAccessibility',
+      label: 'Accessible Smart-Home Controls',
+      category: 'sensory',
+    },
+    {
+      id: 'audibleSecurityAlerts',
+      label: 'Audible Security Alerts',
+      category: 'sensory',
+    },
+    {
+      id: 'easyReadThermostat',
+      label: 'Easy-Read Thermostat',
+      category: 'sensory',
+    },
+    {
+      id: 'enhancedInteriorLighting',
+      label: 'Enhanced Interior Lighting',
+      category: 'sensory',
+    },
+    {
+      id: 'highContrastFeatures',
+      label: 'High-Contrast Interior Features',
+      category: 'sensory',
+    },
+    {
+      id: 'motionActivatedLighting',
+      label: 'Motion-Activated Lighting',
+      category: 'sensory',
+    },
+    {
+      id: 'visualCarbonMonoxideAlarms',
+      label: 'Visual Carbon Monoxide Alarms',
+      category: 'sensory',
+    },
     {
       id: 'visualDoorbell',
       label: 'Visual Doorbell Alert',
@@ -376,48 +433,8 @@ export class AccessibilityEnhancementComponent implements OnInit {
       category: 'sensory',
     },
     {
-      id: 'visualCarbonMonoxideAlarms',
-      label: 'Visual Carbon Monoxide Alarms',
-      category: 'sensory',
-    },
-    {
-      id: 'audibleSecurityAlerts',
-      label: 'Audible Security Alerts',
-      category: 'sensory',
-    },
-    {
       id: 'voiceActivatedControls',
       label: 'Voice-Activated Controls',
-      category: 'sensory',
-    },
-    {
-      id: 'smartHomeAccessibility',
-      label: 'Accessible Smart-Home Controls',
-      category: 'sensory',
-    },
-    {
-      id: 'highContrastFeatures',
-      label: 'High-Contrast Interior Features',
-      category: 'sensory',
-    },
-    {
-      id: 'enhancedInteriorLighting',
-      label: 'Enhanced Interior Lighting',
-      category: 'sensory',
-    },
-    {
-      id: 'motionActivatedLighting',
-      label: 'Motion-Activated Lighting',
-      category: 'sensory',
-    },
-    {
-      id: 'easyReadThermostat',
-      label: 'Easy-Read Thermostat',
-      category: 'sensory',
-    },
-    {
-      id: 'accessibleSecuritySystem',
-      label: 'Accessible Security System',
       category: 'sensory',
     },
   ];
@@ -458,42 +475,81 @@ export class AccessibilityEnhancementComponent implements OnInit {
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
-    const listingUid = this.route.snapshot.paramMap.get('listingUid');
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .accessibility ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
+    const listingUid =
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
-      this.saveError.set('The selected listing could not be identified.');
+      this.saveError.set(
+        'The selected listing could not be identified.'
+      );
+
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(listingUid);
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
-        this.saveError.set('The selected listing could not be found.');
+        this.saveError.set(
+          'The selected listing could not be found.'
+        );
+
         return;
       }
 
-      this.currentEnhancements = listing.enhancements ?? {};
+      this.currentEnhancements =
+        listing.enhancements ?? {};
 
       this.selectedFeatureIds.set(
-        new Set(this.currentEnhancements.accessibility ?? []),
+        new Set(
+          this.currentEnhancements
+            .accessibility ?? []
+        )
       );
 
       this.hasChanges.set(false);
     } catch (error: unknown) {
-      console.error('Unable to load accessibility features:', error);
+      console.error(
+        'Unable to load accessibility features:',
+        error
+      );
 
       this.saveError.set(
-        'We could not load the saved accessibility features.',
+        'We could not load the saved accessibility features.'
       );
     } finally {
       this.isLoading.set(false);
     }
   }
-
   isSelected(featureId: string): boolean {
     return this.selectedFeatureIds().has(featureId);
   }
@@ -532,7 +588,8 @@ export class AccessibilityEnhancementComponent implements OnInit {
     this.lastSavedAt.set(null);
   }
 
-  async saveSection(): Promise<void> {
+  async saveSection():
+    Promise<void> {
     if (
       this.isLoading() ||
       this.isSaving() ||
@@ -542,70 +599,127 @@ export class AccessibilityEnhancementComponent implements OnInit {
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap
+          .get('listingUid');
 
-    const sellerUid = this.authService.currentUserUid;
+    const sellerUid =
+      this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
+
       return;
     }
+
+    const updatedEnhancements:
+      ListingEnhancements = {
+      ...this.currentEnhancements,
+
+      accessibility:
+        Array.from(
+          this.selectedFeatureIds()
+        ).sort(
+          (
+            firstId,
+            secondId
+          ) =>
+            firstId.localeCompare(
+              secondId
+            )
+        )
+    };
 
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const updatedEnhancements: ListingEnhancements = {
-      ...this.currentEnhancements,
-      accessibility: Array.from(this.selectedFeatureIds()),
-    };
-
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
+
+      this.currentEnhancements =
+        updatedEnhancements;
+
+      this.hasChanges.set(false);
+
+      this.lastSavedAt.set(
+        new Date()
       );
 
-      this.currentEnhancements = updatedEnhancements;
-      this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
-      console.error('Unable to save accessibility features:', error);
+      console.error(
+        'Unable to save accessibility features:',
+        error
+      );
 
       this.saveError.set(
-        'We could not save these accessibility features. Please try again.',
+        'We could not save these accessibility features. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

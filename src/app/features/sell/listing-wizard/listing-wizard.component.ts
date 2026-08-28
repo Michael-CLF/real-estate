@@ -26,6 +26,7 @@ import {
 
 import {
   ListingDraftStep,
+  ListingEnhancements,
   ListingFeatures,
   ListingHoa
 } from '../../../core/domains/listings/models/listing.model';
@@ -39,9 +40,7 @@ import {
   PropertyDetailsFormValue,
   PropertyDetailsStepComponent
 } from './components/property-details-step/property-details-step.component';
-
 import {
-  PropertyFeaturesFormValue,
   PropertyFeaturesStepComponent,
   PropertyFeaturesStepValue
 } from './components/property-features-step/property-features-step.component';
@@ -397,27 +396,60 @@ export class ListingWizardComponent
     }
 
 
-    if (draft.features) {
-      const restoredFeatures =
-        this.toPropertyFeaturesFormValue(
-          draft.features as ListingFeatures
+    if (
+      draft.enhancements ||
+      draft.features
+    ) {
+      const enhancements:
+        ListingEnhancements = {
+        ...(
+          draft.enhancements ?? {}
+        )
+      };
+
+      const hasEnhancements =
+        Object.values(
+          enhancements
+        ).some(
+          selectedValues =>
+            Array.isArray(
+              selectedValues
+            ) &&
+            selectedValues.length > 0
         );
 
-      const hasSelectedFeatures =
-        Object.values(
-          restoredFeatures
-        ).some(
-          selected => selected === true
-        );
+      const legacyFeatures =
+        draft.features as
+        ListingFeatures | undefined;
+
+      const hasLegacyFeatures =
+        legacyFeatures
+          ? Object.entries(
+            legacyFeatures
+          ).some(
+            (
+              [
+                key,
+                value
+              ]
+            ) =>
+              value === true ||
+              (
+                key ===
+                'evChargingStatus' &&
+                value !== 'none'
+              )
+          )
+          : false;
 
       this.propertyFeaturesData.set({
         mode:
-          hasSelectedFeatures
+          hasEnhancements ||
+            hasLegacyFeatures
             ? 'add'
             : 'skip',
 
-        features:
-          restoredFeatures
+        enhancements
       });
 
       this.setStepValidity(
@@ -1008,23 +1040,16 @@ export class ListingWizardComponent
           'unselected'
         ) {
           throw new Error(
-            'Please complete the property features step.'
+            'Please complete the property details and amenities step.'
           );
         }
 
-        const features: ListingFeatures =
-          propertyFeatures.mode === 'skip'
-            ? this.emptyFeatures()
-            : this.toListingFeatures(
-              propertyFeatures.features as
-              PropertyFeaturesFormValue
-            );
-
         await this.listingService
-          .saveFeaturesStep(
+          .saveEnhancementsStep(
             listingUid,
             user.uid,
-            features,
+            propertyFeatures
+              .enhancements,
             this.completedSteps()
           );
 
@@ -1153,7 +1178,7 @@ export class ListingWizardComponent
     this.saveError.set('');
     this.isSaving.set(true);
 
-       try {
+    try {
       const pricing =
         this.pricingData();
 
@@ -1308,182 +1333,6 @@ export class ListingWizardComponent
       false
     );
   }
-
-
-  private toPropertyFeaturesFormValue(
-    features: ListingFeatures
-  ): PropertyFeaturesFormValue {
-    return {
-      kitchenIsland: features.kitchenIsland,
-      pantry: features.pantry,
-      stoneCountertops: features.stoneCountertops,
-      stainlessAppliances: features.stainlessAppliances,
-      gasRange: features.gasRange,
-      doubleOven: features.doubleOven,
-      fireplace: features.fireplace,
-      hardwoodFloors: features.hardwoodFloors,
-      vaultedCeilings: features.vaultedCeilings,
-      homeOffice: features.homeOffice,
-      bonusRoom: features.bonusRoom,
-      basement: features.finishedBasement,
-      walkInCloset: features.walkInCloset,
-      ensuiteBath: features.ensuiteBath,
-      doubleVanity: features.doubleVanity,
-      soakingTub: features.soakingTub,
-      separateShower: features.separateTubAndShower,
-      deck: features.deck,
-      patio: features.patio,
-      porch: features.porch,
-      fencedYard: features.fencedYard,
-      pool: features.pool,
-      outdoorKitchen: features.outdoorKitchen,
-      attachedGarage: features.attachedGarage,
-      detachedGarage: features.detachedGarage,
-      carport: features.carport,
-      evCharging: features.evChargingStatus !== 'none',
-      centralHvac: features.centralHvac,
-      heatPump: features.heatPump,
-      gasHeat: features.gasHeat,
-      centralAir: features.centralAir,
-      solarPanels: features.solarPanels,
-      generator: features.generator,
-      smartThermostat: features.smartThermostat
-    };
-  }
-
-
-  private toListingFeatures(
-    features: PropertyFeaturesFormValue
-  ): ListingFeatures {
-    return {
-      ...this.emptyListingFeatures(),
-      kitchenIsland: features.kitchenIsland,
-      pantry: features.pantry,
-      stoneCountertops: features.stoneCountertops,
-      stainlessAppliances: features.stainlessAppliances,
-      gasRange: features.gasRange,
-      doubleOven: features.doubleOven,
-      fireplace: features.fireplace,
-      hardwoodFloors: features.hardwoodFloors,
-      vaultedCeilings: features.vaultedCeilings,
-      homeOffice: features.homeOffice,
-      bonusRoom: features.bonusRoom,
-      finishedBasement: features.basement,
-      walkInCloset: features.walkInCloset,
-      ensuiteBath: features.ensuiteBath,
-      doubleVanity: features.doubleVanity,
-      soakingTub: features.soakingTub,
-      separateTubAndShower: features.separateShower,
-      deck: features.deck,
-      patio: features.patio,
-      porch: features.porch,
-      fencedYard: features.fencedYard,
-      pool: features.pool,
-      outdoorKitchen: features.outdoorKitchen,
-      attachedGarage: features.attachedGarage,
-      detachedGarage: features.detachedGarage,
-      carport: features.carport,
-      evChargingStatus: features.evCharging
-        ? 'installed'
-        : 'none',
-      centralHvac: features.centralHvac,
-      heatPump: features.heatPump,
-      gasHeat: features.gasHeat,
-      centralAir: features.centralAir,
-      solarPanels: features.solarPanels,
-      generator: features.generator,
-      smartThermostat: features.smartThermostat
-    };
-  }
-
-
-  private emptyListingFeatures(): ListingFeatures {
-    return {
-      kitchenIsland: false,
-      pantry: false,
-      stoneCountertops: false,
-      softCloseCabinetry: false,
-      stainlessAppliances: false,
-      gasRange: false,
-      doubleOven: false,
-      butlersPantry: false,
-      fireplace: false,
-      hardwoodFloors: false,
-      vaultedCeilings: false,
-      homeOffice: false,
-      bonusRoom: false,
-      finishedBasement: false,
-      mudroom: false,
-      homeGym: false,
-      walkInCloset: false,
-      customClosets: false,
-      builtInShelving: false,
-      crownMolding: false,
-      wetBar: false,
-      mediaRoom: false,
-      soundproofing: false,
-      ensuiteBath: false,
-      doubleVanity: false,
-      soakingTub: false,
-      separateTubAndShower: false,
-      largeWalkInShower: false,
-      deck: false,
-      patio: false,
-      porch: false,
-      balcony: false,
-      fencedYard: false,
-      irrigationSystem: false,
-      matureLandscaping: false,
-      landscapeLighting: false,
-      pool: false,
-      spaHotTub: false,
-      coveredOutdoorLiving: false,
-      outdoorCeilingFans: false,
-      outdoorHeaters: false,
-      outdoorKitchen: false,
-      builtInGrill: false,
-      firePit: false,
-      outdoorFireplace: false,
-      shed: false,
-      barn: false,
-      workshop: false,
-      guestHouse: false,
-      aduReady: false,
-      greenhouse: false,
-      gardenArea: false,
-      attachedGarage: false,
-      detachedGarage: false,
-      carport: false,
-      garageWorkshop: false,
-      rvParking: false,
-      boatParking: false,
-      evChargingStatus: 'none',
-      centralHvac: false,
-      heatPump: false,
-      gasHeat: false,
-      centralAir: false,
-      multiZoneHvac: false,
-      solarPanels: false,
-      generator: false,
-      smartThermostat: false,
-      smartLighting: false,
-      smartLocks: false,
-      securitySystem: false,
-      securityCameras: false,
-      videoDoorbell: false,
-      hardwiredEthernet: false,
-      builtInSpeakers: false,
-      wholeHomeAirFiltration: false,
-      waterFiltrationSystem: false,
-      waterSenseFixtures: false
-    };
-  }
-
-
-  private emptyFeatures(): ListingFeatures {
-    return this.emptyListingFeatures();
-  }
-
 
   private revokeTemporaryPhotoUrls(
     photo: ListingPhoto

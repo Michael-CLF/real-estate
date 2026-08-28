@@ -1,48 +1,44 @@
 <section class="enhancement-section">
   <header class="section-header">
-    <button
-      type="button"
-      class="back-button"
-      (click)="returnToEnhancements()"
-    >
-      <i
-        class="fa-solid fa-arrow-left"
-        aria-hidden="true"
-      ></i>
+    <button type="button" class="back-button" (click)="returnToEnhancements()">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 
-      <span>Return to Enhancements</span>
+      <span>
+        {{
+        wizardMode()
+        ? 'All property details'
+        : 'Return to Enhancements'
+        }}
+      </span>
     </button>
 
     <div class="section-header__content">
-      <div
-        class="section-header__icon"
-        aria-hidden="true"
-      >
+      <div class="section-header__icon" aria-hidden="true">
         <i class="fa-solid fa-school"></i>
       </div>
 
       <div>
         <p class="section-header__eyebrow">
-          Optional listing enhancement
+          {{
+          wizardMode()
+          ? 'Property details and amenities'
+          : 'Optional listing enhancement'
+          }}
         </p>
 
         <h1>Nearby Schools</h1>
 
         <p class="section-header__description">
-          Add the schools currently assigned to this
-          property. Buyers will see this information in
-          a dedicated Nearby Schools section on the
-          public listing.
+          Add the schools currently assigned to
+          this property. Buyers will see this
+          information in a dedicated Nearby Schools
+          section on the public listing.
         </p>
       </div>
     </div>
   </header>
 
-  <form
-    class="schools-form"
-    [formGroup]="schoolsForm"
-    (ngSubmit)="saveSection()"
-  >
+  <form class="schools-form" [formGroup]="schoolsForm" (ngSubmit)="saveSection()">
     <section class="district-card">
       <div class="section-heading">
         <div>
@@ -61,25 +57,15 @@
       <label class="form-field">
         <span>School district name</span>
 
-        <input
-          type="text"
-          formControlName="districtName"
-          autocomplete="off"
-          placeholder="Example: Wake County Public School System"
-        />
+        <input type="text" formControlName="districtName" autocomplete="off"
+          placeholder="Example: Wake County Public School System" />
       </label>
     </section>
 
     <div class="school-grid">
-      <section
-        class="school-card"
-        formGroupName="elementarySchool"
-      >
+      <section class="school-card" formGroupName="elementarySchool">
         <div class="school-card__header">
-          <span
-            class="school-card__icon"
-            aria-hidden="true"
-          >
+          <span class="school-card__icon" aria-hidden="true">
             <i class="fa-solid fa-child-reaching"></i>
           </span>
 
@@ -93,12 +79,7 @@
           <label class="form-field form-field--wide">
             <span>School name</span>
 
-            <input
-              type="text"
-              formControlName="name"
-              autocomplete="off"
-              placeholder="Elementary school name"
-            />
+            <input type="text" formControlName="name" autocomplete="off" placeholder="Elementary school name" />
           </label>
 
           <label class="form-field">
@@ -106,12 +87,12 @@
 
             <select formControlName="schoolType">
               @for (
-                schoolType of schoolTypes;
-                track schoolType.value
+              schoolType of schoolTypes;
+              track schoolType.value
               ) {
-                <option [value]="schoolType.value">
-                  {{ schoolType.label }}
-                </option>
+              <option [value]="schoolType.value">
+                {{ schoolType.label }}
+              </option>
               }
             </select>
           </label>
@@ -119,26 +100,15 @@
           <label class="form-field">
             <span>Grades served</span>
 
-            <input
-              type="text"
-              formControlName="grades"
-              autocomplete="off"
-              placeholder="Example: K–5"
-            />
+            <input type="text" formControlName="grades" autocomplete="off" placeholder="Example: K–5" />
           </label>
 
           <label class="form-field">
             <span>Distance from property</span>
 
             <div class="input-with-suffix">
-              <input
-                type="number"
-                formControlName="distanceMiles"
-                min="0"
-                step="0.1"
-                inputmode="decimal"
-                placeholder="0.0"
-              />
+              <input type="number" formControlName="distanceMiles" min="0" step="0.1" inputmode="decimal"
+                placeholder="0.0" />
 
               <span>miles</span>
             </div>
@@ -147,25 +117,14 @@
           <label class="form-field">
             <span>District, if different</span>
 
-            <input
-              type="text"
-              formControlName="district"
-              autocomplete="off"
-              placeholder="Optional"
-            />
+            <input type="text" formControlName="district" autocomplete="off" placeholder="Optional" />
           </label>
         </div>
       </section>
 
-      <section
-        class="school-card"
-        formGroupName="middleSchool"
-      >
+      <section class="school-card" formGroupName="middleSchool">
         <div class="school-card__header">
-          <span
-            class="school-card__icon"
-            aria-hidden="true"
-          >
+          <span class="school-card__icon" aria-hidden="true">
             <i class="fa-solid fa-book-open"></i>
           </span>
 
@@ -179,12 +138,7 @@
           <label class="form-field form-field--wide">
             <span>School name</span>
 
-            <input
-              type="text"
-              formControlName="name"
-              autocomplete="off"
-              placeholder="Middle school name"
-            />
+            <input type="text" formControlName="name" autocomplete="off" placeholder="Middle school name" />
           </label>
 
           <label class="form-field">
@@ -192,12 +146,12 @@
 
             <select formControlName="schoolType">
               @for (
-                schoolType of schoolTypes;
-                track schoolType.value
+              schoolType of schoolTypes;
+              track schoolType.value
               ) {
-                <option [value]="schoolType.value">
-                  {{ schoolType.label }}
-                </option>
+              <option [value]="schoolType.value">
+                {{ schoolType.label }}
+              </option>
               }
             </select>
           </label>
@@ -205,26 +159,15 @@
           <label class="form-field">
             <span>Grades served</span>
 
-            <input
-              type="text"
-              formControlName="grades"
-              autocomplete="off"
-              placeholder="Example: 6–8"
-            />
+            <input type="text" formControlName="grades" autocomplete="off" placeholder="Example: 6–8" />
           </label>
 
           <label class="form-field">
             <span>Distance from property</span>
 
             <div class="input-with-suffix">
-              <input
-                type="number"
-                formControlName="distanceMiles"
-                min="0"
-                step="0.1"
-                inputmode="decimal"
-                placeholder="0.0"
-              />
+              <input type="number" formControlName="distanceMiles" min="0" step="0.1" inputmode="decimal"
+                placeholder="0.0" />
 
               <span>miles</span>
             </div>
@@ -233,25 +176,14 @@
           <label class="form-field">
             <span>District, if different</span>
 
-            <input
-              type="text"
-              formControlName="district"
-              autocomplete="off"
-              placeholder="Optional"
-            />
+            <input type="text" formControlName="district" autocomplete="off" placeholder="Optional" />
           </label>
         </div>
       </section>
 
-      <section
-        class="school-card"
-        formGroupName="highSchool"
-      >
+      <section class="school-card" formGroupName="highSchool">
         <div class="school-card__header">
-          <span
-            class="school-card__icon"
-            aria-hidden="true"
-          >
+          <span class="school-card__icon" aria-hidden="true">
             <i class="fa-solid fa-graduation-cap"></i>
           </span>
 
@@ -265,12 +197,7 @@
           <label class="form-field form-field--wide">
             <span>School name</span>
 
-            <input
-              type="text"
-              formControlName="name"
-              autocomplete="off"
-              placeholder="High school name"
-            />
+            <input type="text" formControlName="name" autocomplete="off" placeholder="High school name" />
           </label>
 
           <label class="form-field">
@@ -278,12 +205,12 @@
 
             <select formControlName="schoolType">
               @for (
-                schoolType of schoolTypes;
-                track schoolType.value
+              schoolType of schoolTypes;
+              track schoolType.value
               ) {
-                <option [value]="schoolType.value">
-                  {{ schoolType.label }}
-                </option>
+              <option [value]="schoolType.value">
+                {{ schoolType.label }}
+              </option>
               }
             </select>
           </label>
@@ -291,26 +218,15 @@
           <label class="form-field">
             <span>Grades served</span>
 
-            <input
-              type="text"
-              formControlName="grades"
-              autocomplete="off"
-              placeholder="Example: 9–12"
-            />
+            <input type="text" formControlName="grades" autocomplete="off" placeholder="Example: 9–12" />
           </label>
 
           <label class="form-field">
             <span>Distance from property</span>
 
             <div class="input-with-suffix">
-              <input
-                type="number"
-                formControlName="distanceMiles"
-                min="0"
-                step="0.1"
-                inputmode="decimal"
-                placeholder="0.0"
-              />
+              <input type="number" formControlName="distanceMiles" min="0" step="0.1" inputmode="decimal"
+                placeholder="0.0" />
 
               <span>miles</span>
             </div>
@@ -319,12 +235,7 @@
           <label class="form-field">
             <span>District, if different</span>
 
-            <input
-              type="text"
-              formControlName="district"
-              autocomplete="off"
-              placeholder="Optional"
-            />
+            <input type="text" formControlName="district" autocomplete="off" placeholder="Optional" />
           </label>
         </div>
       </section>
@@ -332,15 +243,9 @@
 
     <section class="verification-card">
       <label class="verification-checkbox">
-        <input
-          type="checkbox"
-          formControlName="assignedSchoolsVerified"
-        />
+        <input type="checkbox" formControlName="assignedSchoolsVerified" />
 
-        <span
-          class="verification-checkbox__control"
-          aria-hidden="true"
-        >
+        <span class="verification-checkbox__control" aria-hidden="true">
           <i class="fa-solid fa-check"></i>
         </span>
 
@@ -365,123 +270,95 @@
     </section>
 
     @if (
-      lastSavedAt() &&
-      !hasChanges() &&
-      !saveError()
+    lastSavedAt() &&
+    !hasChanges() &&
+    !saveError()
     ) {
-      <section
-        class="save-success"
-        role="status"
-        aria-live="polite"
-      >
-        <div class="save-success__message">
-          <i
-            class="fa-solid fa-circle-check"
-            aria-hidden="true"
-          ></i>
+    <section class="save-success" role="status" aria-live="polite">
+      <div class="save-success__message">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
-          <div>
-            <h2>Nearby Schools saved</h2>
+        <div>
+          <h2>Nearby Schools saved</h2>
 
-            <p>
-              The school information has been added
-              to your listing.
-            </p>
-          </div>
+          <p>
+            {{
+            wizardMode()
+            ? 'The school information was saved to this listing draft.'
+            : 'The school information has been added to your listing.'
+            }}
+          </p>
         </div>
+      </div>
 
-        <div class="save-success__actions">
-          <button
-            type="button"
-            class="secondary-button"
-            (click)="returnToEnhancements()"
-          >
-            Return to Enhancements
-          </button>
+      <div class="save-success__actions">
+        <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+          {{
+          wizardMode()
+          ? 'Return to Property Details'
+          : 'Return to Enhancements'
+          }}
+        </button>
 
-          <button
-            type="button"
-            class="primary-button"
-            (click)="viewListing()"
-          >
-            View Listing
-          </button>
-        </div>
-      </section>
+        @if (!wizardMode()) {
+        <button type="button" class="primary-button" (click)="viewListing()">
+          View Listing
+        </button>
+        }
+      </div>
+    </section>
     } @else {
-      <footer class="section-footer">
-        <div
-          class="save-status"
-          aria-live="polite"
-        >
-          @if (
-            isLoading() ||
-            isSaving()
-          ) {
-            <i
-              class="fa-solid fa-spinner fa-spin"
-              aria-hidden="true"
-            ></i>
+    <footer class="section-footer">
+      <div class="save-status" aria-live="polite">
+        @if (
+        isLoading() ||
+        isSaving()
+        ) {
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+        } @else if (saveError()) {
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+        }
+
+        <span>
+          @if (isLoading()) {
+          Loading saved details...
+          } @else if (isSaving()) {
+          Saving...
           } @else if (saveError()) {
-            <i
-              class="fa-solid fa-circle-exclamation"
-              aria-hidden="true"
-            ></i>
+          {{ saveError() }}
+          } @else if (hasChanges()) {
+          Unsaved changes
           }
+        </span>
+      </div>
 
-          <span>
-            @if (isLoading()) {
-              Loading saved details...
-            } @else if (isSaving()) {
-              Saving...
-            } @else if (saveError()) {
-              {{ saveError() }}
-            } @else if (hasChanges()) {
-              Unsaved changes
-            }
-          </span>
-        </div>
+      <div class="section-footer__actions">
+        <button type="button" class="secondary-button" [disabled]="isLoading() || isSaving()"
+          (click)="returnToEnhancements()">
+          {{
+          wizardMode()
+          ? 'Return to Property Details'
+          : 'Return to Enhancements'
+          }}
+        </button>
 
-        <div class="section-footer__actions">
-          <button
-            type="button"
-            class="secondary-button"
-            [disabled]="
-              isLoading() ||
-              isSaving()
-            "
-            (click)="returnToEnhancements()"
-          >
-            Return to Enhancements
-          </button>
-
-          <button
-            type="submit"
-            class="primary-button"
-            [disabled]="
+        <button type="submit" class="primary-button" [disabled]="
               isLoading() ||
               isSaving() ||
               !hasChanges()
-            "
-          >
-            @if (isSaving()) {
-              <i
-                class="fa-solid fa-spinner fa-spin"
-                aria-hidden="true"
-              ></i>
+            ">
+          @if (isSaving()) {
+          <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
-              <span>Saving...</span>
-            } @else {
-              <i
-                class="fa-solid fa-floppy-disk"
-                aria-hidden="true"
-              ></i>
+          <span>Saving...</span>
+          } @else {
+          <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
 
-              <span>Save Nearby Schools</span>
-            }
-          </button>
-        </div>
-      </footer>
+          <span>Save Nearby Schools</span>
+          }
+        </button>
+      </div>
+    </footer>
     }
   </form>
 </section>

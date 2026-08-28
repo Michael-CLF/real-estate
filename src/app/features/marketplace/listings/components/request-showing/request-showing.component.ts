@@ -35,6 +35,10 @@ import {
   ShowingService
 } from '../../../../../core/domains/showings/services/showing.service';
 
+import {
+  AnalyticsDataLayerService
+} from '../../../../../core/analytics/analytics-data-layer.service';
+
 interface ShowingDateOption {
   date: string;
   dayLabel: string;
@@ -66,6 +70,9 @@ export class RequestShowingComponent
 
   private readonly formBuilder =
     inject(FormBuilder);
+
+  private readonly analytics =
+    inject(AnalyticsDataLayerService);
 
   readonly listingUid =
     input.required<string>();
@@ -273,11 +280,11 @@ export class RequestShowingComponent
 
     return (
       selectedSlot?.date ===
-        slot.date &&
+      slot.date &&
       selectedSlot?.startTime ===
-        slot.startTime &&
+      slot.startTime &&
       selectedSlot?.endTime ===
-        slot.endTime
+      slot.endTime
     );
   }
 
@@ -396,6 +403,14 @@ export class RequestShowingComponent
           buyerMessage:
             formValue.buyerMessage.trim()
         });
+
+      this.analytics.track(
+        'showing_requested',
+        {
+          listing_id:
+            this.listingUid()
+        }
+      );
 
       this.submittedTime.set({
         date:
@@ -724,9 +739,9 @@ export class RequestShowingComponent
     const earliestAllowedTime =
       Date.now() +
       minimumNoticeHours *
-        60 *
-        60 *
-        1000;
+      60 *
+      60 *
+      1000;
 
     return (
       slotDate.getTime() >=

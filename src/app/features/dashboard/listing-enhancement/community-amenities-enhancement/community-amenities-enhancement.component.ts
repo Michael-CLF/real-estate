@@ -4,8 +4,11 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
+
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
@@ -23,11 +26,11 @@ interface CommunityAmenity {
   label: string;
   description?: string;
   category:
-    | 'recreation'
-    | 'outdoor'
-    | 'neighborhood'
-    | 'water'
-    | 'services';
+  | 'recreation'
+  | 'outdoor'
+  | 'neighborhood'
+  | 'water'
+  | 'services';
 }
 
 @Component({
@@ -39,24 +42,33 @@ interface CommunityAmenity {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CommunityAmenitiesEnhancementComponent
-  implements OnInit
-{
+  implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly recreationAmenities: readonly CommunityAmenity[] = [
     {
-      id: 'communityPool',
-      label: 'Community Pool',
-      category: 'recreation',
-    },
-    {
-      id: 'indoorPool',
-      label: 'Indoor Pool',
+      id: 'basketballCourts',
+      label: 'Basketball Courts',
       category: 'recreation',
     },
     {
@@ -65,38 +77,8 @@ export class CommunityAmenitiesEnhancementComponent
       category: 'recreation',
     },
     {
-      id: 'fitnessCenter',
-      label: 'Fitness Center',
-      category: 'recreation',
-    },
-    {
-      id: 'tennisCourts',
-      label: 'Tennis Courts',
-      category: 'recreation',
-    },
-    {
-      id: 'pickleballCourts',
-      label: 'Pickleball Courts',
-      category: 'recreation',
-    },
-    {
-      id: 'basketballCourts',
-      label: 'Basketball Courts',
-      category: 'recreation',
-    },
-    {
-      id: 'volleyballCourts',
-      label: 'Volleyball Courts',
-      category: 'recreation',
-    },
-    {
-      id: 'golfCourse',
-      label: 'Golf Course',
-      category: 'recreation',
-    },
-    {
-      id: 'playground',
-      label: 'Playground',
+      id: 'communityEventSpace',
+      label: 'Community Event Space',
       category: 'recreation',
     },
     {
@@ -105,21 +87,61 @@ export class CommunityAmenitiesEnhancementComponent
       category: 'recreation',
     },
     {
-      id: 'communityEventSpace',
-      label: 'Community Event Space',
+      id: 'communityPool',
+      label: 'Community Pool',
+      category: 'recreation',
+    },
+    {
+      id: 'fitnessCenter',
+      label: 'Fitness Center',
+      category: 'recreation',
+    },
+    {
+      id: 'golfCourse',
+      label: 'Golf Course',
+      category: 'recreation',
+    },
+    {
+      id: 'indoorPool',
+      label: 'Indoor Pool',
+      category: 'recreation',
+    },
+    {
+      id: 'pickleballCourts',
+      label: 'Pickleball Courts',
+      category: 'recreation',
+    },
+    {
+      id: 'playground',
+      label: 'Playground',
+      category: 'recreation',
+    },
+    {
+      id: 'tennisCourts',
+      label: 'Tennis Courts',
+      category: 'recreation',
+    },
+    {
+      id: 'volleyballCourts',
+      label: 'Volleyball Courts',
       category: 'recreation',
     },
   ];
 
   readonly outdoorAmenities: readonly CommunityAmenity[] = [
     {
-      id: 'walkingTrails',
-      label: 'Walking Trails',
+      id: 'bikingTrails',
+      label: 'Biking Trails',
       category: 'outdoor',
     },
     {
-      id: 'bikingTrails',
-      label: 'Biking Trails',
+      id: 'communityGarden',
+      label: 'Community Garden',
+      category: 'outdoor',
+    },
+    {
+      id: 'greenSpace',
+      label: 'Community Green Space',
       category: 'outdoor',
     },
     {
@@ -133,11 +155,6 @@ export class CommunityAmenitiesEnhancementComponent
       category: 'outdoor',
     },
     {
-      id: 'communityGarden',
-      label: 'Community Garden',
-      category: 'outdoor',
-    },
-    {
       id: 'picnicArea',
       label: 'Picnic Area',
       category: 'outdoor',
@@ -148,13 +165,25 @@ export class CommunityAmenitiesEnhancementComponent
       category: 'outdoor',
     },
     {
-      id: 'greenSpace',
-      label: 'Community Green Space',
+      id: 'walkingTrails',
+      label: 'Walking Trails',
       category: 'outdoor',
     },
   ];
 
   readonly neighborhoodAmenities: readonly CommunityAmenity[] = [
+    {
+      id: 'activeAdultCommunity',
+      label: 'Active Adult Community',
+      description:
+        'The property is located within a community designed for residents aged 55 or older.',
+      category: 'neighborhood',
+    },
+    {
+      id: 'communityFirePit',
+      label: 'Community Fire Pit',
+      category: 'neighborhood',
+    },
     {
       id: 'gatedCommunity',
       label: 'Gated Community',
@@ -180,39 +209,12 @@ export class CommunityAmenitiesEnhancementComponent
       label: 'Tree-Lined Streets',
       category: 'neighborhood',
     },
-    {
-      id: 'communityFirePit',
-      label: 'Community Fire Pit',
-      category: 'neighborhood',
-    },
-    {
-      id: 'activeAdultCommunity',
-      label: 'Active Adult Community',
-      description:
-        'The property is located within a community designed for residents aged 55 or older.',
-      category: 'neighborhood',
-    },
   ];
 
   readonly waterAmenities: readonly CommunityAmenity[] = [
     {
-      id: 'lakeAccess',
-      label: 'Lake Access',
-      category: 'water',
-    },
-    {
       id: 'beachAccess',
       label: 'Beach Access',
-      category: 'water',
-    },
-    {
-      id: 'riverAccess',
-      label: 'River Access',
-      category: 'water',
-    },
-    {
-      id: 'communityDock',
-      label: 'Community Dock',
       category: 'water',
     },
     {
@@ -221,13 +223,28 @@ export class CommunityAmenitiesEnhancementComponent
       category: 'water',
     },
     {
+      id: 'boatStorage',
+      label: 'Community Boat Storage',
+      category: 'water',
+    },
+    {
+      id: 'communityDock',
+      label: 'Community Dock',
+      category: 'water',
+    },
+    {
+      id: 'lakeAccess',
+      label: 'Lake Access',
+      category: 'water',
+    },
+    {
       id: 'marina',
       label: 'Marina',
       category: 'water',
     },
     {
-      id: 'boatStorage',
-      label: 'Community Boat Storage',
+      id: 'riverAccess',
+      label: 'River Access',
       category: 'water',
     },
   ];
@@ -239,8 +256,18 @@ export class CommunityAmenitiesEnhancementComponent
       category: 'services',
     },
     {
+      id: 'communitySecurity',
+      label: 'Community Security',
+      category: 'services',
+    },
+    {
       id: 'exteriorMaintenance',
       label: 'Exterior Maintenance Included',
+      category: 'services',
+    },
+    {
+      id: 'onsiteManagement',
+      label: 'On-Site Community Management',
       category: 'services',
     },
     {
@@ -251,16 +278,6 @@ export class CommunityAmenitiesEnhancementComponent
     {
       id: 'trashPickup',
       label: 'Trash Pickup Included',
-      category: 'services',
-    },
-    {
-      id: 'communitySecurity',
-      label: 'Community Security',
-      category: 'services',
-    },
-    {
-      id: 'onsiteManagement',
-      label: 'On-Site Community Management',
       category: 'services',
     },
   ];
@@ -322,28 +339,54 @@ export class CommunityAmenitiesEnhancementComponent
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedAmenityIds.set(
+        new Set(
+          this.currentEnhancements
+            .communityAmenities ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(
-          listingUid,
-        );
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
         this.saveError.set(
-          'The selected listing could not be found.',
+          'The selected listing could not be found.'
         );
+
         return;
       }
 
@@ -352,17 +395,20 @@ export class CommunityAmenitiesEnhancementComponent
 
       this.selectedAmenityIds.set(
         new Set(
-          this.currentEnhancements.communityAmenities ?? [],
-        ),
+          this.currentEnhancements
+            .communityAmenities ?? []
+        )
       );
+
+      this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
         'Unable to load community amenities:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved community amenities.',
+        'We could not load the saved community amenities.'
       );
     } finally {
       this.isLoading.set(false);
@@ -400,84 +446,138 @@ export class CommunityAmenitiesEnhancementComponent
     this.lastSavedAt.set(null);
   }
 
-  async saveSection(): Promise<void> {
-    if (this.isSaving() || this.isLoading()) {
+  async saveSection():
+    Promise<void> {
+    if (
+      this.isSaving() ||
+      this.isLoading() ||
+      !this.hasChanges()
+    ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap
+          .get('listingUid');
 
     const sellerUid =
       this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
+
       return;
     }
+
+    const updatedEnhancements:
+      ListingEnhancements = {
+      ...this.currentEnhancements,
+
+      communityAmenities:
+        Array.from(
+          this.selectedAmenityIds()
+        ).sort(
+          (
+            firstId,
+            secondId
+          ) =>
+            firstId.localeCompare(
+              secondId
+            )
+        )
+    };
 
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const updatedEnhancements: ListingEnhancements = {
-      ...this.currentEnhancements,
-      communityAmenities: Array.from(
-        this.selectedAmenityIds(),
-      ),
-    };
-
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
-      );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
 
       this.currentEnhancements =
         updatedEnhancements;
 
       this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+
+      this.lastSavedAt.set(
+        new Date()
+      );
+
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save community amenities:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save these community amenities. Please try again.',
+        'We could not save these community amenities. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

@@ -1,12 +1,14 @@
 <section class="enhancement-section">
   <header class="section-header">
-    <button
-      type="button"
-      class="back-button"
-      (click)="returnToEnhancements()"
-    >
+    <button type="button" class="back-button" (click)="returnToEnhancements()">
       <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-      <span>All enhancements</span>
+      <span>
+        {{
+        wizardMode()
+        ? 'All property details'
+        : 'All enhancements'
+        }}
+      </span>
     </button>
 
     <div class="section-header__content">
@@ -16,7 +18,11 @@
 
       <div>
         <p class="section-header__eyebrow">
-          Optional listing enhancement
+          {{
+          wizardMode()
+          ? 'Property details and amenities'
+          : 'Optional listing enhancement'
+          }}
         </p>
 
         <h1>Parking &amp; Storage</h1>
@@ -44,21 +50,13 @@
     </div>
 
     @if (selectedFeatureCount() > 0) {
-      <button
-        type="button"
-        class="clear-button"
-        [disabled]="isSaving()"
-        (click)="clearSelections()"
-      >
-        Clear selections
-      </button>
+    <button type="button" class="clear-button" [disabled]="isLoading() || isSaving()" (click)="clearSelections()">
+      Clear selections
+    </button>
     }
   </div>
 
-  <section
-    class="feature-group"
-    aria-labelledby="garage-heading"
-  >
+  <section class="feature-group" aria-labelledby="garage-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-warehouse"></i>
@@ -76,40 +74,31 @@
 
     <div class="feature-grid">
       @for (feature of garageFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="covered-parking-heading"
-  >
+  <section class="feature-group" aria-labelledby="covered-parking-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-car-side"></i>
@@ -129,40 +118,31 @@
 
     <div class="feature-grid">
       @for (feature of coveredParkingFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="driveway-heading"
-  >
+  <section class="feature-group" aria-labelledby="driveway-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-road"></i>
@@ -182,40 +162,31 @@
 
     <div class="feature-grid">
       @for (feature of drivewayFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="specialty-parking-heading"
-  >
+  <section class="feature-group" aria-labelledby="specialty-parking-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-truck"></i>
@@ -235,40 +206,31 @@
 
     <div class="feature-grid">
       @for (feature of specialtyParkingFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="ev-heading"
-  >
+  <section class="feature-group" aria-labelledby="ev-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-charging-station"></i>
@@ -288,40 +250,31 @@
 
     <div class="feature-grid">
       @for (feature of evFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="interior-storage-heading"
-  >
+  <section class="feature-group" aria-labelledby="interior-storage-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-boxes-stacked"></i>
@@ -341,40 +294,31 @@
 
     <div class="feature-grid">
       @for (feature of interiorStorageFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="exterior-storage-heading"
-  >
+  <section class="feature-group" aria-labelledby="exterior-storage-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-shed"></i>
@@ -394,40 +338,31 @@
 
     <div class="feature-grid">
       @for (feature of exteriorStorageFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
-  <section
-    class="feature-group"
-    aria-labelledby="workshop-heading"
-  >
+  <section class="feature-group" aria-labelledby="workshop-heading">
     <div class="feature-group__heading">
       <div class="feature-group__icon" aria-hidden="true">
         <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -447,126 +382,99 @@
 
     <div class="feature-grid">
       @for (feature of workshopFeatures; track feature.id) {
-        <button
-          type="button"
-          class="feature-card"
-          [class.feature-card--selected]="isSelected(feature.id)"
-          [attr.aria-pressed]="isSelected(feature.id)"
-          [disabled]="isSaving()"
-          (click)="toggleFeature(feature.id)"
-        >
-          <span class="feature-card__checkbox" aria-hidden="true">
-            @if (isSelected(feature.id)) {
-              <i class="fa-solid fa-check"></i>
-            }
+      <button type="button" class="feature-card" [class.feature-card--selected]="isSelected(feature.id)"
+        [attr.aria-pressed]="isSelected(feature.id)" [disabled]="isLoading() || isSaving()" (click)="toggleFeature(feature.id)">
+        <span class="feature-card__checkbox" aria-hidden="true">
+          @if (isSelected(feature.id)) {
+          <i class="fa-solid fa-check"></i>
+          }
+        </span>
+
+        <span class="feature-card__content">
+          <span class="feature-card__label">
+            {{ feature.label }}
           </span>
 
-          <span class="feature-card__content">
-            <span class="feature-card__label">
-              {{ feature.label }}
-            </span>
-
-            @if (feature.description) {
-              <span class="feature-card__description">
-                {{ feature.description }}
-              </span>
-            }
+          @if (feature.description) {
+          <span class="feature-card__description">
+            {{ feature.description }}
           </span>
-        </button>
+          }
+        </span>
+      </button>
       }
     </div>
   </section>
 
- @if (lastSavedAt() && !hasChanges() && !saveError()) {
-  <section
-    class="save-success"
-    role="status"
-    aria-live="polite"
-  >
+  @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section class="save-success" role="status" aria-live="polite">
     <div class="save-success__message">
-      <i
-        class="fa-solid fa-circle-check"
-        aria-hidden="true"
-      ></i>
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
       <div>
         <h2>Parking &amp; Storage saved</h2>
 
         <p>
-          Your selections have been added to your listing.
+          {{
+          wizardMode()
+          ? 'Your selections were saved to this listing draft.'
+          : 'Your selections have been added to your listing.'
+          }}
         </p>
       </div>
     </div>
 
     <div class="save-success__actions">
-      <button
-        type="button"
-        class="secondary-button"
-        (click)="returnToEnhancements()"
-      >
-        Return to Enhancements
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
-      <button
-        type="button"
-        class="primary-button"
-        (click)="viewListing()"
-      >
+      @if (!wizardMode()) {
+      <button type="button" class="primary-button" (click)="viewListing()">
         View Listing
       </button>
+      }
     </div>
   </section>
-} @else {
+  } @else {
   <footer class="section-footer">
     <div class="save-status" aria-live="polite">
       @if (isLoading() || isSaving()) {
-        <i
-          class="fa-solid fa-spinner fa-spin"
-          aria-hidden="true"
-        ></i>
+      <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
       } @else if (saveError()) {
-        <i
-          class="fa-solid fa-circle-exclamation"
-          aria-hidden="true"
-        ></i>
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
       }
 
       <span>{{ saveStatusText() }}</span>
     </div>
 
     <div class="section-footer__actions">
-      <button
-        type="button"
-        class="secondary-button"
-        [disabled]="isLoading() || isSaving()"
-        (click)="returnToEnhancements()"
-      >
-        Return to Enhancements
+      <button type="button" class="secondary-button" [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()">
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
-      <button
-        type="button"
-        class="primary-button"
-        [disabled]="isLoading() || isSaving() || !hasChanges()"
-        (click)="saveSection()"
-      >
+      <button type="button" class="primary-button" [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()">
         @if (isSaving()) {
-          <i
-            class="fa-solid fa-spinner fa-spin"
-            aria-hidden="true"
-          ></i>
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
-          <span>Saving...</span>
+        <span>Saving...</span>
         } @else {
-          <i
-            class="fa-solid fa-floppy-disk"
-            aria-hidden="true"
-          ></i>
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
 
-          <span>Save Parking &amp; Storage</span>
+        <span>Save Parking &amp; Storage</span>
         }
       </button>
     </div>
   </footer>
-}
+  }
 </section>

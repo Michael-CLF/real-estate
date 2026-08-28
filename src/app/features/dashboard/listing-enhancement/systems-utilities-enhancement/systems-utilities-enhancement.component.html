@@ -1,25 +1,55 @@
 <section class="enhancement-section">
   <header class="section-header">
-    <button type="button" class="back-button" (click)="returnToEnhancements()">
-      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-      <span>All enhancements</span>
+    <button
+      type="button"
+      class="back-button"
+      (click)="returnToEnhancements()"
+    >
+      <i
+        class="fa-solid fa-arrow-left"
+        aria-hidden="true"
+      ></i>
+
+      <span>
+        {{
+          wizardMode()
+            ? 'All property details'
+            : 'All enhancements'
+        }}
+      </span>
     </button>
 
     <div class="section-header__content">
-      <div class="section-header__icon" aria-hidden="true">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
+      <div
+        class="section-header__icon"
+        aria-hidden="true"
+      >
+        <i
+          class="
+            fa-solid
+            fa-screwdriver-wrench
+          "
+        ></i>
       </div>
 
       <div>
         <p class="section-header__eyebrow">
-          Optional listing enhancement
+          {{
+            wizardMode()
+              ? 'Property details and amenities'
+              : 'Optional listing enhancement'
+          }}
         </p>
 
-        <h1>Systems &amp; Utilities</h1>
+        <h1>
+          Systems &amp; Utilities
+        </h1>
 
         <p class="section-header__description">
-          Describe the property’s heating, cooling, electrical, plumbing,
-          water, sewer, fuel, renewable-energy, and backup utility systems.
+          Describe the property’s heating,
+          cooling, electrical, plumbing, water,
+          sewer, fuel, renewable-energy, and
+          backup utility systems.
         </p>
       </div>
     </div>
@@ -482,96 +512,75 @@
     </div>
   </section>
 
- @if (lastSavedAt() && !hasChanges() && !saveError()) {
-  <section
-    class="save-success"
-    role="status"
-    aria-live="polite"
-  >
+  @if (lastSavedAt() && !hasChanges() && !saveError()) {
+  <section class="save-success" role="status" aria-live="polite">
     <div class="save-success__message">
-      <i
-        class="fa-solid fa-circle-check"
-        aria-hidden="true"
-      ></i>
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
       <div>
         <h2>Systems &amp; Utilities saved</h2>
 
         <p>
-          Your selections have been added to your listing.
+          {{
+          wizardMode()
+          ? 'Your selections were saved to this listing draft.'
+          : 'Your selections have been added to your listing.'
+          }}
         </p>
       </div>
     </div>
 
     <div class="save-success__actions">
-      <button
-        type="button"
-        class="secondary-button"
-        (click)="returnToEnhancements()"
-      >
-        Return to Enhancements
+      <button type="button" class="secondary-button" (click)="returnToEnhancements()">
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
-      <button
-        type="button"
-        class="primary-button"
-        (click)="viewListing()"
-      >
+      @if (!wizardMode()) {
+      <button type="button" class="primary-button" (click)="viewListing()">
         View Listing
       </button>
+      }
     </div>
   </section>
-} @else {
+  } @else {
   <footer class="section-footer">
     <div class="save-status" aria-live="polite">
       @if (isLoading() || isSaving()) {
-        <i
-          class="fa-solid fa-spinner fa-spin"
-          aria-hidden="true"
-        ></i>
+      <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
       } @else if (saveError()) {
-        <i
-          class="fa-solid fa-circle-exclamation"
-          aria-hidden="true"
-        ></i>
+      <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
       }
 
       <span>{{ saveStatusText() }}</span>
     </div>
 
     <div class="section-footer__actions">
-      <button
-        type="button"
-        class="secondary-button"
-        [disabled]="isLoading() || isSaving()"
-        (click)="returnToEnhancements()"
-      >
-        Return to Enhancements
+      <button type="button" class="secondary-button" [disabled]="isLoading() || isSaving()"
+        (click)="returnToEnhancements()">
+        {{
+        wizardMode()
+        ? 'Return to Property Details'
+        : 'Return to Enhancements'
+        }}
       </button>
 
-      <button
-        type="button"
-        class="primary-button"
-        [disabled]="isLoading() || isSaving() || !hasChanges()"
-        (click)="saveSection()"
-      >
+      <button type="button" class="primary-button" [disabled]="isLoading() || isSaving() || !hasChanges()"
+        (click)="saveSection()">
         @if (isSaving()) {
-          <i
-            class="fa-solid fa-spinner fa-spin"
-            aria-hidden="true"
-          ></i>
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
-          <span>Saving...</span>
+        <span>Saving...</span>
         } @else {
-          <i
-            class="fa-solid fa-floppy-disk"
-            aria-hidden="true"
-          ></i>
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
 
-          <span>Save Systems &amp; Utilities</span>
+        <span>Save Systems &amp; Utilities</span>
         }
       </button>
     </div>
   </footer>
-}
+  }
 </section>

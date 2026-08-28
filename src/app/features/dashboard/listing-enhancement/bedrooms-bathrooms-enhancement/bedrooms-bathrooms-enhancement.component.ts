@@ -4,7 +4,9 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
@@ -40,16 +42,52 @@ interface BedroomBathroomFeature {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BedroomsBathroomsEnhancementComponent
-  implements OnInit
-{
+  implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly bedroomFeatures: readonly BedroomBathroomFeature[] = [
+    {
+      id: 'ensuiteBedroom',
+      label: 'Additional Ensuite Bedroom',
+      description:
+        'A secondary bedroom with its own private bathroom.',
+      category: 'bedrooms',
+    },
+    {
+      id: 'customClosetSystem',
+      label: 'Custom Closet System',
+      category: 'bedrooms',
+    },
+    {
+      id: 'dualPrimarySuites',
+      label: 'Dual Primary Suites',
+      category: 'bedrooms',
+    },
+    {
+      id: 'guestSuite',
+      label: 'Guest Suite',
+      category: 'bedrooms',
+    },
     {
       id: 'mainFloorPrimaryBedroom',
       label: 'Main-Floor Primary Bedroom',
@@ -58,18 +96,8 @@ export class BedroomsBathroomsEnhancementComponent
       category: 'bedrooms',
     },
     {
-      id: 'walkInCloset',
-      label: 'Walk-In Closet',
-      category: 'bedrooms',
-    },
-    {
       id: 'multipleWalkInClosets',
       label: 'Multiple Walk-In Closets',
-      category: 'bedrooms',
-    },
-    {
-      id: 'customClosetSystem',
-      label: 'Custom Closet System',
       category: 'bedrooms',
     },
     {
@@ -83,13 +111,6 @@ export class BedroomsBathroomsEnhancementComponent
       category: 'bedrooms',
     },
     {
-      id: 'ensuiteBedroom',
-      label: 'Additional Ensuite Bedroom',
-      description:
-        'A secondary bedroom with its own private bathroom.',
-      category: 'bedrooms',
-    },
-    {
       id: 'splitBedroomLayout',
       label: 'Split-Bedroom Layout',
       description:
@@ -97,21 +118,66 @@ export class BedroomsBathroomsEnhancementComponent
       category: 'bedrooms',
     },
     {
-      id: 'guestSuite',
-      label: 'Guest Suite',
-      category: 'bedrooms',
-    },
-    {
-      id: 'dualPrimarySuites',
-      label: 'Dual Primary Suites',
+      id: 'walkInCloset',
+      label: 'Walk-In Closet',
       category: 'bedrooms',
     },
   ];
 
   readonly bathroomFeatures: readonly BedroomBathroomFeature[] = [
     {
+      id: 'linenStorage',
+      label: 'Built-In Linen Storage',
+      category: 'bathrooms',
+    },
+    {
       id: 'doubleVanity',
       label: 'Double Vanity',
+      category: 'bathrooms',
+    },
+    {
+      id: 'framelessGlassShower',
+      label: 'Frameless Glass Shower',
+      category: 'bathrooms',
+    },
+    {
+      id: 'heatedBathroomFloors',
+      label: 'Heated Bathroom Floors',
+      category: 'bathrooms',
+    },
+    {
+      id: 'jettedTub',
+      label: 'Jetted Tub',
+      category: 'bathrooms',
+    },
+    {
+      id: 'makeupVanity',
+      label: 'Makeup Vanity',
+      category: 'bathrooms',
+    },
+    {
+      id: 'multipleShowerHeads',
+      label: 'Multiple Shower Heads',
+      category: 'bathrooms',
+    },
+    {
+      id: 'primaryEnsuiteBathroom',
+      label: 'Primary Ensuite Bathroom',
+      category: 'bathrooms',
+    },
+    {
+      id: 'privateWaterCloset',
+      label: 'Private Water Closet',
+      category: 'bathrooms',
+    },
+    {
+      id: 'rainfallShower',
+      label: 'Rainfall Shower',
+      category: 'bathrooms',
+    },
+    {
+      id: 'separateShower',
+      label: 'Separate Shower',
       category: 'bathrooms',
     },
     {
@@ -125,48 +191,8 @@ export class BedroomsBathroomsEnhancementComponent
       category: 'bathrooms',
     },
     {
-      id: 'jettedTub',
-      label: 'Jetted Tub',
-      category: 'bathrooms',
-    },
-    {
       id: 'walkInShower',
       label: 'Walk-In Shower',
-      category: 'bathrooms',
-    },
-    {
-      id: 'framelessGlassShower',
-      label: 'Frameless Glass Shower',
-      category: 'bathrooms',
-    },
-    {
-      id: 'rainfallShower',
-      label: 'Rainfall Shower',
-      category: 'bathrooms',
-    },
-    {
-      id: 'multipleShowerHeads',
-      label: 'Multiple Shower Heads',
-      category: 'bathrooms',
-    },
-    {
-      id: 'heatedBathroomFloors',
-      label: 'Heated Bathroom Floors',
-      category: 'bathrooms',
-    },
-    {
-      id: 'privateWaterCloset',
-      label: 'Private Water Closet',
-      category: 'bathrooms',
-    },
-    {
-      id: 'linenStorage',
-      label: 'Built-In Linen Storage',
-      category: 'bathrooms',
-    },
-    {
-      id: 'makeupVanity',
-      label: 'Makeup Vanity',
       category: 'bathrooms',
     },
   ];
@@ -222,28 +248,52 @@ export class BedroomsBathroomsEnhancementComponent
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .bedroomsBathrooms ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(
-          listingUid,
-        );
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
         this.saveError.set(
-          'The selected listing could not be found.',
+          'The selected listing could not be found.'
         );
 
         return;
@@ -254,17 +304,20 @@ export class BedroomsBathroomsEnhancementComponent
 
       this.selectedFeatureIds.set(
         new Set(
-          this.currentEnhancements.bedroomsBathrooms ?? [],
-        ),
+          this.currentEnhancements
+            .bedroomsBathrooms ?? []
+        )
       );
+
+      this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
         'Unable to load bedroom and bathroom enhancements:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved bedroom and bathroom details.',
+        'We could not load the saved bedroom and bathroom details.'
       );
     } finally {
       this.isLoading.set(false);
@@ -300,20 +353,29 @@ export class BedroomsBathroomsEnhancementComponent
     this.saveError.set(null);
   }
 
-  async saveSection(): Promise<void> {
-    if (this.isSaving() || this.isLoading()) {
+  async saveSection():
+    Promise<void> {
+    if (
+      this.isSaving() ||
+      this.isLoading() ||
+      !this.hasChanges()
+    ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap
+          .get('listingUid');
 
     const sellerUid =
       this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -321,58 +383,99 @@ export class BedroomsBathroomsEnhancementComponent
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
 
       return;
     }
 
+    const updatedEnhancements:
+      ListingEnhancements = {
+      ...this.currentEnhancements,
+
+      bedroomsBathrooms:
+        Array.from(
+          this.selectedFeatureIds()
+        ).sort(
+          (
+            firstId,
+            secondId
+          ) =>
+            firstId.localeCompare(
+              secondId
+            )
+        )
+    };
+
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const bedroomBathroomSelections =
-      Array.from(this.selectedFeatureIds());
-
-    const updatedEnhancements: ListingEnhancements = {
-      ...this.currentEnhancements,
-      bedroomsBathrooms: bedroomBathroomSelections,
-    };
-
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
-      );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
 
       this.currentEnhancements =
         updatedEnhancements;
 
       this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+
+      this.lastSavedAt.set(
+        new Date()
+      );
+
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save bedroom and bathroom enhancements:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save these bedroom and bathroom details. Please try again.',
+        'We could not save these bedroom and bathroom details. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -381,7 +484,7 @@ export class BedroomsBathroomsEnhancementComponent
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

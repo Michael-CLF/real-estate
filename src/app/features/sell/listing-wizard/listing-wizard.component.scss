@@ -131,7 +131,7 @@
   padding: 2.5rem;
   border: 1px solid #dbe3ec;
   border-radius: 14px;
-  background: #fff;
+  background: #f3f8f8;
 }
 
 .wizard-navigation {
@@ -158,7 +158,7 @@
   font-weight: 600;
 }
 
-.wizard-save-success{
+.wizard-save-success {
   text-align: center;
 }
 
@@ -243,8 +243,7 @@
   font-weight: 800;
 }
 
-.verification-preparation
-.verification-preparation__saved-message {
+.verification-preparation .verification-preparation__saved-message {
   color: #a9c0cf;
   font-size: .925rem;
 }

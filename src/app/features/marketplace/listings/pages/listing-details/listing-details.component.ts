@@ -23,6 +23,10 @@ import {
 } from '../../components/request-showing/request-showing.component';
 
 import {
+  AnalyticsDataLayerService
+} from '../../../../../core/analytics/analytics-data-layer.service';
+
+import {
   catchError,
   firstValueFrom,
   map,
@@ -195,6 +199,9 @@ export class ListingDetailsComponent
   private readonly mortgageCostEstimationService =
     inject(MortgageCostEstimationService);
 
+  private readonly analytics =
+    inject(AnalyticsDataLayerService);
+
   readonly isSaved =
     signal(false);
 
@@ -281,13 +288,22 @@ export class ListingDetailsComponent
       await firstValueFrom(
         this.viewModel$
       );
-
     if (!viewModel.listing) {
       return;
     }
 
-    this.displayedViewCount.set(
-      viewModel.listing.viewCount
+    this.analytics.track(
+      'listing_viewed',
+      {
+        listing_id:
+          viewModel.listing.uid,
+
+        property_type:
+          viewModel.listing.propertyType,
+
+        list_price:
+          viewModel.listing.price
+      }
     );
 
     /*
@@ -429,6 +445,20 @@ export class ListingDetailsComponent
 
         this.isSaved.set(false);
 
+        this.analytics.track(
+          'listing_unsaved',
+          {
+            listing_id:
+              listing.uid,
+
+            property_type:
+              listing.propertyType,
+
+            list_price:
+              listing.price
+          }
+        );
+
       } else {
         await this.saveListing(
           userUid,
@@ -462,6 +492,20 @@ export class ListingDetailsComponent
       );
 
     this.isSaved.set(true);
+
+    this.analytics.track(
+      'listing_saved',
+      {
+        listing_id:
+          listing.uid,
+
+        property_type:
+          listing.propertyType,
+
+        list_price:
+          listing.price
+      }
+    );
   }
 
   private createListingFacts(

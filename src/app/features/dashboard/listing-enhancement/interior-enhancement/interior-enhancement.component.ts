@@ -4,7 +4,9 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
@@ -44,22 +46,71 @@ export class LivingSpacesEnhancementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly livingSpaceFeatures: readonly LivingSpaceFeature[] = [
     {
-      id: 'openFloorPlan',
-      label: 'Open Floor Plan',
-      description:
-        'The main living areas flow together with minimal interior walls.',
+      id: 'basement',
+      label: 'Basement',
+    },
+    {
+      id: 'bonusRoom',
+      label: 'Bonus Room',
+    },
+    {
+      id: 'builtInShelving',
+      label: 'Built-In Shelving',
+    },
+    {
+      id: 'craftRoom',
+      label: 'Craft or Hobby Room',
+    },
+    {
+      id: 'homeOffice',
+      label: 'Dedicated Home Office',
+    },
+    {
+      id: 'exerciseRoom',
+      label: 'Exercise Room / Home Gym',
+    },
+    {
+      id: 'familyRoom',
+      label: 'Family Room',
+    },
+    {
+      id: 'finishedBasement',
+      label: 'Finished Basement',
+    },
+    {
+      id: 'fireplace',
+      label: 'Fireplace',
+    },
+    {
+      id: 'formalDiningRoom',
+      label: 'Formal Dining Room',
     },
     {
       id: 'formalLivingRoom',
       label: 'Formal Living Room',
     },
     {
-      id: 'familyRoom',
-      label: 'Family Room',
+      id: 'gameRoom',
+      label: 'Game Room',
     },
     {
       id: 'greatRoom',
@@ -68,56 +119,50 @@ export class LivingSpacesEnhancementComponent implements OnInit {
         'A large central living space combining multiple everyday functions.',
     },
     {
-      id: 'formalDiningRoom',
-      label: 'Formal Dining Room',
-    },
-    {
-      id: 'homeOffice',
-      label: 'Dedicated Home Office',
-    },
-    {
-      id: 'bonusRoom',
-      label: 'Bonus Room',
-    },
-    {
-      id: 'loft',
-      label: 'Loft',
-    },
-    {
-      id: 'sunroom',
-      label: 'Sunroom',
-    },
-    {
-      id: 'library',
-      label: 'Library',
-    },
-    {
-      id: 'mediaRoom',
-      label: 'Media Room',
+      id: 'hardwoodFloors',
+      label: 'Hardwood Floors',
     },
     {
       id: 'homeTheater',
       label: 'Home Theater',
     },
     {
-      id: 'gameRoom',
-      label: 'Game Room',
+      id: 'library',
+      label: 'Library',
     },
     {
-      id: 'exerciseRoom',
-      label: 'Exercise Room / Home Gym',
+      id: 'loft',
+      label: 'Loft',
     },
     {
-      id: 'craftRoom',
-      label: 'Craft or Hobby Room',
+      id: 'mediaRoom',
+      label: 'Media Room',
     },
     {
       id: 'mudroom',
       label: 'Mudroom',
     },
     {
-      id: 'finishedBasement',
-      label: 'Finished Basement',
+      id: 'multipleFireplaces',
+      label: 'Multiple Fireplaces',
+    },
+    {
+      id: 'openFloorPlan',
+      label: 'Open Floor Plan',
+      description:
+        'The main living areas flow together with minimal interior walls.',
+    },
+    {
+      id: 'sunroom',
+      label: 'Sunroom',
+    },
+    {
+      id: 'trayCeilings',
+      label: 'Tray Ceilings',
+    },
+    {
+      id: 'vaultedCeilings',
+      label: 'Vaulted Ceilings',
     },
     {
       id: 'walkOutBasement',
@@ -126,26 +171,6 @@ export class LivingSpacesEnhancementComponent implements OnInit {
     {
       id: 'wetBar',
       label: 'Wet Bar',
-    },
-    {
-      id: 'builtInShelving',
-      label: 'Built-In Shelving',
-    },
-    {
-      id: 'fireplace',
-      label: 'Fireplace',
-    },
-    {
-      id: 'multipleFireplaces',
-      label: 'Multiple Fireplaces',
-    },
-    {
-      id: 'vaultedCeilings',
-      label: 'Vaulted Ceilings',
-    },
-    {
-      id: 'trayCeilings',
-      label: 'Tray Ceilings',
     },
   ];
 
@@ -186,13 +211,35 @@ export class LivingSpacesEnhancementComponent implements OnInit {
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .interior ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       this.isLoading.set(false);
@@ -201,13 +248,14 @@ export class LivingSpacesEnhancementComponent implements OnInit {
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(
-          listingUid,
-        );
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
         this.saveError.set(
-          'The selected listing could not be found.',
+          'The selected listing could not be found.'
         );
 
         return;
@@ -218,17 +266,20 @@ export class LivingSpacesEnhancementComponent implements OnInit {
 
       this.selectedFeatureIds.set(
         new Set(
-          this.currentEnhancements.interior ?? [],
-        ),
+          this.currentEnhancements
+            .interior ?? []
+        )
       );
+
+      this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
         'Unable to load living-space enhancements:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved living-space details.',
+        'We could not load the saved living-space details.'
       );
     } finally {
       this.isLoading.set(false);
@@ -264,20 +315,29 @@ export class LivingSpacesEnhancementComponent implements OnInit {
     this.saveError.set(null);
   }
 
-  async saveSection(): Promise<void> {
-    if (this.isSaving() || this.isLoading()) {
+  async saveSection():
+    Promise<void> {
+    if (
+      this.isSaving() ||
+      this.isLoading() ||
+      !this.hasChanges()
+    ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap
+          .get('listingUid');
 
     const sellerUid =
       this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -285,58 +345,99 @@ export class LivingSpacesEnhancementComponent implements OnInit {
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
 
       return;
     }
 
+    const updatedEnhancements:
+      ListingEnhancements = {
+      ...this.currentEnhancements,
+
+      interior:
+        Array.from(
+          this.selectedFeatureIds()
+        ).sort(
+          (
+            firstId,
+            secondId
+          ) =>
+            firstId.localeCompare(
+              secondId
+            )
+        )
+    };
+
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const interiorSelections =
-      Array.from(this.selectedFeatureIds());
-
-    const updatedEnhancements: ListingEnhancements = {
-      ...this.currentEnhancements,
-      interior: interiorSelections,
-    };
-
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
-      );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
 
       this.currentEnhancements =
         updatedEnhancements;
 
       this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+
+      this.lastSavedAt.set(
+        new Date()
+      );
+
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save living-space enhancements:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save these living-space details. Please try again.',
+        'We could not save these living-space details. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -345,7 +446,7 @@ export class LivingSpacesEnhancementComponent implements OnInit {
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

@@ -35,6 +35,10 @@ import {
   ListingDraft
 } from '../../../core/domains/listings/models/listing.model';
 
+import {
+  AnalyticsDataLayerService
+} from '../../../core/analytics/analytics-data-layer.service';
+
 
 type PaymentReturnState =
   | 'processing'
@@ -58,6 +62,11 @@ export class PaymentReturnComponent
 
   private readonly router =
     inject(Router);
+
+  private readonly analytics =
+    inject(AnalyticsDataLayerService);
+
+  private purchaseTracked = false;
 
   private unsubscribeFromDraft:
     Unsubscribe | null = null;
@@ -149,12 +158,76 @@ export class PaymentReturnComponent
                   return;
                 }
 
+
                 if (
                   draft.publication.status ===
                   'published' &&
                   draft.publication.paymentStatus ===
                   'paid'
                 ) {
+                  if (!this.purchaseTracked) {
+                    const transactionId =
+                      draft.publication
+                        .stripePaymentIntentId ??
+                      draft.publication
+                        .stripeCheckoutSessionId ??
+                      listingUid;
+
+                    const storageKey =
+                      `navstreet_purchase_${transactionId}`;
+
+                    let wasPreviouslyTracked = false;
+
+                    try {
+                      wasPreviouslyTracked =
+                        localStorage.getItem(
+                          storageKey
+                        ) === 'true';
+                    } catch {
+                      wasPreviouslyTracked = false;
+                    }
+
+                    this.purchaseTracked = true;
+
+                    if (!wasPreviouslyTracked) {
+                      this.analytics.track(
+                        'purchase',
+                        {
+                          transaction_id:
+                            transactionId,
+
+                          listing_id:
+                            draft.publication
+                              .publishedListingUid ??
+                            listingUid,
+
+                          currency:
+                            'USD',
+
+                          value:
+                            draft.publication
+                              .paymentAmount ??
+                            0,
+
+                          featured_listing:
+                            draft.featuredListing
+                        }
+                      );
+
+                      try {
+                        localStorage.setItem(
+                          storageKey,
+                          'true'
+                        );
+                      } catch {
+                        /*
+                         * Analytics must not interfere with
+                         * successful publication.
+                         */
+                      }
+                    }
+                  }
+
                   this.pageState.set('published');
 
                   if (!this.redirectTimer) {

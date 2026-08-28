@@ -4,8 +4,11 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
+
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../../../core/authentication/services/auth.service';
@@ -17,14 +20,14 @@ interface ParkingStorageFeature {
   label: string;
   description?: string;
   category:
-    | 'garage'
-    | 'coveredParking'
-    | 'driveway'
-    | 'specialtyParking'
-    | 'ev'
-    | 'interiorStorage'
-    | 'exteriorStorage'
-    | 'workshop';
+  | 'garage'
+  | 'coveredParking'
+  | 'driveway'
+  | 'specialtyParking'
+  | 'ev'
+  | 'interiorStorage'
+  | 'exteriorStorage'
+  | 'workshop';
 }
 
 @Component({
@@ -41,64 +44,32 @@ export class ParkingStorageEnhancementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly garageFeatures: readonly ParkingStorageFeature[] = [
     {
+      id: 'airConditionedGarage',
+      label: 'Air-Conditioned Garage',
+      category: 'garage',
+    },
+    {
       id: 'attachedGarage',
       label: 'Attached Garage',
-      category: 'garage',
-    },
-    {
-      id: 'detachedGarage',
-      label: 'Detached Garage',
-      category: 'garage',
-    },
-    {
-      id: 'oneCarGarage',
-      label: 'One-Car Garage',
-      category: 'garage',
-    },
-    {
-      id: 'twoCarGarage',
-      label: 'Two-Car Garage',
-      category: 'garage',
-    },
-    {
-      id: 'threeCarGarage',
-      label: 'Three-Car Garage',
-      category: 'garage',
-    },
-    {
-      id: 'fourPlusCarGarage',
-      label: 'Four-or-More-Car Garage',
-      category: 'garage',
-    },
-    {
-      id: 'tandemGarage',
-      label: 'Tandem Garage',
-      description:
-        'A garage with parking spaces arranged one behind another.',
-      category: 'garage',
-    },
-    {
-      id: 'sideEntryGarage',
-      label: 'Side-Entry Garage',
-      category: 'garage',
-    },
-    {
-      id: 'rearEntryGarage',
-      label: 'Rear-Entry Garage',
-      category: 'garage',
-    },
-    {
-      id: 'frontEntryGarage',
-      label: 'Front-Entry Garage',
-      category: 'garage',
-    },
-    {
-      id: 'driveUnderGarage',
-      label: 'Drive-Under Garage',
       category: 'garage',
     },
     {
@@ -107,8 +78,18 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'garage',
     },
     {
-      id: 'oversizedGarage',
-      label: 'Oversized Garage',
+      id: 'detachedGarage',
+      label: 'Detached Garage',
+      category: 'garage',
+    },
+    {
+      id: 'driveUnderGarage',
+      label: 'Drive-Under Garage',
+      category: 'garage',
+    },
+    {
+      id: 'epoxyGarageFloor',
+      label: 'Epoxy Garage Floor',
       category: 'garage',
     },
     {
@@ -124,28 +105,13 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'garage',
     },
     {
-      id: 'insulatedGarage',
-      label: 'Insulated Garage',
+      id: 'fourPlusCarGarage',
+      label: 'Four-or-More-Car Garage',
       category: 'garage',
     },
     {
-      id: 'heatedGarage',
-      label: 'Heated Garage',
-      category: 'garage',
-    },
-    {
-      id: 'airConditionedGarage',
-      label: 'Air-Conditioned Garage',
-      category: 'garage',
-    },
-    {
-      id: 'garageWindows',
-      label: 'Garage Windows',
-      category: 'garage',
-    },
-    {
-      id: 'garageUtilitySink',
-      label: 'Garage Utility Sink',
+      id: 'frontEntryGarage',
+      label: 'Front-Entry Garage',
       category: 'garage',
     },
     {
@@ -154,8 +120,60 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'garage',
     },
     {
-      id: 'epoxyGarageFloor',
-      label: 'Epoxy Garage Floor',
+      id: 'garageUtilitySink',
+      label: 'Garage Utility Sink',
+      category: 'garage',
+    },
+    {
+      id: 'garageWindows',
+      label: 'Garage Windows',
+      category: 'garage',
+    },
+    {
+      id: 'heatedGarage',
+      label: 'Heated Garage',
+      category: 'garage',
+    },
+    {
+      id: 'insulatedGarage',
+      label: 'Insulated Garage',
+      category: 'garage',
+    },
+    {
+      id: 'oneCarGarage',
+      label: 'One-Car Garage',
+      category: 'garage',
+    },
+    {
+      id: 'oversizedGarage',
+      label: 'Oversized Garage',
+      category: 'garage',
+    },
+    {
+      id: 'rearEntryGarage',
+      label: 'Rear-Entry Garage',
+      category: 'garage',
+    },
+    {
+      id: 'sideEntryGarage',
+      label: 'Side-Entry Garage',
+      category: 'garage',
+    },
+    {
+      id: 'tandemGarage',
+      label: 'Tandem Garage',
+      description:
+        'A garage with parking spaces arranged one behind another.',
+      category: 'garage',
+    },
+    {
+      id: 'threeCarGarage',
+      label: 'Three-Car Garage',
+      category: 'garage',
+    },
+    {
+      id: 'twoCarGarage',
+      label: 'Two-Car Garage',
       category: 'garage',
     },
   ];
@@ -167,30 +185,13 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'coveredParking',
     },
     {
-      id: 'detachedCarport',
-      label: 'Detached Carport',
+      id: 'carport',
+      label: 'Carport',
       category: 'coveredParking',
     },
     {
-      id: 'oneCarCarport',
-      label: 'One-Car Carport',
-      category: 'coveredParking',
-    },
-    {
-      id: 'twoCarCarport',
-      label: 'Two-Car Carport',
-      category: 'coveredParking',
-    },
-    {
-      id: 'threePlusCarCarport',
-      label: 'Three-or-More-Car Carport',
-      category: 'coveredParking',
-    },
-    {
-      id: 'porteCochere',
-      label: 'Porte-Cochère',
-      description:
-        'A covered vehicle entrance attached to or positioned beside the home.',
+      id: 'coveredBoatParking',
+      label: 'Covered Boat Parking',
       category: 'coveredParking',
     },
     {
@@ -204,21 +205,38 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'coveredParking',
     },
     {
-      id: 'coveredBoatParking',
-      label: 'Covered Boat Parking',
+      id: 'detachedCarport',
+      label: 'Detached Carport',
+      category: 'coveredParking',
+    },
+    {
+      id: 'oneCarCarport',
+      label: 'One-Car Carport',
+      category: 'coveredParking',
+    },
+    {
+      id: 'porteCochere',
+      label: 'Porte-Cochère',
+      description:
+        'A covered vehicle entrance attached to or positioned beside the home.',
+      category: 'coveredParking',
+    },
+    {
+      id: 'threePlusCarCarport',
+      label: 'Three-or-More-Car Carport',
+      category: 'coveredParking',
+    },
+    {
+      id: 'twoCarCarport',
+      label: 'Two-Car Carport',
       category: 'coveredParking',
     },
   ];
 
   readonly drivewayFeatures: readonly ParkingStorageFeature[] = [
     {
-      id: 'pavedDriveway',
-      label: 'Paved Driveway',
-      category: 'driveway',
-    },
-    {
-      id: 'concreteDriveway',
-      label: 'Concrete Driveway',
+      id: 'additionalParkingPad',
+      label: 'Additional Parking Pad',
       category: 'driveway',
     },
     {
@@ -227,18 +245,13 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'driveway',
     },
     {
+      id: 'automaticDrivewayGate',
+      label: 'Automatic Driveway Gate',
+      category: 'driveway',
+    },
+    {
       id: 'brickDriveway',
       label: 'Brick Driveway',
-      category: 'driveway',
-    },
-    {
-      id: 'paverDriveway',
-      label: 'Paver Driveway',
-      category: 'driveway',
-    },
-    {
-      id: 'gravelDriveway',
-      label: 'Gravel Driveway',
       category: 'driveway',
     },
     {
@@ -247,28 +260,8 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'driveway',
     },
     {
-      id: 'sharedDriveway',
-      label: 'Shared Driveway',
-      category: 'driveway',
-    },
-    {
-      id: 'privateDriveway',
-      label: 'Private Driveway',
-      category: 'driveway',
-    },
-    {
-      id: 'gatedDriveway',
-      label: 'Gated Driveway',
-      category: 'driveway',
-    },
-    {
-      id: 'automaticDrivewayGate',
-      label: 'Automatic Driveway Gate',
-      category: 'driveway',
-    },
-    {
-      id: 'heatedDriveway',
-      label: 'Heated Driveway',
+      id: 'concreteDriveway',
+      label: 'Concrete Driveway',
       category: 'driveway',
     },
     {
@@ -277,8 +270,13 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'driveway',
     },
     {
-      id: 'additionalParkingPad',
-      label: 'Additional Parking Pad',
+      id: 'gatedDriveway',
+      label: 'Gated Driveway',
+      category: 'driveway',
+    },
+    {
+      id: 'gravelDriveway',
+      label: 'Gravel Driveway',
       category: 'driveway',
     },
     {
@@ -287,31 +285,41 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'driveway',
     },
     {
+      id: 'heatedDriveway',
+      label: 'Heated Driveway',
+      category: 'driveway',
+    },
+    {
       id: 'offStreetParking',
       label: 'Off-Street Parking',
+      category: 'driveway',
+    },
+    {
+      id: 'pavedDriveway',
+      label: 'Paved Driveway',
+      category: 'driveway',
+    },
+    {
+      id: 'paverDriveway',
+      label: 'Paver Driveway',
+      category: 'driveway',
+    },
+    {
+      id: 'privateDriveway',
+      label: 'Private Driveway',
+      category: 'driveway',
+    },
+    {
+      id: 'sharedDriveway',
+      label: 'Shared Driveway',
       category: 'driveway',
     },
   ];
 
   readonly specialtyParkingFeatures: readonly ParkingStorageFeature[] = [
     {
-      id: 'rvParking',
-      label: 'RV Parking',
-      category: 'specialtyParking',
-    },
-    {
-      id: 'rvHookup',
-      label: 'RV Hookup',
-      category: 'specialtyParking',
-    },
-    {
-      id: 'rvElectricalHookup',
-      label: 'RV Electrical Hookup',
-      category: 'specialtyParking',
-    },
-    {
-      id: 'rvWaterHookup',
-      label: 'RV Water Hookup',
+      id: 'assignedParking',
+      label: 'Assigned Parking',
       category: 'specialtyParking',
     },
     {
@@ -320,23 +328,18 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'specialtyParking',
     },
     {
-      id: 'trailerParking',
-      label: 'Trailer Parking',
-      category: 'specialtyParking',
-    },
-    {
-      id: 'motorcycleParking',
-      label: 'Motorcycle Parking',
-      category: 'specialtyParking',
-    },
-    {
       id: 'commercialVehicleParking',
       label: 'Commercial Vehicle Parking',
       category: 'specialtyParking',
     },
     {
-      id: 'oversizedVehicleParking',
-      label: 'Oversized Vehicle Parking',
+      id: 'coveredBicycleParking',
+      label: 'Covered Bicycle Parking',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'deededParking',
+      label: 'Deeded Parking',
       category: 'specialtyParking',
     },
     {
@@ -345,8 +348,43 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'specialtyParking',
     },
     {
-      id: 'coveredBicycleParking',
-      label: 'Covered Bicycle Parking',
+      id: 'motorcycleParking',
+      label: 'Motorcycle Parking',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'oversizedVehicleParking',
+      label: 'Oversized Vehicle Parking',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'parkingCourt',
+      label: 'Private Parking Court',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'rvElectricalHookup',
+      label: 'RV Electrical Hookup',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'rvHookup',
+      label: 'RV Hookup',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'rvParking',
+      label: 'RV Parking',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'rvWaterHookup',
+      label: 'RV Water Hookup',
+      category: 'specialtyParking',
+    },
+    {
+      id: 'trailerParking',
+      label: 'Trailer Parking',
       category: 'specialtyParking',
     },
     {
@@ -356,52 +394,22 @@ export class ParkingStorageEnhancementComponent implements OnInit {
         'A permanently installed lift provides elevated vehicle storage or service access.',
       category: 'specialtyParking',
     },
-    {
-      id: 'parkingCourt',
-      label: 'Private Parking Court',
-      category: 'specialtyParking',
-    },
-    {
-      id: 'assignedParking',
-      label: 'Assigned Parking',
-      category: 'specialtyParking',
-    },
-    {
-      id: 'deededParking',
-      label: 'Deeded Parking',
-      category: 'specialtyParking',
-    },
   ];
 
   readonly evFeatures: readonly ParkingStorageFeature[] = [
-    {
-      id: 'evCharger',
-      label: 'Electric Vehicle Charger',
-      category: 'ev',
-    },
-    {
-      id: 'levelOneEvCharger',
-      label: 'Level 1 EV Charger',
-      category: 'ev',
-    },
-    {
-      id: 'levelTwoEvCharger',
-      label: 'Level 2 EV Charger',
-      category: 'ev',
-    },
     {
       id: 'dcFastCharger',
       label: 'DC Fast Charger',
       category: 'ev',
     },
     {
-      id: 'teslaWallConnector',
-      label: 'Tesla Wall Connector',
+      id: 'dualEvChargers',
+      label: 'Dual EV Chargers',
       category: 'ev',
     },
     {
-      id: 'dualEvChargers',
-      label: 'Dual EV Chargers',
+      id: 'evCharger',
+      label: 'Electric Vehicle Charger',
       category: 'ev',
     },
     {
@@ -417,51 +425,36 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'ev',
     },
     {
+      id: 'levelOneEvCharger',
+      label: 'Level 1 EV Charger',
+      category: 'ev',
+    },
+    {
+      id: 'levelTwoEvCharger',
+      label: 'Level 2 EV Charger',
+      category: 'ev',
+    },
+    {
       id: 'solarPoweredEvCharging',
       label: 'Solar-Powered EV Charging',
+      category: 'ev',
+    },
+    {
+      id: 'teslaWallConnector',
+      label: 'Tesla Wall Connector',
       category: 'ev',
     },
   ];
 
   readonly interiorStorageFeatures: readonly ParkingStorageFeature[] = [
     {
-      id: 'walkInClosets',
-      label: 'Walk-In Closets',
+      id: 'atticStorage',
+      label: 'Attic Storage',
       category: 'interiorStorage',
     },
     {
-      id: 'customClosetSystem',
-      label: 'Custom Closet System',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'linenCloset',
-      label: 'Linen Closet',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'coatCloset',
-      label: 'Coat Closet',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'pantryStorage',
-      label: 'Pantry Storage',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'walkInPantry',
-      label: 'Walk-In Pantry',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'butlersPantryStorage',
-      label: 'Butler’s Pantry Storage',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'underStairStorage',
-      label: 'Under-Stair Storage',
+      id: 'basementStorage',
+      label: 'Basement Storage',
       category: 'interiorStorage',
     },
     {
@@ -475,33 +468,13 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'interiorStorage',
     },
     {
-      id: 'mudroomStorage',
-      label: 'Mudroom Storage',
+      id: 'butlersPantryStorage',
+      label: 'Butler’s Pantry Storage',
       category: 'interiorStorage',
     },
     {
-      id: 'laundryRoomStorage',
-      label: 'Laundry Room Storage',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'basementStorage',
-      label: 'Basement Storage',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'atticStorage',
-      label: 'Attic Storage',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'walkUpAttic',
-      label: 'Walk-Up Attic',
-      category: 'interiorStorage',
-    },
-    {
-      id: 'pullDownAtticAccess',
-      label: 'Pull-Down Attic Access',
+      id: 'coatCloset',
+      label: 'Coat Closet',
       category: 'interiorStorage',
     },
     {
@@ -512,13 +485,38 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'interiorStorage',
     },
     {
-      id: 'secureStorageRoom',
-      label: 'Secure Storage Room',
+      id: 'customClosetSystem',
+      label: 'Custom Closet System',
       category: 'interiorStorage',
     },
     {
-      id: 'wineStorage',
-      label: 'Wine Storage',
+      id: 'laundryRoomStorage',
+      label: 'Laundry Room Storage',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'linenCloset',
+      label: 'Linen Closet',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'mudroomStorage',
+      label: 'Mudroom Storage',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'pantryStorage',
+      label: 'Pantry Storage',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'pullDownAtticAccess',
+      label: 'Pull-Down Attic Access',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'secureStorageRoom',
+      label: 'Secure Storage Room',
       category: 'interiorStorage',
     },
     {
@@ -526,47 +524,37 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       label: 'Sports Equipment Storage',
       category: 'interiorStorage',
     },
+    {
+      id: 'underStairStorage',
+      label: 'Under-Stair Storage',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'walkInClosets',
+      label: 'Walk-In Closets',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'walkInPantry',
+      label: 'Walk-In Pantry',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'walkUpAttic',
+      label: 'Walk-Up Attic',
+      category: 'interiorStorage',
+    },
+    {
+      id: 'wineStorage',
+      label: 'Wine Storage',
+      category: 'interiorStorage',
+    },
   ];
 
   readonly exteriorStorageFeatures: readonly ParkingStorageFeature[] = [
     {
-      id: 'storageShed',
-      label: 'Storage Shed',
-      category: 'exteriorStorage',
-    },
-    {
-      id: 'gardenShed',
-      label: 'Garden Shed',
-      category: 'exteriorStorage',
-    },
-    {
-      id: 'utilityShed',
-      label: 'Utility Shed',
-      category: 'exteriorStorage',
-    },
-    {
-      id: 'detachedStorageBuilding',
-      label: 'Detached Storage Building',
-      category: 'exteriorStorage',
-    },
-    {
       id: 'barnStorage',
       label: 'Barn Storage',
-      category: 'exteriorStorage',
-    },
-    {
-      id: 'equipmentStorage',
-      label: 'Equipment Storage',
-      category: 'exteriorStorage',
-    },
-    {
-      id: 'lawnEquipmentStorage',
-      label: 'Lawn Equipment Storage',
-      category: 'exteriorStorage',
-    },
-    {
-      id: 'poolEquipmentStorage',
-      label: 'Pool Equipment Storage',
       category: 'exteriorStorage',
     },
     {
@@ -575,8 +563,23 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'exteriorStorage',
     },
     {
-      id: 'kayakStorage',
-      label: 'Kayak or Canoe Storage',
+      id: 'coveredExteriorStorage',
+      label: 'Covered Exterior Storage',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'storageContainerArea',
+      label: 'Dedicated Storage Container Area',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'detachedStorageBuilding',
+      label: 'Detached Storage Building',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'equipmentStorage',
+      label: 'Equipment Storage',
       category: 'exteriorStorage',
     },
     {
@@ -585,8 +588,18 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'exteriorStorage',
     },
     {
-      id: 'coveredExteriorStorage',
-      label: 'Covered Exterior Storage',
+      id: 'gardenShed',
+      label: 'Garden Shed',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'kayakStorage',
+      label: 'Kayak or Canoe Storage',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'lawnEquipmentStorage',
+      label: 'Lawn Equipment Storage',
       category: 'exteriorStorage',
     },
     {
@@ -595,31 +608,71 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'exteriorStorage',
     },
     {
-      id: 'underDeckStorage',
-      label: 'Under-Deck Storage',
-      category: 'exteriorStorage',
-    },
-    {
       id: 'outdoorStorageCloset',
       label: 'Outdoor Storage Closet',
       category: 'exteriorStorage',
     },
     {
-      id: 'storageContainerArea',
-      label: 'Dedicated Storage Container Area',
+      id: 'poolEquipmentStorage',
+      label: 'Pool Equipment Storage',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'storageShed',
+      label: 'Storage Shed',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'underDeckStorage',
+      label: 'Under-Deck Storage',
+      category: 'exteriorStorage',
+    },
+    {
+      id: 'utilityShed',
+      label: 'Utility Shed',
       category: 'exteriorStorage',
     },
   ];
 
   readonly workshopFeatures: readonly ParkingStorageFeature[] = [
     {
+      id: 'twoHundredTwentyVoltService',
+      label: '240-Volt Workshop Service',
+      category: 'workshop',
+    },
+    {
+      id: 'airConditionedWorkshop',
+      label: 'Air-Conditioned Workshop',
+      category: 'workshop',
+    },
+    {
       id: 'attachedWorkshop',
       label: 'Attached Workshop',
       category: 'workshop',
     },
     {
+      id: 'toolStorage',
+      label: 'Built-In Tool Storage',
+      category: 'workshop',
+    },
+    {
+      id: 'builtInWorkbench',
+      label: 'Built-In Workbench',
+      category: 'workshop',
+    },
+    {
+      id: 'compressedAirSystem',
+      label: 'Compressed-Air System',
+      category: 'workshop',
+    },
+    {
       id: 'detachedWorkshop',
       label: 'Detached Workshop',
+      category: 'workshop',
+    },
+    {
+      id: 'dustCollectionSystem',
+      label: 'Dust-Collection System',
       category: 'workshop',
     },
     {
@@ -630,11 +683,6 @@ export class ParkingStorageEnhancementComponent implements OnInit {
     {
       id: 'heatedWorkshop',
       label: 'Heated Workshop',
-      category: 'workshop',
-    },
-    {
-      id: 'airConditionedWorkshop',
-      label: 'Air-Conditioned Workshop',
       category: 'workshop',
     },
     {
@@ -653,6 +701,11 @@ export class ParkingStorageEnhancementComponent implements OnInit {
       category: 'workshop',
     },
     {
+      id: 'workshopStorage',
+      label: 'Workshop Storage',
+      category: 'workshop',
+    },
+    {
       id: 'workshopUtilitySink',
       label: 'Workshop Utility Sink',
       category: 'workshop',
@@ -660,36 +713,6 @@ export class ParkingStorageEnhancementComponent implements OnInit {
     {
       id: 'workshopVentilation',
       label: 'Workshop Ventilation',
-      category: 'workshop',
-    },
-    {
-      id: 'workshopStorage',
-      label: 'Workshop Storage',
-      category: 'workshop',
-    },
-    {
-      id: 'builtInWorkbench',
-      label: 'Built-In Workbench',
-      category: 'workshop',
-    },
-    {
-      id: 'toolStorage',
-      label: 'Built-In Tool Storage',
-      category: 'workshop',
-    },
-    {
-      id: 'twoHundredTwentyVoltService',
-      label: '240-Volt Workshop Service',
-      category: 'workshop',
-    },
-    {
-      id: 'compressedAirSystem',
-      label: 'Compressed-Air System',
-      category: 'workshop',
-    },
-    {
-      id: 'dustCollectionSystem',
-      label: 'Dust-Collection System',
       category: 'workshop',
     },
   ];
@@ -731,28 +754,54 @@ export class ParkingStorageEnhancementComponent implements OnInit {
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .parkingStorage ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(
-          listingUid,
-        );
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
         this.saveError.set(
-          'The selected listing could not be found.',
+          'The selected listing could not be found.'
         );
+
         return;
       }
 
@@ -761,19 +810,18 @@ export class ParkingStorageEnhancementComponent implements OnInit {
 
       this.selectedFeatureIds.set(
         new Set(
-          this.currentEnhancements.parkingStorage ?? [],
-        ),
+          this.currentEnhancements
+            .parkingStorage ?? []
+        )
       );
-
-      this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
-        'Unable to load parking and storage features:',
-        error,
+        'Unable to load parking and storage enhancements:',
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved parking and storage features.',
+        'We could not load the saved parking and storage details.'
       );
     } finally {
       this.isLoading.set(false);
@@ -819,88 +867,132 @@ export class ParkingStorageEnhancementComponent implements OnInit {
     this.lastSavedAt.set(null);
   }
 
-  async saveSection(): Promise<void> {
+  async saveSection():
+    Promise<void> {
     if (
-      this.isLoading() ||
       this.isSaving() ||
+      this.isLoading() ||
       !this.hasChanges()
     ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap.get(
+            'listingUid'
+          );
 
     const sellerUid =
       this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
+
       return;
     }
 
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const updatedEnhancements: ListingEnhancements = {
+    const parkingStorageSelections =
+      Array.from(
+        this.selectedFeatureIds()
+      ).sort();
+
+    const updatedEnhancements:
+      ListingEnhancements = {
       ...this.currentEnhancements,
-      parkingStorage: Array.from(
-        this.selectedFeatureIds(),
-      ),
+      parkingStorage:
+        parkingStorageSelections
     };
 
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
-      );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
 
       this.currentEnhancements =
         updatedEnhancements;
 
       this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+      this.lastSavedAt.set(
+        new Date()
+      );
+
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
-        'Unable to save parking and storage features:',
-        error,
+        'Unable to save parking and storage enhancements:',
+        error
       );
 
       this.saveError.set(
-        'We could not save these parking and storage features. Please try again.',
+        'We could not save these parking and storage details. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

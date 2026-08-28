@@ -70,6 +70,24 @@ interface ListingDraftDocument {
 
     features?: Record<string, boolean>;
 
+    enhancements?: Record<
+        string,
+        string[]
+    >;
+
+    schools?: Record<
+        string,
+        unknown
+    >;
+
+    hoa?: {
+        hasHoa?: boolean;
+        feeAmount?: number;
+        feeFrequency?: string;
+    };
+
+    includedItems?: string[];
+
     photos?: Array<Record<string, unknown>>;
 
     primaryPhotoUrl?: string;
@@ -502,6 +520,9 @@ async function publishPaidListing(
                 features:
                     draft.features ?? {},
 
+                enhancements:
+                    draft.enhancements ?? {},
+
                 photos:
                     draft.photos ?? [],
 
@@ -534,8 +555,21 @@ async function publishPaidListing(
 
             addOptionalField(
                 listingDocument,
-                'addressLine2',
-                draft.address?.addressLine2
+                'hoa',
+                draft.hoa ??
+                draft.propertyDetails?.hoa
+            );
+
+            addOptionalField(
+                listingDocument,
+                'schools',
+                draft.schools
+            );
+
+            addOptionalField(
+                listingDocument,
+                'includedItems',
+                draft.includedItems
             );
 
             addOptionalField(

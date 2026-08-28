@@ -4,7 +4,9 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,16 +20,16 @@ interface SystemUtilitiesFeature {
   label: string;
   description?: string;
   category:
-    | 'heating'
-    | 'cooling'
-    | 'electrical'
-    | 'plumbing'
-    | 'water'
-    | 'sewer'
-    | 'fuel'
-    | 'renewableEnergy'
-    | 'backupSystems'
-    | 'smartUtilities';
+  | 'heating'
+  | 'cooling'
+  | 'electrical'
+  | 'plumbing'
+  | 'water'
+  | 'sewer'
+  | 'fuel'
+  | 'renewableEnergy'
+  | 'backupSystems'
+  | 'smartUtilities';
 }
 
 @Component({
@@ -44,22 +46,42 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly listingService = inject(ListingService);
 
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
   private currentEnhancements: ListingEnhancements = {};
 
   readonly heatingFeatures: readonly SystemUtilitiesFeature[] = [
+    {
+      id: 'baseboardHeating',
+      label: 'Baseboard Heating',
+      category: 'heating',
+    },
+    {
+      id: 'boiler',
+      label: 'Boiler',
+      category: 'heating',
+    },
     {
       id: 'centralHeating',
       label: 'Central Heating',
       category: 'heating',
     },
     {
-      id: 'forcedAirHeating',
-      label: 'Forced-Air Heating',
-      category: 'heating',
-    },
-    {
-      id: 'heatPump',
-      label: 'Heat Pump',
+      id: 'centralHvac',
+      label: 'Central HVAC',
       category: 'heating',
     },
     {
@@ -70,38 +92,18 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'heating',
     },
     {
-      id: 'furnace',
-      label: 'Furnace',
-      category: 'heating',
-    },
-    {
-      id: 'boiler',
-      label: 'Boiler',
-      category: 'heating',
-    },
-    {
-      id: 'radiatorHeating',
-      label: 'Radiator Heating',
-      category: 'heating',
-    },
-    {
-      id: 'baseboardHeating',
-      label: 'Baseboard Heating',
-      category: 'heating',
-    },
-    {
-      id: 'radiantFloorHeating',
-      label: 'Radiant-Floor Heating',
-      category: 'heating',
-    },
-    {
-      id: 'geothermalHeating',
-      label: 'Geothermal Heating',
-      category: 'heating',
-    },
-    {
       id: 'electricHeating',
       label: 'Electric Heating',
+      category: 'heating',
+    },
+    {
+      id: 'forcedAirHeating',
+      label: 'Forced-Air Heating',
+      category: 'heating',
+    },
+    {
+      id: 'furnace',
+      label: 'Furnace',
       category: 'heating',
     },
     {
@@ -110,8 +112,33 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'heating',
     },
     {
+      id: 'geothermalHeating',
+      label: 'Geothermal Heating',
+      category: 'heating',
+    },
+    {
+      id: 'heatPump',
+      label: 'Heat Pump',
+      category: 'heating',
+    },
+    {
+      id: 'highEfficiencyHeating',
+      label: 'High-Efficiency Heating System',
+      category: 'heating',
+    },
+    {
+      id: 'multiZoneHeating',
+      label: 'Multi-Zone Heating',
+      category: 'heating',
+    },
+    {
       id: 'oilHeating',
       label: 'Oil Heating',
+      category: 'heating',
+    },
+    {
+      id: 'pelletHeating',
+      label: 'Pellet-Stove Heating',
       category: 'heating',
     },
     {
@@ -120,13 +147,23 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'heating',
     },
     {
-      id: 'woodHeating',
-      label: 'Wood-Burning Heating',
+      id: 'radiantFloorHeating',
+      label: 'Radiant-Floor Heating',
       category: 'heating',
     },
     {
-      id: 'pelletHeating',
-      label: 'Pellet-Stove Heating',
+      id: 'radiatorHeating',
+      label: 'Radiator Heating',
+      category: 'heating',
+    },
+    {
+      id: 'humidifier',
+      label: 'Whole-Home Humidifier',
+      category: 'heating',
+    },
+    {
+      id: 'woodHeating',
+      label: 'Wood-Burning Heating',
       category: 'heating',
     },
     {
@@ -136,61 +173,9 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
         'Separate controls allow different areas of the home to be heated independently.',
       category: 'heating',
     },
-    {
-      id: 'multiZoneHeating',
-      label: 'Multi-Zone Heating',
-      category: 'heating',
-    },
-    {
-      id: 'highEfficiencyHeating',
-      label: 'High-Efficiency Heating System',
-      category: 'heating',
-    },
-    {
-      id: 'humidifier',
-      label: 'Whole-Home Humidifier',
-      category: 'heating',
-    },
   ];
 
   readonly coolingFeatures: readonly SystemUtilitiesFeature[] = [
-    {
-      id: 'centralAirConditioning',
-      label: 'Central Air Conditioning',
-      category: 'cooling',
-    },
-    {
-      id: 'heatPumpCooling',
-      label: 'Heat-Pump Cooling',
-      category: 'cooling',
-    },
-    {
-      id: 'ductlessMiniSplit',
-      label: 'Ductless Mini-Split',
-      category: 'cooling',
-    },
-    {
-      id: 'multiZoneMiniSplit',
-      label: 'Multi-Zone Mini-Split',
-      category: 'cooling',
-    },
-    {
-      id: 'zonedCooling',
-      label: 'Zoned Cooling',
-      description:
-        'Separate controls allow different areas of the home to be cooled independently.',
-      category: 'cooling',
-    },
-    {
-      id: 'evaporativeCooler',
-      label: 'Evaporative Cooler',
-      category: 'cooling',
-    },
-    {
-      id: 'wholeHouseFan',
-      label: 'Whole-House Fan',
-      category: 'cooling',
-    },
     {
       id: 'atticFan',
       label: 'Attic Fan',
@@ -202,38 +187,13 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'cooling',
     },
     {
-      id: 'windowAirConditioners',
-      label: 'Window Air-Conditioning Units',
+      id: 'centralAirConditioning',
+      label: 'Central Air Conditioning',
       category: 'cooling',
     },
     {
-      id: 'portableAirConditioners',
-      label: 'Portable Air-Conditioning Units',
-      category: 'cooling',
-    },
-    {
-      id: 'highEfficiencyCooling',
-      label: 'High-Efficiency Cooling System',
-      category: 'cooling',
-    },
-    {
-      id: 'variableSpeedHvac',
-      label: 'Variable-Speed HVAC',
-      category: 'cooling',
-    },
-    {
-      id: 'dehumidifier',
-      label: 'Whole-Home Dehumidifier',
-      category: 'cooling',
-    },
-    {
-      id: 'airPurificationSystem',
-      label: 'Whole-Home Air Purification',
-      category: 'cooling',
-    },
-    {
-      id: 'uvAirTreatment',
-      label: 'UV Air-Treatment System',
+      id: 'ductlessMiniSplit',
+      label: 'Ductless Mini-Split',
       category: 'cooling',
     },
     {
@@ -244,8 +204,70 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'cooling',
     },
     {
+      id: 'evaporativeCooler',
+      label: 'Evaporative Cooler',
+      category: 'cooling',
+    },
+    {
+      id: 'heatPumpCooling',
+      label: 'Heat-Pump Cooling',
+      category: 'cooling',
+    },
+    {
       id: 'heatRecoveryVentilator',
       label: 'Heat-Recovery Ventilator',
+      category: 'cooling',
+    },
+    {
+      id: 'highEfficiencyCooling',
+      label: 'High-Efficiency Cooling System',
+      category: 'cooling',
+    },
+    {
+      id: 'multiZoneMiniSplit',
+      label: 'Multi-Zone Mini-Split',
+      category: 'cooling',
+    },
+    {
+      id: 'portableAirConditioners',
+      label: 'Portable Air-Conditioning Units',
+      category: 'cooling',
+    },
+    {
+      id: 'uvAirTreatment',
+      label: 'UV Air-Treatment System',
+      category: 'cooling',
+    },
+    {
+      id: 'variableSpeedHvac',
+      label: 'Variable-Speed HVAC',
+      category: 'cooling',
+    },
+    {
+      id: 'airPurificationSystem',
+      label: 'Whole-Home Air Purification',
+      category: 'cooling',
+    },
+    {
+      id: 'dehumidifier',
+      label: 'Whole-Home Dehumidifier',
+      category: 'cooling',
+    },
+    {
+      id: 'wholeHouseFan',
+      label: 'Whole-House Fan',
+      category: 'cooling',
+    },
+    {
+      id: 'windowAirConditioners',
+      label: 'Window Air-Conditioning Units',
+      category: 'cooling',
+    },
+    {
+      id: 'zonedCooling',
+      label: 'Zoned Cooling',
+      description:
+        'Separate controls allow different areas of the home to be cooled independently.',
       category: 'cooling',
     },
   ];
@@ -272,63 +294,8 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'electrical',
     },
     {
-      id: 'circuitBreakerPanel',
-      label: 'Circuit-Breaker Panel',
-      category: 'electrical',
-    },
-    {
-      id: 'updatedElectricalPanel',
-      label: 'Updated Electrical Panel',
-      category: 'electrical',
-    },
-    {
-      id: 'multipleElectricalPanels',
-      label: 'Multiple Electrical Panels',
-      category: 'electrical',
-    },
-    {
-      id: 'subpanel',
-      label: 'Electrical Subpanel',
-      category: 'electrical',
-    },
-    {
-      id: 'updatedWiring',
-      label: 'Updated Electrical Wiring',
-      category: 'electrical',
-    },
-    {
-      id: 'copperWiring',
-      label: 'Copper Wiring',
-      category: 'electrical',
-    },
-    {
-      id: 'undergroundElectricalService',
-      label: 'Underground Electrical Service',
-      category: 'electrical',
-    },
-    {
-      id: 'wholeHouseSurgeProtection',
-      label: 'Whole-House Surge Protection',
-      category: 'electrical',
-    },
-    {
-      id: 'gfciProtection',
-      label: 'GFCI Protection',
-      category: 'electrical',
-    },
-    {
       id: 'afciProtection',
       label: 'AFCI Protection',
-      category: 'electrical',
-    },
-    {
-      id: 'dedicatedApplianceCircuits',
-      label: 'Dedicated Appliance Circuits',
-      category: 'electrical',
-    },
-    {
-      id: 'exteriorElectricalOutlets',
-      label: 'Exterior Electrical Outlets',
       category: 'electrical',
     },
     {
@@ -342,8 +309,28 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'electrical',
     },
     {
-      id: 'threePhasePower',
-      label: 'Three-Phase Power',
+      id: 'circuitBreakerPanel',
+      label: 'Circuit-Breaker Panel',
+      category: 'electrical',
+    },
+    {
+      id: 'copperWiring',
+      label: 'Copper Wiring',
+      category: 'electrical',
+    },
+    {
+      id: 'dedicatedApplianceCircuits',
+      label: 'Dedicated Appliance Circuits',
+      category: 'electrical',
+    },
+    {
+      id: 'subpanel',
+      label: 'Electrical Subpanel',
+      category: 'electrical',
+    },
+    {
+      id: 'exteriorElectricalOutlets',
+      label: 'Exterior Electrical Outlets',
       category: 'electrical',
     },
     {
@@ -351,64 +338,47 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       label: 'Generator Transfer Switch',
       category: 'electrical',
     },
+    {
+      id: 'gfciProtection',
+      label: 'GFCI Protection',
+      category: 'electrical',
+    },
+    {
+      id: 'multipleElectricalPanels',
+      label: 'Multiple Electrical Panels',
+      category: 'electrical',
+    },
+    {
+      id: 'threePhasePower',
+      label: 'Three-Phase Power',
+      category: 'electrical',
+    },
+    {
+      id: 'undergroundElectricalService',
+      label: 'Underground Electrical Service',
+      category: 'electrical',
+    },
+    {
+      id: 'updatedElectricalPanel',
+      label: 'Updated Electrical Panel',
+      category: 'electrical',
+    },
+    {
+      id: 'updatedWiring',
+      label: 'Updated Electrical Wiring',
+      category: 'electrical',
+    },
+    {
+      id: 'wholeHouseSurgeProtection',
+      label: 'Whole-House Surge Protection',
+      category: 'electrical',
+    },
   ];
 
   readonly plumbingFeatures: readonly SystemUtilitiesFeature[] = [
     {
-      id: 'copperPlumbing',
-      label: 'Copper Plumbing',
-      category: 'plumbing',
-    },
-    {
-      id: 'pexPlumbing',
-      label: 'PEX Plumbing',
-      category: 'plumbing',
-    },
-    {
-      id: 'cpvcPlumbing',
-      label: 'CPVC Plumbing',
-      category: 'plumbing',
-    },
-    {
-      id: 'updatedPlumbing',
-      label: 'Updated Plumbing',
-      category: 'plumbing',
-    },
-    {
-      id: 'plumbingManifold',
-      label: 'Plumbing Manifold System',
-      description:
-        'A central manifold provides individual water-supply lines to fixtures.',
-      category: 'plumbing',
-    },
-    {
-      id: 'wholeHouseShutoff',
-      label: 'Whole-House Water Shutoff',
-      category: 'plumbing',
-    },
-    {
       id: 'automaticWaterShutoff',
       label: 'Automatic Water Shutoff',
-      category: 'plumbing',
-    },
-    {
-      id: 'leakDetectionSystem',
-      label: 'Whole-Home Leak Detection',
-      category: 'plumbing',
-    },
-    {
-      id: 'waterPressureBooster',
-      label: 'Water-Pressure Booster',
-      category: 'plumbing',
-    },
-    {
-      id: 'pressureReducingValve',
-      label: 'Pressure-Reducing Valve',
-      category: 'plumbing',
-    },
-    {
-      id: 'sumpPump',
-      label: 'Sump Pump',
       category: 'plumbing',
     },
     {
@@ -417,8 +387,13 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'plumbing',
     },
     {
-      id: 'sewageEjectorPump',
-      label: 'Sewage-Ejector Pump',
+      id: 'copperPlumbing',
+      label: 'Copper Plumbing',
+      category: 'plumbing',
+    },
+    {
+      id: 'cpvcPlumbing',
+      label: 'CPVC Plumbing',
       category: 'plumbing',
     },
     {
@@ -432,10 +407,52 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'plumbing',
     },
     {
+      id: 'heatPumpWaterHeater',
+      label: 'Heat-Pump Water Heater',
+      category: 'plumbing',
+    },
+    {
       id: 'hotWaterRecirculation',
       label: 'Hot-Water Recirculation System',
       description:
         'A recirculation system reduces the wait for hot water at fixtures.',
+      category: 'plumbing',
+    },
+    {
+      id: 'multipleWaterHeaters',
+      label: 'Multiple Water Heaters',
+      category: 'plumbing',
+    },
+    {
+      id: 'pexPlumbing',
+      label: 'PEX Plumbing',
+      category: 'plumbing',
+    },
+    {
+      id: 'plumbingManifold',
+      label: 'Plumbing Manifold System',
+      description:
+        'A central manifold provides individual water-supply lines to fixtures.',
+      category: 'plumbing',
+    },
+    {
+      id: 'pressureReducingValve',
+      label: 'Pressure-Reducing Valve',
+      category: 'plumbing',
+    },
+    {
+      id: 'sewageEjectorPump',
+      label: 'Sewage-Ejector Pump',
+      category: 'plumbing',
+    },
+    {
+      id: 'solarWaterHeater',
+      label: 'Solar Water Heater',
+      category: 'plumbing',
+    },
+    {
+      id: 'sumpPump',
+      label: 'Sump Pump',
       category: 'plumbing',
     },
     {
@@ -449,26 +466,36 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'plumbing',
     },
     {
-      id: 'heatPumpWaterHeater',
-      label: 'Heat-Pump Water Heater',
+      id: 'updatedPlumbing',
+      label: 'Updated Plumbing',
       category: 'plumbing',
     },
     {
-      id: 'solarWaterHeater',
-      label: 'Solar Water Heater',
+      id: 'waterPressureBooster',
+      label: 'Water-Pressure Booster',
       category: 'plumbing',
     },
     {
-      id: 'multipleWaterHeaters',
-      label: 'Multiple Water Heaters',
+      id: 'leakDetectionSystem',
+      label: 'Whole-Home Leak Detection',
+      category: 'plumbing',
+    },
+    {
+      id: 'wholeHouseShutoff',
+      label: 'Whole-House Water Shutoff',
       category: 'plumbing',
     },
   ];
 
   readonly waterFeatures: readonly SystemUtilitiesFeature[] = [
     {
-      id: 'publicWater',
-      label: 'Public Water',
+      id: 'artesianWell',
+      label: 'Artesian Well',
+      category: 'water',
+    },
+    {
+      id: 'cistern',
+      label: 'Cistern',
       category: 'water',
     },
     {
@@ -477,13 +504,8 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'water',
     },
     {
-      id: 'privateWell',
-      label: 'Private Well',
-      category: 'water',
-    },
-    {
-      id: 'sharedWell',
-      label: 'Shared Well',
+      id: 'irrigationWell',
+      label: 'Dedicated Irrigation Well',
       category: 'water',
     },
     {
@@ -492,8 +514,53 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'water',
     },
     {
-      id: 'artesianWell',
-      label: 'Artesian Well',
+      id: 'ironFiltrationSystem',
+      label: 'Iron Filtration System',
+      category: 'water',
+    },
+    {
+      id: 'privateWell',
+      label: 'Private Well',
+      category: 'water',
+    },
+    {
+      id: 'publicWater',
+      label: 'Public Water',
+      category: 'water',
+    },
+    {
+      id: 'rainwaterCollection',
+      label: 'Rainwater Collection System',
+      category: 'water',
+    },
+    {
+      id: 'reverseOsmosisSystem',
+      label: 'Reverse-Osmosis System',
+      category: 'water',
+    },
+    {
+      id: 'separateIrrigationMeter',
+      label: 'Separate Irrigation Meter',
+      category: 'water',
+    },
+    {
+      id: 'sharedWell',
+      label: 'Shared Well',
+      category: 'water',
+    },
+    {
+      id: 'ultravioletWaterTreatment',
+      label: 'UV Water-Treatment System',
+      category: 'water',
+    },
+    {
+      id: 'waterConditioner',
+      label: 'Water Conditioner',
+      category: 'water',
+    },
+    {
+      id: 'waterSoftener',
+      label: 'Water Softener',
       category: 'water',
     },
     {
@@ -511,79 +578,9 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       label: 'Whole-House Water Filtration',
       category: 'water',
     },
-    {
-      id: 'reverseOsmosisSystem',
-      label: 'Reverse-Osmosis System',
-      category: 'water',
-    },
-    {
-      id: 'waterSoftener',
-      label: 'Water Softener',
-      category: 'water',
-    },
-    {
-      id: 'waterConditioner',
-      label: 'Water Conditioner',
-      category: 'water',
-    },
-    {
-      id: 'ultravioletWaterTreatment',
-      label: 'UV Water-Treatment System',
-      category: 'water',
-    },
-    {
-      id: 'ironFiltrationSystem',
-      label: 'Iron Filtration System',
-      category: 'water',
-    },
-    {
-      id: 'rainwaterCollection',
-      label: 'Rainwater Collection System',
-      category: 'water',
-    },
-    {
-      id: 'cistern',
-      label: 'Cistern',
-      category: 'water',
-    },
-    {
-      id: 'irrigationWell',
-      label: 'Dedicated Irrigation Well',
-      category: 'water',
-    },
-    {
-      id: 'separateIrrigationMeter',
-      label: 'Separate Irrigation Meter',
-      category: 'water',
-    },
   ];
 
   readonly sewerFeatures: readonly SystemUtilitiesFeature[] = [
-    {
-      id: 'publicSewer',
-      label: 'Public Sewer',
-      category: 'sewer',
-    },
-    {
-      id: 'communitySewer',
-      label: 'Community Sewer System',
-      category: 'sewer',
-    },
-    {
-      id: 'privateSeptic',
-      label: 'Private Septic System',
-      category: 'sewer',
-    },
-    {
-      id: 'sharedSeptic',
-      label: 'Shared Septic System',
-      category: 'sewer',
-    },
-    {
-      id: 'conventionalSeptic',
-      label: 'Conventional Septic System',
-      category: 'sewer',
-    },
     {
       id: 'aerobicSeptic',
       label: 'Aerobic Septic System',
@@ -595,8 +592,13 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'sewer',
     },
     {
-      id: 'moundSeptic',
-      label: 'Mound Septic System',
+      id: 'communitySewer',
+      label: 'Community Sewer System',
+      category: 'sewer',
+    },
+    {
+      id: 'conventionalSeptic',
+      label: 'Conventional Septic System',
       category: 'sewer',
     },
     {
@@ -605,8 +607,18 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'sewer',
     },
     {
-      id: 'septicPumpSystem',
-      label: 'Septic Pump System',
+      id: 'moundSeptic',
+      label: 'Mound Septic System',
+      category: 'sewer',
+    },
+    {
+      id: 'privateSeptic',
+      label: 'Private Septic System',
+      category: 'sewer',
+    },
+    {
+      id: 'publicSewer',
+      label: 'Public Sewer',
       category: 'sewer',
     },
     {
@@ -630,51 +642,26 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'sewer',
     },
     {
+      id: 'septicPumpSystem',
+      label: 'Septic Pump System',
+      category: 'sewer',
+    },
+    {
       id: 'sewerBackflowValve',
       label: 'Sewer Backflow Valve',
+      category: 'sewer',
+    },
+    {
+      id: 'sharedSeptic',
+      label: 'Shared Septic System',
       category: 'sewer',
     },
   ];
 
   readonly fuelFeatures: readonly SystemUtilitiesFeature[] = [
     {
-      id: 'naturalGas',
-      label: 'Natural Gas',
-      category: 'fuel',
-    },
-    {
-      id: 'propane',
-      label: 'Propane',
-      category: 'fuel',
-    },
-    {
-      id: 'ownedPropaneTank',
-      label: 'Owned Propane Tank',
-      category: 'fuel',
-    },
-    {
-      id: 'leasedPropaneTank',
-      label: 'Leased Propane Tank',
-      category: 'fuel',
-    },
-    {
-      id: 'undergroundPropaneTank',
-      label: 'Underground Propane Tank',
-      category: 'fuel',
-    },
-    {
-      id: 'heatingOil',
-      label: 'Heating Oil',
-      category: 'fuel',
-    },
-    {
       id: 'aboveGroundOilTank',
       label: 'Above-Ground Oil Tank',
-      category: 'fuel',
-    },
-    {
-      id: 'undergroundOilTank',
-      label: 'Underground Oil Tank',
       category: 'fuel',
     },
     {
@@ -683,23 +670,8 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'fuel',
     },
     {
-      id: 'woodFuel',
-      label: 'Wood Fuel',
-      category: 'fuel',
-    },
-    {
-      id: 'pelletFuel',
-      label: 'Pellet Fuel',
-      category: 'fuel',
-    },
-    {
-      id: 'keroseneFuel',
-      label: 'Kerosene Fuel',
-      category: 'fuel',
-    },
-    {
-      id: 'multipleFuelSources',
-      label: 'Multiple Fuel Sources',
+      id: 'exteriorGasConnection',
+      label: 'Exterior Gas Connection',
       category: 'fuel',
     },
     {
@@ -708,86 +680,142 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'fuel',
     },
     {
-      id: 'exteriorGasConnection',
-      label: 'Exterior Gas Connection',
+      id: 'heatingOil',
+      label: 'Heating Oil',
+      category: 'fuel',
+    },
+    {
+      id: 'keroseneFuel',
+      label: 'Kerosene Fuel',
+      category: 'fuel',
+    },
+    {
+      id: 'leasedPropaneTank',
+      label: 'Leased Propane Tank',
+      category: 'fuel',
+    },
+    {
+      id: 'multipleFuelSources',
+      label: 'Multiple Fuel Sources',
+      category: 'fuel',
+    },
+    {
+      id: 'naturalGas',
+      label: 'Natural Gas',
+      category: 'fuel',
+    },
+    {
+      id: 'ownedPropaneTank',
+      label: 'Owned Propane Tank',
+      category: 'fuel',
+    },
+    {
+      id: 'pelletFuel',
+      label: 'Pellet Fuel',
+      category: 'fuel',
+    },
+    {
+      id: 'propane',
+      label: 'Propane',
+      category: 'fuel',
+    },
+    {
+      id: 'undergroundOilTank',
+      label: 'Underground Oil Tank',
+      category: 'fuel',
+    },
+    {
+      id: 'undergroundPropaneTank',
+      label: 'Underground Propane Tank',
+      category: 'fuel',
+    },
+    {
+      id: 'woodFuel',
+      label: 'Wood Fuel',
       category: 'fuel',
     },
   ];
 
-  readonly renewableEnergyFeatures: readonly SystemUtilitiesFeature[] = [
-    {
-      id: 'ownedSolarPanels',
-      label: 'Owned Solar Panels',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'leasedSolarPanels',
-      label: 'Leased Solar Panels',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'solarPowerPurchaseAgreement',
-      label: 'Solar Power Purchase Agreement',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'groundMountedSolar',
-      label: 'Ground-Mounted Solar Array',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'solarRoof',
-      label: 'Integrated Solar Roof',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'solarBatteryStorage',
-      label: 'Solar Battery Storage',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'homeBatterySystem',
-      label: 'Whole-Home Battery System',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'netMetering',
-      label: 'Net-Metering Connection',
-      description:
-        'The electrical system is configured to return qualifying generated power to the utility grid.',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'solarReady',
-      label: 'Solar-Ready',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'windPowerSystem',
-      label: 'Residential Wind-Power System',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'microHydroSystem',
-      label: 'Micro-Hydroelectric System',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'geothermalSystem',
-      label: 'Geothermal Energy System',
-      category: 'renewableEnergy',
-    },
-    {
-      id: 'energyMonitoringSystem',
-      label: 'Whole-Home Energy Monitoring',
-      category: 'renewableEnergy',
-    },
-  ];
+  readonly renewableEnergyFeatures:
+    readonly SystemUtilitiesFeature[] = [
+      {
+        id: 'geothermalSystem',
+        label: 'Geothermal Energy System',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'groundMountedSolar',
+        label: 'Ground-Mounted Solar Array',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'solarRoof',
+        label: 'Integrated Solar Roof',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'leasedSolarPanels',
+        label: 'Leased Solar Panels',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'microHydroSystem',
+        label: 'Micro-Hydroelectric System',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'netMetering',
+        label: 'Net-Metering Connection',
+        description:
+          'The electrical system is configured to return qualifying generated power to the utility grid.',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'ownedSolarPanels',
+        label: 'Owned Solar Panels',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'windPowerSystem',
+        label: 'Residential Wind-Power System',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'solarBatteryStorage',
+        label: 'Solar Battery Storage',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'solarPanels',
+        label: 'Solar Panels',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'solarPowerPurchaseAgreement',
+        label: 'Solar Power Purchase Agreement',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'solarReady',
+        label: 'Solar-Ready',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'homeBatterySystem',
+        label: 'Whole-Home Battery System',
+        category: 'renewableEnergy',
+      },
+      {
+        id: 'energyMonitoringSystem',
+        label: 'Whole-Home Energy Monitoring',
+        category: 'renewableEnergy',
+      },
+    ];
 
   readonly backupSystemFeatures: readonly SystemUtilitiesFeature[] = [
     {
-      id: 'wholeHouseGenerator',
-      label: 'Whole-House Generator',
+      id: 'generatorTransferSwitch',
+      label: 'Automatic Generator Transfer Switch',
       category: 'backupSystems',
     },
     {
@@ -796,13 +824,33 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'backupSystems',
     },
     {
-      id: 'portableGeneratorConnection',
-      label: 'Portable Generator Connection',
+      id: 'backupHvacPower',
+      label: 'Backup Power for HVAC',
       category: 'backupSystems',
     },
     {
-      id: 'generatorTransferSwitch',
-      label: 'Automatic Generator Transfer Switch',
+      id: 'backupSumpPower',
+      label: 'Backup Power for Sump Pump',
+      category: 'backupSystems',
+    },
+    {
+      id: 'backupWellPower',
+      label: 'Backup Power for Well Pump',
+      category: 'backupSystems',
+    },
+    {
+      id: 'backupPropaneSupply',
+      label: 'Backup Propane Supply',
+      category: 'backupSystems',
+    },
+    {
+      id: 'emergencyWaterStorage',
+      label: 'Emergency Water Storage',
+      category: 'backupSystems',
+    },
+    {
+      id: 'generator',
+      label: 'Generator',
       category: 'backupSystems',
     },
     {
@@ -816,56 +864,26 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'backupSystems',
     },
     {
+      id: 'portableGeneratorConnection',
+      label: 'Portable Generator Connection',
+      category: 'backupSystems',
+    },
+    {
       id: 'upsBackup',
       label: 'Uninterruptible Power Supply',
       category: 'backupSystems',
     },
     {
-      id: 'backupWellPower',
-      label: 'Backup Power for Well Pump',
-      category: 'backupSystems',
-    },
-    {
-      id: 'backupSumpPower',
-      label: 'Backup Power for Sump Pump',
-      category: 'backupSystems',
-    },
-    {
-      id: 'backupHvacPower',
-      label: 'Backup Power for HVAC',
-      category: 'backupSystems',
-    },
-    {
-      id: 'backupPropaneSupply',
-      label: 'Backup Propane Supply',
-      category: 'backupSystems',
-    },
-    {
-      id: 'emergencyWaterStorage',
-      label: 'Emergency Water Storage',
+      id: 'wholeHouseGenerator',
+      label: 'Whole-House Generator',
       category: 'backupSystems',
     },
   ];
 
   readonly smartUtilityFeatures: readonly SystemUtilitiesFeature[] = [
     {
-      id: 'smartThermostat',
-      label: 'Smart Thermostat',
-      category: 'smartUtilities',
-    },
-    {
       id: 'multipleSmartThermostats',
       label: 'Multiple Smart Thermostats',
-      category: 'smartUtilities',
-    },
-    {
-      id: 'smartHvacControls',
-      label: 'Smart HVAC Controls',
-      category: 'smartUtilities',
-    },
-    {
-      id: 'smartVentControls',
-      label: 'Smart Vent Controls',
       category: 'smartUtilities',
     },
     {
@@ -879,28 +897,13 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'smartUtilities',
     },
     {
-      id: 'smartWaterShutoff',
-      label: 'Smart Water Shutoff',
+      id: 'smartGeneratorMonitoring',
+      label: 'Smart Generator Monitoring',
       category: 'smartUtilities',
     },
     {
-      id: 'smartLeakSensors',
-      label: 'Smart Water-Leak Sensors',
-      category: 'smartUtilities',
-    },
-    {
-      id: 'smartWaterHeater',
-      label: 'Smart Water Heater',
-      category: 'smartUtilities',
-    },
-    {
-      id: 'smartWaterSoftener',
-      label: 'Smart Water Softener',
-      category: 'smartUtilities',
-    },
-    {
-      id: 'smartWellMonitoring',
-      label: 'Smart Well Monitoring',
+      id: 'smartHvacControls',
+      label: 'Smart HVAC Controls',
       category: 'smartUtilities',
     },
     {
@@ -909,13 +912,43 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
       category: 'smartUtilities',
     },
     {
-      id: 'smartGeneratorMonitoring',
-      label: 'Smart Generator Monitoring',
+      id: 'smartSolarMonitoring',
+      label: 'Smart Solar Monitoring',
       category: 'smartUtilities',
     },
     {
-      id: 'smartSolarMonitoring',
-      label: 'Smart Solar Monitoring',
+      id: 'smartThermostat',
+      label: 'Smart Thermostat',
+      category: 'smartUtilities',
+    },
+    {
+      id: 'smartVentControls',
+      label: 'Smart Vent Controls',
+      category: 'smartUtilities',
+    },
+    {
+      id: 'smartWaterHeater',
+      label: 'Smart Water Heater',
+      category: 'smartUtilities',
+    },
+    {
+      id: 'smartWaterShutoff',
+      label: 'Smart Water Shutoff',
+      category: 'smartUtilities',
+    },
+    {
+      id: 'smartWaterSoftener',
+      label: 'Smart Water Softener',
+      category: 'smartUtilities',
+    },
+    {
+      id: 'smartLeakSensors',
+      label: 'Smart Water-Leak Sensors',
+      category: 'smartUtilities',
+    },
+    {
+      id: 'smartWellMonitoring',
+      label: 'Smart Well Monitoring',
       category: 'smartUtilities',
     },
     {
@@ -961,39 +994,76 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
     return '';
   });
 
-  async ngOnInit(): Promise<void> {
-    const listingUid = this.route.snapshot.paramMap.get('listingUid');
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .systemsUtilities ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
+    }
+
+    const listingUid =
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
-      this.saveError.set('The selected listing could not be identified.');
+      this.saveError.set(
+        'The selected listing could not be identified.'
+      );
+
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(listingUid);
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
-        this.saveError.set('The selected listing could not be found.');
+        this.saveError.set(
+          'The selected listing could not be found.'
+        );
+
         return;
       }
 
-      this.currentEnhancements = listing.enhancements ?? {};
+      this.currentEnhancements =
+        listing.enhancements ?? {};
 
       this.selectedFeatureIds.set(
-        new Set(this.currentEnhancements.systemsUtilities ?? []),
+        new Set(
+          this.currentEnhancements
+            .systemsUtilities ?? []
+        )
       );
 
       this.hasChanges.set(false);
     } catch (error: unknown) {
       console.error(
         'Unable to load systems and utilities features:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved systems and utilities features.',
+        'We could not load the saved systems and utilities features.'
       );
     } finally {
       this.isLoading.set(false);
@@ -1038,7 +1108,8 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
     this.lastSavedAt.set(null);
   }
 
-  async saveSection(): Promise<void> {
+  async saveSection():
+    Promise<void> {
     if (
       this.isLoading() ||
       this.isSaving() ||
@@ -1048,73 +1119,121 @@ export class SystemUtilitiesEnhancementComponent implements OnInit {
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+          .paramMap.get(
+            'listingUid'
+          );
 
-    const sellerUid = this.authService.currentUserUid;
+    const sellerUid =
+      this.authService.currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
+
       return;
     }
 
     this.isSaving.set(true);
     this.saveError.set(null);
 
-    const updatedEnhancements: ListingEnhancements = {
+    const systemsUtilitiesSelections =
+      Array.from(
+        this.selectedFeatureIds()
+      ).sort();
+
+    const updatedEnhancements:
+      ListingEnhancements = {
       ...this.currentEnhancements,
-      systemsUtilities: Array.from(this.selectedFeatureIds()),
+      systemsUtilities:
+        systemsUtilitiesSelections
     };
 
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
+
+      this.currentEnhancements =
+        updatedEnhancements;
+
+      this.hasChanges.set(false);
+      this.lastSavedAt.set(
+        new Date()
       );
 
-      this.currentEnhancements = updatedEnhancements;
-      this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save systems and utilities features:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save these systems and utilities features. Please try again.',
+        'We could not save these systems and utilities features. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
+
       return;
     }
 
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 

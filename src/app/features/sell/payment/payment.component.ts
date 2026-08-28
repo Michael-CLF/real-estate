@@ -35,6 +35,10 @@ import {
   ValidateListingPromotionResult
 } from '../../../core/domains/payments/services/listing-payment.service';
 
+import {
+  AnalyticsDataLayerService
+} from '../../../core/analytics/analytics-data-layer.service';
+
 
 type PaymentPageState =
   | 'loading'
@@ -59,6 +63,9 @@ export class PaymentComponent
 
   private readonly listingPaymentService =
     inject(ListingPaymentService);
+
+  private readonly analytics =
+    inject(AnalyticsDataLayerService);
 
   private unsubscribeFromDraft:
     Unsubscribe | null = null;
@@ -409,6 +416,30 @@ export class PaymentComponent
         true
       );
 
+      this.analytics.track(
+        'promotion_applied',
+        {
+          listing_id:
+            listingUid,
+
+          currency:
+            'USD',
+
+          discount:
+            validation.discountAmountCents /
+            100,
+
+          value:
+            validation.totalAmountCents /
+            100,
+
+          featured_listing:
+            validation
+              .featuredListingFeeCents >
+            0
+        }
+      );
+
       this.promotionMessage.set(
         `Promotion code ${validation.code} was applied.`
       );
@@ -482,6 +513,32 @@ export class PaymentComponent
               ?.code ??
             null
           );
+
+      this.analytics.track(
+        'begin_checkout',
+        {
+          listing_id:
+            listingUid,
+
+          currency:
+            'USD',
+
+          value:
+            this.total(),
+
+          listing_fee:
+            this.listingFee(),
+
+          featured_listing_fee:
+            this.featuredFee(),
+
+          promotion_discount:
+            this.discount(),
+
+          promotion_applied:
+            this.promotionIsValid()
+        }
+      );
 
       window.location.assign(
         checkout.checkoutUrl

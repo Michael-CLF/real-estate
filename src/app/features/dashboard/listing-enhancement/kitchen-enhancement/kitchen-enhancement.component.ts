@@ -4,24 +4,26 @@ import {
   OnInit,
   computed,
   inject,
-  signal,
+  input,
+  output,
+  signal
 } from '@angular/core';
 
 import {
   ActivatedRoute,
-  Router,
+  Router
 } from '@angular/router';
 
 import {
-  AuthService,
+  AuthService
 } from '../../../../core/authentication/services/auth.service';
 
 import {
-  ListingEnhancements,
+  ListingEnhancements
 } from '../../../../core/domains/listings/models/listing.model';
 
 import {
-  ListingService,
+  ListingService
 } from '../../../../core/domains/listings/services/listing.service';
 
 interface KitchenFeature {
@@ -34,143 +36,211 @@ interface KitchenFeature {
   selector: 'app-kitchen-enhancement',
   standalone: true,
   imports: [],
-  templateUrl: './kitchen-enhancement.component.html',
-  styleUrl: './kitchen-enhancement.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl:
+    './kitchen-enhancement.component.html',
+  styleUrl:
+    './kitchen-enhancement.component.scss',
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
 })
-export class KitchenEnhancementComponent implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
-  private readonly listingService = inject(ListingService);
+export class KitchenEnhancementComponent
+implements OnInit {
+  private readonly route =
+    inject(ActivatedRoute);
 
-  private currentEnhancements: ListingEnhancements = {};
+  private readonly router =
+    inject(Router);
 
-  readonly kitchenFeatures: readonly KitchenFeature[] = [
-    {
-      id: 'kitchenIsland',
-      label: 'Kitchen Island',
-      description: 'A freestanding or built-in central workspace.',
-    },
-    {
-      id: 'walkInPantry',
-      label: 'Walk-In Pantry',
-      description: 'A dedicated pantry large enough to enter.',
-    },
-    {
-      id: 'butlersPantry',
-      label: "Butler's Pantry",
-      description: 'A separate preparation or storage area near the kitchen.',
-    },
-    {
-      id: 'stainlessSteelAppliances',
-      label: 'Stainless-Steel Appliances',
-    },
-    {
-      id: 'gasRange',
-      label: 'Gas Range',
-    },
-    {
-      id: 'doubleOven',
-      label: 'Double Oven',
-    },
-    {
-      id: 'stoneCountertops',
-      label: 'Quartz / Stone Countertops',
-    },
-    {
-      id: 'softCloseCabinetry',
-      label: 'Soft-Close Cabinetry',
-    },
-    {
-      id: 'breakfastNook',
-      label: 'Breakfast Nook',
-    },
-    {
-      id: 'farmhouseSink',
-      label: 'Farmhouse / Apron-Front Sink',
-    },
-    {
-      id: 'potFiller',
-      label: 'Pot Filler',
-    },
-    {
-      id: 'wineRefrigerator',
-      label: 'Wine Refrigerator',
-    },
-    {
-      id: 'underCabinetLighting',
-      label: 'Under-Cabinet Lighting',
-    },
-    {
-      id: 'waterFiltration',
-      label: 'Water Filtration',
-    },
-    {
-      id: 'instantHotWater',
-      label: 'Instant Hot Water',
-    },
-  ];
+  private readonly authService =
+    inject(AuthService);
+
+  private readonly listingService =
+    inject(ListingService);
+
+  readonly wizardMode =
+    input(false);
+
+  readonly wizardListingUid =
+    input<string | null>(null);
+
+  readonly initialEnhancements =
+    input<ListingEnhancements>({});
+
+  readonly enhancementsChange =
+    output<ListingEnhancements>();
+
+  readonly returnRequested =
+    output<void>();
+
+  private currentEnhancements:
+    ListingEnhancements = {};
+
+  readonly kitchenFeatures:
+    readonly KitchenFeature[] = [
+      {
+        id: 'breakfastNook',
+        label: 'Breakfast Nook'
+      },
+      {
+        id: 'butlersPantry',
+        label: "Butler's Pantry",
+        description:
+          'A separate preparation or storage area near the kitchen.'
+      },
+      {
+        id: 'doubleOven',
+        label: 'Double Oven'
+      },
+      {
+        id: 'farmhouseSink',
+        label: 'Farmhouse / Apron-Front Sink'
+      },
+      {
+        id: 'gasRange',
+        label: 'Gas Range'
+      },
+      {
+        id: 'instantHotWater',
+        label: 'Instant Hot Water'
+      },
+      {
+        id: 'kitchenIsland',
+        label: 'Kitchen Island',
+        description:
+          'A freestanding or built-in central workspace.'
+      },
+      {
+        id: 'potFiller',
+        label: 'Pot Filler'
+      },
+      {
+        id: 'softCloseCabinetry',
+        label: 'Soft-Close Cabinetry'
+      },
+      {
+        id: 'stainlessSteelAppliances',
+        label: 'Stainless-Steel Appliances'
+      },
+      {
+        id: 'stoneCountertops',
+        label: 'Quartz / Stone Countertops'
+      },
+      {
+        id: 'underCabinetLighting',
+        label: 'Under-Cabinet Lighting'
+      },
+      {
+        id: 'walkInPantry',
+        label: 'Walk-In Pantry',
+        description:
+          'A dedicated pantry large enough to enter.'
+      },
+      {
+        id: 'waterFiltration',
+        label: 'Water Filtration'
+      },
+      {
+        id: 'wineRefrigerator',
+        label: 'Wine Refrigerator'
+      }
+    ];
 
   readonly selectedFeatureIds =
-    signal<ReadonlySet<string>>(new Set());
+    signal<ReadonlySet<string>>(
+      new Set()
+    );
 
-  readonly hasChanges = signal(false);
-  readonly isLoading = signal(true);
-  readonly isSaving = signal(false);
-  readonly saveError = signal<string | null>(null);
-  readonly lastSavedAt = signal<Date | null>(null);
+  readonly hasChanges =
+    signal(false);
 
-  readonly selectedFeatureCount = computed(
-    () => this.selectedFeatureIds().size,
-  );
+  readonly isLoading =
+    signal(true);
 
-  readonly saveStatusText = computed(() => {
-    if (this.isLoading()) {
-      return 'Loading saved details...';
+  readonly isSaving =
+    signal(false);
+
+  readonly saveError =
+    signal<string | null>(null);
+
+  readonly lastSavedAt =
+    signal<Date | null>(null);
+
+  readonly selectedFeatureCount =
+    computed(
+      () => this.selectedFeatureIds().size
+    );
+
+  readonly saveStatusText =
+    computed(() => {
+      if (this.isLoading()) {
+        return 'Loading saved details...';
+      }
+
+      if (this.isSaving()) {
+        return 'Saving...';
+      }
+
+      if (this.saveError()) {
+        return 'Unable to save';
+      }
+
+      if (this.hasChanges()) {
+        return 'Unsaved changes';
+      }
+
+      if (this.lastSavedAt()) {
+        return 'All changes saved';
+      }
+
+      return '';
+    });
+
+  async ngOnInit():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.currentEnhancements = {
+        ...this.initialEnhancements()
+      };
+
+      this.selectedFeatureIds.set(
+        new Set(
+          this.currentEnhancements
+            .kitchen ?? []
+        )
+      );
+
+      this.hasChanges.set(false);
+      this.saveError.set(null);
+      this.isLoading.set(false);
+
+      return;
     }
 
-    if (this.isSaving()) {
-      return 'Saving...';
-    }
-
-    if (this.saveError()) {
-      return 'Unable to save';
-    }
-
-    if (this.hasChanges()) {
-      return 'Unsaved changes';
-    }
-
-    if (this.lastSavedAt()) {
-      return 'All changes saved';
-    }
-
-    return '';
-  });
-
-  async ngOnInit(): Promise<void> {
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       this.isLoading.set(false);
+
       return;
     }
 
     try {
       const listing =
-        await this.listingService.getPublishedListing(
-          listingUid,
-        );
+        await this.listingService
+          .getPublishedListing(
+            listingUid
+          );
 
       if (!listing) {
         this.saveError.set(
-          'The selected listing could not be found.',
+          'The selected listing could not be found.'
         );
 
         return;
@@ -181,66 +251,100 @@ export class KitchenEnhancementComponent implements OnInit {
 
       this.selectedFeatureIds.set(
         new Set(
-          this.currentEnhancements.kitchen ?? [],
-        ),
+          this.currentEnhancements
+            .kitchen ?? []
+        )
       );
     } catch (error: unknown) {
       console.error(
         'Unable to load kitchen enhancements:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not load the saved kitchen details.',
+        'We could not load the saved kitchen details.'
       );
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  isSelected(featureId: string): boolean {
-    return this.selectedFeatureIds().has(featureId);
+  isSelected(
+    featureId: string
+  ): boolean {
+    return this.selectedFeatureIds()
+      .has(featureId);
   }
 
-  toggleFeature(featureId: string): void {
+  toggleFeature(
+    featureId: string
+  ): void {
     const updatedSelections =
-      new Set(this.selectedFeatureIds());
+      new Set(
+        this.selectedFeatureIds()
+      );
 
-    if (updatedSelections.has(featureId)) {
-      updatedSelections.delete(featureId);
+    if (
+      updatedSelections.has(featureId)
+    ) {
+      updatedSelections.delete(
+        featureId
+      );
     } else {
-      updatedSelections.add(featureId);
+      updatedSelections.add(
+        featureId
+      );
     }
 
-    this.selectedFeatureIds.set(updatedSelections);
+    this.selectedFeatureIds.set(
+      updatedSelections
+    );
+
     this.hasChanges.set(true);
     this.saveError.set(null);
   }
 
   clearSelections(): void {
-    if (this.selectedFeatureIds().size === 0) {
+    if (
+      this.selectedFeatureIds()
+        .size === 0
+    ) {
       return;
     }
 
-    this.selectedFeatureIds.set(new Set());
+    this.selectedFeatureIds.set(
+      new Set()
+    );
+
     this.hasChanges.set(true);
     this.saveError.set(null);
   }
 
-  async saveSection(): Promise<void> {
-    if (this.isSaving() || this.isLoading()) {
+  async saveSection():
+    Promise<void> {
+    if (
+      this.isSaving() ||
+      this.isLoading() ||
+      !this.hasChanges()
+    ) {
       return;
     }
 
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.wizardMode()
+        ? this.wizardListingUid()
+        : this.route.snapshot
+            .paramMap.get(
+              'listingUid'
+            );
 
     const sellerUid =
-      this.authService.currentUserUid;
+      this.authService
+        .currentUserUid;
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -248,7 +352,7 @@ export class KitchenEnhancementComponent implements OnInit {
 
     if (!sellerUid) {
       this.saveError.set(
-        'You must be signed in to update this listing.',
+        'You must be signed in to update this listing.'
       );
 
       return;
@@ -258,48 +362,82 @@ export class KitchenEnhancementComponent implements OnInit {
     this.saveError.set(null);
 
     const kitchenSelections =
-      Array.from(this.selectedFeatureIds());
+      Array.from(
+        this.selectedFeatureIds()
+      ).sort();
 
-    const updatedEnhancements: ListingEnhancements = {
-      ...this.currentEnhancements,
-      kitchen: kitchenSelections,
-    };
+    const updatedEnhancements:
+      ListingEnhancements = {
+        ...this.currentEnhancements,
+        kitchen:
+          kitchenSelections
+      };
 
     try {
-      await this.listingService.updatePublishedListing(
-        listingUid,
-        sellerUid,
-        {
-          enhancements: updatedEnhancements,
-        },
-      );
+      if (this.wizardMode()) {
+        await this.listingService
+          .updateDraft(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      } else {
+        await this.listingService
+          .updatePublishedListing(
+            listingUid,
+            sellerUid,
+            {
+              enhancements:
+                updatedEnhancements
+            }
+          );
+      }
 
       this.currentEnhancements =
         updatedEnhancements;
 
       this.hasChanges.set(false);
-      this.lastSavedAt.set(new Date());
+      this.lastSavedAt.set(
+        new Date()
+      );
+
+      if (this.wizardMode()) {
+        this.enhancementsChange.emit(
+          updatedEnhancements
+        );
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to save kitchen enhancements:',
-        error,
+        error
       );
 
       this.saveError.set(
-        'We could not save these kitchen details. Please try again.',
+        'We could not save these kitchen details. Please try again.'
       );
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  async returnToEnhancements(): Promise<void> {
+  async returnToEnhancements():
+    Promise<void> {
+    if (this.wizardMode()) {
+      this.returnRequested.emit();
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -308,17 +446,24 @@ export class KitchenEnhancementComponent implements OnInit {
     await this.router.navigate([
       '/sell/listings',
       listingUid,
-      'enhancements',
+      'enhancements'
     ]);
   }
 
-  async viewListing(): Promise<void> {
+  async viewListing():
+    Promise<void> {
+    if (this.wizardMode()) {
+      return;
+    }
+
     const listingUid =
-      this.route.snapshot.paramMap.get('listingUid');
+      this.route.snapshot.paramMap.get(
+        'listingUid'
+      );
 
     if (!listingUid) {
       this.saveError.set(
-        'The selected listing could not be identified.',
+        'The selected listing could not be identified.'
       );
 
       return;
@@ -326,13 +471,13 @@ export class KitchenEnhancementComponent implements OnInit {
 
     await this.router.navigate([
       '/listings',
-      listingUid,
+      listingUid
     ]);
   }
 
   trackFeature(
     _index: number,
-    feature: KitchenFeature,
+    feature: KitchenFeature
   ): string {
     return feature.id;
   }

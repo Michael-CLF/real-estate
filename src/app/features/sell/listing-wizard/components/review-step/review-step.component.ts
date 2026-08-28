@@ -145,27 +145,27 @@ export class ReviewStepComponent {
 
     const labels:
       Record<string, string> = {
-        condo:
-          'Condo',
+      condo:
+        'Condo',
 
-        land:
-          'Land',
+      land:
+        'Land',
 
-        mobile:
-          'Mobile Home',
+      mobile:
+        'Mobile Home',
 
-        multi_family:
-          'Multi-Family',
+      multi_family:
+        'Multi-Family',
 
-        pud:
-          'PUD',
+      pud:
+        'PUD',
 
-        single_family:
-          'Single Family',
+      single_family:
+        'Single Family',
 
-        townhome:
-          'Townhome'
-      };
+      townhome:
+        'Townhome'
+    };
 
     return (
       labels[propertyType] ??
@@ -249,132 +249,94 @@ export class ReviewStepComponent {
     if (
       !featureData ||
       featureData.mode ===
-        'skip' ||
-      featureData.mode ===
-        'unselected'
+      'unselected'
     ) {
       return [];
     }
 
-    const labels:
-      Record<string, string> = {
-        kitchenIsland:
-          'Kitchen Island',
+    const sectionLabels:
+      Record<
+        string,
+        string
+      > = {
+      accessibility:
+        'Accessibility',
 
-        pantry:
-          'Pantry',
+      bedroomsBathrooms:
+        'Bedrooms & Bathrooms',
 
-        stoneCountertops:
-          'Granite / Quartz Countertops',
+      communityAmenities:
+        'Community Amenities',
 
-        stainlessAppliances:
-          'Stainless Appliances',
+      construction:
+        'Construction & Exterior',
 
-        gasRange:
-          'Gas Range',
+      interior:
+        'Interior & Living Spaces',
 
-        doubleOven:
-          'Double Oven',
+      kitchen:
+        'Kitchen',
 
-        fireplace:
-          'Fireplace',
+      outdoorLiving:
+        'Outdoor Living',
 
-        hardwoodFloors:
-          'Hardwood Floors',
+      parkingStorage:
+        'Parking & Storage',
 
-        vaultedCeilings:
-          'Vaulted Ceilings',
+      systemsUtilities:
+        'Systems, Utilities & Efficiency',
 
-        homeOffice:
-          'Home Office',
-
-        bonusRoom:
-          'Bonus Room',
-
-        basement:
-          'Basement',
-
-        walkInCloset:
-          'Walk-In Closet',
-
-        ensuiteBath:
-          'Ensuite Bath',
-
-        doubleVanity:
-          'Double Vanity',
-
-        soakingTub:
-          'Soaking Tub',
-
-        separateShower:
-          'Separate Shower',
-
-        deck:
-          'Deck',
-
-        patio:
-          'Patio',
-
-        porch:
-          'Porch',
-
-        fencedYard:
-          'Fenced Yard',
-
-        pool:
-          'Pool',
-
-        outdoorKitchen:
-          'Outdoor Kitchen',
-
-        attachedGarage:
-          'Attached Garage',
-
-        detachedGarage:
-          'Detached Garage',
-
-        carport:
-          'Carport',
-
-        evCharging:
-          'EV Charging',
-
-        centralHvac:
-          'Central HVAC',
-
-        heatPump:
-          'Heat Pump',
-
-        gasHeat:
-          'Gas Heat',
-
-        centralAir:
-          'Central Air',
-
-        solarPanels:
-          'Solar Panels',
-
-        generator:
-          'Generator',
-
-        smartThermostat:
-          'Smart Thermostat'
-      };
+      technologySecurity:
+        'Technology & Security'
+    };
 
     return Object.entries(
-      featureData.features
+      featureData.enhancements
     )
       .filter(
-        ([, selected]) =>
-          selected
+        (
+          [
+            ,
+            selectedValues
+          ]
+        ) =>
+          Array.isArray(
+            selectedValues
+          ) &&
+          selectedValues.length > 0
       )
       .map(
-        ([key]) =>
-          labels[key] ??
-          key
+        (
+          [
+            sectionKey,
+            selectedValues
+          ]
+        ) => {
+          const sectionLabel =
+            sectionLabels[
+            sectionKey
+            ] ??
+            sectionKey;
+
+          const selectionCount =
+            selectedValues.length;
+
+          return (
+            `${sectionLabel} ` +
+            `(${selectionCount})`
+          );
+        }
+      )
+      .sort(
+        (
+          firstSection,
+          secondSection
+        ) =>
+          firstSection.localeCompare(
+            secondSection
+          )
       );
   }
-
 
   protected get primaryPhoto():
     ListingPhoto |

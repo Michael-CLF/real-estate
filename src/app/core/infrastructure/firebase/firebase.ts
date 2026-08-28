@@ -1,21 +1,31 @@
-import { initializeApp } from 'firebase/app';
+import {
+  initializeApp
+} from 'firebase/app';
 
 import {
-  getAnalytics,
-  isSupported
-} from 'firebase/analytics';
+  getAuth
+} from 'firebase/auth';
 
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
-import { getStorage } from 'firebase/storage';
+import {
+  getFirestore
+} from 'firebase/firestore';
+
+import {
+  getFunctions
+} from 'firebase/functions';
+
+import {
+  getStorage
+} from 'firebase/storage';
 
 import {
   environment
 } from '../../../../environments/environment';
 
 export const firebaseApp =
-  initializeApp(environment.firebase);
+  initializeApp(
+    environment.firebase
+  );
 
 export const auth =
   getAuth(firebaseApp);
@@ -24,21 +34,10 @@ export const firestore =
   getFirestore(firebaseApp);
 
 export const functions =
-  getFunctions(firebaseApp, 'us-east1');
+  getFunctions(
+    firebaseApp,
+    'us-east1'
+  );
 
 export const storage =
   getStorage(firebaseApp);
-
-export let analytics:
-  ReturnType<typeof getAnalytics> | null = null;
-
-isSupported()
-  .then((supported) => {
-    if (supported) {
-      analytics =
-        getAnalytics(firebaseApp);
-    }
-  })
-  .catch(() => {
-    analytics = null;
-  });
