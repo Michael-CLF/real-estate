@@ -326,6 +326,22 @@ export const routes: Routes = [
           )
       },
       /*
+ * How NavStreet Works
+ *
+ * Public product tour for buyers, sellers,
+ * and professional users.
+ */
+      {
+        path: 'how-navstreet-works',
+        loadComponent: () =>
+          import(
+            './features/how-navstreet-works/how-navstreet-works.component'
+          ).then(
+            component =>
+              component.HowNavStreetWorksComponent
+          )
+      },
+      /*
  * NavStreet Education Center
  *
  * Public educational content for buyers,

@@ -1,18 +1,23 @@
 <header class="site-header">
   <div class="site-header__container">
-
     <a
       class="site-header__brand"
       routerLink="/"
-      aria-label="Home"
-      (click)="closeMobileMenu()"
+      aria-label="NavStreet home"
+      (click)="
+        handleHeaderNavigation(
+          'logo',
+          'NavStreet logo',
+          '/'
+        )
+      "
     >
       <span class="site-header__brand-content">
         <img
           class="site-header__logo"
           src="/assets/images/navstreet.svg"
           alt="NavStreet"
-        >
+        />
       </span>
     </a>
 
@@ -23,14 +28,18 @@
     />
 
     <div class="site-header__actions">
-
       @if (!authState.loading()) {
-
         @if (authState.isAuthenticated()) {
-
           <a
             class="site-header__login"
             routerLink="/dashboard"
+            (click)="
+              handleHeaderNavigation(
+                'dashboard',
+                'Dashboard',
+                '/dashboard'
+              )
+            "
           >
             Dashboard
           </a>
@@ -47,12 +56,17 @@
               Log out
             }
           </button>
-
         } @else {
-
           <a
             class="site-header__login"
             routerLink="/sign-in"
+            (click)="
+              handleHeaderNavigation(
+                'login',
+                'Log in',
+                '/sign-in'
+              )
+            "
           >
             Log in
           </a>
@@ -60,20 +74,26 @@
           <a
             class="site-header__signup"
             routerLink="/register"
+            (click)="
+              handleHeaderNavigation(
+                'get_started',
+                'Get started',
+                '/register'
+              )
+            "
           >
             Get started
           </a>
-
         }
-
       }
-
     </div>
 
     <button
       class="site-header__menu-button"
       type="button"
-      [attr.aria-expanded]="isMobileMenuOpen()"
+      [attr.aria-expanded]="
+        isMobileMenuOpen()
+      "
       aria-label="Toggle navigation menu"
       (click)="toggleMobileMenu()"
     >
@@ -81,6 +101,5 @@
       <span></span>
       <span></span>
     </button>
-
   </div>
 </header>

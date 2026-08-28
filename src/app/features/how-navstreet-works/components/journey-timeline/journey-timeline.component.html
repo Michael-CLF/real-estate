@@ -1,0 +1,65 @@
+<section
+  class="journey-timeline"
+  [id]="sectionId()"
+  [attr.aria-labelledby]="
+    sectionId() + '-title'
+  "
+>
+  <div class="journey-timeline__heading">
+    <span class="journey-timeline__eyebrow">
+      {{ eyebrow() }}
+    </span>
+
+    <h2 [id]="sectionId() + '-title'">
+      {{ title() }}
+    </h2>
+
+    <p>
+      {{ description() }}
+    </p>
+  </div>
+
+  <ol class="journey-timeline__steps">
+    @for (
+      step of steps();
+      track step.title;
+      let stepNumber = $index
+    ) {
+      <li
+        class="journey-timeline__step"
+      >
+        <div
+          class="journey-timeline__number"
+          aria-hidden="true"
+        >
+          {{ stepNumber + 1 }}
+        </div>
+
+        <article class="journey-timeline__card">
+          <div class="journey-timeline__card-top">
+            <span
+              class="journey-timeline__icon"
+              aria-hidden="true"
+            >
+              <i [class]="step.icon"></i>
+            </span>
+
+            @if (
+              step.status === 'coming-soon'
+            ) {
+
+            }
+          </div>
+
+          <h3>
+            {{ step.title }}
+          </h3>
+
+          <p>
+            {{ step.description }}
+          </p>
+        </article>
+      </li>
+    }
+  </ol>
+</section>

@@ -553,23 +553,22 @@ async function publishPaidListing(
                 updatedAt: now
             };
 
-            addOptionalField(
-                listingDocument,
-                'hoa',
+            const hoa =
                 draft.hoa ??
-                draft.propertyDetails?.hoa
-            );
+                draft.propertyDetails?.hoa;
+
+            if (hoa) {
+                listingDocument['hoa'] = {
+                    ...hoa,
+                    includedItems:
+                        draft.includedItems ?? []
+                };
+            }
 
             addOptionalField(
                 listingDocument,
                 'schools',
                 draft.schools
-            );
-
-            addOptionalField(
-                listingDocument,
-                'includedItems',
-                draft.includedItems
             );
 
             addOptionalField(

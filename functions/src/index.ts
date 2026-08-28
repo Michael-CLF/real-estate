@@ -28,6 +28,8 @@ export * from './users';
 
 export * from './inquiries';
 
+export * from './contact';
+
 export {
   createOfferDraft
 } from './offers/create-offer-draft';

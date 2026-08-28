@@ -79,8 +79,8 @@
     border-radius: 0.625rem;
     display: inline-flex;
     font-family: variables.$font-body;
-    font-size: 0.9375rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 500;
     justify-content: center;
     min-height: 3rem;
     padding: 0.75rem 1.25rem;
@@ -92,14 +92,14 @@
       transform 160ms ease;
 
     &--primary {
-      background: #2563eb;
-      border: 1px solid #2563eb;
+      background: #154360;
+      border: 1px solid #154360;
       box-shadow: 0 0.5rem 1.25rem rgb(37 99 235 / 18%);
       color: #ffffff;
 
       &:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
+        background: #008080;
+        border-color: #000000;
         transform: translateY(-1px);
       }
     }
@@ -107,12 +107,14 @@
     &--secondary {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      color: #334155;
+      color: #154360;
+      font-weight: 600;
 
       &:hover {
-        border-color: #94a3b8;
-        color: #0f172a;
+        border-color: #000000;
+        color: #ffffff;
         transform: translateY(-1px);
+        background-color: #008080;
       }
     }
 

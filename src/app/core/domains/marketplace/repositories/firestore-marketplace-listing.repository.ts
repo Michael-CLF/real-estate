@@ -87,47 +87,47 @@ export class FirestoreMarketplaceListingRepository
         );
     }
 
-   override getFeaturedListings(
-  limit: number
-): Observable<MarketplaceListingSummary[]> {
-  return this.loadActiveListings().pipe(
-    map(listings =>
-      listings
-        .filter(listing =>
-          this.isFeaturedListing(listing)
-        )
-        .sort(
-          (
-            firstListing,
-            secondListing
-          ) =>
-            (
-              secondListing
-                .publishedAt
-                ?.getTime() ??
-              secondListing
-                .createdAt
-                .getTime()
-            ) -
-            (
-              firstListing
-                .publishedAt
-                ?.getTime() ??
-              firstListing
-                .createdAt
-                .getTime()
+    override getFeaturedListings(
+        limit: number
+    ): Observable<MarketplaceListingSummary[]> {
+        return this.loadActiveListings().pipe(
+            map(listings =>
+                listings
+                    .filter(listing =>
+                        this.isFeaturedListing(listing)
+                    )
+                    .sort(
+                        (
+                            firstListing,
+                            secondListing
+                        ) =>
+                            (
+                                secondListing
+                                    .publishedAt
+                                    ?.getTime() ??
+                                secondListing
+                                    .createdAt
+                                    .getTime()
+                            ) -
+                            (
+                                firstListing
+                                    .publishedAt
+                                    ?.getTime() ??
+                                firstListing
+                                    .createdAt
+                                    .getTime()
+                            )
+                    )
+                    .slice(
+                        0,
+                        Math.max(limit, 0)
+                    )
+                    .map(listing =>
+                        this.toListingSummary(listing)
+                    )
             )
-        )
-        .slice(
-          0,
-          Math.max(limit, 0)
-        )
-        .map(listing =>
-          this.toListingSummary(listing)
-        )
-    )
-  );
-}
+        );
+    }
     private loadActiveListings():
         Observable<MarketplaceListing[]> {
         const listingsReference = collection(
@@ -382,11 +382,12 @@ export class FirestoreMarketplaceListingRepository
         const stateAbbreviation =
             this.getStateAbbreviation(state);
 
-        const photos = Array.isArray(
-            data['photos']
-        )
-            ? data['photos'] as MarketplaceListing['photos']
-            : [];
+        const photos =
+            this.mapFirestorePhotos(
+                documentId,
+                data['photos'],
+                data['photoUrls']
+            );
 
         const primaryPhotoUrl =
             this.readString(
@@ -625,6 +626,160 @@ export class FirestoreMarketplaceListingRepository
                     data['updatedAt']
                 ) ?? new Date()
         };
+    }
+
+    private mapFirestorePhotos(
+        listingUid: string,
+        photosValue: unknown,
+        photoUrlsValue: unknown
+    ): MarketplaceListing['photos'] {
+        const mappedPhotos =
+            Array.isArray(photosValue)
+                ? photosValue
+                    .map(
+                        (
+                            photoValue,
+                            photoIndex
+                        ) => {
+                            const photo =
+                                this.readRecord(
+                                    photoValue
+                                );
+
+                            if (!photo) {
+                                return null;
+                            }
+
+                            const url =
+                                this.readString(
+                                    photo['fullImageUrl']
+                                ) ||
+                                this.readString(
+                                    photo['url']
+                                ) ||
+                                this.readString(
+                                    photo['thumbnailUrl']
+                                );
+
+                            if (!url) {
+                                return null;
+                            }
+
+                            return {
+                                id:
+                                    this.readString(
+                                        photo['id']
+                                    ) ||
+                                    `${listingUid}-${photoIndex}`,
+
+                                listingId:
+                                    listingUid,
+
+                                url,
+
+                                storagePath:
+                                    this.readString(
+                                        photo['storagePath']
+                                    ),
+
+                                altText:
+                                    this.readString(
+                                        photo['altText']
+                                    ) ||
+                                    this.readString(
+                                        photo['originalFileName']
+                                    ) ||
+                                    `Property photograph ${photoIndex + 1
+                                    }`,
+
+                                sortOrder:
+                                    this.readNumber(
+                                        photo['sortOrder']
+                                    ) ??
+                                    photoIndex,
+
+                                isFeatured:
+                                    photo['isPrimary'] === true ||
+                                    photo['isFeatured'] === true,
+
+                                createdAt:
+                                    this.toDate(
+                                        photo['createdAt']
+                                    ) ??
+                                    new Date()
+                            };
+                        }
+                    )
+                    .filter(
+                        (
+                            photo
+                        ): photo is MarketplaceListing['photos'][number] =>
+                            photo !== null
+                    )
+                : [];
+
+        if (mappedPhotos.length > 0) {
+            return mappedPhotos.sort(
+                (
+                    firstPhoto,
+                    secondPhoto
+                ) =>
+                    firstPhoto.sortOrder -
+                    secondPhoto.sortOrder
+            );
+        }
+
+        if (!Array.isArray(photoUrlsValue)) {
+            return [];
+        }
+
+        return photoUrlsValue
+            .map(
+                (
+                    photoUrl,
+                    photoIndex
+                ) => {
+                    const url =
+                        this.readString(
+                            photoUrl
+                        );
+
+                    if (!url) {
+                        return null;
+                    }
+
+                    return {
+                        id:
+                            `${listingUid}-${photoIndex}`,
+
+                        listingId:
+                            listingUid,
+
+                        url,
+
+                        storagePath: '',
+
+                        altText:
+                            `Property photograph ${photoIndex + 1
+                            }`,
+
+                        sortOrder:
+                            photoIndex,
+
+                        isFeatured:
+                            photoIndex === 0,
+
+                        createdAt:
+                            new Date()
+                    };
+                }
+            )
+            .filter(
+                (
+                    photo
+                ): photo is MarketplaceListing['photos'][number] =>
+                    photo !== null
+            );
     }
 
     private readSchools(
@@ -918,15 +1073,15 @@ export class FirestoreMarketplaceListingRepository
                 listing.publishedAt
         };
     }
-    
-   private isFeaturedListing(
-  listing: MarketplaceListing
-): boolean {
-  return (
-    listing.status === 'active' &&
-    listing.featuredListing === true
-  );
-}
+
+    private isFeaturedListing(
+        listing: MarketplaceListing
+    ): boolean {
+        return (
+            listing.status === 'active' &&
+            listing.featuredListing === true
+        );
+    }
 
     private readRecord(
         value: unknown

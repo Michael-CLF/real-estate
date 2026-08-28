@@ -68,12 +68,6 @@ interface MortgageTool {
   readonly route: string;
 }
 
-interface ProcessStep {
-  readonly number: string;
-  readonly title: string;
-  readonly description: string;
-}
-
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -254,34 +248,6 @@ export class HomeComponent {
         description:
           'Prepare for the expenses that may accompany a purchase, sale, or mortgage transaction.',
         route: '/mortgage'
-      }
-    ];
-
-  protected readonly processSteps:
-    readonly ProcessStep[] = [
-      {
-        number: '01',
-        title: 'Create your secure account',
-        description:
-          'Use passwordless email verification to establish your NavStreet profile and protected dashboard.'
-      },
-      {
-        number: '02',
-        title: 'Build and publish the listing',
-        description:
-          'Follow the guided wizard, upload photographs, certify the details, verify identity, and publish.'
-      },
-      {
-        number: '03',
-        title: 'Market and manage the property',
-        description:
-          'Enhance the listing, share it across your network, and monitor buyer interest and activity.'
-      },
-      {
-        number: '04',
-        title: 'Move the transaction forward',
-        description:
-          'Coordinate inquiries, showings, offers, professionals, financing tools, and status changes.'
       }
     ];
 }

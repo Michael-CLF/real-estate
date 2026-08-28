@@ -1,8 +1,5 @@
 <main class="home-page">
-  <section
-    class="hero"
-    aria-labelledby="hero-title"
-  >
+  <section class="hero" aria-labelledby="hero-title">
     <div class="hero__glow hero__glow--one"></div>
     <div class="hero__glow hero__glow--two"></div>
 
@@ -25,63 +22,39 @@
         </p>
 
         <div class="hero__actions">
-          <a
-            class="button button--primary"
-            routerLink="/sell"
-          >
+          <a class="button button--primary" routerLink="/sell">
             List your home for $49
 
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
 
-          <a
-            class="button button--secondary-light"
-            routerLink="/buy"
-          >
+          <a class="button button--secondary-light" routerLink="/buy">
             Browse homes
           </a>
         </div>
 
-        <div
-          class="hero__trust"
-          aria-label="NavStreet platform highlights"
-        >
+        <div class="hero__trust" aria-label="NavStreet platform highlights">
           <span>
-            <i
-              class="fa-solid fa-circle-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
             Flat $49 listing fee
           </span>
 
           <span>
-            <i
-              class="fa-solid fa-circle-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
             Guided step-by-step process
           </span>
 
           <span>
-            <i
-              class="fa-solid fa-circle-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
 
             Secure identity verification
           </span>
         </div>
       </div>
 
-      <div
-        class="hero-product"
-        aria-label="NavStreet seller dashboard preview"
-      >
+      <div class="hero-product" aria-label="NavStreet seller dashboard preview">
         <div class="hero-product__topbar">
           <div>
             <span></span>
@@ -107,28 +80,19 @@
 
           <div class="hero-product__metrics">
             <div>
-              <i
-                class="fa-regular fa-eye"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-regular fa-eye" aria-hidden="true"></i>
               <strong>248</strong>
               <span>Views</span>
             </div>
 
             <div>
-              <i
-                class="fa-regular fa-heart"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-regular fa-heart" aria-hidden="true"></i>
               <strong>17</strong>
               <span>Favorites</span>
             </div>
 
             <div>
-              <i
-                class="fa-regular fa-message"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-regular fa-message" aria-hidden="true"></i>
               <strong>6</strong>
               <span>Inquiries</span>
             </div>
@@ -137,10 +101,7 @@
           <div class="hero-product__tools">
             <div>
               <span>
-                <i
-                  class="fa-solid fa-share-nodes"
-                  aria-hidden="true"
-                ></i>
+                <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
               </span>
 
               <div>
@@ -148,18 +109,12 @@
                 <small>Links, captions, sharing, and QR code</small>
               </div>
 
-              <i
-                class="fa-solid fa-chevron-right"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
             </div>
 
             <div>
               <span>
-                <i
-                  class="fa-solid fa-list-check"
-                  aria-hidden="true"
-                ></i>
+                <i class="fa-solid fa-list-check" aria-hidden="true"></i>
               </span>
 
               <div>
@@ -167,19 +122,13 @@
                 <small>Monitor buyer interest in one place</small>
               </div>
 
-              <i
-                class="fa-solid fa-chevron-right"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
             </div>
           </div>
         </div>
 
         <div class="hero-product__verified">
-          <i
-            class="fa-solid fa-shield-halved"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
 
           <span>
             <strong>Identity verified</strong>
@@ -196,10 +145,7 @@
     </div>
   </section>
 
-  <section
-    class="featured-homes"
-    aria-labelledby="featured-homes-title"
-  >
+  <section class="featured-homes" aria-labelledby="featured-homes-title">
     <div class="page-shell">
       <div class="section-heading-row">
         <div class="section-heading">
@@ -208,7 +154,7 @@
           </p>
 
           <h2 id="featured-homes-title">
-           Featured Homes
+            Featured Homes
           </h2>
 
           <p>
@@ -218,67 +164,49 @@
           </p>
         </div>
 
-        <a
-          class="button button--outline"
-          routerLink="/buy"
-        >
+        <a class="button button--outline" routerLink="/buy">
           View all homes
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
 
       @if (
-        featuredListings$ | async;
-        as featuredListings
+      featuredListings$ | async;
+      as featuredListings
       ) {
-        @if (featuredListings.length > 0) {
-          <div
-            class="featured-homes__grid"
-            aria-label="Featured property listings"
-          >
-            @for (
-              listing of featuredListings;
-              track listing.id
-            ) {
-              <app-listing-card [listing]="listing" />
-            }
-          </div>
-        } @else {
-          <div class="featured-homes__empty">
-            <span>
-              <i
-                class="fa-solid fa-house"
-                aria-hidden="true"
-              ></i>
-            </span>
-
-            <div>
-              <h3>Featured homes are coming soon</h3>
-              <p>
-                Explore the marketplace to see all currently
-                available NavStreet properties.
-              </p>
-            </div>
-
-            <a
-              class="button button--outline"
-              routerLink="/buy"
-            >
-              Browse all homes
-            </a>
-          </div>
+      @if (featuredListings.length > 0) {
+      <div class="featured-homes__grid" aria-label="Featured property listings">
+        @for (
+        listing of featuredListings;
+        track listing.id
+        ) {
+        <app-listing-card [listing]="listing" />
         }
+      </div>
+      } @else {
+      <div class="featured-homes__empty">
+        <span>
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+        </span>
+
+        <div>
+          <h3>Featured homes are coming soon</h3>
+          <p>
+            Explore the marketplace to see all currently
+            available NavStreet properties.
+          </p>
+        </div>
+
+        <a class="button button--outline" routerLink="/buy">
+          Browse all homes
+        </a>
+      </div>
+      }
       }
     </div>
   </section>
 
-  <section
-    class="audiences"
-    aria-labelledby="audiences-title"
-  >
+  <section class="audiences" aria-labelledby="audiences-title">
     <div class="page-shell">
       <header class="section-heading section-heading--centered">
         <p class="section-eyebrow">
@@ -298,41 +226,37 @@
 
       <div class="audiences__grid">
         @for (
-          path of audiencePaths;
-          track path.title
+        path of audiencePaths;
+        track path.title
         ) {
-          <a
-            class="audience-card"
-            [routerLink]="path.route"
-          >
-            <span class="audience-card__icon">
-              <i
-                [class]="path.icon"
-                aria-hidden="true"
-              ></i>
-            </span>
+        <a class="audience-card" [routerLink]="path.route">
+          <span class="audience-card__icon">
+            <i [class]="path.icon" aria-hidden="true"></i>
+          </span>
 
-            <small>{{ path.eyebrow }}</small>
-            <h3>{{ path.title }}</h3>
-            <p>{{ path.description }}</p>
+          <small>{{ path.eyebrow }}</small>
+          <h3>{{ path.title }}</h3>
+          <p>{{ path.description }}</p>
 
-            <span class="audience-card__action">
-              {{ path.action }}
-              <i
-                class="fa-solid fa-arrow-right"
-                aria-hidden="true"
-              ></i>
-            </span>
-          </a>
+          <span class="audience-card__action">
+            {{ path.action }}
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </span>
+        </a>
         }
+      </div>
+
+      <div class="audiences__guide">
+        <a class="button button--outline" routerLink="/how-navstreet-works">
+          Explore Everything NavStreet Can Do
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
       </div>
     </div>
   </section>
 
-  <section
-    class="seller-platform"
-    aria-labelledby="seller-platform-title"
-  >
+  <section class="seller-platform" aria-labelledby="seller-platform-title">
     <div class="page-shell">
       <div class="seller-platform__introduction">
         <div class="section-heading section-heading--light">
@@ -352,47 +276,35 @@
           </p>
         </div>
 
-        <a
-          class="button button--primary"
-          routerLink="/sell"
-        >
+        <a class="button button--primary" routerLink="/how-navstreet-works">
           See how selling works
 
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
 
       <div class="seller-features">
         @for (
-          feature of sellerFeatures;
-          track feature.title
+        feature of sellerFeatures;
+        track feature.title
         ) {
-          <article class="seller-feature">
-            <span>
-              <i
-                [class]="feature.icon"
-                aria-hidden="true"
-              ></i>
-            </span>
+        <article class="seller-feature">
+          <span>
+            <i [class]="feature.icon" aria-hidden="true"></i>
+          </span>
 
-            <div>
-              <h3>{{ feature.title }}</h3>
-              <p>{{ feature.description }}</p>
-            </div>
-          </article>
+          <div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </div>
+        </article>
         }
       </div>
     </div>
   </section>
 
 
-  <section
-    class="savings"
-    aria-labelledby="savings-title"
-  >
+  <section class="savings" aria-labelledby="savings-title">
     <div class="page-shell savings__layout">
       <div class="savings__content">
         <p class="section-eyebrow">
@@ -411,39 +323,24 @@
 
         <ul>
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
             Know the listing cost before you begin
           </li>
 
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
             Use the same platform after publication
           </li>
 
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
             Choose additional services only when needed
           </li>
         </ul>
 
-        <a
-          class="text-link"
-          routerLink="/sell"
-        >
+        <a class="text-link" routerLink="/sell">
           Start a property listing
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
 
@@ -493,19 +390,13 @@
     </div>
   </section>
 
-  <section
-    class="marketing"
-    aria-labelledby="marketing-title"
-  >
+  <section class="marketing" aria-labelledby="marketing-title">
     <div class="page-shell marketing__layout">
       <div class="marketing__preview">
         <div class="marketing__window">
           <header>
             <span>
-              <i
-                class="fa-solid fa-share-nodes"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
             </span>
 
             <div>
@@ -544,10 +435,7 @@
         </div>
 
         <div class="marketing__qr">
-          <i
-            class="fa-solid fa-qrcode"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
           <span>Property QR code</span>
         </div>
       </div>
@@ -569,41 +457,32 @@
 
         <div class="marketing__features">
           @for (
-            feature of marketingFeatures;
-            track feature.title
+          feature of marketingFeatures;
+          track feature.title
           ) {
-            <article>
-              <span>
-                <i
-                  [class]="feature.icon"
-                  aria-hidden="true"
-                ></i>
-              </span>
+          <article>
+            <span>
+              <i [class]="feature.icon" aria-hidden="true"></i>
+            </span>
 
-              <div>
-                <h3>{{ feature.title }}</h3>
-                <p>{{ feature.description }}</p>
-              </div>
-            </article>
+            <div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
+            </div>
+          </article>
           }
         </div>
       </div>
     </div>
   </section>
 
-  <section
-    class="state-section"
-    aria-label="Explore homes by state"
-  >
+  <section id="state-marketplaces" class="state-section" aria-label="Explore homes by state">
     <div class="page-shell">
       <app-state-explorer />
     </div>
   </section>
 
-  <section
-    class="mortgage"
-    aria-labelledby="mortgage-title"
-  >
+  <section class="mortgage" aria-labelledby="mortgage-title">
     <div class="page-shell">
       <div class="section-heading-row">
         <div class="section-heading">
@@ -621,55 +500,37 @@
           </p>
         </div>
 
-        <a
-          class="text-link"
-          routerLink="/mortgage"
-        >
+        <a class="text-link" routerLink="/mortgage">
           Explore all calculators
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
 
       <div class="mortgage__grid">
         @for (
-          tool of mortgageTools;
-          track tool.title
+        tool of mortgageTools;
+        track tool.title
         ) {
-          <a
-            class="mortgage-card"
-            [routerLink]="tool.route"
-          >
-            <span class="mortgage-card__icon">
-              <i
-                [class]="tool.icon"
-                aria-hidden="true"
-              ></i>
-            </span>
+        <a class="mortgage-card" [routerLink]="tool.route">
+          <span class="mortgage-card__icon">
+            <i [class]="tool.icon" aria-hidden="true"></i>
+          </span>
 
-            <small>{{ tool.eyebrow }}</small>
-            <h3>{{ tool.title }}</h3>
-            <p>{{ tool.description }}</p>
+          <small>{{ tool.eyebrow }}</small>
+          <h3>{{ tool.title }}</h3>
+          <p>{{ tool.description }}</p>
 
-            <span class="mortgage-card__action">
-              Open calculator
-              <i
-                class="fa-solid fa-arrow-right"
-                aria-hidden="true"
-              ></i>
-            </span>
-          </a>
+          <span class="mortgage-card__action">
+            Open calculator
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </span>
+        </a>
         }
       </div>
     </div>
   </section>
 
-  <section
-    class="professionals"
-    aria-labelledby="professionals-title"
-  >
+  <section class="professionals" aria-labelledby="professionals-title">
     <div class="page-shell professionals__layout">
       <div class="professionals__content">
         <p class="section-eyebrow section-eyebrow--light">
@@ -686,15 +547,9 @@
           professionals—without surrendering control of the transaction.
         </p>
 
-        <a
-          class="button button--secondary-light"
-          routerLink="/professionals"
-        >
+        <a class="button button--secondary-light" routerLink="/professionals">
           Find a professional
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
 
@@ -727,56 +582,9 @@
     </div>
   </section>
 
-  <section
-    class="process"
-    aria-labelledby="process-title"
-  >
-    <div class="page-shell process__layout">
-      <div class="process__introduction">
-        <p class="section-eyebrow">
-          One clear path forward
-        </p>
 
-        <h2 id="process-title">
-          From property details to buyer interest.
-        </h2>
 
-        <p>
-          NavStreet replaces disconnected tools and uncertain next
-          steps with a guided digital experience that remains useful
-          throughout the life of the listing.
-        </p>
-
-        <a
-          class="button button--dark"
-          routerLink="/sell"
-        >
-          Begin your listing
-        </a>
-      </div>
-
-      <div class="process__steps">
-        @for (
-          step of processSteps;
-          track step.number
-        ) {
-          <article>
-            <span>{{ step.number }}</span>
-
-            <div>
-              <h3>{{ step.title }}</h3>
-              <p>{{ step.description }}</p>
-            </div>
-          </article>
-        }
-      </div>
-    </div>
-  </section>
-
-  <section
-    class="final-cta"
-    aria-labelledby="final-cta-title"
-  >
+  <section class="final-cta" aria-labelledby="final-cta-title">
     <div class="page-shell final-cta__layout">
       <div>
         <p class="section-eyebrow section-eyebrow--light">
@@ -795,21 +603,12 @@
       </div>
 
       <div class="final-cta__actions">
-        <a
-          class="button button--primary"
-          routerLink="/sell"
-        >
+        <a class="button button--primary" routerLink="/sell">
           List your home for $49
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
 
-        <a
-          class="button button--secondary-light"
-          routerLink="/buy"
-        >
+        <a class="button button--secondary-light" routerLink="/buy">
           Explore the marketplace
         </a>
       </div>

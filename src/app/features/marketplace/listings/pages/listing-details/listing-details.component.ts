@@ -739,13 +739,46 @@ export class ListingDetailsComponent
     return ENHANCEMENT_SECTIONS
       .map(section => ({
         ...section,
+
         features: (
           enhancements[section.id] ?? []
-        ).map(featureId =>
-          this.formatFeatureLabel(featureId)
         )
+          .map(featureId =>
+            this.formatFeatureLabel(
+              featureId
+            )
+          )
+          .sort(
+            (
+              firstFeature,
+              secondFeature
+            ) =>
+              firstFeature.localeCompare(
+                secondFeature,
+                'en',
+                {
+                  sensitivity: 'base'
+                }
+              )
+          )
       }))
-      .filter(group => group.features.length > 0);
+      .filter(
+        group =>
+          group.features.length > 0
+      )
+      .sort(
+        (
+          firstGroup,
+          secondGroup
+        ) =>
+          firstGroup.title.localeCompare(
+            secondGroup.title,
+            'en',
+            {
+              sensitivity: 'base'
+            }
+          )
+      );
   }
 
   private formatFeatureLabel(

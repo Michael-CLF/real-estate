@@ -5,6 +5,13 @@
         class="site-footer__brand-link"
         routerLink="/"
         aria-label="NavStreet home"
+        (click)="
+          trackFooterNavigation(
+            'footer_logo',
+            'NavStreet logo',
+            '/'
+          )
+        "
       >
         <span class="site-footer__brand-content">
           <img
@@ -40,6 +47,13 @@
                 <a
                   class="site-footer__link"
                   [routerLink]="link.route"
+                  (click)="
+                    trackFooterNavigation(
+                      link.analyticsName,
+                      link.label,
+                      link.route
+                    )
+                  "
                 >
                   {{ link.label }}
                 </a>
@@ -54,6 +68,13 @@
                 <a
                   class="site-footer-admin__link"
                   routerLink="/administration"
+                  (click)="
+                    trackFooterNavigation(
+                      'company_administration',
+                      'Administration',
+                      '/administration'
+                    )
+                  "
                 >
                   Administration
                 </a>

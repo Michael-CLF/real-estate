@@ -1,0 +1,63 @@
+<section
+  class="product-tour-preview"
+  aria-labelledby="product-tour-preview-title"
+>
+  <div class="product-tour-preview__container">
+    <div class="product-tour-preview__heading">
+      <span class="product-tour-preview__eyebrow">
+        More than a property search
+      </span>
+
+      <h2 id="product-tour-preview-title">
+        One connected platform for the
+        real estate journey
+      </h2>
+
+      <p>
+        NavStreet helps buyers, sellers and
+        professionals discover information,
+        understand costs, communicate and
+        take the next step with confidence.
+      </p>
+    </div>
+
+    <div class="product-tour-preview__grid">
+      @for (
+        capability of capabilities;
+        track capability.title
+      ) {
+        <article class="product-tour-preview__card">
+          <span
+            class="product-tour-preview__icon"
+            aria-hidden="true"
+          >
+            <i [class]="capability.icon"></i>
+          </span>
+
+          <h3>
+            {{ capability.title }}
+          </h3>
+
+          <p>
+            {{ capability.description }}
+          </p>
+        </article>
+      }
+    </div>
+
+    <div class="product-tour-preview__action">
+      <a
+        class="product-tour-preview__button"
+        routerLink="/how-navstreet-works"
+        (click)="trackProductTourClick()"
+      >
+        Discover How NavStreet Works
+
+        <i
+          class="fa-solid fa-arrow-right"
+          aria-hidden="true"
+        ></i>
+      </a>
+    </div>
+  </div>
+</section>

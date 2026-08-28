@@ -1,0 +1,59 @@
+<section
+  class="audience-path"
+  aria-labelledby="audience-path-title"
+>
+  <div class="audience-path__heading">
+    <span class="audience-path__eyebrow">
+      Choose your path
+    </span>
+
+    <h2 id="audience-path-title">
+      What would you like to do?
+    </h2>
+
+    <p>
+      Start with the journey that best
+      describes what brought you to
+      NavStreet.
+    </p>
+  </div>
+
+  <div class="audience-path__grid">
+    @for (
+      path of paths();
+      track path.analyticsName
+    ) {
+      <a
+        class="audience-path__card"
+        [href]="'#' + path.destination"
+        (click)="selectPath(path)"
+      >
+        <span
+          class="audience-path__icon"
+          aria-hidden="true"
+        >
+          <i [class]="path.icon"></i>
+        </span>
+
+        <span class="audience-path__content">
+          <strong>
+            {{ path.label }}
+          </strong>
+
+          <span>
+            {{ path.description }}
+          </span>
+        </span>
+
+        <i
+          class="
+            audience-path__arrow
+            fa-solid
+            fa-arrow-down
+          "
+          aria-hidden="true"
+        ></i>
+      </a>
+    }
+  </div>
+</section>

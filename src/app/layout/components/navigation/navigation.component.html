@@ -10,7 +10,7 @@
           class="navigation__link"
           [routerLink]="item.route"
           routerLinkActive="navigation__link--active"
-          (click)="handleNavigationSelected()"
+          (click)="handleNavigationSelected(item)"
         >
           {{ item.label }}
         </a>

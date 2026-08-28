@@ -16,10 +16,15 @@ import {
 } from 'firebase/auth';
 
 import {
+  AnalyticsDataLayerService
+} from '../../../core/analytics/analytics-data-layer.service';
+
+import {
   AuthState
 } from '../../../core/authentication/state/auth.state';
 
 interface FooterLink {
+  analyticsName: string;
   label: string;
   route: string;
 }
@@ -32,24 +37,23 @@ interface FooterSection {
 @Component({
   changeDetection:
     ChangeDetectionStrategy.OnPush,
-
   imports: [
     RouterLink
   ],
-
   selector:
     'app-footer',
-
   standalone:
     true,
-
   styleUrl:
     './footer.component.scss',
-
   templateUrl:
     './footer.component.html'
 })
 export class FooterComponent {
+  private readonly analytics =
+    inject(
+      AnalyticsDataLayerService
+    );
 
   private readonly authState =
     inject(AuthState);
@@ -68,74 +72,130 @@ export class FooterComponent {
       {
         links: [
           {
-            label: 'About',
-            route: '/about'
+            analyticsName:
+              'company_about',
+            label:
+              'About',
+            route:
+              '/about'
           },
           {
-            label: 'Contact',
-            route: '/contact'
+            analyticsName:
+              'company_contact',
+            label:
+              'Contact',
+            route:
+              '/contact'
           },
           {
-            label: 'Careers',
-            route: '/careers'
+            analyticsName:
+              'company_careers',
+            label:
+              'Careers',
+            route:
+              '/careers'
           }
         ],
-
-        title: 'Company'
+        title:
+          'Company'
       },
       {
         links: [
           {
-            label: 'Buy a Home',
-            route: '/buy'
+            analyticsName:
+              'services_buy_a_home',
+            label:
+              'Buy a Home',
+            route:
+              '/buy'
           },
           {
-            label: 'Sell a Home',
-            route: '/sell'
+            analyticsName:
+              'services_sell_a_home',
+            label:
+              'Sell a Home',
+            route:
+              '/sell'
           },
           {
-            label: 'Mortgage',
-            route: '/mortgage'
+            analyticsName:
+              'services_mortgage',
+            label:
+              'Mortgage',
+            route:
+              '/mortgage'
           }
         ],
-
-        title: 'Services'
+        title:
+          'Services'
       },
       {
         links: [
           {
-            label: 'Mortgage Calculators',
-            route: '/mortgage/calculator'
+            analyticsName:
+              'resources_how-it-works',
+            label:
+              'How it Works',
+            route: 
+              '/how-navstreet-works'
           },
           {
-            label: 'Affordability Calculator',
-            route: '/mortgage/affordability'
+            analyticsName:
+              'resources_mortgage_calculators',
+            label:
+              'Mortgage Calculators',
+            route:
+              '/mortgage/calculator'
           },
           {
-            label: 'Closing Cost Calculator',
-            route: '/mortgage/closing-costs'
+            analyticsName:
+              'resources_affordability_calculator',
+            label:
+              'Affordability Calculator',
+            route:
+              '/mortgage/affordability'
+          },
+          {
+            analyticsName:
+              'resources_closing_cost_calculator',
+            label:
+              'Closing Cost Calculator',
+            route:
+              '/mortgage/closing-costs'
           }
         ],
-
-        title: 'Resources'
+        title:
+          'Resources'
       },
       {
         links: [
           {
-            label: 'Privacy Policy',
-            route: '/privacy'
+            analyticsName:
+              'legal_privacy_policy',
+            label:
+              'Privacy Policy',
+            route:
+              '/privacy'
           },
           {
-            label: 'Terms of Service',
-            route: '/terms'
+            analyticsName:
+              'legal_terms_of_service',
+            label:
+              'Terms of Service',
+            route:
+              '/terms'
           },
           {
-            label: 'Accessibility',
-            route: '/accessibility'
+            analyticsName:
+              'legal_accessibility',
+            label:
+              'Accessibility',
+            route:
+              '/accessibility'
           }
         ],
-
-        title: 'Legal'
+        title:
+          'Legal'
       }
     ];
 
@@ -166,6 +226,25 @@ export class FooterComponent {
     });
   }
 
+  protected trackFooterNavigation(
+    linkName: string,
+    linkText: string,
+    destination: string
+  ): void {
+    this.analytics.track(
+      'navigation_click',
+      {
+        navigation_location:
+          'footer',
+        link_name:
+          linkName,
+        link_text:
+          linkText,
+        destination
+      }
+    );
+  }
+
   private async checkAdministratorClaim(
     user: User,
     administratorCheckId: number
@@ -178,24 +257,25 @@ export class FooterComponent {
 
       if (
         administratorCheckId !==
-          this.administratorCheckId ||
+        this.administratorCheckId ||
         this.authState.user()?.uid !==
-          user.uid
+        user.uid
       ) {
         return;
       }
 
       const isAdministrator =
         tokenResult.claims['admin'] ===
-          true ||
+        true ||
         tokenResult.claims['role'] ===
-          'admin';
+        'admin';
 
       this.isAdministrator.set(
         isAdministrator
       );
-
-    } catch (error: unknown) {
+    } catch (
+    error: unknown
+    ) {
       if (
         administratorCheckId !==
         this.administratorCheckId

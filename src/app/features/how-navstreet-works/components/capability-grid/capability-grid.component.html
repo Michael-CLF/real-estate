@@ -1,0 +1,58 @@
+<section
+  [class]="
+    'capability-section capability-section--' +
+    section().id
+  "
+  [attr.id]="section().id"
+  [attr.aria-labelledby]="
+    section().id + '-title'
+  "
+>
+  <header class="capability-section__header">
+    <p class="capability-section__eyebrow">
+      {{ section().eyebrow }}
+    </p>
+
+    <h2
+      class="capability-section__title"
+      [id]="section().id + '-title'"
+    >
+      {{ section().title }}
+    </h2>
+
+    <p class="capability-section__description">
+      {{ section().description }}
+    </p>
+  </header>
+
+  <div
+    [class]="
+      'capability-section__grid--' +
+      section().id
+    "
+  >
+    @for (
+      capability of section().capabilities;
+      track capability.title
+    ) {
+      <article class="capability-card">
+        <div class="capability-card__icon">
+          <i
+            [class]="capability.icon"
+            aria-hidden="true"
+          ></i>
+        </div>
+
+        <div class="capability-card__content">
+          <h3>
+            {{ capability.title }}
+          </h3>
+
+          <p>
+            {{ capability.description }}
+          </p>
+        </div>
+      </article>
+    }
+  </div>
+</section>

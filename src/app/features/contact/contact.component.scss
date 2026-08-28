@@ -24,11 +24,11 @@
 
   &__badge {
 
-    background: #dbeafe;
+    background: #008080;
     border-radius: 999px;
-    color: #2563eb;
+    color: #ffffff;
     display: inline-block;
-    font-size: .75rem;
+    font-size: .85rem;
     font-weight: 700;
     letter-spacing: .08em;
     padding: .45rem .9rem;
@@ -40,7 +40,7 @@
 
     color: #0f172a;
     font-family: variables.$font-heading;
-    font-size: clamp(2.25rem,5vw,3.5rem);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
     margin: 1rem 0;
 
   }
@@ -69,7 +69,7 @@
 
     display: grid;
     gap: 1.5rem;
-    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
   }
 
@@ -87,19 +87,12 @@
     }
 
     input,
+    select,
     textarea {
-
       border: 1px solid #cbd5e1;
-      border-radius: .6rem;
+      border-radius: 0.6rem;
       font: inherit;
-      padding: .9rem 1rem;
-
-    }
-
-    textarea {
-
-      resize: vertical;
-
+      padding: 0.9rem 1rem;
     }
 
     &--full {
@@ -112,7 +105,7 @@
 
   &__button {
 
-    background: #2563eb;
+    background: #154360;
     border: none;
     border-radius: .6rem;
     color: white;
@@ -125,12 +118,108 @@
 
     &:hover {
 
-      background: #1d4ed8;
+      background: #008080;
 
     }
 
   }
 
+}
+
+.contact {
+  &__optional {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.35rem;
+  }
+
+  &__error {
+    color: #c00000;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  &__consent {
+    align-items: flex-start;
+    color: #475569;
+    cursor: pointer;
+    display: flex;
+    font-size: 0.875rem;
+    font-weight: 500;
+    gap: 0.75rem;
+    line-height: 1.5;
+
+    input {
+      flex: 0 0 auto;
+      height: 1.15rem;
+      margin-top: 0.15rem;
+      width: 1.15rem;
+    }
+  }
+
+  &__honeypot {
+    height: 1px;
+    left: -10000px;
+    overflow: hidden;
+    position: absolute;
+    top: auto;
+    width: 1px;
+  }
+
+  &__submit-error {
+    align-items: center;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.6rem;
+    color: #991b1b;
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+    padding: 0.9rem 1rem;
+  }
+
+  &__success {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 1rem;
+    box-shadow:
+      0 0.75rem 2rem rgb(15 23 42 / 8%);
+    padding: 3rem 2rem;
+    text-align: center;
+
+    >i {
+      color: #15803d;
+      font-size: 3rem;
+    }
+
+    h2 {
+      color: #154360;
+      font-family:
+        variables.$font-heading;
+      font-size: 2rem;
+      margin: 1rem 0 0;
+    }
+
+    p {
+      color: #64748b;
+      line-height: 1.7;
+      margin: 0.75rem auto 0;
+      max-width: 36rem;
+    }
+  }
+
+  &__button {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.55rem;
+    justify-content: center;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+  }
 }
 
 @media (max-width:768px) {
