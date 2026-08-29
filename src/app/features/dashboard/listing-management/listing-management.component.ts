@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  computed,
   inject,
   signal
 } from '@angular/core';
@@ -45,6 +46,14 @@ import {
   ShowingService
 } from '../../../core/domains/showings/services/showing.service';
 
+import {
+  getStateDisclosureRequirements
+} from '../../../core/configuration/state-disclosures.config';
+
+import {
+  ListingDisclosureService
+} from '../../../core/domains/disclosures/services/listing-disclosure.service';
+
 @Component({
   selector: 'app-listing-management',
   standalone: true,
@@ -71,6 +80,9 @@ export class ListingManagementComponent implements OnInit {
 
   private readonly listingService =
     inject(ListingService);
+
+  private readonly disclosureService =
+    inject(ListingDisclosureService);
 
   private readonly listingInquiryService =
     inject(ListingInquiryService);
@@ -101,6 +113,26 @@ export class ListingManagementComponent implements OnInit {
 
   protected readonly pendingShowingRequestCount =
     signal(0);
+
+  protected readonly requiredDisclosureCount =
+    signal(0);
+
+  protected readonly uploadedDisclosureCount =
+    signal(0);
+
+  protected readonly disclosureStatusError =
+    signal('');
+
+  protected readonly disclosureStatusIsLoading =
+    signal(false);
+
+  protected readonly allDisclosuresUploaded =
+    computed(
+      () =>
+        this.requiredDisclosureCount() > 0 &&
+        this.uploadedDisclosureCount() ===
+        this.requiredDisclosureCount()
+    );
 
   protected readonly listingUid =
     this.route.snapshot.paramMap.get(
@@ -162,6 +194,10 @@ export class ListingManagementComponent implements OnInit {
             listing.publishedAt
           )
       });
+
+      void this.loadDisclosureStatus(
+        listing.state
+      );
 
       this.loadShowingActivity(
         currentUserUid
@@ -250,15 +286,25 @@ export class ListingManagementComponent implements OnInit {
   }
 
   protected async openContractTimeline():
-  Promise<void> {
+    Promise<void> {
 
-  await this.router.navigate([
-    '/sell/listings',
-    this.listingUid,
-    'manage',
-    'transaction'
-  ]);
-}
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'manage',
+      'transaction'
+    ]);
+  }
+
+  protected async openDisclosures():
+    Promise<void> {
+    await this.router.navigate([
+      '/sell/listings',
+      this.listingUid,
+      'manage',
+      'disclosures'
+    ]);
+  }
 
   protected async previewListing():
     Promise<void> {
@@ -266,6 +312,94 @@ export class ListingManagementComponent implements OnInit {
       '/listings',
       this.listingUid
     ]);
+  }
+
+  private async loadDisclosureStatus(
+    listingState: string
+  ): Promise<void> {
+    this.disclosureStatusIsLoading.set(true);
+    this.disclosureStatusError.set('');
+
+    try {
+      const stateAbbreviation =
+        this.normalizeState(
+          listingState
+        );
+
+      const requirements =
+        getStateDisclosureRequirements(
+          stateAbbreviation
+        );
+
+      const requiredRequirements =
+        requirements.filter(
+          requirement =>
+            requirement.required
+        );
+
+      const summaries =
+        await this.disclosureService
+          .getListingDisclosures(
+            this.listingUid
+          );
+
+      const uploadedDocumentTypes =
+        new Set(
+          summaries.map(
+            summary =>
+              summary.documentType
+          )
+        );
+
+      const uploadedRequiredCount =
+        requiredRequirements.filter(
+          requirement =>
+            uploadedDocumentTypes.has(
+              requirement.documentType
+            )
+        ).length;
+
+      this.requiredDisclosureCount.set(
+        requiredRequirements.length
+      );
+
+      this.uploadedDisclosureCount.set(
+        uploadedRequiredCount
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to load disclosure status:',
+        error
+      );
+
+      this.requiredDisclosureCount.set(0);
+      this.uploadedDisclosureCount.set(0);
+
+      this.disclosureStatusError.set(
+        'Disclosure status could not be loaded.'
+      );
+    } finally {
+      this.disclosureStatusIsLoading.set(false);
+    }
+  }
+
+  private normalizeState(
+    state: string
+  ): string {
+    const normalizedState =
+      state.trim().toLowerCase();
+
+    if (
+      normalizedState === 'nc' ||
+      normalizedState ===
+      'north carolina'
+    ) {
+      return 'NC';
+    }
+
+    return state
+      .trim()
+      .toUpperCase();
   }
 
   private loadShowingActivity(

@@ -31,6 +31,7 @@ export interface ListingLocation {
 export interface MarketplaceListing {
   uid: string;
   sellerUid: string;
+  firestoreDocumentId?: string;
 
   status: ListingStatus;
   propertyType: PropertyType;

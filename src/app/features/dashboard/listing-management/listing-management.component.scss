@@ -464,10 +464,10 @@
   width: fit-content;
   flex: 0 0 auto;
   padding: 0.35rem 0.65rem;
-  border: 1px solid #f0c76b;
+  border: 1px solid #000000;
   border-radius: 999px;
-  background: #fff4d6;
-  color: #7a5100;
+  background: #c00000;
+  color: #ffffff;
   font-size: 0.68rem;
   font-weight: 800;
   line-height: 1.2;
@@ -567,6 +567,48 @@
     width: auto;
     margin-top: 0.5rem;
   }
+}
+
+.management-card--complete {
+  border-color: #73cfc6;
+}
+
+.management-card__progress {
+  margin-top: 14px;
+
+  > span {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #536d7e;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+}
+
+.management-card__progress-track {
+  height: 7px;
+  overflow: hidden;
+
+  border-radius: 999px;
+  background: #dfe9ed;
+
+  > span {
+    display: block;
+    height: 100%;
+
+    border-radius: inherit;
+    background: #079d95;
+
+    transition: width 180ms ease;
+  }
+}
+
+.management-card__status-error {
+  margin: 12px 0 0;
+  color: #a32921;
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 /*

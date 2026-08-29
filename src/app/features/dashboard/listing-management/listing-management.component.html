@@ -268,6 +268,93 @@
       </article>
 
       <article class="
+    management-card
+    management-card--disclosures
+  " [class.management-card--attention]="
+    !allDisclosuresUploaded()
+  " [class.management-card--complete]="
+    allDisclosuresUploaded()
+  ">
+        <div class="management-card__icon" aria-hidden="true">
+          <i class="fa-solid fa-file-shield"></i>
+        </div>
+
+        <div class="management-card__content">
+          <div class="management-card__heading">
+            <h3>
+              Property Disclosures
+            </h3>
+
+            <div class="management-card__badges">
+              @if (disclosureStatusIsLoading()) {
+              <span class="available-badge">
+                Checking...
+              </span>
+              } @else if (allDisclosuresUploaded()) {
+              <span class="available-badge">
+                Complete
+              </span>
+              } @else {
+              <span class="pending-count-badge">
+                Action required
+              </span>
+              }
+            </div>
+          </div>
+
+          <p>
+            Complete and upload the required state-specific
+            property disclosure documents that buyers must
+            receive before submitting an offer.
+          </p>
+
+          @if (
+          !disclosureStatusIsLoading() &&
+          requiredDisclosureCount() > 0
+          ) {
+          <div class="management-card__progress">
+            <span>
+              {{ uploadedDisclosureCount() }}
+              of
+              {{ requiredDisclosureCount() }}
+              required documents uploaded
+            </span>
+
+            <div class="management-card__progress-track" role="progressbar" [attr.aria-valuemin]="0"
+              [attr.aria-valuemax]="
+            requiredDisclosureCount()
+          " [attr.aria-valuenow]="
+            uploadedDisclosureCount()
+          ">
+              <span [style.width.%]="
+              (
+                uploadedDisclosureCount() /
+                requiredDisclosureCount()
+              ) * 100
+            "></span>
+            </div>
+          </div>
+          }
+
+          @if (disclosureStatusError()) {
+          <p class="management-card__status-error" role="status">
+            {{ disclosureStatusError() }}
+          </p>
+          }
+        </div>
+
+        <button type="button" class="primary-button" (click)="openDisclosures()">
+          @if (allDisclosuresUploaded()) {
+          Review disclosures
+          } @else {
+          Manage disclosures
+          }
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </article>
+
+      <article class="
             management-card
             management-card--attention
           ">

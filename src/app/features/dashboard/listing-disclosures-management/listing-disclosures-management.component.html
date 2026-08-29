@@ -1,0 +1,355 @@
+<section class="disclosure-management">
+  <a
+    class="back-link"
+    [routerLink]="[
+      '/sell/listings',
+      listingUid,
+      'manage'
+    ]"
+  >
+    <i
+      class="fa-solid fa-arrow-left"
+      aria-hidden="true"
+    ></i>
+
+    <span>
+      Return to listing management
+    </span>
+  </a>
+
+  @if (isLoading()) {
+    <div
+      class="state-card"
+      aria-live="polite"
+    >
+      <i
+        class="fa-solid fa-spinner fa-spin"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        Loading property disclosures...
+      </p>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="state-card state-card--error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-circle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        {{ loadError() }}
+      </p>
+
+      <a
+        class="primary-button"
+        [routerLink]="[
+          '/sell/listings',
+          listingUid,
+          'manage'
+        ]"
+      >
+        Return to listing management
+      </a>
+    </div>
+  } @else if (listing(); as currentListing) {
+    <header class="disclosure-header">
+      <p class="disclosure-header__eyebrow">
+        Property disclosures
+      </p>
+
+      <h1>
+        Manage required disclosures
+      </h1>
+
+      <p class="disclosure-header__property">
+        {{ currentListing.addressLine1 }},
+        {{ currentListing.city }},
+        {{ currentListing.state }}
+        {{ currentListing.zipCode }}
+      </p>
+
+      <p class="disclosure-header__description">
+        Upload the completed disclosure documents that
+        apply to this property. The current documents will
+        be available to authenticated buyers from the
+        public listing page.
+      </p>
+    </header>
+
+    <aside
+      class="disclosure-notice"
+      aria-labelledby="disclosure-notice-heading"
+    >
+      <i
+        class="fa-solid fa-scale-balanced"
+        aria-hidden="true"
+      ></i>
+
+      <div>
+        <h2 id="disclosure-notice-heading">
+          Seller responsibility
+        </h2>
+
+        <p>
+          NavStreet provides document management and
+          delivery tools but does not complete disclosure
+          forms or determine what a seller must disclose.
+          Complete each form accurately and consult a
+          qualified North Carolina real estate attorney
+          when you have legal questions.
+        </p>
+      </div>
+    </aside>
+
+    @if (successMessage()) {
+      <div
+        class="message message--success"
+        role="status"
+      >
+        <i
+          class="fa-solid fa-circle-check"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          {{ successMessage() }}
+        </span>
+      </div>
+    }
+
+    @if (actionError()) {
+      <div
+        class="message message--error"
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-circle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        <span>
+          {{ actionError() }}
+        </span>
+      </div>
+    }
+
+    @if (requirements().length) {
+      <div class="disclosure-grid">
+        @for (
+          requirement of requirements();
+          track requirement.documentType
+        ) {
+          @let disclosure =
+            disclosureFor(
+              requirement.documentType
+            );
+
+          @let selectedFile =
+            selectedFileFor(
+              requirement.documentType
+            );
+
+          <article
+            class="disclosure-card"
+            [class.disclosure-card--complete]="
+              disclosure
+            "
+          >
+            <div class="disclosure-card__heading">
+              <div
+                class="disclosure-card__icon"
+                aria-hidden="true"
+              >
+                <i
+                  class="fa-solid fa-file-shield"
+                ></i>
+              </div>
+
+              <div>
+                <p class="disclosure-card__form-code">
+                  {{ requirement.formCode }}
+                </p>
+
+                <h2>
+                  {{ requirement.title }}
+                </h2>
+              </div>
+
+              @if (disclosure) {
+                <span class="status-badge status-badge--complete">
+                  Uploaded
+                </span>
+              } @else {
+                <span class="status-badge status-badge--required">
+                  Required
+                </span>
+              }
+            </div>
+
+            <p class="disclosure-card__description">
+              {{ requirement.description }}
+            </p>
+
+            <a
+              class="official-form-link"
+              [href]="requirement.officialFormUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i
+                class="fa-solid fa-arrow-up-right-from-square"
+                aria-hidden="true"
+              ></i>
+
+              Open the official blank form
+            </a>
+
+            @if (disclosure) {
+              <section class="current-document">
+                <div>
+                  <span>
+                    Current document
+                  </span>
+
+                  <strong>
+                    {{ disclosure.originalFileName }}
+                  </strong>
+                </div>
+
+                <dl>
+                  <div>
+                    <dt>Version</dt>
+                    <dd>
+                      {{ disclosure.version }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Uploaded</dt>
+                    <dd>
+                      {{
+                        disclosure.uploadedAt
+                        | date:'medium'
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+
+                <button
+                  type="button"
+                  class="secondary-button"
+                  (click)="
+                    openDisclosure(disclosure)
+                  "
+                >
+                  <i
+                    class="fa-solid fa-file-pdf"
+                    aria-hidden="true"
+                  ></i>
+
+                  Review current PDF
+                </button>
+              </section>
+            }
+
+            <div class="upload-control">
+              <label
+                [for]="
+                  'disclosure-' +
+                  requirement.documentType
+                "
+              >
+                @if (disclosure) {
+                  Select replacement PDF
+                } @else {
+                  Select completed PDF
+                }
+              </label>
+
+              <input
+                [id]="
+                  'disclosure-' +
+                  requirement.documentType
+                "
+                type="file"
+                accept="application/pdf,.pdf"
+                [disabled]="
+                  uploadingType() !== null
+                "
+                (change)="
+                  onFileSelected(
+                    $event,
+                    requirement.documentType
+                  )
+                "
+              >
+
+              <small>
+                PDF only. Maximum file size: 15 MB.
+              </small>
+            </div>
+
+            @if (selectedFile) {
+              <div class="selected-file">
+                <i
+                  class="fa-solid fa-file-pdf"
+                  aria-hidden="true"
+                ></i>
+
+                <span>
+                  {{ selectedFile.name }}
+                </span>
+              </div>
+            }
+
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="
+                !selectedFile ||
+                uploadingType() !== null
+              "
+              (click)="
+                uploadDisclosure(requirement)
+              "
+            >
+              @if (
+                isUploading(
+                  requirement.documentType
+                )
+              ) {
+                <i
+                  class="fa-solid fa-spinner fa-spin"
+                  aria-hidden="true"
+                ></i>
+
+                Uploading...
+              } @else if (disclosure) {
+                Upload replacement
+              } @else {
+                Upload disclosure
+              }
+            </button>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="state-card">
+        <i
+          class="fa-solid fa-file-circle-question"
+          aria-hidden="true"
+        ></i>
+
+        <p>
+          Disclosure requirements have not yet been
+          configured for this property’s state.
+        </p>
+      </div>
+    }
+  }
+</section>

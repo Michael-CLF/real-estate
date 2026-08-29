@@ -37,23 +37,22 @@ export class ProfessionalDirectoryCardComponent {
   protected readonly categoryLabel =
     computed(() =>
       PROFESSIONAL_CATEGORY_LABELS[
-        this.professional().category
+      this.professional().category
       ]
     );
 
   protected readonly professionalTypeLabel =
     computed(() =>
       PROFESSIONAL_TYPE_LABELS[
-        this.professional().professionalType
+      this.professional().professionalType
       ]
     );
 
   protected readonly categoryClass =
     computed(() =>
-      `professional-card--${
-        this.professional()
-          .category
-          .replaceAll('_', '-')
+      `professional-card--${this.professional()
+        .category
+        .replaceAll('_', '-')
       }`
     );
 
@@ -66,9 +65,8 @@ export class ProfessionalDirectoryCardComponent {
         professional.serviceAreaType ===
         'statewide'
       ) {
-        return `Statewide in ${
-          professional.stateName
-        }`;
+        return `Statewide in ${professional.stateName
+          }`;
       }
 
       if (
@@ -101,21 +99,70 @@ export class ProfessionalDirectoryCardComponent {
   protected readonly hasFullProfile =
     computed(() =>
       this.professional().subscriptionStatus ===
-        'profile' &&
+      'profile' &&
       Boolean(
         this.professional().profileSlug
       )
     );
 
-  protected readonly telephoneHref =
+  protected readonly formattedTelephone =
     computed(() => {
-      const telephone =
-        this.professional().phone.replace(
-          /[^+\d]/g,
+      const originalTelephone =
+        this.professional().phone.trim();
+
+      let digits =
+        originalTelephone.replace(
+          /\D/g,
           ''
         );
 
-      return `tel:${telephone}`;
+      /*
+       * Remove the North American country code before
+       * formatting the visible number.
+       */
+      if (
+        digits.length === 11 &&
+        digits.startsWith('1')
+      ) {
+        digits =
+          digits.slice(1);
+      }
+
+      if (digits.length !== 10) {
+        return originalTelephone;
+      }
+
+      return [
+        `(${digits.slice(0, 3)})`,
+        digits.slice(3, 6) +
+        '-' +
+        digits.slice(6)
+      ].join(' ');
+    });
+
+  protected readonly telephoneHref =
+    computed(() => {
+      const originalTelephone =
+        this.professional().phone.trim();
+
+      const digits =
+        originalTelephone.replace(
+          /\D/g,
+          ''
+        );
+
+      if (digits.length === 10) {
+        return `tel:+1${digits}`;
+      }
+
+      if (
+        digits.length === 11 &&
+        digits.startsWith('1')
+      ) {
+        return `tel:+${digits}`;
+      }
+
+      return `tel:${originalTelephone}`;
     });
 
   protected readonly emailHref =

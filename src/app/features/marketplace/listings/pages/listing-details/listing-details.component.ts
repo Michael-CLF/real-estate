@@ -28,13 +28,19 @@ import {
 
 import {
   catchError,
+  filter,
   firstValueFrom,
   map,
   Observable,
   of,
   shareReplay,
-  switchMap
+  switchMap,
+  take
 } from 'rxjs';
+
+import {
+  toObservable
+} from '@angular/core/rxjs-interop';
 
 import {
   AuthState
@@ -89,6 +95,22 @@ import {
 import {
   MortgageCostEstimationService
 } from '../../../../../core/domains/marketplace/services/mortgage-cost-estimation.service';
+
+import {
+  ListingDisclosureDocument
+} from '../../../../../core/domains/disclosures/models/listing-disclosure-document.model';
+
+import {
+  DisclosureDocumentType
+} from '../../../../../core/domains/disclosures/state-disclosure-requirement.model';
+
+import {
+  ListingDisclosureService
+} from '../../../../../core/domains/disclosures/services/listing-disclosure.service';
+
+import {
+  getStateDisclosureRequirements
+} from '../../../../../core/configuration/state-disclosures.config';
 
 
 interface ListingFact {
@@ -184,6 +206,17 @@ export class ListingDetailsComponent
   private readonly authState =
     inject(AuthState);
 
+  private readonly authenticationReady$ =
+    toObservable(
+      this.authState.loading
+    ).pipe(
+      filter(
+        isLoading =>
+          !isLoading
+      ),
+      take(1)
+    );
+
   private readonly listingRepository =
     inject(MarketplaceListingRepository);
 
@@ -202,6 +235,9 @@ export class ListingDetailsComponent
   private readonly analytics =
     inject(AnalyticsDataLayerService);
 
+  private readonly disclosureService =
+    inject(ListingDisclosureService);
+
   readonly isSaved =
     signal(false);
 
@@ -213,6 +249,23 @@ export class ListingDetailsComponent
 
   readonly displayedViewCount =
     signal(0);
+
+  readonly disclosures =
+    signal<
+      readonly ListingDisclosureDocument[]
+    >([]);
+
+  readonly disclosuresAreLoading =
+    signal(false);
+
+  readonly disclosureBeingOpened =
+    signal<string | null>(null);
+
+  readonly disclosureLoadError =
+    signal('');
+
+  readonly disclosureOpenError =
+    signal('');
 
   readonly viewModel$:
     Observable<ListingDetailsViewModel> =
@@ -288,9 +341,20 @@ export class ListingDetailsComponent
       await firstValueFrom(
         this.viewModel$
       );
+
     if (!viewModel.listing) {
       return;
     }
+
+    /*
+     * Use the public route parameter as the canonical
+     * Firestore listing document identifier.
+     */
+    const listingDocumentUid =
+      this.route.snapshot.paramMap.get(
+        'listingId'
+      ) ??
+      viewModel.listing.uid;
 
     this.analytics.track(
       'listing_viewed',
@@ -331,6 +395,16 @@ export class ListingDetailsComponent
       );
     }
 
+    /*
+  * Wait until Firebase has determined whether the browser
+  * has an authenticated session. Without this wait, a page
+  * refresh can temporarily appear signed out and skip
+  * disclosure and saved-listing loading.
+  */
+    await firstValueFrom(
+      this.authenticationReady$
+    );
+
     const userUid =
       this.authState.uid();
 
@@ -338,6 +412,9 @@ export class ListingDetailsComponent
       return;
     }
 
+    await this.loadDisclosures(
+      viewModel.listing.uid
+    );
     try {
       const saved =
         await this.savedListingService
@@ -478,6 +555,102 @@ export class ListingDetailsComponent
 
     } finally {
       this.isSaving.set(false);
+    }
+  }
+
+  authenticationIsLoading(): boolean {
+    return this.authState.loading();
+  }
+
+  isAuthenticated(): boolean {
+    return this.authState.isAuthenticated();
+  }
+
+  disclosureTitle(
+    documentType:
+      DisclosureDocumentType,
+    stateAbbreviation: string
+  ): string {
+    const requirement =
+      getStateDisclosureRequirements(
+        stateAbbreviation
+      ).find(
+        currentRequirement =>
+          currentRequirement.documentType ===
+          documentType
+      );
+
+    return (
+      requirement?.title ??
+      'Property Disclosure'
+    );
+  }
+
+  async openDisclosure(
+    disclosure:
+      ListingDisclosureDocument
+  ): Promise<void> {
+    if (this.disclosureBeingOpened()) {
+      return;
+    }
+
+    this.disclosureOpenError.set('');
+
+    this.disclosureBeingOpened.set(
+      disclosure.id
+    );
+
+    try {
+      await this.disclosureService
+        .openDisclosure(disclosure);
+    } catch (error: unknown) {
+      console.error(
+        'Unable to open property disclosure:',
+        error
+      );
+
+      this.disclosureOpenError.set(
+        error instanceof Error
+          ? error.message
+          : 'The disclosure document could not be opened.'
+      );
+    } finally {
+      this.disclosureBeingOpened.set(null);
+    }
+  }
+
+  private async loadDisclosures(
+    listingUid: string
+  ): Promise<void> {
+    this.disclosuresAreLoading.set(true);
+    this.disclosureLoadError.set('');
+
+    try {
+      const summaries =
+        await this.disclosureService
+          .getListingDisclosures(
+            listingUid
+          );
+
+      this.disclosures.set(
+        summaries.map(
+          summary =>
+            summary.currentDocument
+        )
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to load property disclosures:',
+        error
+      );
+
+      this.disclosures.set([]);
+
+      this.disclosureLoadError.set(
+        'Property disclosures could not be loaded. Please try again.'
+      );
+    } finally {
+      this.disclosuresAreLoading.set(false);
     }
   }
 

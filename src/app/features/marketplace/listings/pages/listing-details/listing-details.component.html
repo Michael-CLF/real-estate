@@ -111,29 +111,24 @@
           </div>
         </section>
 
-                }
-        
+        }
+
         <section class="listing-details__calculator-section">
-          <app-listing-mortgage-calculator
-            [listingPrice]="listing.price"
-            [annualPropertyTax]="
+          <app-listing-mortgage-calculator [listingPrice]="listing.price" [annualPropertyTax]="
               estimateAnnualPropertyTax(
                 listing
               )
-            "
-            [annualHomeownersInsurance]="
+            " [annualHomeownersInsurance]="
               estimateAnnualHomeownersInsurance(
                 listing
               )
-            "
-            [monthlyHoaFee]="
+            " [monthlyHoaFee]="
               getMonthlyHoaFee(
                 listing.hoa
               )
-            "
-          />
+            " />
         </section>
-        
+
         @if (viewModel.nearbySchools; as nearbySchools) {
         <section class="listing-details__section listing-details__schools">
           <div class="listing-details__schools-heading">
@@ -330,6 +325,168 @@
         }
       </aside>
     </div>
+    <section id="property-disclosures" class="listing-details__disclosures"
+      aria-labelledby="property-disclosures-heading">
+      <div class="listing-details__disclosures-heading">
+        <div class="listing-details__disclosures-icon" aria-hidden="true">
+          <i class="fa-solid fa-file-shield"></i>
+        </div>
+
+        <div>
+          <p class="listing-details__disclosures-eyebrow">
+            Property documents
+          </p>
+
+          <h2 id="property-disclosures-heading">
+            Seller disclosures
+          </h2>
+
+          <p>
+            Review the property disclosures supplied by the
+            seller before submitting an offer.
+          </p>
+        </div>
+      </div>
+
+      @if (authenticationIsLoading()) {
+      <div class="listing-details__disclosure-state" aria-live="polite">
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+        <span>
+          Checking disclosure access...
+        </span>
+      </div>
+      } @else if (!isAuthenticated()) {
+      <div class="listing-details__disclosure-locked">
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+
+        <div>
+          <h3>
+            Sign in to review disclosures
+          </h3>
+
+          <p>
+            Property disclosures are available only to
+            authenticated NavStreet users.
+          </p>
+        </div>
+
+        <a class="listing-details__disclosure-sign-in" routerLink="/sign-in" [queryParams]="{
+          returnUrl:
+            '/listings/' +
+            listing.uid +
+            '#property-disclosures'
+        }">
+          Sign in or create an account
+
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
+      </div>
+      } @else if (disclosuresAreLoading()) {
+      <div class="listing-details__disclosure-state" aria-live="polite">
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+        <span>
+          Loading property disclosures...
+        </span>
+      </div>
+      } @else if (disclosureLoadError()) {
+      <div class="
+        listing-details__disclosure-state
+        listing-details__disclosure-state--error
+      " role="alert">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+
+        <span>
+          {{ disclosureLoadError() }}
+        </span>
+      </div>
+      } @else if (disclosures().length) {
+      <div class="listing-details__disclosure-grid">
+        @for (
+        disclosure of disclosures();
+        track disclosure.id
+        ) {
+        <article class="listing-details__disclosure-card">
+          <div class="listing-details__disclosure-file-icon" aria-hidden="true">
+            <i class="fa-solid fa-file-pdf"></i>
+          </div>
+
+          <div class="listing-details__disclosure-card-content">
+            <span>
+              Seller-provided document
+            </span>
+
+            <h3>
+              {{
+              disclosureTitle(
+              disclosure.documentType,
+              listing.address.stateAbbreviation
+              )
+              }}
+            </h3>
+
+            <p>
+              Current version:
+              {{ disclosure.version }}
+            </p>
+          </div>
+
+          <button type="button" class="listing-details__disclosure-button" [disabled]="
+              disclosureBeingOpened() !== null
+            " (click)="
+              openDisclosure(disclosure)
+            ">
+            @if (
+            disclosureBeingOpened() ===
+            disclosure.id
+            ) {
+            <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+            Opening...
+            } @else {
+            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+
+            Review PDF
+            }
+          </button>
+        </article>
+        }
+      </div>
+
+      <div class="listing-details__disclosure-notice">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+
+        <p>
+          These documents were supplied by the property
+          seller. NavStreet does not prepare, verify, or
+          guarantee the completeness or accuracy of the
+          seller’s disclosures.
+        </p>
+      </div>
+
+      @if (disclosureOpenError()) {
+      <p class="listing-details__disclosure-error" role="alert">
+        {{ disclosureOpenError() }}
+      </p>
+      }
+      } @else {
+      <div class="listing-details__disclosure-state">
+        <i class="fa-solid fa-file-circle-exclamation" aria-hidden="true"></i>
+
+        <div>
+          <strong>
+            Disclosures have not been uploaded
+          </strong>
+
+          <span>
+            The seller has not yet made property
+            disclosures available through NavStreet.
+          </span>
+        </div>
+      </div>
+      }
+    </section>
     } @else {
     <section class="listing-details__message">
       <h1>Listing not found</h1>

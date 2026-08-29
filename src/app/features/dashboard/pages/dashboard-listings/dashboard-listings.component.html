@@ -23,23 +23,7 @@
   </header>
 
   <section class="dashboard-listings__summary" aria-label="Listing totals">
-    <button class="dashboard-listings__summary-card" type="button" [class.dashboard-listings__summary-card--active]="
-        selectedTab() === 'draft'
-      " (click)="selectTab('draft')">
-      <span class="
-          dashboard-listings__summary-icon
-          dashboard-listings__summary-icon--draft
-        ">
-        <i class="fa-solid fa-file-pen" aria-hidden="true"></i>
-      </span>
-
-      <span>
-        <small>Draft</small>
-        <strong>
-          {{ draftListings().length }}
-        </strong>
-      </span>
-    </button>
+   
 
     <button class="dashboard-listings__summary-card" type="button" [class.dashboard-listings__summary-card--active]="
         selectedTab() === 'active'
@@ -55,6 +39,24 @@
         <small>Active</small>
         <strong>
           {{ activeListings().length }}
+        </strong>
+      </span>
+    </button>
+
+     <button class="dashboard-listings__summary-card" type="button" [class.dashboard-listings__summary-card--active]="
+        selectedTab() === 'draft'
+      " (click)="selectTab('draft')">
+      <span class="
+          dashboard-listings__summary-icon
+          dashboard-listings__summary-icon--draft
+        ">
+        <i class="fa-solid fa-file-pen" aria-hidden="true"></i>
+      </span>
+
+      <span>
+        <small>Draft</small>
+        <strong>
+          {{ draftListings().length }}
         </strong>
       </span>
     </button>

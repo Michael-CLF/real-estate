@@ -468,9 +468,9 @@
 .professionals-grid {
   display: grid;
   grid-template-columns:
-    repeat(1, minmax(0, 1fr));
-  column-gap: 64px;
-  row-gap: 64px;
+    repeat(3, minmax(0, 1fr));
+  column-gap: 44px;
+  row-gap: 44px;
   align-items: stretch;
 }
 
@@ -690,7 +690,7 @@
 
   .professionals-grid {
     grid-template-columns:
-      repeat(4, minmax(0, 1fr));
+      repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -702,7 +702,7 @@
 
   .professionals-grid {
     grid-template-columns:
-      repeat(4, minmax(0, 1fr));
+      repeat(3, minmax(0, 1fr));
   }
 }
 
