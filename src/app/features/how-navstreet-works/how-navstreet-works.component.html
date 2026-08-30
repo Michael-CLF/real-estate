@@ -1,6 +1,7 @@
 <main class="product-tour">
   <section class="product-tour__hero">
     <div class="product-tour__hero-container">
+
       <div class="product-tour__hero-content">
         <span class="product-tour__eyebrow">
           How NavStreet Works
@@ -21,124 +22,82 @@
         </p>
 
         <div class="product-tour__hero-actions">
-          <a
-            class="
-              product-tour__button
-              product-tour__button--primary
-            "
-            href="#buyers"
-          >
+          <a class="
+            product-tour__button
+            product-tour__button--primary
+          " routerLink="/homes">
             I’m Buying
           </a>
 
-          <a
-            class="
-              product-tour__button
-              product-tour__button--secondary
-            "
-            href="#sellers"
-          >
+          <a class="
+            product-tour__button
+            product-tour__button--secondary
+          " routerLink="/sell/new">
             I’m Selling
           </a>
         </div>
       </div>
 
-      <div
-        class="product-tour__hero-visual"
-        aria-label="
-          NavStreet connects property
-          information, financial tools,
-          communication and education.
-        "
-      >
+      <div class="product-tour__hero-visual" aria-label="
+        NavStreet connects property
+        information, financial tools,
+        communication and education.
+      ">
         <div class="product-tour__visual-center">
-          <i
-            class="fa-solid fa-house"
-            aria-hidden="true"
-          ></i>
-
-          <strong>NavStreet</strong>
+          <img class="product-tour__compass" src="/assets/images/NavStreet-Favicon.svg" alt="NavStreet" />
         </div>
 
-        <div
-          class="
-            product-tour__visual-item
-            product-tour__visual-item--listings
-          "
-        >
-          <i
-            class="fa-solid fa-list-check"
-            aria-hidden="true"
-          ></i>
+        <div class="
+          product-tour__visual-item
+          product-tour__visual-item--listings
+        ">
+          <i class="fa-solid fa-list-check" aria-hidden="true"></i>
 
           <span>Listings</span>
         </div>
 
-        <div
-          class="
-            product-tour__visual-item
-            product-tour__visual-item--financing
-          "
-        >
-          <i
-            class="fa-solid fa-calculator"
-            aria-hidden="true"
-          ></i>
+        <div class="
+          product-tour__visual-item
+          product-tour__visual-item--financing
+        ">
+          <i class="fa-solid fa-calculator" aria-hidden="true"></i>
 
           <span>Financing</span>
         </div>
 
-        <div
-          class="
-            product-tour__visual-item
-            product-tour__visual-item--connections
-          "
-        >
-          <i
-            class="fa-solid fa-comments"
-            aria-hidden="true"
-          ></i>
+        <div class="
+          product-tour__visual-item
+          product-tour__visual-item--connections
+        ">
+          <i class="fa-solid fa-comments" aria-hidden="true"></i>
 
           <span>Connections</span>
         </div>
 
-        <div
-          class="
-            product-tour__visual-item
-            product-tour__visual-item--education
-          "
-        >
-          <i
-            class="fa-solid fa-graduation-cap"
-            aria-hidden="true"
-          ></i>
+        <div class="
+          product-tour__visual-item
+          product-tour__visual-item--education
+        ">
+          <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
 
           <span>Education</span>
         </div>
       </div>
+
     </div>
   </section>
 
-  <app-audience-path
-    [paths]="audiencePaths"
-    (pathSelected)="
+  <app-audience-path [paths]="audiencePaths" (pathSelected)="
       trackAudiencePath($event)
-    "
-  />
+    " />
 
-  <app-journey-timeline
-    sectionId="buyers"
-    eyebrow="For buyers"
-    title="From discovery to the next step"
-    description="
+  <app-journey-timeline sectionId="buyers" eyebrow="For buyers" title="From discovery to the next step" description="
       NavStreet helps buyers understand the
       property, explore potential costs,
       communicate with the seller and request
       a showing without losing track of the
       journey.
-    "
-    [steps]="buyerJourneySteps"
-  />
+    " [steps]="buyerJourneySteps" />
 
   <section class="product-tour__buyer-value">
     <div class="product-tour__value-container">
@@ -188,27 +147,18 @@
           </li>
         </ul>
 
-        <a
-          class="
+        <a class="
             product-tour__text-link
-          "
-          routerLink="/homes"
-        >
+          " routerLink="/homes">
           Explore available homes
 
-          <i
-            class="fa-solid fa-arrow-right"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
 
       <div class="product-tour__property-preview">
         <div class="product-tour__preview-photo">
-          <i
-            class="fa-solid fa-images"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-images" aria-hidden="true"></i>
 
           <span>
             Complete property gallery
@@ -217,37 +167,25 @@
 
         <div class="product-tour__preview-grid">
           <div>
-            <i
-              class="fa-solid fa-house"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-house" aria-hidden="true"></i>
 
             <span>Property details</span>
           </div>
 
           <div>
-            <i
-              class="fa-solid fa-list-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-list-check" aria-hidden="true"></i>
 
             <span>Features and amenities</span>
           </div>
 
           <div>
-            <i
-              class="fa-solid fa-school"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-school" aria-hidden="true"></i>
 
             <span>Nearby schools</span>
           </div>
 
           <div>
-            <i
-              class="fa-solid fa-calculator"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-calculator" aria-hidden="true"></i>
 
             <span>Payment estimate</span>
           </div>
@@ -256,18 +194,13 @@
     </div>
   </section>
 
-  <app-journey-timeline
-    sectionId="sellers"
-    eyebrow="For sellers"
-    title="Create, publish and manage with confidence"
+  <app-journey-timeline sectionId="sellers" eyebrow="For sellers" title="Create, publish and manage with confidence"
     description="
       The listing workflow breaks a detailed
       property presentation into manageable
       steps, saves progress and provides the
       tools needed after publication.
-    "
-    [steps]="sellerJourneySteps"
-  />
+    " [steps]="sellerJourneySteps" />
 
   <section class="product-tour__listing-process">
     <div class="product-tour__listing-container">
@@ -292,10 +225,7 @@
 
       <div class="product-tour__listing-highlights">
         <article>
-          <i
-            class="fa-solid fa-floppy-disk"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
 
           <h3>Saved automatically</h3>
 
@@ -306,10 +236,7 @@
         </article>
 
         <article>
-          <i
-            class="fa-solid fa-layer-group"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
 
           <h3>Complete at your pace</h3>
 
@@ -320,10 +247,7 @@
         </article>
 
         <article>
-          <i
-            class="fa-solid fa-shield-halved"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
 
           <h3>Secure verification</h3>
 
@@ -338,25 +262,17 @@
 
   <div id="capabilities">
     @for (
-      section of capabilitySections;
-      track section.id
+    section of capabilitySections;
+    track section.id
     ) {
-      <app-capability-grid
-        [section]="section"
-      />
+    <app-capability-grid [section]="section" />
     }
   </div>
 
-  <section
-    class="product-tour__offer"
-    aria-labelledby="offer-title"
-  >
+  <section class="product-tour__offer" aria-labelledby="offer-title">
     <div class="product-tour__offer-container">
       <div class="product-tour__offer-icon">
-        <i
-          class="fa-solid fa-file-signature"
-          aria-hidden="true"
-        ></i>
+        <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
       </div>
 
       <div class="product-tour__offer-content">
@@ -399,23 +315,16 @@
         </p>
       </div>
 
-      <a
-        class="
+      <a class="
           product-tour__button
           product-tour__button--primary
-        "
-        routerLink="/"
-        fragment="state-marketplaces"
-      >
+        " routerLink="/" fragment="state-marketplaces">
         Explore State Marketplaces
       </a>
     </div>
   </section>
 
-  <section
-    class="product-tour__faq"
-    aria-labelledby="product-tour-faq-title"
-  >
+  <section class="product-tour__faq" aria-labelledby="product-tour-faq-title">
     <div class="product-tour__faq-heading">
       <span class="product-tour__eyebrow">
         Common questions
@@ -428,37 +337,28 @@
 
     <div class="product-tour__questions">
       @for (
-        item of questions;
-        track item.question
+      item of questions;
+      track item.question
       ) {
-        <details class="product-tour__question">
-          <summary>
-            {{ item.question }}
+      <details class="product-tour__question">
+        <summary>
+          {{ item.question }}
 
-            <i
-              class="fa-solid fa-plus"
-              aria-hidden="true"
-            ></i>
-          </summary>
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        </summary>
 
-          <p>
-            {{ item.answer }}
-          </p>
-        </details>
+        <p>
+          {{ item.answer }}
+        </p>
+      </details>
       }
     </div>
 
     <div class="product-tour__faq-action">
-      <a
-        class="product-tour__text-link"
-        routerLink="/faq"
-      >
+      <a class="product-tour__text-link" routerLink="/faq">
         Visit the complete FAQ
 
-        <i
-          class="fa-solid fa-arrow-right"
-          aria-hidden="true"
-        ></i>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
       </a>
     </div>
   </section>
@@ -481,22 +381,16 @@
 
       <div class="product-tour__final-actions">
         @for (
-          action of productTourActions;
-          track action.analyticsName
+        action of productTourActions;
+        track action.analyticsName
         ) {
-          <a
-            class="product-tour__button"
-            [class.product-tour__button--primary]="
+        <a class="product-tour__button" [class.product-tour__button--primary]="
               action.style === 'primary'
-            "
-            [class.product-tour__button--secondary]="
+            " [class.product-tour__button--secondary]="
               action.style === 'secondary'
-            "
-            [routerLink]="action.destination"
-            (click)="trackAction(action)"
-          >
-            {{ action.label }}
-          </a>
+            " [routerLink]="action.destination" (click)="trackAction(action)">
+          {{ action.label }}
+        </a>
         }
       </div>
     </div>

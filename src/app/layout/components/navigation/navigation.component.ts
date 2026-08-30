@@ -63,7 +63,7 @@ export class NavigationComponent {
         label:
           'Sell Your Home',
         route:
-          '/dashboard'
+          '/sell'
       },
       {
         analyticsName:

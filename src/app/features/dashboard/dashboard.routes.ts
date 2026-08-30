@@ -28,8 +28,12 @@ export const DASHBOARD_ROUTES:
       ],
 
       children: [
+        /*
+         * Dashboard overview
+         */
         {
           path: '',
+
           pathMatch: 'full',
 
           loadComponent: () =>
@@ -41,6 +45,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Listings
+         */
         {
           path: 'listings',
 
@@ -54,6 +61,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Saved properties
+         */
         {
           path: 'saved-properties',
 
@@ -67,6 +77,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Inquiries
+         */
         {
           path: 'inquiries',
 
@@ -80,6 +93,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Activity
+         */
         {
           path: 'activity',
 
@@ -93,6 +109,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Offers
+         */
         {
           path: 'offers',
 
@@ -106,6 +125,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Showing requests
+         */
         {
           path: 'showings',
 
@@ -119,6 +141,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Professional business
+         */
         {
           path: 'business',
 
@@ -132,6 +157,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Account
+         */
         {
           path: 'account',
 
@@ -145,6 +173,9 @@ export const DASHBOARD_ROUTES:
             )
         },
 
+        /*
+         * Unknown dashboard URL
+         */
         {
           path: '**',
           redirectTo: ''

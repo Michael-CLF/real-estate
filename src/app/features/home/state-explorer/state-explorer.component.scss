@@ -23,7 +23,7 @@
   }
 
   &__title {
-    color: #ffffff;
+    color: #154360;
     font-family: variables.$font-heading;
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
@@ -84,7 +84,7 @@
   text-transform: uppercase;
 
   &--light {
-    color: #9de2df;
+    color: #008080;
   }
 }
 
@@ -134,7 +134,7 @@
   }
 
   &--active {
-    background: #EAF2F8;
+    background: #ffffff;
     border: 2px solid #154360;
     box-shadow:
       0 0.875rem 2rem rgb(21 67 96 / 24%),
@@ -226,6 +226,30 @@
     color: #2563eb;
     font-size: 1.25rem;
     font-weight: 700;
+  }
+}
+
+/* Homepage video */
+
+.home-video {
+  padding: 5rem 0 6rem;
+  background: var(--white);
+}
+
+.home-video__player {
+  width: min(100%, 1050px);
+  margin: 2.5rem auto 0;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: #000;
+  box-shadow: var(--shadow-medium);
+
+  video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    background: #000;
   }
 }
 

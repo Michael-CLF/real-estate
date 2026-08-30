@@ -17,8 +17,8 @@ import {
 export const SELL_ROUTES:
   Routes = [
     /*
-     * Authenticated seller pages using the public
-     * NavStreet header and footer.
+     * Everything in this branch is the authenticated
+     * seller workspace and uses the public-site layout.
      */
     {
       path: '',
@@ -32,11 +32,26 @@ export const SELL_ROUTES:
       ],
 
       children: [
+        /*
+         * /sell
+         *
+         * SellComponent no longer exists.
+         * Send users directly into the listing workflow.
+         */
         {
           path: '',
+
           pathMatch: 'full',
-          redirectTo: '/dashboard'
+
+          redirectTo: 'new'
         },
+
+        /*
+         * Create listing
+         *
+         * Full URL:
+         * /sell/new
+         */
         {
           path: 'new',
 
@@ -50,6 +65,11 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Resume/edit draft
+         *
+         * /sell/listings/:listingUid/edit
+         */
         {
           path:
             'listings/:listingUid/edit',
@@ -64,6 +84,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Property disclosures
+         */
         {
           path:
             'listings/:listingUid/manage/disclosures',
@@ -78,6 +101,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Listing editor
+         */
         {
           path:
             'listings/:listingUid/manage/edit',
@@ -92,6 +118,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Buyer inquiries
+         */
         {
           path:
             'listings/:listingUid/manage/inquiries',
@@ -106,6 +135,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Marketing toolkit
+         */
         {
           path:
             'listings/:listingUid/manage/marketing',
@@ -120,6 +152,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Transaction timeline
+         */
         {
           path:
             'listings/:listingUid/manage/transaction',
@@ -134,20 +169,9 @@ export const SELL_ROUTES:
             )
         },
 
-        {
-          path:
-            'listings/:listingUid/manage',
-
-          loadComponent: () =>
-            import(
-              '../dashboard/listing-management/listing-management.component'
-            ).then(
-              component =>
-                component
-                  .ListingManagementComponent
-            )
-        },
-
+        /*
+         * Listing status
+         */
         {
           path:
             'listings/:listingUid/manage/status',
@@ -162,6 +186,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Listing activity
+         */
         {
           path:
             'listings/:listingUid/manage/activity',
@@ -176,6 +203,26 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Listing management hub
+         */
+        {
+          path:
+            'listings/:listingUid/manage',
+
+          loadComponent: () =>
+            import(
+              '../dashboard/listing-management/listing-management.component'
+            ).then(
+              component =>
+                component
+                  .ListingManagementComponent
+            )
+        },
+
+        /*
+         * Enhancement hub
+         */
         {
           path:
             'listings/:listingUid/enhancements',
@@ -190,6 +237,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Construction
+         */
         {
           path:
             'listings/:listingUid/enhancements/construction',
@@ -204,6 +254,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Interior
+         */
         {
           path:
             'listings/:listingUid/enhancements/interior',
@@ -218,6 +271,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Kitchen
+         */
         {
           path:
             'listings/:listingUid/enhancements/kitchen',
@@ -232,6 +288,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Bedrooms and bathrooms
+         */
         {
           path:
             'listings/:listingUid/enhancements/bedrooms-bathrooms',
@@ -246,6 +305,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Parking and storage
+         */
         {
           path:
             'listings/:listingUid/enhancements/parking-storage',
@@ -260,6 +322,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Outdoor living
+         */
         {
           path:
             'listings/:listingUid/enhancements/outdoor-living',
@@ -274,6 +339,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Systems and utilities
+         */
         {
           path:
             'listings/:listingUid/enhancements/systems-utilities',
@@ -288,6 +356,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Technology and security
+         */
         {
           path:
             'listings/:listingUid/enhancements/technology-security',
@@ -302,6 +373,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Accessibility
+         */
         {
           path:
             'listings/:listingUid/enhancements/accessibility',
@@ -316,6 +390,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Community amenities
+         */
         {
           path:
             'listings/:listingUid/enhancements/community-amenities',
@@ -330,6 +407,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Schools
+         */
         {
           path:
             'listings/:listingUid/enhancements/schools',
@@ -344,6 +424,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Showing availability
+         */
         {
           path:
             'listings/:listingUid/showing-availability',
@@ -358,6 +441,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Showing requests
+         */
         {
           path:
             'listings/:listingUid/showing-requests',
@@ -372,6 +458,9 @@ export const SELL_ROUTES:
             )
         },
 
+        /*
+         * Showing request details
+         */
         {
           path:
             'listings/:listingUid/showing-requests/:showingRequestUid',
@@ -389,8 +478,13 @@ export const SELL_ROUTES:
     },
 
     /*
-     * Identity and payment callback pages intentionally
-     * remain outside PublicLayout.
+     * Stripe Identity callback
+     *
+     * Full URL:
+     * /sell/listings/:listingUid/verification-return
+     *
+     * Intentionally outside the guarded layout branch,
+     * matching the original routing architecture.
      */
     {
       path:
@@ -406,6 +500,9 @@ export const SELL_ROUTES:
         )
     },
 
+    /*
+     * Payment
+     */
     {
       path:
         'listings/:listingUid/payment',
@@ -419,6 +516,9 @@ export const SELL_ROUTES:
         )
     },
 
+    /*
+     * Payment callback
+     */
     {
       path:
         'listings/:listingUid/payment-return',

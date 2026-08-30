@@ -6,6 +6,10 @@ import {
 } from '@angular/core';
 
 import {
+  RouterLink
+} from '@angular/router';
+
+import {
   AudiencePath
 } from '../../models/how-navstreet-works.models';
 
@@ -18,6 +22,10 @@ import {
 
   standalone:
     true,
+
+  imports: [
+    RouterLink
+  ],
 
   styleUrl:
     './audience-path.component.scss',
@@ -38,7 +46,7 @@ export class AudiencePathComponent {
   protected selectPath(
     path: AudiencePath
   ): void {
+
     this.pathSelected.emit(path);
   }
-
 }

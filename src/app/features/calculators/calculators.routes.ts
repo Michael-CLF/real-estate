@@ -14,116 +14,115 @@ import {
   accountGuard
 } from '../../core/authentication/guards/account.guard';
 
-export const CALCULATOR_ROUTES:
-  Routes = [
-    {
-      path: '',
+export const CALCULATOR_ROUTES: Routes = [
+  {
+    path: '',
 
-      component:
-        PublicLayoutComponent,
+    component:
+      PublicLayoutComponent,
 
-      canActivate: [
-        authGuard,
-        accountGuard
-      ],
+    canActivate: [
+      authGuard,
+      accountGuard
+    ],
 
-      children: [
-        {
-          path: '',
-          pathMatch: 'full',
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
 
-          loadComponent: () =>
-            import(
-              './calculators.component'
-            ).then(
-              component =>
-                component
-                  .CalculatorsComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './calculators.component'
+          ).then(
+            component =>
+              component
+                .CalculatorsComponent
+          )
+      },
 
-        {
-          path: 'mortgage-payment',
+      {
+        path: 'mortgage-payment',
 
-          loadComponent: () =>
-            import(
-              './components/mortgage-payment-calculator/mortgage-payment-calculator.component'
-            ).then(
-              component =>
-                component
-                  .MortgagePaymentCalculatorComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './components/mortgage-payment-calculator/mortgage-payment-calculator.component'
+          ).then(
+            component =>
+              component
+                .MortgagePaymentCalculatorComponent
+          )
+      },
 
-        {
-          path: 'affordability',
+      {
+        path: 'affordability',
 
-          loadComponent: () =>
-            import(
-              './components/affordability-calculator/affordability-calculator.component'
-            ).then(
-              component =>
-                component
-                  .AffordabilityCalculatorComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './components/affordability-calculator/affordability-calculator.component'
+          ).then(
+            component =>
+              component
+                .AffordabilityCalculatorComponent
+          )
+      },
 
-        {
-          path: 'interest-only',
+      {
+        path: 'interest-only',
 
-          loadComponent: () =>
-            import(
-              './components/interest-only-calculator/interest-only-calculator.component'
-            ).then(
-              component =>
-                component
-                  .InterestOnlyCalculatorComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './components/interest-only-calculator/interest-only-calculator.component'
+          ).then(
+            component =>
+              component
+                .InterestOnlyCalculatorComponent
+          )
+      },
 
-        {
-          path: 'balloon-payment',
+      {
+        path: 'balloon-payment',
 
-          loadComponent: () =>
-            import(
-              './components/balloon-payment-calculator/balloon-payment-calculator.component'
-            ).then(
-              component =>
-                component
-                  .BalloonPaymentCalculatorComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './components/balloon-payment-calculator/balloon-payment-calculator.component'
+          ).then(
+            component =>
+              component
+                .BalloonPaymentCalculatorComponent
+          )
+      },
 
-        {
-          path: 'loan-to-value',
+      {
+        path: 'loan-to-value',
 
-          loadComponent: () =>
-            import(
-              './components/loan-to-value-calculator/loan-to-value-calculator.component'
-            ).then(
-              component =>
-                component
-                  .LoanToValueCalculatorComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './components/loan-to-value-calculator/loan-to-value-calculator.component'
+          ).then(
+            component =>
+              component
+                .LoanToValueCalculatorComponent
+          )
+      },
 
-        {
-          path: 'extra-payment',
+      {
+        path: 'extra-payment',
 
-          loadComponent: () =>
-            import(
-              './components/extra-payment-calculator/extra-payment-calculator.component'
-            ).then(
-              component =>
-                component
-                  .ExtraPaymentCalculatorComponent
-            )
-        },
+        loadComponent: () =>
+          import(
+            './components/extra-payment-calculator/extra-payment-calculator.component'
+          ).then(
+            component =>
+              component
+                .ExtraPaymentCalculatorComponent
+          )
+      },
 
-        {
-          path: '**',
-          redirectTo: ''
-        }
-      ]
-    }
-  ];
+      {
+        path: '**',
+        redirectTo: ''
+      }
+    ]
+  }
+];

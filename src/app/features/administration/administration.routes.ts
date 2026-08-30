@@ -33,8 +33,13 @@ export const ADMINISTRATION_ROUTES:
       ],
 
       children: [
+        /*
+         * Overview
+         */
         {
           path: '',
+
+          pathMatch: 'full',
 
           loadComponent: () =>
             import(
@@ -46,6 +51,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Users
+         */
         {
           path: 'users',
 
@@ -58,6 +66,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Listings
+         */
         {
           path: 'listings',
 
@@ -70,6 +81,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Businesses
+         */
         {
           path: 'businesses',
 
@@ -82,6 +96,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Payments
+         */
         {
           path: 'payments',
 
@@ -94,6 +111,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Subscriptions
+         */
         {
           path: 'subscriptions',
 
@@ -102,16 +122,19 @@ export const ADMINISTRATION_ROUTES:
               './pages/subscriptions/subscriptions.component'
             ).then(
               component =>
-                component
-                  .SubscriptionsComponent
+                component.SubscriptionsComponent
             )
         },
 
+        /*
+         * Activity
+         */
         {
           path: 'activity',
 
           data: {
-            title: 'Activity',
+            title:
+              'Activity',
 
             description:
               'Review important NavStreet platform and administrator activity.',
@@ -130,6 +153,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Promotion Codes
+         */
         {
           path: 'promotion-codes',
 
@@ -138,16 +164,19 @@ export const ADMINISTRATION_ROUTES:
               './pages/promotion-codes/promotion-codes.component'
             ).then(
               component =>
-                component
-                  .PromotionCodesComponent
+                component.PromotionCodesComponent
             )
         },
 
+        /*
+         * Settings
+         */
         {
           path: 'settings',
 
           data: {
-            title: 'Settings',
+            title:
+              'Settings',
 
             description:
               'Manage NavStreet administration and platform configuration.',
@@ -166,6 +195,9 @@ export const ADMINISTRATION_ROUTES:
             )
         },
 
+        /*
+         * Unknown administration URL
+         */
         {
           path: '**',
           redirectTo: ''
