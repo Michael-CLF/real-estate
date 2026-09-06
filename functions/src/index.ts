@@ -12,6 +12,8 @@ setGlobalOptions(
 
 export * from './authentication/otp';
 
+export * from './assistant';
+
 export * from './identity';
 
 export * from './listings';

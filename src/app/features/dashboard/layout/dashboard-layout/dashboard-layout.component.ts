@@ -10,15 +10,22 @@ import {
 } from '@angular/router';
 
 import {
+  NavStreetAssistantComponent
+} from '../../../../shared/components/navstreet-assistant/navstreet-assistant.component';
+
+import {
   DashboardSidebarComponent
 } from '../../components/dashboard-sidebar/dashboard-sidebar.component';
 
 @Component({
-  selector: 'app-dashboard-layout',
-  standalone: true,
+  selector:
+    'app-dashboard-layout',
+  standalone:
+    true,
   imports: [
     RouterOutlet,
-    DashboardSidebarComponent
+    DashboardSidebarComponent,
+    NavStreetAssistantComponent
   ],
   templateUrl:
     './dashboard-layout.component.html',

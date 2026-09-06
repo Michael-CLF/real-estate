@@ -1,0 +1,388 @@
+<div class="navstreet-assistant">
+
+  @if (!isOpen()) {
+    <button
+      class="navstreet-assistant__launcher"
+      type="button"
+      aria-label="Open NavStreet Assistant"
+      (click)="openAssistant()">
+      <span
+        class="navstreet-assistant__launcher-icon"
+        aria-hidden="true">
+        <i class="fa-solid fa-comments"></i>
+      </span>
+
+      <span class="navstreet-assistant__launcher-label">
+        Ask NavStreet
+      </span>
+    </button>
+  }
+
+  @if (isOpen()) {
+    <section
+      class="navstreet-assistant__panel"
+      role="dialog"
+      aria-label="NavStreet Assistant"
+      aria-modal="false">
+
+      <header class="navstreet-assistant__header">
+        <div class="navstreet-assistant__identity">
+          <span
+            class="navstreet-assistant__brand-icon"
+            aria-hidden="true">
+            <i class="fa-solid fa-compass"></i>
+          </span>
+
+          <div>
+            <h2>
+              NavStreet Assistant
+            </h2>
+
+            <p>
+              Your guide to using NavStreet
+            </p>
+          </div>
+        </div>
+
+        <div class="navstreet-assistant__header-actions">
+          @if (messages().length) {
+            <button
+              class="navstreet-assistant__header-button"
+              type="button"
+              aria-label="Start a new conversation"
+              title="Start a new conversation"
+              [disabled]="isSending()"
+              (click)="startNewConversation()">
+              <i
+                class="fa-solid fa-rotate-right"
+                aria-hidden="true">
+              </i>
+            </button>
+          }
+
+          <button
+            class="navstreet-assistant__header-button"
+            type="button"
+            aria-label="Close NavStreet Assistant"
+            title="Close"
+            (click)="closeAssistant()">
+            <i
+              class="fa-solid fa-xmark"
+              aria-hidden="true">
+            </i>
+          </button>
+        </div>
+      </header>
+
+      <div
+        #messageList
+        class="navstreet-assistant__messages"
+        aria-live="polite"
+        aria-relevant="additions">
+
+        @if (!messages().length) {
+          <div class="navstreet-assistant__welcome">
+            <span
+              class="navstreet-assistant__welcome-icon"
+              aria-hidden="true">
+              <i class="fa-solid fa-house"></i>
+            </span>
+
+            <h3>
+              How can I help?
+            </h3>
+
+            <p>
+              Ask me how NavStreet works, how to
+              create or manage a listing, or how
+              buyers can use the platform.
+            </p>
+          </div>
+
+          <div class="navstreet-assistant__suggestions">
+            <p class="navstreet-assistant__suggestions-label">
+              Popular questions
+            </p>
+
+            <div class="navstreet-assistant__suggestion-list">
+              @for (
+                suggestion of suggestions;
+                track suggestion.question;
+                let suggestionPosition = $index
+              ) {
+                <button
+                  class="navstreet-assistant__suggestion"
+                  type="button"
+                  [disabled]="isSending()"
+                  (click)="
+                    useSuggestion(
+                      suggestion.question,
+                      suggestionPosition
+                    )
+                  ">
+                  <span>
+                    {{ suggestion.label }}
+                  </span>
+
+                  <i
+                    class="fa-solid fa-chevron-right"
+                    aria-hidden="true">
+                  </i>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @for (
+          message of messages();
+          track trackMessage($index, message)
+        ) {
+          <article
+            class="navstreet-assistant__message"
+            [class.navstreet-assistant__message--user]="
+              message.role === 'user'
+            "
+            [class.navstreet-assistant__message--assistant]="
+              message.role === 'assistant'
+            ">
+
+            <div class="navstreet-assistant__message-heading">
+              <span
+                class="navstreet-assistant__message-avatar"
+                aria-hidden="true">
+                @if (message.role === 'user') {
+                  <i class="fa-solid fa-user"></i>
+                } @else {
+                  <i class="fa-solid fa-compass"></i>
+                }
+              </span>
+
+              <strong>
+                {{
+                  message.role === 'user'
+                    ? 'You'
+                    : 'NavStreet Assistant'
+                }}
+              </strong>
+            </div>
+
+            <p class="navstreet-assistant__message-content">
+              {{ message.content }}
+            </p>
+
+            @if (
+              message.role === 'assistant' &&
+              message.sources.length
+            ) {
+              <div class="navstreet-assistant__sources">
+                <span>
+                  Helpful pages:
+                </span>
+
+                <div class="navstreet-assistant__source-links">
+                  @for (
+                    source of message.sources;
+                    track source.id;
+                    let sourcePosition = $index
+                  ) {
+                    @if (source.path) {
+                      <a
+                        [routerLink]="source.path"
+                        (click)="
+                          trackSourceClick(
+                            source.id,
+                            sourcePosition
+                          )
+                        ">
+                        {{ source.title }}
+
+                        <i
+                          class="fa-solid fa-arrow-right"
+                          aria-hidden="true">
+                        </i>
+                      </a>
+                    }
+                  }
+                </div>
+              </div>
+            }
+
+            @if (
+              message.requiresProfessionalAssistance
+            ) {
+              <div class="navstreet-assistant__professional-notice">
+                <i
+                  class="fa-solid fa-circle-info"
+                  aria-hidden="true">
+                </i>
+
+                <span>
+                  Consider confirming this information
+                  with an appropriately qualified
+                  professional.
+                </span>
+              </div>
+            }
+
+            @if (message.role === 'assistant') {
+              <div class="navstreet-assistant__feedback">
+                @if (!feedbackByMessageUid()[message.uid]) {
+                  <span class="navstreet-assistant__feedback-label">
+                    Was this helpful?
+                  </span>
+
+                  <div class="navstreet-assistant__feedback-actions">
+                    <button
+                      class="navstreet-assistant__feedback-button"
+                      type="button"
+                      aria-label="Mark this answer as helpful"
+                      title="Helpful"
+                      (click)="
+                        submitFeedback(
+                          message,
+                          'helpful'
+                        )
+                      ">
+                      <i
+                        class="fa-regular fa-thumbs-up"
+                        aria-hidden="true">
+                      </i>
+                    </button>
+
+                    <button
+                      class="navstreet-assistant__feedback-button"
+                      type="button"
+                      aria-label="Mark this answer as unhelpful"
+                      title="Not helpful"
+                      (click)="
+                        submitFeedback(
+                          message,
+                          'unhelpful'
+                        )
+                      ">
+                      <i
+                        class="fa-regular fa-thumbs-down"
+                        aria-hidden="true">
+                      </i>
+                    </button>
+                  </div>
+                } @else {
+                  <span
+                    class="navstreet-assistant__feedback-confirmation"
+                    role="status">
+                    <i
+                      class="fa-solid fa-check"
+                      aria-hidden="true">
+                    </i>
+
+                    Thank you for your feedback.
+                  </span>
+                }
+              </div>
+            }
+          </article>
+        }
+
+        @if (isSending()) {
+          <div class="
+            navstreet-assistant__message
+            navstreet-assistant__message--assistant
+            navstreet-assistant__message--loading
+          ">
+            <div class="navstreet-assistant__message-heading">
+              <span
+                class="navstreet-assistant__message-avatar"
+                aria-hidden="true">
+                <i class="fa-solid fa-compass"></i>
+              </span>
+
+              <strong>
+                NavStreet Assistant
+              </strong>
+            </div>
+
+            <div
+              class="navstreet-assistant__typing"
+              aria-label="NavStreet Assistant is preparing a response">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div
+            class="navstreet-assistant__error"
+            role="alert">
+            <i
+              class="fa-solid fa-triangle-exclamation"
+              aria-hidden="true">
+            </i>
+
+            <span>
+              {{ errorMessage() }}
+            </span>
+          </div>
+        }
+      </div>
+
+      <footer class="navstreet-assistant__composer">
+        <div class="navstreet-assistant__form">
+          <label for="navstreet-assistant-question">
+            Ask a question
+          </label>
+
+          <div class="navstreet-assistant__input-row">
+            <textarea
+              id="navstreet-assistant-question"
+              [formControl]="messageControl"
+              [attr.maxlength]="maximumMessageLength"
+              rows="2"
+              placeholder="Ask how NavStreet works..."
+              aria-describedby="navstreet-assistant-help"
+              (keydown)="handleQuestionKeydown($event)">
+            </textarea>
+
+            <button
+              class="navstreet-assistant__send"
+              type="button"
+              aria-label="Send question"
+              [disabled]="
+                messageControl.invalid ||
+                isSending()
+              "
+              (click)="submitQuestion()">
+              <i
+                class="fa-solid fa-paper-plane"
+                aria-hidden="true">
+              </i>
+            </button>
+          </div>
+
+          <div
+            id="navstreet-assistant-help"
+            class="navstreet-assistant__composer-help">
+            <span>
+              AI-generated guidance may contain
+              errors. Do not enter sensitive
+              information.
+            </span>
+
+            @if (
+              remainingRequests() !== null
+            ) {
+              <span>
+                {{ remainingRequests() }}
+                questions remaining
+              </span>
+            }
+          </div>
+        </div>
+      </footer>
+
+    </section>
+  }
+
+</div>
