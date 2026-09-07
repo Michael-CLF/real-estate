@@ -5,13 +5,27 @@
         Account overview
       </p>
 
+      @if (
+      dashboardState.state().userProfile;
+      as profile
+      ) {
       <h1 id="dashboard-overview-title">
+        @if (
+        dashboardState.state()
+        .isFirstDashboardVisit
+        ) {
+        Welcome to your dashboard,
+        {{ profile.firstName }}
+        } @else {
         Welcome back,
-        {{
-        dashboardState.state().firstName ||
-        'NavStreet member'
-        }}
+        {{ profile.firstName }}
+        }
       </h1>
+      } @else {
+      <h1 id="dashboard-overview-title" aria-live="polite">
+        Loading your dashboard...
+      </h1>
+      }
 
       <p class="dashboard-overview__introduction">
         Here is a quick look at your properties,

@@ -60,6 +60,20 @@ export const PUBLIC_ROUTES:
                   .HowNavStreetWorksComponent
             )
         },
+        /*
+ * Pricing
+ */
+        {
+          path: 'pricing',
+
+          loadComponent: () =>
+            import(
+              '../features/pricing/pricing.component'
+            ).then(
+              component =>
+                component.PricingComponent
+            )
+        },
 
         /*
          * Education Center

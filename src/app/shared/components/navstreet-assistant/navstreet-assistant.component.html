@@ -1,388 +1,468 @@
 <div class="navstreet-assistant">
 
   @if (!isOpen()) {
-    <button
-      class="navstreet-assistant__launcher"
-      type="button"
-      aria-label="Open NavStreet Assistant"
-      (click)="openAssistant()">
-      <span
-        class="navstreet-assistant__launcher-icon"
-        aria-hidden="true">
-        <i class="fa-solid fa-comments"></i>
-      </span>
+  <button class="navstreet-assistant__launcher" type="button" aria-label="Open NavStreet Assistant"
+    (click)="openAssistant()">
+    <span class="navstreet-assistant__launcher-icon" aria-hidden="true">
+      <i class="fa-solid fa-comments"></i>
+    </span>
 
-      <span class="navstreet-assistant__launcher-label">
-        Ask NavStreet
-      </span>
-    </button>
+    <span class="navstreet-assistant__launcher-label">
+      Ask NavStreet
+    </span>
+  </button>
   }
 
   @if (isOpen()) {
-    <section
-      class="navstreet-assistant__panel"
-      role="dialog"
-      aria-label="NavStreet Assistant"
-      aria-modal="false">
+  <section class="navstreet-assistant__panel" role="dialog" aria-label="NavStreet Assistant" aria-modal="false">
 
-      <header class="navstreet-assistant__header">
-        <div class="navstreet-assistant__identity">
-          <span
-            class="navstreet-assistant__brand-icon"
-            aria-hidden="true">
-            <i class="fa-solid fa-compass"></i>
-          </span>
+    <header class="navstreet-assistant__header">
+      <div class="navstreet-assistant__identity">
+        <span class="navstreet-assistant__brand-icon" aria-hidden="true">
+          <i class="fa-solid fa-compass"></i>
+        </span>
 
-          <div>
-            <h2>
-              NavStreet Assistant
-            </h2>
+        <div>
+          <h2>
+            NavStreet Assistant
+          </h2>
 
-            <p>
-              Your guide to using NavStreet
-            </p>
-          </div>
+          <p>
+            Your guide to using NavStreet
+          </p>
         </div>
+      </div>
 
-        <div class="navstreet-assistant__header-actions">
-          @if (messages().length) {
-            <button
-              class="navstreet-assistant__header-button"
-              type="button"
-              aria-label="Start a new conversation"
-              title="Start a new conversation"
-              [disabled]="isSending()"
-              (click)="startNewConversation()">
-              <i
-                class="fa-solid fa-rotate-right"
-                aria-hidden="true">
-              </i>
-            </button>
-          }
+      <div class="navstreet-assistant__header-actions">
+        @if (messages().length) {
+        <button class="navstreet-assistant__header-button" type="button" aria-label="Start a new conversation"
+          title="Start a new conversation" [disabled]="isSending()" (click)="startNewConversation()">
+          <i class="fa-solid fa-rotate-right" aria-hidden="true">
+          </i>
+        </button>
+        }
 
-          <button
-            class="navstreet-assistant__header-button"
-            type="button"
-            aria-label="Close NavStreet Assistant"
-            title="Close"
-            (click)="closeAssistant()">
-            <i
-              class="fa-solid fa-xmark"
-              aria-hidden="true">
-            </i>
-          </button>
-        </div>
-      </header>
+        <button class="navstreet-assistant__header-button" type="button" aria-label="Close NavStreet Assistant"
+          title="Close" (click)="closeAssistant()">
+          <i class="fa-solid fa-xmark" aria-hidden="true">
+          </i>
+        </button>
+      </div>
+    </header>
 
-      <div
-        #messageList
-        class="navstreet-assistant__messages"
-        aria-live="polite"
-        aria-relevant="additions">
+    <div #messageList class="navstreet-assistant__messages" aria-live="polite" aria-relevant="additions">
 
-        @if (!messages().length) {
-          <div class="navstreet-assistant__welcome">
-            <span
-              class="navstreet-assistant__welcome-icon"
-              aria-hidden="true">
-              <i class="fa-solid fa-house"></i>
-            </span>
+      @if (!messages().length) {
+      <div class="navstreet-assistant__welcome">
+        <span class="navstreet-assistant__welcome-icon" aria-hidden="true">
+          <i class="fa-solid fa-house"></i>
+        </span>
 
-            <h3>
-              How can I help?
-            </h3>
+        <h3>
+          How can I help?
+        </h3>
 
-            <p>
-              Ask me how NavStreet works, how to
-              create or manage a listing, or how
-              buyers can use the platform.
-            </p>
-          </div>
+        <p>
+          Ask me how NavStreet works, how to
+          create or manage a listing, or how
+          buyers can use the platform.
+        </p>
+      </div>
 
-          <div class="navstreet-assistant__suggestions">
-            <p class="navstreet-assistant__suggestions-label">
-              Popular questions
-            </p>
+      <div class="navstreet-assistant__suggestions">
+        <p class="navstreet-assistant__suggestions-label">
+          Popular questions
+        </p>
 
-            <div class="navstreet-assistant__suggestion-list">
-              @for (
-                suggestion of suggestions;
-                track suggestion.question;
-                let suggestionPosition = $index
-              ) {
-                <button
-                  class="navstreet-assistant__suggestion"
-                  type="button"
-                  [disabled]="isSending()"
-                  (click)="
+        <div class="navstreet-assistant__suggestion-list">
+          @for (
+          suggestion of suggestions;
+          track suggestion.question;
+          let suggestionPosition = $index
+          ) {
+          <button class="navstreet-assistant__suggestion" type="button" [disabled]="isSending()" (click)="
                     useSuggestion(
                       suggestion.question,
                       suggestionPosition
                     )
                   ">
-                  <span>
-                    {{ suggestion.label }}
-                  </span>
+            <span>
+              {{ suggestion.label }}
+            </span>
 
-                  <i
-                    class="fa-solid fa-chevron-right"
-                    aria-hidden="true">
-                  </i>
-                </button>
-              }
-            </div>
-          </div>
-        }
+            <i class="fa-solid fa-chevron-right" aria-hidden="true">
+            </i>
+          </button>
+          }
+        </div>
+      </div>
+      }
 
-        @for (
-          message of messages();
-          track trackMessage($index, message)
-        ) {
-          <article
-            class="navstreet-assistant__message"
-            [class.navstreet-assistant__message--user]="
+      @for (
+      message of messages();
+      track trackMessage($index, message)
+      ) {
+      <article class="navstreet-assistant__message" [class.navstreet-assistant__message--user]="
               message.role === 'user'
-            "
-            [class.navstreet-assistant__message--assistant]="
+            " [class.navstreet-assistant__message--assistant]="
               message.role === 'assistant'
             ">
 
-            <div class="navstreet-assistant__message-heading">
-              <span
-                class="navstreet-assistant__message-avatar"
-                aria-hidden="true">
-                @if (message.role === 'user') {
-                  <i class="fa-solid fa-user"></i>
-                } @else {
-                  <i class="fa-solid fa-compass"></i>
-                }
-              </span>
+        <div class="navstreet-assistant__message-heading">
+          <span class="navstreet-assistant__message-avatar" aria-hidden="true">
+            @if (message.role === 'user') {
+            <i class="fa-solid fa-user"></i>
+            } @else {
+            <i class="fa-solid fa-compass"></i>
+            }
+          </span>
 
-              <strong>
-                {{
-                  message.role === 'user'
-                    ? 'You'
-                    : 'NavStreet Assistant'
-                }}
-              </strong>
-            </div>
+          <strong>
+            {{
+            message.role === 'user'
+            ? 'You'
+            : 'NavStreet Assistant'
+            }}
+          </strong>
+        </div>
 
-            <p class="navstreet-assistant__message-content">
-              {{ message.content }}
-            </p>
+        <p class="navstreet-assistant__message-content">
+          {{ message.content }}
+        </p>
 
-            @if (
-              message.role === 'assistant' &&
-              message.sources.length
+        @if (
+        message.role === 'assistant' &&
+        message.sources.length
+        ) {
+        <div class="navstreet-assistant__sources">
+          <span>
+            Helpful pages:
+          </span>
+
+          <div class="navstreet-assistant__source-links">
+            @for (
+            source of message.sources;
+            track source.id;
+            let sourcePosition = $index
             ) {
-              <div class="navstreet-assistant__sources">
-                <span>
-                  Helpful pages:
-                </span>
-
-                <div class="navstreet-assistant__source-links">
-                  @for (
-                    source of message.sources;
-                    track source.id;
-                    let sourcePosition = $index
-                  ) {
-                    @if (source.path) {
-                      <a
-                        [routerLink]="source.path"
-                        (click)="
+            @if (source.path) {
+            <a [routerLink]="source.path" (click)="
                           trackSourceClick(
                             source.id,
                             sourcePosition
                           )
                         ">
-                        {{ source.title }}
+              {{ source.title }}
 
-                        <i
-                          class="fa-solid fa-arrow-right"
-                          aria-hidden="true">
-                        </i>
-                      </a>
-                    }
-                  }
-                </div>
-              </div>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true">
+              </i>
+            </a>
             }
-
-            @if (
-              message.requiresProfessionalAssistance
-            ) {
-              <div class="navstreet-assistant__professional-notice">
-                <i
-                  class="fa-solid fa-circle-info"
-                  aria-hidden="true">
-                </i>
-
-                <span>
-                  Consider confirming this information
-                  with an appropriately qualified
-                  professional.
-                </span>
-              </div>
             }
+          </div>
+        </div>
+        }
 
-            @if (message.role === 'assistant') {
-              <div class="navstreet-assistant__feedback">
-                @if (!feedbackByMessageUid()[message.uid]) {
-                  <span class="navstreet-assistant__feedback-label">
-                    Was this helpful?
-                  </span>
+        @if (
+        message.requiresProfessionalAssistance
+        ) {
+        <div class="navstreet-assistant__professional-notice">
+          <i class="fa-solid fa-circle-info" aria-hidden="true">
+          </i>
 
-                  <div class="navstreet-assistant__feedback-actions">
-                    <button
-                      class="navstreet-assistant__feedback-button"
-                      type="button"
-                      aria-label="Mark this answer as helpful"
-                      title="Helpful"
-                      (click)="
+          <span>
+            Consider confirming this information
+            with an appropriately qualified
+            professional.
+          </span>
+        </div>
+        }
+
+        @if (message.role === 'assistant') {
+        <div class="navstreet-assistant__feedback">
+          @if (!feedbackByMessageUid()[message.uid]) {
+          <span class="navstreet-assistant__feedback-label">
+            Was this helpful?
+          </span>
+
+          <div class="navstreet-assistant__feedback-actions">
+            <button class="navstreet-assistant__feedback-button" type="button" aria-label="Mark this answer as helpful"
+              title="Helpful" (click)="
                         submitFeedback(
                           message,
                           'helpful'
                         )
                       ">
-                      <i
-                        class="fa-regular fa-thumbs-up"
-                        aria-hidden="true">
-                      </i>
-                    </button>
+              <i class="fa-regular fa-thumbs-up" aria-hidden="true">
+              </i>
+            </button>
 
-                    <button
-                      class="navstreet-assistant__feedback-button"
-                      type="button"
-                      aria-label="Mark this answer as unhelpful"
-                      title="Not helpful"
-                      (click)="
+            <button class="navstreet-assistant__feedback-button" type="button"
+              aria-label="Mark this answer as unhelpful" title="Not helpful" (click)="
                         submitFeedback(
                           message,
                           'unhelpful'
                         )
                       ">
-                      <i
-                        class="fa-regular fa-thumbs-down"
-                        aria-hidden="true">
-                      </i>
-                    </button>
-                  </div>
-                } @else {
-                  <span
-                    class="navstreet-assistant__feedback-confirmation"
-                    role="status">
-                    <i
-                      class="fa-solid fa-check"
-                      aria-hidden="true">
-                    </i>
+              <i class="fa-regular fa-thumbs-down" aria-hidden="true">
+              </i>
+            </button>
+          </div>
+          } @else {
+          <span class="navstreet-assistant__feedback-confirmation" role="status">
+            <i class="fa-solid fa-check" aria-hidden="true">
+            </i>
 
-                    Thank you for your feedback.
-                  </span>
-                }
-              </div>
-            }
-          </article>
+            Thank you for your feedback.
+          </span>
+          }
+        </div>
         }
+      </article>
+      }
 
-        @if (isSending()) {
-          <div class="
+      @if (shouldShowContactPrompt()) {
+      <section class="navstreet-assistant__contact" aria-labelledby="navstreet-assistant-contact-title">
+
+        <div class="navstreet-assistant__contact-heading">
+          <div>
+            <h3 id="navstreet-assistant-contact-title">
+              Would you like us to follow up?
+            </h3>
+
+            <p>
+              Leave your contact information and
+              someone from NavStreet can contact you.
+              This is optional, and you can continue
+              using the assistant without submitting it.
+            </p>
+          </div>
+
+          <button class="navstreet-assistant__contact-close" type="button" aria-label="Dismiss contact request"
+            title="Not now" [disabled]="isContactSubmitting()" (click)="dismissContactPrompt()">
+            <i class="fa-solid fa-xmark" aria-hidden="true">
+            </i>
+          </button>
+        </div>
+
+        <div class="navstreet-assistant__contact-form" [formGroup]="contactForm">
+
+          <div class="navstreet-assistant__contact-field">
+            <label for="navstreet-assistant-contact-first-name">
+              First name
+            </label>
+
+            <input id="navstreet-assistant-contact-first-name" type="text" formControlName="firstName"
+              autocomplete="given-name" maxlength="100">
+
+            @if (
+            contactForm.controls.firstName.touched &&
+            contactForm.controls.firstName.invalid
+            ) {
+            <span class="navstreet-assistant__field-error">
+              Enter your first name.
+            </span>
+            }
+          </div>
+
+          <div class="navstreet-assistant__contact-field">
+            <label for="navstreet-assistant-contact-email">
+              Email address
+            </label>
+
+            <input id="navstreet-assistant-contact-email" type="email" formControlName="email" autocomplete="email"
+              maxlength="254">
+
+            @if (
+            contactForm.controls.email.touched &&
+            contactForm.controls.email.invalid
+            ) {
+            <span class="navstreet-assistant__field-error">
+              Enter a valid email address.
+            </span>
+            }
+          </div>
+
+          <div class="navstreet-assistant__contact-field">
+            <label for="navstreet-assistant-contact-phone">
+              Phone number
+              <span>Optional</span>
+            </label>
+
+            <input id="navstreet-assistant-contact-phone" type="tel" formControlName="phone" autocomplete="tel"
+              inputmode="numeric" maxlength="14" placeholder="(919) 555-1234" (input)="formatContactPhone($event)">
+
+            @if (
+            contactForm.controls.phone.touched &&
+            contactForm.controls.phone.invalid
+            ) {
+            <span class="navstreet-assistant__field-error">
+              Enter a valid 10-digit phone number.
+            </span>
+            }
+          </div>
+
+          <div class="navstreet-assistant__honeypot" aria-hidden="true">
+            <label for="navstreet-assistant-contact-website">
+              Website
+            </label>
+
+            <input id="navstreet-assistant-contact-website" type="text" formControlName="website" autocomplete="off"
+              tabindex="-1">
+          </div>
+
+          <label class="navstreet-assistant__contact-consent">
+            <input type="checkbox" formControlName="contactConsent">
+
+            <span>
+              I agree that NavStreet may contact me
+              about my request. I have reviewed the
+              <a routerLink="/privacy" (click)="closeAssistant()">
+                Privacy Policy
+              </a>.
+            </span>
+          </label>
+
+          @if (
+          contactForm.controls.contactConsent.touched &&
+          contactForm.controls.contactConsent.invalid
+          ) {
+          <span class="navstreet-assistant__field-error">
+            You must agree before requesting a follow-up.
+          </span>
+          }
+
+          @if (contactErrorMessage()) {
+          <div class="navstreet-assistant__contact-error" role="alert">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true">
+            </i>
+
+            <span>
+              {{ contactErrorMessage() }}
+            </span>
+          </div>
+          }
+
+          <div class="navstreet-assistant__contact-actions">
+            <button class="navstreet-assistant__contact-decline" type="button" [disabled]="isContactSubmitting()"
+              (click)="dismissContactPrompt()">
+              Not now
+            </button>
+
+            <button class="navstreet-assistant__contact-submit" type="button" [disabled]="isContactSubmitting()"
+              (click)="submitContactRequest()">
+              @if (isContactSubmitting()) {
+              <i class="fa-solid fa-spinner fa-spin" aria-hidden="true">
+              </i>
+
+              Sending
+              } @else {
+              Request a follow-up
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+      }
+
+      @if (
+      wasContactSubmitted() &&
+      assistantResponseCount() >= 3
+      ) {
+      <div class="navstreet-assistant__contact-success" role="status">
+        <i class="fa-solid fa-circle-check" aria-hidden="true">
+        </i>
+
+        <div>
+          <strong>
+            Your request was received.
+          </strong>
+
+          <span>
+            Someone from NavStreet can now follow up
+            using the information you provided.
+          </span>
+        </div>
+      </div>
+      }
+
+      @if (isSending()) {
+      <div class="
             navstreet-assistant__message
             navstreet-assistant__message--assistant
             navstreet-assistant__message--loading
           ">
-            <div class="navstreet-assistant__message-heading">
-              <span
-                class="navstreet-assistant__message-avatar"
-                aria-hidden="true">
-                <i class="fa-solid fa-compass"></i>
-              </span>
+        <div class="navstreet-assistant__message-heading">
+          <span class="navstreet-assistant__message-avatar" aria-hidden="true">
+            <i class="fa-solid fa-compass"></i>
+          </span>
 
-              <strong>
-                NavStreet Assistant
-              </strong>
-            </div>
+          <strong>
+            NavStreet Assistant
+          </strong>
+        </div>
 
-            <div
-              class="navstreet-assistant__typing"
-              aria-label="NavStreet Assistant is preparing a response">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
-        }
-
-        @if (errorMessage()) {
-          <div
-            class="navstreet-assistant__error"
-            role="alert">
-            <i
-              class="fa-solid fa-triangle-exclamation"
-              aria-hidden="true">
-            </i>
-
-            <span>
-              {{ errorMessage() }}
-            </span>
-          </div>
-        }
+        <div class="navstreet-assistant__typing" aria-label="NavStreet Assistant is preparing a response">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
+      }
 
-      <footer class="navstreet-assistant__composer">
-        <div class="navstreet-assistant__form">
-          <label for="navstreet-assistant-question">
-            Ask a question
-          </label>
+      @if (errorMessage()) {
+      <div class="navstreet-assistant__error" role="alert">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true">
+        </i>
 
-          <div class="navstreet-assistant__input-row">
-            <textarea
-              id="navstreet-assistant-question"
-              [formControl]="messageControl"
-              [attr.maxlength]="maximumMessageLength"
-              rows="2"
-              placeholder="Ask how NavStreet works..."
-              aria-describedby="navstreet-assistant-help"
-              (keydown)="handleQuestionKeydown($event)">
+        <span>
+          {{ errorMessage() }}
+        </span>
+      </div>
+      }
+    </div>
+
+    <footer class="navstreet-assistant__composer">
+      <div class="navstreet-assistant__form">
+        <label for="navstreet-assistant-question">
+          Ask a question
+        </label>
+
+        <div class="navstreet-assistant__input-row">
+          <textarea id="navstreet-assistant-question" [formControl]="messageControl"
+            [attr.maxlength]="maximumMessageLength" rows="2" placeholder="Ask how NavStreet works..."
+            aria-describedby="navstreet-assistant-help" (keydown)="handleQuestionKeydown($event)">
             </textarea>
 
-            <button
-              class="navstreet-assistant__send"
-              type="button"
-              aria-label="Send question"
-              [disabled]="
+          <button class="navstreet-assistant__send" type="button" aria-label="Send question" [disabled]="
                 messageControl.invalid ||
                 isSending()
-              "
-              (click)="submitQuestion()">
-              <i
-                class="fa-solid fa-paper-plane"
-                aria-hidden="true">
-              </i>
-            </button>
-          </div>
-
-          <div
-            id="navstreet-assistant-help"
-            class="navstreet-assistant__composer-help">
-            <span>
-              AI-generated guidance may contain
-              errors. Do not enter sensitive
-              information.
-            </span>
-
-            @if (
-              remainingRequests() !== null
-            ) {
-              <span>
-                {{ remainingRequests() }}
-                questions remaining
-              </span>
-            }
-          </div>
+              " (click)="submitQuestion()">
+            <i class="fa-solid fa-paper-plane" aria-hidden="true">
+            </i>
+          </button>
         </div>
-      </footer>
 
-    </section>
+        <div id="navstreet-assistant-help" class="navstreet-assistant__composer-help">
+          <span>
+            AI-generated guidance may contain
+            errors. Do not enter sensitive
+            information.
+          </span>
+
+          @if (
+          remainingRequests() !== null
+          ) {
+          <span>
+            {{ remainingRequests() }}
+            questions remaining
+          </span>
+          }
+        </div>
+      </div>
+    </footer>
+
+  </section>
   }
 
 </div>

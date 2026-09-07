@@ -24,6 +24,8 @@ export class DashboardStateService {
     firstName: '',
     userProfile: null,
 
+    isFirstDashboardVisit: false,
+
     hasListings: false,
     hasDraftListings: false,
     hasSavedProperties: false,
@@ -39,6 +41,18 @@ export class DashboardStateService {
   });
 
   async load(): Promise<void> {
+    /*
+     * Prevent a placeholder or a previously
+     * loaded user from appearing while the
+     * current profile is being retrieved.
+     */
+    this.state.update(state => ({
+      ...state,
+
+      firstName: '',
+      userProfile: null,
+      isFirstDashboardVisit: false
+    }));
 
     const [
       userProfile,
@@ -59,6 +73,11 @@ export class DashboardStateService {
         .getSavedHomes()
     ]);
 
+    const isFirstDashboardVisit =
+      userProfile !== null &&
+      userProfile.dashboardVisitedAt ===
+      null;
+
     this.state.update(state => ({
       ...state,
 
@@ -66,6 +85,9 @@ export class DashboardStateService {
         userProfile?.firstName ?? '',
 
       userProfile,
+
+      isFirstDashboardVisit,
+
       draftListings,
       activeListings,
       savedProperties,
@@ -85,6 +107,17 @@ export class DashboardStateService {
         activeListings.length === 0 &&
         savedProperties.length === 0
     }));
+
+    if (isFirstDashboardVisit) {
+      void this.dashboardService
+        .markDashboardVisited()
+        .catch(error => {
+          console.error(
+            'Unable to record the first dashboard visit:',
+            error
+          );
+        });
+    }
   }
 
   async removeSavedProperty(

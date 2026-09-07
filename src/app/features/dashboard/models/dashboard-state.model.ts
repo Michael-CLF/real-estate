@@ -30,19 +30,25 @@ export interface SavedPropertySummary {
 
 export interface DashboardState {
   firstName: string;
-  userProfile: DashboardUserProfile | null;
+
+  userProfile:
+  DashboardUserProfile | null;
+
+  isFirstDashboardVisit: boolean;
+
   hasListings: boolean;
   hasDraftListings: boolean;
   hasSavedProperties: boolean;
   hasMessages: boolean;
   hasOffers: boolean;
   hasShowings: boolean;
-
   showWelcome: boolean;
 
   draftListings: Listing[];
   activeListings: Listing[];
-  savedProperties: SavedPropertySummary[];
+
+  savedProperties:
+  SavedPropertySummary[];
 }
 
 export interface DashboardUserProfile {
@@ -53,4 +59,5 @@ export interface DashboardUserProfile {
   email: string;
   phone: string;
   emailVerified: boolean;
+  dashboardVisitedAt: Date | null;
 }

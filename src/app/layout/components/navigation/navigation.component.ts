@@ -99,6 +99,14 @@ export class NavigationComponent {
       },
       {
         analyticsName:
+          'pricing',
+        label:
+          'Pricing',
+        route:
+          '/pricing'
+      },
+      {
+        analyticsName:
           'faq',
         label:
           'FAQ',
@@ -106,32 +114,32 @@ export class NavigationComponent {
           '/faq'
       }
     ];
-protected handleNavigationSelected(
-  item: NavigationItem
-): void {
-  console.log(
-    'Header navigation selected:',
-    item
-  );
+  protected handleNavigationSelected(
+    item: NavigationItem
+  ): void {
+    console.log(
+      'Header navigation selected:',
+      item
+    );
 
-  this.analytics.track(
-    'navigation_click',
-    {
-      navigation_location:
-        'header',
-      navigation_mode:
-        this.isMobileMenuOpen()
-          ? 'mobile'
-          : 'desktop',
-      link_name:
-        item.analyticsName,
-      link_text:
-        item.label,
-      destination:
-        item.route
-    }
-  );
+    this.analytics.track(
+      'navigation_click',
+      {
+        navigation_location:
+          'header',
+        navigation_mode:
+          this.isMobileMenuOpen()
+            ? 'mobile'
+            : 'desktop',
+        link_name:
+          item.analyticsName,
+        link_text:
+          item.label,
+        destination:
+          item.route
+      }
+    );
 
-  this.navigationSelected.emit();
-}
+    this.navigationSelected.emit();
+  }
 }

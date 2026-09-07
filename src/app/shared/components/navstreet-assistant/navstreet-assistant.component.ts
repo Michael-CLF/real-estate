@@ -4,6 +4,8 @@ import {
   ElementRef,
   PLATFORM_ID,
   ViewChild,
+  computed,
+  effect,
   inject,
   signal
 } from '@angular/core';
@@ -14,6 +16,7 @@ import {
 
 import {
   FormControl,
+  FormGroup,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
@@ -24,7 +27,7 @@ import {
 } from '@angular/router';
 
 import {
-  AnalyticsDataLayerService,
+  AnalyticsDataLayerService
 } from '../../../core/analytics/analytics-data-layer.service';
 
 import type {
@@ -40,14 +43,24 @@ import {
 } from '../../../core/ai/models/assistant-message.model';
 
 import {
+  NavStreetAssistantContactService
+} from '../../../core/ai/services/navstreet-assistant-contact.service';
+
+import {
   NavStreetAssistantService
 } from '../../../core/ai/services/navstreet-assistant.service';
 
 const ASSISTANT_SESSION_STORAGE_KEY =
   'navstreet_assistant_session_uid';
 
+const ASSISTANT_CONTACT_STATUS_STORAGE_KEY =
+  'navstreet_assistant_contact_status';
+
 const MAXIMUM_MESSAGE_LENGTH =
   1000;
+
+const CONTACT_PROMPT_ANSWER_COUNT =
+  3;
 
 type AssistantQuestionSource =
   | 'typed'
@@ -56,6 +69,10 @@ type AssistantQuestionSource =
 type AssistantFeedback =
   | 'helpful'
   | 'unhelpful';
+
+type AssistantContactStatus =
+  | 'dismissed'
+  | 'submitted';
 
 @Component({
   selector:
@@ -84,6 +101,11 @@ export class NavStreetAssistantComponent {
       NavStreetAssistantService
     );
 
+  private readonly assistantContactService =
+    inject(
+      NavStreetAssistantContactService
+    );
+
   private readonly analytics =
     inject(
       AnalyticsDataLayerService
@@ -94,6 +116,9 @@ export class NavStreetAssistantComponent {
 
   private readonly platformId =
     inject(PLATFORM_ID);
+
+  private readonly initialContactStatus =
+    this.getStoredContactStatus();
 
   readonly suggestions =
     ASSISTANT_SUGGESTIONS;
@@ -112,6 +137,68 @@ export class NavStreetAssistantComponent {
         ]
       }
     );
+
+  readonly contactForm =
+    new FormGroup({
+      firstName:
+        new FormControl(
+          '',
+          {
+            nonNullable:
+              true,
+            validators: [
+              Validators.required,
+              Validators.minLength(2),
+              Validators.maxLength(100)
+            ]
+          }
+        ),
+      email:
+        new FormControl(
+          '',
+          {
+            nonNullable:
+              true,
+            validators: [
+              Validators.required,
+              Validators.email,
+              Validators.maxLength(254)
+            ]
+          }
+        ),
+      phone:
+        new FormControl(
+          '',
+          {
+            nonNullable:
+              true,
+            validators: [
+              Validators.pattern(
+                /^\(\d{3}\) \d{3}-\d{4}$/
+              )
+            ]
+          }
+        ),
+      contactConsent:
+        new FormControl(
+          false,
+          {
+            nonNullable:
+              true,
+            validators: [
+              Validators.requiredTrue
+            ]
+          }
+        ),
+      website:
+        new FormControl(
+          '',
+          {
+            nonNullable:
+              true
+          }
+        )
+    });
 
   readonly isOpen =
     signal(false);
@@ -145,11 +232,74 @@ export class NavStreetAssistantComponent {
       >
     >({});
 
+  readonly isContactPromptDismissed =
+    signal(
+      this.initialContactStatus ===
+      'dismissed'
+    );
+
+  readonly wasContactSubmitted =
+    signal(
+      this.initialContactStatus ===
+      'submitted'
+    );
+
+  readonly isContactSubmitting =
+    signal(false);
+
+  readonly contactErrorMessage =
+    signal<string | null>(
+      null
+    );
+
+  readonly assistantResponseCount =
+    computed(
+      () =>
+        this.messages().filter(
+          message =>
+            message.role ===
+            'assistant'
+        ).length
+    );
+
+  readonly shouldShowContactPrompt =
+    computed(
+      () =>
+        this.assistantResponseCount() >=
+        CONTACT_PROMPT_ANSWER_COUNT &&
+        !this.isContactPromptDismissed() &&
+        !this.wasContactSubmitted()
+    );
+
   readonly maximumMessageLength =
     MAXIMUM_MESSAGE_LENGTH;
 
   private readonly anonymousSessionUid =
     this.getOrCreateAnonymousSessionUid();
+
+  private readonly hasTrackedContactPrompt =
+    signal(false);
+
+  constructor() {
+    effect(() => {
+      if (
+        !this.shouldShowContactPrompt() ||
+        this.hasTrackedContactPrompt()
+      ) {
+        return;
+      }
+
+      this.hasTrackedContactPrompt.set(
+        true
+      );
+
+      this.trackAssistantEvent(
+        'assistant_contact_prompt_shown'
+      );
+
+      this.scheduleScrollToBottom();
+    });
+  }
 
   openAssistant(): void {
     if (this.isOpen()) {
@@ -348,6 +498,163 @@ export class NavStreetAssistantComponent {
     );
   }
 
+  formatContactPhone(
+    event: Event
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
+
+    const digits =
+      input.value
+        .replace(
+          /\D/g,
+          ''
+        )
+        .slice(0, 10);
+
+    let formattedPhone = '';
+
+    if (digits.length > 0) {
+      formattedPhone =
+        `(${digits.slice(0, 3)}`;
+    }
+
+    if (digits.length >= 4) {
+      formattedPhone +=
+        `) ${digits.slice(3, 6)}`;
+    }
+
+    if (digits.length >= 7) {
+      formattedPhone +=
+        `-${digits.slice(6, 10)}`;
+    }
+
+    this.contactForm.controls.phone
+      .setValue(
+        formattedPhone,
+        {
+          emitEvent: false
+        }
+      );
+  }
+
+  dismissContactPrompt(): void {
+    if (this.isContactSubmitting()) {
+      return;
+    }
+
+    this.isContactPromptDismissed.set(
+      true
+    );
+
+    this.contactErrorMessage.set(null);
+
+    this.storeContactStatus(
+      'dismissed'
+    );
+
+    this.trackAssistantEvent(
+      'assistant_contact_prompt_declined'
+    );
+  }
+
+  async submitContactRequest():
+    Promise<void> {
+    this.contactErrorMessage.set(null);
+    this.contactForm.markAllAsTouched();
+
+    if (
+      this.contactForm.invalid ||
+      this.isContactSubmitting()
+    ) {
+      return;
+    }
+
+    this.isContactSubmitting.set(true);
+
+    const formValue =
+      this.contactForm.getRawValue();
+
+    try {
+      const response =
+        await this.assistantContactService
+          .submit({
+            firstName:
+              formValue.firstName.trim(),
+            email:
+              formValue.email
+                .trim()
+                .toLowerCase(),
+            phone:
+              formValue.phone.trim(),
+            contactConsent:
+              formValue.contactConsent,
+            website:
+              formValue.website.trim(),
+            anonymousSessionUid:
+              this.anonymousSessionUid
+          });
+
+      if (!response.accepted) {
+        throw new Error(
+          'The contact request was not accepted.'
+        );
+      }
+
+      this.wasContactSubmitted.set(
+        true
+      );
+
+      this.storeContactStatus(
+        'submitted'
+      );
+
+      this.trackAssistantEvent(
+        'assistant_contact_submitted',
+        {
+          has_phone:
+            Boolean(
+              formValue.phone.trim()
+            )
+        }
+      );
+
+      this.contactForm.reset({
+        firstName:
+          '',
+        email:
+          '',
+        phone:
+          '',
+        contactConsent:
+          false,
+        website:
+          ''
+      });
+
+      this.scheduleScrollToBottom();
+    } catch (error: unknown) {
+      console.error(
+        'Unable to submit assistant contact request:',
+        error
+      );
+
+      this.trackAssistantEvent(
+        'assistant_contact_error'
+      );
+
+      this.contactErrorMessage.set(
+        this.getContactErrorMessage(
+          error
+        )
+      );
+    } finally {
+      this.isContactSubmitting.set(
+        false
+      );
+    }
+  }
+
   trackMessage(
     index: number,
     message: AssistantMessage
@@ -520,13 +827,6 @@ export class NavStreetAssistantComponent {
     parameters:
       AnalyticsParameters = {}
   ): void {
-    /*
-     * Data Layer variables persist between
-     * events unless they are explicitly
-     * cleared. Reset every assistant
-     * parameter before adding the values
-     * belonging to the current event.
-     */
     this.analytics.track(
       eventName,
       {
@@ -562,6 +862,8 @@ export class NavStreetAssistantComponent {
           null,
         previous_question_count:
           null,
+        has_phone:
+          null,
         ...parameters
       }
     );
@@ -576,6 +878,47 @@ export class NavStreetAssistantComponent {
       message =>
         message.role === 'user'
     ).length;
+  }
+
+  private getContactErrorMessage(
+    error: unknown
+  ): string {
+    if (
+      error instanceof Error &&
+      error.message
+    ) {
+      const normalizedMessage =
+        error.message.replace(
+          /^Firebase:\s*/i,
+          ''
+        );
+
+      if (
+        normalizedMessage.includes(
+          'resource-exhausted'
+        )
+      ) {
+        return 'Please wait a moment before submitting another contact request.';
+      }
+
+      if (
+        normalizedMessage.includes(
+          'invalid-argument'
+        ) ||
+        normalizedMessage.includes(
+          'failed-precondition'
+        )
+      ) {
+        return normalizedMessage
+          .replace(
+            /\(functions\/[^)]+\)\.?$/i,
+            ''
+          )
+          .trim();
+      }
+    }
+
+    return 'We could not submit your contact request. Please try again.';
   }
 
   private scheduleScrollToBottom():
@@ -637,6 +980,57 @@ export class NavStreetAssistantComponent {
       return newUid;
     } catch {
       return this.createUid();
+    }
+  }
+
+  private getStoredContactStatus():
+    AssistantContactStatus | null {
+    if (
+      !isPlatformBrowser(
+        this.platformId
+      )
+    ) {
+      return null;
+    }
+
+    try {
+      const status =
+        window.sessionStorage.getItem(
+          ASSISTANT_CONTACT_STATUS_STORAGE_KEY
+        );
+
+      return (
+        status === 'dismissed' ||
+        status === 'submitted'
+      )
+        ? status
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private storeContactStatus(
+    status: AssistantContactStatus
+  ): void {
+    if (
+      !isPlatformBrowser(
+        this.platformId
+      )
+    ) {
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem(
+        ASSISTANT_CONTACT_STATUS_STORAGE_KEY,
+        status
+      );
+    } catch {
+      /*
+       * The form still works when browser
+       * storage is unavailable.
+       */
     }
   }
 

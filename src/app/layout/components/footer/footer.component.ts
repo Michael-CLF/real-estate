@@ -136,8 +136,16 @@ export class FooterComponent {
               'resources_how-it-works',
             label:
               'How it Works',
-            route: 
+            route:
               '/how-navstreet-works'
+          },
+          {
+            analyticsName:
+              'resources_pricing',
+            label:
+              'Pricing',
+            route:
+              '/pricing'
           },
           {
             analyticsName:
@@ -147,22 +155,6 @@ export class FooterComponent {
             route:
               '/mortgage/calculator'
           },
-          {
-            analyticsName:
-              'resources_affordability_calculator',
-            label:
-              'Affordability Calculator',
-            route:
-              '/mortgage/affordability'
-          },
-          {
-            analyticsName:
-              'resources_closing_cost_calculator',
-            label:
-              'Closing Cost Calculator',
-            route:
-              '/mortgage/closing-costs'
-          }
         ],
         title:
           'Resources'

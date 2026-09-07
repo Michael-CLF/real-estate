@@ -21,7 +21,7 @@
     </button>
   </header>
 
-  @if (mode() === 'unselected') {
+  @if (mode() !== 'add') {
   <section class="introduction-card">
     <div class="introduction-card__icon">
       <i class="fa-solid fa-list-check" aria-hidden="true"></i>
@@ -51,7 +51,7 @@
   }
 
   @if (
-  mode() !== 'unselected' &&
+  mode() === 'add' &&
   activeSection() === null
   ) {
   <section class="progress-card" aria-labelledby="enhancement-progress-title">

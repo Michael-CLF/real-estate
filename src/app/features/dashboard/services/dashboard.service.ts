@@ -10,6 +10,8 @@ import {
   getDocs,
   orderBy,
   query,
+  serverTimestamp,
+  updateDoc,
   where
 } from 'firebase/firestore';
 
@@ -225,6 +227,10 @@ export class DashboardService {
         ? data['accountNumber'].trim()
         : '';
 
+    const dashboardVisitedAt =
+      data['dashboardVisitedAt']
+        ?.toDate?.() ?? null;
+
     return {
       accountNumber:
         storedAccountNumber ||
@@ -237,8 +243,28 @@ export class DashboardService {
       phone,
 
       emailVerified:
-        data['emailVerified'] === true
+        data['emailVerified'] === true,
+
+      dashboardVisitedAt
     };
+  }
+
+  async markDashboardVisited():
+    Promise<void> {
+
+    const userRef = doc(
+      firestore,
+      'users',
+      this.currentUserId
+    );
+
+    await updateDoc(
+      userRef,
+      {
+        dashboardVisitedAt:
+          serverTimestamp()
+      }
+    );
   }
 
   async getSavedHomes():

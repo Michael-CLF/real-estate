@@ -92,11 +92,9 @@ textarea {
   gap: 14px;
   color: var(--assistant-white);
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       var(--assistant-navy),
-      var(--assistant-blue)
-    );
+      var(--assistant-blue));
 }
 
 .navstreet-assistant__identity {
@@ -174,8 +172,7 @@ textarea {
   overscroll-behavior: contain;
   background: var(--assistant-background);
   scrollbar-color:
-    #aabcc7
-    transparent;
+    #aabcc7 transparent;
   scrollbar-width: thin;
 }
 
@@ -331,7 +328,7 @@ textarea {
   padding-top: 10px;
   border-top: 1px solid var(--assistant-border);
 
-  > span {
+  >span {
     display: block;
     margin-bottom: 6px;
     color: var(--assistant-muted);
@@ -445,6 +442,263 @@ textarea {
 
   i {
     font-size: 0.65rem;
+  }
+}
+
+.navstreet-assistant__contact {
+  width: 100%;
+  margin: 4px 0 15px;
+  padding: 15px;
+  border: 1px solid rgba(0, 143, 136, 0.45);
+  border-radius: 14px;
+  background: var(--assistant-white);
+  box-shadow:
+    0 8px 24px rgba(13, 48, 72, 0.08);
+}
+
+.navstreet-assistant__contact-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: var(--assistant-navy);
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  p {
+    margin-top: 6px;
+    color: var(--assistant-muted);
+    font-size: 0.73rem;
+    line-height: 1.5;
+  }
+}
+
+.navstreet-assistant__contact-close {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  place-items: center;
+  color: var(--assistant-muted);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: var(--assistant-navy);
+    background: var(--assistant-background);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--assistant-teal);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.navstreet-assistant__contact-form {
+  display: grid;
+  margin-top: 14px;
+  gap: 11px;
+}
+
+.navstreet-assistant__contact-field {
+  display: grid;
+  gap: 5px;
+
+  label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--assistant-text);
+    font-size: 0.72rem;
+    font-weight: 750;
+
+    span {
+      color: var(--assistant-muted);
+      font-size: 0.63rem;
+      font-weight: 500;
+    }
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 9px 11px;
+    border: 1px solid #b9cad5;
+    border-radius: 8px;
+    outline: 0;
+    color: var(--assistant-text);
+    background: var(--assistant-white);
+    font: inherit;
+    font-size: 0.8rem;
+
+    &:focus {
+      border-color: var(--assistant-teal);
+      box-shadow:
+        0 0 0 3px rgba(0, 143, 136, 0.12);
+    }
+
+    &::placeholder {
+      color: #8293a3;
+    }
+  }
+}
+
+.navstreet-assistant__field-error {
+  color: #9c2f2f;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.navstreet-assistant__honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  pointer-events: none;
+}
+
+.navstreet-assistant__contact-consent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  color: var(--assistant-muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  line-height: 1.45;
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 1px 0 0;
+    accent-color: var(--assistant-teal);
+  }
+
+  a {
+    color: var(--assistant-teal);
+    font-weight: 700;
+  }
+}
+
+.navstreet-assistant__contact-error {
+  display: flex;
+  padding: 9px 10px;
+  border: 1px solid #e7b9b9;
+  border-radius: 8px;
+  align-items: flex-start;
+  gap: 7px;
+  color: #852626;
+  background: #fff0f0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+
+  i {
+    margin-top: 2px;
+  }
+}
+
+.navstreet-assistant__contact-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.navstreet-assistant__contact-decline,
+.navstreet-assistant__contact-submit {
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 750;
+
+  &:focus-visible {
+    outline: 2px solid var(--assistant-teal);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.navstreet-assistant__contact-decline {
+  border: 1px solid var(--assistant-border);
+  color: var(--assistant-muted);
+  background: var(--assistant-white);
+
+  &:hover:not(:disabled) {
+    color: var(--assistant-navy);
+    background: var(--assistant-background);
+  }
+}
+
+.navstreet-assistant__contact-submit {
+  display: inline-flex;
+  border: 1px solid var(--assistant-teal);
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--assistant-white);
+  background: var(--assistant-teal);
+
+  &:hover:not(:disabled) {
+    border-color: #007a74;
+    background: #007a74;
+  }
+}
+
+.navstreet-assistant__contact-success {
+  display: flex;
+  width: 100%;
+  margin: 4px 0 15px;
+  padding: 13px 14px;
+  border: 1px solid rgba(0, 143, 136, 0.4);
+  border-radius: 12px;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--assistant-navy);
+  background: var(--assistant-light-teal);
+
+  >i {
+    margin-top: 2px;
+    color: var(--assistant-teal);
+  }
+
+  div {
+    display: grid;
+    gap: 3px;
+  }
+
+  strong {
+    font-size: 0.78rem;
+  }
+
+  span {
+    color: var(--assistant-muted);
+    font-size: 0.68rem;
+    line-height: 1.4;
   }
 }
 
@@ -590,6 +844,7 @@ textarea {
 }
 
 @keyframes assistant-typing {
+
   0%,
   60%,
   100% {
@@ -621,9 +876,7 @@ textarea {
 
   .navstreet-assistant__header {
     padding:
-      max(14px, env(safe-area-inset-top))
-      15px
-      14px;
+      max(14px, env(safe-area-inset-top)) 15px 14px;
   }
 
   .navstreet-assistant__messages {
@@ -636,9 +889,7 @@ textarea {
 
   .navstreet-assistant__composer {
     padding:
-      11px
-      12px
-      max(11px, env(safe-area-inset-bottom));
+      11px 12px max(11px, env(safe-area-inset-bottom));
   }
 
   .navstreet-assistant__composer-help {
