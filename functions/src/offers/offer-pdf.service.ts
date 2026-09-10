@@ -261,7 +261,7 @@ function renderHeader(
     .font('Helvetica-Bold')
     .fontSize(15)
     .text(
-      input.documentTitle.toUpperCase(),
+      'RESIDENTIAL PURCHASE AND SALE AGREEMENT',
       {
         align: 'center',
       }
@@ -519,14 +519,8 @@ function renderProperty(
   document: PDFKit.PDFDocument,
   version: OfferVersionDocument
 ): void {
-  const terms =
-    version.terms;
-
   const property =
-    getObject(
-      terms,
-      'property'
-    );
+    version.terms.property;
 
   addSectionHeading(
     document,
@@ -537,49 +531,34 @@ function renderProperty(
     document,
     'Property address',
     formatPropertyAddress(
-      property
+      asObject(property)
     )
   );
 
   addDataRow(
     document,
     'County',
-    getText(
-      property,
-      'county'
-    )
+    property.county
   );
 
   addDataRow(
     document,
     'Property type',
     formatStatus(
-      getText(
-        property,
-        'propertyType'
-      )
+      property.propertyType
     )
   );
 
   addOptionalDataRow(
     document,
     'Parcel identification',
-    getOptionalText(
-      property,
-      'parcelIdentificationNumber'
-    )
+    property
+      .parcelIdentificationNumber
   );
 
   const deedReference = [
-    getOptionalText(
-      property,
-      'deedBook'
-    ),
-
-    getOptionalText(
-      property,
-      'deedPage'
-    ),
+    property.deedBook,
+    property.deedPage,
   ]
     .filter(Boolean)
     .join(' / ');
@@ -593,10 +572,8 @@ function renderProperty(
   addOptionalDataRow(
     document,
     'Legal description',
-    getOptionalText(
-      property,
-      'legalDescription'
-    )
+    property.legalDescription ??
+      property.otherPropertyReference
   );
 }
 
@@ -606,10 +583,7 @@ function renderPurchaseTerms(
   version: OfferVersionDocument
 ): void {
   const purchase =
-    getObject(
-      version.terms,
-      'purchase'
-    );
+    version.terms.purchase;
 
   addSectionHeading(
     document,
@@ -620,10 +594,7 @@ function renderPurchaseTerms(
     document,
     'Purchase price',
     formatCurrency(
-      getNumber(
-        purchase,
-        'purchasePriceInCents'
-      )
+      purchase.purchasePriceInCents
     )
   );
 
@@ -631,81 +602,20 @@ function renderPurchaseTerms(
     document,
     'Payment method',
     formatStatus(
-      getText(
-        purchase,
-        'financingType'
-      )
-    )
-  );
-
-  addDataRow(
-    document,
-    'Loan type',
-    formatStatus(
-      getText(
-        purchase,
-        'loanType'
-      )
-    )
-  );
-
-  addOptionalMoneyRow(
-    document,
-    'Proposed loan amount',
-    getOptionalNumber(
-      purchase,
-      'proposedLoanAmountInCents'
-    )
-  );
-
-  addOptionalMoneyRow(
-    document,
-    'Proposed down payment',
-    getOptionalNumber(
-      purchase,
-      'proposedDownPaymentInCents'
-    )
-  );
-
-  addOptionalMoneyRow(
-    document,
-    'Proposed cash contribution',
-    getOptionalNumber(
-      purchase,
-      'proposedCashContributionInCents'
+      purchase.financingType
     )
   );
 
   addBooleanRow(
     document,
-    'Preapproval provided',
-    purchase[
-      'preapprovalProvided'
-    ] === true
+    'Other property will fund purchase',
+    purchase.otherPropertyWillFundPurchase
   );
 
-  addBooleanRow(
+  addOptionalDataRow(
     document,
-    'Proof of funds provided',
-    purchase[
-      'proofOfFundsProvided'
-    ] === true
-  );
-
-  addBooleanRow(
-    document,
-    'Loan required to complete purchase',
-    purchase[
-      'loanRequiredToCompletePurchase'
-    ] === true
-  );
-
-  addBooleanRow(
-    document,
-    'Lender appraisal anticipated',
-    purchase[
-      'lenderAppraisalAnticipated'
-    ] === true
+    'Other property description',
+    purchase.otherPropertyDescription
   );
 }
 
@@ -715,10 +625,7 @@ function renderDepositTerms(
   version: OfferVersionDocument
 ): void {
   const deposits =
-    getObject(
-      version.terms,
-      'deposits'
-    );
+    version.terms.deposits;
 
   addSectionHeading(
     document,
@@ -727,102 +634,50 @@ function renderDepositTerms(
 
   addDataRow(
     document,
-    'Due-diligence fee',
+    'Deposit',
     formatCurrency(
-      getNumber(
-        deposits,
-        'dueDiligenceFeeInCents'
-      )
+      deposits.depositInCents
     )
   );
 
   addDataRow(
     document,
-    'Due-diligence fee delivery deadline',
-    formatDateTimeValue(
-      deposits[
-        'dueDiligenceFeeDeliveryDeadline'
-      ]
-    )
+    'Deposit delivery',
+    `${deposits.depositDeliveryDays} calendar days after the Effective Date`
   );
 
   addDataRow(
     document,
-    'Due-diligence expiration',
-    formatDateTimeValue(
-      deposits[
-        'dueDiligenceExpiration'
-      ]
-    )
-  );
-
-  addDataRow(
-    document,
-    'Initial earnest money',
-    formatCurrency(
-      getNumber(
-        deposits,
-        'initialEarnestMoneyInCents'
-      )
-    )
-  );
-
-  addDataRow(
-    document,
-    'Initial earnest-money deadline',
-    formatDateTimeValue(
-      deposits[
-        'initialEarnestMoneyDeliveryDeadline'
-      ]
-    )
-  );
-
-  addDataRow(
-    document,
-    'Additional earnest money',
-    formatCurrency(
-      getNumber(
-        deposits,
-        'additionalEarnestMoneyInCents'
-      )
+    'Due-diligence deadline type',
+    formatStatus(
+      deposits.dueDiligenceDeadlineType
     )
   );
 
   addOptionalDataRow(
     document,
-    'Additional earnest-money deadline',
-    formatOptionalDateTimeValue(
-      deposits[
-        'additionalEarnestMoneyDeliveryDeadline'
-      ]
-    )
+    'Due-diligence end date',
+    deposits.dueDiligenceEndDate
+  );
+
+  addOptionalDataRow(
+    document,
+    'Days after Effective Date',
+    deposits
+      .dueDiligenceDaysAfterEffectiveDate
+      ?.toString()
+  );
+
+  addDataRow(
+    document,
+    'Due-diligence end time',
+    `${deposits.dueDiligenceEndTime} Eastern Time`
   );
 
   addDataRow(
     document,
     'Escrow agent',
-    getText(
-      deposits,
-      'escrowAgentName'
-    )
-  );
-
-  addOptionalDataRow(
-    document,
-    'Escrow agent email',
-    getOptionalText(
-      deposits,
-      'escrowAgentEmail'
-    )
-  );
-
-  addOptionalDataRow(
-    document,
-    'Escrow agent phone',
-    getOptionalText(
-      deposits,
-      'escrowAgentPhone'
-    )
+    deposits.escrowAgentName
   );
 }
 
@@ -831,56 +686,28 @@ function renderFinancingAndPropertySale(
   document: PDFKit.PDFDocument,
   version: OfferVersionDocument
 ): void {
-  const propertySale =
-    getObject(
-      version.terms,
-      'existingPropertySale'
-    );
+  const purchase =
+    version.terms.purchase;
 
   addSectionHeading(
     document,
-    '5. Buyer’s existing property'
+    '5. Financing disclosure'
   );
 
-  addBooleanRow(
+  addDataRow(
     document,
-    'Sale or closing of another property required',
-    propertySale['required'] ===
-      true
+    'Purchase funding',
+    purchase.financingType === 'cash'
+      ? 'Cash purchase'
+      : purchase.financingType === 'loan'
+        ? 'Buyer intends to obtain a loan'
+        : 'Not selected'
   );
 
-  if (
-    propertySale['required'] === true
-  ) {
-    addDataRow(
-      document,
-      'Existing property address',
-      getText(
-        propertySale,
-        'propertyAddress'
-      )
-    );
-
-    addDataRow(
-      document,
-      'Current status',
-      formatStatus(
-        getText(
-          propertySale,
-          'status'
-        )
-      )
-    );
-
-    addOptionalDataRow(
-      document,
-      'Anticipated closing date',
-      getOptionalText(
-        propertySale,
-        'anticipatedClosingDate'
-      )
-    );
-  }
+  addParagraph(
+    document,
+    'The stated funding method is informational and does not create a financing, appraisal, or sale-of-other-property contingency.'
+  );
 }
 
 
@@ -888,90 +715,29 @@ function renderInvestigations(
   document: PDFKit.PDFDocument,
   version: OfferVersionDocument
 ): void {
-  const investigations =
-    getObject(
-      version.terms,
-      'investigations'
-    );
+  const deposits =
+    version.terms.deposits;
 
   addSectionHeading(
     document,
-    '6. Planned due-diligence investigations'
+    '6. Due-diligence period'
   );
 
-  const investigationLabels:
-    Record<string, string> = {
-      generalHomeInspection:
-        'General home inspection',
+  addParagraph(
+    document,
+    'During the due-diligence period, the buyer may conduct inspections, investigations, appraisals, surveys, title review, insurance review, and other evaluations permitted by this agreement.'
+  );
 
-      woodDestroyingInsectInspection:
-        'Wood-destroying insect inspection',
-
-      radonTesting:
-        'Radon testing',
-
-      wellWaterTesting:
-        'Well-water testing',
-
-      septicInspection:
-        'Septic inspection',
-
-      survey:
-        'Survey',
-
-      appraisal:
-        'Appraisal',
-
-      insuranceReview:
-        'Insurance review',
-
-      floodZoneReview:
-        'Flood-zone review',
-
-      environmentalReview:
-        'Environmental review',
-
-      hoaDocumentReview:
-        'HOA document review',
-
-      titleAndCovenantReview:
-        'Title and restrictive-covenant review',
-    };
-
-  for (
-    const [
-      fieldName,
-      label,
-    ] of Object.entries(
-      investigationLabels
-    )
-  ) {
-    addDataRow(
-      document,
-      label,
-      formatStatus(
-        getText(
-          investigations,
-          fieldName
-        )
+  addDataRow(
+    document,
+    'Deadline',
+    deposits.dueDiligenceDeadlineType ===
+      'specific_date'
+      ? formatDateValue(
+        deposits.dueDiligenceEndDate
       )
-    );
-  }
-
-  if (
-    investigations[
-      'otherInvestigationRequested'
-    ] === true
-  ) {
-    addOptionalDataRow(
-      document,
-      'Other investigation',
-      getOptionalText(
-        investigations,
-        'otherInvestigationDescription'
-      )
-    );
-  }
+      : `${deposits.dueDiligenceDaysAfterEffectiveDate ?? 0} days after the Effective Date`
+  );
 }
 
 
@@ -980,80 +746,43 @@ function renderConcessions(
   version: OfferVersionDocument
 ): void {
   const concessions =
-    getObject(
-      version.terms,
-      'concessions'
-    );
+    version.terms.concessions;
 
   addSectionHeading(
     document,
     '7. Seller concessions'
   );
 
-  addBooleanAndMoneyRow(
+  addDataRow(
     document,
-    'Seller-paid buyer expenses',
-    concessions[
-      'sellerPaidBuyerExpensesRequested'
-    ] === true,
-
-    getNumber(
-      concessions,
-      'sellerPaidBuyerExpensesInCents'
+    'Seller concession type',
+    formatStatus(
+      concessions.concessionType
     )
+  );
+
+  addOptionalMoneyRow(
+    document,
+    'Seller concession amount',
+    concessions.sellerConcessionInCents
+  );
+
+  addOptionalDataRow(
+    document,
+    'Seller concession percentage',
+    typeof concessions
+      .sellerConcessionPercentage ===
+      'number'
+      ? `${concessions.sellerConcessionPercentage}%`
+      : undefined
   );
 
   addBooleanAndMoneyRow(
     document,
     'Home warranty',
-    concessions[
-      'homeWarrantyRequested'
-    ] === true,
-
-    getNumber(
-      concessions,
-      'homeWarrantyInCents'
-    )
+    concessions.homeWarrantyRequested,
+    concessions.homeWarrantyInCents ?? 0
   );
-
-  addBooleanAndMoneyRow(
-    document,
-    'Buyer-agent compensation',
-    concessions[
-      'buyerAgentCompensationRequested'
-    ] === true,
-
-    getNumber(
-      concessions,
-      'buyerAgentCompensationInCents'
-    )
-  );
-
-  if (
-    concessions[
-      'otherConcessionRequested'
-    ] === true
-  ) {
-    addOptionalDataRow(
-      document,
-      'Other concession',
-      getOptionalText(
-        concessions,
-        'otherConcessionDescription'
-      )
-    );
-
-    addDataRow(
-      document,
-      'Other concession amount',
-      formatCurrency(
-        getNumber(
-          concessions,
-          'otherConcessionInCents'
-        )
-      )
-    );
-  }
 }
 
 
@@ -1061,75 +790,52 @@ function renderPropertyInclusions(
   document: PDFKit.PDFDocument,
   version: OfferVersionDocument
 ): void {
-  const inclusions =
-    getObject(
-      version.terms,
-      'propertyInclusions'
-    );
+  const propertyTerms =
+    version.terms.propertyTerms;
 
   addSectionHeading(
     document,
     '8. Fixtures and personal property'
   );
 
-  const items =
-    inclusions['items'];
+  addBooleanRow(
+    document,
+    'Manufactured home included',
+    propertyTerms.manufacturedHomeIncluded
+  );
 
-  if (
-    !Array.isArray(items) ||
-    items.length === 0
-  ) {
-    addParagraph(
-      document,
-      'No additional fixture, personal-property or leased-equipment selections were recorded.'
-    );
-  } else {
-    items.forEach(
-      item => {
-        const itemData =
-          asObject(item);
-
-        addDataRow(
-          document,
-          getText(
-            itemData,
-            'name'
-          ),
-
-          formatStatus(
-            getText(
-              itemData,
-              'treatment'
-            )
-          )
-        );
-      }
-    );
-  }
+  addBooleanRow(
+    document,
+    'Separate personal property included',
+    propertyTerms.separatePropertyIncluded
+  );
 
   addOptionalDataRow(
     document,
-    'Additional personal property',
-    getOptionalText(
-      inclusions,
-      'additionalPersonalPropertyDescription'
-    )
+    'Separate property description',
+    propertyTerms
+      .separatePropertyDescription
   );
 
-  addBooleanRow(
+  addOptionalDataRow(
     document,
-    'Leased equipment present',
-    inclusions[
-      'leasedEquipmentPresent'
-    ] === true
+    'Included items',
+    propertyTerms
+      .includedItemsDescription
   );
 
-  addBooleanRow(
+  addOptionalDataRow(
     document,
-    'Leased-equipment obligations accepted',
-    inclusions[
-      'leasedEquipmentObligationsAccepted'
-    ] === true
+    'Excluded items',
+    propertyTerms
+      .excludedItemsDescription
+  );
+
+  addOptionalDataRow(
+    document,
+    'Leased items',
+    propertyTerms
+      .leasedItemsDescription
   );
 }
 
@@ -1139,10 +845,7 @@ function renderSettlement(
   version: OfferVersionDocument
 ): void {
   const settlement =
-    getObject(
-      version.terms,
-      'settlement'
-    );
+    version.terms.settlement;
 
   addSectionHeading(
     document,
@@ -1153,37 +856,7 @@ function renderSettlement(
     document,
     'Settlement date',
     formatDateValue(
-      settlement[
-        'settlementDate'
-      ]
-    )
-  );
-
-  addDataRow(
-    document,
-    'Closing date',
-    formatDateValue(
-      settlement[
-        'closingDate'
-      ]
-    )
-  );
-
-  addOptionalDataRow(
-    document,
-    'Proposed closing attorney',
-    getOptionalText(
-      settlement,
-      'proposedClosingAttorneyName'
-    )
-  );
-
-  addOptionalDataRow(
-    document,
-    'Settlement location',
-    getOptionalText(
-      settlement,
-      'proposedSettlementLocation'
+      settlement.settlementDate
     )
   );
 
@@ -1191,38 +864,15 @@ function renderSettlement(
     document,
     'Possession',
     formatStatus(
-      getText(
-        settlement,
-        'possessionTiming'
-      )
+      settlement.possessionTiming
     )
   );
 
   addOptionalDataRow(
     document,
-    'Possession date',
-    getOptionalText(
-      settlement,
-      'possessionDate'
-    )
-  );
-
-  addOptionalDataRow(
-    document,
-    'Possession time',
-    getOptionalText(
-      settlement,
-      'possessionTime'
-    )
-  );
-
-  addDataRow(
-    document,
-    'Proposed deed name',
-    getText(
-      settlement,
-      'proposedDeedName'
-    )
+    'Possession agreement document',
+    settlement
+      .possessionAgreementDocumentUid
   );
 }
 
@@ -1236,55 +886,61 @@ function renderDisclosuresAndAddenda(
     '10. Disclosures and addenda'
   );
 
-  const disclosures =
-    version.terms[
-      'disclosures'
-    ];
+  const buyerDisclosures =
+    version.terms.buyerDisclosures;
 
-  if (
-    Array.isArray(disclosures) &&
-    disclosures.length > 0
-  ) {
-    document
-      .fillColor(
-        NAVSTREET_TEAL
-      )
-      .font('Helvetica-Bold')
-      .fontSize(10)
-      .text('Disclosures');
+  const residentialProperty =
+    buyerDisclosures
+      .residentialProperty;
 
-    disclosures.forEach(
-      disclosure => {
-        const data =
-          asObject(
-            disclosure
-          );
+  const mineralOilGasRights =
+    buyerDisclosures
+      .mineralOilGasRights;
 
-        addDataRow(
-          document,
-          getText(
-            data,
-            'title'
-          ),
+  addDataRow(
+    document,
+    'Residential Property Disclosure',
+    formatDisclosureReceipt(
+      residentialProperty.status,
+      residentialProperty.acknowledged
+    )
+  );
 
-          data['acknowledged'] ===
-            true
-            ? 'Received and acknowledged'
-            : 'Not acknowledged'
-        );
-      }
-    );
-  } else {
-    addParagraph(
-      document,
-      'No disclosures were attached to this prototype version.'
-    );
-  }
+  addOptionalDataRow(
+    document,
+    'Residential disclosure exemption',
+    residentialProperty.exemptionReason
+  );
+
+  addOptionalDataRow(
+    document,
+    'Residential disclosure document',
+    residentialProperty.documentUid
+  );
+
+  addDataRow(
+    document,
+    'Mineral, Oil and Gas Rights Disclosure',
+    formatDisclosureReceipt(
+      mineralOilGasRights.status,
+      mineralOilGasRights.acknowledged
+    )
+  );
+
+  addOptionalDataRow(
+    document,
+    'Mineral-rights disclosure exemption',
+    mineralOilGasRights.exemptionReason
+  );
+
+  addOptionalDataRow(
+    document,
+    'Mineral-rights disclosure document',
+    mineralOilGasRights.documentUid
+  );
 
   const addenda =
-    version.terms[
-      'addenda'
-    ];
+    version.terms.addenda;
 
   if (
     Array.isArray(addenda) &&
@@ -1301,20 +957,10 @@ function renderDisclosuresAndAddenda(
 
     addenda.forEach(
       addendum => {
-        const data =
-          asObject(
-            addendum
-          );
-
         addDataRow(
           document,
-          getText(
-            data,
-            'title'
-          ),
-
-          data['selected'] ===
-            true
+          addendum.title,
+          addendum.included
             ? 'Included'
             : 'Not included'
         );
@@ -1323,7 +969,7 @@ function renderDisclosuresAndAddenda(
   } else {
     addParagraph(
       document,
-      'No addenda were attached to this prototype version.'
+      'No addenda were attached to this agreement.'
     );
   }
 }
@@ -1338,14 +984,12 @@ function renderAdditionalTerms(
     '11. Additional terms'
   );
 
-  const requests =
-    version.terms[
-      'additionalTermRequests'
-    ];
+  const exhibit =
+    version.terms
+      .additionalTermsExhibit;
 
   if (
-    !Array.isArray(requests) ||
-    requests.length === 0
+    !exhibit.included
   ) {
     addParagraph(
       document,
@@ -1355,42 +999,26 @@ function renderAdditionalTerms(
     return;
   }
 
-  requests.forEach(
-    (request, index) => {
-      const data =
-        asObject(
-          request
-        );
+  addDataRow(
+    document,
+    'Additional Terms Exhibit',
+    'Included'
+  );
 
-      addDataRow(
-        document,
-        `Additional term ${index + 1}`,
-        getText(
-          data,
-          'plainLanguageRequest'
-        )
-      );
+  addOptionalDataRow(
+    document,
+    'Prepared by',
+    exhibit.preparedBy
+      ? formatStatus(
+        exhibit.preparedBy
+      )
+      : undefined
+  );
 
-      addDataRow(
-        document,
-        'Resolution',
-        formatStatus(
-          getText(
-            data,
-            'resolution'
-          )
-        )
-      );
-
-      addOptionalDataRow(
-        document,
-        'Attorney-prepared language',
-        getOptionalText(
-          data,
-          'attorneyPreparedText'
-        )
-      );
-    }
+  addOptionalDataRow(
+    document,
+    'Exhibit document',
+    exhibit.documentUid
   );
 }
 
@@ -1400,10 +1028,7 @@ function renderDeliveryAndExpiration(
   version: OfferVersionDocument
 ): void {
   const delivery =
-    getObject(
-      version.terms,
-      'delivery'
-    );
+    version.terms.delivery;
 
   addSectionHeading(
     document,
@@ -1414,43 +1039,32 @@ function renderDeliveryAndExpiration(
     document,
     'Offer expires',
     formatDateTimeValue(
-      delivery['expiresAt']
+      delivery.expiresAt
     )
   );
 
   addDataRow(
     document,
     'Time zone',
-    getText(
-      delivery,
-      'timeZone'
-    )
+    delivery.timeZone
   );
 
   addDataRow(
     document,
     'Buyer delivery email',
-    getText(
-      delivery,
-      'buyerDeliveryEmail'
-    )
+    delivery.buyerDeliveryEmail
   );
 
   addDataRow(
     document,
     'Seller delivery email',
-    getText(
-      delivery,
-      'sellerDeliveryEmail'
-    )
+    delivery.sellerDeliveryEmail
   );
 
   addBooleanRow(
     document,
     'Electronic delivery authorized',
-    delivery[
-      'electronicDeliveryAuthorized'
-    ] === true
+    delivery.electronicDeliveryAuthorized
   );
 }
 
@@ -1523,6 +1137,26 @@ function renderSignatures(
           lineY
         )
         .stroke();
+
+      if (
+        party.signature.status ===
+        'signed'
+      ) {
+        document
+          .fillColor(
+            NAVSTREET_BLUE
+          )
+          .font('Helvetica-Oblique')
+          .fontSize(11)
+          .text(
+            `/s/ ${party.legalName}`,
+            PAGE_MARGIN,
+            lineY - 15,
+            {
+              width: 315,
+            }
+          );
+      }
 
       document
         .fillColor(MUTED_COLOR)
@@ -1945,16 +1579,6 @@ function addPageFooters(
 }
 
 
-function getObject(
-  parent: Record<string, unknown>,
-  key: string
-): Record<string, unknown> {
-  return asObject(
-    parent[key]
-  );
-}
-
-
 function asObject(
   value: unknown
 ): Record<string, unknown> {
@@ -1996,38 +1620,6 @@ function getOptionalText(
       .trim();
 
   return value.length > 0
-    ? value
-    : undefined;
-}
-
-
-function getNumber(
-  data: Record<string, unknown>,
-  key: string
-): number {
-  const value =
-    data[key];
-
-  return (
-    typeof value === 'number' &&
-    Number.isFinite(value)
-  )
-    ? value
-    : 0;
-}
-
-
-function getOptionalNumber(
-  data: Record<string, unknown>,
-  key: string
-): number | undefined {
-  const value =
-    data[key];
-
-  return (
-    typeof value === 'number' &&
-    Number.isFinite(value)
-  )
     ? value
     : undefined;
 }
@@ -2137,22 +1729,6 @@ function formatDateTimeValue(
 }
 
 
-function formatOptionalDateTimeValue(
-  value: unknown
-): string | undefined {
-  if (
-    typeof value !== 'string' ||
-    value.trim().length === 0
-  ) {
-    return undefined;
-  }
-
-  return formatDateTimeValue(
-    value
-  );
-}
-
-
 function formatDateValue(
   value: unknown
 ): string {
@@ -2215,6 +1791,19 @@ function formatStatus(
     .filter(Boolean)
     .map(capitalize)
     .join(' ');
+}
+
+
+function formatDisclosureReceipt(
+  status: string,
+  acknowledged: boolean
+): string {
+  const statusLabel =
+    formatStatus(status);
+
+  return acknowledged
+    ? `${statusLabel} — acknowledged`
+    : statusLabel;
 }
 
 

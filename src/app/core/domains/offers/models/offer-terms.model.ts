@@ -2,8 +2,7 @@
  * Standard ISO date format used by offer fields that do
  * not require a time of day.
  *
- * Expected value:
- * YYYY-MM-DD
+ * Expected value: YYYY-MM-DD
  */
 export type OfferDate = string;
 
@@ -20,71 +19,56 @@ export type OfferDateTime = string;
  * Currency values are stored as whole cents to avoid
  * floating-point rounding errors.
  *
- * Example:
- * $450,000.00 = 45000000
+ * Example: $450,000.00 = 45000000
  */
 export type MoneyInCents = number;
 
 
 export type FinancingType =
+  | 'unselected'
   | 'cash'
-  | 'financing';
+  | 'loan';
 
 
-export type LoanType =
-  | 'conventional'
-  | 'fha'
-  | 'va'
-  | 'usda'
-  | 'seller_financing'
-  | 'other'
-  | 'not_applicable';
-
-
-export type PropertyUse =
-  | 'primary_residence'
-  | 'second_home'
-  | 'investment_property'
-  | 'other';
-
-
-export type PropertySaleStatus =
-  | 'not_listed'
-  | 'listed'
-  | 'under_contract'
-  | 'closed'
-  | 'not_applicable';
-
-
-export type DepositPaymentMethod =
-  | 'cashiers_check'
-  | 'certified_check'
-  | 'personal_check'
-  | 'wire_transfer'
-  | 'electronic_transfer'
-  | 'other'
-  | 'not_applicable';
-
-
-export type InvestigationSelection =
-  | 'planned'
-  | 'not_planned'
-  | 'not_applicable';
+export type DueDiligenceDeadlineType =
+  | 'unselected'
+  | 'specific_date'
+  | 'days_after_effective_date';
 
 
 export type PossessionTiming =
   | 'at_closing'
-  | 'before_closing'
-  | 'after_closing';
+  | 'other';
 
 
-export type OfferExpirationTimeZone =
-  | 'America/New_York'
-  | 'America/Chicago'
-  | 'America/Denver'
-  | 'America/Los_Angeles'
-  | 'America/Anchorage'
-  | 'Pacific/Honolulu';
+export type SellerConcessionType =
+  | 'none'
+  | 'amount'
+  | 'percentage';
+
+
+export type DisclosureReceiptStatus =
+  | 'unselected'
+  | 'received'
+  | 'not_received'
+  | 'exempt';
+
+
+export type SellerOwnershipStatus =
+  | 'owned_at_least_one_year'
+  | 'owned_less_than_one_year'
+  | 'does_not_yet_own';
+
+
+export type FuelTankOwnership =
+  | 'owned'
+  | 'leased';
+
+
+export type AdditionalTermsPreparedBy =
+  | 'buyer'
+  | 'seller'
+  | 'attorney';
 
 
 /*
@@ -110,330 +94,219 @@ export interface OfferPropertySnapshot {
   deedBook?: string;
   deedPage?: string;
 
+  /*
+   * Preserved for compatibility with the existing listing
+   * and offer implementation.
+   */
   legalDescription?: string;
 
+  otherPropertyReference?: string;
+
   propertyType: string;
+  yearBuilt?: number;
 
   listPriceInCents: MoneyInCents;
 }
 
 
 /*
- * Purchase price and proposed payment structure.
+ * Page 1, Sections 3 and 12.
+ *
+ * These values describe real or personal property that is
+ * included in or excluded from the proposed purchase.
+ */
+export interface OfferPropertyTerms {
+  manufacturedHomeIncluded: boolean;
+
+  separatePropertyIncluded: boolean;
+  separatePropertyDescription?: string;
+
+  includedItemsDescription?: string;
+  excludedItemsDescription?: string;
+  leasedItemsDescription?: string;
+}
+
+
+/*
+ * Page 1, Sections 4 and 5.
+ *
+ * The agreement intentionally contains no financing,
+ * appraisal or sale-of-other-property contingency.
  */
 export interface OfferPurchaseTerms {
   purchasePriceInCents: MoneyInCents;
 
   financingType: FinancingType;
 
-  loanType: LoanType;
-
-  proposedLoanAmountInCents?: MoneyInCents;
-  proposedDownPaymentInCents?: MoneyInCents;
-  proposedCashContributionInCents?: MoneyInCents;
-
-  preapprovalProvided: boolean;
-  proofOfFundsProvided: boolean;
-
-  preapprovalDocumentUid?: string;
-  proofOfFundsDocumentUid?: string;
-
-  loanRequiredToCompletePurchase: boolean;
-  lenderAppraisalAnticipated: boolean;
-
-  otherLoanTypeDescription?: string;
+  /*
+   * Disclosure only. This does not create a contingency.
+   */
+  otherPropertyWillFundPurchase: boolean;
+  otherPropertyDescription?: string;
 }
 
 
 /*
- * Information about another property the buyer must sell
- * or close before completing this purchase.
- */
-export interface OfferExistingPropertySale {
-  required: boolean;
-
-  propertyAddress?: string;
-
-  status: PropertySaleStatus;
-
-  listingDate?: OfferDate;
-  anticipatedContractDate?: OfferDate;
-  anticipatedClosingDate?: OfferDate;
-
-  approvedAddendumRequired: boolean;
-}
-
-
-/*
- * Due-diligence and earnest-money terms.
+ * Page 1, Sections 4, 7 and 10.
+ *
+ * The separate North Carolina due-diligence fee used in
+ * the earlier prototype is intentionally omitted.
  */
 export interface OfferDepositTerms {
-  dueDiligenceFeeInCents: MoneyInCents;
+  depositInCents: MoneyInCents;
 
-  dueDiligenceFeePaymentMethod:
-    DepositPaymentMethod;
-
-  dueDiligenceFeeDeliveryDeadline:
-    OfferDateTime;
-
-  dueDiligenceExpiration:
-    OfferDateTime;
-
-  initialEarnestMoneyInCents:
-    MoneyInCents;
-
-  initialEarnestMoneyPaymentMethod:
-    DepositPaymentMethod;
-
-  initialEarnestMoneyDeliveryDeadline:
-    OfferDateTime;
-
-  additionalEarnestMoneyInCents:
-    MoneyInCents;
-
-  additionalEarnestMoneyPaymentMethod:
-    DepositPaymentMethod;
-
-  additionalEarnestMoneyDeliveryDeadline?:
-    OfferDateTime;
+  /*
+   * The attorney-approved agreement currently requires
+   * delivery within four calendar days of the Effective
+   * Date. It is stored so the generated document and
+   * transaction timeline use the same value.
+   */
+  depositDeliveryDays: 4;
 
   escrowAgentName: string;
-  escrowAgentEmail?: string;
-  escrowAgentPhone?: string;
-  escrowAgentAddress?: string;
+
+  dueDiligenceDeadlineType:
+  DueDiligenceDeadlineType;
+
+  dueDiligenceEndDate?: OfferDate;
+  dueDiligenceDaysAfterEffectiveDate?: number;
+
+  /*
+   * The contract fixes the deadline time at 5:00 p.m.
+   * North Carolina time.
+   */
+  dueDiligenceEndTime: '17:00';
 }
 
 
 /*
- * Buyer investigations planned during the applicable
- * due-diligence period.
- *
- * These selections create transaction tasks. They do not,
- * by themselves, create additional contract contingencies.
- */
-export interface OfferInvestigationTerms {
-  generalHomeInspection:
-    InvestigationSelection;
-
-  woodDestroyingInsectInspection:
-    InvestigationSelection;
-
-  radonTesting:
-    InvestigationSelection;
-
-  wellWaterTesting:
-    InvestigationSelection;
-
-  septicInspection:
-    InvestigationSelection;
-
-  survey:
-    InvestigationSelection;
-
-  appraisal:
-    InvestigationSelection;
-
-  insuranceReview:
-    InvestigationSelection;
-
-  floodZoneReview:
-    InvestigationSelection;
-
-  environmentalReview:
-    InvestigationSelection;
-
-  hoaDocumentReview:
-    InvestigationSelection;
-
-  titleAndCovenantReview:
-    InvestigationSelection;
-
-  otherInvestigationRequested: boolean;
-  otherInvestigationDescription?: string;
-}
-
-
-/*
- * Seller-paid expenses and other authorized concessions.
+ * Page 1, Sections 6 and 11.
  */
 export interface OfferConcessionTerms {
-  sellerPaidBuyerExpensesRequested: boolean;
+  concessionType: SellerConcessionType;
 
-  sellerPaidBuyerExpensesInCents:
-    MoneyInCents;
+  sellerConcessionInCents?: MoneyInCents;
+  sellerConcessionPercentage?: number;
 
   homeWarrantyRequested: boolean;
-  homeWarrantyInCents: MoneyInCents;
-
-  buyerAgentCompensationRequested:
-    boolean;
-
-  buyerAgentCompensationInCents:
-    MoneyInCents;
-
-  otherConcessionRequested: boolean;
-  otherConcessionDescription?: string;
-  otherConcessionInCents: MoneyInCents;
+  homeWarrantyInCents?: MoneyInCents;
 }
 
 
 /*
- * A fixture, personal-property item or leased item included
- * in the offer.
- */
-export interface OfferPropertyItem {
-  Uid: string;
-
-  name: string;
-
-  category:
-    | 'fixture'
-    | 'personal_property'
-    | 'leased_equipment'
-    | 'other';
-
-  treatment:
-    | 'included'
-    | 'excluded'
-    | 'buyer_assumes_lease'
-    | 'seller_to_remove';
-
-  description?: string;
-}
-
-
-/*
- * Fixtures, personal property and leased equipment.
- */
-export interface OfferPropertyInclusionTerms {
-  items: OfferPropertyItem[];
-
-  additionalPersonalPropertyRequested:
-    boolean;
-
-  additionalPersonalPropertyDescription?:
-    string;
-
-  leasedEquipmentPresent: boolean;
-
-  leasedEquipmentObligationsAccepted:
-    boolean;
-}
-
-
-/*
- * Proposed settlement, closing and possession.
+ * Page 1, Sections 8 and 9.
  */
 export interface OfferSettlementTerms {
   settlementDate: OfferDate;
-  closingDate: OfferDate;
-
-  proposedClosingAttorneyName?: string;
-  proposedClosingAttorneyEmail?: string;
-  proposedClosingAttorneyPhone?: string;
-
-  proposedSettlementLocation?: string;
 
   possessionTiming: PossessionTiming;
 
-  possessionDate?: OfferDate;
-  possessionTime?: string;
-
-  possessionAddendumRequired: boolean;
-
-  proposedDeedName: string;
+  /*
+   * Required only when possession will not occur at
+   * Closing. The actual arrangement must be contained in
+   * an attached possession agreement.
+   */
+  possessionAgreementDocumentUid?: string;
 }
 
 
 /*
- * Disclosure and addendum selection.
- *
- * Specific state packages determine which items are
- * required for a particular property and transaction.
+ * One disclosure delivered to the buyer before or when
+ * the buyer makes the offer.
  */
-export interface OfferDisclosureSelection {
-  disclosureUid: string;
+export interface OfferDisclosureReceipt {
+  status: DisclosureReceiptStatus;
 
-  stateCode: string;
-
-  title: string;
-
-  version: string;
-
-  required: boolean;
-  received: boolean;
-  acknowledged: boolean;
-
-  acknowledgedAt?: Date;
+  exemptionReason?: string;
 
   documentUid?: string;
+  documentVersionId?: string;
+
+  acknowledged: boolean;
+  acknowledgedAt?: Date;
 }
 
 
+/*
+ * Buyer selections required by Section 4(c) and 4(d).
+ */
+export interface OfferBuyerDisclosureTerms {
+  residentialProperty:
+  OfferDisclosureReceipt;
+
+  mineralOilGasRights:
+  OfferDisclosureReceipt;
+}
+
+
+/*
+ * Seller selections required by Section 6.
+ *
+ * These values are completed or confirmed by the seller
+ * during the seller-review process. They are optional
+ * while the buyer's initial offer is still being drafted.
+ */
+export interface OfferSellerStatements {
+  ownershipStatus?: SellerOwnershipStatus;
+
+  leadBasedPaintApplies?: boolean;
+  leadBasedPaintDisclosureDocumentUid?: string;
+
+  ownersAssociationApplies?: boolean;
+  ownersAssociationName?: string;
+  ownersAssociationDuesInCents?: MoneyInCents;
+  ownersAssociationDuesFrequency?: string;
+  ownersAssociationContact?: string;
+
+  fuelTankPresent?: boolean;
+  fuelTankOwnership?: FuelTankOwnership;
+
+  leasesExist?: boolean;
+  leaseAddendumDocumentUid?: string;
+}
+
+
+/*
+ * An attorney-approved or party-prepared document attached
+ * to the offer package.
+ */
 export interface OfferAddendumSelection {
   addendumUid: string;
 
-  stateCode: string;
-
   title: string;
+  documentUid: string;
 
-  version: string;
+  preparedBy:
+  AdditionalTermsPreparedBy;
 
-  required: boolean;
-  selected: boolean;
+  included: boolean;
+}
+
+
+/*
+ * Page 1, Section 13.
+ *
+ * NavStreet does not draft language for the parties. It
+ * records and attaches an exhibit prepared outside the
+ * standard contract form.
+ */
+export interface OfferAdditionalTermsExhibit {
+  included: boolean;
+
+  preparedBy?:
+  AdditionalTermsPreparedBy;
 
   documentUid?: string;
 }
 
 
 /*
- * Plain-language request submitted by a buyer or seller
- * when an approved form provision may not address the
- * requested outcome.
- *
- * Requested language does not become contract language
- * unless an authorized provision or attorney-prepared
- * provision is attached.
- */
-export interface OfferAdditionalTermRequest {
-  Uid: string;
-
-  requestedBy:
-    | 'buyer'
-    | 'seller';
-
-  plainLanguageRequest: string;
-
-  resolution:
-    | 'pending_review'
-    | 'covered_by_standard_term'
-    | 'covered_by_approved_addendum'
-    | 'attorney_language_required'
-    | 'attorney_language_received'
-    | 'removed';
-
-  standardTermUid?: string;
-  addendumUid?: string;
-
-  attorneyUid?: string;
-  attorneyPreparedText?: string;
-  attorneyDocumentUid?: string;
-
-  approvedByBuyer: boolean;
-  approvedBySeller: boolean;
-
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-
-/*
- * Offer expiration and authorized electronic delivery.
+ * Page 1, Section 14 and authorized electronic delivery.
  */
 export interface OfferDeliveryTerms {
   expiresAt: OfferDateTime;
 
-  timeZone: OfferExpirationTimeZone;
+  timeZone: 'America/New_York';
 
   buyerDeliveryEmail: string;
   sellerDeliveryEmail: string;
@@ -443,39 +316,30 @@ export interface OfferDeliveryTerms {
 
 
 /*
- * Complete set of negotiable offer terms stored in each
- * immutable offer or counteroffer version.
+ * Complete set of negotiable terms and party statements
+ * stored in each immutable offer or counteroffer version.
  */
 export interface OfferTerms {
-  stateCode: string;
+  stateCode: 'NC';
 
   property: OfferPropertySnapshot;
+  propertyTerms: OfferPropertyTerms;
 
   purchase: OfferPurchaseTerms;
-
-  existingPropertySale:
-    OfferExistingPropertySale;
-
   deposits: OfferDepositTerms;
-
-  investigations:
-    OfferInvestigationTerms;
-
   concessions: OfferConcessionTerms;
-
-  propertyInclusions:
-    OfferPropertyInclusionTerms;
-
   settlement: OfferSettlementTerms;
 
-  disclosures:
-    OfferDisclosureSelection[];
+  buyerDisclosures:
+  OfferBuyerDisclosureTerms;
 
-  addenda:
-    OfferAddendumSelection[];
+  sellerStatements:
+  OfferSellerStatements;
 
-  additionalTermRequests:
-    OfferAdditionalTermRequest[];
+  addenda: OfferAddendumSelection[];
+
+  additionalTermsExhibit:
+  OfferAdditionalTermsExhibit;
 
   delivery: OfferDeliveryTerms;
 }

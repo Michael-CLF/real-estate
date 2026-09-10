@@ -25,6 +25,8 @@ import type {
   CreateOfferDraftData,
   CreateOfferDraftResponse,
   OfferEligibleListing,
+  OfferPropertySnapshotDocument,
+  OfferTermsDocument,
   OfferUserProfile,
   OfferVersionPartySnapshotDocument,
 } from './offer-types';
@@ -90,6 +92,17 @@ export const createOfferDraft =
           eligibleListing.sellerUid
         ),
       ]);
+
+      if (
+        !isProfileIdentityVerified(
+          buyerProfile
+        )
+      ) {
+        throw new HttpsError(
+          'failed-precondition',
+          'You must complete identity verification before making an offer.'
+        );
+      }
 
       const offerReference =
         adminFirestore
@@ -219,16 +232,88 @@ export const createOfferDraft =
               const existingOfferData =
                 existingOfferDocument.data();
 
+              const currentVersionUid =
+                readRequiredString(
+                  existingOfferData,
+                  'currentVersionUid',
+                  'The existing offer does not identify its current version.'
+                );
+
+              if (
+                existingOfferData['status'] ===
+                  'draft'
+              ) {
+                const existingVersionReference =
+                  existingOfferDocument.ref
+                    .collection('versions')
+                    .doc(currentVersionUid);
+
+                const existingVersionSnapshot =
+                  await transaction.get(
+                    existingVersionReference
+                  );
+
+                if (
+                  !existingVersionSnapshot.exists
+                ) {
+                  throw new HttpsError(
+                    'not-found',
+                    'The existing offer draft version could not be found.'
+                  );
+                }
+
+                const existingVersionData =
+                  existingVersionSnapshot.data();
+
+                if (
+                  existingVersionData?.['status'] ===
+                    'draft' &&
+                  existingVersionData?.['immutable'] !==
+                    true
+                ) {
+                  const existingBuyers =
+                    existingVersionData['buyers'];
+
+                  if (
+                    !Array.isArray(
+                      existingBuyers
+                    )
+                  ) {
+                    throw new HttpsError(
+                      'data-loss',
+                      'The existing offer draft does not contain its buyer information.'
+                    );
+                  }
+
+                  const refreshedBuyers =
+                    existingBuyers.map(
+                      buyer =>
+                        refreshDraftBuyerIdentity(
+                          buyer,
+                          buyerUid,
+                          buyerProfile,
+                          buyerAuthUser.email ?? '',
+                          now
+                        )
+                    );
+
+                  transaction.update(
+                    existingVersionReference,
+                    {
+                      buyers:
+                        refreshedBuyers,
+                      updatedAt: now,
+                    }
+                  );
+                }
+              }
+
               return {
                 offerUid:
                   existingOfferDocument.id,
 
                 offerVersionUid:
-                  readRequiredString(
-                    existingOfferData,
-                    'currentVersionUid',
-                    'The existing offer does not identify its current version.'
-                  ),
+                  currentVersionUid,
 
                 referenceNumber:
                   readRequiredString(
@@ -455,7 +540,7 @@ export const createOfferDraft =
 
 function createPropertySnapshot(
   listing: OfferEligibleListing
-): Record<string, unknown> {
+): OfferPropertySnapshotDocument {
   return removeUndefinedValues({
     listingUid: listing.Uid,
 
@@ -483,8 +568,15 @@ function createPropertySnapshot(
     legalDescription:
       listing.legalDescription,
 
+    otherPropertyReference:
+      listing.otherPropertyReference ??
+      listing.legalDescription,
+
     propertyType:
       listing.propertyType,
+
+    yearBuilt:
+      listing.yearBuilt,
 
     /*
      * Published listing prices are currently stored as
@@ -494,7 +586,7 @@ function createPropertySnapshot(
       Math.round(
         listing.listPrice * 100
       ),
-  });
+  }) as OfferPropertySnapshotDocument;
 }
 
 
@@ -539,11 +631,8 @@ function createPartySnapshot(
       ?.trim();
 
   const identityVerified =
-    input.profile?.identityStatus ===
-    'verified' ||
-    (
-      Boolean(verifiedFirstName) &&
-      Boolean(verifiedLastName)
+    isProfileIdentityVerified(
+      input.profile
     );
 
   const legalNameParts =
@@ -688,28 +777,27 @@ function createPartySnapshot(
 
 function createInitialOfferTerms(
   property:
-    Record<string, unknown>,
+    OfferPropertySnapshotDocument,
 
   buyer:
     OfferVersionPartySnapshotDocument,
 
   seller:
     OfferVersionPartySnapshotDocument
-): Record<string, unknown> {
+): OfferTermsDocument {
   const listPriceInCents =
-    typeof property[
-      'listPriceInCents'
-    ] === 'number'
-      ? property[
-      'listPriceInCents'
-      ]
-      : 0;
+    property.listPriceInCents;
 
   return {
-    stateCode:
-      property['state'],
+    stateCode: 'NC',
 
     property,
+
+    propertyTerms: {
+      manufacturedHomeIncluded: false,
+
+      separatePropertyIncluded: false,
+    },
 
     purchase: {
       purchasePriceInCents:
@@ -718,158 +806,56 @@ function createInitialOfferTerms(
       financingType:
         'unselected',
 
-      loanType:
-        'not_applicable',
-
-      preapprovalProvided:
-        false,
-
-      proofOfFundsProvided:
-        false,
-
-      loanRequiredToCompletePurchase:
-        false,
-
-      lenderAppraisalAnticipated:
-        false,
-    },
-
-    existingPropertySale: {
-      required: false,
-
-      status:
-        'not_applicable',
-
-      approvedAddendumRequired:
+      otherPropertyWillFundPurchase:
         false,
     },
 
     deposits: {
-      dueDiligenceFeeInCents: 0,
+      depositInCents: 0,
 
-      dueDiligenceFeePaymentMethod:
-        'not_applicable',
-
-      dueDiligenceFeeDeliveryDeadline:
-        '',
-
-      dueDiligenceExpiration:
-        '',
-
-      initialEarnestMoneyInCents: 0,
-
-      initialEarnestMoneyPaymentMethod:
-        'not_applicable',
-
-      initialEarnestMoneyDeliveryDeadline:
-        '',
-
-      additionalEarnestMoneyInCents: 0,
-
-      additionalEarnestMoneyPaymentMethod:
-        'not_applicable',
+      depositDeliveryDays: 4,
 
       escrowAgentName: '',
-    },
 
-    investigations: {
-      generalHomeInspection:
-        'not_applicable',
+      dueDiligenceDeadlineType:
+        'unselected',
 
-      woodDestroyingInsectInspection:
-        'not_applicable',
-
-      radonTesting:
-        'not_applicable',
-
-      wellWaterTesting:
-        'not_applicable',
-
-      septicInspection:
-        'not_applicable',
-
-      survey:
-        'not_applicable',
-
-      appraisal:
-        'not_applicable',
-
-      insuranceReview:
-        'not_applicable',
-
-      floodZoneReview:
-        'not_applicable',
-
-      environmentalReview:
-        'not_applicable',
-
-      hoaDocumentReview:
-        'not_applicable',
-
-      titleAndCovenantReview:
-        'not_applicable',
-
-      otherInvestigationRequested:
-        false,
+      dueDiligenceEndTime: '17:00',
     },
 
     concessions: {
-      sellerPaidBuyerExpensesRequested:
-        false,
-
-      sellerPaidBuyerExpensesInCents:
-        0,
+      concessionType: 'none',
 
       homeWarrantyRequested:
-        false,
-
-      homeWarrantyInCents: 0,
-
-      buyerAgentCompensationRequested:
-        false,
-
-      buyerAgentCompensationInCents:
-        0,
-
-      otherConcessionRequested:
-        false,
-
-      otherConcessionInCents: 0,
-    },
-
-    propertyInclusions: {
-      items: [],
-
-      additionalPersonalPropertyRequested:
-        false,
-
-      leasedEquipmentPresent:
-        false,
-
-      leasedEquipmentObligationsAccepted:
         false,
     },
 
     settlement: {
       settlementDate: '',
-      closingDate: '',
 
       possessionTiming:
         'at_closing',
-
-      possessionAddendumRequired:
-        false,
-
-      proposedDeedName:
-        buyer.proposedDeedName ??
-        buyer.legalName,
     },
 
-    disclosures: [],
+    buyerDisclosures: {
+      residentialProperty: {
+        status: 'unselected',
+        acknowledged: false,
+      },
+
+      mineralOilGasRights: {
+        status: 'unselected',
+        acknowledged: false,
+      },
+    },
+
+    sellerStatements: {},
 
     addenda: [],
 
-    additionalTermRequests: [],
+    additionalTermsExhibit: {
+      included: false,
+    },
 
     delivery: {
       expiresAt: '',
@@ -1184,4 +1170,88 @@ function removeUndefinedValues<T>(
   }
 
   return value;
+}
+
+
+function refreshDraftBuyerIdentity(
+  value: unknown,
+  buyerUid: string,
+  buyerProfile: OfferUserProfile | null,
+  fallbackEmail: string,
+  now: Timestamp
+): unknown {
+  if (
+    !value ||
+    typeof value !== 'object'
+  ) {
+    return value;
+  }
+
+  const currentBuyer =
+    value as
+      OfferVersionPartySnapshotDocument;
+
+  if (
+    currentBuyer.userUid !== buyerUid
+  ) {
+    return value;
+  }
+
+  const refreshedBuyer =
+    createPartySnapshot({
+      role: 'buyer',
+      partyUid:
+        currentBuyer.partyUid,
+      userUid: buyerUid,
+      profile: buyerProfile,
+      fallbackEmail,
+      sequence:
+        currentBuyer.sequence,
+      primaryParty:
+        currentBuyer.primaryParty,
+      now,
+    });
+
+  return removeUndefinedValues({
+    ...currentBuyer,
+    firstName:
+      refreshedBuyer.firstName,
+    middleName:
+      refreshedBuyer.middleName,
+    lastName:
+      refreshedBuyer.lastName,
+    legalName:
+      refreshedBuyer.legalName,
+    email:
+      refreshedBuyer.email,
+    phone:
+      refreshedBuyer.phone,
+    proposedDeedName:
+      refreshedBuyer.proposedDeedName,
+    identityVerification:
+      refreshedBuyer
+        .identityVerification,
+  });
+}
+
+
+function isProfileIdentityVerified(
+  profile: OfferUserProfile | null
+): boolean {
+  return (
+    profile?.identityStatus ===
+      'verified' ||
+    (
+      Boolean(
+        profile
+          ?.verifiedFirstName
+          ?.trim()
+      ) &&
+      Boolean(
+        profile
+          ?.verifiedLastName
+          ?.trim()
+      )
+    )
+  );
 }

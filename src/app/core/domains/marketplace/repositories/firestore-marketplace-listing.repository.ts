@@ -137,7 +137,15 @@ export class FirestoreMarketplaceListingRepository
 
         const activeListingsQuery = query(
             listingsReference,
-            where('status', '==', 'active')
+            where(
+                'status',
+                'in',
+                [
+                    'active',
+                    'under_contract',
+                    'sold'
+                ]
+            )
         );
 
         return defer(() =>
@@ -176,6 +184,16 @@ export class FirestoreMarketplaceListingRepository
         );
 
         let filteredListings = [...listings];
+
+        if (filters.listingStatuses?.length) {
+            filteredListings =
+                filteredListings.filter(
+                    listing =>
+                        filters.listingStatuses?.includes(
+                            listing.status
+                        )
+                );
+        }
 
         if (filters.searchTerm) {
             const searchTerm =
@@ -441,6 +459,14 @@ export class FirestoreMarketplaceListingRepository
 
             status:
                 data['status'] as MarketplaceListing['status'],
+
+            pendingOfferCount:
+                Math.max(
+                    0,
+                    this.readNumber(
+                        data['pendingOfferCount']
+                    ) ?? 0
+                ),
 
             propertyType:
                 data['propertyType'] as
@@ -1040,6 +1066,8 @@ export class FirestoreMarketplaceListingRepository
             title: listing.title,
             propertyType: listing.propertyType,
             status: listing.status,
+            pendingOfferCount:
+                listing.pendingOfferCount,
 
             price: listing.price,
             originalPrice: listing.originalPrice,

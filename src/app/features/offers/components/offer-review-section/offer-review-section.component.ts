@@ -12,6 +12,7 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 
+
 @Component({
   selector:
     'app-offer-review-section',
@@ -52,7 +53,8 @@ export class OfferReviewSectionComponent {
       {
         style: 'currency',
         currency: 'USD',
-        maximumFractionDigits: 0
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
       }
     );
 
@@ -98,223 +100,259 @@ export class OfferReviewSectionComponent {
       'Not provided';
   }
 
-  get financingMethodLabel():
-    string {
+  get propertyAddress(): string {
+    const street =
+      this.value(
+        'buyerProperty.propertyAddress'
+      );
+
+    const city =
+      this.value(
+        'buyerProperty.propertyCity'
+      );
+
+    const stateAndZip = [
+      this.value(
+        'buyerProperty.propertyState'
+      ),
+
+      this.value(
+        'buyerProperty.propertyPostalCode'
+      )
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    return [
+      street,
+      city,
+      stateAndZip
+    ]
+      .filter(Boolean)
+      .join(', ') ||
+      'Not provided';
+  }
+
+  get financingMethodLabel(): string {
     switch (
     this.value(
       'priceFinancing.financingMethod'
     )
     ) {
       case 'cash':
-        return 'Cash purchase';
+        return 'All cash—no loan';
 
-      case 'financing':
-        return 'Financing';
-
-      case 'cash_and_financing':
-        return 'Cash and financing';
+      case 'loan':
+        return 'Buyer intends to obtain a loan';
 
       default:
         return 'Not selected';
     }
   }
 
-  get loanTypeLabel(): string {
-    const loanType =
+  get dueDiligenceDeadlineLabel(): string {
+    const deadlineType =
       this.value(
-        'priceFinancing.loanType'
+        'depositsDueDiligence.dueDiligenceDeadlineType'
+      );
+
+    if (deadlineType === 'specific_date') {
+      return (
+        '5:00 p.m. Eastern Time on ' +
+        this.dateValue(
+          'depositsDueDiligence.dueDiligenceEndDate'
+        )
+      );
+    }
+
+    if (
+      deadlineType ===
+        'days_after_effective_date'
+    ) {
+      const days =
+        this.value(
+          'depositsDueDiligence.dueDiligenceDaysAfterEffectiveDate'
+        );
+
+      return (
+        '5:00 p.m. Eastern Time on day ' +
+        (days || 'not provided') +
+        ' after the Effective Date'
+      );
+    }
+
+    return 'Not selected';
+  }
+
+  get concessionLabel(): string {
+    switch (
+    this.value(
+      'concessions.concessionType'
+    )
+    ) {
+      case 'amount':
+        return this.currencyValue(
+          'concessions.sellerConcessionAmount'
+        );
+
+      case 'percentage':
+        return (
+          this.value(
+            'concessions.sellerConcessionPercentage'
+          ) || '0'
+        ) + '% of the Purchase Price';
+
+      default:
+        return 'None';
+    }
+  }
+
+  get possessionTimingLabel(): string {
+    return this.value(
+      'settlementPossession.possessionTiming'
+    ) === 'other'
+      ? 'Other—separate possession agreement attached'
+      : 'At Closing';
+  }
+
+  get residentialDisclosureLabel(): string {
+    return this.disclosureStatusLabel(
+      'disclosuresAddenda.residentialPropertyStatus'
+    );
+  }
+
+  get mineralDisclosureLabel(): string {
+    return this.disclosureStatusLabel(
+      'disclosuresAddenda.mineralOilGasRightsStatus'
+    );
+  }
+
+  get additionalTermsLabel(): string {
+    if (
+      !this.booleanValue(
+        'additionalTerms.hasAdditionalTerms'
+      )
+    ) {
+      return 'No exhibit included';
+    }
+
+    const preparedBy =
+      this.value(
+        'additionalTerms.preparedBy'
       );
 
     const labels:
       Record<string, string> = {
-      conventional:
-        'Conventional',
-
-      fha:
-        'FHA',
-
-      va:
-        'VA',
-
-      usda:
-        'USDA',
-
-      jumbo:
-        'Jumbo',
-
-      other:
-        this.value(
-          'priceFinancing.otherLoanType'
-        ) || 'Other'
+      attorney: 'Exhibit prepared by an attorney',
+      buyer: 'Exhibit prepared by the buyer',
+      seller: 'Exhibit prepared by the seller'
     };
 
-    return labels[loanType] ??
-      'Not applicable';
+    return labels[preparedBy] ??
+      'Exhibit included—preparer not selected';
   }
 
-  get selectedConditions():
-    string[] {
-    const conditions:
-      string[] = [];
+  get requiredAttachmentIssues(): string[] {
+    const issues: string[] = [];
 
     if (
-      this.booleanValue(
-        'investigations.inspectionIntended'
-      )
-    ) {
-      conditions.push(
-        'Property inspections intended'
-      );
-    }
-
-    if (
-      this.booleanValue(
-        'investigations.appraisalContingencyRequested'
-      )
-    ) {
-      conditions.push(
-        'Appraisal condition requested'
-      );
-    }
-
-    if (
-      this.booleanValue(
-        'investigations.financingContingencyRequested'
-      )
-    ) {
-      conditions.push(
-        'Financing condition requested'
-      );
-    }
-
-    if (
-      this.booleanValue(
-        'investigations.saleOfExistingHomeRequired'
-      )
-    ) {
-      conditions.push(
-        'Sale of existing home required'
-      );
-    }
-
-    return conditions;
-  }
-
-  get selectedInclusions():
-    string[] {
-    const inclusions:
-      Array<{
-        path: string;
-        label: string;
-      }> = [
-        {
-          path:
-            'propertyInclusions.builtInAppliancesIncluded',
-
-          label:
-            'Built-in appliances'
-        },
-
-        {
-          path:
-            'propertyInclusions.refrigeratorIncluded',
-
-          label:
-            'Refrigerator'
-        },
-
-        {
-          path:
-            'propertyInclusions.washerIncluded',
-
-          label:
-            'Clothes washer'
-        },
-
-        {
-          path:
-            'propertyInclusions.dryerIncluded',
-
-          label:
-            'Clothes dryer'
-        },
-
-        {
-          path:
-            'propertyInclusions.windowTreatmentsIncluded',
-
-          label:
-            'Window treatments'
-        },
-
-        {
-          path:
-            'propertyInclusions.securitySystemsIncluded',
-
-          label:
-            'Security equipment'
-        },
-
-        {
-          path:
-            'propertyInclusions.fuelOrPropaneIncluded',
-
-          label:
-            'Fuel or propane'
-        }
-      ];
-
-    return inclusions
-      .filter(
-        inclusion =>
-          this.booleanValue(
-            inclusion.path
-          )
-      )
-      .map(
-        inclusion =>
-          inclusion.label
-      );
-  }
-
-  get hasAttorneyBlocker():
-    boolean {
-    const attorneyRequired =
-      this.booleanValue(
-        'additionalTerms.attorneyDraftedLanguageRequired'
-      );
-
-    const attorneyStatus =
       this.value(
-        'additionalTerms.attorneyReviewStatus'
+        'settlementPossession.possessionTiming'
+      ) === 'other' &&
+      !this.hasText(
+        'settlementPossession.possessionAgreementDocumentUid'
+      )
+    ) {
+      issues.push(
+        'Separate possession agreement'
       );
+    }
 
-    return (
-      attorneyRequired &&
-      attorneyStatus !== 'completed'
-    );
+    if (
+      this.booleanValue(
+        'additionalTerms.hasAdditionalTerms'
+      ) &&
+      !this.hasText(
+        'additionalTerms.documentUid'
+      )
+    ) {
+      issues.push(
+        'Additional Terms Exhibit'
+      );
+    }
+
+    return issues;
   }
 
-  get allPriorSectionsValid():
-    boolean {
-    const sectionNames = [
-      'buyerProperty',
-      'priceFinancing',
-      'depositsDueDiligence',
-      'investigations',
-      'concessions',
-      'propertyInclusions',
-      'settlementPossession',
-      'disclosuresAddenda',
-      'additionalTerms',
-      'offerExpiration'
+  get allPriorSectionsValid(): boolean {
+    return this.incompleteSectionLabels
+      .length === 0;
+  }
+
+  get incompleteSectionLabels(): string[] {
+    const sections = [
+      {
+        controlName: 'buyerProperty',
+        label: 'Section 1 — Buyer and Property'
+      },
+      {
+        controlName: 'priceFinancing',
+        label: 'Section 2 — Purchase Price and Funding'
+      },
+      {
+        controlName: 'depositsDueDiligence',
+        label: 'Section 3 — Deposit and Due Diligence'
+      },
+      {
+        controlName: 'concessions',
+        label: 'Section 4 — Seller Concessions'
+      },
+      {
+        controlName: 'propertyInclusions',
+        label: 'Section 5 — Property Inclusions and Exclusions'
+      },
+      {
+        controlName: 'settlementPossession',
+        label: 'Section 6 — Settlement and Possession'
+      },
+      {
+        controlName: 'disclosuresAddenda',
+        label: 'Section 7 — Buyer Disclosure Acknowledgements'
+      },
+      {
+        controlName: 'additionalTerms',
+        label: 'Section 8 — Additional Terms Exhibit'
+      },
+      {
+        controlName: 'offerExpiration',
+        label: 'Section 9 — Offer Expiration'
+      }
     ];
 
-    return sectionNames.every(
-      sectionName =>
-        this.offerForm
-          .get(sectionName)
-          ?.valid === true
+    return sections
+      .filter(
+        section => {
+          const sectionControl =
+            this.offerForm.get(
+              section.controlName
+            );
+
+          return !(
+            sectionControl?.valid === true ||
+            sectionControl?.disabled === true
+          );
+        }
+      )
+      .map(
+        section => section.label
+      );
+  }
+
+  get readyForCertification(): boolean {
+    return (
+      this.allPriorSectionsValid &&
+      this.requiredAttachmentIssues
+        .length === 0
     );
   }
 
@@ -372,15 +410,31 @@ export class OfferReviewSectionComponent {
     );
   }
 
+  yesNoValue(
+    path: string
+  ): string {
+    return this.booleanValue(path)
+      ? 'Yes'
+      : 'No';
+  }
+
   currencyValue(
     path: string
   ): string {
-    const value =
-      Number(
-        this.offerForm.get(
-          path
-        )?.value
-      );
+    const rawValue =
+      this.offerForm.get(
+        path
+      )?.value;
+
+    if (
+      rawValue === null ||
+      rawValue === undefined ||
+      rawValue === ''
+    ) {
+      return 'Not provided';
+    }
+
+    const value = Number(rawValue);
 
     if (!Number.isFinite(value)) {
       return 'Not provided';
@@ -423,11 +477,29 @@ export class OfferReviewSectionComponent {
     ).format(date);
   }
 
-  yesNoValue(
+  private disclosureStatusLabel(
     path: string
   ): string {
-    return this.booleanValue(path)
-      ? 'Yes'
-      : 'No';
+    switch (this.value(path)) {
+      case 'received':
+        return 'Received before making this offer';
+
+      case 'not_received':
+        return 'Not received before making this offer';
+
+      case 'exempt':
+        return 'Sale marked exempt';
+
+      default:
+        return 'Not selected';
+    }
+  }
+
+  private hasText(
+    path: string
+  ): boolean {
+    return this.value(path)
+      .trim()
+      .length > 0;
   }
 }

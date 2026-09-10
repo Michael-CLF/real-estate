@@ -1,63 +1,72 @@
-<div class="offer-review-section" formGroupName="offerReview">
+<div
+  class="offer-review-section"
+  formGroupName="offerReview"
+>
   @if (!allPriorSectionsValid) {
-  <aside class="review-notice review-notice--error" role="alert">
-    <span aria-hidden="true">!</span>
+    <aside
+      class="review-notice review-notice--error"
+      role="alert"
+    >
+      <span aria-hidden="true">!</span>
 
-    <div>
-      <strong>
-        The offer has incomplete sections
-      </strong>
+      <div>
+        <strong>
+          The offer has incomplete sections
+        </strong>
 
-      <p>
-        Return to the highlighted sections and complete
-        the required information before submitting the
-        offer.
-      </p>
-    </div>
-  </aside>
+        <p>
+          Complete the required information in:
+          <strong>
+            {{ incompleteSectionLabels.join(', ') }}.
+          </strong>
+        </p>
+      </div>
+    </aside>
   }
 
-  @if (hasAttorneyBlocker) {
-  <aside class="review-notice review-notice--warning" role="alert">
-    <span aria-hidden="true">§</span>
+  @if (requiredAttachmentIssues.length > 0) {
+    <aside
+      class="review-notice review-notice--warning"
+      role="alert"
+    >
+      <span aria-hidden="true">§</span>
 
-    <div>
-      <strong>
-        Attorney-prepared language is incomplete
-      </strong>
+      <div>
+        <strong>
+          Required documents are not yet attached
+        </strong>
 
-      <p>
-        This offer may remain saved as a draft, but it
-        cannot be submitted until the required
-        attorney-prepared language has been completed and
-        attached to this offer version.
-      </p>
-    </div>
-  </aside>
+        <p>
+          This offer may remain saved as a draft. Before
+          submission, attach:
+          {{ requiredAttachmentIssues.join(', ') }}.
+        </p>
+      </div>
+    </aside>
   }
 
-  @if (
-  allPriorSectionsValid &&
-  !hasAttorneyBlocker
-  ) {
-  <aside class="review-notice review-notice--success">
-    <span aria-hidden="true">✓</span>
+  @if (readyForCertification) {
+    <aside class="review-notice review-notice--success">
+      <span aria-hidden="true">✓</span>
 
-    <div>
-      <strong>
-        All offer sections are complete
-      </strong>
+      <div>
+        <strong>
+          All offer sections are complete
+        </strong>
 
-      <p>
-        Review every term below and accept the required
-        certifications before preparing the offer for
-        submission.
-      </p>
-    </div>
-  </aside>
+        <p>
+          Review every term below and accept the required
+          certifications before generating the offer for
+          electronic signature.
+        </p>
+      </div>
+    </aside>
   }
 
-  <section class="review-section" aria-labelledby="review-parties-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-parties-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
@@ -65,7 +74,7 @@
         </p>
 
         <h3 id="review-parties-heading">
-          Buyer and property
+          Buyer, seller and property
         </h3>
       </div>
     </header>
@@ -77,56 +86,103 @@
       </div>
 
       <div class="review-item">
-        <dt>Email</dt>
+        <dt>Buyer email</dt>
         <dd>
           {{
-          value(
-          'buyerProperty.buyerEmail'
-          ) || 'Not provided'
+            value(
+              'buyerProperty.buyerEmail'
+            ) || 'Not provided'
+          }}
+        </dd>
+      </div>
+
+      <div class="review-item">
+        <dt>Seller</dt>
+        <dd>
+          {{
+            value(
+              'buyerProperty.sellerLegalName'
+            ) || 'Not provided'
+          }}
+        </dd>
+      </div>
+
+      <div class="review-item">
+        <dt>Seller email</dt>
+        <dd>
+          {{
+            value(
+              'buyerProperty.sellerEmail'
+            ) || 'Not provided'
           }}
         </dd>
       </div>
 
       <div class="review-item review-item--wide">
         <dt>Property address</dt>
-        <dd>
-          {{
-          value(
-          'buyerProperty.propertyAddress'
-          ) || 'Not provided'
-          }}
-        </dd>
+        <dd>{{ propertyAddress }}</dd>
       </div>
 
       <div class="review-item">
         <dt>County</dt>
         <dd>
           {{
-          value(
-          'buyerProperty.propertyCounty'
-          ) || 'Not provided'
+            value(
+              'buyerProperty.propertyCounty'
+            ) || 'Not provided'
           }}
         </dd>
       </div>
 
       <div class="review-item">
-        <dt>Parcel identification</dt>
+        <dt>Parcel ID</dt>
         <dd>
           {{
-          value(
-          'buyerProperty.propertyParcelId'
-          ) || 'Not provided'
+            value(
+              'buyerProperty.propertyParcelId'
+            ) || 'Not provided'
+          }}
+        </dd>
+      </div>
+
+      <div class="review-item">
+        <dt>Deed book and page</dt>
+        <dd>
+          {{
+            value(
+              'buyerProperty.propertyDeedBook'
+            ) || 'Not provided'
+          }}
+          /
+          {{
+            value(
+              'buyerProperty.propertyDeedPage'
+            ) || 'Not provided'
+          }}
+        </dd>
+      </div>
+
+      <div class="review-item review-item--wide">
+        <dt>Other property reference</dt>
+        <dd>
+          {{
+            value(
+              'buyerProperty.propertyOtherReference'
+            ) || 'Not provided'
           }}
         </dd>
       </div>
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-price-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-price-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
-          Price and financing
+          Price and payment
         </p>
 
         <h3 id="review-price-heading">
@@ -137,202 +193,108 @@
 
     <dl class="review-grid">
       <div class="review-item review-item--emphasis">
-        <dt>Purchase price</dt>
+        <dt>Purchase Price</dt>
         <dd>
           {{
-          currencyValue(
-          'priceFinancing.purchasePrice'
-          )
+            currencyValue(
+              'priceFinancing.purchasePrice'
+            )
           }}
         </dd>
       </div>
 
       <div class="review-item">
-        <dt>Funding method</dt>
+        <dt>How buyer will pay</dt>
         <dd>{{ financingMethodLabel }}</dd>
       </div>
 
+      <div class="review-item">
+        <dt>Other property will fund purchase</dt>
+        <dd>
+          {{
+            yesNoValue(
+              'priceFinancing.otherPropertyWillFundPurchase'
+            )
+          }}
+        </dd>
+      </div>
+
       @if (
-      value(
-      'priceFinancing.financingMethod'
-      ) !== 'cash'
+        booleanValue(
+          'priceFinancing.otherPropertyWillFundPurchase'
+        )
       ) {
-      <div class="review-item">
-        <dt>Loan type</dt>
-        <dd>{{ loanTypeLabel }}</dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Loan amount</dt>
-        <dd>
-          {{
-          currencyValue(
-          'priceFinancing.loanAmount'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Down payment</dt>
-        <dd>
-          {{
-          currencyValue(
-          'priceFinancing.downPaymentAmount'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Preapproval provided</dt>
-        <dd>
-          {{
-          yesNoValue(
-          'priceFinancing.preapprovalProvided'
-          )
-          }}
-        </dd>
-      </div>
+        <div class="review-item">
+          <dt>Other property</dt>
+          <dd>
+            {{
+              value(
+                'priceFinancing.otherPropertyDescription'
+              ) || 'Not provided'
+            }}
+          </dd>
+        </div>
       }
-
-      <div class="review-item">
-        <dt>Proof of funds provided</dt>
-        <dd>
-          {{
-          yesNoValue(
-          'priceFinancing.proofOfFundsProvided'
-          )
-          }}
-        </dd>
-      </div>
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-deposits-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-deposit-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
-          Deposits and due diligence
+          Deposit and due diligence
         </p>
 
-        <h3 id="review-deposits-heading">
-          Proposed deposits
+        <h3 id="review-deposit-heading">
+          Deposit terms
         </h3>
       </div>
     </header>
 
     <dl class="review-grid">
       <div class="review-item">
-        <dt>Initial earnest money</dt>
+        <dt>Deposit</dt>
         <dd>
           {{
-          currencyValue(
-          'depositsDueDiligence.earnestMoneyAmount'
-          )
+            currencyValue(
+              'depositsDueDiligence.depositAmount'
+            )
           }}
         </dd>
       </div>
 
       <div class="review-item">
-        <dt>Earnest-money delivery</dt>
+        <dt>Deposit delivery</dt>
         <dd>
-          {{
-          value(
-          'depositsDueDiligence.earnestMoneyDeliveryDays'
-          )
-          }}
-          days
+          Within 4 calendar days after the Effective Date
         </dd>
       </div>
 
-      <div class="review-item">
-        <dt>Additional earnest money</dt>
+      <div class="review-item review-item--wide">
+        <dt>Escrow Agent</dt>
         <dd>
           {{
-          currencyValue(
-          'depositsDueDiligence.additionalEarnestMoneyAmount'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Additional deposit due</dt>
-        <dd>
-          {{
-          dateValue(
-          'depositsDueDiligence.additionalEarnestMoneyDueDate'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Due-diligence fee</dt>
-        <dd>
-          {{
-          currencyValue(
-          'depositsDueDiligence.dueDiligenceFeeAmount'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Due-diligence expiration</dt>
-        <dd>
-          {{
-          dateValue(
-          'depositsDueDiligence.dueDiligenceExpirationDate'
-          )
+            value(
+              'depositsDueDiligence.escrowAgentName'
+            ) || 'Not provided'
           }}
         </dd>
       </div>
 
       <div class="review-item review-item--wide">
-        <dt>Proposed escrow agent</dt>
-        <dd>
-          {{
-          value(
-          'depositsDueDiligence.escrowAgentName'
-          ) || 'Not provided'
-          }}
-        </dd>
+        <dt>Due Diligence Period ends</dt>
+        <dd>{{ dueDiligenceDeadlineLabel }}</dd>
       </div>
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-conditions-heading">
-    <header class="review-section__header">
-      <div>
-        <p class="review-section__eyebrow">
-          Investigations
-        </p>
-
-        <h3 id="review-conditions-heading">
-          Requested conditions
-        </h3>
-      </div>
-    </header>
-
-    @if (selectedConditions.length) {
-    <ul class="review-tags">
-      @for (
-      condition of selectedConditions;
-      track condition
-      ) {
-      <li>{{ condition }}</li>
-      }
-    </ul>
-    } @else {
-    <p class="empty-value">
-      No investigation conditions selected.
-    </p>
-    }
-  </section>
-
-  <section class="review-section" aria-labelledby="review-concessions-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-concessions-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
@@ -340,119 +302,142 @@
         </p>
 
         <h3 id="review-concessions-heading">
-          Requested seller payments and credits
+          Concessions and home warranty
         </h3>
       </div>
     </header>
 
     <dl class="review-grid">
       <div class="review-item">
-        <dt>Seller-paid closing costs</dt>
-
-        <dd>
-          @if (
-          booleanValue(
-          'concessions.sellerPaidClosingCostsRequested'
-          )
-          ) {
-          {{
-          currencyValue(
-          'concessions.sellerPaidClosingCostsAmount'
-          )
-          }}
-          } @else {
-          Not requested
-          }
-        </dd>
+        <dt>Seller concession</dt>
+        <dd>{{ concessionLabel }}</dd>
       </div>
 
       <div class="review-item">
-        <dt>Repair or condition credit</dt>
-
-        <dd>
-          @if (
-          booleanValue(
-          'concessions.repairCreditRequested'
-          )
-          ) {
-          {{
-          currencyValue(
-          'concessions.repairCreditAmount'
-          )
-          }}
-          } @else {
-          Not requested
-          }
-        </dd>
-      </div>
-
-      <div class="review-item review-item--wide">
-        <dt>Other concessions</dt>
+        <dt>Home warranty requested</dt>
         <dd>
           {{
-          value(
-          'concessions.otherConcessions'
-          ) || 'None'
+            yesNoValue(
+              'concessions.homeWarrantyRequested'
+            )
           }}
         </dd>
       </div>
+
+      @if (
+        booleanValue(
+          'concessions.homeWarrantyRequested'
+        )
+      ) {
+        <div class="review-item review-item--wide">
+          <dt>Home warranty value</dt>
+          <dd>
+            {{
+              currencyValue(
+                'concessions.homeWarrantyAmount'
+              )
+            }}
+          </dd>
+        </div>
+      }
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-inclusions-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-property-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
-          Property inclusions
+          Included and excluded property
         </p>
 
-        <h3 id="review-inclusions-heading">
-          Requested included items
+        <h3 id="review-property-heading">
+          Property terms
         </h3>
       </div>
     </header>
 
-    @if (selectedInclusions.length) {
-    <ul class="review-tags">
-      @for (
-      inclusion of selectedInclusions;
-      track inclusion
-      ) {
-      <li>{{ inclusion }}</li>
-      }
-    </ul>
-    } @else {
-    <p class="empty-value">
-      No listed personal-property items selected.
-    </p>
-    }
-
-    <dl class="review-grid review-grid--spaced">
-      <div class="review-item review-item--wide">
-        <dt>Other requested personal property</dt>
+    <dl class="review-grid">
+      <div class="review-item">
+        <dt>Manufactured home included</dt>
         <dd>
           {{
-          value(
-          'propertyInclusions.otherPersonalProperty'
-          ) || 'None'
+            yesNoValue(
+              'propertyInclusions.manufacturedHomeIncluded'
+            )
+          }}
+        </dd>
+      </div>
+
+      <div class="review-item">
+        <dt>Separate property included</dt>
+        <dd>
+          {{
+            yesNoValue(
+              'propertyInclusions.separatePropertyIncluded'
+            )
+          }}
+        </dd>
+      </div>
+
+      @if (
+        booleanValue(
+          'propertyInclusions.separatePropertyIncluded'
+        )
+      ) {
+        <div class="review-item review-item--wide">
+          <dt>Separate property description</dt>
+          <dd>
+            {{
+              value(
+                'propertyInclusions.separatePropertyDescription'
+              ) || 'Not provided'
+            }}
+          </dd>
+        </div>
+      }
+
+      <div class="review-item review-item--wide">
+        <dt>Included beyond fixtures</dt>
+        <dd>
+          {{
+            value(
+              'propertyInclusions.includedItemsDescription'
+            ) || 'None'
           }}
         </dd>
       </div>
 
       <div class="review-item review-item--wide">
-        <dt>Excluded items</dt>
+        <dt>Excluded</dt>
         <dd>
           {{
-          value(
-          'propertyInclusions.excludedItems'
-          ) || 'None'
+            value(
+              'propertyInclusions.excludedItemsDescription'
+            ) || 'None'
+          }}
+        </dd>
+      </div>
+
+      <div class="review-item review-item--wide">
+        <dt>Leased or not owned by seller</dt>
+        <dd>
+          {{
+            value(
+              'propertyInclusions.leasedItemsDescription'
+            ) || 'None'
           }}
         </dd>
       </div>
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-settlement-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-settlement-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
@@ -460,70 +445,97 @@
         </p>
 
         <h3 id="review-settlement-heading">
-          Proposed closing schedule
+          Proposed schedule
         </h3>
       </div>
     </header>
 
     <dl class="review-grid">
       <div class="review-item">
-        <dt>Settlement date</dt>
+        <dt>Settlement Date</dt>
         <dd>
           {{
-          dateValue(
-          'settlementPossession.proposedSettlementDate'
-          )
+            dateValue(
+              'settlementPossession.settlementDate'
+            )
           }}
         </dd>
       </div>
 
       <div class="review-item">
-        <dt>Possession date</dt>
-        <dd>
-          {{
-          dateValue(
-          'settlementPossession.proposedPossessionDate'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Possession arrangement</dt>
-        <dd>
-          {{
-          value(
-          'settlementPossession.possessionTiming'
-          ) || 'Not selected'
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Preferred settlement agent</dt>
-        <dd>
-          {{
-          value(
-          'settlementPossession.settlementAgentPreference'
-          ) || 'No preference'
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item review-item--wide">
-        <dt>Possession notes</dt>
-        <dd>
-          {{
-          value(
-          'settlementPossession.possessionNotes'
-          ) || 'None'
-          }}
-        </dd>
+        <dt>Possession</dt>
+        <dd>{{ possessionTimingLabel }}</dd>
       </div>
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-additional-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-disclosures-heading"
+  >
+    <header class="review-section__header">
+      <div>
+        <p class="review-section__eyebrow">
+          Buyer disclosures
+        </p>
+
+        <h3 id="review-disclosures-heading">
+          Required disclosure selections
+        </h3>
+      </div>
+    </header>
+
+    <dl class="review-grid">
+      <div class="review-item review-item--wide">
+        <dt>Residential Property disclosure</dt>
+        <dd>{{ residentialDisclosureLabel }}</dd>
+      </div>
+
+      @if (
+        value(
+          'disclosuresAddenda.residentialPropertyStatus'
+        ) === 'exempt'
+      ) {
+        <div class="review-item review-item--wide">
+          <dt>Residential disclosure exemption reason</dt>
+          <dd>
+            {{
+              value(
+                'disclosuresAddenda.residentialPropertyExemptionReason'
+              ) || 'Not provided'
+            }}
+          </dd>
+        </div>
+      }
+
+      <div class="review-item review-item--wide">
+        <dt>Mineral and Oil and Gas Rights disclosure</dt>
+        <dd>{{ mineralDisclosureLabel }}</dd>
+      </div>
+
+      @if (
+        value(
+          'disclosuresAddenda.mineralOilGasRightsStatus'
+        ) === 'exempt'
+      ) {
+        <div class="review-item review-item--wide">
+          <dt>Mineral-rights exemption reason</dt>
+          <dd>
+            {{
+              value(
+                'disclosuresAddenda.mineralOilGasRightsExemptionReason'
+              ) || 'Not provided'
+            }}
+          </dd>
+        </div>
+      }
+    </dl>
+  </section>
+
+  <section
+    class="review-section"
+    aria-labelledby="review-additional-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
@@ -531,48 +543,23 @@
         </p>
 
         <h3 id="review-additional-heading">
-          Additional requested terms
+          Additional Terms Exhibit
         </h3>
       </div>
     </header>
 
     <dl class="review-grid">
       <div class="review-item review-item--wide">
-        <dt>Requested term</dt>
-        <dd>
-          {{
-          value(
-          'additionalTerms.standardRequestedTerms'
-          ) || 'None'
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Attorney language required</dt>
-        <dd>
-          {{
-          yesNoValue(
-          'additionalTerms.attorneyDraftedLanguageRequired'
-          )
-          }}
-        </dd>
-      </div>
-
-      <div class="review-item">
-        <dt>Attorney review status</dt>
-        <dd>
-          {{
-          value(
-          'additionalTerms.attorneyReviewStatus'
-          ) || 'Not required'
-          }}
-        </dd>
+        <dt>Exhibit status</dt>
+        <dd>{{ additionalTermsLabel }}</dd>
       </div>
     </dl>
   </section>
 
-  <section class="review-section" aria-labelledby="review-expiration-heading">
+  <section
+    class="review-section"
+    aria-labelledby="review-expiration-heading"
+  >
     <header class="review-section__header">
       <div>
         <p class="review-section__eyebrow">
@@ -592,17 +579,17 @@
         This offer expires on
         <strong>
           {{
-          dateValue(
-          'offerExpiration.expirationDate'
-          )
+            dateValue(
+              'offerExpiration.expirationDate'
+            )
           }}
         </strong>
         at
         <strong>
           {{
-          value(
-          'offerExpiration.expirationTime'
-          ) || 'Not provided'
+            value(
+              'offerExpiration.expirationTime'
+            ) || 'Not provided'
           }}
         </strong>
         Eastern Time unless accepted earlier.
@@ -610,7 +597,10 @@
     </div>
   </section>
 
-  <section class="certification-section" aria-labelledby="certification-heading">
+  <section
+    class="certification-section"
+    aria-labelledby="certification-heading"
+  >
     <header class="certification-section__header">
       <p class="review-section__eyebrow">
         Required acknowledgements
@@ -622,16 +612,22 @@
 
       <p>
         Each acknowledgement must be accepted before the
-        offer can proceed to document generation and
-        signature.
+        offer proceeds to document generation and
+        electronic signature.
       </p>
     </header>
 
     <div class="certification-list">
-      <label class="certification-card" [class.certification-card--invalid]="
+      <label
+        class="certification-card"
+        [class.certification-card--invalid]="
           isInvalid('informationCertified')
-        ">
-        <input type="checkbox" formControlName="informationCertified" />
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="informationCertified"
+        />
 
         <span class="certification-card__indicator">
           <span aria-hidden="true">✓</span>
@@ -639,14 +635,21 @@
 
         <span>
           I certify that the information I provided is
-          accurate and complete to the best of my knowledge.
+          accurate and complete to the best of my
+          knowledge.
         </span>
       </label>
 
-      <label class="certification-card" [class.certification-card--invalid]="
+      <label
+        class="certification-card"
+        [class.certification-card--invalid]="
           isInvalid('electronicRecordsConsent')
-        ">
-        <input type="checkbox" formControlName="electronicRecordsConsent" />
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="electronicRecordsConsent"
+        />
 
         <span class="certification-card__indicator">
           <span aria-hidden="true">✓</span>
@@ -658,10 +661,16 @@
         </span>
       </label>
 
-      <label class="certification-card" [class.certification-card--invalid]="
+      <label
+        class="certification-card"
+        [class.certification-card--invalid]="
           isInvalid('electronicSignatureConsent')
-        ">
-        <input type="checkbox" formControlName="electronicSignatureConsent" />
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="electronicSignatureConsent"
+        />
 
         <span class="certification-card__indicator">
           <span aria-hidden="true">✓</span>
@@ -674,10 +683,16 @@
         </span>
       </label>
 
-      <label class="certification-card" [class.certification-card--invalid]="
+      <label
+        class="certification-card"
+        [class.certification-card--invalid]="
           isInvalid('navStreetDisclaimerAccepted')
-        ">
-        <input type="checkbox" formControlName="navStreetDisclaimerAccepted" />
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="navStreetDisclaimerAccepted"
+        />
 
         <span class="certification-card__indicator">
           <span aria-hidden="true">✓</span>
@@ -690,36 +705,44 @@
         </span>
       </label>
 
-      <label class="certification-card" [class.certification-card--invalid]="
+      <label
+        class="certification-card"
+        [class.certification-card--invalid]="
           isInvalid('attorneyLanguageAcknowledged')
-        ">
-        <input type="checkbox" formControlName="attorneyLanguageAcknowledged" />
+        "
+      >
+        <input
+          type="checkbox"
+          formControlName="attorneyLanguageAcknowledged"
+        />
 
         <span class="certification-card__indicator">
           <span aria-hidden="true">✓</span>
         </span>
 
         <span>
-          I understand that NavStreet does not draft special
-          provisions or other language defining the parties’
-          legal rights, and that attorney-prepared language
-          must be obtained when an appropriate approved
-          provision does not exist.
+          I understand that NavStreet does not draft
+          special provisions or other language defining the
+          parties’ legal rights, and that separate legal
+          documents should be prepared or reviewed by a
+          qualified attorney.
         </span>
       </label>
     </div>
   </section>
 
   <aside class="signature-notice">
-    <strong>
-      Certification is not yet the electronic signature
-    </strong>
+    <div>
+      <strong>
+        Certification is not the electronic signature
+      </strong>
 
-    <p>
-      After the offer document is generated, the buyer will
-      review the final PDF, complete identity verification
-      and sign the exact document version. No signature will
-      be copied to a counteroffer or later version.
-    </p>
+      <p>
+        After the offer document is generated, the buyer
+        will review and electronically sign the exact
+        document version. No signature is copied to a
+        counteroffer or later version.
+      </p>
+    </div>
   </aside>
 </div>

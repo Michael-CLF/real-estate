@@ -30,6 +30,18 @@ import {
 } from '../../core/domains/inquiries/services/listing-inquiry.service';
 
 import {
+  OfferSummary
+} from '../../core/domains/offers/models/offer.model';
+
+import {
+  OFFER_STATUS_LABELS
+} from '../../core/domains/offers/models/offer-status.model';
+
+import {
+  OfferService
+} from '../../core/domains/offers/services/offer.service';
+
+import {
   ActivityItem
 } from './components/activity-card/activity-card.component';
 
@@ -77,6 +89,16 @@ type ListingTab =
   | 'under-contract'
   | 'sold';
 
+interface DashboardOfferItem {
+  offer: OfferSummary;
+
+  perspective:
+    | 'buyer'
+    | 'seller';
+
+  actionRequired: boolean;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -99,6 +121,9 @@ export class DashboardComponent
   private readonly listingInquiryService =
     inject(ListingInquiryService);
 
+  private readonly offerService =
+    inject(OfferService);
+
   protected readonly selectedListingTab =
     signal<ListingTab>('active');
 
@@ -110,6 +135,23 @@ export class DashboardComponent
 
   protected readonly savedPropertyError =
     signal('');
+
+  protected readonly offerItems =
+    signal<DashboardOfferItem[]>([]);
+
+  protected readonly offersLoading =
+    signal(true);
+
+  protected readonly offersError =
+    signal('');
+
+  protected readonly offersRequiringAction =
+    computed(
+      () =>
+        this.offerItems().filter(
+          item => item.actionRequired
+        ).length
+    );
 
   private readonly authState =
     inject(AuthState);
@@ -220,6 +262,48 @@ export class DashboardComponent
     }
 
     await this.loadRecentInquiryActivity();
+    await this.loadOfferActivity();
+  }
+
+  protected getOfferVersionLabel(
+    offer: OfferSummary
+  ): string {
+    return (
+      `${offer.referenceNumber}-` +
+      `${offer.currentVersionNumber}`
+    );
+  }
+
+  protected getOfferTypeLabel(
+    offer: OfferSummary
+  ): string {
+    return offer.currentVersionNumber === 1
+      ? 'Offer'
+      : 'Counteroffer';
+  }
+
+  protected getOfferStatusLabel(
+    offer: OfferSummary
+  ): string {
+    return OFFER_STATUS_LABELS[
+      offer.status
+    ];
+  }
+
+  protected getOfferPrice(
+    offer: OfferSummary
+  ): string {
+    return new Intl.NumberFormat(
+      'en-US',
+      {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }
+    ).format(
+      offer.purchasePriceInCents /
+      100
+    );
   }
 
   protected async upgradeBusinessProfile():
@@ -500,6 +584,118 @@ export class DashboardComponent
 
       this.recentActivities.set([]);
     }
+  }
+
+  private async loadOfferActivity():
+    Promise<void> {
+    this.offersLoading.set(true);
+    this.offersError.set('');
+
+    try {
+      const [
+        buyerOffers,
+        sellerOffers
+      ] = await Promise.all([
+        this.offerService.getMyOffers({
+          role: 'buyer',
+          limit: 50
+        }),
+
+        this.offerService.getMyOffers({
+          role: 'seller',
+          limit: 50
+        })
+      ]);
+
+      const itemsByOfferUid =
+        new Map<
+          string,
+          DashboardOfferItem
+        >();
+
+      for (const offer of buyerOffers) {
+        itemsByOfferUid.set(
+          offer.Uid,
+          this.createDashboardOfferItem(
+            offer,
+            'buyer'
+          )
+        );
+      }
+
+      for (const offer of sellerOffers) {
+        if (
+          !itemsByOfferUid.has(
+            offer.Uid
+          )
+        ) {
+          itemsByOfferUid.set(
+            offer.Uid,
+            this.createDashboardOfferItem(
+              offer,
+              'seller'
+            )
+          );
+        }
+      }
+
+      this.offerItems.set(
+        Array.from(
+          itemsByOfferUid.values()
+        ).sort(
+          (left, right) =>
+            right.offer.lastActivityAt
+              .getTime() -
+            left.offer.lastActivityAt
+              .getTime()
+        )
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Unable to load offer activity:',
+        error
+      );
+
+      this.offerItems.set([]);
+
+      this.offersError.set(
+        'Your offers and counteroffers could not be loaded. Your other dashboard features are still available.'
+      );
+    } finally {
+      this.offersLoading.set(false);
+    }
+  }
+
+  private createDashboardOfferItem(
+    offer: OfferSummary,
+    perspective:
+      | 'buyer'
+      | 'seller'
+  ): DashboardOfferItem {
+    const openStatus =
+      offer.status === 'submitted' ||
+      offer.status === 'viewed' ||
+      offer.status === 'countered';
+
+    const currentVersionCameFromOtherParty =
+      (
+        perspective === 'buyer' &&
+        offer.currentVersionInitiatedBy ===
+          'seller'
+      ) || (
+        perspective === 'seller' &&
+        offer.currentVersionInitiatedBy ===
+          'buyer'
+      );
+
+    return {
+      offer,
+      perspective,
+
+      actionRequired:
+        openStatus &&
+        currentVersionCameFromOtherParty
+    };
   }
 
   private mapInquiryActivity(

@@ -1,377 +1,524 @@
 import {
   FieldValue,
-  getFirestore
+  Timestamp,
 } from 'firebase-admin/firestore';
 
 import {
   HttpsError,
-  onCall
+  onCall,
 } from 'firebase-functions/v2/https';
 
 import {
-  addOfferNotificationToTransaction
+  adminFirestore,
+} from '../shared/firebase-admin';
+
+import {
+  callableFunctionOptions,
+} from '../shared/function-options';
+
+import {
+  addOfferNotificationToTransaction,
 } from './offer-notification.service';
 
-type SellerDecision =
-  | 'accept'
-  | 'reject';
+import type {
+  OfferDocument,
+  OfferVersionDocument,
+  RespondToOfferData,
+  RespondToOfferResponse,
+} from './offer-types';
 
-interface RespondToOfferRequest {
-  offerUid: string;
-  offerVersionUid: string;
-  decision: SellerDecision;
-}
 
-interface RespondToOfferResponse {
-  offerUid: string;
-  offerVersionUid: string;
-  decision: SellerDecision;
-  offerStatus: string;
-  versionStatus: string;
-  alreadyProcessed: boolean;
-}
+const DECLINABLE_VERSION_STATUSES =
+  new Set([
+    'signed',
+    'delivered',
+  ]);
 
-interface OfferRecord {
-  Uid?: string;
-  buyerUid?: string;
-  sellerUid?: string;
-  listingUid?: string;
-  currentVersionUid?: string;
-  status?: string;
-}
 
-interface OfferVersionRecord {
-  Uid?: string;
-  offerUid?: string;
-  createdByUid?: string;
-  status?: string;
-  sellerDecision?: SellerDecision;
-  sellerRespondedAt?: unknown;
-}
+/*
+ * Records a decline by the party who received the current
+ * signed offer or counteroffer.
+ *
+ * Acceptance is completed by signOffer so an offer cannot
+ * become a contract until the final required party signs.
+ * Counteroffers and withdrawals use their dedicated
+ * callable Functions.
+ */
+export const respondToOffer =
+  onCall<
+    RespondToOfferData,
+    Promise<RespondToOfferResponse>
+  >(
+    callableFunctionOptions,
+    async request => {
+      const userUid =
+        request.auth?.uid;
 
-const allowedOfferStatuses = new Set([
-  'submitted',
-  'seller_review',
-  'awaiting_seller_response',
-  'awaiting_signatures'
-]);
+      if (!userUid) {
+        throw new HttpsError(
+          'unauthenticated',
+          'You must sign in before responding to an offer.'
+        );
+      }
 
-const allowedVersionStatuses = new Set([
-  'submitted',
-  'seller_review',
-  'awaiting_seller_response',
-  'awaiting_signatures'
-]);
-
-export const respondToOffer = onCall<
-  RespondToOfferRequest,
-  Promise<RespondToOfferResponse>
->(
-  {
-    region: 'us-east1'
-  },
-
-  async request => {
-    const userUid = request.auth?.uid;
-
-    if (!userUid) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to respond to an offer.'
-      );
-    }
-
-    const offerUid =
-      requireNonEmptyString(
-        request.data?.offerUid,
-        'offerUid'
-      );
-
-    const offerVersionUid =
-      requireNonEmptyString(
-        request.data?.offerVersionUid,
-        'offerVersionUid'
-      );
-
-    const decision =
-      validateDecision(
-        request.data?.decision
-      );
-
-    const firestore = getFirestore();
-
-    const offerReference =
-      firestore
-        .collection('offers')
-        .doc(offerUid);
-
-    const versionReference =
-      offerReference
-        .collection('versions')
-        .doc(offerVersionUid);
-
-    return firestore.runTransaction(
-      async transaction => {
-        const [
-          offerSnapshot,
-          versionSnapshot
-        ] = await Promise.all([
-          transaction.get(offerReference),
-          transaction.get(versionReference)
-        ]);
-
-        if (!offerSnapshot.exists) {
-          throw new HttpsError(
-            'not-found',
-            'The requested offer does not exist.'
-          );
-        }
-
-        if (!versionSnapshot.exists) {
-          throw new HttpsError(
-            'not-found',
-            'The requested offer version does not exist.'
-          );
-        }
-
-        const offer =
-          offerSnapshot.data() as
-          OfferRecord | undefined;
-
-        const version =
-          versionSnapshot.data() as
-          OfferVersionRecord | undefined;
-
-        if (!offer) {
-          throw new HttpsError(
-            'data-loss',
-            'The stored offer contains no data.'
-          );
-        }
-
-        if (!version) {
-          throw new HttpsError(
-            'data-loss',
-            'The stored offer version contains no data.'
-          );
-        }
-
-        verifySellerAccess(
-          offer,
-          userUid
+      const offerUid =
+        requireIdentifier(
+          request.data?.offerUid,
+          'offerUid'
         );
 
-        const buyerUid =
-          requireOfferBuyerUid(
-            offer
+      const offerVersionUid =
+        requireIdentifier(
+          request.data?.offerVersionUid,
+          'offerVersionUid'
+        );
+
+      const action =
+        requireDeclineAction(
+          request.data?.action
+        );
+
+      const note =
+        normalizeOptionalNote(
+          request.data?.note
+        );
+
+      const offerReference =
+        adminFirestore
+          .collection('offers')
+          .doc(offerUid);
+
+      const versionReference =
+        offerReference
+          .collection('versions')
+          .doc(offerVersionUid);
+
+      return adminFirestore.runTransaction(
+        async transaction => {
+          const [
+            offerSnapshot,
+            versionSnapshot,
+          ] = await Promise.all([
+            transaction.get(
+              offerReference
+            ),
+
+            transaction.get(
+              versionReference
+            ),
+          ]);
+
+          if (!offerSnapshot.exists) {
+            throw new HttpsError(
+              'not-found',
+              'The offer could not be found.'
+            );
+          }
+
+          if (!versionSnapshot.exists) {
+            throw new HttpsError(
+              'not-found',
+              'The offer version could not be found.'
+            );
+          }
+
+          const offer =
+            offerSnapshot.data() as
+              OfferDocument;
+
+          const version =
+            versionSnapshot.data() as
+              OfferVersionDocument;
+
+          if (
+            offer.status === 'declined' &&
+            version.status === 'declined'
+          ) {
+            return {
+              offerUid,
+              offerVersionUid,
+              action,
+              offerStatus: 'declined',
+              listingStatusChanged:
+                false,
+            };
+          }
+
+          verifyCurrentVersion(
+            offer,
+            version,
+            offerVersionUid
           );
 
-        verifyVersionBelongsToOffer(
-          version,
-          offerUid
-        );
+          const actorRole =
+            getReceivingPartyRole(
+              version
+            );
 
-        verifyCurrentVersion(
-          offer,
-          offerVersionUid
-        );
+          verifyReceivingPartyAccess(
+            offer,
+            actorRole,
+            userUid
+          );
 
-        /*
-         * Make a repeated request idempotent.
-         *
-         * This protects against double-clicks, browser retries,
-         * slow network retries and callable-function retries.
-         */
-        if (
-          version.sellerDecision === decision &&
-          (
-            offer.status === 'accepted' ||
-            offer.status === 'rejected'
-          )
-        ) {
+          const actorName =
+            getPartyName(
+              version,
+              actorRole,
+              userUid
+            );
+
+          const recipientUids =
+            actorRole === 'buyer'
+              ? offer.sellerUids
+              : offer.buyerUids;
+
+          const listingReference =
+            adminFirestore
+              .collection('listings')
+              .doc(offer.listingUid);
+
+          const listingSnapshot =
+            await transaction.get(
+              listingReference
+            );
+
+          if (!listingSnapshot.exists) {
+            throw new HttpsError(
+              'not-found',
+              'The property listing could not be found.'
+            );
+          }
+
+          const now =
+            Timestamp.now();
+
+          const shouldRemovePendingOffer =
+            offer.pendingOfferCounted ===
+            true;
+
+          transaction.update(
+            versionReference,
+            {
+              status: 'declined',
+              declinedAt: now,
+              updatedAt: now,
+
+              statusHistory:
+                FieldValue.arrayUnion({
+                  fromStatus:
+                    version.status,
+
+                  toStatus: 'declined',
+                  action: 'declined',
+
+                  actorUid: userUid,
+                  actorRole,
+
+                  ...(
+                    note
+                      ? {
+                        note,
+                      }
+                      : {}
+                  ),
+
+                  occurredAt: now,
+                }),
+            }
+          );
+
+          transaction.update(
+            offerReference,
+            {
+              status: 'declined',
+
+              pendingOfferCounted:
+                false,
+
+              closedReason:
+                'declined',
+
+              closedAt: now,
+              lastActivityAt: now,
+              updatedAt: now,
+
+              statusHistory:
+                FieldValue.arrayUnion({
+                  fromStatus:
+                    offer.status,
+
+                  toStatus: 'declined',
+                  action: 'declined',
+
+                  actorUid: userUid,
+                  actorRole,
+
+                  offerVersionUid,
+                  offerVersionNumber:
+                    version.versionNumber,
+
+                  ...(
+                    note
+                      ? {
+                        note,
+                      }
+                      : {}
+                  ),
+
+                  occurredAt: now,
+                }),
+            }
+          );
+
+          if (shouldRemovePendingOffer) {
+            transaction.update(
+              listingReference,
+              {
+                pendingOfferCount:
+                  FieldValue.increment(-1),
+
+                updatedAt: now,
+              }
+            );
+          }
+
+          for (
+            const recipientUid of
+              uniqueStrings(
+                recipientUids
+              )
+          ) {
+            addOfferNotificationToTransaction(
+              transaction,
+              adminFirestore,
+              {
+                recipientUid,
+                actorUid: userUid,
+
+                offerUid,
+                offerVersionUid,
+
+                listingUid:
+                  offer.listingUid,
+
+                type:
+                  'offer_rejected',
+
+                title:
+                  `Offer ${offer.referenceNumber}-${version.versionNumber} was declined`,
+
+                message:
+                  `${actorName} declined the current offer version. The complete history remains available on your dashboard.`,
+
+                propertyAddress:
+                  formatPropertyAddress(
+                    offer
+                  ),
+
+                channels: [
+                  'in_app',
+                  'email',
+                ],
+
+                eventKey:
+                  `${actorRole}-declined`,
+
+                metadata: {
+                  referenceNumber:
+                    offer.referenceNumber,
+
+                  versionNumber:
+                    version.versionNumber,
+
+                  fromPartyRole:
+                    actorRole,
+
+                  fromPartyName:
+                    actorName,
+                },
+              }
+            );
+          }
+
           return {
             offerUid,
             offerVersionUid,
-            decision,
-            offerStatus:
-              offer.status,
-            versionStatus:
-              version.status ??
-              offer.status,
-            alreadyProcessed: true
+            action,
+            offerStatus: 'declined',
+            listingStatusChanged:
+              false,
           };
         }
+      );
+    }
+  );
 
-        verifyOfferCanBeReviewed(
-          offer
-        );
 
-        verifyVersionCanBeReviewed(
-          version
-        );
-
-        const offerStatus =
-          decision === 'accept'
-            ? 'accepted'
-            : 'rejected';
-
-        const versionStatus =
-          decision === 'accept'
-            ? 'accepted'
-            : 'rejected';
-
-        const responseEventReference =
-          offerReference
-            .collection('events')
-            .doc();
-
-        transaction.update(
-          versionReference,
-          {
-            status: versionStatus,
-            sellerDecision: decision,
-            sellerRespondedAt:
-              FieldValue.serverTimestamp(),
-            sellerRespondedByUid:
-              userUid,
-            updatedAt:
-              FieldValue.serverTimestamp()
-          }
-        );
-
-        transaction.update(
-          offerReference,
-          {
-            status: offerStatus,
-            sellerDecision: decision,
-            sellerRespondedAt:
-              FieldValue.serverTimestamp(),
-            sellerRespondedByUid:
-              userUid,
-            updatedAt:
-              FieldValue.serverTimestamp()
-          }
-        );
-
-        transaction.set(
-          responseEventReference,
-          {
-            Uid:
-              responseEventReference.id,
-
-            offerUid,
-            offerVersionUid,
-
-            listingUid:
-              offer.listingUid ?? null,
-
-            eventType:
-              decision === 'accept'
-                ? 'seller_accepted_offer'
-                : 'seller_rejected_offer',
-
-            actorUid:
-              userUid,
-
-            actorRole:
-              'seller',
-
-            decision,
-
-            offerStatus,
-            versionStatus,
-
-            createdAt:
-              FieldValue.serverTimestamp()
-          }
-        );
-
-        addOfferNotificationToTransaction(
-          transaction,
-          firestore,
-          {
-            recipientUid:
-              buyerUid,
-
-            actorUid:
-              userUid,
-
-            offerUid,
-            offerVersionUid,
-
-            listingUid:
-              offer.listingUid ?? null,
-
-            type:
-              decision === 'accept'
-                ? 'offer_accepted'
-                : 'offer_rejected',
-
-            title:
-              decision === 'accept'
-                ? 'Your offer was accepted'
-                : 'Your offer was not accepted',
-
-            message:
-              decision === 'accept'
-                ? (
-                  'The seller accepted your offer. ' +
-                  'The agreement must now be completed and signed ' +
-                  'before the property is placed under contract.'
-                )
-                : (
-                  'The seller declined your offer. ' +
-                  'You can review the offer history from your dashboard.'
-                ),
-
-            channels: [
-              'in_app',
-              'email'
-            ],
-
-            eventKey:
-              decision === 'accept'
-                ? 'seller-accepted'
-                : 'seller-rejected',
-
-            metadata: {
-              decision,
-              offerStatus,
-              versionStatus
-            }
-          }
-        );
-
-        /*
-         * IMPORTANT:
-         *
-         * Accepting the offer does not yet change the listing
-         * to under_contract.
-         *
-         * That must happen only after all required signatures
-         * have been completed and the final agreement becomes
-         * effective.
-         */
-        return {
-          offerUid,
-          offerVersionUid,
-          decision,
-          offerStatus,
-          versionStatus,
-          alreadyProcessed: false
-        };
-      }
+function verifyCurrentVersion(
+  offer: OfferDocument,
+  version: OfferVersionDocument,
+  offerVersionUid: string
+): void {
+  if (
+    offer.currentVersionUid !==
+      offerVersionUid ||
+    version.Uid !== offerVersionUid ||
+    version.offerUid !== offer.Uid
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This is no longer the current offer version.'
     );
   }
-);
 
-function requireNonEmptyString(
+  if (
+    !version.immutable ||
+    !DECLINABLE_VERSION_STATUSES.has(
+      version.status
+    )
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This offer version is not available for a response.'
+    );
+  }
+
+  if (
+    offer.status !== 'submitted' &&
+    offer.status !== 'viewed' &&
+    offer.status !== 'countered'
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This offer transaction is no longer open.'
+    );
+  }
+}
+
+
+function getReceivingPartyRole(
+  version: OfferVersionDocument
+): 'buyer' | 'seller' {
+  return version.initiatedBy ===
+    'buyer'
+    ? 'seller'
+    : 'buyer';
+}
+
+
+function verifyReceivingPartyAccess(
+  offer: OfferDocument,
+  actorRole: 'buyer' | 'seller',
+  userUid: string
+): void {
+  const authorized =
+    actorRole === 'buyer'
+      ? offer.buyerUids.includes(
+        userUid
+      )
+      : offer.sellerUids.includes(
+        userUid
+      );
+
+  if (!authorized) {
+    throw new HttpsError(
+      'permission-denied',
+      'Only the party who received this offer version may decline it.'
+    );
+  }
+}
+
+
+function getPartyName(
+  version: OfferVersionDocument,
+  actorRole: 'buyer' | 'seller',
+  userUid: string
+): string {
+  const parties =
+    actorRole === 'buyer'
+      ? version.buyers
+      : version.sellers;
+
+  const party =
+    parties.find(
+      candidate =>
+        candidate.userUid ===
+        userUid
+    ) ?? parties[0];
+
+  return party?.legalName ||
+    (
+      actorRole === 'buyer'
+        ? 'Buyer'
+        : 'Seller'
+    );
+}
+
+
+function formatPropertyAddress(
+  offer: OfferDocument
+): string {
+  return [
+    offer.property.addressLine1,
+    offer.property.city,
+    offer.property.state,
+    offer.property.zipCode,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+
+function requireDeclineAction(
+  value: unknown
+): 'decline' {
+  if (value !== 'decline') {
+    throw new HttpsError(
+      'invalid-argument',
+      'The supported response action is decline. Acceptance is completed by signing, and counteroffers use the counteroffer action.'
+    );
+  }
+
+  return value;
+}
+
+
+function normalizeOptionalNote(
+  value: unknown
+): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== 'string') {
+    throw new HttpsError(
+      'invalid-argument',
+      'The response note is invalid.'
+    );
+  }
+
+  const normalized =
+    value.trim();
+
+  if (normalized.length > 1000) {
+    throw new HttpsError(
+      'invalid-argument',
+      'The response note cannot exceed 1,000 characters.'
+    );
+  }
+
+  return normalized || undefined;
+}
+
+
+function requireIdentifier(
   value: unknown,
   fieldName: string
 ): string {
   if (
     typeof value !== 'string' ||
-    value.trim().length === 0
+    !value.trim()
   ) {
     throw new HttpsError(
       'invalid-argument',
@@ -379,125 +526,29 @@ function requireNonEmptyString(
     );
   }
 
-  return value.trim();
-}
+  const normalized =
+    value.trim();
 
-function validateDecision(
-  value: unknown
-): SellerDecision {
   if (
-    value !== 'accept' &&
-    value !== 'reject'
+    normalized.length > 200 ||
+    normalized.includes('/')
   ) {
     throw new HttpsError(
       'invalid-argument',
-      'The seller decision must be accept or reject.'
+      `${fieldName} is invalid.`
     );
   }
 
-  return value;
+  return normalized;
 }
 
-function verifySellerAccess(
-  offer: OfferRecord,
-  userUid: string
-): void {
-  if (!offer.sellerUid) {
-    throw new HttpsError(
-      'data-loss',
-      'The offer does not identify a seller.'
-    );
-  }
 
-  if (offer.sellerUid !== userUid) {
-    throw new HttpsError(
-      'permission-denied',
-      'Only the property seller may respond to this offer.'
-    );
-  }
-}
-
-function verifyVersionBelongsToOffer(
-  version: OfferVersionRecord,
-  offerUid: string
-): void {
-  if (
-    version.offerUid &&
-    version.offerUid !== offerUid
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The selected version does not belong to this offer.'
-    );
-  }
-}
-
-function verifyCurrentVersion(
-  offer: OfferRecord,
-  offerVersionUid: string
-): void {
-  if (!offer.currentVersionUid) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The offer does not have a current version.'
-    );
-  }
-
-  if (
-    offer.currentVersionUid !==
-    offerVersionUid
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'Only the current offer version may be accepted or rejected.'
-    );
-  }
-}
-
-function requireOfferBuyerUid(
-  offer: OfferRecord
-): string {
-  if (
-    typeof offer.buyerUid !== 'string' ||
-    offer.buyerUid.trim().length === 0
-  ) {
-    throw new HttpsError(
-      'data-loss',
-      'The offer does not identify a buyer.'
-    );
-  }
-
-  return offer.buyerUid.trim();
-}
-
-function verifyOfferCanBeReviewed(
-  offer: OfferRecord
-): void {
-  if (
-    !offer.status ||
-    !allowedOfferStatuses.has(
-      offer.status
+function uniqueStrings(
+  values: string[]
+): string[] {
+  return Array.from(
+    new Set(
+      values.filter(Boolean)
     )
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'This offer is not currently awaiting a seller response.'
-    );
-  }
-}
-
-function verifyVersionCanBeReviewed(
-  version: OfferVersionRecord
-): void {
-  if (
-    !version.status ||
-    !allowedVersionStatuses.has(
-      version.status
-    )
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'This offer version is not currently awaiting a seller response.'
-    );
-  }
+  );
 }

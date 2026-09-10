@@ -12,34 +12,34 @@
 
     <div>
       <strong>
-        Clearly identify requested items
+        Describe property specifically
       </strong>
 
       <p>
-        Fixtures and personal property can be treated
-        differently. Select the items requested with the
-        property and review the final agreement carefully to
-        confirm what will remain at settlement.
+        These entries become part of the offer. Identify
+        included, excluded, leased or separately included
+        property clearly enough for both parties to
+        understand what is being proposed.
       </p>
     </div>
   </aside>
 
   <section
     class="form-section"
-    aria-labelledby="included-items-heading"
+    aria-labelledby="special-property-heading"
   >
     <header class="form-section__header">
       <p class="form-section__eyebrow">
-        Requested inclusions
+        Property classification
       </p>
 
-      <h3 id="included-items-heading">
-        Items requested with the property
+      <h3 id="special-property-heading">
+        Manufactured home and separate property
       </h3>
 
       <p>
-        Select each item the buyer requests to be included
-        in the purchase.
+        Select the applicable options for the property
+        included in the proposed purchase.
       </p>
     </header>
 
@@ -47,14 +47,12 @@
       <label
         class="inclusion-card"
         [class.inclusion-card--selected]="
-          isSelected(
-            'builtInAppliancesIncluded'
-          )
+          manufacturedHomeIncluded
         "
       >
         <input
           type="checkbox"
-          formControlName="builtInAppliancesIncluded"
+          formControlName="manufacturedHomeIncluded"
         />
 
         <span class="inclusion-card__indicator">
@@ -63,12 +61,12 @@
 
         <span class="inclusion-card__content">
           <strong>
-            Built-in appliances
+            Manufactured home included
           </strong>
 
           <small>
-            Permanently installed cooking, ventilation or
-            similar built-in appliances.
+            Select this when a manufactured home is
+            included as part of the property.
           </small>
         </span>
       </label>
@@ -76,12 +74,12 @@
       <label
         class="inclusion-card"
         [class.inclusion-card--selected]="
-          isSelected('refrigeratorIncluded')
+          separatePropertyIncluded
         "
       >
         <input
           type="checkbox"
-          formControlName="refrigeratorIncluded"
+          formControlName="separatePropertyIncluded"
         />
 
         <span class="inclusion-card__indicator">
@@ -90,217 +88,113 @@
 
         <span class="inclusion-card__content">
           <strong>
-            Refrigerator
+            Separate property included
           </strong>
 
           <small>
-            Existing refrigerator located at the property.
-          </small>
-        </span>
-      </label>
-
-      <label
-        class="inclusion-card"
-        [class.inclusion-card--selected]="
-          isSelected('washerIncluded')
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="washerIncluded"
-        />
-
-        <span class="inclusion-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span class="inclusion-card__content">
-          <strong>
-            Clothes washer
-          </strong>
-
-          <small>
-            Existing clothes washer located at the
-            property.
-          </small>
-        </span>
-      </label>
-
-      <label
-        class="inclusion-card"
-        [class.inclusion-card--selected]="
-          isSelected('dryerIncluded')
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="dryerIncluded"
-        />
-
-        <span class="inclusion-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span class="inclusion-card__content">
-          <strong>
-            Clothes dryer
-          </strong>
-
-          <small>
-            Existing clothes dryer located at the
-            property.
-          </small>
-        </span>
-      </label>
-
-      <label
-        class="inclusion-card"
-        [class.inclusion-card--selected]="
-          isSelected(
-            'windowTreatmentsIncluded'
-          )
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="windowTreatmentsIncluded"
-        />
-
-        <span class="inclusion-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span class="inclusion-card__content">
-          <strong>
-            Window treatments
-          </strong>
-
-          <small>
-            Existing blinds, shades, rods, curtains or
-            related window treatments.
-          </small>
-        </span>
-      </label>
-
-      <label
-        class="inclusion-card"
-        [class.inclusion-card--selected]="
-          isSelected(
-            'securitySystemsIncluded'
-          )
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="securitySystemsIncluded"
-        />
-
-        <span class="inclusion-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span class="inclusion-card__content">
-          <strong>
-            Security equipment
-          </strong>
-
-          <small>
-            Existing owned alarms, cameras, doorbells or
-            other security equipment.
-          </small>
-        </span>
-      </label>
-
-      <label
-        class="inclusion-card"
-        [class.inclusion-card--selected]="
-          isSelected(
-            'fuelOrPropaneIncluded'
-          )
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="fuelOrPropaneIncluded"
-        />
-
-        <span class="inclusion-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span class="inclusion-card__content">
-          <strong>
-            Fuel or propane
-          </strong>
-
-          <small>
-            Existing fuel remaining in an owned storage
-            tank, subject to the final agreement.
+            Select this when specifically identified
+            personal or other property is included.
           </small>
         </span>
       </label>
     </div>
+
+    @if (separatePropertyIncluded) {
+      <div class="form-field">
+        <label for="separatePropertyDescription">
+          Separate property description
+        </label>
+
+        <textarea
+          id="separatePropertyDescription"
+          formControlName="separatePropertyDescription"
+          rows="5"
+          maxlength="1500"
+          placeholder="Describe the separate property included in the purchase."
+          [class.input-invalid]="
+            isInvalid(
+              'separatePropertyDescription'
+            )
+          "
+          [attr.aria-invalid]="
+            isInvalid(
+              'separatePropertyDescription'
+            )
+          "
+        ></textarea>
+
+        @if (
+          isInvalid(
+            'separatePropertyDescription'
+          )
+        ) {
+          <p class="field-error">
+            {{
+              errorMessage(
+                'separatePropertyDescription'
+              )
+            }}
+          </p>
+        }
+      </div>
+    }
   </section>
 
   <section
     class="form-section form-section--divided"
-    aria-labelledby="other-property-heading"
+    aria-labelledby="included-items-heading"
   >
     <header class="form-section__header">
       <p class="form-section__eyebrow">
-        Other personal property
+        Inclusions
       </p>
 
-      <h3 id="other-property-heading">
-        Additional items requested
+      <h3 id="included-items-heading">
+        Included items
       </h3>
 
       <p>
-        Identify other specific personal-property items the
-        buyer requests to receive with the property.
+        Identify items that the buyer proposes will remain
+        with the property.
       </p>
     </header>
 
     <div class="form-field">
-      <label for="otherPersonalProperty">
-        Other requested personal property
+      <label for="includedItemsDescription">
+        Included items
         <span class="optional-marker">
           Optional
         </span>
       </label>
 
       <textarea
-        id="otherPersonalProperty"
-        formControlName="otherPersonalProperty"
+        id="includedItemsDescription"
+        formControlName="includedItemsDescription"
         rows="5"
         maxlength="1500"
-        placeholder="Describe each requested item specifically, including its location when helpful. Leave blank if not applicable."
+        placeholder="Example: kitchen refrigerator, washer, dryer and dining-room light fixture."
         [class.input-invalid]="
-          isInvalid('otherPersonalProperty')
+          isInvalid(
+            'includedItemsDescription'
+          )
         "
         [attr.aria-invalid]="
-          isInvalid('otherPersonalProperty')
-        "
-        [attr.aria-describedby]="
-          isInvalid('otherPersonalProperty')
-            ? 'otherPersonalProperty-error'
-            : 'otherPersonalProperty-help'
+          isInvalid(
+            'includedItemsDescription'
+          )
         "
       ></textarea>
 
       <div class="field-meta">
-        <p
-          id="otherPersonalProperty-help"
-          class="field-help"
-        >
-          Avoid general descriptions when a particular item
-          can be identified.
+        <p class="field-help">
+          Describe particular items and their locations
+          when helpful.
         </p>
 
         <span>
           {{
             control(
-              'otherPersonalProperty'
+              'includedItemsDescription'
             )?.value?.length || 0
           }}
           / 1500
@@ -308,15 +202,14 @@
       </div>
 
       @if (
-        isInvalid('otherPersonalProperty')
+        isInvalid(
+          'includedItemsDescription'
+        )
       ) {
-        <p
-          id="otherPersonalProperty-error"
-          class="field-error"
-        >
+        <p class="field-error">
           {{
             errorMessage(
-              'otherPersonalProperty'
+              'includedItemsDescription'
             )
           }}
         </p>
@@ -334,18 +227,17 @@
       </p>
 
       <h3 id="excluded-items-heading">
-        Items not included
+        Excluded items
       </h3>
 
       <p>
-        Record any known item that will not remain with the
-        property so the exclusion is clearly visible during
-        review.
+        Identify fixtures or other items that are not
+        included in the proposed purchase.
       </p>
     </header>
 
     <div class="form-field">
-      <label for="excludedItems">
+      <label for="excludedItemsDescription">
         Excluded items
         <span class="optional-marker">
           Optional
@@ -353,63 +245,142 @@
       </label>
 
       <textarea
-        id="excludedItems"
-        formControlName="excludedItems"
+        id="excludedItemsDescription"
+        formControlName="excludedItemsDescription"
         rows="5"
         maxlength="1500"
-        placeholder="Identify excluded items, or leave blank if no exclusions are known."
+        placeholder="Identify excluded items, or leave blank if there are none."
         [class.input-invalid]="
-          isInvalid('excludedItems')
+          isInvalid(
+            'excludedItemsDescription'
+          )
         "
         [attr.aria-invalid]="
-          isInvalid('excludedItems')
-        "
-        [attr.aria-describedby]="
-          isInvalid('excludedItems')
-            ? 'excludedItems-error'
-            : 'excludedItems-help'
+          isInvalid(
+            'excludedItemsDescription'
+          )
         "
       ></textarea>
 
       <div class="field-meta">
-        <p
-          id="excludedItems-help"
-          class="field-help"
-        >
-          The seller will have an opportunity to review and
-          respond to all requested inclusions and exclusions.
+        <p class="field-help">
+          The seller can review and respond to every
+          proposed exclusion.
         </p>
 
         <span>
           {{
             control(
-              'excludedItems'
+              'excludedItemsDescription'
             )?.value?.length || 0
           }}
           / 1500
         </span>
       </div>
 
-      @if (isInvalid('excludedItems')) {
-        <p
-          id="excludedItems-error"
-          class="field-error"
-        >
-          {{ errorMessage('excludedItems') }}
+      @if (
+        isInvalid(
+          'excludedItemsDescription'
+        )
+      ) {
+        <p class="field-error">
+          {{
+            errorMessage(
+              'excludedItemsDescription'
+            )
+          }}
+        </p>
+      }
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--divided"
+    aria-labelledby="leased-items-heading"
+  >
+    <header class="form-section__header">
+      <p class="form-section__eyebrow">
+        Leased items
+      </p>
+
+      <h3 id="leased-items-heading">
+        Leased equipment or property
+      </h3>
+
+      <p>
+        Identify solar equipment, fuel tanks, security
+        systems or other items subject to a lease.
+      </p>
+    </header>
+
+    <div class="form-field">
+      <label for="leasedItemsDescription">
+        Leased items
+        <span class="optional-marker">
+          Optional
+        </span>
+      </label>
+
+      <textarea
+        id="leasedItemsDescription"
+        formControlName="leasedItemsDescription"
+        rows="5"
+        maxlength="1500"
+        placeholder="Describe leased items and the company involved, or leave blank if there are none."
+        [class.input-invalid]="
+          isInvalid(
+            'leasedItemsDescription'
+          )
+        "
+        [attr.aria-invalid]="
+          isInvalid(
+            'leasedItemsDescription'
+          )
+        "
+      ></textarea>
+
+      <div class="field-meta">
+        <p class="field-help">
+          The parties should review any related agreement
+          before accepting responsibility for a lease.
+        </p>
+
+        <span>
+          {{
+            control(
+              'leasedItemsDescription'
+            )?.value?.length || 0
+          }}
+          / 1500
+        </span>
+      </div>
+
+      @if (
+        isInvalid(
+          'leasedItemsDescription'
+        )
+      ) {
+        <p class="field-error">
+          {{
+            errorMessage(
+              'leasedItemsDescription'
+            )
+          }}
         </p>
       }
     </div>
   </section>
 
   <aside class="final-review-notice">
-    <strong>
-      Final agreement controls
-    </strong>
+    <div>
+      <strong>
+        Final signed agreement controls
+      </strong>
 
-    <p>
-      These selections capture the buyer’s proposal. Only
-      the inclusions and exclusions stated in the final
-      signed agreement will control.
-    </p>
+      <p>
+        Only the inclusions, exclusions and leased items
+        stated in the final signed agreement will control.
+      </p>
+    </div>
   </aside>
 </div>

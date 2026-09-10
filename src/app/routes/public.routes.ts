@@ -18,6 +18,14 @@ import {
   guestGuard
 } from '../core/authentication/guards/guest.guard';
 
+import {
+  offerAccessGuard
+} from '../core/domains/offers/guards/offer-access.guard';
+
+import {
+  offerIdentityGuard
+} from '../core/domains/identity/guards/offer-identity.guard';
+
 export const PUBLIC_ROUTES:
   Routes = [
     {
@@ -568,9 +576,34 @@ export const PUBLIC_ROUTES:
         },
 
         /*
+         * Return from Stripe Identity.
+         *
+         * This route must remain outside offerIdentityGuard so it can
+         * check Stripe's result before reopening the offer wizard.
+         */
+        {
+          path:
+            'listings/:listingUid/offer/verification-return',
+
+          canActivate: [
+            authGuard,
+            accountGuard
+          ],
+
+          loadComponent: () =>
+            import(
+              '../features/identity/offer-verification-return/offer-verification-return.component'
+            ).then(
+              component =>
+                component
+                  .OfferVerificationReturnComponent
+            )
+        },
+
+        /*
          * Create/resume offer
          *
-         * Account required.
+         * Account and verified identity required.
          */
         {
           path:
@@ -578,7 +611,8 @@ export const PUBLIC_ROUTES:
 
           canActivate: [
             authGuard,
-            accountGuard
+            accountGuard,
+            offerIdentityGuard
           ],
 
           loadComponent: () =>
@@ -588,6 +622,32 @@ export const PUBLIC_ROUTES:
               component =>
                 component
                   .OfferWizardComponent
+            )
+        },
+
+        /*
+         * Offer and counteroffer details
+         *
+         * Only buyers and sellers recorded on the offer
+         * may open this route.
+         */
+        {
+          path:
+            'offers/:offerUid',
+
+          canActivate: [
+            authGuard,
+            accountGuard,
+            offerAccessGuard
+          ],
+
+          loadComponent: () =>
+            import(
+              '../features/offers/offer-details/offer-details.component'
+            ).then(
+              component =>
+                component
+                  .OfferDetailsComponent
             )
         },
 

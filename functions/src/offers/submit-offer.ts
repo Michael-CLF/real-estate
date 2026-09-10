@@ -194,6 +194,9 @@ export const submitOffer =
           const now =
             Timestamp.now();
 
+          const shouldIncrementPendingOfferCount =
+            offer.pendingOfferCounted !== true;
+
           transaction.update(
             versionReference,
             {
@@ -235,6 +238,8 @@ export const submitOffer =
             {
               status: 'submitted',
 
+              pendingOfferCounted: true,
+
               submittedAt:
                 offer.submittedAt ??
                 now,
@@ -266,6 +271,18 @@ export const submitOffer =
                 }),
             }
           );
+
+          if (shouldIncrementPendingOfferCount) {
+            transaction.update(
+              listingReference,
+              {
+                pendingOfferCount:
+                  FieldValue.increment(1),
+
+                updatedAt: now,
+              }
+            );
+          }
         }
       );
 
@@ -393,60 +410,39 @@ function validateVersionForSubmission(
     );
   }
 
-  validateParties(
-    version
-  );
-
-  validateProperty(
-    terms,
-    offer
-  );
-
-  validatePurchaseTerms(
-    terms
-  );
-
-  validateDeposits(
-    terms
-  );
-
-  validateSettlement(
-    terms
-  );
-
-  validateDelivery(
+  validateParties(version);
+  validateProperty(terms, offer);
+  validatePropertyTerms(terms);
+  validatePurchaseTerms(terms);
+  validateDeposits(terms);
+  validateConcessions(terms);
+  validateSettlement(terms);
+  validateDelivery(terms, version);
+  validateBuyerDisclosures(terms);
+  validateSellerStatements(
     terms,
     version
   );
-
-  validateDisclosures(
-    terms
-  );
-
-  validateAdditionalTerms(
-    terms
-  );
-
-  validateChronology(
-    terms
-  );
+  validateAddenda(terms);
+  validateAdditionalTerms(terms);
+  validateChronology(terms);
 }
 
 
 function validateParties(
   version: OfferVersionDocument
 ): void {
-  if (version.buyers.length === 0) {
+  if (version.buyers.length !== 1) {
     throw new HttpsError(
       'failed-precondition',
-      'At least one buyer is required.'
+      'The NavStreet offer form currently supports exactly one buyer.'
     );
   }
 
-  if (version.sellers.length === 0) {
+  if (version.sellers.length !== 1) {
     throw new HttpsError(
       'failed-precondition',
-      'At least one seller is required.'
+      'The NavStreet offer form currently supports exactly one seller.'
     );
   }
 
@@ -469,7 +465,8 @@ function validateParties(
     if (!isValidEmail(party.email)) {
       throw new HttpsError(
         'failed-precondition',
-        `${party.legalName} must have a valid email address.`
+        party.legalName +
+          ' must have a valid email address.'
       );
     }
 
@@ -479,30 +476,15 @@ function validateParties(
     ) {
       throw new HttpsError(
         'failed-precondition',
-        `${party.legalName} must have a phone number.`
-      );
-    }
-
-    const address =
-      party.mailingAddress;
-
-    if (
-      !address.addressLine1 ||
-      !address.city ||
-      !address.state ||
-      !address.zipCode ||
-      !address.country
-    ) {
-      throw new HttpsError(
-        'failed-precondition',
-        `${party.legalName} must have a complete mailing address.`
+        party.legalName +
+          ' must have a phone number.'
       );
     }
   }
 
   /*
-   * The initiating party must be identity verified before
-   * the document is generated for signature.
+   * Only the party submitting this version must already
+   * be identity verified.
    */
   const initiatingParties =
     version.initiatedBy === 'buyer'
@@ -519,7 +501,8 @@ function validateParties(
     ) {
       throw new HttpsError(
         'failed-precondition',
-        `${party.legalName} must complete identity verification before submitting this offer.`
+        party.legalName +
+          ' must complete identity verification before submitting this offer.'
       );
     }
   }
@@ -562,11 +545,20 @@ function validateProperty(
     'The property city is required.'
   );
 
-  readRequiredString(
-    property,
-    'state',
-    'The property state is required.'
-  );
+  const propertyState =
+    readRequiredString(
+      property,
+      'state',
+      'The property state is required.'
+    )
+      .toUpperCase();
+
+  if (propertyState !== 'NC') {
+    throw new HttpsError(
+      'failed-precondition',
+      'The purchase agreement currently supports only North Carolina property.'
+    );
+  }
 
   readRequiredString(
     property,
@@ -579,6 +571,38 @@ function validateProperty(
     'county',
     'The property county is required.'
   );
+}
+
+
+function validatePropertyTerms(
+  terms: Record<string, unknown>
+): void {
+  const propertyTerms =
+    requireObject(
+      terms['propertyTerms'],
+      'Property inclusion terms are required.'
+    );
+
+  readRequiredBoolean(
+    propertyTerms,
+    'manufacturedHomeIncluded',
+    'Specify whether a manufactured home is included.'
+  );
+
+  const separatePropertyIncluded =
+    readRequiredBoolean(
+      propertyTerms,
+      'separatePropertyIncluded',
+      'Specify whether separate property is included.'
+    );
+
+  if (separatePropertyIncluded) {
+    readRequiredString(
+      propertyTerms,
+      'separatePropertyDescription',
+      'Describe the separate property included in the purchase.'
+    );
+  }
 }
 
 
@@ -609,50 +633,32 @@ function validatePurchaseTerms(
     readRequiredString(
       purchase,
       'financingType',
-      'Select cash or financing.'
+      'Select cash or loan.'
     );
 
   if (
     financingType !== 'cash' &&
-    financingType !== 'financing'
+    financingType !== 'loan'
   ) {
     throw new HttpsError(
       'failed-precondition',
-      'Select cash or financing.'
+      'Select cash or loan.'
     );
   }
 
-  if (financingType === 'financing') {
-    const loanType =
-      readRequiredString(
-        purchase,
-        'loanType',
-        'Select a loan type.'
-      );
+  const otherPropertyWillFundPurchase =
+    readRequiredBoolean(
+      purchase,
+      'otherPropertyWillFundPurchase',
+      'Specify whether other property will fund this purchase.'
+    );
 
-    if (
-      loanType ===
-      'not_applicable'
-    ) {
-      throw new HttpsError(
-        'failed-precondition',
-        'Select a loan type.'
-      );
-    }
-
-    const loanAmount =
-      readRequiredInteger(
-        purchase,
-        'proposedLoanAmountInCents',
-        'Enter the proposed loan amount.'
-      );
-
-    if (loanAmount <= 0) {
-      throw new HttpsError(
-        'failed-precondition',
-        'The proposed loan amount must be greater than zero.'
-      );
-    }
+  if (otherPropertyWillFundPurchase) {
+    readRequiredString(
+      purchase,
+      'otherPropertyDescription',
+      'Describe the other property that will fund this purchase.'
+    );
   }
 }
 
@@ -668,60 +674,165 @@ function validateDeposits(
 
   validateNonNegativeMoney(
     deposits,
-    'dueDiligenceFeeInCents',
-    'The due-diligence fee'
+    'depositInCents',
+    'The deposit'
   );
 
-  validateNonNegativeMoney(
-    deposits,
-    'initialEarnestMoneyInCents',
-    'The initial earnest-money deposit'
-  );
-
-  const additionalEarnestMoney =
-    validateNonNegativeMoney(
+  const depositDeliveryDays =
+    readRequiredInteger(
       deposits,
-      'additionalEarnestMoneyInCents',
-      'The additional earnest-money deposit'
+      'depositDeliveryDays',
+      'The deposit-delivery period is invalid.'
     );
 
-  requireValidDateTime(
-    deposits[
-      'dueDiligenceFeeDeliveryDeadline'
-    ],
-    'Enter a valid due-diligence fee delivery deadline.'
-  );
-
-  requireValidDateTime(
-    deposits[
-      'dueDiligenceExpiration'
-    ],
-    'Enter a valid due-diligence expiration date and time.'
-  );
-
-  requireValidDateTime(
-    deposits[
-      'initialEarnestMoneyDeliveryDeadline'
-    ],
-    'Enter a valid initial earnest-money delivery deadline.'
-  );
-
-  if (
-    additionalEarnestMoney > 0
-  ) {
-    requireValidDateTime(
-      deposits[
-        'additionalEarnestMoneyDeliveryDeadline'
-      ],
-      'Enter a valid additional earnest-money delivery deadline.'
+  if (depositDeliveryDays !== 4) {
+    throw new HttpsError(
+      'failed-precondition',
+      'The deposit must be delivered within four calendar days after the Effective Date.'
     );
   }
 
-  readRequiredString(
-    deposits,
-    'escrowAgentName',
-    'An escrow agent is required.'
-  );
+  const escrowAgentName =
+    deposits['escrowAgentName'];
+
+  if (
+    typeof escrowAgentName !== 'string' ||
+    escrowAgentName.trim().length > 200
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'The escrow-agent name must be 200 characters or fewer.'
+    );
+  }
+
+  const deadlineType =
+    readRequiredString(
+      deposits,
+      'dueDiligenceDeadlineType',
+      'Select a due-diligence deadline.'
+    );
+
+  if (deadlineType === 'specific_date') {
+    requireValidDate(
+      deposits['dueDiligenceEndDate'],
+      'Enter a valid due-diligence end date.'
+    );
+  } else if (
+    deadlineType ===
+      'days_after_effective_date'
+  ) {
+    const days =
+      readRequiredInteger(
+        deposits,
+        'dueDiligenceDaysAfterEffectiveDate',
+        'Enter the number of due-diligence days.'
+      );
+
+    if (days <= 0 || days > 365) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The due-diligence period must be between 1 and 365 days.'
+      );
+    }
+  } else {
+    throw new HttpsError(
+      'failed-precondition',
+      'Select a due-diligence deadline.'
+    );
+  }
+
+  if (
+    deposits['dueDiligenceEndTime'] !==
+      '17:00'
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'The due-diligence deadline must use 5:00 p.m.'
+    );
+  }
+}
+
+
+function validateConcessions(
+  terms: Record<string, unknown>
+): void {
+  const concessions =
+    requireObject(
+      terms['concessions'],
+      'Seller-concession terms are required.'
+    );
+
+  const concessionType =
+    readRequiredString(
+      concessions,
+      'concessionType',
+      'Select the seller-concession type.'
+    );
+
+  if (concessionType === 'amount') {
+    const amount =
+      readRequiredInteger(
+        concessions,
+        'sellerConcessionInCents',
+        'Enter a valid seller-concession amount.'
+      );
+
+    if (amount <= 0) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The seller-concession amount must be greater than zero.'
+      );
+    }
+  } else if (
+    concessionType === 'percentage'
+  ) {
+    const percentage =
+      readRequiredNumber(
+        concessions,
+        'sellerConcessionPercentage',
+        'Enter a valid seller-concession percentage.'
+      );
+
+    if (
+      percentage <= 0 ||
+      percentage > 100
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The seller-concession percentage must be greater than 0 and no more than 100.'
+      );
+    }
+  } else if (
+    concessionType !== 'none'
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'Select a valid seller-concession type.'
+    );
+  }
+
+  const homeWarrantyRequested =
+    readRequiredBoolean(
+      concessions,
+      'homeWarrantyRequested',
+      'Specify whether a home warranty is requested.'
+    );
+
+  if (homeWarrantyRequested) {
+    const warrantyAmount =
+      readRequiredInteger(
+        concessions,
+        'homeWarrantyInCents',
+        'Enter a valid home-warranty amount.'
+      );
+
+    if (warrantyAmount <= 0) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The home-warranty amount must be greater than zero.'
+      );
+    }
+  }
 }
 
 
@@ -739,17 +850,6 @@ function validateSettlement(
     'Enter a valid settlement date.'
   );
 
-  requireValidDate(
-    settlement['closingDate'],
-    'Enter a valid closing date.'
-  );
-
-  readRequiredString(
-    settlement,
-    'proposedDeedName',
-    'Enter the proposed deed recipient name.'
-  );
-
   const possessionTiming =
     readRequiredString(
       settlement,
@@ -758,18 +858,20 @@ function validateSettlement(
     );
 
   if (
-    possessionTiming !==
-      'at_closing'
+    possessionTiming !== 'at_closing' &&
+    possessionTiming !== 'other'
   ) {
-    requireValidDate(
-      settlement['possessionDate'],
-      'Enter a valid possession date.'
+    throw new HttpsError(
+      'failed-precondition',
+      'Select when possession will be delivered.'
     );
+  }
 
+  if (possessionTiming === 'other') {
     readRequiredString(
       settlement,
-      'possessionTime',
-      'Enter a possession time.'
+      'possessionAgreementDocumentUid',
+      'Attach the separate possession agreement.'
     );
   }
 }
@@ -812,6 +914,16 @@ function validateDelivery(
   }
 
   if (
+    delivery['timeZone'] !==
+      'America/New_York'
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'The offer must use North Carolina time.'
+    );
+  }
+
+  if (
     delivery[
       'electronicDeliveryAuthorized'
     ] !== true
@@ -842,50 +954,210 @@ function validateDelivery(
 }
 
 
-function validateDisclosures(
+function validateBuyerDisclosures(
   terms: Record<string, unknown>
 ): void {
   const disclosures =
-    terms['disclosures'];
+    requireObject(
+      terms['buyerDisclosures'],
+      'Buyer disclosure selections are required.'
+    );
 
-  if (!Array.isArray(disclosures)) {
+  validateDisclosureReceipt(
+    disclosures['residentialProperty'],
+    'Residential Property and Owners Association Disclosure Statement'
+  );
+
+  validateDisclosureReceipt(
+    disclosures['mineralOilGasRights'],
+    'Mineral and Oil and Gas Rights Mandatory Disclosure Statement'
+  );
+}
+
+
+function validateDisclosureReceipt(
+  value: unknown,
+  label: string
+): void {
+  const receipt =
+    requireObject(
+      value,
+      label + ' selection is required.'
+    );
+
+  const status =
+    readRequiredString(
+      receipt,
+      'status',
+      'Select the status of the ' +
+        label + '.'
+    );
+
+  if (
+    status !== 'received' &&
+    status !== 'not_received' &&
+    status !== 'exempt'
+  ) {
     throw new HttpsError(
       'failed-precondition',
-      'The offer disclosures are invalid.'
+      'Select the status of the ' +
+        label + '.'
     );
   }
 
-  for (
-    const disclosure of disclosures
+  if (receipt['acknowledged'] !== true) {
+    throw new HttpsError(
+      'failed-precondition',
+      'Acknowledge the ' +
+        label + ' selection.'
+    );
+  }
+
+  if (status === 'exempt') {
+    readRequiredString(
+      receipt,
+      'exemptionReason',
+      'Enter the reason this sale is exempt from the ' +
+        label + '.'
+    );
+  }
+}
+
+
+function validateSellerStatements(
+  terms: Record<string, unknown>,
+  version: OfferVersionDocument
+): void {
+  const statements =
+    requireObject(
+      terms['sellerStatements'],
+      'Seller statements are invalid.'
+    );
+
+  /*
+   * A buyer does not answer Section 6 for the seller.
+   * A seller-created counteroffer must contain the seller's
+   * completed statements before the seller submits it.
+   */
+  if (version.initiatedBy !== 'seller') {
+    return;
+  }
+
+  const ownershipStatus =
+    readRequiredString(
+      statements,
+      'ownershipStatus',
+      'Select how long the seller has owned the property.'
+    );
+
+  if (
+    ownershipStatus !==
+      'owned_at_least_one_year' &&
+    ownershipStatus !==
+      'owned_less_than_one_year' &&
+    ownershipStatus !==
+      'does_not_yet_own'
   ) {
-    const disclosureData =
-      requireObject(
-        disclosure,
-        'An offer disclosure is invalid.'
+    throw new HttpsError(
+      'failed-precondition',
+      'Select a valid seller ownership status.'
+    );
+  }
+
+  const leadBasedPaintApplies =
+    readRequiredBoolean(
+      statements,
+      'leadBasedPaintApplies',
+      'Complete the lead-based-paint statement.'
+    );
+
+  if (leadBasedPaintApplies) {
+    readRequiredString(
+      statements,
+      'leadBasedPaintDisclosureDocumentUid',
+      'Attach the lead-based-paint disclosure.'
+    );
+  }
+
+  const ownersAssociationApplies =
+    readRequiredBoolean(
+      statements,
+      'ownersAssociationApplies',
+      'Specify whether an owners association applies.'
+    );
+
+  if (ownersAssociationApplies) {
+    readRequiredString(
+      statements,
+      'ownersAssociationName',
+      'Enter the owners association name.'
+    );
+
+    validateNonNegativeMoney(
+      statements,
+      'ownersAssociationDuesInCents',
+      'The owners association dues'
+    );
+
+    readRequiredString(
+      statements,
+      'ownersAssociationDuesFrequency',
+      'Enter the owners association dues frequency.'
+    );
+
+    readRequiredString(
+      statements,
+      'ownersAssociationContact',
+      'Enter the owners association contact information.'
+    );
+  }
+
+  const fuelTankPresent =
+    readRequiredBoolean(
+      statements,
+      'fuelTankPresent',
+      'Specify whether a fuel tank is present.'
+    );
+
+  if (fuelTankPresent) {
+    const fuelTankOwnership =
+      readRequiredString(
+        statements,
+        'fuelTankOwnership',
+        'Specify whether the fuel tank is owned or leased.'
       );
 
     if (
-      disclosureData['required'] ===
-        true &&
-      (
-        disclosureData['received'] !==
-          true ||
-        disclosureData[
-          'acknowledged'
-        ] !== true
-      )
+      fuelTankOwnership !== 'owned' &&
+      fuelTankOwnership !== 'leased'
     ) {
       throw new HttpsError(
         'failed-precondition',
-        `${readRequiredString(
-          disclosureData,
-          'title',
-          'A required disclosure is incomplete.'
-        )} must be received and acknowledged.`
+        'Specify whether the fuel tank is owned or leased.'
       );
     }
   }
 
+  const leasesExist =
+    readRequiredBoolean(
+      statements,
+      'leasesExist',
+      'Specify whether any leases exist.'
+    );
+
+  if (leasesExist) {
+    readRequiredString(
+      statements,
+      'leaseAddendumDocumentUid',
+      'Attach the applicable lease addendum.'
+    );
+  }
+}
+
+
+function validateAddenda(
+  terms: Record<string, unknown>
+): void {
   const addenda =
     terms['addenda'];
 
@@ -903,21 +1175,38 @@ function validateDisclosures(
         'An offer addendum is invalid.'
       );
 
-    if (
-      addendumData['required'] ===
-        true &&
-      addendumData['selected'] !==
-        true
-    ) {
-      throw new HttpsError(
-        'failed-precondition',
-        `${readRequiredString(
-          addendumData,
-          'title',
-          'A required addendum is incomplete.'
-        )} is required.`
+    const included =
+      readRequiredBoolean(
+        addendumData,
+        'included',
+        'Specify whether each addendum is included.'
       );
+
+    if (!included) {
+      continue;
     }
+
+    readRequiredString(
+      addendumData,
+      'addendumUid',
+      'An included addendum is missing its identifier.'
+    );
+
+    readRequiredString(
+      addendumData,
+      'title',
+      'An included addendum is missing its title.'
+    );
+
+    readRequiredString(
+      addendumData,
+      'documentUid',
+      'An included addendum is missing its document.'
+    );
+
+    validatePreparedBy(
+      addendumData['preparedBy']
+    );
   }
 }
 
@@ -925,61 +1214,47 @@ function validateDisclosures(
 function validateAdditionalTerms(
   terms: Record<string, unknown>
 ): void {
-  const requests =
-    terms[
-      'additionalTermRequests'
-    ];
-
-  if (!Array.isArray(requests)) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The additional-term requests are invalid.'
+  const exhibit =
+    requireObject(
+      terms['additionalTermsExhibit'],
+      'The additional-terms exhibit selection is invalid.'
     );
+
+  const included =
+    readRequiredBoolean(
+      exhibit,
+      'included',
+      'Specify whether an additional-terms exhibit is included.'
+    );
+
+  if (!included) {
+    return;
   }
 
-  for (const request of requests) {
-    const requestData =
-      requireObject(
-        request,
-        'An additional-term request is invalid.'
-      );
+  validatePreparedBy(
+    exhibit['preparedBy']
+  );
 
-    const resolution =
-      readRequiredString(
-        requestData,
-        'resolution',
-        'An additional-term request has not been resolved.'
-      );
+  readRequiredString(
+    exhibit,
+    'documentUid',
+    'Attach the additional-terms exhibit.'
+  );
+}
 
-    if (
-      resolution ===
-        'pending_review' ||
-      resolution ===
-        'attorney_language_required'
-    ) {
-      throw new HttpsError(
-        'failed-precondition',
-        'Every additional-term request must be resolved before submission.'
-      );
-    }
 
-    if (
-      resolution ===
-        'attorney_language_received' &&
-      (
-        requestData[
-          'approvedByBuyer'
-        ] !== true ||
-        requestData[
-          'approvedBySeller'
-        ] !== true
-      )
-    ) {
-      throw new HttpsError(
-        'failed-precondition',
-        'Attorney-prepared language must be approved by both parties.'
-      );
-    }
+function validatePreparedBy(
+  value: unknown
+): void {
+  if (
+    value !== 'buyer' &&
+    value !== 'seller' &&
+    value !== 'attorney'
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'Select who prepared the attached terms.'
+    );
   }
 }
 
@@ -1011,54 +1286,53 @@ function validateChronology(
       'The offer expiration is invalid.'
     );
 
-  const dueDiligenceExpiration =
-    requireValidDateTime(
-      deposits[
-        'dueDiligenceExpiration'
-      ],
-      'The due-diligence expiration is invalid.'
-    );
-
   const settlementDate =
     requireValidDate(
       settlement['settlementDate'],
       'The settlement date is invalid.'
     );
 
-  const closingDate =
-    requireValidDate(
-      settlement['closingDate'],
-      'The closing date is invalid.'
-    );
+  /*
+   * Use the end of the proposed settlement date for this
+   * comparison because settlement has no time-of-day field.
+   */
+  settlementDate.setUTCHours(
+    23,
+    59,
+    59,
+    999
+  );
 
   if (
     offerExpiration.getTime() >=
-    dueDiligenceExpiration.getTime()
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The offer must expire before the proposed due-diligence period ends.'
-    );
-  }
-
-  if (
-    dueDiligenceExpiration.getTime() >=
     settlementDate.getTime()
   ) {
     throw new HttpsError(
       'failed-precondition',
-      'The due-diligence period must end before settlement.'
+      'The offer must expire before the proposed settlement date.'
     );
   }
 
   if (
-    closingDate.getTime() <
-    settlementDate.getTime()
+    deposits[
+      'dueDiligenceDeadlineType'
+    ] === 'specific_date'
   ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'Closing cannot occur before settlement.'
-    );
+    const dueDiligenceDate =
+      requireValidDate(
+        deposits['dueDiligenceEndDate'],
+        'The due-diligence end date is invalid.'
+      );
+
+    if (
+      dueDiligenceDate.getTime() >=
+      settlementDate.getTime()
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The due-diligence period must end before settlement.'
+      );
+    }
   }
 }
 
@@ -1072,13 +1346,13 @@ function validateNonNegativeMoney(
     readRequiredInteger(
       data,
       fieldName,
-      `${label} must be a valid amount.`
+      label + ' must be a valid amount.'
     );
 
   if (amount < 0) {
     throw new HttpsError(
       'failed-precondition',
-      `${label} cannot be negative.`
+      label + ' cannot be negative.'
     );
   }
 
@@ -1138,13 +1412,16 @@ function requireValidDate(
 
   const parsedDate =
     new Date(
-      `${value}T12:00:00Z`
+      value + 'T12:00:00Z'
     );
 
   if (
     Number.isNaN(
       parsedDate.getTime()
-    )
+    ) ||
+    parsedDate
+      .toISOString()
+      .slice(0, 10) !== value
   ) {
     throw new HttpsError(
       'failed-precondition',
@@ -1220,6 +1497,47 @@ function readRequiredInteger(
 }
 
 
+function readRequiredNumber(
+  data: Record<string, unknown>,
+  fieldName: string,
+  message: string
+): number {
+  const value =
+    data[fieldName];
+
+  if (
+    typeof value !== 'number' ||
+    !Number.isFinite(value)
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      message
+    );
+  }
+
+  return value;
+}
+
+
+function readRequiredBoolean(
+  data: Record<string, unknown>,
+  fieldName: string,
+  message: string
+): boolean {
+  const value =
+    data[fieldName];
+
+  if (typeof value !== 'boolean') {
+    throw new HttpsError(
+      'failed-precondition',
+      message
+    );
+  }
+
+  return value;
+}
+
+
 function isValidEmail(
   value: unknown
 ): boolean {
@@ -1242,7 +1560,7 @@ function requireIdentifier(
   ) {
     throw new HttpsError(
       'invalid-argument',
-      `${fieldName} is required.`
+      fieldName + ' is required.'
     );
   }
 
@@ -1255,7 +1573,7 @@ function requireIdentifier(
   ) {
     throw new HttpsError(
       'invalid-argument',
-      `${fieldName} is invalid.`
+      fieldName + ' is invalid.'
     );
   }
 

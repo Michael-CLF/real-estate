@@ -184,6 +184,40 @@ export const generateOfferDocument =
                     );
                 }
 
+                if (
+                    documentType ===
+                    'accepted_agreement'
+                ) {
+                    const linkUpdatedAt =
+                        Timestamp.now();
+
+                    await Promise.all([
+                        offerReference.update({
+                            'contract.finalAgreementDocumentUid':
+                                documentUid,
+
+                            updatedAt:
+                                linkUpdatedAt,
+                        }),
+
+                        adminFirestore
+                            .collection('contracts')
+                            .doc(offerUid)
+                            .set(
+                                {
+                                    finalAgreementDocumentUid:
+                                        documentUid,
+
+                                    updatedAt:
+                                        linkUpdatedAt,
+                                },
+                                {
+                                    merge: true,
+                                }
+                            ),
+                    ]);
+                }
+
                 return {
                     documentUid,
 
@@ -224,10 +258,6 @@ export const generateOfferDocument =
                     version.versionNumber
                 );
 
-            /*
-             * This remains a prototype until the attorney-approved
-             * NavStreet master agreement is activated.
-             */
             const generatedPdf =
                 await generateOfferPdf({
                     offer,
@@ -238,7 +268,7 @@ export const generateOfferDocument =
                     generatedAt,
 
                     documentStatus:
-                        'prototype',
+                        'approved',
                 });
 
             const hashValue =
@@ -313,7 +343,7 @@ export const generateOfferDocument =
                     'NavStreet North Carolina Residential Purchase Agreement',
 
                 templateVersion:
-                    'prototype-1.0.0',
+                    '1.0.0',
 
                 effectiveDate:
                     generatedAt
@@ -321,7 +351,7 @@ export const generateOfferDocument =
                         .slice(0, 10),
 
                 releaseStatus:
-                    'prototype',
+                    'approved',
             };
 
             const hash = {
@@ -335,11 +365,24 @@ export const generateOfferDocument =
                     now,
             };
 
+            const isAcceptedAgreement =
+                documentType ===
+                'accepted_agreement';
+
             const documentData = {
                 Uid: documentUid,
 
                 offerUid,
                 offerVersionUid,
+
+                ...(
+                    isAcceptedAgreement
+                        ? {
+                            contractUid:
+                                offerUid,
+                        }
+                        : {}
+                ),
 
                 type:
                     documentType,
@@ -376,7 +419,9 @@ export const generateOfferDocument =
 
                 signatureRequest: {
                     status:
-                        'not_started',
+                        isAcceptedAgreement
+                            ? 'completed'
+                            : 'not_started',
 
                     signers: [
                         ...version.buyers,
@@ -402,8 +447,35 @@ export const generateOfferDocument =
                                 party.requiredSigner,
 
                             status:
-                                'not_started',
+                                isAcceptedAgreement
+                                    ? party.signature
+                                        .status
+                                    : 'not_started',
+
+                            ...(
+                                isAcceptedAgreement &&
+                                party.signature
+                                    .signedAt
+                                    ? {
+                                        signedAt:
+                                            party.signature
+                                                .signedAt,
+
+                                        signatureUid:
+                                            party.partyUid,
+                                    }
+                                    : {}
+                            ),
                         })
+                    ),
+
+                    ...(
+                        isAcceptedAgreement
+                            ? {
+                                completedAt:
+                                    now,
+                            }
+                            : {}
                     ),
                 },
 
@@ -441,9 +513,20 @@ export const generateOfferDocument =
                 generatedAt: now,
 
                 signatureRequestStatus:
-                    'not_started',
+                    isAcceptedAgreement
+                        ? 'completed'
+                        : 'not_started',
 
-                fullySigned: false,
+                fullySigned:
+                    isAcceptedAgreement,
+
+                ...(
+                    isAcceptedAgreement
+                        ? {
+                            signedAt: now,
+                        }
+                        : {}
+                ),
 
                 downloadable: true,
                 printable: true,
@@ -511,10 +594,38 @@ export const generateOfferDocument =
                         transaction.update(
                             offerReference,
                             {
+                                ...(
+                                    isAcceptedAgreement
+                                        ? {
+                                            'contract.finalAgreementDocumentUid':
+                                                documentUid,
+                                        }
+                                        : {}
+                                ),
+
                                 lastActivityAt: now,
                                 updatedAt: now,
                             }
                         );
+
+                        if (
+                            isAcceptedAgreement
+                        ) {
+                            transaction.set(
+                                adminFirestore
+                                    .collection('contracts')
+                                    .doc(offerUid),
+                                {
+                                    finalAgreementDocumentUid:
+                                        documentUid,
+
+                                    updatedAt: now,
+                                },
+                                {
+                                    merge: true,
+                                }
+                            );
+                        }
                     }
                 );
             } catch (error) {
@@ -675,13 +786,13 @@ function getDocumentTitle(
 ): string {
     switch (documentType) {
         case 'offer_agreement':
-            return 'Residential Purchase Offer';
+            return 'Residential Purchase and Sale Agreement — Offer';
 
         case 'counteroffer_agreement':
-            return `Residential Counteroffer — Version ${versionNumber}`;
+            return `Residential Purchase and Sale Agreement — Counteroffer Version ${versionNumber}`;
 
         case 'accepted_agreement':
-            return 'Final Accepted Residential Purchase Agreement';
+            return 'Residential Purchase and Sale Agreement — Final Accepted';
     }
 }
 

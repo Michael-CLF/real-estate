@@ -34,6 +34,7 @@ interface OfferRecord {
   currentVersionUid?: string;
 
   status?: string;
+  pendingOfferCounted?: boolean;
 }
 
 const nonWithdrawableStatuses = new Set([
@@ -156,6 +157,48 @@ export const withdrawOffer = onCall<
           );
         }
 
+        const shouldRemovePendingOffer =
+          offer.pendingOfferCounted === true;
+
+        const listingUid =
+          requireNonEmptyString(
+            offer.listingUid,
+            'listingUid'
+          );
+
+        const listingReference =
+          firestore
+            .collection('listings')
+            .doc(listingUid);
+
+        const listingSnapshot =
+          await transaction.get(
+            listingReference
+          );
+
+        if (!listingSnapshot.exists) {
+          throw new HttpsError(
+            'not-found',
+            'The property listing could not be found.'
+          );
+        }
+
+        const storedPendingOfferCount =
+          listingSnapshot.get(
+            'pendingOfferCount'
+          );
+
+        const nextPendingOfferCount =
+          Math.max(
+            0,
+            (
+              typeof storedPendingOfferCount ===
+                'number'
+                ? storedPendingOfferCount
+                : 0
+            ) - 1
+          );
+
         const eventReference =
           offerReference
             .collection('events')
@@ -176,10 +219,29 @@ export const withdrawOffer = onCall<
             withdrawalReason:
               reason,
 
+            ...(shouldRemovePendingOffer
+              ? {
+                  pendingOfferCounted: false
+                }
+              : {}),
+
             updatedAt:
               FieldValue.serverTimestamp()
           }
         );
+
+        if (shouldRemovePendingOffer) {
+          transaction.update(
+            listingReference,
+            {
+              pendingOfferCount:
+                nextPendingOfferCount,
+
+              updatedAt:
+                FieldValue.serverTimestamp()
+            }
+          );
+        }
 
         transaction.update(
           versionReference,

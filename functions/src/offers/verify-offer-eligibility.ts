@@ -213,11 +213,26 @@ export async function verifyOfferEligibility(
         'legalDescription'
       ),
 
+    otherPropertyReference:
+      readFirstOptionalString(
+        listingData,
+        [
+          'otherPropertyReference',
+          'legalDescription',
+        ]
+      ),
+
     propertyType:
       readRequiredString(
         listingData,
         'propertyType',
         'The listing does not identify the property type.'
+      ),
+
+    yearBuilt:
+      readOptionalNumber(
+        listingData,
+        'yearBuilt'
       ),
 
     listPrice,
@@ -359,6 +374,24 @@ function readRequiredNumber(
       'failed-precondition',
       errorMessage
     );
+  }
+
+  return value;
+}
+
+
+function readOptionalNumber(
+  data: DocumentData,
+  fieldName: string
+): number | undefined {
+  const value =
+    data[fieldName];
+
+  if (
+    typeof value !== 'number' ||
+    !Number.isFinite(value)
+  ) {
+    return undefined;
   }
 
   return value;

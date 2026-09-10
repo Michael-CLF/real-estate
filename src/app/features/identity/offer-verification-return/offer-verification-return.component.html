@@ -1,0 +1,87 @@
+<main class="identity-return">
+  <section class="identity-return__card">
+    <div class="identity-return__icon" aria-hidden="true">
+      @if (status() === 'verified') {
+        <i class="fa-solid fa-check"></i>
+      } @else if (status() === 'requires_input' || status() === 'canceled') {
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      } @else {
+        <i class="fa-solid fa-id-card"></i>
+      }
+    </div>
+
+    <p class="identity-return__eyebrow">
+      Identity verification
+    </p>
+
+    @if (status() === 'processing') {
+      <h1>Stripe is reviewing your identity</h1>
+      <p>
+        This page will continue automatically as soon as Stripe confirms your verification.
+      </p>
+    } @else if (status() === 'requires_input') {
+      <h1>Stripe needs more information</h1>
+      <p>
+        Restart verification to correct the information or document Stripe could not verify.
+      </p>
+    } @else if (status() === 'canceled') {
+      <h1>Identity verification was canceled</h1>
+      <p>
+        Restart verification when you are ready. Your offer has not been submitted.
+      </p>
+    } @else if (status() === 'verified') {
+      <h1>Identity verified</h1>
+      <p>Opening your offer now.</p>
+    } @else {
+      <h1>Verify your identity to make an offer</h1>
+      <p>
+        NavStreet requires identity verification before an offer can be created or edited.
+      </p>
+    }
+
+    @if (errorMessage()) {
+      <div class="identity-return__error" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="identity-return__actions">
+      @if (
+        status() === 'requires_input' ||
+        status() === 'canceled' ||
+        status() === 'not_started'
+      ) {
+        <button
+          class="button button--primary"
+          type="button"
+          [disabled]="restarting()"
+          (click)="restartVerification()"
+        >
+          {{ restarting() ? 'Opening Stripe…' : 'Start Identity Verification' }}
+        </button>
+      }
+
+      @if (status() === 'processing' || errorMessage()) {
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="checking()"
+          (click)="checkStatus()"
+        >
+          {{ checking() ? 'Checking…' : 'Check Status' }}
+        </button>
+      }
+
+      <a
+        class="button button--secondary"
+        [routerLink]="['/listings', listingUid()]"
+      >
+        Return to Property
+      </a>
+    </div>
+
+    <p class="identity-return__notice">
+      NavStreet stores the verification result and verified legal name. Identity documents and selfie images remain with Stripe.
+    </p>
+  </section>
+</main>

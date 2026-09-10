@@ -252,6 +252,43 @@
     );
 }
 
+.preparer-options {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+  gap: 0.875rem;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+}
+
+.sr-only {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+
+  border: 0;
+
+  position: absolute;
+
+  clip: rect(
+    0,
+    0,
+    0,
+    0
+  );
+
+  white-space: nowrap;
+}
+
 .attorney-review-card {
   margin-top: 1.25rem;
 }
@@ -502,6 +539,72 @@
   }
 }
 
+.attachment-control {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+
+  margin-top: 1rem;
+  padding-top: 1rem;
+
+  border-top: 1px solid #ecd18e;
+}
+
+.attachment-button {
+  min-height: 2.75rem;
+  padding: 0.6875rem 1rem;
+
+  border: 1px solid
+    var(--section-blue);
+  border-radius: 0.5rem;
+
+  color: #ffffff;
+  background:
+    var(--section-blue);
+
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #0f344b;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    box-shadow:
+      0 0 0 0.25rem
+      var(--section-focus);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.attachment-help,
+.attachment-success {
+  margin: 0;
+
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.attachment-help {
+  color: #7a5a21;
+}
+
+.attachment-success {
+  color:
+    var(--section-green);
+
+  font-weight: 600;
+}
+
 .no-additional-terms {
   display: flex;
   align-items: flex-start;
@@ -546,6 +649,14 @@
 
     font-size: 0.8125rem;
     line-height: 1.55;
+  }
+}
+
+@media (
+  max-width: 760px
+) {
+  .preparer-options {
+    grid-template-columns: 1fr;
   }
 }
 

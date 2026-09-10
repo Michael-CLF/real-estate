@@ -34,6 +34,7 @@ export interface MarketplaceListing {
   firestoreDocumentId?: string;
 
   status: ListingStatus;
+  pendingOfferCount?: number;
   propertyType: PropertyType;
 
   title: string;

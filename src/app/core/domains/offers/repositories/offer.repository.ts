@@ -88,6 +88,32 @@ export interface RespondToOfferResult {
 }
 
 
+export interface SignOfferRequest {
+  offerUid: string;
+  offerVersionUid: string;
+  documentUid: string;
+
+  typedSignature: string;
+
+  consentToElectronicRecords: boolean;
+  consentToElectronicSignature: boolean;
+  certificationAccepted: boolean;
+}
+
+
+export interface SignOfferResult {
+  offerUid: string;
+  offerVersionUid: string;
+  documentUid: string;
+  signatureUid: string;
+
+  fullyExecuted: boolean;
+  alreadySigned: boolean;
+
+  contractUid?: string;
+}
+
+
 /*
  * Abstract persistence contract for the complete offer
  * lifecycle.
@@ -188,6 +214,11 @@ export abstract class OfferRepository {
   abstract respondToOffer(
     request: RespondToOfferRequest
   ): Promise<RespondToOfferResult>;
+
+
+  abstract signOffer(
+    request: SignOfferRequest
+  ): Promise<SignOfferResult>;
 
 
   abstract withdrawOffer(

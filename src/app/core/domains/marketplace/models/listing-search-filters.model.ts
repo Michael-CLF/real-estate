@@ -50,6 +50,8 @@ export interface MarketplaceListingSummary {
   propertyType: PropertyType;
   status: ListingStatus;
 
+  pendingOfferCount?: number;
+
   price: number;
   originalPrice?: number;
   featuredListing: boolean;

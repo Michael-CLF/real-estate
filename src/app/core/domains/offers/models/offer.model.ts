@@ -204,6 +204,12 @@ export interface OfferSummary {
   currentVersionUid: string;
   currentVersionNumber: number;
 
+  currentVersionInitiatedBy:
+    | 'buyer'
+    | 'seller';
+
+  currentVersionSenderName: string;
+
   purchasePriceInCents: number;
 
   expiresAt: string;

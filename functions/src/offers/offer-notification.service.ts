@@ -15,7 +15,9 @@ export type OfferNotificationType =
   | 'buyer_signed'
   | 'seller_signed'
   | 'offer_fully_executed'
-  | 'offer_expired';
+  | 'offer_closed_due_to_contract'
+  | 'offer_expired'
+  | 'property_marked_sold';
 
 export type OfferNotificationChannel =
   | 'in_app'
@@ -349,7 +351,9 @@ function validateNotificationType(
       'buyer_signed',
       'seller_signed',
       'offer_fully_executed',
-      'offer_expired'
+      'offer_closed_due_to_contract',
+      'offer_expired',
+      'property_marked_sold'
     ];
 
   if (!supportedTypes.includes(type)) {

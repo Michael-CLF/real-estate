@@ -192,6 +192,113 @@
     </a>
   </section>
 
+  <section
+    class="dashboard-overview__panel"
+    aria-labelledby="dashboard-offers-title"
+  >
+    <header class="dashboard-overview__panel-header">
+      <div>
+        <p class="dashboard-overview__panel-eyebrow">
+          Purchase negotiations
+        </p>
+
+        <h2 id="dashboard-offers-title">
+          Offers and counteroffers
+        </h2>
+      </div>
+
+      @if (offersRequiringAction() > 0) {
+        <strong>
+          {{ offersRequiringAction() }}
+          {{ offersRequiringAction() === 1 ? 'response' : 'responses' }}
+          needed
+        </strong>
+      }
+    </header>
+
+    @if (offersLoading()) {
+      <div class="dashboard-overview__empty-listings">
+        <span aria-hidden="true">
+          <i class="fa-solid fa-file-signature"></i>
+        </span>
+
+        <div>
+          <strong>Loading your offers…</strong>
+          <p>Checking buyer and seller negotiations.</p>
+        </div>
+      </div>
+    } @else if (offersError()) {
+      <p
+        class="dashboard-overview__business-error"
+        role="alert"
+      >
+        {{ offersError() }}
+      </p>
+    } @else if (offerItems().length === 0) {
+      <div class="dashboard-overview__empty-listings">
+        <span aria-hidden="true">
+          <i class="fa-solid fa-file-circle-plus"></i>
+        </span>
+
+        <div>
+          <strong>No offers or counteroffers yet</strong>
+          <p>
+            Offers you make and offers received on your
+            listings will appear here.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="dashboard-overview__quick-actions">
+        @for (item of offerItems(); track item.offer.Uid) {
+          <a
+            class="dashboard-overview__quick-action"
+            [routerLink]="['/offers', item.offer.Uid]"
+          >
+            <span aria-hidden="true">
+              <i
+                class="fa-solid"
+                [class.fa-file-signature]="item.actionRequired"
+                [class.fa-file-contract]="!item.actionRequired"
+              ></i>
+            </span>
+
+            <div>
+              <strong>
+                @if (item.actionRequired) {
+                  Action required:
+                }
+
+                {{ getOfferTypeLabel(item.offer) }}
+                {{ getOfferVersionLabel(item.offer) }}
+              </strong>
+
+              <p>
+                {{ getOfferTypeLabel(item.offer) }} from:
+                {{ item.offer.currentVersionSenderName }}
+              </p>
+
+              <p>
+                {{ item.offer.propertyAddress }}
+                ·
+                {{ getOfferPrice(item.offer) }}
+                ·
+                {{ getOfferStatusLabel(item.offer) }}
+                ·
+                You are the {{ item.perspective }}
+              </p>
+            </div>
+
+            <i
+              class="fa-solid fa-chevron-right"
+              aria-hidden="true"
+            ></i>
+          </a>
+        }
+      </div>
+    }
+  </section>
+
   <div class="dashboard-overview__main-grid">
     <section class="dashboard-overview__panel">
       <header class="dashboard-overview__panel-header">

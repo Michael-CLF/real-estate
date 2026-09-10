@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  OnInit,
-  inject
+  inject,
+  input,
+  signal
 } from '@angular/core';
 
 import {
@@ -11,17 +11,13 @@ import {
   ControlContainer,
   FormGroup,
   FormGroupDirective,
-  ReactiveFormsModule,
-  Validators
+  ReactiveFormsModule
 } from '@angular/forms';
 
 import {
-  takeUntilDestroyed
-} from '@angular/core/rxjs-interop';
+  OfferDocumentService
+} from '../../../../core/domains/offers/services/offer-document.service';
 
-import {
-  startWith
-} from 'rxjs';
 
 @Component({
   selector:
@@ -52,14 +48,28 @@ import {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
-export class SettlementPossessionSectionComponent
-implements OnInit {
+export class SettlementPossessionSectionComponent {
+
+  readonly offerUid =
+    input.required<string>();
+
+  readonly offerVersionUid =
+    input.required<string>();
+
+  readonly uploadingPossessionAgreement =
+    signal(false);
+
+  readonly possessionAgreementUploadError =
+    signal('');
+
+  readonly possessionAgreementFileName =
+    signal('');
 
   private readonly parentFormDirective =
     inject(FormGroupDirective);
 
-  private readonly destroyRef =
-    inject(DestroyRef);
+  private readonly offerDocumentService =
+    inject(OfferDocumentService);
 
   get sectionForm(): FormGroup {
     const section =
@@ -86,53 +96,91 @@ implements OnInit {
     );
   }
 
-  get requiresPossessionNotes():
+  get otherPossessionSelected(): boolean {
+    return this.possessionTiming === 'other';
+  }
+
+  get hasPossessionAgreementDocument():
     boolean {
+    const value =
+      this.control(
+        'possessionAgreementDocumentUid'
+      )?.value;
+
     return (
-      this.possessionTiming !== '' &&
-      this.possessionTiming !==
-        'at_closing'
+      typeof value === 'string' &&
+      value.trim().length > 0
     );
   }
 
-  get hasPossessionDateError():
+  get possessionAgreementRequired():
     boolean {
     return (
-      this.sectionForm.hasError(
-        'possessionBeforeSettlement'
-      ) &&
+      this.otherPossessionSelected &&
+      !this.hasPossessionAgreementDocument &&
       (
-        this.control(
-          'proposedSettlementDate'
-        )?.touched === true ||
-        this.control(
-          'proposedPossessionDate'
-        )?.touched === true
+        this.sectionForm.touched ||
+        this.sectionForm.dirty
       )
     );
   }
 
-  ngOnInit(): void {
-    this.control(
-      'possessionTiming'
-    )
-      ?.valueChanges
-      .pipe(
-        startWith(
-          this.control(
-            'possessionTiming'
-          )?.value
-        ),
+  async uploadPossessionAgreement(
+    event: Event
+  ): Promise<void> {
+    const fileInput =
+      event.target as HTMLInputElement;
 
-        takeUntilDestroyed(
-          this.destroyRef
-        )
-      )
-      .subscribe(
-        () => {
-          this.updatePossessionNotesValidator();
-        }
+    const file =
+      fileInput.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.possessionAgreementUploadError
+      .set('');
+
+    this.uploadingPossessionAgreement
+      .set(true);
+
+    try {
+      const result =
+        await this.offerDocumentService
+          .uploadAttachment(
+            this.offerUid(),
+            this.offerVersionUid(),
+            'possession_agreement',
+            file
+          );
+
+      const documentControl =
+        this.control(
+          'possessionAgreementDocumentUid'
+        );
+
+      documentControl?.setValue(
+        result.documentUid
       );
+
+      documentControl?.markAsDirty();
+      documentControl?.markAsTouched();
+
+      this.possessionAgreementFileName
+        .set(file.name);
+    } catch (error) {
+      this.possessionAgreementUploadError
+        .set(
+          error instanceof Error
+            ? error.message
+            : 'The possession agreement could not be uploaded.'
+        );
+    } finally {
+      this.uploadingPossessionAgreement
+        .set(false);
+
+      fileInput.value = '';
+    }
   }
 
   control(
@@ -177,34 +225,6 @@ implements OnInit {
       return 'This field is required.';
     }
 
-    if (control.hasError('maxlength')) {
-      return 'The entered value is too long.';
-    }
-
     return 'Review the information entered in this field.';
-  }
-
-  private updatePossessionNotesValidator():
-    void {
-    const notesControl =
-      this.control(
-        'possessionNotes'
-      );
-
-    if (this.requiresPossessionNotes) {
-      notesControl?.setValidators([
-        Validators.required,
-        Validators.maxLength(1000)
-      ]);
-    } else {
-      notesControl?.setValidators([
-        Validators.maxLength(1000)
-      ]);
-    }
-
-    notesControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
   }
 }

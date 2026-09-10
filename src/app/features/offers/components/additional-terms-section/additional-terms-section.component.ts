@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  OnInit,
-  inject
+  inject,
+  input,
+  signal
 } from '@angular/core';
 
 import {
@@ -11,17 +11,13 @@ import {
   ControlContainer,
   FormGroup,
   FormGroupDirective,
-  ReactiveFormsModule,
-  Validators
+  ReactiveFormsModule
 } from '@angular/forms';
 
 import {
-  takeUntilDestroyed
-} from '@angular/core/rxjs-interop';
+  OfferDocumentService
+} from '../../../../core/domains/offers/services/offer-document.service';
 
-import {
-  startWith
-} from 'rxjs';
 
 @Component({
   selector:
@@ -52,14 +48,28 @@ import {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
-export class AdditionalTermsSectionComponent
-implements OnInit {
+export class AdditionalTermsSectionComponent {
+
+  readonly offerUid =
+    input.required<string>();
+
+  readonly offerVersionUid =
+    input.required<string>();
+
+  readonly uploadingAdditionalTerms =
+    signal(false);
+
+  readonly additionalTermsUploadError =
+    signal('');
+
+  readonly additionalTermsFileName =
+    signal('');
 
   private readonly parentFormDirective =
     inject(FormGroupDirective);
 
-  private readonly destroyRef =
-    inject(DestroyRef);
+  private readonly offerDocumentService =
+    inject(OfferDocumentService);
 
   get sectionForm(): FormGroup {
     const section =
@@ -78,8 +88,7 @@ implements OnInit {
     return section;
   }
 
-  get hasAdditionalTerms():
-    boolean {
+  get hasAdditionalTerms(): boolean {
     return (
       this.control(
         'hasAdditionalTerms'
@@ -87,66 +96,108 @@ implements OnInit {
     );
   }
 
-  get attorneyDraftedLanguageRequired():
-    boolean {
-    return (
-      this.control(
-        'attorneyDraftedLanguageRequired'
-      )?.value === true
-    );
-  }
-
-  get attorneyReviewStatus(): string {
+  get preparedBy(): string {
     return String(
       this.control(
-        'attorneyReviewStatus'
-      )?.value ??
-      'not_required'
+        'preparedBy'
+      )?.value ?? ''
     );
   }
 
-  ngOnInit(): void {
-    this.control(
-      'hasAdditionalTerms'
-    )
-      ?.valueChanges
-      .pipe(
-        startWith(
-          this.control(
-            'hasAdditionalTerms'
-          )?.value
-        ),
+  get documentAttached(): boolean {
+    const value =
+      this.control(
+        'documentUid'
+      )?.value;
 
-        takeUntilDestroyed(
-          this.destroyRef
-        )
+    return (
+      typeof value === 'string' &&
+      value.trim().length > 0
+    );
+  }
+
+  get preparedByRequired(): boolean {
+    return (
+      this.hasAdditionalTerms &&
+      this.sectionForm.hasError(
+        'preparedByRequired'
+      ) &&
+      (
+        this.sectionForm.touched ||
+        this.sectionForm.dirty
       )
-      .subscribe(
-        () => {
-          this.updateAdditionalTermsValidators();
-        }
+    );
+  }
+
+  get documentRequired(): boolean {
+    return (
+      this.hasAdditionalTerms &&
+      this.sectionForm.hasError(
+        'additionalTermsDocumentRequired'
+      ) &&
+      (
+        this.sectionForm.touched ||
+        this.sectionForm.dirty
+      )
+    );
+  }
+
+  async uploadAdditionalTerms(
+    event: Event
+  ): Promise<void> {
+    const fileInput =
+      event.target as HTMLInputElement;
+
+    const file =
+      fileInput.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.additionalTermsUploadError
+      .set('');
+
+    this.uploadingAdditionalTerms
+      .set(true);
+
+    try {
+      const result =
+        await this.offerDocumentService
+          .uploadAttachment(
+            this.offerUid(),
+            this.offerVersionUid(),
+            'additional_terms_exhibit',
+            file
+          );
+
+      const documentControl =
+        this.control(
+          'documentUid'
+        );
+
+      documentControl?.setValue(
+        result.documentUid
       );
 
-    this.control(
-      'attorneyDraftedLanguageRequired'
-    )
-      ?.valueChanges
-      .pipe(
-        startWith(
-          this.control(
-            'attorneyDraftedLanguageRequired'
-          )?.value
-        ),
+      documentControl?.markAsDirty();
+      documentControl?.markAsTouched();
 
-        takeUntilDestroyed(
-          this.destroyRef
-        )
-      )
-      .subscribe(
-        () => {
-          this.updateAttorneyReviewStatus();
-        }
-      );
+      this.additionalTermsFileName
+        .set(file.name);
+    } catch (error) {
+      this.additionalTermsUploadError
+        .set(
+          error instanceof Error
+            ? error.message
+            : 'The Additional Terms Exhibit could not be uploaded.'
+        );
+    } finally {
+      this.uploadingAdditionalTerms
+        .set(false);
+
+      fileInput.value = '';
+    }
   }
 
   control(
@@ -154,115 +205,6 @@ implements OnInit {
   ): AbstractControl | null {
     return this.sectionForm.get(
       controlName
-    );
-  }
-
-  isInvalid(
-    controlName: string
-  ): boolean {
-    const control =
-      this.control(
-        controlName
-      );
-
-    return Boolean(
-      control &&
-      control.invalid &&
-      (
-        control.touched ||
-        control.dirty
-      )
-    );
-  }
-
-  errorMessage(
-    controlName: string
-  ): string {
-    const control =
-      this.control(
-        controlName
-      );
-
-    if (!control?.errors) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Describe the requested business term.';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'The entered value is too long.';
-    }
-
-    return 'Review the information entered in this field.';
-  }
-
-  private updateAdditionalTermsValidators():
-    void {
-    const termsControl =
-      this.control(
-        'standardRequestedTerms'
-      );
-
-    if (this.hasAdditionalTerms) {
-      termsControl?.setValidators([
-        Validators.required,
-        Validators.maxLength(1500)
-      ]);
-    } else {
-      termsControl?.setValidators([
-        Validators.maxLength(1500)
-      ]);
-    }
-
-    termsControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
-
-    if (!this.hasAdditionalTerms) {
-      this.control(
-        'attorneyDraftedLanguageRequired'
-      )?.setValue(
-        false,
-        {
-          emitEvent: true
-        }
-      );
-    }
-  }
-
-  private updateAttorneyReviewStatus():
-    void {
-    const statusControl =
-      this.control(
-        'attorneyReviewStatus'
-      );
-
-    if (
-      this.attorneyDraftedLanguageRequired
-    ) {
-      if (
-        statusControl?.value ===
-          'not_required'
-      ) {
-        statusControl.setValue(
-          'required',
-          {
-            emitEvent: false
-          }
-        );
-      }
-
-      return;
-    }
-
-    statusControl?.setValue(
-      'not_required',
-      {
-        emitEvent: false
-      }
     );
   }
 }

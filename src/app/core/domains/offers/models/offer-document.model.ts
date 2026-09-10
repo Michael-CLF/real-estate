@@ -19,6 +19,8 @@ export type OfferDocumentType =
   | 'identity_verification_record'
   | 'signature_certificate'
   | 'audit_certificate'
+  | 'possession_agreement'
+  | 'additional_terms_exhibit'
   | 'attorney_prepared_provision'
   | 'supporting_document'
   | 'termination_notice'
@@ -120,6 +122,8 @@ export interface OfferDocumentSigner {
   viewedAt?: Date;
   signedAt?: Date;
   declinedAt?: Date;
+
+  signatureUid?: string;
 
   /*
    * The signature image itself should remain with the

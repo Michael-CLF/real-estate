@@ -52,10 +52,6 @@ import {
 } from '../components/disclosures-addenda-section/disclosures-addenda-section.component';
 
 import {
-  InvestigationsSectionComponent
-} from '../components/investigations-section/investigations-section.component';
-
-import {
   OfferExpirationSectionComponent
 } from '../components/offer-expiration-section/offer-expiration-section.component';
 
@@ -88,8 +84,21 @@ import {
 } from '../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
 
 import {
+  OfferTerms
+} from '../../../core/domains/offers/models/offer-terms.model';
+
+import {
+  OfferVersion
+} from '../../../core/domains/offers/models/offer-version.model';
+
+import {
   OfferService
 } from '../../../core/domains/offers/services/offer.service';
+
+import {
+  OfferDocumentService
+} from '../../../core/domains/offers/services/offer-document.service';
+
 
 export interface OfferWizardSection {
   key: string;
@@ -98,9 +107,11 @@ export interface OfferWizardSection {
   description: string;
 }
 
+
 @Component({
   selector: 'app-offer-wizard',
   standalone: true,
+
   imports: [
     ReactiveFormsModule,
     AdditionalTermsSectionComponent,
@@ -108,7 +119,6 @@ export interface OfferWizardSection {
     ConcessionsSectionComponent,
     DepositsDueDiligenceSectionComponent,
     DisclosuresAddendaSectionComponent,
-    InvestigationsSectionComponent,
     OfferExpirationSectionComponent,
     OfferReviewSectionComponent,
     PriceFinancingSectionComponent,
@@ -131,11 +141,12 @@ export interface OfferWizardSection {
 
   styleUrl:
     './offer-wizard.component.scss',
+
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
 export class OfferWizardComponent
-  implements OnInit {
+implements OnInit {
 
   private readonly formBuilder =
     inject(FormBuilder);
@@ -146,15 +157,8 @@ export class OfferWizardComponent
   private readonly offerService =
     inject(OfferService);
 
-  private offerUid = '';
-
-  private offerVersionUid = '';
-
-  private lastSavedSnapshot = '';
-
-  private saveChain:
-    Promise<void> =
-    Promise.resolve();
+  private readonly offerDocumentService =
+    inject(OfferDocumentService);
 
   private readonly route =
     inject(ActivatedRoute);
@@ -167,6 +171,20 @@ export class OfferWizardComponent
 
   private readonly listingRepository =
     inject(MarketplaceListingRepository);
+
+  offerUid = '';
+  offerVersionUid = '';
+
+  private existingTerms:
+    OfferTerms | null = null;
+
+  private offerVersionNumber = 1;
+
+  private lastSavedSnapshot = '';
+
+  private saveChain:
+    Promise<void> =
+    Promise.resolve();
 
   readonly listingUid =
     this.route.snapshot.paramMap.get(
@@ -198,157 +216,74 @@ export class OfferWizardComponent
   readonly sections:
     readonly OfferWizardSection[] = [
       {
-        key:
-          'buyerProperty',
-
-        title:
-          'Buyer and Property',
-
-        shortTitle:
-          'Buyer',
-
+        key: 'buyerProperty',
+        title: 'Buyer and Property',
+        shortTitle: 'Buyer',
         description:
-          'Confirm the buyer’s legal identity and the property being purchased.'
+          'Confirm the buyer, seller and property information pulled from NavStreet.'
       },
-
       {
-        key:
-          'priceFinancing',
-
-        title:
-          'Purchase Price and Financing',
-
-        shortTitle:
-          'Price',
-
+        key: 'priceFinancing',
+        title: 'Purchase Price and Funding',
+        shortTitle: 'Price',
         description:
-          'Enter the proposed purchase price and how the purchase will be funded.'
+          'Enter the proposed purchase price and indicate whether the purchase will use cash or a loan.'
       },
-
       {
-        key:
-          'depositsDueDiligence',
-
-        title:
-          'Deposits and Due Diligence',
-
-        shortTitle:
-          'Deposits',
-
+        key: 'depositsDueDiligence',
+        title: 'Deposit and Due Diligence',
+        shortTitle: 'Deposit',
         description:
-          'Enter the proposed earnest money, due-diligence fee and due-diligence period.'
+          'Enter the Deposit, escrow agent and proposed due-diligence deadline.'
       },
-
       {
-        key:
-          'investigations',
-
-        title:
-          'Investigations and Conditions',
-
-        shortTitle:
-          'Conditions',
-
+        key: 'concessions',
+        title: 'Seller Concessions',
+        shortTitle: 'Concessions',
         description:
-          'Identify requested inspections, appraisal, financing and property-sale conditions.'
+          'Enter any seller concession and home-warranty amount requested by the buyer.'
       },
-
       {
-        key:
-          'concessions',
-
-        title:
-          'Seller Concessions',
-
-        shortTitle:
-          'Concessions',
-
+        key: 'propertyInclusions',
+        title: 'Property Inclusions and Exclusions',
+        shortTitle: 'Property',
         description:
-          'Enter any closing costs, credits or other concessions requested from the seller.'
+          'Identify included, excluded, leased and separately included property.'
       },
-
       {
-        key:
-          'propertyInclusions',
-
-        title:
-          'Property and Personal Property',
-
-        shortTitle:
-          'Inclusions',
-
+        key: 'settlementPossession',
+        title: 'Settlement and Possession',
+        shortTitle: 'Settlement',
         description:
-          'Identify fixtures, personal property and other items requested with the property.'
+          'Enter the proposed settlement date and when possession will be delivered.'
       },
-
       {
-        key:
-          'settlementPossession',
-
-        title:
-          'Settlement and Possession',
-
-        shortTitle:
-          'Closing',
-
+        key: 'disclosuresAddenda',
+        title: 'Buyer Disclosure Acknowledgements',
+        shortTitle: 'Disclosures',
         description:
-          'Enter the proposed settlement date, possession date and settlement preferences.'
+          'Record the buyer’s selections for the required North Carolina disclosure statements.'
       },
-
       {
-        key:
-          'disclosuresAddenda',
-
-        title:
-          'Disclosures and Addenda',
-
-        shortTitle:
-          'Disclosures',
-
+        key: 'additionalTerms',
+        title: 'Additional Terms Exhibit',
+        shortTitle: 'Terms',
         description:
-          'Identify applicable disclosures, addenda and supporting documents.'
+          'Attach separately prepared additional terms when they are part of the offer.'
       },
-
       {
-        key:
-          'additionalTerms',
-
-        title:
-          'Additional Requested Terms',
-
-        shortTitle:
-          'Terms',
-
-        description:
-          'Review any additional requested terms and determine whether attorney-drafted language is required.'
-      },
-
-      {
-        key:
-          'offerExpiration',
-
-        title:
-          'Offer Expiration',
-
-        shortTitle:
-          'Expiration',
-
+        key: 'offerExpiration',
+        title: 'Offer Expiration',
+        shortTitle: 'Expiration',
         description:
           'Specify when the offer expires if it has not been accepted.'
       },
-
       {
-        key:
-          'offerReview',
-
-        title:
-          'Review and Certification',
-
-        shortTitle:
-          'Review',
-
+        key: 'offerReview',
+        title: 'Review and Certification',
+        shortTitle: 'Review',
         description:
-          'Review the complete offer, accept the required certifications and prepare it for submission.'
+          'Review the offer and accept the required electronic records and platform acknowledgements.'
       }
     ];
 
@@ -356,7 +291,7 @@ export class OfferWizardComponent
     computed(
       () =>
         this.sections[
-        this.currentSectionIndex()
+          this.currentSectionIndex()
         ]
     );
 
@@ -391,62 +326,73 @@ export class OfferWizardComponent
       buyerProperty:
         this.formBuilder.group({
           buyerFirstName: [
-            '',
-            [
-              Validators.required,
-              Validators.maxLength(100)
-            ]
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           buyerMiddleName: [
-            '',
-            [
-              Validators.maxLength(100)
-            ]
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           buyerLastName: [
-            '',
-            [
-              Validators.required,
-              Validators.maxLength(100)
-            ]
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           buyerSuffix: [
-            '',
-            [
-              Validators.maxLength(20)
-            ]
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           buyerEmail: [
-            '',
-            [
-              Validators.required,
-              Validators.email,
-              Validators.maxLength(254)
-            ]
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           buyerPhone: [
-            '',
-            [
-              Validators.required,
-              Validators.pattern(
-                /^\(\d{3}\) \d{3}-\d{4}$/
-              )
-            ]
+            {
+              value: '',
+              disabled: true
+            }
+          ],
+
+          sellerLegalName: [
+            {
+              value: '',
+              disabled: true
+            }
+          ],
+
+          sellerEmail: [
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           propertyAddress: [
             {
               value: '',
               disabled: true
-            },
-            [
-              Validators.required
-            ]
+            }
+          ],
+
+          propertyCity: [
+            {
+              value: '',
+              disabled: true
+            }
           ],
 
           propertyCounty: [
@@ -475,270 +421,227 @@ export class OfferWizardComponent
               value: '',
               disabled: true
             }
+          ],
+
+          propertyDeedBook: [
+            {
+              value: '',
+              disabled: true
+            }
+          ],
+
+          propertyDeedPage: [
+            {
+              value: '',
+              disabled: true
+            }
+          ],
+
+          propertyOtherReference: [
+            {
+              value: '',
+              disabled: true
+            }
           ]
         }),
 
       priceFinancing:
-        this.formBuilder.group({
-          purchasePrice: [
-            null as number | null,
-            [
-              Validators.required,
-              Validators.min(1)
+        this.formBuilder.group(
+          {
+            purchasePrice: [
+              null as number | null,
+              [
+                Validators.required,
+                Validators.min(1)
+              ]
+            ],
+
+            financingMethod: [
+              '',
+              [
+                Validators.required,
+                Validators.pattern(
+                  /^(cash|loan)$/
+                )
+              ]
+            ],
+
+            otherPropertyWillFundPurchase: [
+              false
+            ],
+
+            otherPropertyDescription: [
+              '',
+              [
+                Validators.maxLength(500)
+              ]
             ]
-          ],
-
-          financingMethod: [
-            '',
-            [
-              Validators.required
+          },
+          {
+            validators: [
+              priceFundingValidator
             ]
-          ],
-
-          loanType: [
-            ''
-          ],
-
-          otherLoanType: [
-            '',
-            [
-              Validators.maxLength(100)
-            ]
-          ],
-
-          loanAmount: [
-            null as number | null,
-            [
-              Validators.min(0)
-            ]
-          ],
-
-          downPaymentAmount: [
-            null as number | null,
-            [
-              Validators.min(0)
-            ]
-          ],
-
-          downPaymentPercentage: [
-            null as number | null,
-            [
-              Validators.min(0),
-              Validators.max(100)
-            ]
-          ],
-
-          preapprovalProvided: [
-            false
-          ],
-
-          proofOfFundsProvided: [
-            false
-          ],
-
-          financingContingencyRequested: [
-            false
-          ],
-
-          financingApplicationDays: [
-            null as number | null,
-            [
-              Validators.min(0),
-              Validators.max(365)
-            ]
-          ],
-
-          financingNotes: [
-            '',
-            [
-              Validators.maxLength(1000)
-            ]
-          ]
-        }),
+          }
+        ),
 
       depositsDueDiligence:
-        this.formBuilder.group({
-          earnestMoneyAmount: [
-            null as number | null,
-            [
-              Validators.required,
-              Validators.min(0)
+        this.formBuilder.group(
+          {
+            depositAmount: [
+              null as number | null,
+              [
+                Validators.required,
+                Validators.min(0)
+              ]
+            ],
+
+            depositDeliveryDays: [
+              {
+                value: 4,
+                disabled: true
+              }
+            ],
+
+            escrowAgentName: [
+              '',
+              [
+                Validators.required,
+                Validators.maxLength(200)
+              ]
+            ],
+
+            dueDiligenceDeadlineType: [
+              '',
+              [
+                Validators.required,
+                Validators.pattern(
+                  /^(specific_date|days_after_effective_date)$/
+                )
+              ]
+            ],
+
+            dueDiligenceEndDate: [
+              ''
+            ],
+
+            dueDiligenceDaysAfterEffectiveDate: [
+              null as number | null,
+              [
+                Validators.min(1),
+                Validators.max(365)
+              ]
+            ],
+
+            dueDiligenceEndTime: [
+              {
+                value: '17:00',
+                disabled: true
+              }
             ]
-          ],
-
-          earnestMoneyDeliveryDays: [
-            null as number | null,
-            [
-              Validators.required,
-              Validators.min(0),
-              Validators.max(365)
+          },
+          {
+            validators: [
+              dueDiligenceValidator
             ]
-          ],
-
-          additionalEarnestMoneyAmount: [
-            null as number | null,
-            [
-              Validators.min(0)
-            ]
-          ],
-
-          additionalEarnestMoneyDueDate: [
-            ''
-          ],
-
-          dueDiligenceFeeAmount: [
-            null as number | null,
-            [
-              Validators.required,
-              Validators.min(0)
-            ]
-          ],
-
-          dueDiligenceExpirationDate: [
-            '',
-            [
-              Validators.required
-            ]
-          ],
-        }),
-
-      investigations:
-        this.formBuilder.group({
-          inspectionIntended: [
-            false
-          ],
-
-          appraisalContingencyRequested: [
-            false
-          ],
-
-          financingContingencyRequested: [
-            false
-          ],
-
-          saleOfExistingHomeRequired: [
-            false
-          ],
-
-          existingHomeAddress: [
-            '',
-            [
-              Validators.maxLength(300)
-            ]
-          ],
-
-          existingHomeStatus: [
-            ''
-          ],
-
-          existingHomeDeadline: [
-            ''
-          ],
-
-          buyerInvestigationNotes: [
-            '',
-            [
-              Validators.maxLength(1500)
-            ]
-          ]
-        }),
+          }
+        ),
 
       concessions:
-        this.formBuilder.group({
-          sellerPaidClosingCostsRequested: [
-            false
-          ],
+        this.formBuilder.group(
+          {
+            concessionType: [
+              'none',
+              [
+                Validators.required,
+                Validators.pattern(
+                  /^(none|amount|percentage)$/
+                )
+              ]
+            ],
 
-          sellerPaidClosingCostsAmount: [
-            null as number | null,
-            [
-              Validators.min(0)
+            sellerConcessionAmount: [
+              null as number | null,
+              [
+                Validators.min(0)
+              ]
+            ],
+
+            sellerConcessionPercentage: [
+              null as number | null,
+              [
+                Validators.min(0),
+                Validators.max(100)
+              ]
+            ],
+
+            homeWarrantyRequested: [
+              false
+            ],
+
+            homeWarrantyAmount: [
+              null as number | null,
+              [
+                Validators.min(0)
+              ]
             ]
-          ],
-
-          sellerPaidClosingCostsPercentage: [
-            null as number | null,
-            [
-              Validators.min(0),
-              Validators.max(100)
+          },
+          {
+            validators: [
+              concessionsValidator
             ]
-          ],
-
-          repairCreditRequested: [
-            false
-          ],
-
-          repairCreditAmount: [
-            null as number | null,
-            [
-              Validators.min(0)
-            ]
-          ],
-
-          otherConcessions: [
-            '',
-            [
-              Validators.maxLength(1000)
-            ]
-          ]
-        }),
+          }
+        ),
 
       propertyInclusions:
-        this.formBuilder.group({
-          builtInAppliancesIncluded: [
-            true
-          ],
+        this.formBuilder.group(
+          {
+            manufacturedHomeIncluded: [
+              false
+            ],
 
-          refrigeratorIncluded: [
-            false
-          ],
+            separatePropertyIncluded: [
+              false
+            ],
 
-          washerIncluded: [
-            false
-          ],
+            separatePropertyDescription: [
+              '',
+              [
+                Validators.maxLength(1500)
+              ]
+            ],
 
-          dryerIncluded: [
-            false
-          ],
+            includedItemsDescription: [
+              '',
+              [
+                Validators.maxLength(1500)
+              ]
+            ],
 
-          windowTreatmentsIncluded: [
-            false
-          ],
+            excludedItemsDescription: [
+              '',
+              [
+                Validators.maxLength(1500)
+              ]
+            ],
 
-          securitySystemsIncluded: [
-            false
-          ],
-
-          fuelOrPropaneIncluded: [
-            false
-          ],
-
-          otherPersonalProperty: [
-            '',
-            [
-              Validators.maxLength(1500)
+            leasedItemsDescription: [
+              '',
+              [
+                Validators.maxLength(1500)
+              ]
             ]
-          ],
-
-          excludedItems: [
-            '',
-            [
-              Validators.maxLength(1500)
+          },
+          {
+            validators: [
+              propertyInclusionsValidator
             ]
-          ]
-        }),
+          }
+        ),
 
       settlementPossession:
         this.formBuilder.group(
           {
-            proposedSettlementDate: [
-              '',
-              [
-                Validators.required
-              ]
-            ],
-
-            proposedPossessionDate: [
+            settlementDate: [
               '',
               [
                 Validators.required
@@ -748,106 +651,112 @@ export class OfferWizardComponent
             possessionTiming: [
               'at_closing',
               [
-                Validators.required
+                Validators.required,
+                Validators.pattern(
+                  /^(at_closing|other)$/
+                )
               ]
             ],
 
-            possessionNotes: [
-              '',
-              [
-                Validators.maxLength(1000)
-              ]
-            ],
-
-            settlementAgentPreference: [
-              '',
-              [
-                Validators.maxLength(200)
-              ]
-            ],
-
-            settlementLocationPreference: [
-              '',
-              [
-                Validators.maxLength(300)
-              ]
+            possessionAgreementDocumentUid: [
+              ''
             ]
           },
           {
             validators: [
-              possessionNotBeforeSettlementValidator
+              settlementPossessionValidator
             ]
           }
         ),
 
       disclosuresAddenda:
         this.formBuilder.group({
-          propertyDisclosureReceived: [
-            false
-          ],
-
-          mineralOilGasDisclosureReceived: [
-            false
-          ],
-
-          leadBasedPaintAddendumRequired: [
-            false
-          ],
-
-          ownersAssociationAddendumRequired: [
-            false
-          ],
-
-          septicOrWellAddendumRequired: [
-            false
-          ],
-
-          saleOfExistingPropertyAddendumRequired: [
-            false
-          ],
-
-          otherAddenda: [
+          residentialPropertyStatus: [
             '',
             [
-              Validators.maxLength(1000)
+              Validators.required,
+              Validators.pattern(
+                /^(received|not_received|exempt)$/
+              )
             ]
           ],
 
-          supportingDocumentUids:
-            this.formBuilder.control<
-              string[]
-            >([])
+          residentialPropertyDocumentUid: [
+            ''
+          ],
+
+          residentialPropertyDocumentVersionId: [
+            ''
+          ],
+
+          residentialPropertyExemptionReason: [
+            '',
+            [
+              Validators.maxLength(500)
+            ]
+          ],
+
+          residentialPropertyAcknowledged: [
+            false,
+            [
+              Validators.requiredTrue
+            ]
+          ],
+
+          mineralOilGasRightsStatus: [
+            '',
+            [
+              Validators.required,
+              Validators.pattern(
+                /^(received|not_received|exempt)$/
+              )
+            ]
+          ],
+
+          mineralOilGasRightsDocumentUid: [
+            ''
+          ],
+
+          mineralOilGasRightsDocumentVersionId: [
+            ''
+          ],
+
+          mineralOilGasRightsExemptionReason: [
+            '',
+            [
+              Validators.maxLength(500)
+            ]
+          ],
+
+          mineralOilGasRightsAcknowledged: [
+            false,
+            [
+              Validators.requiredTrue
+            ]
+          ]
         }),
 
       additionalTerms:
-        this.formBuilder.group({
-          hasAdditionalTerms: [
-            false
-          ],
+        this.formBuilder.group(
+          {
+            hasAdditionalTerms: [
+              false
+            ],
 
-          standardRequestedTerms: [
-            '',
-            [
-              Validators.maxLength(1500)
+            preparedBy: [
+              ''
+            ],
+
+            documentUid: [
+              ''
             ]
-          ],
-
-          attorneyDraftedLanguageRequired: [
-            false
-          ],
-
-          attorneyUid: [
-            ''
-          ],
-
-          attorneyDocumentUid: [
-            ''
-          ],
-
-          attorneyReviewStatus: [
-            'not_required'
-          ]
-        }),
+          },
+          {
+            validators: [
+              additionalTermsValidator
+            ]
+          }
+        ),
 
       offerExpiration:
         this.formBuilder.group(
@@ -867,10 +776,11 @@ export class OfferWizardComponent
             ],
 
             timeZone: [
-              'America/New_York',
-              [
-                Validators.required
-              ]
+              {
+                value:
+                  'America/New_York',
+                disabled: true
+              }
             ]
           },
           {
@@ -940,39 +850,101 @@ export class OfferWizardComponent
         );
       }
 
-      /*
-       * Create the buyer's offer draft or return the
-       * existing editable draft for this listing.
-       */
-      const draftResult =
-        await this.offerService
-          .createOrResumeDraft(
-            this.listingUid
+      const requestedOfferUid =
+        this.route.snapshot
+          .queryParamMap
+          .get('offerUid');
+
+      const requestedOfferVersionUid =
+        this.route.snapshot
+          .queryParamMap
+          .get('offerVersionUid');
+
+      if (
+        !!requestedOfferUid !==
+        !!requestedOfferVersionUid
+      ) {
+        throw new Error(
+          'Both the offer and offer-version identifiers are required to open a counteroffer draft.'
+        );
+      }
+
+      let offerVersion:
+        OfferVersion | null;
+
+      if (
+        requestedOfferUid &&
+        requestedOfferVersionUid
+      ) {
+        const requestedOffer =
+          await this.offerService.getOffer(
+            requestedOfferUid
           );
 
-      this.offerUid =
-        draftResult.offerUid;
+        if (
+          !requestedOffer ||
+          requestedOffer.listingUid !==
+            this.listingUid ||
+          requestedOffer.currentVersionUid !==
+            requestedOfferVersionUid
+        ) {
+          throw new Error(
+            'The requested counteroffer draft is not the current version for this property.'
+          );
+        }
 
-      this.offerVersionUid =
-        draftResult.offerVersionUid;
+        offerVersion =
+          await this.offerService.getVersion(
+            requestedOfferUid,
+            requestedOfferVersionUid
+          );
 
-      const [
-        listing,
-        offerVersion
-      ] =
-        await Promise.all([
-          firstValueFrom(
-            this.listingRepository
-              .getListingById(
-                this.listingUid
-              )
-          ),
+        if (
+          !offerVersion ||
+          !this.offerService
+            .getParticipantAccess(
+              requestedOffer,
+              offerVersion
+            )
+            .canEditCurrentDraft
+        ) {
+          throw new Error(
+            'You do not have permission to edit this counteroffer draft.'
+          );
+        }
 
-          this.offerService.getVersion(
+        this.offerUid =
+          requestedOfferUid;
+
+        this.offerVersionUid =
+          requestedOfferVersionUid;
+      } else {
+        const draftResult =
+          await this.offerService
+            .createOrResumeDraft(
+              this.listingUid
+            );
+
+        this.offerUid =
+          draftResult.offerUid;
+
+        this.offerVersionUid =
+          draftResult.offerVersionUid;
+
+        offerVersion =
+          await this.offerService.getVersion(
             this.offerUid,
             this.offerVersionUid
-          )
-        ]);
+          );
+      }
+
+      const listing =
+        await firstValueFrom(
+          this.listingRepository
+            .getListingById(
+              this.listingUid
+            )
+        );
 
       if (!listing) {
         throw new Error(
@@ -986,60 +958,367 @@ export class OfferWizardComponent
         );
       }
 
+      this.existingTerms =
+        offerVersion.terms;
+
+      this.offerVersionNumber =
+        offerVersion.versionNumber;
+
+      const buyer =
+        offerVersion.buyers[0];
+
+      const seller =
+        offerVersion.sellers[0];
+
+      const property =
+        offerVersion.terms.property;
+
       const propertyAddress = [
-        listing.address.addressLine1,
-        listing.address.addressLine2
+        property.addressLine1,
+        property.addressLine2
       ]
         .filter(Boolean)
         .join(', ');
 
-      /*
-       * Establish the initial values from the authenticated
-       * account and published listing.
-       */
+      const expiration =
+        splitExpiration(
+          offerVersion.terms
+            .delivery.expiresAt
+        );
+
       this.offerForm.patchValue(
         {
           buyerProperty: {
             buyerFirstName:
+              buyer?.firstName ??
               profile.firstName,
 
             buyerMiddleName:
-              '',
+              buyer?.middleName ?? '',
 
             buyerLastName:
+              buyer?.lastName ??
               profile.lastName,
 
             buyerSuffix:
-              '',
+              buyer?.suffix ?? '',
 
             buyerEmail:
+              buyer?.email ??
               profile.email,
 
             buyerPhone:
               formatUsPhoneNumber(
-                profile.phone ?? ''
+                buyer?.phone ??
+                profile.phone ??
+                ''
               ),
+
+            sellerLegalName:
+              seller?.legalName ?? '',
+
+            sellerEmail:
+              seller?.email ?? '',
 
             propertyAddress,
 
+            propertyCity:
+              property.city,
+
             propertyCounty:
-              listing.address.county ??
+              property.county ||
+              listing.address.county ||
               'Not provided',
 
             propertyState:
-              listing.address
-                .stateAbbreviation,
+              property.state,
 
             propertyPostalCode:
-              listing.address.postalCode,
+              property.zipCode,
 
             propertyParcelId:
+              property
+                .parcelIdentificationNumber ??
+              'Not provided',
+
+            propertyDeedBook:
+              property.deedBook ??
+              'Not provided',
+
+            propertyDeedPage:
+              property.deedPage ??
+              'Not provided',
+
+            propertyOtherReference:
+              property.otherPropertyReference ??
+              property.legalDescription ??
               'Not provided'
           },
 
           priceFinancing: {
             purchasePrice:
-              listing.price
+              fromCents(
+                offerVersion.terms
+                  .purchase
+                  .purchasePriceInCents
+              ),
+
+            financingMethod:
+              offerVersion.terms
+                .purchase
+                .financingType ===
+                  'unselected'
+                ? ''
+                : offerVersion.terms
+                  .purchase
+                  .financingType,
+
+            otherPropertyWillFundPurchase:
+              offerVersion.terms
+                .purchase
+                .otherPropertyWillFundPurchase,
+
+            otherPropertyDescription:
+              offerVersion.terms
+                .purchase
+                .otherPropertyDescription ??
+              ''
+          },
+
+          depositsDueDiligence: {
+            depositAmount:
+              fromCents(
+                offerVersion.terms
+                  .deposits
+                  .depositInCents
+              ),
+
+            depositDeliveryDays: 4,
+
+            escrowAgentName:
+              offerVersion.terms
+                .deposits
+                .escrowAgentName,
+
+            dueDiligenceDeadlineType:
+              offerVersion.terms
+                .deposits
+                .dueDiligenceDeadlineType ===
+                  'unselected'
+                ? ''
+                : offerVersion.terms
+                  .deposits
+                  .dueDiligenceDeadlineType,
+
+            dueDiligenceEndDate:
+              offerVersion.terms
+                .deposits
+                .dueDiligenceEndDate ??
+              '',
+
+            dueDiligenceDaysAfterEffectiveDate:
+              offerVersion.terms
+                .deposits
+                .dueDiligenceDaysAfterEffectiveDate ??
+              null,
+
+            dueDiligenceEndTime:
+              '17:00'
+          },
+
+          concessions: {
+            concessionType:
+              offerVersion.terms
+                .concessions
+                .concessionType,
+
+            sellerConcessionAmount:
+              fromOptionalCents(
+                offerVersion.terms
+                  .concessions
+                  .sellerConcessionInCents
+              ),
+
+            sellerConcessionPercentage:
+              offerVersion.terms
+                .concessions
+                .sellerConcessionPercentage ??
+              null,
+
+            homeWarrantyRequested:
+              offerVersion.terms
+                .concessions
+                .homeWarrantyRequested,
+
+            homeWarrantyAmount:
+              fromOptionalCents(
+                offerVersion.terms
+                  .concessions
+                  .homeWarrantyInCents
+              )
+          },
+
+          propertyInclusions: {
+            manufacturedHomeIncluded:
+              offerVersion.terms
+                .propertyTerms
+                .manufacturedHomeIncluded,
+
+            separatePropertyIncluded:
+              offerVersion.terms
+                .propertyTerms
+                .separatePropertyIncluded,
+
+            separatePropertyDescription:
+              offerVersion.terms
+                .propertyTerms
+                .separatePropertyDescription ??
+              '',
+
+            includedItemsDescription:
+              offerVersion.terms
+                .propertyTerms
+                .includedItemsDescription ??
+              '',
+
+            excludedItemsDescription:
+              offerVersion.terms
+                .propertyTerms
+                .excludedItemsDescription ??
+              '',
+
+            leasedItemsDescription:
+              offerVersion.terms
+                .propertyTerms
+                .leasedItemsDescription ??
+              ''
+          },
+
+          settlementPossession: {
+            settlementDate:
+              offerVersion.terms
+                .settlement
+                .settlementDate,
+
+            possessionTiming:
+              offerVersion.terms
+                .settlement
+                .possessionTiming,
+
+            possessionAgreementDocumentUid:
+              offerVersion.terms
+                .settlement
+                .possessionAgreementDocumentUid ??
+              ''
+          },
+
+          disclosuresAddenda: {
+            residentialPropertyStatus:
+              disclosureStatusForForm(
+                offerVersion.terms
+                  .buyerDisclosures
+                  .residentialProperty
+                  .status
+              ),
+
+            residentialPropertyDocumentUid:
+              offerVersion.terms
+                .buyerDisclosures
+                .residentialProperty
+                .documentUid ??
+              '',
+
+            residentialPropertyDocumentVersionId:
+              offerVersion.terms
+                .buyerDisclosures
+                .residentialProperty
+                .documentVersionId ??
+              '',
+
+            residentialPropertyExemptionReason:
+              offerVersion.terms
+                .buyerDisclosures
+                .residentialProperty
+                .exemptionReason ??
+              '',
+
+            residentialPropertyAcknowledged:
+              offerVersion.terms
+                .buyerDisclosures
+                .residentialProperty
+                .acknowledged,
+
+            mineralOilGasRightsStatus:
+              disclosureStatusForForm(
+                offerVersion.terms
+                  .buyerDisclosures
+                  .mineralOilGasRights
+                  .status
+              ),
+
+            mineralOilGasRightsDocumentUid:
+              offerVersion.terms
+                .buyerDisclosures
+                .mineralOilGasRights
+                .documentUid ??
+              '',
+
+            mineralOilGasRightsDocumentVersionId:
+              offerVersion.terms
+                .buyerDisclosures
+                .mineralOilGasRights
+                .documentVersionId ??
+              '',
+
+            mineralOilGasRightsExemptionReason:
+              offerVersion.terms
+                .buyerDisclosures
+                .mineralOilGasRights
+                .exemptionReason ??
+              '',
+
+            mineralOilGasRightsAcknowledged:
+              offerVersion.terms
+                .buyerDisclosures
+                .mineralOilGasRights
+                .acknowledged
+          },
+
+          additionalTerms: {
+            hasAdditionalTerms:
+              offerVersion.terms
+                .additionalTermsExhibit
+                .included,
+
+            preparedBy:
+              offerVersion.terms
+                .additionalTermsExhibit
+                .preparedBy ??
+              '',
+
+            documentUid:
+              offerVersion.terms
+                .additionalTermsExhibit
+                .documentUid ??
+              ''
+          },
+
+          offerExpiration: {
+            expirationDate:
+              expiration.date,
+
+            expirationTime:
+              expiration.time,
+
+            timeZone:
+              'America/New_York'
+          },
+
+          offerReview: {
+            electronicRecordsConsent:
+              offerVersion.terms
+                .delivery
+                .electronicDeliveryAuthorized
           }
         },
         {
@@ -1058,7 +1337,13 @@ export class OfferWizardComponent
           'currentSectionIndex'
         ];
 
+      const schemaVersion =
+        savedWizardData?.[
+          'schemaVersion'
+        ];
+
       const hasSavedForm =
+        schemaVersion === 2 &&
         savedForm !== null &&
         typeof savedForm === 'object' &&
         !Array.isArray(savedForm) &&
@@ -1067,12 +1352,6 @@ export class OfferWizardComponent
             Record<string, unknown>
         ).length > 0;
 
-      /*
-       * Saved wizard values take precedence over profile
-       * and listing defaults. Disabled property controls
-       * are included because getRawValue() is used when
-       * the draft is saved.
-       */
       if (hasSavedForm) {
         this.offerForm.patchValue(
           savedForm as
@@ -1115,11 +1394,6 @@ export class OfferWizardComponent
 
       this.loading.set(false);
 
-      /*
-       * A new draft is saved immediately so the populated
-       * account, property and purchase-price values are
-       * preserved even if the buyer leaves without typing.
-       */
       if (!hasSavedForm) {
         await this.queueDraftSave();
       }
@@ -1158,15 +1432,355 @@ export class OfferWizardComponent
   private createWizardData():
     Record<string, unknown> {
     return {
+      schemaVersion: 2,
+
       currentSectionIndex:
         this.currentSectionIndex(),
 
-      /*
-       * getRawValue() includes the disabled property
-       * fields copied from the published listing.
-       */
       form:
         this.offerForm.getRawValue()
+    };
+  }
+
+  private createTerms(): OfferTerms {
+    if (!this.existingTerms) {
+      throw new Error(
+        'The existing offer terms are unavailable.'
+      );
+    }
+
+    const form =
+      this.offerForm.getRawValue();
+
+    const expiration =
+      createExpirationIso(
+        form.offerExpiration
+          .expirationDate,
+        form.offerExpiration
+          .expirationTime
+      );
+
+    return {
+      stateCode: 'NC',
+
+      property:
+        this.existingTerms.property,
+
+      propertyTerms: {
+        manufacturedHomeIncluded:
+          form.propertyInclusions
+            .manufacturedHomeIncluded ===
+          true,
+
+        separatePropertyIncluded:
+          form.propertyInclusions
+            .separatePropertyIncluded ===
+          true,
+
+        separatePropertyDescription:
+          optionalText(
+            form.propertyInclusions
+              .separatePropertyDescription
+          ),
+
+        includedItemsDescription:
+          optionalText(
+            form.propertyInclusions
+              .includedItemsDescription
+          ),
+
+        excludedItemsDescription:
+          optionalText(
+            form.propertyInclusions
+              .excludedItemsDescription
+          ),
+
+        leasedItemsDescription:
+          optionalText(
+            form.propertyInclusions
+              .leasedItemsDescription
+          )
+      },
+
+      purchase: {
+        purchasePriceInCents:
+          toCents(
+            form.priceFinancing
+              .purchasePrice
+          ),
+
+        financingType:
+          (
+            form.priceFinancing
+              .financingMethod ||
+            'unselected'
+          ) as
+            OfferTerms[
+              'purchase'
+            ][
+              'financingType'
+            ],
+
+        otherPropertyWillFundPurchase:
+          form.priceFinancing
+            .otherPropertyWillFundPurchase ===
+          true,
+
+        otherPropertyDescription:
+          optionalText(
+            form.priceFinancing
+              .otherPropertyDescription
+          )
+      },
+
+      deposits: {
+        depositInCents:
+          toCents(
+            form.depositsDueDiligence
+              .depositAmount
+          ),
+
+        depositDeliveryDays: 4,
+
+        escrowAgentName:
+          String(
+            form.depositsDueDiligence
+              .escrowAgentName ??
+            ''
+          ).trim(),
+
+        dueDiligenceDeadlineType:
+          (
+            form.depositsDueDiligence
+              .dueDiligenceDeadlineType ||
+            'unselected'
+          ) as
+            OfferTerms[
+              'deposits'
+            ][
+              'dueDiligenceDeadlineType'
+            ],
+
+        dueDiligenceEndDate:
+          optionalText(
+            form.depositsDueDiligence
+              .dueDiligenceEndDate
+          ),
+
+        dueDiligenceDaysAfterEffectiveDate:
+          optionalInteger(
+            form.depositsDueDiligence
+              .dueDiligenceDaysAfterEffectiveDate
+          ),
+
+        dueDiligenceEndTime: '17:00'
+      },
+
+      concessions: {
+        concessionType:
+          (
+            form.concessions
+              .concessionType ||
+            'none'
+          ) as
+              OfferTerms[
+                'concessions'
+              ][
+                'concessionType'
+              ],
+
+        sellerConcessionInCents:
+          optionalCents(
+            form.concessions
+              .sellerConcessionAmount
+          ),
+
+        sellerConcessionPercentage:
+          optionalNumber(
+            form.concessions
+              .sellerConcessionPercentage
+          ),
+
+        homeWarrantyRequested:
+          form.concessions
+            .homeWarrantyRequested ===
+          true,
+
+        homeWarrantyInCents:
+          optionalCents(
+            form.concessions
+              .homeWarrantyAmount
+          )
+      },
+
+      settlement: {
+        settlementDate:
+          String(
+            form.settlementPossession
+              .settlementDate ??
+            ''
+          ),
+
+        possessionTiming:
+          (
+            form.settlementPossession
+              .possessionTiming ||
+            'at_closing'
+          ) as
+              OfferTerms[
+                'settlement'
+              ][
+                'possessionTiming'
+              ],
+
+        possessionAgreementDocumentUid:
+          optionalText(
+            form.settlementPossession
+              .possessionAgreementDocumentUid
+          )
+      },
+
+      buyerDisclosures: {
+        residentialProperty: {
+          status:
+            (
+              form.disclosuresAddenda
+                .residentialPropertyStatus ||
+              'unselected'
+            ) as
+              OfferTerms[
+                'buyerDisclosures'
+              ][
+                'residentialProperty'
+              ][
+                'status'
+              ],
+
+          documentUid:
+            optionalText(
+              form.disclosuresAddenda
+                .residentialPropertyDocumentUid
+            ),
+
+          documentVersionId:
+            optionalText(
+              form.disclosuresAddenda
+                .residentialPropertyDocumentVersionId
+            ),
+
+          exemptionReason:
+            optionalText(
+              form.disclosuresAddenda
+                .residentialPropertyExemptionReason
+            ),
+
+          acknowledged:
+            form.disclosuresAddenda
+              .residentialPropertyAcknowledged ===
+            true
+        },
+
+        mineralOilGasRights: {
+          status:
+            (
+              form.disclosuresAddenda
+                .mineralOilGasRightsStatus ||
+              'unselected'
+            ) as
+              OfferTerms[
+                'buyerDisclosures'
+              ][
+                'mineralOilGasRights'
+              ][
+                'status'
+              ],
+
+          documentUid:
+            optionalText(
+              form.disclosuresAddenda
+                .mineralOilGasRightsDocumentUid
+            ),
+
+          documentVersionId:
+            optionalText(
+              form.disclosuresAddenda
+                .mineralOilGasRightsDocumentVersionId
+            ),
+
+          exemptionReason:
+            optionalText(
+              form.disclosuresAddenda
+                .mineralOilGasRightsExemptionReason
+            ),
+
+          acknowledged:
+            form.disclosuresAddenda
+              .mineralOilGasRightsAcknowledged ===
+            true
+        }
+      },
+
+      sellerStatements:
+        this.existingTerms
+          .sellerStatements,
+
+      addenda:
+        this.existingTerms.addenda,
+
+      additionalTermsExhibit: {
+        included:
+          form.additionalTerms
+            .hasAdditionalTerms ===
+          true,
+
+        preparedBy:
+          form.additionalTerms
+            .hasAdditionalTerms ===
+              true
+            ? (
+              form.additionalTerms
+                .preparedBy ||
+              undefined
+            ) as
+                OfferTerms[
+                  'additionalTermsExhibit'
+                ][
+                  'preparedBy'
+                ]
+            : undefined,
+
+        documentUid:
+          form.additionalTerms
+            .hasAdditionalTerms ===
+              true
+            ? optionalText(
+              form.additionalTerms
+                .documentUid
+            )
+            : undefined
+      },
+
+      delivery: {
+        expiresAt: expiration,
+
+        timeZone:
+          'America/New_York',
+
+        buyerDeliveryEmail:
+          this.existingTerms
+            .delivery
+            .buyerDeliveryEmail,
+
+        sellerDeliveryEmail:
+          this.existingTerms
+            .delivery
+            .sellerDeliveryEmail,
+
+        electronicDeliveryAuthorized:
+          form.offerReview
+            .electronicRecordsConsent ===
+          true
+      }
     };
   }
 
@@ -1190,6 +1804,7 @@ export class OfferWizardComponent
     if (
       !this.offerUid ||
       !this.offerVersionUid ||
+      !this.existingTerms ||
       this.loading()
     ) {
       return;
@@ -1198,15 +1813,15 @@ export class OfferWizardComponent
     const wizardData =
       this.createWizardData();
 
-    const serializedSnapshot =
-      JSON.stringify(
-        wizardData
-      );
+    const terms =
+      this.createTerms();
 
-    /*
-     * Navigation and autosave can request the same save.
-     * Avoid writing an identical snapshot twice.
-     */
+    const serializedSnapshot =
+      JSON.stringify({
+        wizardData,
+        terms
+      });
+
     if (
       serializedSnapshot ===
       this.lastSavedSnapshot
@@ -1222,9 +1837,14 @@ export class OfferWizardComponent
         this.offerUid,
         this.offerVersionUid,
         {
-          wizardData
+          terms,
+          wizardData,
+          expiresAt:
+            terms.delivery.expiresAt
         }
       );
+
+      this.existingTerms = terms;
 
       this.lastSavedSnapshot =
         serializedSnapshot;
@@ -1261,7 +1881,7 @@ export class OfferWizardComponent
 
     if (!(section instanceof FormGroup)) {
       throw new Error(
-        `Offer section "${this.currentSection().key}" is unavailable.`
+        'The requested offer section is unavailable.'
       );
     }
 
@@ -1325,9 +1945,7 @@ export class OfferWizardComponent
     this.errorMessage.set('');
 
     if (this.isLastSection()) {
-      await this.queueDraftSave();
-
-      this.prepareForSubmission();
+      await this.submitCurrentOffer();
       return;
     }
 
@@ -1366,10 +1984,6 @@ export class OfferWizardComponent
       try {
         await this.queueDraftSave();
       } catch {
-        /*
-         * The save error is already displayed. Do not
-         * silently navigate away after a failed final save.
-         */
         return;
       }
     }
@@ -1388,7 +2002,64 @@ export class OfferWizardComponent
     ]);
   }
 
-  private prepareForSubmission(): void {
+  private async submitCurrentOffer():
+    Promise<void> {
+    if (!this.prepareForSubmission()) {
+      return;
+    }
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
+    this.saveMessage.set('');
+
+    try {
+      await this.queueDraftSave();
+
+      await this.offerService.submitVersion(
+        this.offerUid,
+        this.offerVersionUid
+      );
+
+      try {
+        await this.offerDocumentService
+          .generateAgreement(
+            this.offerUid,
+            this.offerVersionUid,
+            this.offerVersionNumber === 1
+              ? 'offer_agreement'
+              : 'counteroffer_agreement'
+          );
+      } catch (error: unknown) {
+        console.error(
+          'The offer was submitted, but its agreement PDF could not be prepared automatically.',
+          error
+        );
+      }
+
+      await this.router.navigate([
+        '/offers',
+        this.offerUid
+      ]);
+    } catch (error: unknown) {
+      console.error(
+        'Unable to submit the offer.',
+        error
+      );
+
+      this.errorMessage.set(
+        error instanceof Error
+          ? error.message
+          : 'Your offer could not be submitted. Please try again.'
+      );
+
+      this.scrollToTop();
+    } finally {
+      this.submitting.set(false);
+    }
+  }
+
+  private prepareForSubmission():
+    boolean {
     this.offerForm.markAllAsTouched();
 
     if (this.offerForm.invalid) {
@@ -1404,17 +2075,10 @@ export class OfferWizardComponent
       );
 
       this.scrollToTop();
-      return;
+      return false;
     }
 
-    /*
-     * Submission will be connected after the section
-     * components are complete and the final review screen
-     * displays the complete offer.
-     */
-    this.saveMessage.set(
-      'The offer is complete and ready for final review.'
-    );
+    return true;
   }
 
   private findFirstInvalidSection():
@@ -1440,54 +2104,224 @@ export class OfferWizardComponent
   }
 }
 
-function possessionNotBeforeSettlementValidator(
+
+function priceFundingValidator(
   control: AbstractControl
 ): ValidationErrors | null {
-  const settlementDate =
-    control.get(
-      'proposedSettlementDate'
-    )?.value;
-
-  const possessionDate =
-    control.get(
-      'proposedPossessionDate'
-    )?.value;
-
   if (
-    !settlementDate ||
-    !possessionDate
-  ) {
-    return null;
-  }
-
-  const settlement =
-    new Date(
-      `${settlementDate}T00:00:00`
-    );
-
-  const possession =
-    new Date(
-      `${possessionDate}T00:00:00`
-    );
-
-  if (
-    Number.isNaN(
-      settlement.getTime()
-    ) ||
-    Number.isNaN(
-      possession.getTime()
+    control.get(
+      'otherPropertyWillFundPurchase'
+    )?.value === true &&
+    !hasText(
+      control.get(
+        'otherPropertyDescription'
+      )?.value
     )
   ) {
+    return {
+      otherPropertyDescriptionRequired:
+        true
+    };
+  }
+
+  return null;
+}
+
+
+function dueDiligenceValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  const deadlineType =
+    control.get(
+      'dueDiligenceDeadlineType'
+    )?.value;
+
+  if (
+    deadlineType === 'specific_date' &&
+    !hasText(
+      control.get(
+        'dueDiligenceEndDate'
+      )?.value
+    )
+  ) {
+    return {
+      dueDiligenceEndDateRequired:
+        true
+    };
+  }
+
+  if (
+    deadlineType ===
+      'days_after_effective_date'
+  ) {
+    const days =
+      Number(
+        control.get(
+          'dueDiligenceDaysAfterEffectiveDate'
+        )?.value
+      );
+
+    if (
+      !Number.isInteger(days) ||
+      days <= 0 ||
+      days > 365
+    ) {
+      return {
+        dueDiligenceDaysRequired:
+          true
+      };
+    }
+  }
+
+  return null;
+}
+
+
+function concessionsValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  const type =
+    control.get(
+      'concessionType'
+    )?.value;
+
+  if (
+    type === 'amount' &&
+    !isPositiveNumber(
+      control.get(
+        'sellerConcessionAmount'
+      )?.value
+    )
+  ) {
+    return {
+      concessionAmountRequired:
+        true
+    };
+  }
+
+  if (
+    type === 'percentage' &&
+    !isPositiveNumber(
+      control.get(
+        'sellerConcessionPercentage'
+      )?.value
+    )
+  ) {
+    return {
+      concessionPercentageRequired:
+        true
+    };
+  }
+
+  if (
+    control.get(
+      'homeWarrantyRequested'
+    )?.value === true &&
+    !isPositiveNumber(
+      control.get(
+        'homeWarrantyAmount'
+      )?.value
+    )
+  ) {
+    return {
+      homeWarrantyAmountRequired:
+        true
+    };
+  }
+
+  return null;
+}
+
+
+function propertyInclusionsValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  if (
+    control.get(
+      'separatePropertyIncluded'
+    )?.value === true &&
+    !hasText(
+      control.get(
+        'separatePropertyDescription'
+      )?.value
+    )
+  ) {
+    return {
+      separatePropertyDescriptionRequired:
+        true
+    };
+  }
+
+  return null;
+}
+
+
+function settlementPossessionValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  if (
+    control.get(
+      'possessionTiming'
+    )?.value === 'other' &&
+    !hasText(
+      control.get(
+        'possessionAgreementDocumentUid'
+      )?.value
+    )
+  ) {
+    return {
+      possessionAgreementRequired:
+        true
+    };
+  }
+
+  return null;
+}
+
+
+function additionalTermsValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  if (
+    control.get(
+      'hasAdditionalTerms'
+    )?.value !== true
+  ) {
     return null;
   }
 
-  return possession < settlement
-    ? {
-      possessionBeforeSettlement:
+  const preparedBy =
+    control.get(
+      'preparedBy'
+    )?.value;
+
+  if (
+    preparedBy !== 'buyer' &&
+    preparedBy !== 'seller' &&
+    preparedBy !== 'attorney'
+  ) {
+    return {
+      preparedByRequired:
         true
-    }
-    : null;
+    };
+  }
+
+  if (
+    !hasText(
+      control.get(
+        'documentUid'
+      )?.value
+    )
+  ) {
+    return {
+      additionalTermsDocumentRequired:
+        true
+    };
+  }
+
+  return null;
 }
+
 
 function offerExpirationValidator(
   control: AbstractControl
@@ -1511,7 +2345,10 @@ function offerExpirationValidator(
 
   const expiration =
     new Date(
-      `${expirationDate}T${expirationTime}:00`
+      String(expirationDate) +
+      'T' +
+      String(expirationTime) +
+      ':00'
     );
 
   if (
@@ -1533,6 +2370,232 @@ function offerExpirationValidator(
     }
     : null;
 }
+
+
+function createExpirationIso(
+  expirationDate: unknown,
+  expirationTime: unknown
+): string {
+  if (
+    !expirationDate ||
+    !expirationTime
+  ) {
+    return '';
+  }
+
+  const expiration =
+    new Date(
+      String(expirationDate) +
+      'T' +
+      String(expirationTime) +
+      ':00'
+    );
+
+  return Number.isNaN(
+    expiration.getTime()
+  )
+    ? ''
+    : expiration.toISOString();
+}
+
+
+function splitExpiration(
+  expiresAt: string
+): {
+  date: string;
+  time: string;
+} {
+  if (!expiresAt) {
+    return {
+      date: '',
+      time: ''
+    };
+  }
+
+  const expiration =
+    new Date(expiresAt);
+
+  if (
+    Number.isNaN(
+      expiration.getTime()
+    )
+  ) {
+    return {
+      date: '',
+      time: ''
+    };
+  }
+
+  const year =
+    expiration.getFullYear();
+
+  const month =
+    String(
+      expiration.getMonth() + 1
+    )
+      .padStart(2, '0');
+
+  const day =
+    String(
+      expiration.getDate()
+    )
+      .padStart(2, '0');
+
+  const hours =
+    String(
+      expiration.getHours()
+    )
+      .padStart(2, '0');
+
+  const minutes =
+    String(
+      expiration.getMinutes()
+    )
+      .padStart(2, '0');
+
+  return {
+    date:
+      year + '-' + month + '-' + day,
+
+    time:
+      hours + ':' + minutes
+  };
+}
+
+
+function toCents(
+  value: unknown
+): number {
+  const amount =
+    Number(value ?? 0);
+
+  return Number.isFinite(amount)
+    ? Math.round(amount * 100)
+    : 0;
+}
+
+
+function optionalCents(
+  value: unknown
+): number | undefined {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ''
+  ) {
+    return undefined;
+  }
+
+  return toCents(
+    Number(value)
+  );
+}
+
+
+function fromCents(
+  value: number
+): number {
+  return value / 100;
+}
+
+
+function fromOptionalCents(
+  value: number | undefined
+): number | null {
+  return typeof value === 'number'
+    ? fromCents(value)
+    : null;
+}
+
+
+function optionalNumber(
+  value: unknown
+): number | undefined {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ''
+  ) {
+    return undefined;
+  }
+
+  const parsed =
+    Number(value);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : undefined;
+}
+
+
+function optionalInteger(
+  value: unknown
+): number | undefined {
+  const parsed =
+    optionalNumber(value);
+
+  return (
+    typeof parsed === 'number' &&
+    Number.isInteger(parsed)
+  )
+    ? parsed
+    : undefined;
+}
+
+
+function optionalText(
+  value: unknown
+): string | undefined {
+  const normalized =
+    typeof value === 'string'
+      ? value.trim()
+      : '';
+
+  return normalized.length > 0
+    ? normalized
+    : undefined;
+}
+
+
+function disclosureStatusForForm(
+  value:
+    OfferTerms[
+      'buyerDisclosures'
+    ][
+      'residentialProperty'
+    ][
+      'status'
+    ]
+): string {
+  return value === 'unselected'
+    ? ''
+    : value;
+}
+
+
+function hasText(
+  value: unknown
+): boolean {
+  return (
+    typeof value === 'string' &&
+    value.trim().length > 0
+  );
+}
+
+
+function isPositiveNumber(
+  value: unknown
+): boolean {
+  const parsed =
+    Number(value);
+
+  return (
+    Number.isFinite(parsed) &&
+    parsed > 0
+  );
+}
+
+
 function formatUsPhoneNumber(
   value: string
 ): string {
@@ -1558,8 +2621,8 @@ function formatUsPhoneNumber(
   }
 
   return (
-    `(${digits.slice(0, 3)}) ` +
-    `${digits.slice(3, 6)}-` +
+    '(' + digits.slice(0, 3) + ') ' +
+    digits.slice(3, 6) + '-' +
     digits.slice(6)
   );
 }

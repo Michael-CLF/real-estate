@@ -17,6 +17,8 @@ export type OfferSignatureMethod =
   | 'external_provider';
 
 export interface CreateOfferSignatureInput {
+  signatureUid?: string;
+
   signerUid: string;
   signerRole: OfferSignerRole;
 
@@ -204,7 +206,9 @@ export function createOfferSignatureRecord(
     Timestamp.now();
 
   const signatureUid =
-    randomUUID();
+    normalizeOptionalString(
+      input.signatureUid
+    ) ?? randomUUID();
 
   const auditHash =
     createSignatureAuditHash({

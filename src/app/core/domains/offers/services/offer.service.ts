@@ -37,7 +37,8 @@ import {
 
 import {
   CreateCounterofferResult,
-  RespondToOfferResult
+  RespondToOfferResult,
+  SignOfferResult
 } from '../repositories/offer.repository';
 
 import {
@@ -58,6 +59,7 @@ export interface OfferParticipantAccess {
   canSubmitCurrentVersion: boolean;
   canCounter: boolean;
   canAccept: boolean;
+  canSign: boolean;
   canDecline: boolean;
   canWithdraw: boolean;
 }
@@ -363,6 +365,51 @@ export class OfferService {
   }
 
 
+  async signOffer(
+    offerUid: string,
+    offerVersionUid: string,
+    documentUid: string,
+    typedSignature: string,
+    consentToElectronicRecords: boolean,
+    consentToElectronicSignature: boolean,
+    certificationAccepted: boolean
+  ): Promise<SignOfferResult> {
+    this.requireText(
+      offerUid,
+      'An offer identifier is required.'
+    );
+
+    this.requireText(
+      offerVersionUid,
+      'An offer-version identifier is required.'
+    );
+
+    this.requireText(
+      documentUid,
+      'An agreement document identifier is required.'
+    );
+
+    this.requireText(
+      typedSignature,
+      'Your typed legal signature is required.'
+    );
+
+    return this.offerRepository
+      .signOffer({
+        offerUid,
+        offerVersionUid,
+        documentUid,
+
+        typedSignature:
+          typedSignature.trim(),
+
+        consentToElectronicRecords,
+        consentToElectronicSignature,
+        certificationAccepted
+      });
+  }
+
+
   async withdrawOffer(
     offerUid: string,
     offerVersionUid: string
@@ -430,6 +477,32 @@ export class OfferService {
       version.status === 'delivered' ||
       version.status === 'signed';
 
+    const currentParty = [
+      ...version.buyers,
+      ...version.sellers
+    ].find(
+      party =>
+        party.userUid === userUid &&
+        party.requiredSigner
+    );
+
+    const currentPartyHasSigned =
+      currentParty?.signature.status ===
+      'signed';
+
+    const initiatingPartyCanSign =
+      isInitiatingParty &&
+      (
+        version.status ===
+          'awaiting_signatures' ||
+        version.status ===
+          'partially_signed'
+      );
+
+    const receivingPartyCanSign =
+      isReceivingParty &&
+      actionableStatus;
+
     return {
       userUid,
 
@@ -456,6 +529,14 @@ export class OfferService {
       canAccept:
         actionableStatus &&
         isReceivingParty,
+
+      canSign:
+        !!currentParty &&
+        !currentPartyHasSigned &&
+        (
+          initiatingPartyCanSign ||
+          receivingPartyCanSign
+        ),
 
       canDecline:
         actionableStatus &&

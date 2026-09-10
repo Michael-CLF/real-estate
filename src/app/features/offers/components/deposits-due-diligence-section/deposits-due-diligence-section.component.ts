@@ -23,6 +23,7 @@ import {
   startWith
 } from 'rxjs';
 
+
 @Component({
   selector:
     'app-deposits-due-diligence-section',
@@ -78,30 +79,23 @@ implements OnInit {
     return section;
   }
 
-  get hasAdditionalEarnestMoney():
-    boolean {
-    const amount =
-      Number(
-        this.control(
-          'additionalEarnestMoneyAmount'
-        )?.value ?? 0
-      );
-
-    return (
-      Number.isFinite(amount) &&
-      amount > 0
+  get deadlineType(): string {
+    return String(
+      this.control(
+        'dueDiligenceDeadlineType'
+      )?.value ?? ''
     );
   }
 
   ngOnInit(): void {
     this.control(
-      'additionalEarnestMoneyAmount'
+      'dueDiligenceDeadlineType'
     )
       ?.valueChanges
       .pipe(
         startWith(
           this.control(
-            'additionalEarnestMoneyAmount'
+            'dueDiligenceDeadlineType'
           )?.value
         ),
 
@@ -111,7 +105,7 @@ implements OnInit {
       )
       .subscribe(
         () => {
-          this.updateAdditionalDepositValidator();
+          this.updateDeadlineValidators();
         }
       );
   }
@@ -158,12 +152,16 @@ implements OnInit {
       return 'This field is required.';
     }
 
+    if (control.hasError('pattern')) {
+      return 'Select a valid due-diligence deadline.';
+    }
+
     if (control.hasError('min')) {
-      return 'Enter an amount or number of days of zero or greater.';
+      return 'Enter zero or a greater amount.';
     }
 
     if (control.hasError('max')) {
-      return 'The entered number of days is too large.';
+      return 'The number of days cannot exceed 365.';
     }
 
     if (control.hasError('maxlength')) {
@@ -173,22 +171,56 @@ implements OnInit {
     return 'Review the information entered in this field.';
   }
 
-  private updateAdditionalDepositValidator():
+  private updateDeadlineValidators():
     void {
-    const dueDateControl =
+    const dateControl =
       this.control(
-        'additionalEarnestMoneyDueDate'
+        'dueDiligenceEndDate'
       );
 
-    if (this.hasAdditionalEarnestMoney) {
-      dueDateControl?.setValidators([
+    const daysControl =
+      this.control(
+        'dueDiligenceDaysAfterEffectiveDate'
+      );
+
+    if (
+      this.deadlineType ===
+        'specific_date'
+    ) {
+      dateControl?.setValidators([
         Validators.required
       ]);
+
+      daysControl?.setValidators([
+        Validators.min(1),
+        Validators.max(365)
+      ]);
+    } else if (
+      this.deadlineType ===
+        'days_after_effective_date'
+    ) {
+      dateControl?.clearValidators();
+
+      daysControl?.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(365)
+      ]);
     } else {
-      dueDateControl?.clearValidators();
+      dateControl?.clearValidators();
+
+      daysControl?.setValidators([
+        Validators.min(1),
+        Validators.max(365)
+      ]);
     }
 
-    dueDateControl
+    dateControl
+      ?.updateValueAndValidity({
+        emitEvent: false
+      });
+
+    daysControl
       ?.updateValueAndValidity({
         emitEvent: false
       });

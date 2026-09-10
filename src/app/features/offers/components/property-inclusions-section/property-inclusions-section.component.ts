@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  OnInit,
   inject
 } from '@angular/core';
 
@@ -9,8 +11,18 @@ import {
   ControlContainer,
   FormGroup,
   FormGroupDirective,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  Validators
 } from '@angular/forms';
+
+import {
+  takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
+  startWith
+} from 'rxjs';
+
 
 @Component({
   selector:
@@ -41,10 +53,14 @@ import {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
-export class PropertyInclusionsSectionComponent {
+export class PropertyInclusionsSectionComponent
+implements OnInit {
 
   private readonly parentFormDirective =
     inject(FormGroupDirective);
+
+  private readonly destroyRef =
+    inject(DestroyRef);
 
   get sectionForm(): FormGroup {
     const section =
@@ -63,6 +79,43 @@ export class PropertyInclusionsSectionComponent {
     return section;
   }
 
+  get manufacturedHomeIncluded():
+    boolean {
+    return this.isSelected(
+      'manufacturedHomeIncluded'
+    );
+  }
+
+  get separatePropertyIncluded():
+    boolean {
+    return this.isSelected(
+      'separatePropertyIncluded'
+    );
+  }
+
+  ngOnInit(): void {
+    this.control(
+      'separatePropertyIncluded'
+    )
+      ?.valueChanges
+      .pipe(
+        startWith(
+          this.control(
+            'separatePropertyIncluded'
+          )?.value
+        ),
+
+        takeUntilDestroyed(
+          this.destroyRef
+        )
+      )
+      .subscribe(
+        () => {
+          this.updateSeparatePropertyValidator();
+        }
+      );
+  }
+
   control(
     controlName: string
   ): AbstractControl | null {
@@ -74,11 +127,9 @@ export class PropertyInclusionsSectionComponent {
   isSelected(
     controlName: string
   ): boolean {
-    return (
-      this.control(
-        controlName
-      )?.value === true
-    );
+    return this.control(
+      controlName
+    )?.value === true;
   }
 
   isInvalid(
@@ -111,10 +162,40 @@ export class PropertyInclusionsSectionComponent {
       return '';
     }
 
+    if (control.hasError('required')) {
+      return 'This field is required.';
+    }
+
     if (control.hasError('maxlength')) {
       return 'The entered value is too long.';
     }
 
     return 'Review the information entered in this field.';
+  }
+
+  private updateSeparatePropertyValidator():
+    void {
+    const descriptionControl =
+      this.control(
+        'separatePropertyDescription'
+      );
+
+    if (this.separatePropertyIncluded) {
+      descriptionControl
+        ?.setValidators([
+          Validators.required,
+          Validators.maxLength(1500)
+        ]);
+    } else {
+      descriptionControl
+        ?.setValidators([
+          Validators.maxLength(1500)
+        ]);
+    }
+
+    descriptionControl
+      ?.updateValueAndValidity({
+        emitEvent: false
+      });
   }
 }

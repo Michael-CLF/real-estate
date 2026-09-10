@@ -166,8 +166,10 @@ export interface OfferEligibleListing {
   deedBook?: string;
   deedPage?: string;
   legalDescription?: string;
+  otherPropertyReference?: string;
 
   propertyType: string;
+  yearBuilt?: number;
 
   listPrice: number;
 
@@ -229,8 +231,10 @@ export interface OfferPropertySnapshotDocument {
   deedPage?: string;
 
   legalDescription?: string;
+  otherPropertyReference?: string;
 
   propertyType: string;
+  yearBuilt?: number;
 
   listPriceInCents: number;
 }
@@ -354,6 +358,13 @@ export interface OfferDocument {
 
   status: OfferStatus;
 
+  /*
+   * True while this complete offer transaction contributes
+   * one unit to the listing's pendingOfferCount. Counteroffer
+   * versions do not create additional units.
+   */
+  pendingOfferCounted?: boolean;
+
   currentVersionUid: string;
   currentVersionNumber: number;
 
@@ -436,6 +447,222 @@ export interface OfferStatusHistoryDocument {
 
 
 /*
+ * North Carolina purchase-agreement terms stored in each
+ * immutable offer or counteroffer version.
+ */
+export type OfferFinancingType =
+  | 'unselected'
+  | 'cash'
+  | 'loan';
+
+
+export type OfferDueDiligenceDeadlineType =
+  | 'unselected'
+  | 'specific_date'
+  | 'days_after_effective_date';
+
+
+export type OfferPossessionTiming =
+  | 'at_closing'
+  | 'other';
+
+
+export type OfferSellerConcessionType =
+  | 'none'
+  | 'amount'
+  | 'percentage';
+
+
+export type OfferDisclosureReceiptStatus =
+  | 'unselected'
+  | 'received'
+  | 'not_received'
+  | 'exempt';
+
+
+export type OfferSellerOwnershipStatus =
+  | 'owned_at_least_one_year'
+  | 'owned_less_than_one_year'
+  | 'does_not_yet_own';
+
+
+export type OfferFuelTankOwnership =
+  | 'owned'
+  | 'leased';
+
+
+export type OfferAdditionalTermsPreparedBy =
+  | 'buyer'
+  | 'seller'
+  | 'attorney';
+
+
+export interface OfferPropertyTermsDocument {
+  manufacturedHomeIncluded: boolean;
+
+  separatePropertyIncluded: boolean;
+  separatePropertyDescription?: string;
+
+  includedItemsDescription?: string;
+  excludedItemsDescription?: string;
+  leasedItemsDescription?: string;
+}
+
+
+export interface OfferPurchaseTermsDocument {
+  purchasePriceInCents: number;
+  financingType: OfferFinancingType;
+
+  /*
+   * Disclosure only. It does not create a financing or
+   * sale-of-other-property contingency.
+   */
+  otherPropertyWillFundPurchase: boolean;
+  otherPropertyDescription?: string;
+}
+
+
+export interface OfferDepositTermsDocument {
+  depositInCents: number;
+
+  /*
+   * The attorney agreement currently requires delivery
+   * within four calendar days after the Effective Date.
+   */
+  depositDeliveryDays: 4;
+
+  escrowAgentName: string;
+
+  dueDiligenceDeadlineType:
+    OfferDueDiligenceDeadlineType;
+
+  dueDiligenceEndDate?: string;
+  dueDiligenceDaysAfterEffectiveDate?: number;
+
+  dueDiligenceEndTime: '17:00';
+}
+
+
+export interface OfferConcessionTermsDocument {
+  concessionType: OfferSellerConcessionType;
+
+  sellerConcessionInCents?: number;
+  sellerConcessionPercentage?: number;
+
+  homeWarrantyRequested: boolean;
+  homeWarrantyInCents?: number;
+}
+
+
+export interface OfferSettlementTermsDocument {
+  settlementDate: string;
+
+  possessionTiming: OfferPossessionTiming;
+  possessionAgreementDocumentUid?: string;
+}
+
+
+export interface OfferDisclosureReceiptDocument {
+  status: OfferDisclosureReceiptStatus;
+
+  exemptionReason?: string;
+
+  documentUid?: string;
+  documentVersionId?: string;
+
+  acknowledged: boolean;
+  acknowledgedAt?: Timestamp;
+}
+
+
+export interface OfferBuyerDisclosureTermsDocument {
+  residentialProperty:
+    OfferDisclosureReceiptDocument;
+
+  mineralOilGasRights:
+    OfferDisclosureReceiptDocument;
+}
+
+
+export interface OfferSellerStatementsDocument {
+  ownershipStatus?: OfferSellerOwnershipStatus;
+
+  leadBasedPaintApplies?: boolean;
+  leadBasedPaintDisclosureDocumentUid?: string;
+
+  ownersAssociationApplies?: boolean;
+  ownersAssociationName?: string;
+  ownersAssociationDuesInCents?: number;
+  ownersAssociationDuesFrequency?: string;
+  ownersAssociationContact?: string;
+
+  fuelTankPresent?: boolean;
+  fuelTankOwnership?: OfferFuelTankOwnership;
+
+  leasesExist?: boolean;
+  leaseAddendumDocumentUid?: string;
+}
+
+
+export interface OfferAddendumSelectionDocument {
+  addendumUid: string;
+
+  title: string;
+  documentUid: string;
+
+  preparedBy: OfferAdditionalTermsPreparedBy;
+
+  included: boolean;
+}
+
+
+export interface OfferAdditionalTermsExhibitDocument {
+  included: boolean;
+
+  preparedBy?: OfferAdditionalTermsPreparedBy;
+  documentUid?: string;
+}
+
+
+export interface OfferDeliveryTermsDocument {
+  expiresAt: string;
+
+  timeZone: 'America/New_York';
+
+  buyerDeliveryEmail: string;
+  sellerDeliveryEmail: string;
+
+  electronicDeliveryAuthorized: boolean;
+}
+
+
+export interface OfferTermsDocument {
+  stateCode: 'NC';
+
+  property: OfferPropertySnapshotDocument;
+  propertyTerms: OfferPropertyTermsDocument;
+
+  purchase: OfferPurchaseTermsDocument;
+  deposits: OfferDepositTermsDocument;
+  concessions: OfferConcessionTermsDocument;
+  settlement: OfferSettlementTermsDocument;
+
+  buyerDisclosures:
+    OfferBuyerDisclosureTermsDocument;
+
+  sellerStatements:
+    OfferSellerStatementsDocument;
+
+  addenda: OfferAddendumSelectionDocument[];
+
+  additionalTermsExhibit:
+    OfferAdditionalTermsExhibitDocument;
+
+  delivery: OfferDeliveryTermsDocument;
+}
+
+
+/*
  * Offer-version document stored at:
  *
  * offers/{offerUid}/versions/{offerVersionUid}
@@ -459,7 +686,7 @@ export interface OfferVersionDocument {
 
   stateCode: string;
 
-  terms: Record<string, unknown>;
+  terms: OfferTermsDocument;
   /*
  * Draft-only snapshot of the Angular offer wizard.
  */

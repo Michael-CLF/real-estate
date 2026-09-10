@@ -18,7 +18,44 @@ export class ListingBadgeService {
     listing: ListingBadgeSource,
     now: Date = new Date()
   ): ListingBadge[] {
+    if (listing.status === 'sold') {
+      return [
+        {
+          type: 'sold',
+          label: 'Sold',
+          icon: 'fa-solid fa-house-circle-check',
+          tone: 'green',
+          priority: 130
+        }
+      ];
+    }
+
+    if (listing.status === 'under_contract') {
+      return [
+        {
+          type: 'under-contract',
+          label: 'Under Contract',
+          icon: 'fa-solid fa-file-signature',
+          tone: 'navy',
+          priority: 120
+        }
+      ];
+    }
+
     const badges: ListingBadge[] = [];
+
+    if (
+      listing.status === 'active' &&
+      (listing.pendingOfferCount ?? 0) > 0
+    ) {
+      badges.push({
+        type: 'offer-pending',
+        label: 'Offer Pending',
+        icon: 'fa-solid fa-handshake',
+        tone: 'coral',
+        priority: 110
+      });
+    }
 
     if (listing.featuredListing === true) {
       badges.push({

@@ -23,6 +23,7 @@ import {
   startWith
 } from 'rxjs';
 
+
 @Component({
   selector:
     'app-concessions-section',
@@ -78,33 +79,30 @@ implements OnInit {
     return section;
   }
 
-  get closingCostsRequested():
-    boolean {
-    return (
+  get concessionType(): string {
+    return String(
       this.control(
-        'sellerPaidClosingCostsRequested'
-      )?.value === true
+        'concessionType'
+      )?.value ?? 'none'
     );
   }
 
-  get repairCreditRequested():
+  get homeWarrantyRequested():
     boolean {
-    return (
-      this.control(
-        'repairCreditRequested'
-      )?.value === true
-    );
+    return this.control(
+      'homeWarrantyRequested'
+    )?.value === true;
   }
 
   ngOnInit(): void {
     this.control(
-      'sellerPaidClosingCostsRequested'
+      'concessionType'
     )
       ?.valueChanges
       .pipe(
         startWith(
           this.control(
-            'sellerPaidClosingCostsRequested'
+            'concessionType'
           )?.value
         ),
 
@@ -114,18 +112,18 @@ implements OnInit {
       )
       .subscribe(
         () => {
-          this.updateClosingCostValidators();
+          this.updateConcessionValidators();
         }
       );
 
     this.control(
-      'repairCreditRequested'
+      'homeWarrantyRequested'
     )
       ?.valueChanges
       .pipe(
         startWith(
           this.control(
-            'repairCreditRequested'
+            'homeWarrantyRequested'
           )?.value
         ),
 
@@ -135,7 +133,7 @@ implements OnInit {
       )
       .subscribe(
         () => {
-          this.updateRepairCreditValidators();
+          this.updateWarrantyValidator();
         }
       );
   }
@@ -183,47 +181,61 @@ implements OnInit {
     }
 
     if (control.hasError('min')) {
-      return 'Enter an amount greater than zero.';
+      return 'Enter a value greater than zero.';
     }
 
     if (control.hasError('max')) {
       return 'Enter a percentage no greater than 100.';
     }
 
-    if (control.hasError('maxlength')) {
-      return 'The entered value is too long.';
-    }
-
     return 'Review the information entered in this field.';
   }
 
-  private updateClosingCostValidators():
+  private updateConcessionValidators():
     void {
     const amountControl =
       this.control(
-        'sellerPaidClosingCostsAmount'
+        'sellerConcessionAmount'
       );
 
     const percentageControl =
       this.control(
-        'sellerPaidClosingCostsPercentage'
+        'sellerConcessionPercentage'
       );
 
-    if (this.closingCostsRequested) {
+    if (this.concessionType === 'amount') {
       amountControl?.setValidators([
         Validators.required,
-        Validators.min(1)
+        Validators.min(0.01)
+      ]);
+
+      percentageControl?.setValidators([
+        Validators.min(0),
+        Validators.max(100)
+      ]);
+    } else if (
+      this.concessionType ===
+        'percentage'
+    ) {
+      amountControl?.setValidators([
+        Validators.min(0)
+      ]);
+
+      percentageControl?.setValidators([
+        Validators.required,
+        Validators.min(0.01),
+        Validators.max(100)
       ]);
     } else {
       amountControl?.setValidators([
         Validators.min(0)
       ]);
-    }
 
-    percentageControl?.setValidators([
-      Validators.min(0),
-      Validators.max(100)
-    ]);
+      percentageControl?.setValidators([
+        Validators.min(0),
+        Validators.max(100)
+      ]);
+    }
 
     amountControl
       ?.updateValueAndValidity({
@@ -236,17 +248,17 @@ implements OnInit {
       });
   }
 
-  private updateRepairCreditValidators():
+  private updateWarrantyValidator():
     void {
     const amountControl =
       this.control(
-        'repairCreditAmount'
+        'homeWarrantyAmount'
       );
 
-    if (this.repairCreditRequested) {
+    if (this.homeWarrantyRequested) {
       amountControl?.setValidators([
         Validators.required,
-        Validators.min(1)
+        Validators.min(0.01)
       ]);
     } else {
       amountControl?.setValidators([

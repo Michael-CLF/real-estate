@@ -18,6 +18,7 @@ import {
 
 import type {
   OfferDocument,
+  OfferTermsDocument,
   OfferVersionDocument,
   OfferVersionPartySnapshotDocument,
   SaveOfferDraftData,
@@ -285,7 +286,8 @@ function sanitizeDraftChanges(
     sanitized['terms'] =
       sanitizeTerms(
         changes['terms'],
-        currentVersion.terms
+        currentVersion.terms,
+        currentVersion.initiatedBy
       );
   }
 
@@ -371,8 +373,9 @@ function sanitizeDraftChanges(
 
 function sanitizeTerms(
   requestedTerms: unknown,
-  currentTerms: Record<string, unknown>
-): Record<string, unknown> {
+  currentTerms: OfferTermsDocument,
+  initiatedBy: 'buyer' | 'seller'
+): OfferTermsDocument {
   if (
     requestedTerms === null ||
     typeof requestedTerms !== 'object' ||
@@ -395,10 +398,70 @@ function sanitizeTerms(
    * snapshots. A browser may never replace them.
    */
   terms['stateCode'] =
-    currentTerms['stateCode'];
+    currentTerms.stateCode;
 
   terms['property'] =
-    currentTerms['property'];
+    currentTerms.property;
+
+  const requestedDeposits =
+    requireObject(
+      terms['deposits'],
+      'Deposit terms must be an object.'
+    );
+
+  /*
+   * These values come directly from the attorney-approved
+   * agreement and are not editable browser fields.
+   */
+  requestedDeposits[
+    'depositDeliveryDays'
+  ] = 4;
+
+  requestedDeposits[
+    'dueDiligenceEndTime'
+  ] = '17:00';
+
+  const requestedDelivery =
+    requireObject(
+      terms['delivery'],
+      'Delivery terms must be an object.'
+    );
+
+  /*
+   * Party delivery addresses are populated from the
+   * NavStreet account snapshots and cannot be replaced by
+   * the browser.
+   */
+  requestedDelivery[
+    'buyerDeliveryEmail'
+  ] = currentTerms
+    .delivery
+    .buyerDeliveryEmail;
+
+  requestedDelivery[
+    'sellerDeliveryEmail'
+  ] = currentTerms
+    .delivery
+    .sellerDeliveryEmail;
+
+  requestedDelivery['timeZone'] =
+    'America/New_York';
+
+  if (initiatedBy === 'buyer') {
+    /*
+     * A buyer cannot answer or overwrite the seller's
+     * Section 6 statements.
+     */
+    terms['sellerStatements'] =
+      currentTerms.sellerStatements;
+  } else {
+    /*
+     * A seller cannot rewrite disclosure selections that
+     * the buyer previously made and acknowledged.
+     */
+    terms['buyerDisclosures'] =
+      currentTerms.buyerDisclosures;
+  }
 
   rejectUnsafeObjectKeys(
     terms
@@ -406,7 +469,7 @@ function sanitizeTerms(
 
   return removeUndefinedValues(
     terms
-  );
+  ) as unknown as OfferTermsDocument;
 }
 
 function sanitizeWizardData(
@@ -507,9 +570,9 @@ function sanitizeInitiatingParty(
   }
 
   /*
-   * Additional-party invitations will be implemented as a
-   * separate secure workflow. Until then, saving a draft
-   * may update only existing party records.
+   * The MVP supports one buyer and one seller. Party names,
+   * email addresses and signature identities come from the
+   * trusted Firebase snapshots and are not browser-editable.
    */
   if (
     requestedParties.length !==
@@ -521,242 +584,60 @@ function sanitizeInitiatingParty(
     );
   }
 
-  return existingParties.map(
-    existingParty => {
-      const requestedParty =
-        requestedParties.find(
-          party => {
-            if (
-              party === null ||
-              typeof party !== 'object'
-            ) {
-              return false;
-            }
+  if (
+    !existingParties.some(
+      party =>
+        party.userUid === userUid &&
+        party.role === expectedRole
+    )
+  ) {
+    throw new HttpsError(
+      'permission-denied',
+      'The authenticated offer party could not be verified.'
+    );
+  }
 
-            return (
-              party as
-              Record<string, unknown>
-            )['partyUid'] ===
-              existingParty.partyUid;
-          }
-        );
-
-      if (!requestedParty) {
-        throw new HttpsError(
-          'invalid-argument',
-          'An existing offer party is missing from the save request.'
-        );
-      }
-
-      const requested =
-        requestedParty as
-        Record<string, unknown>;
-
-      if (
-        existingParty.role !==
-        expectedRole
-      ) {
-        throw new HttpsError(
-          'failed-precondition',
-          'The offer party role is invalid.'
-        );
-      }
-
-      /*
-       * Only the authenticated initiating party may change
-       * their own editable profile snapshot.
-       */
-      if (
-        existingParty.userUid !==
-        userUid
-      ) {
-        return existingParty;
-      }
-
-      const identityVerified =
-        existingParty
-          .identityVerification
-          .status === 'verified';
-
-      const firstName =
-        identityVerified
-          ? existingParty.firstName
-          : readEditableString(
-            requested,
-            'firstName',
-            100
-          );
-
-      const middleName =
-        identityVerified
-          ? existingParty.middleName
-          : readOptionalEditableString(
-            requested,
-            'middleName',
-            100
-          );
-
-      const lastName =
-        identityVerified
-          ? existingParty.lastName
-          : readEditableString(
-            requested,
-            'lastName',
-            100
-          );
-
-      const suffix =
-        identityVerified
-          ? existingParty.suffix
-          : readOptionalEditableString(
-            requested,
-            'suffix',
-            30
-          );
-
-      const legalName =
-        identityVerified
-          ? existingParty.legalName
-          : [
-            firstName,
-            middleName,
-            lastName,
-            suffix,
-          ]
-            .filter(
-              (
-                namePart
-              ): namePart is string =>
-                typeof namePart ===
-                'string' &&
-                namePart.length > 0
-            )
-            .join(' ');
-
-      const requestedAddress =
-        requireObject(
-          requested[
-          'mailingAddress'
-          ],
-          'A mailing address is required.'
-        );
-
-      return removeUndefinedValues({
-        ...existingParty,
-
-        capacity:
-          readPartyCapacity(
-            requested['capacity']
-          ),
-
-        firstName,
-        middleName,
-        lastName,
-        suffix,
-        legalName,
-
-        /*
-         * Email is tied to the authenticated NavStreet
-         * account and cannot be changed through an offer.
-         */
-        email:
-          existingParty.email,
-
-        phone:
-          readEditableString(
-            requested,
-            'phone',
-            40
-          ),
-
-        mailingAddress: {
-          addressLine1:
-            readEditableString(
-              requestedAddress,
-              'addressLine1',
-              200
-            ),
-
-          addressLine2:
-            readOptionalEditableString(
-              requestedAddress,
-              'addressLine2',
-              200
-            ),
-
-          city:
-            readEditableString(
-              requestedAddress,
-              'city',
-              100
-            ),
-
-          state:
-            readEditableString(
-              requestedAddress,
-              'state',
-              2
-            )
-              .toUpperCase(),
-
-          zipCode:
-            readEditableString(
-              requestedAddress,
-              'zipCode',
-              20
-            ),
-
-          country:
-            readEditableString(
-              requestedAddress,
-              'country',
-              2
-            )
-              .toUpperCase(),
-        },
-
-        intendedUse:
-          expectedRole === 'buyer'
-            ? readOptionalEditableString(
-              requested,
-              'intendedUse',
-              50
-            )
-            : existingParty
-              .intendedUse,
-
-        proposedDeedName:
-          expectedRole === 'buyer'
-            ? readOptionalEditableString(
-              requested,
-              'proposedDeedName',
-              250
-            )
-            : existingParty
-              .proposedDeedName,
-
-        /*
-         * These values are controlled only by identity and
-         * signature workflows.
-         */
-        identityVerification:
-          existingParty
-            .identityVerification,
-
-        signature:
-          existingParty.signature,
-
-        electronicTransactionsConsentAccepted:
-          existingParty
-            .electronicTransactionsConsentAccepted,
-
-        electronicTransactionsConsentAcceptedAt:
-          existingParty
-            .electronicTransactionsConsentAcceptedAt,
-      }) as
-        OfferVersionPartySnapshotDocument;
+  for (
+    const existingParty of
+    existingParties
+  ) {
+    if (
+      existingParty.role !==
+      expectedRole
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The offer party role is invalid.'
+      );
     }
-  );
+
+    const requestedParty =
+      requestedParties.find(
+        party => {
+          if (
+            party === null ||
+            typeof party !== 'object'
+          ) {
+            return false;
+          }
+
+          return (
+            party as
+              Record<string, unknown>
+          )['partyUid'] ===
+            existingParty.partyUid;
+        }
+      );
+
+    if (!requestedParty) {
+      throw new HttpsError(
+        'invalid-argument',
+        'An existing offer party is missing from the save request.'
+      );
+    }
+  }
+
+  return existingParties;
 }
 
 
@@ -803,128 +684,6 @@ function requireChanges(
   }
 
   return changes;
-}
-
-
-function readPartyCapacity(
-  value: unknown
-):
-  | 'individual'
-  | 'joint'
-  | 'trust'
-  | 'estate'
-  | 'corporation'
-  | 'limited_liability_company'
-  | 'partnership'
-  | 'other' {
-  const allowedValues =
-    new Set([
-      'individual',
-      'joint',
-      'trust',
-      'estate',
-      'corporation',
-      'limited_liability_company',
-      'partnership',
-      'other',
-    ]);
-
-  if (
-    typeof value !== 'string' ||
-    !allowedValues.has(value)
-  ) {
-    throw new HttpsError(
-      'invalid-argument',
-      'The party capacity is invalid.'
-    );
-  }
-
-  return value as
-    | 'individual'
-    | 'joint'
-    | 'trust'
-    | 'estate'
-    | 'corporation'
-    | 'limited_liability_company'
-    | 'partnership'
-    | 'other';
-}
-
-
-function readEditableString(
-  data: Record<string, unknown>,
-  fieldName: string,
-  maximumLength: number
-): string {
-  const value =
-    data[fieldName];
-
-  if (
-    typeof value !== 'string' ||
-    value.trim().length === 0
-  ) {
-    throw new HttpsError(
-      'invalid-argument',
-      `${fieldName} is required.`
-    );
-  }
-
-  const normalizedValue =
-    value.trim();
-
-  if (
-    normalizedValue.length >
-    maximumLength
-  ) {
-    throw new HttpsError(
-      'invalid-argument',
-      `${fieldName} is too long.`
-    );
-  }
-
-  return normalizedValue;
-}
-
-
-function readOptionalEditableString(
-  data: Record<string, unknown>,
-  fieldName: string,
-  maximumLength: number
-): string | undefined {
-  const value =
-    data[fieldName];
-
-  if (
-    value === undefined ||
-    value === null ||
-    value === ''
-  ) {
-    return undefined;
-  }
-
-  if (typeof value !== 'string') {
-    throw new HttpsError(
-      'invalid-argument',
-      `${fieldName} must be text.`
-    );
-  }
-
-  const normalizedValue =
-    value.trim();
-
-  if (
-    normalizedValue.length >
-    maximumLength
-  ) {
-    throw new HttpsError(
-      'invalid-argument',
-      `${fieldName} is too long.`
-    );
-  }
-
-  return normalizedValue.length > 0
-    ? normalizedValue
-    : undefined;
 }
 
 

@@ -1,5 +1,11 @@
-<div class="buyer-property-section" formGroupName="buyerProperty">
-  <section class="form-section" aria-labelledby="buyer-information-heading">
+<div
+  class="buyer-property-section"
+  formGroupName="buyerProperty"
+>
+  <section
+    class="form-section"
+    aria-labelledby="buyer-information-heading"
+  >
     <header class="form-section__header">
       <div>
         <p class="form-section__eyebrow">
@@ -11,206 +17,191 @@
         </h3>
 
         <p>
-          Your account information is shown below. Your
-          signature must match your verified legal name
-          before the offer can be submitted.
+          NavStreet automatically uses the authenticated
+          buyer’s account information. These fields cannot
+          be edited inside an offer.
         </p>
       </div>
 
-      <span class="identity-status">
-        Identity verification required
+      <span class="locked-status">
+        <span aria-hidden="true">🔒</span>
+        Account information
       </span>
     </header>
 
-    <div class="form-grid form-grid--name">
-      <div class="form-field">
-        <label for="buyerFirstName">
-          Legal first name
-          <span class="required-marker" aria-hidden="true">
-            *
-          </span>
-        </label>
+    <div class="property-card">
+      <div class="form-grid form-grid--name">
+        <div class="form-field">
+          <label for="buyerFirstName">
+            Legal first name
+          </label>
 
-        <input id="buyerFirstName" type="text" formControlName="buyerFirstName" autocomplete="given-name"
-          maxlength="100" [class.input-invalid]="
-            isInvalid('buyerFirstName')
-          " [attr.aria-invalid]="
-            isInvalid('buyerFirstName')
-          " [attr.aria-describedby]="
-            isInvalid('buyerFirstName')
-              ? 'buyerFirstName-error'
-              : null
-          " />
+          <input
+            id="buyerFirstName"
+            type="text"
+            formControlName="buyerFirstName"
+          />
+        </div>
 
-        @if (isInvalid('buyerFirstName')) {
-        <p id="buyerFirstName-error" class="field-error">
-          {{ errorMessage('buyerFirstName') }}
-        </p>
-        }
+        <div class="form-field">
+          <label for="buyerMiddleName">
+            Middle name
+          </label>
+
+          <input
+            id="buyerMiddleName"
+            type="text"
+            formControlName="buyerMiddleName"
+            placeholder="Not provided"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="buyerLastName">
+            Legal last name
+          </label>
+
+          <input
+            id="buyerLastName"
+            type="text"
+            formControlName="buyerLastName"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="buyerSuffix">
+            Suffix
+          </label>
+
+          <input
+            id="buyerSuffix"
+            type="text"
+            formControlName="buyerSuffix"
+            placeholder="Not provided"
+          />
+        </div>
       </div>
 
-      <div class="form-field">
-        <label for="buyerMiddleName">
-          Middle name
-          <span class="optional-marker">
-            Optional
-          </span>
-        </label>
+      <div class="form-grid form-grid--two">
+        <div class="form-field">
+          <label for="buyerEmail">
+            Email address
+          </label>
 
-        <input id="buyerMiddleName" type="text" formControlName="buyerMiddleName" autocomplete="additional-name"
-          maxlength="100" [class.input-invalid]="
-            isInvalid('buyerMiddleName')
-          " [attr.aria-invalid]="
-            isInvalid('buyerMiddleName')
-          " [attr.aria-describedby]="
-            isInvalid('buyerMiddleName')
-              ? 'buyerMiddleName-error'
-              : null
-          " />
+          <input
+            id="buyerEmail"
+            type="email"
+            formControlName="buyerEmail"
+          />
 
-        @if (isInvalid('buyerMiddleName')) {
-        <p id="buyerMiddleName-error" class="field-error">
-          {{ errorMessage('buyerMiddleName') }}
-        </p>
-        }
-      </div>
+          <p class="field-help">
+            Offer notices and signature requests will be
+            delivered to this address.
+          </p>
+        </div>
 
-      <div class="form-field">
-        <label for="buyerLastName">
-          Legal last name
-          <span class="required-marker" aria-hidden="true">
-            *
-          </span>
-        </label>
+        <div class="form-field">
+          <label for="buyerPhone">
+            Phone number
+          </label>
 
-        <input id="buyerLastName" type="text" formControlName="buyerLastName" autocomplete="family-name" maxlength="100"
-          [class.input-invalid]="
-            isInvalid('buyerLastName')
-          " [attr.aria-invalid]="
-            isInvalid('buyerLastName')
-          " [attr.aria-describedby]="
-            isInvalid('buyerLastName')
-              ? 'buyerLastName-error'
-              : null
-          " />
-
-        @if (isInvalid('buyerLastName')) {
-        <p id="buyerLastName-error" class="field-error">
-          {{ errorMessage('buyerLastName') }}
-        </p>
-        }
-      </div>
-
-      <div class="form-field">
-        <label for="buyerSuffix">
-          Suffix
-          <span class="optional-marker">
-            Optional
-          </span>
-        </label>
-
-        <input id="buyerSuffix" type="text" formControlName="buyerSuffix" autocomplete="honorific-suffix" maxlength="20"
-          placeholder="Jr., Sr., III" [class.input-invalid]="
-            isInvalid('buyerSuffix')
-          " [attr.aria-invalid]="
-            isInvalid('buyerSuffix')
-          " [attr.aria-describedby]="
-            isInvalid('buyerSuffix')
-              ? 'buyerSuffix-error'
-              : null
-          " />
-
-        @if (isInvalid('buyerSuffix')) {
-        <p id="buyerSuffix-error" class="field-error">
-          {{ errorMessage('buyerSuffix') }}
-        </p>
-        }
+          <input
+            id="buyerPhone"
+            type="tel"
+            formControlName="buyerPhone"
+            placeholder="Not provided"
+          />
+        </div>
       </div>
     </div>
-
-    <div class="form-grid form-grid--two">
-      <div class="form-field">
-        <label for="buyerEmail">
-          Email address
-          <span class="required-marker" aria-hidden="true">
-            *
-          </span>
-        </label>
-
-        <input id="buyerEmail" type="email" formControlName="buyerEmail" autocomplete="email" inputmode="email"
-          maxlength="254" [class.input-invalid]="
-            isInvalid('buyerEmail')
-          " [attr.aria-invalid]="
-            isInvalid('buyerEmail')
-          " [attr.aria-describedby]="
-            isInvalid('buyerEmail')
-              ? 'buyerEmail-error'
-              : 'buyerEmail-help'
-          " />
-
-        <p id="buyerEmail-help" class="field-help">
-          Offer notices and signature requests will be
-          delivered to this address.
-        </p>
-
-        @if (isInvalid('buyerEmail')) {
-        <p id="buyerEmail-error" class="field-error">
-          {{ errorMessage('buyerEmail') }}
-        </p>
-        }
-      </div>
-
-      <div class="form-field">
-        <label for="buyerPhone">
-          Phone number
-          <span class="required-marker" aria-hidden="true">
-            *
-          </span>
-        </label>
-
-        <input id="buyerPhone" type="tel" formControlName="buyerPhone" autocomplete="tel" inputmode="numeric"
-          maxlength="14" placeholder="(919) 555-0123" (keydown)="preventAdditionalPhoneDigit($event)"
-          (input)="formatPhoneInput($event)" [class.input-invalid]="
-    isInvalid('buyerPhone')
-  " [attr.aria-invalid]="
-    isInvalid('buyerPhone')
-  " [attr.aria-describedby]="
-    isInvalid('buyerPhone')
-      ? 'buyerPhone-error'
-      : null
-  " />
-
-        @if (isInvalid('buyerPhone')) {
-        <p id="buyerPhone-error" class="field-error">
-          {{ errorMessage('buyerPhone') }}
-        </p>
-        }
-      </div>
-    </div>
-
 
     <aside class="identity-notice">
-      <span class="identity-notice__icon" aria-hidden="true">
+      <span
+        class="identity-notice__icon"
+        aria-hidden="true"
+      >
         ✓
       </span>
 
       <div>
         <strong>
-          Legal identity verification
+          One-buyer offer
         </strong>
 
         <p>
-          Before signing, NavStreet will verify the buyer's
-          identity and legal name. After verification, the
-          verified name will be used on the final offer and
-          cannot be changed without completing verification
-          again.
+          This standard NavStreet offer supports one buyer.
+          A transaction involving additional buyers, an
+          entity, trust, estate or another signing capacity
+          should be handled through a qualified attorney.
         </p>
       </div>
     </aside>
   </section>
 
-  <section class="form-section form-section--property" aria-labelledby="property-information-heading">
+  <section
+    class="form-section form-section--property"
+    aria-labelledby="seller-information-heading"
+  >
+    <header class="form-section__header">
+      <div>
+        <p class="form-section__eyebrow">
+          Seller
+        </p>
+
+        <h3 id="seller-information-heading">
+          Seller information
+        </h3>
+
+        <p>
+          NavStreet automatically uses the seller connected
+          to the published property listing.
+        </p>
+      </div>
+
+      <span class="locked-status">
+        <span aria-hidden="true">🔒</span>
+        Listing owner
+      </span>
+    </header>
+
+    <div class="property-card">
+      <div class="form-grid form-grid--two">
+        <div class="form-field">
+          <label for="sellerLegalName">
+            Seller legal name
+          </label>
+
+          <input
+            id="sellerLegalName"
+            type="text"
+            formControlName="sellerLegalName"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="sellerEmail">
+            Seller email
+          </label>
+
+          <input
+            id="sellerEmail"
+            type="email"
+            formControlName="sellerEmail"
+          />
+
+          <p class="field-help">
+            The offer and related notices will be delivered
+            to this address.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="form-section form-section--property"
+    aria-labelledby="property-information-heading"
+  >
     <header class="form-section__header">
       <div>
         <p class="form-section__eyebrow">
@@ -222,7 +213,8 @@
         </h3>
 
         <p>
-          This information comes from the listing and cannot
+          This information is copied from the published
+          listing when the offer draft is created. It cannot
           be changed from the offer form.
         </p>
       </div>
@@ -236,19 +228,39 @@
     <div class="property-card">
       <div class="form-field form-field--full">
         <label for="propertyAddress">
-          Property address
+          Street address
         </label>
 
-        <input id="propertyAddress" type="text" formControlName="propertyAddress" />
+        <input
+          id="propertyAddress"
+          type="text"
+          formControlName="propertyAddress"
+        />
       </div>
 
       <div class="form-grid form-grid--property">
+        <div class="form-field">
+          <label for="propertyCity">
+            City
+          </label>
+
+          <input
+            id="propertyCity"
+            type="text"
+            formControlName="propertyCity"
+          />
+        </div>
+
         <div class="form-field">
           <label for="propertyCounty">
             County
           </label>
 
-          <input id="propertyCounty" type="text" formControlName="propertyCounty" />
+          <input
+            id="propertyCounty"
+            type="text"
+            formControlName="propertyCounty"
+          />
         </div>
 
         <div class="form-field">
@@ -256,7 +268,11 @@
             State
           </label>
 
-          <input id="propertyState" type="text" formControlName="propertyState" />
+          <input
+            id="propertyState"
+            type="text"
+            formControlName="propertyState"
+          />
         </div>
 
         <div class="form-field">
@@ -264,15 +280,61 @@
             ZIP code
           </label>
 
-          <input id="propertyPostalCode" type="text" formControlName="propertyPostalCode" />
+          <input
+            id="propertyPostalCode"
+            type="text"
+            formControlName="propertyPostalCode"
+          />
+        </div>
+      </div>
+
+      <div class="form-grid form-grid--property">
+        <div class="form-field">
+          <label for="propertyParcelId">
+            Parcel ID (PIN/PID)
+          </label>
+
+          <input
+            id="propertyParcelId"
+            type="text"
+            formControlName="propertyParcelId"
+          />
         </div>
 
         <div class="form-field">
-          <label for="propertyParcelId">
-            Parcel identification
+          <label for="propertyDeedBook">
+            Deed book
           </label>
 
-          <input id="propertyParcelId" type="text" formControlName="propertyParcelId" placeholder="Not provided" />
+          <input
+            id="propertyDeedBook"
+            type="text"
+            formControlName="propertyDeedBook"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="propertyDeedPage">
+            Deed page
+          </label>
+
+          <input
+            id="propertyDeedPage"
+            type="text"
+            formControlName="propertyDeedPage"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="propertyOtherReference">
+            Other reference
+          </label>
+
+          <input
+            id="propertyOtherReference"
+            type="text"
+            formControlName="propertyOtherReference"
+          />
         </div>
       </div>
     </div>

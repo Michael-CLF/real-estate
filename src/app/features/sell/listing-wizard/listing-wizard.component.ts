@@ -22,7 +22,7 @@ import {
 
 import {
   IdentityVerificationService
-} from '../../../core/domains/identity/services/identity-verification.service';
+} from '../../identity/services/identity-verification.service';
 
 import {
   ListingDraftStep,

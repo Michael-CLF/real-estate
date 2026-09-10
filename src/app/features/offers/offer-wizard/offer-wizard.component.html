@@ -55,7 +55,11 @@
           <button type="button" class="section-link" [class.section-link--active]="
                 sectionIndex === currentSectionIndex()
               " [class.section-link--complete]="
-                sectionIndex < currentSectionIndex()
+                sectionIndex < currentSectionIndex() &&
+                (
+                  offerForm.get(section.key)?.valid === true ||
+                  offerForm.get(section.key)?.disabled === true
+                )
               " [attr.aria-current]="
                 sectionIndex === currentSectionIndex()
                   ? 'step'
@@ -63,7 +67,11 @@
               " (click)="goToSection(sectionIndex)">
             <span class="section-link__number">
               @if (
-              sectionIndex < currentSectionIndex() ) { <span aria-hidden="true">✓</span>
+              sectionIndex < currentSectionIndex() &&
+              (
+                offerForm.get(section.key)?.valid === true ||
+                offerForm.get(section.key)?.disabled === true
+              ) ) { <span aria-hidden="true">✓</span>
             } @else {
             {{ sectionIndex + 1 }}
             }
@@ -146,10 +154,6 @@
           <app-deposits-due-diligence-section />
           }
 
-          @case ('investigations') {
-          <app-investigations-section />
-          }
-
           @case ('concessions') {
           <app-concessions-section />
           }
@@ -159,15 +163,23 @@
           }
 
           @case ('settlementPossession') {
-          <app-settlement-possession-section />
+          <app-settlement-possession-section
+            [offerUid]="offerUid"
+            [offerVersionUid]="offerVersionUid"
+          />
           }
 
           @case ('disclosuresAddenda') {
-          <app-disclosures-addenda-section />
+          <app-disclosures-addenda-section
+            [listingUid]="listingUid"
+          />
           }
 
           @case ('additionalTerms') {
-          <app-additional-terms-section />
+          <app-additional-terms-section
+            [offerUid]="offerUid"
+            [offerVersionUid]="offerVersionUid"
+          />
           }
 
           @case ('offerExpiration') {
@@ -207,9 +219,9 @@
                     submitting()
                   ">
               @if (submitting()) {
-              Preparing offer…
+              Preparing agreement…
               } @else {
-              Review complete offer
+              Prepare agreement for signature
               }
             </button>
             }

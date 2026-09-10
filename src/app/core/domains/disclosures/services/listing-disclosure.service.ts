@@ -115,6 +115,41 @@ export class ListingDisclosureService {
     return summary?.currentDocument ?? null;
   }
 
+  async getDisclosureVersion(
+    listingUid: string,
+    documentType: DisclosureDocumentType,
+    versionId: string
+  ): Promise<ListingDisclosureDocument | null> {
+    if (
+      !listingUid.trim() ||
+      !versionId.trim()
+    ) {
+      return null;
+    }
+
+    const versionReference =
+      doc(
+        firestore,
+        'listings',
+        listingUid,
+        'disclosures',
+        documentType,
+        'versions',
+        versionId
+      );
+
+    const snapshot =
+      await getDoc(versionReference);
+
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    return this.mapDisclosureDocument(
+      snapshot.data()
+    );
+  }
+
   async uploadDisclosure(
     sellerUid: string,
     listingUid: string,

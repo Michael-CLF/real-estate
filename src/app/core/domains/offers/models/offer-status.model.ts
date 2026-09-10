@@ -116,6 +116,7 @@ export type OfferDocumentStatus =
   | 'not_generated'
   | 'generating'
   | 'generated'
+  | 'uploaded'
   | 'generation_failed';
 
 

@@ -21,16 +21,13 @@ export type OfferValidationSeverity =
 
 export interface OfferValidationIssue {
   fieldPath: string;
-
   message: string;
-
   severity: OfferValidationSeverity;
 }
 
 
 export interface OfferValidationResult {
   valid: boolean;
-
   errors: OfferValidationIssue[];
   warnings: OfferValidationIssue[];
 }
@@ -78,12 +75,12 @@ export class OfferValidationService {
       issues
     );
 
-    this.validatePurchaseTerms(
+    this.validatePropertyTerms(
       terms,
       issues
     );
 
-    this.validateExistingPropertySale(
+    this.validatePurchaseTerms(
       terms,
       issues
     );
@@ -93,17 +90,7 @@ export class OfferValidationService {
       issues
     );
 
-    this.validateInvestigations(
-      terms,
-      issues
-    );
-
     this.validateConcessions(
-      terms,
-      issues
-    );
-
-    this.validatePropertyInclusions(
       terms,
       issues
     );
@@ -113,15 +100,24 @@ export class OfferValidationService {
       issues
     );
 
-    this.validateDisclosuresAndAddenda(
+    this.validateBuyerDisclosures(
       terms,
       context,
       issues
     );
 
+    this.validateSellerStatements(
+      terms,
+      issues
+    );
+
+    this.validateAddenda(
+      terms,
+      issues
+    );
+
     this.validateAdditionalTerms(
       terms,
-      context,
       issues
     );
 
@@ -136,15 +132,17 @@ export class OfferValidationService {
       issues
     );
 
-    const errors = issues.filter(
-      issue =>
-        issue.severity === 'error'
-    );
+    const errors =
+      issues.filter(
+        issue =>
+          issue.severity === 'error'
+      );
 
-    const warnings = issues.filter(
-      issue =>
-        issue.severity === 'warning'
-    );
+    const warnings =
+      issues.filter(
+        issue =>
+          issue.severity === 'warning'
+      );
 
     return {
       valid: errors.length === 0,
@@ -158,21 +156,11 @@ export class OfferValidationService {
     terms: OfferTerms,
     issues: OfferValidationIssue[]
   ): void {
-    if (!this.hasText(terms.stateCode)) {
+    if (terms.stateCode !== 'NC') {
       this.addError(
         issues,
         'stateCode',
-        'A state contract jurisdiction is required.'
-      );
-
-      return;
-    }
-
-    if (!/^[A-Z]{2}$/.test(terms.stateCode)) {
-      this.addError(
-        issues,
-        'stateCode',
-        'The state code must contain two uppercase letters.'
+        'NavStreet currently supports only the North Carolina purchase agreement.'
       );
     }
   }
@@ -184,19 +172,19 @@ export class OfferValidationService {
     context: OfferValidationContext,
     issues: OfferValidationIssue[]
   ): void {
-    if (buyers.length === 0) {
+    if (buyers.length !== 1) {
       this.addError(
         issues,
         'buyers',
-        'At least one buyer is required.'
+        'The NavStreet offer form currently supports exactly one buyer.'
       );
     }
 
-    if (sellers.length === 0) {
+    if (sellers.length !== 1) {
       this.addError(
         issues,
         'sellers',
-        'At least one seller is required.'
+        'The NavStreet offer form currently supports exactly one seller.'
       );
     }
 
@@ -204,7 +192,7 @@ export class OfferValidationService {
       (buyer, index) =>
         this.validateParty(
           buyer,
-          `buyers.${index}`,
+          'buyers.' + index,
           context,
           issues
         )
@@ -214,49 +202,11 @@ export class OfferValidationService {
       (seller, index) =>
         this.validateParty(
           seller,
-          `sellers.${index}`,
+          'sellers.' + index,
           context,
           issues
         )
     );
-
-    const buyerEmails =
-      buyers.map(
-        buyer =>
-          buyer.email
-            .trim()
-            .toLowerCase()
-      );
-
-    if (
-      new Set(buyerEmails).size !==
-      buyerEmails.length
-    ) {
-      this.addError(
-        issues,
-        'buyers',
-        'Every buyer must use a separate email address.'
-      );
-    }
-
-    const sellerEmails =
-      sellers.map(
-        seller =>
-          seller.email
-            .trim()
-            .toLowerCase()
-      );
-
-    if (
-      new Set(sellerEmails).size !==
-      sellerEmails.length
-    ) {
-      this.addError(
-        issues,
-        'sellers',
-        'Every seller must use a separate email address.'
-      );
-    }
   }
 
 
@@ -269,7 +219,7 @@ export class OfferValidationService {
     if (!this.hasText(party.legalName)) {
       this.addError(
         issues,
-        `${fieldPath}.legalName`,
+        fieldPath + '.legalName',
         'A legal name is required.'
       );
     }
@@ -277,7 +227,7 @@ export class OfferValidationService {
     if (!this.isValidEmail(party.email)) {
       this.addError(
         issues,
-        `${fieldPath}.email`,
+        fieldPath + '.email',
         'A valid email address is required.'
       );
     }
@@ -285,84 +235,55 @@ export class OfferValidationService {
     if (!this.hasText(party.phone)) {
       this.addError(
         issues,
-        `${fieldPath}.phone`,
+        fieldPath + '.phone',
         'A phone number is required.'
       );
     }
 
-    if (
-      !this.hasText(
-        party.mailingAddress.addressLine1
-      )
-    ) {
-      this.addError(
-        issues,
-        `${fieldPath}.mailingAddress.addressLine1`,
-        'A mailing address is required.'
-      );
-    }
-
-    if (
-      !this.hasText(
-        party.mailingAddress.city
-      )
-    ) {
-      this.addError(
-        issues,
-        `${fieldPath}.mailingAddress.city`,
-        'A city is required.'
-      );
-    }
-
-    if (
-      !this.hasText(
-        party.mailingAddress.state
-      )
-    ) {
-      this.addError(
-        issues,
-        `${fieldPath}.mailingAddress.state`,
-        'A state is required.'
-      );
-    }
-
-    if (
-      !this.hasText(
-        party.mailingAddress.zipCode
-      )
-    ) {
-      this.addError(
-        issues,
-        `${fieldPath}.mailingAddress.zipCode`,
-        'A ZIP code is required.'
-      );
-    }
-
-    if (
+    const identityCheckApplies =
       (
-        context.mode === 'signature' ||
-        context.mode === 'submit'
+        context.mode === 'submit' ||
+        context.mode === 'signature'
       ) &&
+      (
+        !context.currentUserUid ||
+        party.userUid ===
+          context.currentUserUid
+      );
+
+    if (
+      identityCheckApplies &&
       party.signature.required &&
       party.identityVerification.status !==
-      'verified'
+        'verified'
     ) {
       this.addError(
         issues,
-        `${fieldPath}.identityVerification`,
-        `${party.legalName || 'This signer'} must complete identity verification before signing.`
+        fieldPath +
+          '.identityVerification',
+        (
+          party.legalName ||
+          'This signer'
+        ) +
+          ' must complete identity verification.'
       );
     }
 
     if (
       context.mode === 'signature' &&
+      identityCheckApplies &&
       !party
         .electronicTransactionsConsentAccepted
     ) {
       this.addError(
         issues,
-        `${fieldPath}.electronicTransactionsConsentAccepted`,
-        `${party.legalName || 'This signer'} must consent to electronic transactions.`
+        fieldPath +
+          '.electronicTransactionsConsentAccepted',
+        (
+          party.legalName ||
+          'This signer'
+        ) +
+          ' must consent to electronic transactions.'
       );
     }
   }
@@ -372,64 +293,96 @@ export class OfferValidationService {
     terms: OfferTerms,
     issues: OfferValidationIssue[]
   ): void {
-    const property = terms.property;
+    const property =
+      terms.property;
 
-    if (!this.hasText(property.listingUid)) {
-      this.addError(
-        issues,
-        'property.listingUid',
-        'A listing identifier is required.'
-      );
-    }
+    const requiredTextFields: Array<{
+      value: string | undefined;
+      path: string;
+      message: string;
+    }> = [
+      {
+        value: property.listingUid,
+        path: 'property.listingUid',
+        message:
+          'A listing identifier is required.'
+      },
+      {
+        value: property.addressLine1,
+        path: 'property.addressLine1',
+        message:
+          'The property street address is required.'
+      },
+      {
+        value: property.city,
+        path: 'property.city',
+        message:
+          'The property city is required.'
+      },
+      {
+        value: property.state,
+        path: 'property.state',
+        message:
+          'The property state is required.'
+      },
+      {
+        value: property.zipCode,
+        path: 'property.zipCode',
+        message:
+          'The property ZIP code is required.'
+      },
+      {
+        value: property.county,
+        path: 'property.county',
+        message:
+          'The property county is required.'
+      }
+    ];
 
-    if (!this.hasText(property.addressLine1)) {
-      this.addError(
-        issues,
-        'property.addressLine1',
-        'The property street address is required.'
-      );
-    }
-
-    if (!this.hasText(property.city)) {
-      this.addError(
-        issues,
-        'property.city',
-        'The property city is required.'
-      );
-    }
-
-    if (!this.hasText(property.state)) {
-      this.addError(
-        issues,
-        'property.state',
-        'The property state is required.'
-      );
-    }
-
-    if (!this.hasText(property.zipCode)) {
-      this.addError(
-        issues,
-        'property.zipCode',
-        'The property ZIP code is required.'
-      );
-    }
-
-    if (!this.hasText(property.county)) {
-      this.addError(
-        issues,
-        'property.county',
-        'The property county is required.'
-      );
-    }
+    requiredTextFields.forEach(
+      field => {
+        if (!this.hasText(field.value)) {
+          this.addError(
+            issues,
+            field.path,
+            field.message
+          );
+        }
+      }
+    );
 
     if (
       property.state.toUpperCase() !==
-      terms.stateCode.toUpperCase()
+      terms.stateCode
     ) {
       this.addError(
         issues,
         'property.state',
-        'The contract jurisdiction must match the property state.'
+        'The contract state must match the property state.'
+      );
+    }
+  }
+
+
+  private validatePropertyTerms(
+    terms: OfferTerms,
+    issues: OfferValidationIssue[]
+  ): void {
+    const propertyTerms =
+      terms.propertyTerms;
+
+    if (
+      propertyTerms
+        .separatePropertyIncluded &&
+      !this.hasText(
+        propertyTerms
+          .separatePropertyDescription
+      )
+    ) {
+      this.addError(
+        issues,
+        'propertyTerms.separatePropertyDescription',
+        'Describe the separate property included in the purchase.'
       );
     }
   }
@@ -439,7 +392,8 @@ export class OfferValidationService {
     terms: OfferTerms,
     issues: OfferValidationIssue[]
   ): void {
-    const purchase = terms.purchase;
+    const purchase =
+      terms.purchase;
 
     if (
       !this.isPositiveMoney(
@@ -454,118 +408,27 @@ export class OfferValidationService {
     }
 
     if (
-      purchase.financingType ===
-      'financing'
-    ) {
-      if (
-        purchase.loanType ===
-        'not_applicable'
-      ) {
-        this.addError(
-          issues,
-          'purchase.loanType',
-          'Select the proposed loan type.'
-        );
-      }
-
-      if (
-        purchase.loanType === 'other' &&
-        !this.hasText(
-          purchase.otherLoanTypeDescription
-        )
-      ) {
-        this.addError(
-          issues,
-          'purchase.otherLoanTypeDescription',
-          'Describe the proposed loan type.'
-        );
-      }
-
-      if (
-        purchase
-          .proposedLoanAmountInCents ===
-          undefined ||
-        !this.isPositiveMoney(
-          purchase.proposedLoanAmountInCents
-        )
-      ) {
-        this.addError(
-          issues,
-          'purchase.proposedLoanAmountInCents',
-          'Enter the proposed loan amount.'
-        );
-      }
-    }
-
-    if (
-      purchase.financingType === 'cash' &&
-      !purchase.proofOfFundsProvided
-    ) {
-      this.addWarning(
-        issues,
-        'purchase.proofOfFundsProvided',
-        'A cash offer without proof of funds may be less persuasive to the seller.'
-      );
-    }
-
-    if (
-      purchase.financingType ===
-        'financing' &&
-      !purchase.preapprovalProvided
-    ) {
-      this.addWarning(
-        issues,
-        'purchase.preapprovalProvided',
-        'A financed offer without a preapproval letter may be less persuasive to the seller.'
-      );
-    }
-
-    this.validateOptionalMoney(
-      purchase.proposedLoanAmountInCents,
-      'purchase.proposedLoanAmountInCents',
-      issues
-    );
-
-    this.validateOptionalMoney(
-      purchase.proposedDownPaymentInCents,
-      'purchase.proposedDownPaymentInCents',
-      issues
-    );
-
-    this.validateOptionalMoney(
-      purchase.proposedCashContributionInCents,
-      'purchase.proposedCashContributionInCents',
-      issues
-    );
-  }
-
-
-  private validateExistingPropertySale(
-    terms: OfferTerms,
-    issues: OfferValidationIssue[]
-  ): void {
-    const sale =
-      terms.existingPropertySale;
-
-    if (!sale.required) {
-      return;
-    }
-
-    if (!this.hasText(sale.propertyAddress)) {
-      this.addError(
-        issues,
-        'existingPropertySale.propertyAddress',
-        'Enter the address of the property the buyer must sell.'
-      );
-    }
-
-    if (
-      sale.status === 'not_applicable'
+      purchase.financingType !== 'cash' &&
+      purchase.financingType !== 'loan'
     ) {
       this.addError(
         issues,
-        'existingPropertySale.status',
-        'Select the current status of the buyer’s property.'
+        'purchase.financingType',
+        'Select cash or loan.'
+      );
+    }
+
+    if (
+      purchase
+        .otherPropertyWillFundPurchase &&
+      !this.hasText(
+        purchase.otherPropertyDescription
+      )
+    ) {
+      this.addError(
+        issues,
+        'purchase.otherPropertyDescription',
+        'Identify the other property expected to fund this purchase.'
       );
     }
   }
@@ -575,111 +438,84 @@ export class OfferValidationService {
     terms: OfferTerms,
     issues: OfferValidationIssue[]
   ): void {
-    const deposits = terms.deposits;
+    const deposits =
+      terms.deposits;
 
     this.validateRequiredMoney(
-      deposits.dueDiligenceFeeInCents,
-      'deposits.dueDiligenceFeeInCents',
-      'The due-diligence fee cannot be negative.',
+      deposits.depositInCents,
+      'deposits.depositInCents',
+      'The Deposit cannot be negative.',
       issues
     );
 
-    this.validateRequiredMoney(
-      deposits.initialEarnestMoneyInCents,
-      'deposits.initialEarnestMoneyInCents',
-      'The initial earnest-money deposit cannot be negative.',
-      issues
-    );
-
-    this.validateRequiredMoney(
-      deposits.additionalEarnestMoneyInCents,
-      'deposits.additionalEarnestMoneyInCents',
-      'The additional earnest-money deposit cannot be negative.',
-      issues
-    );
-
-    if (
-      !this.isValidDateTime(
-        deposits
-          .dueDiligenceFeeDeliveryDeadline
-      )
-    ) {
+    if (deposits.depositDeliveryDays !== 4) {
       this.addError(
         issues,
-        'deposits.dueDiligenceFeeDeliveryDeadline',
-        'Enter a valid due-diligence fee delivery deadline.'
+        'deposits.depositDeliveryDays',
+        'The Deposit delivery period must be four calendar days.'
       );
     }
 
     if (
-      !this.isValidDateTime(
-        deposits.dueDiligenceExpiration
-      )
+      deposits.escrowAgentName.trim().length > 200
     ) {
-      this.addError(
-        issues,
-        'deposits.dueDiligenceExpiration',
-        'Enter a valid due-diligence expiration date and time.'
-      );
-    }
-
-    if (
-      !this.isValidDateTime(
-        deposits
-          .initialEarnestMoneyDeliveryDeadline
-      )
-    ) {
-      this.addError(
-        issues,
-        'deposits.initialEarnestMoneyDeliveryDeadline',
-        'Enter a valid initial earnest-money delivery deadline.'
-      );
-    }
-
-    if (
-      deposits.additionalEarnestMoneyInCents >
-        0 &&
-      !this.isValidDateTime(
-        deposits
-          .additionalEarnestMoneyDeliveryDeadline
-      )
-    ) {
-      this.addError(
-        issues,
-        'deposits.additionalEarnestMoneyDeliveryDeadline',
-        'Enter a valid additional earnest-money delivery deadline.'
-      );
-    }
-
-    if (!this.hasText(deposits.escrowAgentName)) {
       this.addError(
         issues,
         'deposits.escrowAgentName',
-        'An escrow agent is required.'
+        'The escrow-agent name cannot exceed 200 characters.'
       );
     }
-  }
-
-
-  private validateInvestigations(
-    terms: OfferTerms,
-    issues: OfferValidationIssue[]
-  ): void {
-    const investigations =
-      terms.investigations;
 
     if (
-      investigations
-        .otherInvestigationRequested &&
-      !this.hasText(
-        investigations
-          .otherInvestigationDescription
-      )
+      deposits.dueDiligenceDeadlineType ===
+        'specific_date'
+    ) {
+      if (
+        !this.isValidDate(
+          deposits.dueDiligenceEndDate
+        )
+      ) {
+        this.addError(
+          issues,
+          'deposits.dueDiligenceEndDate',
+          'Enter a valid due-diligence end date.'
+        );
+      }
+    } else if (
+      deposits.dueDiligenceDeadlineType ===
+        'days_after_effective_date'
+    ) {
+      const days =
+        deposits
+          .dueDiligenceDaysAfterEffectiveDate;
+
+      if (
+        !Number.isInteger(days) ||
+        (days ?? 0) <= 0 ||
+        (days ?? 0) > 365
+      ) {
+        this.addError(
+          issues,
+          'deposits.dueDiligenceDaysAfterEffectiveDate',
+          'Enter a due-diligence period between 1 and 365 days.'
+        );
+      }
+    } else {
+      this.addError(
+        issues,
+        'deposits.dueDiligenceDeadlineType',
+        'Select a due-diligence deadline.'
+      );
+    }
+
+    if (
+      deposits.dueDiligenceEndTime !==
+        '17:00'
     ) {
       this.addError(
         issues,
-        'investigations.otherInvestigationDescription',
-        'Describe the additional investigation.'
+        'deposits.dueDiligenceEndTime',
+        'The due-diligence deadline must use 5:00 p.m.'
       );
     }
   }
@@ -692,107 +528,77 @@ export class OfferValidationService {
     const concessions =
       terms.concessions;
 
-    this.validateRequiredMoney(
-      concessions
-        .sellerPaidBuyerExpensesInCents,
-      'concessions.sellerPaidBuyerExpensesInCents',
-      'Seller-paid expenses cannot be negative.',
-      issues
-    );
-
-    this.validateRequiredMoney(
-      concessions.homeWarrantyInCents,
-      'concessions.homeWarrantyInCents',
-      'The home-warranty amount cannot be negative.',
-      issues
-    );
-
-    this.validateRequiredMoney(
-      concessions
-        .buyerAgentCompensationInCents,
-      'concessions.buyerAgentCompensationInCents',
-      'Buyer-agent compensation cannot be negative.',
-      issues
-    );
-
-    this.validateRequiredMoney(
-      concessions.otherConcessionInCents,
-      'concessions.otherConcessionInCents',
-      'The other concession amount cannot be negative.',
-      issues
-    );
-
     if (
-      concessions
-        .sellerPaidBuyerExpensesRequested &&
-      concessions
-        .sellerPaidBuyerExpensesInCents === 0
+      concessions.concessionType ===
+        'amount'
     ) {
-      this.addError(
-        issues,
-        'concessions.sellerPaidBuyerExpensesInCents',
-        'Enter the requested seller-paid expense amount.'
-      );
-    }
-
-    if (
-      concessions.homeWarrantyRequested &&
-      concessions.homeWarrantyInCents === 0
-    ) {
-      this.addError(
-        issues,
-        'concessions.homeWarrantyInCents',
-        'Enter the requested home-warranty amount.'
-      );
-    }
-
-    if (
-      concessions.otherConcessionRequested &&
-      !this.hasText(
+      if (
         concessions
-          .otherConcessionDescription
-      )
+          .sellerConcessionInCents ===
+            undefined ||
+        !this.isPositiveMoney(
+          concessions
+            .sellerConcessionInCents
+        )
+      ) {
+        this.addError(
+          issues,
+          'concessions.sellerConcessionInCents',
+          'Enter a seller-concession amount greater than zero.'
+        );
+      }
+    } else if (
+      concessions.concessionType ===
+        'percentage'
+    ) {
+      const percentage =
+        concessions
+          .sellerConcessionPercentage;
+
+      if (
+        typeof percentage !== 'number' ||
+        !Number.isFinite(percentage) ||
+        percentage <= 0 ||
+        percentage > 100
+      ) {
+        this.addError(
+          issues,
+          'concessions.sellerConcessionPercentage',
+          'Enter a seller-concession percentage greater than 0 and no more than 100.'
+        );
+      }
+    } else if (
+      concessions.concessionType !==
+        'none'
     ) {
       this.addError(
         issues,
-        'concessions.otherConcessionDescription',
-        'Describe the requested concession.'
-      );
-    }
-  }
-
-
-  private validatePropertyInclusions(
-    terms: OfferTerms,
-    issues: OfferValidationIssue[]
-  ): void {
-    const inclusions =
-      terms.propertyInclusions;
-
-    if (
-      inclusions
-        .additionalPersonalPropertyRequested &&
-      !this.hasText(
-        inclusions
-          .additionalPersonalPropertyDescription
-      )
-    ) {
-      this.addError(
-        issues,
-        'propertyInclusions.additionalPersonalPropertyDescription',
-        'Describe the requested personal property.'
+        'concessions.concessionType',
+        'Select a valid seller-concession type.'
       );
     }
 
     if (
-      inclusions.leasedEquipmentPresent &&
-      !inclusions
-        .leasedEquipmentObligationsAccepted
+      concessions.homeWarrantyRequested
     ) {
-      this.addWarning(
-        issues,
-        'propertyInclusions.leasedEquipmentObligationsAccepted',
-        'The parties must determine how leased-equipment obligations will be handled.'
+      if (
+        concessions.homeWarrantyInCents ===
+          undefined ||
+        !this.isPositiveMoney(
+          concessions.homeWarrantyInCents
+        )
+      ) {
+        this.addError(
+          issues,
+          'concessions.homeWarrantyInCents',
+          'Enter a home-warranty amount greater than zero.'
+        );
+      }
+    } else {
+      this.validateOptionalMoney(
+        concessions.homeWarrantyInCents,
+        'concessions.homeWarrantyInCents',
+        issues
       );
     }
   }
@@ -818,60 +624,36 @@ export class OfferValidationService {
     }
 
     if (
-      !this.isValidDate(
-        settlement.closingDate
-      )
-    ) {
-      this.addError(
-        issues,
-        'settlement.closingDate',
-        'Enter a valid closing date.'
-      );
-    }
-
-    if (
-      !this.hasText(
-        settlement.proposedDeedName
-      )
-    ) {
-      this.addError(
-        issues,
-        'settlement.proposedDeedName',
-        'Enter the proposed deed recipient name.'
-      );
-    }
-
-    if (
       settlement.possessionTiming !==
         'at_closing' &&
-      !this.isValidDate(
-        settlement.possessionDate
-      )
+      settlement.possessionTiming !==
+        'other'
     ) {
       this.addError(
         issues,
-        'settlement.possessionDate',
-        'Enter the proposed possession date.'
+        'settlement.possessionTiming',
+        'Select when possession will be delivered.'
       );
     }
 
     if (
-      settlement.possessionTiming !==
-        'at_closing' &&
+      settlement.possessionTiming ===
+        'other' &&
       !this.hasText(
-        settlement.possessionTime
+        settlement
+          .possessionAgreementDocumentUid
       )
     ) {
       this.addError(
         issues,
-        'settlement.possessionTime',
-        'Enter the proposed possession time.'
+        'settlement.possessionAgreementDocumentUid',
+        'Attach the separate possession agreement.'
       );
     }
   }
 
 
-  private validateDisclosuresAndAddenda(
+  private validateBuyerDisclosures(
     terms: OfferTerms,
     context: OfferValidationContext,
     issues: OfferValidationIssue[]
@@ -880,101 +662,214 @@ export class OfferValidationService {
       return;
     }
 
-    terms.disclosures
-      .filter(
-        disclosure =>
-          disclosure.required
-      )
-      .forEach(
-        disclosure => {
-          if (!disclosure.received) {
-            this.addError(
-              issues,
-              `disclosures.${disclosure.disclosureUid}.received`,
-              `${disclosure.title} must be received before submission.`
-            );
-          }
+    this.validateDisclosureReceipt(
+      terms
+        .buyerDisclosures
+        .residentialProperty,
+      'buyerDisclosures.residentialProperty',
+      'Residential Property and Owners Association Disclosure Statement',
+      issues
+    );
 
-          if (!disclosure.acknowledged) {
-            this.addError(
-              issues,
-              `disclosures.${disclosure.disclosureUid}.acknowledged`,
-              `${disclosure.title} must be acknowledged before submission.`
-            );
-          }
-        }
-      );
+    this.validateDisclosureReceipt(
+      terms
+        .buyerDisclosures
+        .mineralOilGasRights,
+      'buyerDisclosures.mineralOilGasRights',
+      'Mineral and Oil and Gas Rights Mandatory Disclosure Statement',
+      issues
+    );
+  }
 
-    terms.addenda
-      .filter(
-        addendum =>
-          addendum.required
-      )
-      .forEach(
-        addendum => {
-          if (!addendum.selected) {
-            this.addError(
-              issues,
-              `addenda.${addendum.addendumUid}`,
-              `${addendum.title} is required for this offer.`
-            );
-          }
-        }
+
+  private validateDisclosureReceipt(
+    receipt:
+      OfferTerms[
+        'buyerDisclosures'
+      ][
+        'residentialProperty'
+      ],
+    fieldPath: string,
+    title: string,
+    issues: OfferValidationIssue[]
+  ): void {
+    if (
+      receipt.status !== 'received' &&
+      receipt.status !== 'not_received' &&
+      receipt.status !== 'exempt'
+    ) {
+      this.addError(
+        issues,
+        fieldPath + '.status',
+        'Select the status of the ' +
+          title + '.'
       );
+    }
+
+    if (!receipt.acknowledged) {
+      this.addError(
+        issues,
+        fieldPath + '.acknowledged',
+        'Acknowledge the ' +
+          title + ' selection.'
+      );
+    }
+
+    if (
+      receipt.status === 'exempt' &&
+      !this.hasText(receipt.exemptionReason)
+    ) {
+      this.addError(
+        issues,
+        fieldPath + '.exemptionReason',
+        'Enter the reason this sale is exempt from the ' +
+          title + '.'
+      );
+    }
+  }
+
+
+  private validateSellerStatements(
+    terms: OfferTerms,
+    issues: OfferValidationIssue[]
+  ): void {
+    const statements =
+      terms.sellerStatements;
+
+    if (
+      statements.leadBasedPaintApplies &&
+      !this.hasText(
+        statements
+          .leadBasedPaintDisclosureDocumentUid
+      )
+    ) {
+      this.addError(
+        issues,
+        'sellerStatements.leadBasedPaintDisclosureDocumentUid',
+        'Attach the lead-based-paint disclosure.'
+      );
+    }
+
+    if (
+      statements.ownersAssociationApplies
+    ) {
+      if (
+        !this.hasText(
+          statements.ownersAssociationName
+        )
+      ) {
+        this.addError(
+          issues,
+          'sellerStatements.ownersAssociationName',
+          'Enter the owners association name.'
+        );
+      }
+
+      this.validateOptionalMoney(
+        statements
+          .ownersAssociationDuesInCents,
+        'sellerStatements.ownersAssociationDuesInCents',
+        issues
+      );
+    }
+
+    if (
+      statements.fuelTankPresent &&
+      statements.fuelTankOwnership !==
+        'owned' &&
+      statements.fuelTankOwnership !==
+        'leased'
+    ) {
+      this.addError(
+        issues,
+        'sellerStatements.fuelTankOwnership',
+        'Specify whether the fuel tank is owned or leased.'
+      );
+    }
+
+    if (
+      statements.leasesExist &&
+      !this.hasText(
+        statements
+          .leaseAddendumDocumentUid
+      )
+    ) {
+      this.addError(
+        issues,
+        'sellerStatements.leaseAddendumDocumentUid',
+        'Attach the applicable lease addendum.'
+      );
+    }
+  }
+
+
+  private validateAddenda(
+    terms: OfferTerms,
+    issues: OfferValidationIssue[]
+  ): void {
+    terms.addenda.forEach(
+      (addendum, index) => {
+        if (!addendum.included) {
+          return;
+        }
+
+        const fieldPath =
+          'addenda.' + index;
+
+        if (!this.hasText(addendum.title)) {
+          this.addError(
+            issues,
+            fieldPath + '.title',
+            'An included addendum needs a title.'
+          );
+        }
+
+        if (
+          !this.hasText(
+            addendum.documentUid
+          )
+        ) {
+          this.addError(
+            issues,
+            fieldPath + '.documentUid',
+            'An included addendum needs a document.'
+          );
+        }
+      }
+    );
   }
 
 
   private validateAdditionalTerms(
     terms: OfferTerms,
-    context: OfferValidationContext,
     issues: OfferValidationIssue[]
   ): void {
-    terms.additionalTermRequests.forEach(
-      request => {
-        if (
-          !this.hasText(
-            request.plainLanguageRequest
-          )
-        ) {
-          this.addError(
-            issues,
-            `additionalTermRequests.${request.Uid}.plainLanguageRequest`,
-            'Describe the requested additional term.'
-          );
-        }
+    const exhibit =
+      terms.additionalTermsExhibit;
 
-        if (
-          context.mode !== 'draft' &&
-          (
-            request.resolution ===
-              'pending_review' ||
-            request.resolution ===
-              'attorney_language_required'
-          )
-        ) {
-          this.addError(
-            issues,
-            `additionalTermRequests.${request.Uid}.resolution`,
-            'This additional term must be resolved before the offer can be submitted.'
-          );
-        }
+    if (!exhibit.included) {
+      return;
+    }
 
-        if (
-          request.resolution ===
-            'attorney_language_received' &&
-          (
-            !request.approvedByBuyer ||
-            !request.approvedBySeller
-          )
-        ) {
-          this.addError(
-            issues,
-            `additionalTermRequests.${request.Uid}`,
-            'Attorney-prepared language must be approved by both parties.'
-          );
-        }
-      }
-    );
+    if (
+      exhibit.preparedBy !== 'buyer' &&
+      exhibit.preparedBy !== 'seller' &&
+      exhibit.preparedBy !== 'attorney'
+    ) {
+      this.addError(
+        issues,
+        'additionalTermsExhibit.preparedBy',
+        'Select who prepared the additional terms.'
+      );
+    }
+
+    if (!this.hasText(exhibit.documentUid)) {
+      this.addError(
+        issues,
+        'additionalTermsExhibit.documentUid',
+        'Attach the additional-terms exhibit.'
+      );
+    }
   }
 
 
@@ -983,7 +878,8 @@ export class OfferValidationService {
     context: OfferValidationContext,
     issues: OfferValidationIssue[]
   ): void {
-    const delivery = terms.delivery;
+    const delivery =
+      terms.delivery;
 
     if (
       !this.isValidDateTime(
@@ -1005,7 +901,7 @@ export class OfferValidationService {
       this.addError(
         issues,
         'delivery.buyerDeliveryEmail',
-        'Enter a valid buyer delivery email.'
+        'A valid buyer delivery email is required.'
       );
     }
 
@@ -1017,7 +913,18 @@ export class OfferValidationService {
       this.addError(
         issues,
         'delivery.sellerDeliveryEmail',
-        'Enter a valid seller delivery email.'
+        'A valid seller delivery email is required.'
+      );
+    }
+
+    if (
+      delivery.timeZone !==
+        'America/New_York'
+    ) {
+      this.addError(
+        issues,
+        'delivery.timeZone',
+        'The offer must use North Carolina time.'
       );
     }
 
@@ -1059,64 +966,53 @@ export class OfferValidationService {
     terms: OfferTerms,
     issues: OfferValidationIssue[]
   ): void {
-    const offerExpiration =
+    const expiration =
       this.parseDate(
         terms.delivery.expiresAt
       );
 
-    const dueDiligenceExpiration =
-      this.parseDate(
-        terms.deposits
-          .dueDiligenceExpiration
-      );
-
-    const settlementDate =
+    const settlement =
       this.parseDate(
         terms.settlement.settlementDate
       );
 
-    const closingDate =
-      this.parseDate(
-        terms.settlement.closingDate
-      );
-
     if (
-      offerExpiration &&
-      dueDiligenceExpiration &&
-      offerExpiration.getTime() >=
-        dueDiligenceExpiration.getTime()
+      expiration &&
+      settlement &&
+      expiration.getTime() >=
+        settlement.getTime() +
+          12 * 60 * 60 * 1000
     ) {
       this.addError(
         issues,
         'delivery.expiresAt',
-        'The offer must expire before the proposed due-diligence period ends.'
+        'The offer must expire before the proposed settlement date.'
       );
     }
 
     if (
-      dueDiligenceExpiration &&
-      settlementDate &&
-      dueDiligenceExpiration.getTime() >=
-        settlementDate.getTime()
+      terms.deposits
+        .dueDiligenceDeadlineType ===
+          'specific_date'
     ) {
-      this.addError(
-        issues,
-        'deposits.dueDiligenceExpiration',
-        'The due-diligence period must end before settlement.'
-      );
-    }
+      const dueDiligenceDate =
+        this.parseDate(
+          terms.deposits
+            .dueDiligenceEndDate
+        );
 
-    if (
-      settlementDate &&
-      closingDate &&
-      closingDate.getTime() <
-        settlementDate.getTime()
-    ) {
-      this.addError(
-        issues,
-        'settlement.closingDate',
-        'The closing date cannot occur before settlement.'
-      );
+      if (
+        dueDiligenceDate &&
+        settlement &&
+        dueDiligenceDate.getTime() >=
+          settlement.getTime()
+      ) {
+        this.addError(
+          issues,
+          'deposits.dueDiligenceEndDate',
+          'The due-diligence period must end before settlement.'
+        );
+      }
     }
   }
 
@@ -1187,23 +1083,27 @@ export class OfferValidationService {
       return false;
     }
 
-    return this.parseDate(value) !== null;
+    const parsed =
+      new Date(
+        value + 'T12:00:00Z'
+      );
+
+    return (
+      !Number.isNaN(
+        parsed.getTime()
+      ) &&
+      parsed
+        .toISOString()
+        .slice(0, 10) === value
+    );
   }
 
 
   private isValidDateTime(
     value: OfferDateTime | undefined
   ): boolean {
-    if (!value) {
-      return false;
-    }
-
-    /*
-     * A deadline must include an explicit UTC offset or Z
-     * suffix so it cannot be interpreted differently by
-     * buyers, sellers or backend Functions.
-     */
     if (
+      !value ||
       !/(Z|[+-]\d{2}:\d{2})$/.test(
         value
       )
@@ -1222,7 +1122,15 @@ export class OfferValidationService {
       return null;
     }
 
-    const parsed = new Date(value);
+    const dateValue =
+      /^\d{4}-\d{2}-\d{2}$/.test(
+        value
+      )
+        ? value + 'T12:00:00Z'
+        : value;
+
+    const parsed =
+      new Date(dateValue);
 
     return Number.isNaN(
       parsed.getTime()
@@ -1245,12 +1153,11 @@ export class OfferValidationService {
   private isValidEmail(
     value: string | undefined
   ): boolean {
-    if (!value) {
-      return false;
-    }
-
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      value.trim()
+    return (
+      typeof value === 'string' &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        value.trim()
+      )
     );
   }
 
@@ -1264,19 +1171,6 @@ export class OfferValidationService {
       fieldPath,
       message,
       severity: 'error'
-    });
-  }
-
-
-  private addWarning(
-    issues: OfferValidationIssue[],
-    fieldPath: string,
-    message: string
-  ): void {
-    issues.push({
-      fieldPath,
-      message,
-      severity: 'warning'
     });
   }
 }

@@ -10,7 +10,7 @@ import {
 
 import {
   functions
-} from '../../../infrastructure/firebase/firebase';
+} from '../../../core/infrastructure/firebase/firebase';
 
 
 interface CreateIdentityVerificationSessionRequest {

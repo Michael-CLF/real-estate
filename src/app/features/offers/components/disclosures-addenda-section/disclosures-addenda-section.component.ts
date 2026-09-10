@@ -1,17 +1,31 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject
+  DestroyRef,
+  OnInit,
+  WritableSignal,
+  inject,
+  input,
+  signal
 } from '@angular/core';
 
 import {
   AbstractControl,
   ControlContainer,
-  FormControl,
   FormGroup,
   FormGroupDirective,
-  ReactiveFormsModule
+  ReactiveFormsModule,
+  Validators
 } from '@angular/forms';
+
+import {
+  takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
+  startWith
+} from 'rxjs';
+
 
 @Component({
   selector:
@@ -42,10 +56,17 @@ import {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
-export class DisclosuresAddendaSectionComponent {
+export class DisclosuresAddendaSectionComponent
+  implements OnInit {
+
+  readonly listingUid =
+    input.required<string>();
 
   private readonly parentFormDirective =
     inject(FormGroupDirective);
+
+  private readonly destroyRef =
+    inject(DestroyRef);
 
   get sectionForm(): FormGroup {
     const section =
@@ -64,28 +85,41 @@ export class DisclosuresAddendaSectionComponent {
     return section;
   }
 
-  get supportingDocumentUidsControl():
-    FormControl<string[]> {
-    const control =
-      this.sectionForm.get(
-        'supportingDocumentUids'
-      );
-
-    if (!(control instanceof FormControl)) {
-      throw new Error(
-        'The supportingDocumentUids control is unavailable.'
-      );
-    }
-
-    return control as
-      FormControl<string[]>;
+  get residentialPropertyStatus(): string {
+    return this.status(
+      'residentialPropertyStatus'
+    );
   }
 
-  get supportingDocumentCount():
-    number {
-    return (
-      this.supportingDocumentUidsControl
-        .value?.length ?? 0
+  get mineralOilGasRightsStatus(): string {
+    return this.status(
+      'mineralOilGasRightsStatus'
+    );
+  }
+
+  get residentialPropertyDocumentAttached():
+    boolean {
+    return this.hasText(
+      'residentialPropertyDocumentUid'
+    );
+  }
+
+  get mineralOilGasRightsDocumentAttached():
+    boolean {
+    return this.hasText(
+      'mineralOilGasRightsDocumentUid'
+    );
+  }
+
+  ngOnInit(): void {
+    this.watchExemptionReason(
+      'residentialPropertyStatus',
+      'residentialPropertyExemptionReason'
+    );
+
+    this.watchExemptionReason(
+      'mineralOilGasRightsStatus',
+      'mineralOilGasRightsExemptionReason'
     );
   }
 
@@ -97,13 +131,13 @@ export class DisclosuresAddendaSectionComponent {
     );
   }
 
-  isSelected(
+  status(
     controlName: string
-  ): boolean {
-    return (
+  ): string {
+    return String(
       this.control(
         controlName
-      )?.value === true
+      )?.value ?? ''
     );
   }
 
@@ -137,10 +171,73 @@ export class DisclosuresAddendaSectionComponent {
       return '';
     }
 
+    if (control.hasError('required')) {
+      return 'This field is required.';
+    }
+
     if (control.hasError('maxlength')) {
       return 'The entered value is too long.';
     }
 
     return 'Review the information entered in this field.';
+  }
+
+  private watchExemptionReason(
+    statusControlName: string,
+    reasonControlName: string
+  ): void {
+    this.control(
+      statusControlName
+    )
+      ?.valueChanges
+      .pipe(
+        startWith(
+          this.control(
+            statusControlName
+          )?.value
+        ),
+
+        takeUntilDestroyed(
+          this.destroyRef
+        )
+      )
+      .subscribe(
+        (status) => {
+          const reasonControl =
+            this.control(
+              reasonControlName
+            );
+
+          if (status === 'exempt') {
+            reasonControl?.setValidators([
+              Validators.required,
+              Validators.maxLength(500)
+            ]);
+          } else {
+            reasonControl?.setValidators([
+              Validators.maxLength(500)
+            ]);
+          }
+
+          reasonControl
+            ?.updateValueAndValidity({
+              emitEvent: false
+            });
+        }
+      );
+  }
+
+  private hasText(
+    controlName: string
+  ): boolean {
+    const value =
+      this.control(
+        controlName
+      )?.value;
+
+    return (
+      typeof value === 'string' &&
+      value.trim().length > 0
+    );
   }
 }

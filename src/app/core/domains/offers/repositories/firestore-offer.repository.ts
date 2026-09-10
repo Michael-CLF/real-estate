@@ -44,6 +44,8 @@ import {
   RespondToOfferRequest,
   RespondToOfferResult,
   SaveOfferDraftRequest,
+  SignOfferRequest,
+  SignOfferResult,
   SubmitOfferVersionRequest
 } from './offer.repository';
 
@@ -137,6 +139,16 @@ export class FirestoreOfferRepository
     >(
       functions,
       'respondToOffer'
+    );
+
+
+  private readonly signOfferFunction =
+    httpsCallable<
+      SignOfferRequest,
+      SignOfferResult
+    >(
+      functions,
+      'signOffer'
     );
 
 
@@ -505,6 +517,18 @@ export class FirestoreOfferRepository
   }
 
 
+  override async signOffer(
+    request: SignOfferRequest
+  ): Promise<SignOfferResult> {
+    const result =
+      await this.signOfferFunction(
+        request
+      );
+
+    return result.data;
+  }
+
+
   override async withdrawOffer(
     offerUid: string,
     offerVersionUid: string
@@ -599,6 +623,25 @@ export class FirestoreOfferRepository
 
       currentVersionNumber:
         offer.currentVersionNumber,
+
+      currentVersionInitiatedBy:
+        version.initiatedBy,
+
+      currentVersionSenderName:
+        (
+          version.initiatedBy === 'buyer'
+            ? version.buyers
+            : version.sellers
+        ).find(
+          party =>
+            party.userUid ===
+            version.initiatedByUid
+        )?.legalName ??
+        (
+          version.initiatedBy === 'buyer'
+            ? primaryBuyer?.legalName
+            : primarySeller?.legalName
+        ) ?? '',
 
       purchasePriceInCents:
         version.terms.purchase

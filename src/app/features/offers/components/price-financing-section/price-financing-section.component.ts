@@ -23,6 +23,7 @@ import {
   startWith
 } from 'rxjs';
 
+
 @Component({
   selector:
     'app-price-financing-section',
@@ -86,45 +87,22 @@ implements OnInit {
     );
   }
 
-  get loanType(): string {
-    return String(
-      this.control(
-        'loanType'
-      )?.value ?? ''
-    );
-  }
-
-  get isCashPurchase(): boolean {
-    return this.financingMethod ===
-      'cash';
-  }
-
-  get usesFinancing(): boolean {
-    return (
-      this.financingMethod ===
-        'financing' ||
-      this.financingMethod ===
-        'cash_and_financing'
-    );
-  }
-
-  get requiresOtherLoanType():
+  get otherPropertyWillFundPurchase():
     boolean {
-    return (
-      this.usesFinancing &&
-      this.loanType === 'other'
-    );
+    return this.control(
+      'otherPropertyWillFundPurchase'
+    )?.value === true;
   }
 
   ngOnInit(): void {
     this.control(
-      'financingMethod'
+      'otherPropertyWillFundPurchase'
     )
       ?.valueChanges
       .pipe(
         startWith(
           this.control(
-            'financingMethod'
+            'otherPropertyWillFundPurchase'
           )?.value
         ),
 
@@ -134,28 +112,7 @@ implements OnInit {
       )
       .subscribe(
         () => {
-          this.updateFinancingValidators();
-        }
-      );
-
-    this.control(
-      'loanType'
-    )
-      ?.valueChanges
-      .pipe(
-        startWith(
-          this.control(
-            'loanType'
-          )?.value
-        ),
-
-        takeUntilDestroyed(
-          this.destroyRef
-        )
-      )
-      .subscribe(
-        () => {
-          this.updateOtherLoanTypeValidator();
+          this.updateOtherPropertyValidator();
         }
       );
   }
@@ -202,12 +159,12 @@ implements OnInit {
       return 'This field is required.';
     }
 
-    if (control.hasError('min')) {
-      return 'Enter an amount greater than zero.';
+    if (control.hasError('pattern')) {
+      return 'Select cash or loan.';
     }
 
-    if (control.hasError('max')) {
-      return 'Enter a percentage no greater than 100.';
+    if (control.hasError('min')) {
+      return 'Enter an amount greater than zero.';
     }
 
     if (control.hasError('maxlength')) {
@@ -217,134 +174,29 @@ implements OnInit {
     return 'Review the information entered in this field.';
   }
 
-  private updateFinancingValidators():
+  private updateOtherPropertyValidator():
     void {
-    const loanTypeControl =
+    const descriptionControl =
       this.control(
-        'loanType'
+        'otherPropertyDescription'
       );
 
-    const loanAmountControl =
-      this.control(
-        'loanAmount'
-      );
-
-    const downPaymentAmountControl =
-      this.control(
-        'downPaymentAmount'
-      );
-
-    const downPaymentPercentageControl =
-      this.control(
-        'downPaymentPercentage'
-      );
-
-    const financingApplicationDaysControl =
-      this.control(
-        'financingApplicationDays'
-      );
-
-    if (this.usesFinancing) {
-      loanTypeControl?.setValidators([
-        Validators.required
-      ]);
-
-      loanAmountControl?.setValidators([
-        Validators.required,
-        Validators.min(1)
-      ]);
-
-      downPaymentAmountControl
+    if (
+      this.otherPropertyWillFundPurchase
+    ) {
+      descriptionControl
         ?.setValidators([
           Validators.required,
-          Validators.min(0)
-        ]);
-
-      downPaymentPercentageControl
-        ?.setValidators([
-          Validators.min(0),
-          Validators.max(100)
-        ]);
-
-      financingApplicationDaysControl
-        ?.setValidators([
-          Validators.min(0),
-          Validators.max(365)
+          Validators.maxLength(500)
         ]);
     } else {
-      loanTypeControl?.clearValidators();
-
-      loanAmountControl?.setValidators([
-        Validators.min(0)
-      ]);
-
-      downPaymentAmountControl
+      descriptionControl
         ?.setValidators([
-          Validators.min(0)
-        ]);
-
-      downPaymentPercentageControl
-        ?.setValidators([
-          Validators.min(0),
-          Validators.max(100)
-        ]);
-
-      financingApplicationDaysControl
-        ?.setValidators([
-          Validators.min(0),
-          Validators.max(365)
+          Validators.maxLength(500)
         ]);
     }
 
-    loanTypeControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
-
-    loanAmountControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
-
-    downPaymentAmountControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
-
-    downPaymentPercentageControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
-
-    financingApplicationDaysControl
-      ?.updateValueAndValidity({
-        emitEvent: false
-      });
-
-    this.updateOtherLoanTypeValidator();
-  }
-
-  private updateOtherLoanTypeValidator():
-    void {
-    const otherLoanTypeControl =
-      this.control(
-        'otherLoanType'
-      );
-
-    if (this.requiresOtherLoanType) {
-      otherLoanTypeControl
-        ?.setValidators([
-          Validators.required,
-          Validators.maxLength(100)
-        ]);
-    } else {
-      otherLoanTypeControl
-        ?.setValidators([
-          Validators.maxLength(100)
-        ]);
-    }
-
-    otherLoanTypeControl
+    descriptionControl
       ?.updateValueAndValidity({
         emitEvent: false
       });

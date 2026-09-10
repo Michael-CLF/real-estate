@@ -3,7 +3,10 @@ export type ListingBadgeType =
   | 'new-listing'
   | 'coming-soon'
   | 'hot-property'
-  | 'price-reduced';
+  | 'price-reduced'
+  | 'offer-pending'
+  | 'under-contract'
+  | 'sold';
 
 export type ListingBadgeTone =
   | 'gold'
@@ -22,6 +25,7 @@ export interface ListingBadge {
 
 export interface ListingBadgeSource {
   status: string;
+  pendingOfferCount?: number;
   featuredListing?: boolean;
 
   price: number;

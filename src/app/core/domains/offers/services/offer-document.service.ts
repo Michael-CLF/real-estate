@@ -17,10 +17,16 @@ import {
 } from 'firebase/functions';
 
 import {
+  deleteObject,
   getDownloadURL,
   getStorage,
-  ref
+  ref,
+  uploadBytes
 } from 'firebase/storage';
+
+import {
+  getAuth
+} from 'firebase/auth';
 
 import {
   firestore,
@@ -57,6 +63,33 @@ export interface GenerateOfferDocumentResponse {
 }
 
 
+export type OfferAttachmentType =
+  | 'possession_agreement'
+  | 'additional_terms_exhibit';
+
+
+export interface RegisterOfferAttachmentRequest {
+  offerUid: string;
+  offerVersionUid: string;
+  documentUid: string;
+
+  attachmentType: OfferAttachmentType;
+
+  originalFileName: string;
+  storagePath: string;
+}
+
+
+export interface RegisterOfferAttachmentResponse {
+  documentUid: string;
+
+  fileName: string;
+  storagePath: string;
+
+  attachmentType: OfferAttachmentType;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -74,6 +107,106 @@ export class OfferDocumentService {
       functions,
       'generateOfferDocument'
     );
+
+
+  private readonly registerOfferAttachmentFunction =
+    httpsCallable<
+      RegisterOfferAttachmentRequest,
+      RegisterOfferAttachmentResponse
+    >(
+      functions,
+      'registerOfferAttachment'
+    );
+
+
+  async uploadAttachment(
+    offerUid: string,
+    offerVersionUid: string,
+    attachmentType: OfferAttachmentType,
+    file: File
+  ): Promise<RegisterOfferAttachmentResponse> {
+    this.requireText(
+      offerUid,
+      'An offer identifier is required.'
+    );
+
+    this.requireText(
+      offerVersionUid,
+      'An offer-version identifier is required.'
+    );
+
+    await this.validatePdfFile(file);
+
+    const userUid =
+      getAuth().currentUser?.uid;
+
+    if (!userUid) {
+      throw new Error(
+        'You must sign in before uploading an offer attachment.'
+      );
+    }
+
+    const documentUid =
+      crypto.randomUUID();
+
+    const storagePath = [
+      'offers',
+      offerUid,
+      'versions',
+      offerVersionUid,
+      'attachments',
+      `${documentUid}.pdf`
+    ].join('/');
+
+    const storageReference =
+      ref(
+        this.storage,
+        storagePath
+      );
+
+    try {
+      await uploadBytes(
+        storageReference,
+        file,
+        {
+          contentType:
+            'application/pdf',
+
+          customMetadata: {
+            offerUid,
+            offerVersionUid,
+            documentUid,
+            attachmentType,
+            uploaderUid:
+              userUid,
+            originalFileName:
+              file.name
+          }
+        }
+      );
+
+      const result =
+        await this.registerOfferAttachmentFunction({
+          offerUid,
+          offerVersionUid,
+          documentUid,
+          attachmentType,
+          originalFileName:
+            file.name,
+          storagePath
+        });
+
+      return result.data;
+    } catch (error) {
+      await deleteObject(
+        storageReference
+      ).catch(
+        () => undefined
+      );
+
+      throw error;
+    }
+  }
 
 
   async generateAgreement(
@@ -355,6 +488,53 @@ export class OfferDocumentService {
       value.trim().length === 0
     ) {
       throw new Error(message);
+    }
+  }
+
+
+  private async validatePdfFile(
+    file: File
+  ): Promise<void> {
+    const maximumSizeBytes =
+      15 * 1024 * 1024;
+
+    if (!file) {
+      throw new Error(
+        'Select a completed PDF document.'
+      );
+    }
+
+    if (
+      file.type !== 'application/pdf' ||
+      !file.name.toLowerCase().endsWith('.pdf')
+    ) {
+      throw new Error(
+        'Offer attachments must be PDF files.'
+      );
+    }
+
+    if (
+      file.size <= 0 ||
+      file.size > maximumSizeBytes
+    ) {
+      throw new Error(
+        'The PDF must be larger than 0 bytes and no larger than 15 MB.'
+      );
+    }
+
+    const headerBuffer =
+      await file
+        .slice(0, 5)
+        .arrayBuffer();
+
+    const header =
+      new TextDecoder()
+        .decode(headerBuffer);
+
+    if (header !== '%PDF-') {
+      throw new Error(
+        'The selected file does not appear to be a valid PDF document.'
+      );
     }
   }
 }
