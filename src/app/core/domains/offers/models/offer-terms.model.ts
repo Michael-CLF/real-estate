@@ -156,17 +156,16 @@ export interface OfferDepositTerms {
   depositInCents: MoneyInCents;
 
   /*
-   * The attorney-approved agreement currently requires
-   * delivery within four calendar days of the Effective
-   * Date. It is stored so the generated document and
-   * transaction timeline use the same value.
+   * Buyer-selected delivery period after the Effective
+   * Date. Offer validation limits this to 1–30 whole
+   * calendar days.
    */
-  depositDeliveryDays: 4;
+  depositDeliveryDays: number;
 
   escrowAgentName: string;
 
   dueDiligenceDeadlineType:
-  DueDiligenceDeadlineType;
+    DueDiligenceDeadlineType;
 
   dueDiligenceEndDate?: OfferDate;
   dueDiligenceDaysAfterEffectiveDate?: number;
@@ -232,10 +231,10 @@ export interface OfferDisclosureReceipt {
  */
 export interface OfferBuyerDisclosureTerms {
   residentialProperty:
-  OfferDisclosureReceipt;
+    OfferDisclosureReceipt;
 
   mineralOilGasRights:
-  OfferDisclosureReceipt;
+    OfferDisclosureReceipt;
 }
 
 
@@ -277,7 +276,7 @@ export interface OfferAddendumSelection {
   documentUid: string;
 
   preparedBy:
-  AdditionalTermsPreparedBy;
+    AdditionalTermsPreparedBy;
 
   included: boolean;
 }
@@ -294,7 +293,7 @@ export interface OfferAdditionalTermsExhibit {
   included: boolean;
 
   preparedBy?:
-  AdditionalTermsPreparedBy;
+    AdditionalTermsPreparedBy;
 
   documentUid?: string;
 }
@@ -331,15 +330,15 @@ export interface OfferTerms {
   settlement: OfferSettlementTerms;
 
   buyerDisclosures:
-  OfferBuyerDisclosureTerms;
+    OfferBuyerDisclosureTerms;
 
   sellerStatements:
-  OfferSellerStatements;
+    OfferSellerStatements;
 
   addenda: OfferAddendumSelection[];
 
   additionalTermsExhibit:
-  OfferAdditionalTermsExhibit;
+    OfferAdditionalTermsExhibit;
 
   delivery: OfferDeliveryTerms;
 }

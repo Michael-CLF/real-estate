@@ -11,15 +11,27 @@
     </span>
 
     <div>
-      <strong>
-        The buyer must make both disclosure selections
-      </strong>
+      @if (readOnly) {
+        <strong>
+          Buyer disclosure selections are read-only
+        </strong>
 
-      <p>
-        Select the statement that accurately describes
-        whether the buyer received each required North
-        Carolina disclosure before making this offer.
-      </p>
+        <p>
+          These statements were made and acknowledged by
+          the buyer. The seller may review them but cannot
+          change the buyer’s recorded receipt status.
+        </p>
+      } @else {
+        <strong>
+          The buyer must make both disclosure selections
+        </strong>
+
+        <p>
+          Select the statement that accurately describes
+          whether the buyer received each required North
+          Carolina disclosure before making this offer.
+        </p>
+      }
     </div>
   </aside>
 
@@ -38,8 +50,13 @@
       </h3>
 
       <p>
-        Choose the one statement that applies when the
-        buyer makes this offer.
+        @if (readOnly) {
+          Review the statement previously selected by the
+          buyer.
+        } @else {
+          Choose the one statement that applies when the
+          buyer makes this offer.
+        }
       </p>
     </header>
 
@@ -276,8 +293,13 @@
       </h3>
 
       <p>
-        Choose the one statement that applies when the
-        buyer makes this offer.
+        @if (readOnly) {
+          Review the statement previously selected by the
+          buyer.
+        } @else {
+          Choose the one statement that applies when the
+          buyer makes this offer.
+        }
       </p>
     </header>
 

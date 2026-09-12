@@ -23,6 +23,10 @@ import {
   startWith
 } from 'rxjs';
 
+import {
+  CurrencyInputDirective
+} from '../../directives/currency-input.directive';
+
 
 @Component({
   selector:
@@ -31,7 +35,8 @@ import {
   standalone: true,
 
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CurrencyInputDirective
   ],
 
   templateUrl:

@@ -10,8 +10,8 @@
       </h1>
 
       <p>
-        Review marketplace listings, publication status,
-        seller ownership, and listing activity.
+        Review published listings, unfinished drafts,
+        seller ownership and publication status.
       </p>
     </div>
 
@@ -35,24 +35,23 @@
     aria-label="Listing summary"
   >
     <article>
-      <span>Total listings</span>
-      <strong>
-        {{ summary().totalListings }}
-      </strong>
+      <span>Total records</span>
+      <strong>{{ summary().totalListings }}</strong>
+    </article>
+
+    <article>
+      <span>Drafts</span>
+      <strong>{{ summary().draftListings }}</strong>
     </article>
 
     <article>
       <span>Active</span>
-      <strong>
-        {{ summary().activeListings }}
-      </strong>
+      <strong>{{ summary().activeListings }}</strong>
     </article>
 
     <article>
       <span>Featured</span>
-      <strong>
-        {{ summary().featuredListings }}
-      </strong>
+      <strong>{{ summary().featuredListings }}</strong>
     </article>
 
     <article>
@@ -64,18 +63,28 @@
 
     <article>
       <span>Sold</span>
-      <strong>
-        {{ summary().soldListings }}
-      </strong>
+      <strong>{{ summary().soldListings }}</strong>
     </article>
 
     <article>
       <span>Inactive</span>
-      <strong>
-        {{ summary().inactiveListings }}
-      </strong>
+      <strong>{{ summary().inactiveListings }}</strong>
     </article>
   </section>
+
+  @if (deletionError()) {
+    <p
+      class="administration-listings__deletion-error"
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-triangle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      {{ deletionError() }}
+    </p>
+  }
 
   <section class="administration-listings__workspace">
     <div class="administration-listings__toolbar">
@@ -91,9 +100,7 @@
 
         <input
           type="search"
-          placeholder="
-            Search address, listing ID, seller, or property type
-          "
+          placeholder="Search address, listing ID, seller or status"
           [value]="searchTerm()"
           (input)="onSearch($event)"
         />
@@ -102,9 +109,7 @@
       <div class="administration-listings__filters">
         <button
           type="button"
-          [class.active]="
-            statusFilter() === 'all'
-          "
+          [class.active]="statusFilter() === 'all'"
           (click)="onStatusFilter('all')"
         >
           All
@@ -112,9 +117,15 @@
 
         <button
           type="button"
-          [class.active]="
-            statusFilter() === 'active'
-          "
+          [class.active]="statusFilter() === 'draft'"
+          (click)="onStatusFilter('draft')"
+        >
+          Drafts
+        </button>
+
+        <button
+          type="button"
+          [class.active]="statusFilter() === 'active'"
           (click)="onStatusFilter('active')"
         >
           Active
@@ -122,9 +133,7 @@
 
         <button
           type="button"
-          [class.active]="
-            statusFilter() === 'published'
-          "
+          [class.active]="statusFilter() === 'published'"
           (click)="onStatusFilter('published')"
         >
           Published
@@ -142,9 +151,7 @@
 
         <button
           type="button"
-          [class.active]="
-            statusFilter() === 'sold'
-          "
+          [class.active]="statusFilter() === 'sold'"
           (click)="onStatusFilter('sold')"
         >
           Sold
@@ -164,7 +171,6 @@
 
         Loading NavStreet listings...
       </div>
-
     } @else if (error()) {
       <div
         class="
@@ -189,7 +195,6 @@
           Try again
         </button>
       </div>
-
     } @else if (
       filteredListings().length === 0
     ) {
@@ -203,7 +208,6 @@
           No listings match the selected filters.
         </p>
       </div>
-
     } @else {
       <div class="administration-listings__table-wrapper">
         <table>
@@ -211,50 +215,66 @@
             <tr>
               <th>Property</th>
               <th>Price</th>
-              <th>Details</th>
               <th>Status</th>
-              <th>Activity</th>
               <th>Seller</th>
-              <th>Published</th>
+              <th>Updated</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
             @for (
               listing of filteredListings();
-              track listing.uid
+              track getListingKey(listing)
             ) {
               <tr>
                 <td data-label="Property">
                   <div class="administration-listings__property">
-                    <span
-                      class="administration-listings__property-icon"
+                    <a
+                      class="administration-listings__property-link"
+                      [routerLink]="[
+                        '/administration',
+                        'listings',
+                        listing.recordType,
+                        listing.uid
+                      ]"
                     >
-                      <i
-                        class="fa-solid fa-house"
-                        aria-hidden="true"
-                      ></i>
-                    </span>
+                      {{
+                        formatAddress(listing) ||
+                        listing.title
+                      }}
+                    </a>
 
-                    <span>
-                      <strong>
+                    <small
+                      class="administration-listings__listing-id"
+                      [attr.title]="listing.uid"
+                    >
+                      {{
+                        abbreviateUid(
+                          listing.uid
+                        )
+                      }}
+                    </small>
+
+                    <div class="administration-listings__badges">
+                      <span
+                        class="administration-listings__record-type"
+                        [attr.data-record-type]="
+                          listing.recordType
+                        "
+                      >
                         {{
-                          formatAddress(listing) ||
-                          listing.title
+                          listing.recordType === 'draft'
+                            ? 'Draft'
+                            : 'Published'
                         }}
-                      </strong>
-
-                      <small>
-                        {{ listing.uid }}
-                      </small>
+                      </span>
 
                       @if (
                         listing.featuredListing
                       ) {
                         <span
-                          class="
-                            administration-listings__featured
-                          "
+                          class="administration-listings__featured"
                         >
                           <i
                             class="fa-solid fa-star"
@@ -264,7 +284,7 @@
                           Featured
                         </span>
                       }
-                    </span>
+                    </div>
                   </div>
                 </td>
 
@@ -272,121 +292,129 @@
                   <strong
                     class="administration-listings__price"
                   >
-                    {{
-                      listing.price |
-                        currency:
-                          'USD':
-                          'symbol':
-                          '1.0-0'
-                    }}
+                    @if (listing.price > 0) {
+                      {{
+                        listing.price |
+                          currency:
+                            'USD':
+                            'symbol':
+                            '1.0-0'
+                      }}
+                    } @else {
+                      Not set
+                    }
                   </strong>
                 </td>
 
-                <td data-label="Details">
-                  <span
-                    class="administration-listings__details"
-                  >
-                    <strong>
-                      {{ listing.propertyType }}
-                    </strong>
-
-                    <small>
-                      @if (
-                        listing.bedrooms !== null
-                      ) {
-                        {{ listing.bedrooms }} bd
-                      }
-
-                      @if (
-                        listing.bathrooms !== null
-                      ) {
-                        · {{ listing.bathrooms }} ba
-                      }
-
-                      @if (
-                        listing.squareFeet !== null
-                      ) {
-                        ·
-                        {{
-                          listing.squareFeet |
-                            number:'1.0-0'
-                        }}
-                        sq ft
-                      }
-                    </small>
-
-                    <small>
-                      {{ listing.photoCount }}
-                      photos
-                    </small>
-                  </span>
-                </td>
-
                 <td data-label="Status">
-                  <span
-                    class="administration-listings__status"
-                    [attr.data-status]="
-                      listing.status
-                    "
-                  >
-                    {{
-                      formatStatus(
+                  <div class="administration-listings__status-group">
+                    <span
+                      class="administration-listings__status"
+                      [attr.data-status]="
                         listing.status
-                      )
-                    }}
-                  </span>
-                </td>
-
-                <td data-label="Activity">
-                  <span
-                    class="administration-listings__activity"
-                  >
-                    <span>
-                      <i
-                        class="fa-regular fa-eye"
-                        aria-hidden="true"
-                      ></i>
-
-                      {{ listing.viewCount }}
+                      "
+                    >
+                      {{
+                        formatStatus(
+                          listing.status
+                        )
+                      }}
                     </span>
 
-                    <span>
-                      <i
-                        class="fa-regular fa-heart"
-                        aria-hidden="true"
-                      ></i>
-
-                      {{ listing.favoriteCount }}
-                    </span>
-
-                    <span>
-                      <i
-                        class="fa-regular fa-message"
-                        aria-hidden="true"
-                      ></i>
-
-                      {{ listing.inquiryCount }}
-                    </span>
-                  </span>
+                    @if (
+                      listing.recordType === 'draft' &&
+                      listing.publicationStatus
+                    ) {
+                      <small>
+                        {{
+                          formatStatus(
+                            listing.publicationStatus
+                          )
+                        }}
+                      </small>
+                    }
+                  </div>
                 </td>
 
                 <td data-label="Seller">
                   <span
                     class="administration-listings__seller"
+                    [attr.title]="listing.sellerUid"
                   >
-                    {{ listing.sellerUid }}
+                    {{
+                      abbreviateUid(
+                        listing.sellerUid
+                      )
+                    }}
                   </span>
                 </td>
 
-                <td data-label="Published">
-                  @if (listing.publishedAt) {
-                    {{
-                      listing.publishedAt |
-                        date:'MMM d, y'
-                    }}
-                  } @else {
-                    —
-                  }
+                <td data-label="Updated">
+                  <span class="administration-listings__date">
+                    @if (listing.updatedAt) {
+                      {{
+                        listing.updatedAt |
+                          date:'MMM d, y'
+                      }}
+                    } @else if (listing.publishedAt) {
+                      {{
+                        listing.publishedAt |
+                          date:'MMM d, y'
+                      }}
+                    } @else {
+                      —
+                    }
+                  </span>
+                </td>
+
+                <td data-label="Actions">
+                  <div class="administration-listings__actions">
+                    <a
+                      class="
+                        administration-listings__action
+                        administration-listings__action--view
+                      "
+                      [routerLink]="[
+                        '/administration',
+                        'listings',
+                        listing.recordType,
+                        listing.uid
+                      ]"
+                    >
+                      <i
+                        class="fa-solid fa-eye"
+                        aria-hidden="true"
+                      ></i>
+
+                      View
+                    </a>
+
+                    <button
+                      type="button"
+                      class="
+                        administration-listings__action
+                        administration-listings__action--delete
+                      "
+                      [disabled]="
+                        deletingListingKey() !== null
+                      "
+                      (click)="deleteListing(listing)"
+                    >
+                      <i
+                        class="fa-solid fa-trash"
+                        aria-hidden="true"
+                      ></i>
+
+                      @if (
+                        deletingListingKey() ===
+                        getListingKey(listing)
+                      ) {
+                        Deleting...
+                      } @else {
+                        Delete
+                      }
+                    </button>
+                  </div>
                 </td>
               </tr>
             }
@@ -396,7 +424,7 @@
 
       <p class="administration-listings__result-count">
         Showing {{ filteredListings().length }} of
-        {{ summary().totalListings }} listings
+        {{ summary().totalListings }} records
       </p>
     }
   </section>

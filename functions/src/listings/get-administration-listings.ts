@@ -1,4 +1,5 @@
 import {
+  DocumentData,
   Timestamp
 } from 'firebase-admin/firestore';
 
@@ -15,16 +16,26 @@ import {
   callableFunctionOptions
 } from '../shared/function-options';
 
+
+type AdministrationListingRecordType =
+  | 'draft'
+  | 'published';
+
+
 type AdministrationListingStatus =
   | 'draft'
   | 'pending_review'
   | 'published'
+  | 'coming_soon'
   | 'active'
   | 'paused'
   | 'under_contract'
+  | 'pending'
   | 'sold'
+  | 'expired'
   | 'withdrawn'
   | 'archived';
+
 
 interface AdministrationListingAddress {
   addressLine1: string;
@@ -33,13 +44,30 @@ interface AdministrationListingAddress {
   postalCode: string;
 }
 
+
 interface AdministrationListing {
   uid: string;
   sellerUid: string;
 
+  recordType:
+    AdministrationListingRecordType;
+
+  sourceDraftUid: string | null;
+
+  linkedPublishedListingUid:
+    string | null;
+
   title: string;
   propertyType: string;
-  status: AdministrationListingStatus;
+
+  status:
+    AdministrationListingStatus;
+
+  publicationStatus: string | null;
+  identityStatus: string | null;
+  paymentStatus: string | null;
+
+  completionPercent: number | null;
 
   price: number;
   featuredListing: boolean;
@@ -48,7 +76,8 @@ interface AdministrationListing {
   bathrooms: number | null;
   squareFeet: number | null;
 
-  address: AdministrationListingAddress;
+  address:
+    AdministrationListingAddress;
 
   viewCount: number;
   favoriteCount: number;
@@ -60,8 +89,10 @@ interface AdministrationListing {
   updatedAt: string | null;
 }
 
+
 interface AdministrationListingSummary {
   totalListings: number;
+  draftListings: number;
   activeListings: number;
   featuredListings: number;
   underContractListings: number;
@@ -69,16 +100,28 @@ interface AdministrationListingSummary {
   inactiveListings: number;
 }
 
+
 interface GetAdministrationListingsResult {
-  listings: AdministrationListing[];
-  summary: AdministrationListingSummary;
+  listings:
+    AdministrationListing[];
+
+  summary:
+    AdministrationListingSummary;
 }
+
 
 const LISTING_COLLECTION =
   'listings';
 
+const DRAFT_COLLECTION =
+  'listingDrafts';
+
 const MAXIMUM_LISTING_RESULTS =
   500;
+
+const MAXIMUM_DRAFT_RESULTS =
+  500;
+
 
 export const getAdministrationListings =
   onCall<
@@ -88,14 +131,18 @@ export const getAdministrationListings =
     {
       ...callableFunctionOptions
     },
+
     async request => {
       requireAdministrator(
         request.auth?.token
       );
 
       try {
-        const snapshot =
-          await adminFirestore
+        const [
+          publishedSnapshot,
+          draftSnapshot
+        ] = await Promise.all([
+          adminFirestore
             .collection(
               LISTING_COLLECTION
             )
@@ -106,152 +153,130 @@ export const getAdministrationListings =
             .limit(
               MAXIMUM_LISTING_RESULTS
             )
-            .get();
+            .get(),
 
-        const listings =
-          snapshot.docs.map(
-            documentSnapshot => {
-              const data =
-                documentSnapshot.data();
+          adminFirestore
+            .collection(
+              DRAFT_COLLECTION
+            )
+            .orderBy(
+              'createdAt',
+              'desc'
+            )
+            .limit(
+              MAXIMUM_DRAFT_RESULTS
+            )
+            .get()
+        ]);
 
-              const status =
-                readListingStatus(
-                  data['status']
-                );
-
-              return {
-                uid:
-                  documentSnapshot.id,
-
-                sellerUid:
-                  readString(
-                    data['sellerUid']
-                  ),
-
-                title:
-                  readListingTitle(data),
-
-                propertyType:
-                  readString(
-                    data['propertyType']
-                  ) || 'Unknown',
-
-                status,
-
-                price:
-                  readNumber(
-                    data['price'] ??
-                    data['listPrice']
-                  ) ?? 0,
-
-                featuredListing:
-                  data['featuredListing'] ===
-                  true,
-
-                bedrooms:
-                  readNumber(
-                    data['bedrooms']
-                  ),
-
-                bathrooms:
-                  readBathrooms(data),
-
-                squareFeet:
-                  readNumber(
-                    data['squareFeet']
-                  ),
-
-                address:
-                  readAddress(data),
-
-                viewCount:
-                  readNumber(
-                    data['viewCount'] ??
-                    data['views']
-                  ) ?? 0,
-
-                favoriteCount:
-                  readNumber(
-                    data['favoriteCount'] ??
-                    data['favorites']
-                  ) ?? 0,
-
-                inquiryCount:
-                  readNumber(
-                    data['inquiryCount']
-                  ) ?? 0,
-
-                photoCount:
-                  readPhotoCount(data),
-
-                publishedAt:
-                  serializeDate(
-                    data['publishedAt']
-                  ),
-
-                createdAt:
-                  serializeDate(
-                    data['createdAt']
-                  ),
-
-                updatedAt:
-                  serializeDate(
-                    data['updatedAt']
-                  )
-              } satisfies AdministrationListing;
-            }
+        const publishedListingUids =
+          new Set(
+            publishedSnapshot.docs.map(
+              documentSnapshot =>
+                documentSnapshot.id
+            )
           );
+
+        /*
+         * Published source drafts are associated with
+         * their published row instead of appearing as
+         * duplicate independent table records.
+         */
+        const sourceDraftUidByListingUid =
+          new Map<string, string>();
+
+        draftSnapshot.docs.forEach(
+          documentSnapshot => {
+            const publishedListingUid =
+              readNestedString(
+                documentSnapshot.data(),
+                'publication',
+                'publishedListingUid'
+              );
+
+            if (
+              publishedListingUid &&
+              publishedListingUids.has(
+                publishedListingUid
+              )
+            ) {
+              sourceDraftUidByListingUid.set(
+                publishedListingUid,
+                documentSnapshot.id
+              );
+            }
+          }
+        );
+
+        const publishedListings =
+          publishedSnapshot.docs.map(
+            documentSnapshot =>
+              mapPublishedListing(
+                documentSnapshot.id,
+                documentSnapshot.data(),
+                sourceDraftUidByListingUid.get(
+                  documentSnapshot.id
+                ) ?? null
+              )
+          );
+
+        const unfinishedDrafts =
+          draftSnapshot.docs
+            .filter(
+              documentSnapshot => {
+                const publishedListingUid =
+                  readNestedString(
+                    documentSnapshot.data(),
+                    'publication',
+                    'publishedListingUid'
+                  );
+
+                /*
+                 * Keep a linked draft visible if its
+                 * published listing no longer exists.
+                 * That exposes orphaned test data for
+                 * administrator review and cleanup.
+                 */
+                return (
+                  !publishedListingUid ||
+                  !publishedListingUids.has(
+                    publishedListingUid
+                  )
+                );
+              }
+            )
+            .map(
+              documentSnapshot =>
+                mapDraftListing(
+                  documentSnapshot.id,
+                  documentSnapshot.data()
+                )
+            );
+
+        const listings = [
+          ...publishedListings,
+          ...unfinishedDrafts
+        ].sort(
+          (
+            firstListing,
+            secondListing
+          ) =>
+            getSortableDate(
+              secondListing.updatedAt ??
+              secondListing.createdAt
+            ) -
+            getSortableDate(
+              firstListing.updatedAt ??
+              firstListing.createdAt
+            )
+        );
 
         return {
           listings,
 
-          summary: {
-            totalListings:
-              listings.length,
-
-            activeListings:
-              listings.filter(
-                listing =>
-                  listing.status ===
-                    'active' ||
-                  listing.status ===
-                    'published'
-              ).length,
-
-            featuredListings:
-              listings.filter(
-                listing =>
-                  listing.featuredListing
-              ).length,
-
-            underContractListings:
-              listings.filter(
-                listing =>
-                  listing.status ===
-                  'under_contract'
-              ).length,
-
-            soldListings:
-              listings.filter(
-                listing =>
-                  listing.status ===
-                  'sold'
-              ).length,
-
-            inactiveListings:
-              listings.filter(
-                listing =>
-                  [
-                    'paused',
-                    'withdrawn',
-                    'archived'
-                  ].includes(
-                    listing.status
-                  )
-              ).length
-          }
+          summary:
+            createSummary(listings)
         };
-
       } catch (error: unknown) {
         if (
           error instanceof HttpsError
@@ -272,29 +297,337 @@ export const getAdministrationListings =
     }
   );
 
-function requireAdministrator(
-  token:
-    | Record<string, unknown>
-    | undefined
-): void {
-  if (!token) {
-    throw new HttpsError(
-      'unauthenticated',
-      'You must be signed in to access administration.'
-    );
-  }
 
-  const isAdministrator =
-    token['admin'] === true ||
-    token['role'] === 'admin';
-
-  if (!isAdministrator) {
-    throw new HttpsError(
-      'permission-denied',
-      'Administrator access is required.'
+function mapPublishedListing(
+  uid: string,
+  data: DocumentData,
+  sourceDraftUid: string | null
+): AdministrationListing {
+  const status =
+    readListingStatus(
+      data['status']
     );
-  }
+
+  const address =
+    readPublishedAddress(data);
+
+  return {
+    uid,
+
+    sellerUid:
+      readString(
+        data['sellerUid']
+      ),
+
+    recordType:
+      'published',
+
+    sourceDraftUid,
+
+    linkedPublishedListingUid:
+      uid,
+
+    title:
+      readListingTitle(
+        data,
+        address
+      ),
+
+    propertyType:
+      readString(
+        data['propertyType']
+      ) || 'Unknown',
+
+    status,
+
+    publicationStatus:
+      'published',
+
+    identityStatus:
+      null,
+
+    paymentStatus:
+      null,
+
+    completionPercent:
+      100,
+
+    price:
+      readNumber(
+        data['price'] ??
+        data['listPrice']
+      ) ?? 0,
+
+    featuredListing:
+      data['featuredListing'] === true,
+
+    bedrooms:
+      readNumber(
+        data['bedrooms']
+      ),
+
+    bathrooms:
+      readBathrooms(data),
+
+    squareFeet:
+      readNumber(
+        data['squareFeet']
+      ),
+
+    address,
+
+    viewCount:
+      readNumber(
+        data['viewCount'] ??
+        data['views']
+      ) ?? 0,
+
+    favoriteCount:
+      readNumber(
+        data['favoriteCount'] ??
+        data['favorites']
+      ) ?? 0,
+
+    inquiryCount:
+      readNumber(
+        data['inquiryCount'] ??
+        data['inquiries']
+      ) ?? 0,
+
+    photoCount:
+      readPhotoCount(data),
+
+    publishedAt:
+      serializeDate(
+        data['publishedAt']
+      ),
+
+    createdAt:
+      serializeDate(
+        data['createdAt']
+      ),
+
+    updatedAt:
+      serializeDate(
+        data['updatedAt']
+      )
+  };
 }
+
+
+function mapDraftListing(
+  uid: string,
+  data: DocumentData
+): AdministrationListing {
+  const address =
+    readDraftAddress(data);
+
+  const propertyDetails =
+    readRecord(
+      data['propertyDetails']
+    );
+
+  const pricing =
+    readRecord(
+      data['pricing']
+    );
+
+  const progress =
+    readRecord(
+      data['progress']
+    );
+
+  const publication =
+    readRecord(
+      data['publication']
+    );
+
+  return {
+    uid,
+
+    sellerUid:
+      readString(
+        data['sellerUid']
+      ),
+
+    recordType:
+      'draft',
+
+    sourceDraftUid:
+      uid,
+
+    linkedPublishedListingUid:
+      readString(
+        publication[
+          'publishedListingUid'
+        ]
+      ) || null,
+
+    title:
+      readListingTitle(
+        data,
+        address
+      ),
+
+    propertyType:
+      readString(
+        propertyDetails[
+          'propertyType'
+        ]
+      ) || 'Not selected',
+
+    status:
+      'draft',
+
+    publicationStatus:
+      readString(
+        publication['status']
+      ) || null,
+
+    identityStatus:
+      readString(
+        publication[
+          'identityStatus'
+        ]
+      ) || null,
+
+    paymentStatus:
+      readString(
+        publication[
+          'paymentStatus'
+        ]
+      ) || null,
+
+    completionPercent:
+      readNumber(
+        progress[
+          'completionPercent'
+        ]
+      ) ?? 0,
+
+    price:
+      readNumber(
+        pricing['listPrice']
+      ) ?? 0,
+
+    featuredListing:
+      data['featuredListing'] === true,
+
+    bedrooms:
+      readNumber(
+        propertyDetails['bedrooms']
+      ),
+
+    bathrooms:
+      readDraftBathrooms(
+        propertyDetails
+      ),
+
+    squareFeet:
+      readNumber(
+        propertyDetails[
+          'squareFeet'
+        ]
+      ),
+
+    address,
+
+    viewCount:
+      0,
+
+    favoriteCount:
+      0,
+
+    inquiryCount:
+      0,
+
+    photoCount:
+      readPhotoCount(data),
+
+    publishedAt:
+      serializeDate(
+        publication['publishedAt']
+      ),
+
+    createdAt:
+      serializeDate(
+        data['createdAt']
+      ),
+
+    updatedAt:
+      serializeDate(
+        data['updatedAt']
+      )
+  };
+}
+
+
+function createSummary(
+  listings:
+    AdministrationListing[]
+): AdministrationListingSummary {
+  const publishedListings =
+    listings.filter(
+      listing =>
+        listing.recordType ===
+        'published'
+    );
+
+  return {
+    totalListings:
+      listings.length,
+
+    draftListings:
+      listings.filter(
+        listing =>
+          listing.recordType ===
+          'draft'
+      ).length,
+
+    activeListings:
+      publishedListings.filter(
+        listing =>
+          listing.status ===
+            'active' ||
+          listing.status ===
+            'published'
+      ).length,
+
+    featuredListings:
+      publishedListings.filter(
+        listing =>
+          listing.featuredListing
+      ).length,
+
+    underContractListings:
+      publishedListings.filter(
+        listing =>
+          listing.status ===
+          'under_contract'
+      ).length,
+
+    soldListings:
+      publishedListings.filter(
+        listing =>
+          listing.status ===
+          'sold'
+      ).length,
+
+    inactiveListings:
+      publishedListings.filter(
+        listing =>
+          [
+            'paused',
+            'withdrawn',
+            'archived',
+            'expired'
+          ].includes(
+            listing.status
+          )
+      ).length
+  };
+}
+
 
 function readListingStatus(
   value: unknown
@@ -303,10 +636,13 @@ function readListingStatus(
     case 'draft':
     case 'pending_review':
     case 'published':
+    case 'coming_soon':
     case 'active':
     case 'paused':
     case 'under_contract':
+    case 'pending':
     case 'sold':
+    case 'expired':
     case 'withdrawn':
     case 'archived':
       return value;
@@ -316,8 +652,11 @@ function readListingStatus(
   }
 }
 
+
 function readListingTitle(
-  data: Record<string, unknown>
+  data: DocumentData,
+  address:
+    AdministrationListingAddress
 ): string {
   const title =
     readString(
@@ -327,9 +666,6 @@ function readListingTitle(
   if (title) {
     return title;
   }
-
-  const address =
-    readAddress(data);
 
   return [
     address.addressLine1,
@@ -341,20 +677,21 @@ function readListingTitle(
     'Untitled listing';
 }
 
-function readAddress(
-  data: Record<string, unknown>
+
+function readPublishedAddress(
+  data: DocumentData
 ): AdministrationListingAddress {
   const nestedAddress =
-    isRecord(
+    readRecord(
       data['address']
-    )
-      ? data['address']
-      : {};
+    );
 
   return {
     addressLine1:
       readString(
-        nestedAddress['addressLine1'] ??
+        nestedAddress[
+          'addressLine1'
+        ] ??
         data['addressLine1']
       ),
 
@@ -375,14 +712,51 @@ function readAddress(
 
     postalCode:
       readString(
-        nestedAddress['postalCode'] ??
+        nestedAddress[
+          'postalCode'
+        ] ??
+        nestedAddress['zipCode'] ??
         data['zipCode']
       )
   };
 }
 
+
+function readDraftAddress(
+  data: DocumentData
+): AdministrationListingAddress {
+  const address =
+    readRecord(
+      data['address']
+    );
+
+  return {
+    addressLine1:
+      readString(
+        address['addressLine1']
+      ),
+
+    city:
+      readString(
+        address['city']
+      ),
+
+    state:
+      readString(
+        address['state']
+      ),
+
+    postalCode:
+      readString(
+        address['zipCode'] ??
+        address['postalCode']
+      )
+  };
+}
+
+
 function readBathrooms(
-  data: Record<string, unknown>
+  data: DocumentData
 ): number | null {
   const bathrooms =
     readNumber(
@@ -393,31 +767,59 @@ function readBathrooms(
     return bathrooms;
   }
 
-  const fullBathrooms =
+  return combineBathrooms(
     readNumber(
       data['fullBathrooms']
-    ) ?? 0;
-
-  const halfBathrooms =
+    ),
     readNumber(
       data['halfBathrooms']
-    ) ?? 0;
+    )
+  );
+}
+
+
+function readDraftBathrooms(
+  propertyDetails:
+    Record<string, unknown>
+): number | null {
+  return combineBathrooms(
+    readNumber(
+      propertyDetails[
+        'fullBathrooms'
+      ]
+    ),
+    readNumber(
+      propertyDetails[
+        'halfBathrooms'
+      ]
+    )
+  );
+}
+
+
+function combineBathrooms(
+  fullBathrooms: number | null,
+  halfBathrooms: number | null
+): number | null {
+  const full =
+    fullBathrooms ?? 0;
+
+  const half =
+    halfBathrooms ?? 0;
 
   if (
-    fullBathrooms === 0 &&
-    halfBathrooms === 0
+    full === 0 &&
+    half === 0
   ) {
     return null;
   }
 
-  return (
-    fullBathrooms +
-    halfBathrooms * 0.5
-  );
+  return full + half * 0.5;
 }
 
+
 function readPhotoCount(
-  data: Record<string, unknown>
+  data: DocumentData
 ): number {
   const storedPhotoCount =
     readNumber(
@@ -447,6 +849,37 @@ function readPhotoCount(
   return 0;
 }
 
+
+function readNestedString(
+  data: DocumentData,
+  objectField: string,
+  valueField: string
+): string {
+  const nestedObject =
+    readRecord(
+      data[objectField]
+    );
+
+  return readString(
+    nestedObject[valueField]
+  );
+}
+
+
+function readRecord(
+  value: unknown
+): Record<string, unknown> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value)
+  )
+    ? value as
+      Record<string, unknown>
+    : {};
+}
+
+
 function readString(
   value: unknown
 ): string {
@@ -454,6 +887,7 @@ function readString(
     ? value.trim()
     : '';
 }
+
 
 function readNumber(
   value: unknown
@@ -466,15 +900,6 @@ function readNumber(
     : null;
 }
 
-function isRecord(
-  value: unknown
-): value is Record<string, unknown> {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    !Array.isArray(value)
-  );
-}
 
 function serializeDate(
   value: unknown
@@ -510,4 +935,47 @@ function serializeDate(
   }
 
   return null;
+}
+
+
+function getSortableDate(
+  value: string | null
+): number {
+  if (!value) {
+    return 0;
+  }
+
+  const parsedDate =
+    new Date(value);
+
+  return Number.isNaN(
+    parsedDate.getTime()
+  )
+    ? 0
+    : parsedDate.getTime();
+}
+
+
+function requireAdministrator(
+  token:
+    | Record<string, unknown>
+    | undefined
+): void {
+  if (!token) {
+    throw new HttpsError(
+      'unauthenticated',
+      'You must be signed in to access administration.'
+    );
+  }
+
+  const isAdministrator =
+    token['admin'] === true ||
+    token['role'] === 'admin';
+
+  if (!isAdministrator) {
+    throw new HttpsError(
+      'permission-denied',
+      'Administrator access is required.'
+    );
+  }
 }

@@ -1,144 +1,198 @@
 @if (listings().length > 0) {
+  <div class="listing-grid">
+    @for (
+      listing of listings();
+      track listing.Uid
+    ) {
+      <article class="listing-card">
+        <div class="listing-card__top">
+          <div class="listing-card__identity">
+            <div class="listing-card__badges">
+              <span
+                class="listing-card__status"
+                [class.listing-card__status--active]="
+                  listing.status === 'active'
+                "
+                [class.listing-card__status--draft]="
+                  listing.status === 'draft'
+                "
+              >
+                {{ listing.status }}
+              </span>
 
-<div class="listing-grid">
+              @if (listing.featuredListing) {
+                <span class="listing-card__featured">
+                  Featured
+                </span>
+              }
+            </div>
 
-  @for (
-  listing of listings();
-  track $index
-  ) {
+            <h3>
+              {{ listing.addressLine1 }}
+            </h3>
 
-  <article class="listing-card">
+            <p class="listing-card__location">
+              {{ listing.city }},
+              {{ listing.state }}
+              {{ listing.zipCode }}
+            </p>
+          </div>
 
-    <div class="listing-card__top">
+          <div class="listing-card__price">
+            <span class="listing-card__price-label">
+              Listing Price:
+            </span>
 
-      <div class="listing-card__identity">
-
-        <div class="listing-card__badges">
-
-          <span class="listing-card__status" [class.listing-card__status--active]="listing.status === 'active'"
-            [class.listing-card__status--draft]="listing.status === 'draft'">
-            {{ listing.status }}
-          </span>
-
-          @if (listing.featuredListing) {
-          <span class="listing-card__featured">
-            Featured
-          </span>
-          }
-
+            <strong>
+              @if (listing.listPrice > 0) {
+                {{
+                  listing.listPrice |
+                    currency:
+                      'USD':
+                      'symbol':
+                      '1.0-0'
+                }}
+              } @else {
+                Not set
+              }
+            </strong>
+          </div>
         </div>
 
-        <h3>
-          {{ listing.addressLine1 }}
-        </h3>
+        <div class="listing-card__details">
+          <span>
+            <strong>
+              {{ listing.bedrooms }}
+            </strong>
 
-        <p class="listing-card__location">
-          {{ listing.city }},
-          {{ listing.state }}
-          {{ listing.zipCode }}
-        </p>
+            Beds
+          </span>
 
-      </div>
+          <span>
+            <strong>
+              {{ listing.bathrooms }}
+            </strong>
 
-      <div class="listing-card__price">
+            Baths
+          </span>
 
-        <span class="listing-card__price-label">
-          Listing Price:
-        </span>
+          <span>
+            <strong>
+              {{ listing.squareFeet }}
+            </strong>
 
-        <strong>
-          @if (listing.listPrice > 0) {
-          {{ listing.listPrice | currency:'USD':'symbol':'1.0-0' }}
-          } @else {
-          Not set
-          }
-        </strong>
+            Sq Ft
+          </span>
+        </div>
 
-      </div>
-    </div>
+        <div class="listing-card__footer">
+          <div class="listing-card__meta">
+            @if (listing.status === 'draft') {
+              <span>
+                {{ listing.completionPercent }}%
+                complete
+              </span>
+            } @else {
+              <span>
+                {{ listing.daysOnMarket }}
 
-    <div class="listing-card__details">
+                @if (listing.daysOnMarket === 1) {
+                  day
+                } @else {
+                  days
+                }
 
-      <span>
-        <strong>{{ listing.bedrooms }}</strong>
-        Beds
-      </span>
+                on NavStreet
+              </span>
+            }
+          </div>
 
-      <span>
-        <strong>{{ listing.bathrooms }}</strong>
-        Baths
-      </span>
+          <div class="listing-card__actions">
+            @if (listing.status !== 'draft') {
+              <button
+                type="button"
+                class="
+                  listing-card__action
+                  listing-card__action--secondary
+                "
+                [disabled]="
+                  deletingListingUid() !== null
+                "
+                (click)="
+                  marketingSelected.emit(listing)
+                "
+              >
+                <i
+                  class="fa-solid fa-bullhorn"
+                  aria-hidden="true"
+                ></i>
 
-      <span>
-        <strong>{{ listing.squareFeet }}</strong>
-        Sq Ft
-      </span>
+                Marketing
+              </button>
+            }
 
-    </div>
+            @if (allowDeletion()) {
+              <button
+                type="button"
+                class="
+                  listing-card__action
+                  listing-card__action--delete
+                "
+                [disabled]="
+                  deletingListingUid() !== null
+                "
+                (click)="
+                  deleteSelected.emit(listing)
+                "
+              >
+                <i
+                  class="fa-solid fa-trash"
+                  aria-hidden="true"
+                ></i>
 
-    <div class="listing-card__footer">
+                @if (
+                  deletingListingUid() ===
+                  listing.Uid
+                ) {
+                  Deleting...
+                } @else {
+                  Delete
+                }
+              </button>
+            }
 
-      <div class="listing-card__meta">
-
-        @if (listing.status === 'draft') {
-        <span>
-          {{ listing.completionPercent }}% complete
-        </span>
-        } @else {
-        <span>
-          {{ listing.daysOnMarket }}
-
-          @if (listing.daysOnMarket === 1) {
-          day
-          } @else {
-          days
-          }
-
-          on NavStreet
-        </span>
-        }
-
-      </div>
-
-      <div class="listing-card__actions">
-        @if (listing.status !== 'draft') {
-        <button type="button" class="
-        listing-card__action
-        listing-card__action--secondary
-      " (click)="marketingSelected.emit(listing)">
-          <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
-
-          Marketing
-        </button>
-        }
-
-        <button type="button" class="listing-card__action" (click)="actionSelected.emit(listing)">
-          {{ actionLabel() }}
-        </button>
-      </div>
-
-    </div>
-
-  </article>
-
-  }
-
-</div>
-
+            <button
+              type="button"
+              class="listing-card__action"
+              [disabled]="
+                deletingListingUid() !== null
+              "
+              (click)="
+                actionSelected.emit(listing)
+              "
+            >
+              {{ actionLabel() }}
+            </button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
 } @else {
+  <div class="empty-listings">
+    <h3>
+      No properties here yet
+    </h3>
 
-<div class="empty-listings">
+    <p>
+      {{ emptyMessage() }}
+    </p>
 
-  <h3>No properties here yet</h3>
-
-  <p>
-    {{ emptyMessage() }}
-  </p>
-
-  <a routerLink="/sell/new" class="empty-listings__button">
-    List a Property
-  </a>
-
-</div>
-
+    <a
+      routerLink="/sell/new"
+      class="empty-listings__button"
+    >
+      List a Property
+    </a>
+  </div>
 }

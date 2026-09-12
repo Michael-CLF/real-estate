@@ -8,18 +8,29 @@ import {
 } from '@angular/core';
 
 import {
-  SavedPropertySummary
-} from './models/dashboard-state.model';
-
-import {
   Router,
   RouterLink
 } from '@angular/router';
 
+import {
+  httpsCallable
+} from 'firebase/functions';
+
+import {
+  SavedPropertySummary
+} from './models/dashboard-state.model';
 
 import {
   DashboardStateService
 } from './services/dashboard-state.service';
+
+import {
+  ActivityItem
+} from './components/activity-card/activity-card.component';
+
+import {
+  AuthState
+} from '../../core/authentication/state/auth.state';
 
 import {
   Listing
@@ -42,18 +53,6 @@ import {
 } from '../../core/domains/offers/services/offer.service';
 
 import {
-  ActivityItem
-} from './components/activity-card/activity-card.component';
-
-import {
-  httpsCallable
-} from 'firebase/functions';
-
-import {
-  AuthState
-} from '../../core/authentication/state/auth.state';
-
-import {
   PROFESSIONAL_TYPE_LABELS
 } from '../../core/domains/users/models/professional-type';
 
@@ -69,25 +68,24 @@ import {
   functions
 } from '../../core/infrastructure/firebase/firebase';
 
-interface ProfessionalProfileCheckoutResult {
-  checkoutSessionId: string;
-  checkoutUrl: string;
-}
 
 interface ProfessionalProfileCheckoutResult {
   checkoutSessionId: string;
   checkoutUrl: string;
 }
+
 
 interface ProfessionalBillingPortalResult {
   portalUrl: string;
 }
+
 
 type ListingTab =
   | 'draft'
   | 'active'
   | 'under-contract'
   | 'sold';
+
 
 interface DashboardOfferItem {
   offer: OfferSummary;
@@ -99,19 +97,28 @@ interface DashboardOfferItem {
   actionRequired: boolean;
 }
 
+
 @Component({
   selector: 'app-dashboard',
+
   standalone: true,
+
   imports: [
-    RouterLink,
+    RouterLink
   ],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss',
+
+  templateUrl:
+    './dashboard.component.html',
+
+  styleUrl:
+    './dashboard.component.scss',
+
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent
   implements OnInit {
+
   protected readonly dashboardState =
     inject(DashboardStateService);
 
@@ -123,6 +130,13 @@ export class DashboardComponent
 
   private readonly offerService =
     inject(OfferService);
+
+  private readonly authState =
+    inject(AuthState);
+
+  private readonly professionalRepository =
+    inject(FirebaseProfessionalRepository);
+
 
   protected readonly selectedListingTab =
     signal<ListingTab>('active');
@@ -149,18 +163,15 @@ export class DashboardComponent
     computed(
       () =>
         this.offerItems().filter(
-          item => item.actionRequired
+          item =>
+            item.actionRequired
         ).length
     );
 
-  private readonly authState =
-    inject(AuthState);
-
-  private readonly professionalRepository =
-    inject(FirebaseProfessionalRepository);
-
   protected readonly professional =
-    signal<ProfessionalUser | null>(null);
+    signal<ProfessionalUser | null>(
+      null
+    );
 
   protected readonly isProfessionalLoading =
     signal(true);
@@ -181,70 +192,74 @@ export class DashboardComponent
     signal('');
 
   protected readonly professionalTypeLabel =
-    computed(() => {
-      const professional =
-        this.professional();
+    computed(
+      () => {
+        const professional =
+          this.professional();
 
-      return professional
-        ? PROFESSIONAL_TYPE_LABELS[
-        professional.professionalType
-        ]
-        : '';
-    });
+        return professional
+          ? PROFESSIONAL_TYPE_LABELS[
+              professional.professionalType
+            ]
+          : '';
+      }
+    );
 
   protected readonly hasFullBusinessProfile =
     computed(
       () =>
         this.professional()
-          ?.subscriptionStatus === 'profile'
+          ?.subscriptionStatus ===
+        'profile'
     );
 
   protected readonly publicProfileRoute =
-    computed(() => {
-      const professional =
-        this.professional();
+    computed(
+      () => {
+        const professional =
+          this.professional();
 
-      if (
-        !professional ||
-        professional.subscriptionStatus !==
-        'profile' ||
-        !professional.profileSlug
-      ) {
-        return null;
+        if (
+          !professional ||
+          professional.subscriptionStatus !==
+            'profile' ||
+          !professional.profileSlug
+        ) {
+          return null;
+        }
+
+        return [
+          '/find-a-pro',
+          professional.stateSlug,
+          professional.profileSlug
+        ];
       }
-
-      return [
-        '/find-a-pro',
-        professional.stateSlug,
-        professional.profileSlug
-      ];
-    });
+    );
 
   protected readonly profileSetupRoute =
-    computed(() => {
-      const professional =
-        this.professional();
+    computed(
+      () => {
+        const professional =
+          this.professional();
 
-      if (!professional) {
-        return null;
+        if (!professional) {
+          return null;
+        }
+
+        return [
+          '/professionals',
+          professional.stateSlug,
+          'profile',
+          'setup'
+        ];
       }
+    );
 
-      return [
-        '/professionals',
-        professional.stateSlug,
-        'profile',
-        'setup'
-      ];
-    });
 
   async ngOnInit(): Promise<void> {
     await this.dashboardState.load();
     await this.loadProfessionalAccount();
 
-    /*
-     * Prefer Active when active listings exist.
-     * Otherwise show Draft when drafts exist.
-     */
     if (
       this.dashboardState.state()
         .activeListings.length > 0
@@ -265,6 +280,7 @@ export class DashboardComponent
     await this.loadOfferActivity();
   }
 
+
   protected getOfferVersionLabel(
     offer: OfferSummary
   ): string {
@@ -274,6 +290,7 @@ export class DashboardComponent
     );
   }
 
+
   protected getOfferTypeLabel(
     offer: OfferSummary
   ): string {
@@ -282,13 +299,38 @@ export class DashboardComponent
       : 'Counteroffer';
   }
 
+
   protected getOfferStatusLabel(
     offer: OfferSummary
   ): string {
+    const versionStatus =
+      offer.currentVersionStatus;
+
+    if (
+      versionStatus === 'draft'
+    ) {
+      return 'Draft';
+    }
+
+    if (
+      versionStatus ===
+        'awaiting_signatures'
+    ) {
+      return 'Draft — ready to sign';
+    }
+
+    if (
+      versionStatus ===
+        'partially_signed'
+    ) {
+      return 'Draft — signing in progress';
+    }
+
     return OFFER_STATUS_LABELS[
       offer.status
     ];
   }
+
 
   protected getOfferPrice(
     offer: OfferSummary
@@ -296,15 +338,60 @@ export class DashboardComponent
     return new Intl.NumberFormat(
       'en-US',
       {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0
+        style:
+          'currency',
+
+        currency:
+          'USD',
+
+        maximumFractionDigits:
+          0
       }
     ).format(
       offer.purchasePriceInCents /
       100
     );
   }
+
+
+  protected selectListingTab(
+    tab: ListingTab
+  ): void {
+    this.selectedListingTab.set(tab);
+  }
+
+
+  protected formatTelephone(
+    telephone: string
+  ): string {
+    const digits =
+      telephone.replace(
+        /\D/g,
+        ''
+      );
+
+    if (digits.length === 10) {
+      return (
+        `(${digits.slice(0, 3)}) ` +
+        `${digits.slice(3, 6)}-` +
+        `${digits.slice(6)}`
+      );
+    }
+
+    if (
+      digits.length === 11 &&
+      digits.startsWith('1')
+    ) {
+      return (
+        `+1 (${digits.slice(1, 4)}) ` +
+        `${digits.slice(4, 7)}-` +
+        `${digits.slice(7)}`
+      );
+    }
+
+    return telephone;
+  }
+
 
   protected async upgradeBusinessProfile():
     Promise<void> {
@@ -340,7 +427,9 @@ export class DashboardComponent
         );
       }
 
-      window.location.assign(checkoutUrl);
+      window.location.assign(
+        checkoutUrl
+      );
     } catch (error: unknown) {
       console.error(
         'Unable to begin the business profile upgrade:',
@@ -357,6 +446,7 @@ export class DashboardComponent
       this.isStartingUpgrade.set(false);
     }
   }
+
 
   protected async openBusinessBillingPortal():
     Promise<void> {
@@ -392,7 +482,9 @@ export class DashboardComponent
         );
       }
 
-      window.location.assign(portalUrl);
+      window.location.assign(
+        portalUrl
+      );
     } catch (error: unknown) {
       console.error(
         'Unable to open the business billing portal:',
@@ -409,40 +501,6 @@ export class DashboardComponent
       this.isOpeningBillingPortal.set(false);
     }
   }
-
-  protected selectListingTab(
-    tab: ListingTab
-  ): void {
-    this.selectedListingTab.set(tab);
-  }
-
-  protected formatTelephone(
-  telephone: string
-): string {
-  const digits =
-    telephone.replace(/\D/g, '');
-
-  if (digits.length === 10) {
-    return (
-      `(${digits.slice(0, 3)}) ` +
-      `${digits.slice(3, 6)}-` +
-      `${digits.slice(6)}`
-    );
-  }
-
-  if (
-    digits.length === 11 &&
-    digits.startsWith('1')
-  ) {
-    return (
-      `+1 (${digits.slice(1, 4)}) ` +
-      `${digits.slice(4, 7)}-` +
-      `${digits.slice(7)}`
-    );
-  }
-
-  return telephone;
-}
 
 
   protected async manageListing(
@@ -463,17 +521,15 @@ export class DashboardComponent
       listing.Uid,
       'manage'
     ]);
-
-    console.log(
-      'Manage active listing:',
-      listing
-    );
   }
+
 
   protected async removeSavedProperty(
     property: SavedPropertySummary
   ): Promise<void> {
-    if (this.removingSavedListingUid()) {
+    if (
+      this.removingSavedListingUid()
+    ) {
       return;
     }
 
@@ -503,6 +559,8 @@ export class DashboardComponent
       );
     }
   }
+
+
   private async loadProfessionalAccount():
     Promise<void> {
     this.isProfessionalLoading.set(true);
@@ -526,7 +584,9 @@ export class DashboardComponent
             ownerUid
           );
 
-      this.professional.set(professional);
+      this.professional.set(
+        professional
+      );
     } catch (error: unknown) {
       console.error(
         'Unable to load the business account:',
@@ -539,9 +599,12 @@ export class DashboardComponent
         'Your business information could not be loaded. Your other dashboard features are still available.'
       );
     } finally {
-      this.isProfessionalLoading.set(false);
+      this.isProfessionalLoading.set(
+        false
+      );
     }
   }
+
 
   private async loadRecentInquiryActivity():
     Promise<void> {
@@ -573,10 +636,6 @@ export class DashboardComponent
         activities
       );
     } catch (error: unknown) {
-      /*
-       * Inquiry activity must not prevent the rest
-       * of the universal dashboard from loading.
-       */
       console.error(
         'Unable to load recent inquiry activity:',
         error
@@ -585,6 +644,7 @@ export class DashboardComponent
       this.recentActivities.set([]);
     }
   }
+
 
   private async loadOfferActivity():
     Promise<void> {
@@ -597,13 +657,19 @@ export class DashboardComponent
         sellerOffers
       ] = await Promise.all([
         this.offerService.getMyOffers({
-          role: 'buyer',
-          limit: 50
+          role:
+            'buyer',
+
+          limit:
+            50
         }),
 
         this.offerService.getMyOffers({
-          role: 'seller',
-          limit: 50
+          role:
+            'seller',
+
+          limit:
+            50
         })
       ]);
 
@@ -613,9 +679,12 @@ export class DashboardComponent
           DashboardOfferItem
         >();
 
-      for (const offer of buyerOffers) {
+      for (
+        const offer of buyerOffers
+      ) {
         itemsByOfferUid.set(
           offer.Uid,
+
           this.createDashboardOfferItem(
             offer,
             'buyer'
@@ -623,7 +692,9 @@ export class DashboardComponent
         );
       }
 
-      for (const offer of sellerOffers) {
+      for (
+        const offer of sellerOffers
+      ) {
         if (
           !itemsByOfferUid.has(
             offer.Uid
@@ -631,6 +702,7 @@ export class DashboardComponent
         ) {
           itemsByOfferUid.set(
             offer.Uid,
+
             this.createDashboardOfferItem(
               offer,
               'seller'
@@ -666,23 +738,26 @@ export class DashboardComponent
     }
   }
 
+
   private createDashboardOfferItem(
     offer: OfferSummary,
     perspective:
       | 'buyer'
       | 'seller'
   ): DashboardOfferItem {
-    const openStatus =
-      offer.status === 'submitted' ||
-      offer.status === 'viewed' ||
-      offer.status === 'countered';
+    const actionableVersion =
+      offer.currentVersionStatus ===
+        'delivered' ||
+      offer.currentVersionStatus ===
+        'signed';
 
     const currentVersionCameFromOtherParty =
       (
         perspective === 'buyer' &&
         offer.currentVersionInitiatedBy ===
           'seller'
-      ) || (
+      ) ||
+      (
         perspective === 'seller' &&
         offer.currentVersionInitiatedBy ===
           'buyer'
@@ -693,22 +768,26 @@ export class DashboardComponent
       perspective,
 
       actionRequired:
-        openStatus &&
+        actionableVersion &&
         currentVersionCameFromOtherParty
     };
   }
+
 
   private mapInquiryActivity(
     activity: {
       inquiryUid: string;
       inquiryReferenceNumber: string;
       listingUid: string;
+
       perspective:
-      | 'sent'
-      | 'received';
+        | 'sent'
+        | 'received';
+
       status:
-      | 'new'
-      | 'read';
+        | 'new'
+        | 'read';
+
       buyerName: string;
       propertyAddress: string;
       createdAt: string;
@@ -717,7 +796,7 @@ export class DashboardComponent
   ): ActivityItem {
     if (
       activity.perspective ===
-      'received'
+        'received'
     ) {
       return {
         activityUid:
@@ -755,7 +834,9 @@ export class DashboardComponent
 
     const sellerViewedInquiry =
       activity.status === 'read' &&
-      Boolean(activity.readAt);
+      Boolean(
+        activity.readAt
+      );
 
     return {
       activityUid:
@@ -797,6 +878,7 @@ export class DashboardComponent
     };
   }
 
+
   private createActivityDate(
     value: string | null
   ): Date {
@@ -813,6 +895,7 @@ export class DashboardComponent
       ? new Date(0)
       : date;
   }
+
 
   private getErrorMessage(
     error: unknown,

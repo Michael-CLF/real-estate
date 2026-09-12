@@ -23,7 +23,7 @@
   </header>
 
   <section class="dashboard-listings__summary" aria-label="Listing totals">
-   
+
 
     <button class="dashboard-listings__summary-card" type="button" [class.dashboard-listings__summary-card--active]="
         selectedTab() === 'active'
@@ -43,7 +43,7 @@
       </span>
     </button>
 
-     <button class="dashboard-listings__summary-card" type="button" [class.dashboard-listings__summary-card--active]="
+    <button class="dashboard-listings__summary-card" type="button" [class.dashboard-listings__summary-card--active]="
         selectedTab() === 'draft'
       " (click)="selectTab('draft')">
       <span class="
@@ -99,6 +99,28 @@
       </span>
     </button>
   </section>
+
+  @if (deletionSuccess()) {
+  <p class="
+        dashboard-listings__message
+        dashboard-listings__message--success
+      " role="status">
+    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+
+    {{ deletionSuccess() }}
+  </p>
+  }
+
+  @if (deletionError()) {
+  <p class="
+        dashboard-listings__message
+        dashboard-listings__message--error
+      " role="alert">
+    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+
+    {{ deletionError() }}
+  </p>
+  }
 
   <section class="dashboard-listings__panel">
     <nav class="dashboard-listings__tabs" aria-label="Filter listings by status">
@@ -182,15 +204,10 @@
         </div>
       </div>
       } @else {
-      <app-account-listings [listings]="selectedListings()" [emptyMessage]="
-    selectedEmptyMessage()
-  " [actionLabel]="
-    selectedActionLabel()
-  " (actionSelected)="
-    manageListing($event)
-  " (marketingSelected)="
-    openMarketingToolkit($event)
-  " />
+      <app-account-listings [listings]="selectedListings()" [emptyMessage]="selectedEmptyMessage()"
+        [actionLabel]="selectedActionLabel()" [allowDeletion]="deletionAllowed()"
+        [deletingListingUid]="deletingListingUid()" (actionSelected)="manageListing($event)"
+        (marketingSelected)="openMarketingToolkit($event)" (deleteSelected)="deleteListing($event)" />
       }
     </div>
   </section>

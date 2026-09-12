@@ -417,6 +417,9 @@ export const createOfferDraft =
 
                 currentVersionNumber: 1,
 
+                currentVersionInitiatedBy:
+                  'buyer',
+
                 initialVersionUid:
                   versionReference.id,
 

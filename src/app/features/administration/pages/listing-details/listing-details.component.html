@@ -1,0 +1,519 @@
+<main
+  class="administration-listing-details"
+  aria-labelledby="listing-details-title"
+>
+  <header class="administration-listing-details__header">
+    <div>
+      <a
+        class="administration-listing-details__back"
+        routerLink="/administration/listings"
+      >
+        <i
+          class="fa-solid fa-arrow-left"
+          aria-hidden="true"
+        ></i>
+
+        Back to Listings
+      </a>
+
+      <p class="administration-listing-details__eyebrow">
+        NavStreet administration
+      </p>
+
+      <h1 id="listing-details-title">
+        Listing Review
+      </h1>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <section
+      class="administration-listing-details__state"
+      role="status"
+    >
+      <span
+        class="administration-listing-details__spinner"
+        aria-hidden="true"
+      ></span>
+
+      Loading listing details...
+    </section>
+  } @else if (error()) {
+    <section
+      class="
+        administration-listing-details__state
+        administration-listing-details__state--error
+      "
+      role="alert"
+    >
+      <i
+        class="fa-solid fa-triangle-exclamation"
+        aria-hidden="true"
+      ></i>
+
+      <p>
+        {{ error() }}
+      </p>
+
+      <a routerLink="/administration/listings">
+        Return to Listings
+      </a>
+    </section>
+  } @else if (details(); as listingDetails) {
+    <section class="administration-listing-details__title-card">
+      <div>
+        <div class="administration-listing-details__badges">
+          <span
+            class="administration-listing-details__type"
+            [attr.data-record-type]="
+              listingDetails.recordType
+            "
+          >
+            {{
+              listingDetails.recordType === 'draft'
+                ? 'Draft'
+                : 'Published Listing'
+            }}
+          </span>
+
+          <span class="administration-listing-details__status">
+            {{
+              formatStatus(status() || 'unknown')
+            }}
+          </span>
+        </div>
+
+        <h2>
+          {{ address() }}
+        </h2>
+
+        <p>
+          Seller UID:
+          <strong>
+            {{ listingDetails.sellerUid }}
+          </strong>
+        </p>
+      </div>
+
+      <div class="administration-listing-details__title-actions">
+        <button
+          type="button"
+          class="administration-listing-details__delete"
+          [disabled]="deleting()"
+          (click)="deleteListing()"
+        >
+          <i
+            class="fa-solid fa-trash"
+            aria-hidden="true"
+          ></i>
+
+          @if (deleting()) {
+            Deleting...
+          } @else {
+            Delete Permanently
+          }
+        </button>
+      </div>
+    </section>
+
+    @if (deletionError()) {
+      <p
+        class="administration-listing-details__deletion-error"
+        role="alert"
+      >
+        <i
+          class="fa-solid fa-triangle-exclamation"
+          aria-hidden="true"
+        ></i>
+
+        {{ deletionError() }}
+      </p>
+    }
+
+    <section class="administration-listing-details__identifiers">
+      <article>
+        <span>Requested UID</span>
+        <strong>
+          {{ listingDetails.requestedListingUid }}
+        </strong>
+      </article>
+
+      <article>
+        <span>Published listing UID</span>
+        <strong>
+          {{
+            listingDetails.publishedListingUid ||
+            'Not published'
+          }}
+        </strong>
+      </article>
+
+      <article>
+        <span>Source draft UID</span>
+        <strong>
+          {{
+            listingDetails.sourceDraftUid ||
+            'No linked draft'
+          }}
+        </strong>
+      </article>
+    </section>
+
+    <div class="administration-listing-details__grid">
+      <section class="administration-listing-details__panel">
+        <header>
+          <h2>Property</h2>
+        </header>
+
+        <dl>
+          <div>
+            <dt>Property type</dt>
+            <dd>
+              {{
+                formatValue(
+                  propertyValue('propertyType')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Listing price</dt>
+            <dd>
+              @if (listPrice() > 0) {
+                {{
+                  listPrice() |
+                    currency:
+                      'USD':
+                      'symbol':
+                      '1.0-0'
+                }}
+              } @else {
+                Not set
+              }
+            </dd>
+          </div>
+
+          <div>
+            <dt>Bedrooms</dt>
+            <dd>
+              {{
+                formatValue(
+                  propertyValue('bedrooms')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Full bathrooms</dt>
+            <dd>
+              {{
+                formatValue(
+                  propertyValue('fullBathrooms')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Half bathrooms</dt>
+            <dd>
+              {{
+                formatValue(
+                  propertyValue('halfBathrooms')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Square feet</dt>
+            <dd>
+              {{
+                formatValue(
+                  propertyValue('squareFeet')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Year built</dt>
+            <dd>
+              {{
+                formatValue(
+                  propertyValue('yearBuilt')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Featured</dt>
+            <dd>
+              {{
+                formatValue(
+                  recordValue('featuredListing')
+                )
+              }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="administration-listing-details__panel">
+        <header>
+          <h2>Workflow</h2>
+        </header>
+
+        <dl>
+          <div>
+            <dt>Current status</dt>
+            <dd>
+              {{
+                formatStatus(
+                  status() || 'unknown'
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Current draft step</dt>
+            <dd>
+              {{
+                formatValue(
+                  workflowValue(
+                    'progress',
+                    'currentStep'
+                  )
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Completion</dt>
+            <dd>
+              {{
+                formatValue(
+                  workflowValue(
+                    'progress',
+                    'completionPercent'
+                  )
+                )
+              }}%
+            </dd>
+          </div>
+
+          <div>
+            <dt>Publication</dt>
+            <dd>
+              {{
+                formatValue(
+                  workflowValue(
+                    'publication',
+                    'status'
+                  )
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Identity</dt>
+            <dd>
+              {{
+                formatValue(
+                  workflowValue(
+                    'publication',
+                    'identityStatus'
+                  )
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Payment</dt>
+            <dd>
+              {{
+                formatValue(
+                  workflowValue(
+                    'publication',
+                    'paymentStatus'
+                  )
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Created</dt>
+            <dd>
+              {{
+                formatDate(
+                  recordValue('createdAt')
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Updated</dt>
+            <dd>
+              {{
+                formatDate(
+                  recordValue('updatedAt')
+                )
+              }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <section class="administration-listing-details__panel">
+      <header>
+        <h2>Related Activity</h2>
+      </header>
+
+      <div class="administration-listing-details__metrics">
+        <article>
+          <span>Views</span>
+          <strong>
+            {{ listingDetails.related.viewCount }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Saved</span>
+          <strong>
+            {{ listingDetails.related.savedCount }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Inquiries</span>
+          <strong>
+            {{ listingDetails.related.inquiryCount }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Showings</span>
+          <strong>
+            {{
+              listingDetails.related
+                .showingRequestCount
+            }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Offers</span>
+          <strong>
+            {{ listingDetails.related.offerCount }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Disclosures</span>
+          <strong>
+            {{
+              listingDetails.related
+                .disclosureCount
+            }}
+          </strong>
+        </article>
+      </div>
+    </section>
+
+    <section class="administration-listing-details__panel">
+      <header>
+        <h2>Marketing and Transaction</h2>
+      </header>
+
+      <dl>
+        <div>
+          <dt>Marketing link</dt>
+          <dd>
+            {{
+              listingDetails.related.hasMarketingLink
+                ? listingDetails.related.marketingShortPath
+                : 'Not created'
+            }}
+          </dd>
+        </div>
+
+        <div>
+          <dt>Share code</dt>
+          <dd>
+            {{
+              listingDetails.related.marketingShareCode ||
+              'Not created'
+            }}
+          </dd>
+        </div>
+
+        <div>
+          <dt>Transaction timeline</dt>
+          <dd>
+            {{
+              listingDetails.related.hasTransaction
+                ? 'Created'
+                : 'Not created'
+            }}
+          </dd>
+        </div>
+
+        <div>
+          <dt>Recorded view sessions</dt>
+          <dd>
+            {{
+              listingDetails.related.viewSessionCount
+            }}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="administration-listing-details__panel">
+      <header>
+        <h2>Complete Stored Records</h2>
+
+        <p>
+          These sections show the complete Firestore
+          records used by NavStreet.
+        </p>
+      </header>
+
+      @if (listingDetails.publishedListing) {
+        <details>
+          <summary>
+            Published listing record
+          </summary>
+
+          <pre>{{
+            listingDetails.publishedListing |
+              json
+          }}</pre>
+        </details>
+      }
+
+      @if (listingDetails.sourceDraft) {
+        <details>
+          <summary>
+            Source draft record
+          </summary>
+
+          <pre>{{
+            listingDetails.sourceDraft |
+              json
+          }}</pre>
+        </details>
+      }
+    </section>
+  }
+</main>

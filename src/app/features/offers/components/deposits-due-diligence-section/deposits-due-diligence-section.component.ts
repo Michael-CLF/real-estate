@@ -23,6 +23,10 @@ import {
   startWith
 } from 'rxjs';
 
+import {
+  CurrencyInputDirective
+} from '../../directives/currency-input.directive';
+
 
 @Component({
   selector:
@@ -31,7 +35,8 @@ import {
   standalone: true,
 
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CurrencyInputDirective
   ],
 
   templateUrl:
@@ -153,15 +158,24 @@ implements OnInit {
     }
 
     if (control.hasError('pattern')) {
-      return 'Select a valid due-diligence deadline.';
+      return controlName ===
+        'depositDeliveryDays'
+        ? 'Enter a whole number of calendar days.'
+        : 'Select a valid due-diligence deadline.';
     }
 
     if (control.hasError('min')) {
-      return 'Enter zero or a greater amount.';
+      return controlName ===
+        'depositDeliveryDays'
+        ? 'Enter at least 1 calendar day.'
+        : 'Enter zero or a greater amount.';
     }
 
     if (control.hasError('max')) {
-      return 'The number of days cannot exceed 365.';
+      return controlName ===
+        'depositDeliveryDays'
+        ? 'The delivery period cannot exceed 30 days.'
+        : 'The number of days cannot exceed 365.';
     }
 
     if (control.hasError('maxlength')) {

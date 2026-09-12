@@ -406,6 +406,13 @@ textarea {
   border-color: #154360;
 }
 
+.button--primary:disabled {
+  color: #687782;
+  background: #dce4e8;
+  border-color: #c7d2d9;
+  opacity: 1;
+}
+
 .button--primary:hover:not(:disabled) {
   background: #0f344c;
 }
@@ -434,7 +441,8 @@ textarea {
 }
 
 .button--text-danger {
-  border-color: transparent;
+  background-color: #8b1d1d;
+  color: #ffffff;
 }
 
 .state-card {

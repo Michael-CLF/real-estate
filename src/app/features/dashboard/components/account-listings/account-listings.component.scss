@@ -251,6 +251,30 @@
     }
   }
 }
+.listing-card__action:disabled {
+  cursor: wait;
+  opacity: 0.55;
+  transform: none;
+}
+
+.listing-card__action--delete {
+  border-color: #b42318;
+  color: #b42318;
+  background: #ffffff;
+
+  &:hover:not(:disabled) {
+    border-color: #b42318;
+    color: #ffffff;
+    background: #b42318;
+    box-shadow:
+      0 5px 14px rgba(
+        180,
+        35,
+        24,
+        0.18
+      );
+  }
+}
 
 /*
  * Tablet
@@ -301,5 +325,4 @@
       width: 100%;
     }
   }
-
 }

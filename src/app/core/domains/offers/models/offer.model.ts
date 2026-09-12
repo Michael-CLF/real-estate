@@ -1,6 +1,7 @@
 import {
   ContractStatus,
   OfferStatus,
+  OfferVersionStatus,
   TransactionPhase
 } from './offer-status.model';
 
@@ -110,8 +111,6 @@ export interface Offer {
 
   /*
    * All authenticated buyers associated with the offer.
-   * Additional invited buyers may be added after their
-   * accounts are connected.
    */
   buyerUids: string[];
 
@@ -124,10 +123,26 @@ export interface Offer {
   status: OfferStatus;
 
   /*
+   * True while this complete offer transaction contributes
+   * one unit to the listing's pending-offer count.
+   */
+  pendingOfferCounted?: boolean;
+
+  /*
    * Current editable or actionable version.
    */
   currentVersionUid: string;
   currentVersionNumber: number;
+
+  currentVersionInitiatedBy:
+    | 'buyer'
+    | 'seller';
+
+  /*
+   * Most recent version signed and sent to the receiving
+   * party. The current version may still be a private draft.
+   */
+  lastDeliveredVersionUid?: string;
 
   /*
    * First buyer-created version.
@@ -159,10 +174,6 @@ export interface Offer {
 
 /*
  * Data required to create a new offer thread.
- *
- * The backend obtains seller and property information from
- * the published listing rather than trusting values sent
- * by the browser.
  */
 export interface CreateOfferDraftInput {
   listingUid: string;
@@ -204,11 +215,16 @@ export interface OfferSummary {
   currentVersionUid: string;
   currentVersionNumber: number;
 
+  lastDeliveredVersionUid?: string;
+
   currentVersionInitiatedBy:
     | 'buyer'
     | 'seller';
 
   currentVersionSenderName: string;
+
+  currentVersionStatus:
+    OfferVersionStatus;
 
   purchasePriceInCents: number;
 
@@ -237,11 +253,7 @@ export interface OfferSearchFilters {
 
 
 /*
- * Complete offer thread with its ordered versions.
- *
- * The version type is imported by consumers only when the
- * full history is needed, helping avoid circular model
- * imports here.
+ * Complete offer thread with its ordered version UIDs.
  */
 export interface OfferWithVersionUids {
   offer: Offer;

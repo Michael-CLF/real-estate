@@ -56,6 +56,7 @@ export interface OfferVersionStatusHistoryEntry {
   action:
     | 'created'
     | 'saved'
+    | 'reopened'
     | 'submitted'
     | 'signature_requested'
     | 'partially_signed'

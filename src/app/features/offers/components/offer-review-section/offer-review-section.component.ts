@@ -53,7 +53,7 @@ export class OfferReviewSectionComponent {
       {
         style: 'currency',
         currency: 'USD',
-        minimumFractionDigits: 0,
+        minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }
     );
@@ -182,6 +182,27 @@ export class OfferReviewSectionComponent {
     }
 
     return 'Not selected';
+  }
+
+  get depositDeliveryLabel(): string {
+    const days = Number(
+      this.value(
+        'depositsDueDiligence.depositDeliveryDays'
+      )
+    );
+
+    if (!Number.isInteger(days) || days < 1) {
+      return 'Not provided';
+    }
+
+    return [
+      'Within',
+      days,
+      days === 1
+        ? 'calendar day'
+        : 'calendar days',
+      'after the Effective Date'
+    ].join(' ');
   }
 
   get concessionLabel(): string {

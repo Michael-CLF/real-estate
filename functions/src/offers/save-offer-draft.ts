@@ -29,6 +29,14 @@ import type {
 const MAX_SAVE_PAYLOAD_BYTES =
   750_000;
 
+const EDITABLE_DRAFT_OFFER_STATUSES =
+  new Set([
+    'draft',
+    'submitted',
+    'viewed',
+    'countered'
+  ]);
+
 
 /*
  * Saves editable fields on the current draft version.
@@ -178,8 +186,11 @@ export const saveOfferDraft =
 
               statusHistory:
                 FieldValue.arrayUnion({
-                  fromStatus: 'draft',
-                  toStatus: 'draft',
+                  fromStatus:
+                    offer.status,
+
+                  toStatus:
+                    offer.status,
 
                   action: 'draft_saved',
 
@@ -223,8 +234,9 @@ function verifyDraftOwnership(
   }
 
   if (
-    offer.status !== 'draft' &&
-    offer.status !== 'countered'
+    !EDITABLE_DRAFT_OFFER_STATUSES.has(
+      offer.status
+    )
   ) {
     throw new HttpsError(
       'failed-precondition',
@@ -299,7 +311,8 @@ function sanitizeDraftChanges(
   ) {
     sanitized['wizardData'] =
       sanitizeWizardData(
-        changes['wizardData']
+        changes['wizardData'],
+        currentVersion
       );
   }
 
@@ -403,19 +416,15 @@ function sanitizeTerms(
   terms['property'] =
     currentTerms.property;
 
+  /*
+   * The due-diligence deadline time comes directly from
+   * the agreement and is not an editable browser field.
+   */
   const requestedDeposits =
     requireObject(
       terms['deposits'],
       'Deposit terms must be an object.'
     );
-
-  /*
-   * These values come directly from the attorney-approved
-   * agreement and are not editable browser fields.
-   */
-  requestedDeposits[
-    'depositDeliveryDays'
-  ] = 4;
 
   requestedDeposits[
     'dueDiligenceEndTime'
@@ -473,7 +482,8 @@ function sanitizeTerms(
 }
 
 function sanitizeWizardData(
-  requestedWizardData: unknown
+  requestedWizardData: unknown,
+  currentVersion: OfferVersionDocument
 ): Record<string, unknown> {
   if (
     requestedWizardData === null ||
@@ -493,6 +503,16 @@ function sanitizeWizardData(
       Record<string, unknown>
     );
 
+  if (
+    currentVersion.initiatedBy ===
+      'seller'
+  ) {
+    preserveBuyerDisclosureWizardData(
+      wizardData,
+      currentVersion.terms
+    );
+  }
+
   rejectUnsafeObjectKeys(
     wizardData
   );
@@ -500,6 +520,78 @@ function sanitizeWizardData(
   return removeUndefinedValues(
     wizardData
   );
+}
+
+
+function preserveBuyerDisclosureWizardData(
+  wizardData: Record<string, unknown>,
+  terms: OfferTermsDocument
+): void {
+  const form =
+    wizardData['form'];
+
+  if (
+    form === null ||
+    typeof form !== 'object' ||
+    Array.isArray(form)
+  ) {
+    return;
+  }
+
+  const formData =
+    form as Record<string, unknown>;
+
+  const residentialProperty =
+    terms.buyerDisclosures
+      .residentialProperty;
+
+  const mineralOilGasRights =
+    terms.buyerDisclosures
+      .mineralOilGasRights;
+
+  formData['disclosuresAddenda'] = {
+    residentialPropertyStatus:
+      residentialProperty.status ===
+        'unselected'
+        ? ''
+        : residentialProperty.status,
+
+    residentialPropertyDocumentUid:
+      residentialProperty.documentUid ??
+      '',
+
+    residentialPropertyDocumentVersionId:
+      residentialProperty.documentVersionId ??
+      '',
+
+    residentialPropertyExemptionReason:
+      residentialProperty.exemptionReason ??
+      '',
+
+    residentialPropertyAcknowledged:
+      residentialProperty.acknowledged,
+
+    mineralOilGasRightsStatus:
+      mineralOilGasRights.status ===
+        'unselected'
+        ? ''
+        : mineralOilGasRights.status,
+
+    mineralOilGasRightsDocumentUid:
+      mineralOilGasRights.documentUid ??
+      '',
+
+    mineralOilGasRightsDocumentVersionId:
+      mineralOilGasRights.documentVersionId ??
+      '',
+
+    mineralOilGasRightsExemptionReason:
+      mineralOilGasRights.exemptionReason ??
+      '',
+
+    mineralOilGasRightsAcknowledged:
+      mineralOilGasRights.acknowledged
+  };
 }
 
 

@@ -337,6 +337,19 @@ export const signOffer =
             initiatingSideSigned &&
             receivingSideSigned;
 
+          const versionDeliveredNow =
+            initiatingSideSigned &&
+            !version.deliveredAt;
+
+          const shouldIncrementPendingOfferCount =
+            versionDeliveredNow &&
+            offer.pendingOfferCounted !== true;
+
+          const deliveredOfferStatus =
+            version.versionNumber === 1
+              ? 'submitted'
+              : 'countered';
+
           const signerRole =
             signer.role;
 
@@ -470,9 +483,10 @@ export const signOffer =
               version?: OfferVersionDocument;
             }> = [];
 
-          let listingReference:
-            DocumentReference |
-            undefined;
+          const listingReference =
+            adminFirestore
+              .collection('listings')
+              .doc(offer.listingUid);
 
           let contractReference:
             DocumentReference |
@@ -482,11 +496,6 @@ export const signOffer =
             offerUid;
 
           if (fullyExecuted) {
-            listingReference =
-              adminFirestore
-                .collection('listings')
-                .doc(offer.listingUid);
-
             contractReference =
               adminFirestore
                 .collection('contracts')
@@ -651,9 +660,12 @@ export const signOffer =
                     fullySignedAt: now,
                     acceptedAt: now,
                   }
-                  : initiatingSideSigned
+                  : versionDeliveredNow
                     ? {
                       deliveredAt: now,
+                      submittedAt:
+                        version.submittedAt ??
+                        now,
                     }
                     : {}
               ),
@@ -803,7 +815,7 @@ export const signOffer =
             );
 
             transaction.update(
-              listingReference!,
+              listingReference,
               {
                 status:
                   'under_contract',
@@ -840,18 +852,77 @@ export const signOffer =
             transaction.update(
               offerReference,
               {
+                ...(
+                  versionDeliveredNow
+                    ? {
+                      status:
+                        deliveredOfferStatus,
+
+                      lastDeliveredVersionUid:
+                        offerVersionUid,
+
+                      pendingOfferCounted:
+                        true,
+
+                      submittedAt:
+                        offer.submittedAt ??
+                        now,
+
+                      statusHistory:
+                        FieldValue.arrayUnion({
+                          fromStatus:
+                            offer.status,
+
+                          toStatus:
+                            deliveredOfferStatus,
+
+                          action:
+                            version.versionNumber ===
+                              1
+                              ? 'submitted'
+                              : 'countered',
+
+                          actorUid: userUid,
+                          actorRole: signerRole,
+
+                          offerVersionUid,
+                          offerVersionNumber:
+                            version.versionNumber,
+
+                          occurredAt: now,
+                        }),
+                    }
+                    : {}
+                ),
+
                 lastActivityAt: now,
                 updatedAt: now,
               }
             );
 
-            notifySignatureProgress(
-              transaction,
-              offer,
-              version,
-              signer,
-              initiatingSideSigned
-            );
+            if (
+              shouldIncrementPendingOfferCount
+            ) {
+              transaction.update(
+                listingReference,
+                {
+                  pendingOfferCount:
+                    FieldValue.increment(1),
+
+                  updatedAt: now,
+                }
+              );
+            }
+
+            if (versionDeliveredNow) {
+              notifySignatureProgress(
+                transaction,
+                offer,
+                version,
+                signer,
+                true
+              );
+            }
           }
 
           return {

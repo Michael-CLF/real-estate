@@ -1,6 +1,7 @@
 import {
   FieldValue,
-  getFirestore
+  getFirestore,
+  type DocumentReference
 } from 'firebase-admin/firestore';
 
 import {
@@ -12,8 +13,10 @@ import {
   addOfferNotificationToTransaction
 } from './offer-notification.service';
 
+
 interface WithdrawOfferRequest {
   offerUid: string;
+  offerVersionUid?: string | null;
   reason?: string | null;
 }
 
@@ -27,25 +30,42 @@ interface WithdrawOfferResponse {
 interface OfferRecord {
   Uid?: string;
 
-  buyerUid?: string;
-  sellerUid?: string;
+  primaryBuyerUid?: string;
+  buyerUids?: string[];
+
+  primarySellerUid?: string;
+  sellerUids?: string[];
 
   listingUid?: string;
   currentVersionUid?: string;
+  lastDeliveredVersionUid?: string;
 
   status?: string;
   pendingOfferCounted?: boolean;
 }
 
-const nonWithdrawableStatuses = new Set([
-  'rejected',
-  'withdrawn',
-  'expired',
-  'fully_executed',
-  'executed',
-  'voided',
-  'cancelled'
-]);
+interface OfferVersionRecord {
+  Uid?: string;
+  versionNumber?: number;
+  initiatedBy?: 'buyer' | 'seller';
+  status?: string;
+}
+
+const withdrawableOfferStatuses =
+  new Set([
+    'draft',
+    'submitted',
+    'viewed',
+    'countered'
+  ]);
+
+const privateVersionStatuses =
+  new Set([
+    'draft',
+    'awaiting_signatures',
+    'partially_signed'
+  ]);
+
 
 export const withdrawOffer = onCall<
   WithdrawOfferRequest,
@@ -70,6 +90,11 @@ export const withdrawOffer = onCall<
       requireNonEmptyString(
         request.data?.offerUid,
         'offerUid'
+      );
+
+    const requestedOfferVersionUid =
+      normalizeOptionalString(
+        request.data?.offerVersionUid
       );
 
     const reason =
@@ -110,16 +135,22 @@ export const withdrawOffer = onCall<
           );
         }
 
-        verifyBuyerAccess(
-          offer,
-          userUid
-        );
-
         const offerVersionUid =
           requireNonEmptyString(
             offer.currentVersionUid,
             'currentVersionUid'
           );
+
+        if (
+          requestedOfferVersionUid &&
+          requestedOfferVersionUid !==
+            offerVersionUid
+        ) {
+          throw new HttpsError(
+            'failed-precondition',
+            'The offer changed. Refresh the page and try again.'
+          );
+        }
 
         if (offer.status === 'withdrawn') {
           return {
@@ -133,12 +164,6 @@ export const withdrawOffer = onCall<
         verifyOfferCanBeWithdrawn(
           offer
         );
-
-        const sellerUid =
-          requireNonEmptyString(
-            offer.sellerUid,
-            'sellerUid'
-          );
 
         const versionReference =
           offerReference
@@ -157,8 +182,45 @@ export const withdrawOffer = onCall<
           );
         }
 
-        const shouldRemovePendingOffer =
+        const version =
+          versionSnapshot.data() as
+            OfferVersionRecord | undefined;
+
+        if (!version) {
+          throw new HttpsError(
+            'data-loss',
+            'The current offer version contains no data.'
+          );
+        }
+
+        const actorRole =
+          verifyInitiatingPartyAccess(
+            offer,
+            version,
+            userUid
+          );
+
+        const isPrivateInitialDraft =
+          version.versionNumber === 1 &&
+          offer.status === 'draft' &&
+          privateVersionStatuses.has(
+            version.status ?? ''
+          );
+
+        const wasDelivered =
+          offer.lastDeliveredVersionUid ===
+            offerVersionUid ||
           offer.pendingOfferCounted === true;
+
+        if (
+          !isPrivateInitialDraft &&
+          !wasDelivered
+        ) {
+          throw new HttpsError(
+            'failed-precondition',
+            'This private draft cannot be withdrawn from this screen.'
+          );
+        }
 
         const listingUid =
           requireNonEmptyString(
@@ -166,38 +228,50 @@ export const withdrawOffer = onCall<
             'listingUid'
           );
 
-        const listingReference =
-          firestore
-            .collection('listings')
-            .doc(listingUid);
+        const shouldRemovePendingOffer =
+          wasDelivered &&
+          offer.pendingOfferCounted === true;
 
-        const listingSnapshot =
-          await transaction.get(
-            listingReference
-          );
+        let listingReference:
+          DocumentReference |
+          null = null;
 
-        if (!listingSnapshot.exists) {
-          throw new HttpsError(
-            'not-found',
-            'The property listing could not be found.'
-          );
+        let nextPendingOfferCount = 0;
+
+        if (shouldRemovePendingOffer) {
+          listingReference =
+            firestore
+              .collection('listings')
+              .doc(listingUid);
+
+          const listingSnapshot =
+            await transaction.get(
+              listingReference
+            );
+
+          if (!listingSnapshot.exists) {
+            throw new HttpsError(
+              'not-found',
+              'The property listing could not be found.'
+            );
+          }
+
+          const storedPendingOfferCount =
+            listingSnapshot.get(
+              'pendingOfferCount'
+            );
+
+          nextPendingOfferCount =
+            Math.max(
+              0,
+              (
+                typeof storedPendingOfferCount ===
+                  'number'
+                  ? storedPendingOfferCount
+                  : 0
+              ) - 1
+            );
         }
-
-        const storedPendingOfferCount =
-          listingSnapshot.get(
-            'pendingOfferCount'
-          );
-
-        const nextPendingOfferCount =
-          Math.max(
-            0,
-            (
-              typeof storedPendingOfferCount ===
-                'number'
-                ? storedPendingOfferCount
-                : 0
-            ) - 1
-          );
 
         const eventReference =
           offerReference
@@ -207,36 +281,30 @@ export const withdrawOffer = onCall<
         transaction.update(
           offerReference,
           {
-            status:
-              'withdrawn',
-
-            withdrawnByUid:
-              userUid,
-
+            status: 'withdrawn',
+            withdrawnByUid: userUid,
             withdrawnAt:
               FieldValue.serverTimestamp(),
-
-            withdrawalReason:
-              reason,
-
+            withdrawalReason: reason,
             ...(shouldRemovePendingOffer
               ? {
                   pendingOfferCounted: false
                 }
               : {}),
-
             updatedAt:
               FieldValue.serverTimestamp()
           }
         );
 
-        if (shouldRemovePendingOffer) {
+        if (
+          shouldRemovePendingOffer &&
+          listingReference
+        ) {
           transaction.update(
             listingReference,
             {
               pendingOfferCount:
                 nextPendingOfferCount,
-
               updatedAt:
                 FieldValue.serverTimestamp()
             }
@@ -246,18 +314,11 @@ export const withdrawOffer = onCall<
         transaction.update(
           versionReference,
           {
-            status:
-              'withdrawn',
-
-            withdrawnByUid:
-              userUid,
-
+            status: 'withdrawn',
+            withdrawnByUid: userUid,
             withdrawnAt:
               FieldValue.serverTimestamp(),
-
-            withdrawalReason:
-              reason,
-
+            withdrawalReason: reason,
             updatedAt:
               FieldValue.serverTimestamp()
           }
@@ -266,77 +327,69 @@ export const withdrawOffer = onCall<
         transaction.set(
           eventReference,
           {
-            Uid:
-              eventReference.id,
-
+            Uid: eventReference.id,
             offerUid,
             offerVersionUid,
-
-            listingUid:
-              offer.listingUid ?? null,
-
+            listingUid,
             eventType:
-              'buyer_withdrew_offer',
-
-            actorUid:
-              userUid,
-
-            actorRole:
-              'buyer',
-
+              isPrivateInitialDraft
+                ? 'offer_draft_discarded'
+                : 'offer_withdrawn',
+            actorUid: userUid,
+            actorRole,
             reason,
-
             createdAt:
               FieldValue.serverTimestamp()
           }
         );
 
-        addOfferNotificationToTransaction(
-          transaction,
-          firestore,
-          {
-            recipientUid:
-              sellerUid,
+        if (wasDelivered) {
+          const recipientUids =
+            actorRole === 'buyer'
+              ? getSellerUids(offer)
+              : getBuyerUids(offer);
 
-            actorUid:
-              userUid,
-
-            offerUid,
-            offerVersionUid,
-
-            listingUid:
-              offer.listingUid ?? null,
-
-            type:
-              'offer_withdrawn',
-
-            title:
-              'Buyer withdrew an offer',
-
-            message:
-              reason
-                ? (
-                    'The buyer withdrew the offer. ' +
-                    `Reason: ${reason}`
-                  )
-                : (
-                    'The buyer withdrew the offer. ' +
-                    'The offer remains available in the historical record.'
-                  ),
-
-            channels: [
-              'in_app',
-              'email'
-            ],
-
-            eventKey:
-              'buyer-withdrew',
-
-            metadata: {
-              reason
-            }
+          for (
+            const recipientUid of
+              recipientUids
+          ) {
+            addOfferNotificationToTransaction(
+              transaction,
+              firestore,
+              {
+                recipientUid,
+                actorUid: userUid,
+                offerUid,
+                offerVersionUid,
+                listingUid,
+                type: 'offer_withdrawn',
+                title:
+                  actorRole === 'buyer'
+                    ? 'Buyer withdrew an offer'
+                    : 'Seller withdrew a counteroffer',
+                message:
+                  reason
+                    ? (
+                        'The initiating party withdrew the offer. ' +
+                        `Reason: ${reason}`
+                      )
+                    : (
+                        'The initiating party withdrew the offer. ' +
+                        'The offer remains available in the historical record.'
+                      ),
+                channels: [
+                  'in_app',
+                  'email'
+                ],
+                eventKey:
+                  `${actorRole}-withdrew`,
+                metadata: {
+                  reason
+                }
+              }
+            );
           }
-        );
+        }
 
         return {
           offerUid,
@@ -349,24 +402,38 @@ export const withdrawOffer = onCall<
   }
 );
 
-function verifyBuyerAccess(
+
+function verifyInitiatingPartyAccess(
   offer: OfferRecord,
+  version: OfferVersionRecord,
   userUid: string
-): void {
-  if (!offer.buyerUid) {
-    throw new HttpsError(
-      'data-loss',
-      'The offer does not identify a buyer.'
-    );
+): 'buyer' | 'seller' {
+  const buyerUids =
+    getBuyerUids(offer);
+
+  const sellerUids =
+    getSellerUids(offer);
+
+  if (
+    version.initiatedBy === 'buyer' &&
+    buyerUids.includes(userUid)
+  ) {
+    return 'buyer';
   }
 
-  if (offer.buyerUid !== userUid) {
-    throw new HttpsError(
-      'permission-denied',
-      'Only the buyer who created the offer may withdraw it.'
-    );
+  if (
+    version.initiatedBy === 'seller' &&
+    sellerUids.includes(userUid)
+  ) {
+    return 'seller';
   }
+
+  throw new HttpsError(
+    'permission-denied',
+    'Only the party who initiated the current version may withdraw it.'
+  );
 }
+
 
 function verifyOfferCanBeWithdrawn(
   offer: OfferRecord
@@ -379,7 +446,7 @@ function verifyOfferCanBeWithdrawn(
   }
 
   if (
-    nonWithdrawableStatuses.has(
+    !withdrawableOfferStatuses.has(
       offer.status
     )
   ) {
@@ -389,6 +456,47 @@ function verifyOfferCanBeWithdrawn(
     );
   }
 }
+
+
+function getBuyerUids(
+  offer: OfferRecord
+): string[] {
+  return uniqueStrings([
+    ...(offer.buyerUids ?? []),
+    offer.primaryBuyerUid
+  ]);
+}
+
+
+function getSellerUids(
+  offer: OfferRecord
+): string[] {
+  return uniqueStrings([
+    ...(offer.sellerUids ?? []),
+    offer.primarySellerUid
+  ]);
+}
+
+
+function uniqueStrings(
+  values: Array<string | undefined>
+): string[] {
+  return Array.from(
+    new Set(
+      values.filter(
+        (
+          value
+        ): value is string =>
+          typeof value === 'string' &&
+          value.trim().length > 0
+      ).map(
+        value =>
+          value.trim()
+      )
+    )
+  );
+}
+
 
 function requireNonEmptyString(
   value: unknown,
@@ -406,6 +514,7 @@ function requireNonEmptyString(
 
   return value.trim();
 }
+
 
 function normalizeOptionalString(
   value: unknown

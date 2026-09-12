@@ -196,10 +196,44 @@ implements OnInit {
 
   readonly actionHeading =
     computed(
-      () =>
-        this.isReceivingParty()
-          ? 'Respond to this offer'
-          : 'Complete and send this offer'
+      () => {
+        const version =
+          this.currentVersion();
+
+        if (this.isReceivingParty()) {
+          return 'Respond to this offer';
+        }
+
+        if (
+          version?.status === 'delivered' ||
+          version?.status === 'signed'
+        ) {
+          return 'Offer sent';
+        }
+
+        return 'Complete and send this offer';
+      }
+    );
+
+  readonly actionNote =
+    computed(
+      () => {
+        const version =
+          this.currentVersion();
+
+        if (
+          this.actionHeading() !==
+            'Offer sent' ||
+          !version
+        ) {
+          return '';
+        }
+
+        return version.initiatedBy ===
+          'buyer'
+          ? 'Waiting for the seller to respond.'
+          : 'Waiting for the buyer to respond.';
+      }
     );
 
   readonly signButtonLabel =
@@ -216,6 +250,23 @@ implements OnInit {
         const offer =
           this.offer();
 
+        const version =
+          this.currentVersion();
+
+        if (
+          offer &&
+          version &&
+          this.isPrivatePreparedVersion(
+            version
+          ) &&
+          this.isUserOnInitiatingSide(
+            offer,
+            version
+          )
+        ) {
+          return 'Draft';
+        }
+
         return offer
           ? OFFER_STATUS_LABELS[
             offer.status
@@ -229,6 +280,33 @@ implements OnInit {
       () => {
         const version =
           this.currentVersion();
+
+        if (
+          version &&
+          this.isPrivatePreparedVersion(
+            version
+          ) &&
+          this.isUserOnInitiatingSide(
+            this.offer(),
+            version
+          )
+        ) {
+          if (
+            version.status ===
+              'awaiting_signatures'
+          ) {
+            return 'Ready to sign';
+          }
+
+          if (
+            version.status ===
+              'partially_signed'
+          ) {
+            return 'Signing in progress';
+          }
+
+          return 'Draft';
+        }
 
         return version
           ? OFFER_VERSION_STATUS_LABELS[
@@ -341,6 +419,32 @@ implements OnInit {
   getVersionStatusLabel(
     version: OfferVersion
   ): string {
+    if (
+      this.isPrivatePreparedVersion(
+        version
+      ) &&
+      this.isUserOnInitiatingSide(
+        this.offer(),
+        version
+      )
+    ) {
+      if (
+        version.status ===
+          'awaiting_signatures'
+      ) {
+        return 'Ready to sign';
+      }
+
+      if (
+        version.status ===
+          'partially_signed'
+      ) {
+        return 'Signing in progress';
+      }
+
+      return 'Draft';
+    }
+
     return OFFER_VERSION_STATUS_LABELS[
       version.status
     ];
@@ -455,24 +559,32 @@ implements OnInit {
     this.openingDocument.set(true);
     this.clearMessages();
 
+    const previewWindow =
+      window.open('', '_blank');
+
+    if (previewWindow) {
+      previewWindow.opener = null;
+      previewWindow.document.title =
+        'Opening agreement PDF…';
+    }
+
     try {
       const downloadUrl =
         await this.offerDocumentService
           .getDownloadUrl(document);
 
-      const openedWindow =
-        window.open(
-          downloadUrl,
-          '_blank',
-          'noopener,noreferrer'
+      if (previewWindow) {
+        previewWindow.location.replace(
+          downloadUrl
         );
-
-      if (!openedWindow) {
-        throw new Error(
-          'The browser blocked the agreement window. Allow pop-ups for NavStreet and try again.'
+      } else {
+        window.location.assign(
+          downloadUrl
         );
       }
     } catch (error) {
+      previewWindow?.close();
+
       this.errorMessage.set(
         this.getErrorMessage(error)
       );
@@ -737,16 +849,24 @@ implements OnInit {
 
 
   async withdrawOffer(): Promise<void> {
+    const offer =
+      this.offer();
+
     const version =
       this.currentVersion();
 
-    if (!version) {
+    if (!offer || !version) {
       return;
     }
 
+    const isUnsignedDraft =
+      offer.status === 'draft';
+
     const confirmed =
       window.confirm(
-        'Withdraw this offer? The negotiation will close, but its complete history will remain available.'
+        isUnsignedDraft
+          ? 'Discard this unsigned offer draft? It will be closed and cannot be resumed.'
+          : 'Withdraw this offer? The negotiation will close, but its complete history will remain available.'
       );
 
     if (!confirmed) {
@@ -766,7 +886,9 @@ implements OnInit {
       await this.loadOffer(false);
 
       this.successMessage.set(
-        'The current offer was withdrawn. Its history remains available.'
+        isUnsignedDraft
+          ? 'The unsigned offer draft was discarded.'
+          : 'The current offer was withdrawn. Its history remains available.'
       );
     } catch (error) {
       this.errorMessage.set(
@@ -815,9 +937,8 @@ implements OnInit {
       }
 
       const [
-        currentVersion,
-        versions,
-        documents
+        latestVersion,
+        versions
       ] = await Promise.all([
         this.offerService.getVersion(
           offer.Uid,
@@ -827,47 +948,148 @@ implements OnInit {
         this.offerService
           .getVersionHistory(
             offer.Uid
-          ),
-
-        this.offerDocumentService
-          .getDocumentsForVersion(
-            offer.Uid,
-            offer.currentVersionUid
           )
       ]);
 
-      if (!currentVersion) {
+      if (!latestVersion) {
         throw new Error(
           'The current offer version could not be found.'
         );
       }
 
+      let visibleVersion =
+        latestVersion;
+
+      if (
+        this.isUndeliveredVersion(
+          offer,
+          latestVersion
+        ) &&
+        !this.isUserOnInitiatingSide(
+          offer,
+          latestVersion
+        )
+      ) {
+        if (!offer.lastDeliveredVersionUid) {
+          throw new Error(
+            'This offer has not been signed and sent to you yet.'
+          );
+        }
+
+        visibleVersion =
+          versions.find(
+            version =>
+              version.Uid ===
+              offer.lastDeliveredVersionUid
+          ) ??
+          await this.offerService.getVersion(
+            offer.Uid,
+            offer.lastDeliveredVersionUid
+          ) ??
+          latestVersion;
+      }
+
+      const documents =
+        await this.offerDocumentService
+          .getDocumentsForVersion(
+            offer.Uid,
+            visibleVersion.Uid
+          );
+
       this.offer.set(offer);
       this.currentVersion.set(
-        currentVersion
+        visibleVersion
       );
 
       this.versions.set(
-        [...versions].sort(
-          (left, right) =>
-            right.versionNumber -
-            left.versionNumber
-        )
+        versions
+          .filter(
+            version =>
+              !this.isUndeliveredVersion(
+                offer,
+                version
+              ) ||
+              this.isUserOnInitiatingSide(
+                offer,
+                version
+              )
+          )
+          .sort(
+            (left, right) =>
+              right.versionNumber -
+              left.versionNumber
+          )
       );
 
       this.agreementDocument.set(
         this.findAgreementDocument(
           documents,
-          currentVersion
+          visibleVersion
         )
       );
-    } catch (error) {
+       } catch (error: unknown) {
+      console.error(
+        'Unable to load offer details:',
+        error
+      );
+
       this.errorMessage.set(
         this.getErrorMessage(error)
       );
     } finally {
       this.loading.set(false);
     }
+  }
+
+    private isPrivatePreparedVersion(
+    version: OfferVersion
+  ): boolean {
+    return (
+      version.status === 'draft' ||
+      version.status ===
+        'awaiting_signatures' ||
+      version.status ===
+        'partially_signed'
+    );
+  }
+
+
+  private isUndeliveredVersion(
+    offer: Offer,
+    version: OfferVersion
+  ): boolean {
+    return (
+      this.isPrivatePreparedVersion(
+        version
+      ) ||
+      (
+        !!offer.lastDeliveredVersionUid &&
+        version.Uid !==
+          offer.lastDeliveredVersionUid &&
+        !version.deliveredAt
+      )
+    );
+  }
+
+
+  private isUserOnInitiatingSide(
+    offer: Offer | null,
+    version: OfferVersion
+  ): boolean {
+    if (!offer) {
+      return false;
+    }
+
+    const userUid =
+      this.offerService.currentUserUid;
+
+    return version.initiatedBy === 'buyer'
+      ? offer.buyerUids.includes(
+          userUid
+        )
+      : offer.sellerUids.includes(
+          userUid
+        );
   }
 
 

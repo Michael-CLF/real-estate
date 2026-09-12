@@ -194,9 +194,6 @@ export const submitOffer =
           const now =
             Timestamp.now();
 
-          const shouldIncrementPendingOfferCount =
-            offer.pendingOfferCounted !== true;
-
           transaction.update(
             versionReference,
             {
@@ -208,7 +205,6 @@ export const submitOffer =
               lockedAt: now,
               lockedByUid: userUid,
 
-              submittedAt: now,
               updatedAt: now,
 
               statusHistory:
@@ -218,7 +214,8 @@ export const submitOffer =
                   toStatus:
                     'awaiting_signatures',
 
-                  action: 'submitted',
+                  action:
+                    'signature_requested',
 
                   actorUid: userUid,
 
@@ -236,53 +233,18 @@ export const submitOffer =
           transaction.update(
             offerReference,
             {
-              status: 'submitted',
+              pendingOfferCounted:
+                offer.pendingOfferCounted ===
+                true,
 
-              pendingOfferCounted: true,
-
-              submittedAt:
-                offer.submittedAt ??
-                now,
+              currentVersionInitiatedBy:
+                version.initiatedBy,
 
               lastActivityAt: now,
               updatedAt: now,
-
-              statusHistory:
-                FieldValue.arrayUnion({
-                  fromStatus:
-                    offer.status,
-
-                  toStatus:
-                    'submitted',
-
-                  action:
-                    'submitted',
-
-                  actorUid: userUid,
-
-                  actorRole:
-                    version.initiatedBy,
-
-                  offerVersionUid,
-                  offerVersionNumber:
-                    version.versionNumber,
-
-                  occurredAt: now,
-                }),
             }
           );
 
-          if (shouldIncrementPendingOfferCount) {
-            transaction.update(
-              listingReference,
-              {
-                pendingOfferCount:
-                  FieldValue.increment(1),
-
-                updatedAt: now,
-              }
-            );
-          }
         }
       );
 
@@ -685,10 +647,13 @@ function validateDeposits(
       'The deposit-delivery period is invalid.'
     );
 
-  if (depositDeliveryDays !== 4) {
+  if (
+    depositDeliveryDays < 1 ||
+    depositDeliveryDays > 30
+  ) {
     throw new HttpsError(
       'failed-precondition',
-      'The deposit must be delivered within four calendar days after the Effective Date.'
+      'Enter a deposit-delivery period from 1 to 30 calendar days after the Effective Date.'
     );
   }
 

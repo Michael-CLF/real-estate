@@ -147,12 +147,12 @@
 
             <input
               id="sellerConcessionAmount"
-              type="number"
+              type="text"
+              appCurrencyInput
               formControlName="sellerConcessionAmount"
-              min="0.01"
-              step="100"
               inputmode="decimal"
-              placeholder="0"
+              autocomplete="off"
+              placeholder="0.00"
               [attr.aria-invalid]="
                 isInvalid(
                   'sellerConcessionAmount'
@@ -305,12 +305,12 @@
 
             <input
               id="homeWarrantyAmount"
-              type="number"
+              type="text"
+              appCurrencyInput
               formControlName="homeWarrantyAmount"
-              min="0.01"
-              step="50"
               inputmode="decimal"
-              placeholder="0"
+              autocomplete="off"
+              placeholder="0.00"
               [attr.aria-invalid]="
                 isInvalid('homeWarrantyAmount')
               "

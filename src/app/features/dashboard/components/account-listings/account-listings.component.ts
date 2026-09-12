@@ -17,16 +17,25 @@ import {
   Listing
 } from '../../../../core/domains/listings/models/listing.model';
 
+
 @Component({
   selector: 'app-account-listings',
+
   standalone: true,
+
   imports: [
     CurrencyPipe,
     RouterLink
   ],
-  templateUrl: './account-listings.component.html',
-  styleUrl: './account-listings.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+
+  templateUrl:
+    './account-listings.component.html',
+
+  styleUrl:
+    './account-listings.component.scss',
+
+  changeDetection:
+    ChangeDetectionStrategy.OnPush
 })
 export class AccountListingsComponent {
 
@@ -39,9 +48,18 @@ export class AccountListingsComponent {
   readonly actionLabel =
     input('Manage Listing');
 
+  readonly allowDeletion =
+    input(false);
+
+  readonly deletingListingUid =
+    input<string | null>(null);
+
   readonly actionSelected =
     output<Listing>();
 
   readonly marketingSelected =
+    output<Listing>();
+
+  readonly deleteSelected =
     output<Listing>();
 }

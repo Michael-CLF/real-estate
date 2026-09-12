@@ -503,6 +503,18 @@ export class OfferService {
       isReceivingParty &&
       actionableStatus;
 
+    const canDiscardInitialDraft =
+      version.versionNumber === 1 &&
+      offer.status === 'draft' &&
+      isInitiatingParty &&
+      (
+        version.status === 'draft' ||
+        version.status ===
+          'awaiting_signatures' ||
+        version.status ===
+          'partially_signed'
+      );
+
     return {
       userUid,
 
@@ -543,12 +555,16 @@ export class OfferService {
         isReceivingParty,
 
       canWithdraw:
+        canDiscardInitialDraft ||
         (
-          offer.status === 'submitted' ||
-          offer.status === 'viewed' ||
-          offer.status === 'countered'
-        ) &&
-        isInitiatingParty
+          actionableStatus &&
+          isInitiatingParty &&
+          (
+            offer.status === 'submitted' ||
+            offer.status === 'viewed' ||
+            offer.status === 'countered'
+          )
+        )
     };
   }
 

@@ -97,6 +97,10 @@ export class DisclosuresAddendaSectionComponent
     );
   }
 
+  get readOnly(): boolean {
+    return this.sectionForm.disabled;
+  }
+
   get residentialPropertyDocumentAttached():
     boolean {
     return this.hasText(

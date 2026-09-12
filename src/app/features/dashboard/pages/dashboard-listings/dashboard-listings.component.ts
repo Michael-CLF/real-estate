@@ -17,6 +17,10 @@ import {
 } from '../../../../core/domains/listings/models/listing.model';
 
 import {
+  ListingDeletionService
+} from '../../../../core/domains/listings/services/listing-deletion.service';
+
+import {
   AccountListingsComponent
 } from '../../components/account-listings/account-listings.component';
 
@@ -24,23 +28,32 @@ import {
   DashboardStateService
 } from '../../services/dashboard-state.service';
 
+
 type ListingTab =
   | 'draft'
   | 'active'
   | 'under-contract'
   | 'sold';
 
+
 @Component({
-  selector: 'app-dashboard-listings',
-  standalone: true,
+  selector:
+    'app-dashboard-listings',
+
+  standalone:
+    true,
+
   imports: [
     RouterLink,
     AccountListingsComponent
   ],
+
   templateUrl:
     './dashboard-listings.component.html',
+
   styleUrl:
     './dashboard-listings.component.scss',
+
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
@@ -53,6 +66,10 @@ export class DashboardListingsComponent
   private readonly router =
     inject(Router);
 
+  private readonly deletionService =
+    inject(ListingDeletionService);
+
+
   protected readonly selectedTab =
     signal<ListingTab>('active');
 
@@ -62,12 +79,23 @@ export class DashboardListingsComponent
   protected readonly loadError =
     signal('');
 
+  protected readonly deletionError =
+    signal('');
+
+  protected readonly deletionSuccess =
+    signal('');
+
+  protected readonly deletingListingUid =
+    signal<string | null>(null);
+
+
   protected readonly draftListings =
     computed(
       () =>
         this.dashboardState.state()
           .draftListings
     );
+
 
   protected readonly activeListings =
     computed(() =>
@@ -85,6 +113,7 @@ export class DashboardListingsComponent
         })
     );
 
+
   protected readonly underContractListings =
     computed(() =>
       this.dashboardState.state()
@@ -100,6 +129,7 @@ export class DashboardListingsComponent
         })
     );
 
+
   protected readonly soldListings =
     computed(() =>
       this.dashboardState.state()
@@ -111,6 +141,7 @@ export class DashboardListingsComponent
         )
     );
 
+
   protected readonly selectedListings =
     computed<Listing[]>(() => {
       switch (this.selectedTab()) {
@@ -118,7 +149,8 @@ export class DashboardListingsComponent
           return this.draftListings();
 
         case 'under-contract':
-          return this.underContractListings();
+          return this
+            .underContractListings();
 
         case 'sold':
           return this.soldListings();
@@ -128,6 +160,7 @@ export class DashboardListingsComponent
           return this.activeListings();
       }
     });
+
 
   protected readonly selectedEmptyMessage =
     computed(() => {
@@ -159,6 +192,7 @@ export class DashboardListingsComponent
       }
     });
 
+
   protected readonly selectedActionLabel =
     computed(() =>
       this.selectedTab() === 'draft'
@@ -166,26 +200,40 @@ export class DashboardListingsComponent
         : 'Manage Listing'
     );
 
+
+  protected readonly deletionAllowed =
+    computed(() =>
+      this.selectedTab() === 'draft' ||
+      this.selectedTab() === 'active'
+    );
+
+
   async ngOnInit(): Promise<void> {
     await this.loadListings();
   }
+
 
   protected selectTab(
     tab: ListingTab
   ): void {
     this.selectedTab.set(tab);
+    this.deletionError.set('');
+    this.deletionSuccess.set('');
   }
+
 
   protected async retryLoading():
     Promise<void> {
     await this.loadListings();
   }
 
+
   protected async manageListing(
     listing: Listing
   ): Promise<void> {
     if (
-      String(listing.status) === 'draft'
+      String(listing.status) ===
+      'draft'
     ) {
       await this.router.navigate([
         '/sell/listings',
@@ -203,11 +251,13 @@ export class DashboardListingsComponent
     ]);
   }
 
+
   protected async openMarketingToolkit(
     listing: Listing
   ): Promise<void> {
     if (
-      String(listing.status) === 'draft'
+      String(listing.status) ===
+      'draft'
     ) {
       return;
     }
@@ -220,6 +270,96 @@ export class DashboardListingsComponent
     ]);
   }
 
+
+  protected async deleteListing(
+    listing: Listing
+  ): Promise<void> {
+    if (
+      this.deletingListingUid()
+    ) {
+      return;
+    }
+
+    const recordType =
+      String(listing.status) ===
+        'draft'
+        ? 'draft'
+        : 'published';
+
+    const address = [
+      listing.addressLine1,
+      listing.city,
+      listing.state,
+      listing.zipCode
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    const confirmationMessage =
+      recordType === 'draft'
+        ? (
+          'Permanently delete this listing draft?\n\n' +
+          `${address || listing.Uid}\n\n` +
+          'Any uploaded listing photos will also be deleted.\n\n' +
+          'This action cannot be undone.'
+        )
+        : (
+          'Permanently delete this property listing?\n\n' +
+          `${address || listing.Uid}\n\n` +
+          'NavStreet will also delete its draft, photos, disclosures, saved-property references, inquiries, showings, offers, contracts, documents, marketing records, and transaction information.\n\n' +
+          'This action cannot be undone.'
+        );
+
+    const confirmed =
+      window.confirm(
+        confirmationMessage
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingListingUid.set(
+      listing.Uid
+    );
+
+    this.deletionError.set('');
+    this.deletionSuccess.set('');
+
+    try {
+      await this.deletionService
+        .deleteListing(
+          listing.Uid,
+          recordType
+        );
+
+      await this.loadListings();
+
+      this.deletionSuccess.set(
+        recordType === 'draft'
+          ? 'The listing draft was permanently deleted.'
+          : 'The property listing and its related records were permanently deleted.'
+      );
+    } catch (error: unknown) {
+      console.error(
+        'Listing deletion failed:',
+        error
+      );
+
+      this.deletionError.set(
+        error instanceof Error &&
+        error.message
+          ? error.message
+          : 'The listing could not be deleted.'
+      );
+    } finally {
+      this.deletingListingUid.set(
+        null
+      );
+    }
+  }
+
+
   private async loadListings():
     Promise<void> {
     this.isLoading.set(true);
@@ -228,15 +368,17 @@ export class DashboardListingsComponent
     try {
       await this.dashboardState.load();
 
-      if (this.activeListings().length > 0) {
+      if (
+        this.activeListings().length > 0
+      ) {
         this.selectedTab.set('active');
       } else if (
         this.draftListings().length > 0
       ) {
         this.selectedTab.set('draft');
       } else if (
-        this.underContractListings().length >
-        0
+        this.underContractListings()
+          .length > 0
       ) {
         this.selectedTab.set(
           'under-contract'

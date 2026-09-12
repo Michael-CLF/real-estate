@@ -448,11 +448,17 @@ export class OfferValidationService {
       issues
     );
 
-    if (deposits.depositDeliveryDays !== 4) {
+    if (
+      !Number.isInteger(
+        deposits.depositDeliveryDays
+      ) ||
+      deposits.depositDeliveryDays < 1 ||
+      deposits.depositDeliveryDays > 30
+    ) {
       this.addError(
         issues,
         'deposits.depositDeliveryDays',
-        'The Deposit delivery period must be four calendar days.'
+        'Enter a Deposit delivery period from 1 to 30 calendar days.'
       );
     }
 

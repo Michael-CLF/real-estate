@@ -368,6 +368,11 @@ export interface OfferDocument {
   currentVersionUid: string;
   currentVersionNumber: number;
 
+  currentVersionInitiatedBy:
+  OfferInitiatingParty;
+
+  lastDeliveredVersionUid?: string;
+
   initialVersionUid: string;
   versionUids: string[];
 
@@ -526,15 +531,15 @@ export interface OfferDepositTermsDocument {
   depositInCents: number;
 
   /*
-   * The attorney agreement currently requires delivery
-   * within four calendar days after the Effective Date.
+   * Buyer-selected whole-day delivery period after the
+   * Effective Date. Validation limits it to 1–30 days.
    */
-  depositDeliveryDays: 4;
+  depositDeliveryDays: number;
 
   escrowAgentName: string;
 
   dueDiligenceDeadlineType:
-    OfferDueDiligenceDeadlineType;
+  OfferDueDiligenceDeadlineType;
 
   dueDiligenceEndDate?: string;
   dueDiligenceDaysAfterEffectiveDate?: number;
@@ -577,10 +582,10 @@ export interface OfferDisclosureReceiptDocument {
 
 export interface OfferBuyerDisclosureTermsDocument {
   residentialProperty:
-    OfferDisclosureReceiptDocument;
+  OfferDisclosureReceiptDocument;
 
   mineralOilGasRights:
-    OfferDisclosureReceiptDocument;
+  OfferDisclosureReceiptDocument;
 }
 
 
@@ -648,15 +653,15 @@ export interface OfferTermsDocument {
   settlement: OfferSettlementTermsDocument;
 
   buyerDisclosures:
-    OfferBuyerDisclosureTermsDocument;
+  OfferBuyerDisclosureTermsDocument;
 
   sellerStatements:
-    OfferSellerStatementsDocument;
+  OfferSellerStatementsDocument;
 
   addenda: OfferAddendumSelectionDocument[];
 
   additionalTermsExhibit:
-    OfferAdditionalTermsExhibitDocument;
+  OfferAdditionalTermsExhibitDocument;
 
   delivery: OfferDeliveryTermsDocument;
 }

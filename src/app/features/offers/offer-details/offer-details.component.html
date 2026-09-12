@@ -107,7 +107,7 @@
                 <div>
                   <dt>Purchase price</dt>
                   <dd>
-                    {{ dollarsFromCents(version.terms.purchase.purchasePriceInCents) | currency:'USD':'symbol':'1.0-0' }}
+                    {{ dollarsFromCents(version.terms.purchase.purchasePriceInCents) | currency:'USD':'symbol':'1.2-2' }}
                   </dd>
                 </div>
 
@@ -121,7 +121,16 @@
                 <div>
                   <dt>Deposit</dt>
                   <dd>
-                    {{ dollarsFromCents(version.terms.deposits.depositInCents) | currency:'USD':'symbol':'1.0-0' }}
+                    {{ dollarsFromCents(version.terms.deposits.depositInCents) | currency:'USD':'symbol':'1.2-2' }}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Deposit delivery</dt>
+                  <dd>
+                    Within {{ version.terms.deposits.depositDeliveryDays }}
+                    {{ version.terms.deposits.depositDeliveryDays === 1 ? 'calendar day' : 'calendar days' }}
+                    after the Effective Date
                   </dd>
                 </div>
 
@@ -203,6 +212,7 @@
                   </button>
                 }
               </div>
+
             </section>
 
             <section class="card">
@@ -243,7 +253,7 @@
 
                       <div class="history-item__facts">
                         <span>
-                          {{ dollarsFromCents(historyVersion.terms.purchase.purchasePriceInCents) | currency:'USD':'symbol':'1.0-0' }}
+                          {{ dollarsFromCents(historyVersion.terms.purchase.purchasePriceInCents) | currency:'USD':'symbol':'1.2-2' }}
                         </span>
 
                         @if (historyVersion.submittedAt) {
@@ -269,6 +279,12 @@
             <section class="card action-card">
               <p class="section-kicker">Available actions</p>
               <h2>{{ actionHeading() }}</h2>
+
+              @if (actionNote()) {
+                <p class="action-card__note">
+                  {{ actionNote() }}
+                </p>
+              }
 
               @if (access()?.canEditCurrentDraft) {
                 <button
@@ -326,7 +342,7 @@
                   [disabled]="processing()"
                   (click)="withdrawOffer()"
                 >
-                  Withdraw Offer
+                  {{ offer.status === 'draft' ? 'Discard Draft' : 'Withdraw Offer' }}
                 </button>
               }
 
@@ -454,7 +470,7 @@
                   <button
                     class="button button--primary"
                     type="submit"
-                    [disabled]="processing()"
+                    [disabled]="processing() || signingForm.invalid"
                   >
                     {{ processing() ? 'Recording Signature…' : signButtonLabel() }}
                   </button>
@@ -542,4 +558,3 @@
     }
   </div>
 </main>
-

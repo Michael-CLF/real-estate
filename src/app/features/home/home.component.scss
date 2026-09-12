@@ -255,27 +255,6 @@
       var(--navy-700) 100%);
 }
 
-.hero__glow {
-  position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  pointer-events: none;
-
-  &--one {
-    width: 44rem;
-    height: 44rem;
-    top: -27rem;
-    left: -15rem;
-  }
-
-  &--two {
-    width: 36rem;
-    height: 36rem;
-    right: -16rem;
-    bottom: -22rem;
-  }
-}
-
 .hero__layout {
   position: relative;
   z-index: 1;

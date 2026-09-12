@@ -315,12 +315,11 @@
   border-radius: 50%;
 
   animation:
-    dashboard-listings-spin
-    750ms linear infinite;
+    dashboard-listings-spin 750ms linear infinite;
 }
 
 .dashboard-listings__error {
-  > span {
+  >span {
     display: grid;
     flex: 0 0 44px;
     width: 44px;
@@ -349,6 +348,29 @@
 @keyframes dashboard-listings-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+.dashboard-listings__message {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 16px;
+  border: 1px solid;
+  border-radius: 9px;
+  margin: 0 0 18px;
+  font-weight: 650;
+
+  &--success {
+    border-color: #a8d9c5;
+    color: #08745e;
+    background: #e8f7f1;
+  }
+
+  &--error {
+    border-color: #efb5b0;
+    color: #9b1c13;
+    background: #fff1ef;
   }
 }
 

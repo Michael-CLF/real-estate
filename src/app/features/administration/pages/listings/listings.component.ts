@@ -9,9 +9,16 @@ import {
 
 import {
   CurrencyPipe,
-  DatePipe,
-  DecimalPipe
+  DatePipe
 } from '@angular/common';
+
+import {
+  RouterLink
+} from '@angular/router';
+
+import {
+  ListingDeletionService
+} from '../../../../core/domains/listings/services/listing-deletion.service';
 
 import {
   AdministrationListing,
@@ -20,9 +27,11 @@ import {
   AdministrationListingSummary
 } from '../../data-access/administration-listings.service';
 
+
 type ListingStatusFilter =
   | 'all'
   | AdministrationListingStatus;
+
 
 @Component({
   selector:
@@ -34,7 +43,7 @@ type ListingStatusFilter =
   imports: [
     CurrencyPipe,
     DatePipe,
-    DecimalPipe
+    RouterLink
   ],
 
   templateUrl:
@@ -54,12 +63,17 @@ export class ListingsComponent
       AdministrationListingsService
     );
 
+  private readonly deletionService =
+    inject(ListingDeletionService);
+
+
   protected readonly listings =
     signal<AdministrationListing[]>([]);
 
   protected readonly summary =
     signal<AdministrationListingSummary>({
       totalListings: 0,
+      draftListings: 0,
       activeListings: 0,
       featuredListings: 0,
       underContractListings: 0,
@@ -73,6 +87,12 @@ export class ListingsComponent
   protected readonly error =
     signal<string | null>(null);
 
+  protected readonly deletionError =
+    signal('');
+
+  protected readonly deletingListingKey =
+    signal<string | null>(null);
+
   protected readonly searchTerm =
     signal('');
 
@@ -80,6 +100,7 @@ export class ListingsComponent
     signal<ListingStatusFilter>(
       'all'
     );
+
 
   protected readonly filteredListings =
     computed(() => {
@@ -94,9 +115,17 @@ export class ListingsComponent
       return this.listings().filter(
         listing => {
           const matchesStatus =
-            selectedStatus === 'all' ||
-            listing.status ===
-              selectedStatus;
+            selectedStatus === 'all'
+              ? true
+              : selectedStatus === 'draft'
+                ? listing.recordType === 'draft'
+                : selectedStatus === 'published'
+                  ? listing.recordType ===
+                    'published'
+                  : listing.recordType ===
+                      'published' &&
+                    listing.status ===
+                      selectedStatus;
 
           if (!matchesStatus) {
             return false;
@@ -115,8 +144,11 @@ export class ListingsComponent
             listing.title,
             listing.uid,
             listing.sellerUid,
+            listing.recordType,
             listing.propertyType,
             listing.status,
+            listing.publicationStatus ?? '',
+            listing.paymentStatus ?? '',
             address
           ].some(
             value =>
@@ -128,9 +160,11 @@ export class ListingsComponent
       );
     });
 
+
   ngOnInit(): void {
     void this.loadListings();
   }
+
 
   protected onSearch(
     event: Event
@@ -143,15 +177,20 @@ export class ListingsComponent
     );
   }
 
+
   protected onStatusFilter(
     status: ListingStatusFilter
   ): void {
     this.statusFilter.set(status);
   }
 
+
   protected refresh(): void {
+    this.deletionError.set('');
+
     void this.loadListings();
   }
+
 
   protected formatAddress(
     listing: AdministrationListing
@@ -179,16 +218,116 @@ export class ListingsComponent
       .join(', ');
   }
 
+
   protected formatStatus(
-    status:
-      AdministrationListingStatus
+    status: string | null
   ): string {
+    if (!status) {
+      return 'Not available';
+    }
+
     return status
       .replace(
         /_/g,
         ' '
+      )
+      .replace(
+        /-/g,
+        ' '
       );
   }
+
+
+  protected abbreviateUid(
+    uid: string
+  ): string {
+    if (uid.length <= 14) {
+      return uid;
+    }
+
+    return (
+      `${uid.slice(0, 8)}` +
+      `…${uid.slice(-4)}`
+    );
+  }
+
+
+  protected getListingKey(
+    listing: AdministrationListing
+  ): string {
+    return [
+      listing.recordType,
+      listing.uid
+    ].join(':');
+  }
+
+
+  protected async deleteListing(
+    listing: AdministrationListing
+  ): Promise<void> {
+    if (
+      this.deletingListingKey()
+    ) {
+      return;
+    }
+
+    const address =
+      this.formatAddress(listing) ||
+      listing.title;
+
+    const recordLabel =
+      listing.recordType === 'draft'
+        ? 'listing draft'
+        : 'published listing';
+
+    const confirmed =
+      window.confirm(
+        `Permanently delete this ${recordLabel}?\n\n` +
+        `${address}\n\n` +
+        'NavStreet will also delete all related photos, disclosures, saved-property references, inquiries, showings, offers, contracts, documents, marketing records, and transaction information.\n\n' +
+        'This action cannot be undone.'
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const listingKey =
+      this.getListingKey(listing);
+
+    this.deletingListingKey.set(
+      listingKey
+    );
+
+    this.deletionError.set('');
+
+    try {
+      await this.deletionService
+        .deleteListing(
+          listing.uid,
+          listing.recordType
+        );
+
+      await this.loadListings();
+    } catch (error: unknown) {
+      console.error(
+        'Administrator listing deletion failed:',
+        error
+      );
+
+      this.deletionError.set(
+        error instanceof Error &&
+        error.message
+          ? error.message
+          : 'The listing could not be deleted.'
+      );
+    } finally {
+      this.deletingListingKey.set(
+        null
+      );
+    }
+  }
+
 
   private async loadListings():
     Promise<void> {
@@ -207,14 +346,12 @@ export class ListingsComponent
       this.summary.set(
         result.summary
       );
-
     } catch (error: unknown) {
       this.error.set(
         error instanceof Error
           ? error.message
           : 'NavStreet listings could not be loaded.'
       );
-
     } finally {
       this.loading.set(false);
     }

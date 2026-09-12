@@ -80,6 +80,18 @@ export const ADMINISTRATION_ROUTES:
                 component.ListingsComponent
             )
         },
+        {
+          path:
+            'listings/:recordType/:listingUid',
+
+          loadComponent: () =>
+            import(
+              './pages/listing-details/listing-details.component'
+            ).then(
+              component =>
+                component.ListingDetailsComponent
+            )
+        },
 
         /*
          * Businesses

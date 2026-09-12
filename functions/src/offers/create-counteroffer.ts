@@ -1,19 +1,19 @@
 import {
   HttpsError,
-  onCall,
+  onCall
 } from 'firebase-functions/v2/https';
 
 import {
   FieldValue,
-  Timestamp,
+  Timestamp
 } from 'firebase-admin/firestore';
 
 import {
-  adminFirestore,
+  adminFirestore
 } from '../shared/firebase-admin';
 
 import {
-  callableFunctionOptions,
+  callableFunctionOptions
 } from '../shared/function-options';
 
 import type {
@@ -21,15 +21,16 @@ import type {
   CreateCounterofferResponse,
   OfferDocument,
   OfferInitiatingParty,
+  OfferTermsDocument,
   OfferVersionDocument,
-  OfferVersionPartySnapshotDocument,
+  OfferVersionPartySnapshotDocument
 } from './offer-types';
 
 
 const COUNTERABLE_VERSION_STATUSES =
   new Set([
     'signed',
-    'delivered',
+    'delivered'
   ]);
 
 
@@ -37,7 +38,8 @@ const COUNTERABLE_VERSION_STATUSES =
  * Creates a new editable version from the current signed
  * offer or counteroffer.
  *
- * The source version remains immutable and unchanged.
+ * Creating the draft does not send it to the other party.
+ * Delivery occurs only after the initiating party signs it.
  */
 export const createCounteroffer =
   onCall<
@@ -45,6 +47,7 @@ export const createCounteroffer =
     Promise<CreateCounterofferResponse>
   >(
     callableFunctionOptions,
+
     async request => {
       const userUid =
         request.auth?.uid;
@@ -88,7 +91,7 @@ export const createCounteroffer =
           async transaction => {
             const [
               offerSnapshot,
-              sourceVersionSnapshot,
+              sourceVersionSnapshot
             ] = await Promise.all([
               transaction.get(
                 offerReference
@@ -96,7 +99,7 @@ export const createCounteroffer =
 
               transaction.get(
                 sourceVersionReference
-              ),
+              )
             ]);
 
             if (!offerSnapshot.exists) {
@@ -106,9 +109,7 @@ export const createCounteroffer =
               );
             }
 
-            if (
-              !sourceVersionSnapshot.exists
-            ) {
+            if (!sourceVersionSnapshot.exists) {
               throw new HttpsError(
                 'not-found',
                 'The offer version could not be found.'
@@ -170,18 +171,14 @@ export const createCounteroffer =
                 initiatedByUid:
                   userUid,
 
-                status: 'draft',
+                status:
+                  'draft',
 
                 stateCode:
                   sourceVersion.stateCode,
 
-                /*
-                 * Terms are copied as a new Firestore map.
-                 * The source version itself is never
-                 * updated.
-                 */
                 terms:
-                  clonePlainValue(
+                  createCounterofferTerms(
                     sourceVersion.terms
                   ),
 
@@ -191,15 +188,19 @@ export const createCounteroffer =
                 changesFromPreviousVersion:
                   [],
 
-                documents: [],
+                documents:
+                  [],
 
                 statusHistory: [
                   {
-                    toStatus: 'draft',
+                    toStatus:
+                      'draft',
 
-                    action: 'created',
+                    action:
+                      'created',
 
-                    actorUid: userUid,
+                    actorUid:
+                      userUid,
 
                     actorRole:
                       initiatingParty,
@@ -207,20 +208,26 @@ export const createCounteroffer =
                     note:
                       `Counteroffer Version ${nextVersionNumber} created from Version ${sourceVersion.versionNumber}.`,
 
-                    occurredAt: now,
-                  },
+                    occurredAt:
+                      now
+                  }
                 ],
 
-                immutable: false,
+                immutable:
+                  false,
 
                 /*
-                 * The party creating the counteroffer must
-                 * select a new expiration before submitting.
+                 * The countering party must choose a new
+                 * expiration before preparing the version.
                  */
-                expiresAt: '',
+                expiresAt:
+                  '',
 
-                createdAt: now,
-                updatedAt: now,
+                createdAt:
+                  now,
+
+                updatedAt:
+                  now
               });
 
             transaction.create(
@@ -231,13 +238,22 @@ export const createCounteroffer =
             transaction.update(
               offerReference,
               {
-                status: 'countered',
-
                 currentVersionUid:
                   counterofferReference.id,
 
                 currentVersionNumber:
                   nextVersionNumber,
+
+                currentVersionInitiatedBy:
+                  initiatingParty,
+
+                /*
+                 * The receiving party continues to see the
+                 * last version that was actually delivered.
+                 */
+                lastDeliveredVersionUid:
+                  offer.lastDeliveredVersionUid ??
+                  sourceVersionUid,
 
                 versionUids:
                   FieldValue.arrayUnion(
@@ -247,33 +263,11 @@ export const createCounteroffer =
                 totalVersions:
                   nextVersionNumber,
 
-                lastActivityAt: now,
-                updatedAt: now,
+                lastActivityAt:
+                  now,
 
-                statusHistory:
-                  FieldValue.arrayUnion({
-                    fromStatus:
-                      offer.status,
-
-                    toStatus:
-                      'countered',
-
-                    action:
-                      'countered',
-
-                    actorUid: userUid,
-
-                    actorRole:
-                      initiatingParty,
-
-                    offerVersionUid:
-                      counterofferReference.id,
-
-                    offerVersionNumber:
-                      nextVersionNumber,
-
-                    occurredAt: now,
-                  }),
+                updatedAt:
+                  now
               }
             );
 
@@ -284,7 +278,7 @@ export const createCounteroffer =
                 counterofferReference.id,
 
               offerVersionNumber:
-                nextVersionNumber,
+                nextVersionNumber
             };
           }
         );
@@ -341,11 +335,11 @@ function verifyCounterofferAccess(
   const authorized =
     receivingParty === 'buyer'
       ? offer.buyerUids.includes(
-        userUid
-      )
+          userUid
+        )
       : offer.sellerUids.includes(
-        userUid
-      );
+          userUid
+        );
 
   if (!authorized) {
     throw new HttpsError(
@@ -375,17 +369,41 @@ function resetPartySignatures(
         ...party,
 
         signature: {
-          status: 'not_started',
+          status:
+            'not_started'
         },
 
         electronicTransactionsConsentAccepted:
           false,
 
         electronicTransactionsConsentAcceptedAt:
-          undefined,
+          undefined
       }) as
         OfferVersionPartySnapshotDocument
   );
+}
+
+
+function createCounterofferTerms(
+  sourceTerms: OfferTermsDocument
+): OfferTermsDocument {
+  const terms =
+    clonePlainValue(
+      sourceTerms
+    );
+
+  return {
+    ...terms,
+
+    delivery: {
+      ...terms.delivery,
+
+      expiresAt: '',
+
+      electronicDeliveryAuthorized:
+        false
+    }
+  };
 }
 
 
@@ -413,7 +431,7 @@ function clonePlainValue<T>(
           key,
           clonePlainValue(
             nestedValue
-          ),
+          )
         ]
       )
     ) as T;
@@ -483,7 +501,7 @@ function removeUndefinedValues<T>(
             key,
             removeUndefinedValues(
               nestedValue
-            ),
+            )
           ]
         )
     ) as T;

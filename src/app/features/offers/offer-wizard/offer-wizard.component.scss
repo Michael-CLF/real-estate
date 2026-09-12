@@ -586,6 +586,18 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.wizard-actions__validation-hint {
+  flex-basis: 100%;
+  margin: 0;
+
+  color: var(--navstreet-red);
+
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: right;
 }
 
 .button {

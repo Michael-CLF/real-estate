@@ -496,16 +496,20 @@ implements OnInit {
             ],
 
             depositDeliveryDays: [
-              {
-                value: 4,
-                disabled: true
-              }
+              4,
+              [
+                Validators.required,
+                Validators.min(1),
+                Validators.max(30),
+                Validators.pattern(
+                  /^[1-9]\d*$/
+                )
+              ]
             ],
 
             escrowAgentName: [
               '',
               [
-                Validators.required,
                 Validators.maxLength(200)
               ]
             ],
@@ -1093,7 +1097,10 @@ implements OnInit {
                   .depositInCents
               ),
 
-            depositDeliveryDays: 4,
+            depositDeliveryDays:
+              offerVersion.terms
+                .deposits
+                .depositDeliveryDays,
 
             escrowAgentName:
               offerVersion.terms
@@ -1315,10 +1322,20 @@ implements OnInit {
           },
 
           offerReview: {
+            informationCertified:
+              false,
+
             electronicRecordsConsent:
-              offerVersion.terms
-                .delivery
-                .electronicDeliveryAuthorized
+              false,
+
+            electronicSignatureConsent:
+              false,
+
+            navStreetDisclaimerAccepted:
+              false,
+
+            attorneyLanguageAcknowledged:
+              false
           }
         },
         {
@@ -1363,6 +1380,44 @@ implements OnInit {
           }
         );
       }
+
+      if (
+        !hasSavedForm &&
+        offerVersion.versionNumber > 1
+      ) {
+        this.offerForm.patchValue(
+          {
+            offerExpiration: {
+              expirationDate: '',
+              expirationTime: ''
+            },
+
+            offerReview: {
+              informationCertified:
+                false,
+
+              electronicRecordsConsent:
+                false,
+
+              electronicSignatureConsent:
+                false,
+
+              navStreetDisclaimerAccepted:
+                false,
+
+              attorneyLanguageAcknowledged:
+                false
+            }
+          },
+          {
+            emitEvent: false
+          }
+        );
+      }
+
+      this.configureBuyerDisclosureAccess(
+        offerVersion
+      );
 
       if (
         typeof savedSectionIndex ===
@@ -1427,6 +1482,31 @@ implements OnInit {
           void this.queueDraftSave();
         }
       );
+  }
+
+
+  private configureBuyerDisclosureAccess(
+    offerVersion: OfferVersion
+  ): void {
+    const disclosuresAddenda =
+      this.offerForm.get(
+        'disclosuresAddenda'
+      );
+
+    if (
+      offerVersion.initiatedBy ===
+        'seller'
+    ) {
+      disclosuresAddenda?.disable({
+        emitEvent: false
+      });
+
+      return;
+    }
+
+    disclosuresAddenda?.enable({
+      emitEvent: false
+    });
   }
 
   private createWizardData():
@@ -1540,7 +1620,11 @@ implements OnInit {
               .depositAmount
           ),
 
-        depositDeliveryDays: 4,
+        depositDeliveryDays:
+          Number(
+            form.depositsDueDiligence
+              .depositDeliveryDays
+          ),
 
         escrowAgentName:
           String(
@@ -1886,6 +1970,14 @@ implements OnInit {
     }
 
     return section;
+  }
+
+  isSectionComplete(
+    sectionKey: string
+  ): boolean {
+    return this.offerForm.get(
+      sectionKey
+    )?.valid === true;
   }
 
   async goToSection(

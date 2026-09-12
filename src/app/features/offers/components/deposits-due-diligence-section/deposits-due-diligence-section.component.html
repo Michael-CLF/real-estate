@@ -38,9 +38,10 @@
       </h3>
 
       <p>
-        Enter the Deposit and the escrow agent that will
-        hold it. The current agreement requires delivery
-        within four calendar days after the Effective Date.
+        Enter the Deposit and choose how many calendar days
+        after the Effective Date the buyer will have to
+        deliver it. You may identify an escrow agent if one
+        is already known.
       </p>
     </header>
 
@@ -66,12 +67,12 @@
 
           <input
             id="depositAmount"
-            type="number"
+            type="text"
+            appCurrencyInput
             formControlName="depositAmount"
-            min="0"
-            step="100"
             inputmode="decimal"
-            placeholder="0"
+            autocomplete="off"
+            placeholder="0.00"
             [attr.aria-invalid]="
               isInvalid('depositAmount')
             "
@@ -88,21 +89,45 @@
       <div class="form-field">
         <label for="depositDeliveryDays">
           Delivery period
+          <span
+            class="required-marker"
+            aria-hidden="true"
+          >
+            *
+          </span>
         </label>
 
-        <div class="input-with-suffix">
+        <div
+          class="input-with-suffix"
+          [class.input-with-suffix--invalid]="
+            isInvalid('depositDeliveryDays')
+          "
+        >
           <input
             id="depositDeliveryDays"
             type="number"
             formControlName="depositDeliveryDays"
+            min="1"
+            max="30"
+            step="1"
+            inputmode="numeric"
+            [attr.aria-invalid]="
+              isInvalid('depositDeliveryDays')
+            "
           />
 
           <span>calendar days</span>
         </div>
 
         <p class="field-help">
-          Fixed by the current agreement and not editable.
+          Enter 1–30 calendar days after the Effective Date.
         </p>
+
+        @if (isInvalid('depositDeliveryDays')) {
+          <p class="field-error">
+            {{ errorMessage('depositDeliveryDays') }}
+          </p>
+        }
       </div>
 
       <div class="form-field">

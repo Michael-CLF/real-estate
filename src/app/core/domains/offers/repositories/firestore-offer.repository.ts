@@ -341,7 +341,8 @@ export class FirestoreOfferRepository
     }
 
     return this.createOfferSummaries(
-      offers
+      offers,
+      userUid
     );
   }
 
@@ -541,14 +542,16 @@ export class FirestoreOfferRepository
 
 
   private async createOfferSummaries(
-    offers: Offer[]
+    offers: Offer[],
+    userUid?: string
   ): Promise<OfferSummary[]> {
     const summaries =
       await Promise.all(
         offers.map(
           offer =>
             this.createOfferSummary(
-              offer
+              offer,
+              userUid
             )
         )
       );
@@ -563,9 +566,10 @@ export class FirestoreOfferRepository
 
 
   private async createOfferSummary(
-    offer: Offer
+    offer: Offer,
+    userUid?: string
   ): Promise<OfferSummary | null> {
-    const version =
+    let version =
       await this.getOfferVersionByUid(
         offer.Uid,
         offer.currentVersionUid
@@ -573,6 +577,32 @@ export class FirestoreOfferRepository
 
     if (!version) {
       return null;
+    }
+
+    if (
+      this.isPrivatePreparedVersion(
+        version
+      ) &&
+      Boolean(userUid) &&
+      !this.isUserOnCurrentInitiatingSide(
+        offer,
+        version,
+        userUid!
+      )
+    ) {
+      if (!offer.lastDeliveredVersionUid) {
+        return null;
+      }
+
+      version =
+        await this.getOfferVersionByUid(
+          offer.Uid,
+          offer.lastDeliveredVersionUid
+        );
+
+      if (!version) {
+        return null;
+      }
     }
 
     const primaryBuyer =
@@ -619,10 +649,10 @@ export class FirestoreOfferRepository
         offer.status,
 
       currentVersionUid:
-        offer.currentVersionUid,
+        version.Uid,
 
       currentVersionNumber:
-        offer.currentVersionNumber,
+        version.versionNumber,
 
       currentVersionInitiatedBy:
         version.initiatedBy,
@@ -643,9 +673,14 @@ export class FirestoreOfferRepository
             : primarySeller?.legalName
         ) ?? '',
 
+      currentVersionStatus:
+        version.status,
+
       purchasePriceInCents:
         version.terms.purchase
           .purchasePriceInCents,
+
+
 
       expiresAt:
         version.expiresAt,
@@ -656,6 +691,34 @@ export class FirestoreOfferRepository
       lastActivityAt:
         offer.lastActivityAt
     };
+  }
+
+
+  private isPrivatePreparedVersion(
+    version: OfferVersion
+  ): boolean {
+    return (
+      version.status === 'draft' ||
+      version.status ===
+        'awaiting_signatures' ||
+      version.status ===
+        'partially_signed'
+    );
+  }
+
+
+  private isUserOnCurrentInitiatingSide(
+    offer: Offer,
+    version: OfferVersion,
+    userUid: string
+  ): boolean {
+    return version.initiatedBy === 'buyer'
+      ? offer.buyerUids.includes(
+          userUid
+        )
+      : offer.sellerUids.includes(
+          userUid
+        );
   }
 
 
