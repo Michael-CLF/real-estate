@@ -40,6 +40,12 @@ jobs:
           npm ci
           npm run build
 
+                - name: Add Angular SPA routing
+        run: |
+          cp .deploy-now/real-estate/.htaccess.template "${DEPLOYMENT_FOLDER}/.htaccess"
+          test -f "${DEPLOYMENT_FOLDER}/.htaccess"
+          ls -la "${DEPLOYMENT_FOLDER}/.htaccess"
+
 # Please do not touch the following action
       - name: Store deployment content
         uses: ionos-deploy-now/artifact-action@v1
