@@ -380,3 +380,119 @@
     padding: 15px;
   }
 }
+.dashboard-offers__error {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #e6b6b6;
+  border-radius: 10px;
+  color: #8f2020;
+  background: #fff3f3;
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dashboard-offers__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-offers__offer {
+  display: flex;
+  min-width: 0;
+  padding: 20px 22px;
+  align-items: center;
+  gap: 14px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 160ms ease;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  &:hover {
+    background: var(--surface-soft);
+  }
+}
+
+.dashboard-offers__offer-icon {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  place-items: center;
+  color: var(--teal);
+  background: var(--teal-soft);
+}
+
+.dashboard-offers__offer-content {
+  min-width: 0;
+  flex: 1 1 auto;
+
+  p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.86rem;
+    line-height: 1.45;
+  }
+}
+
+.dashboard-offers__offer-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  strong {
+    min-width: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+}
+
+.dashboard-offers__offer-role {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: var(--teal-dark);
+  background: var(--teal-soft);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.dashboard-offers__offer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.dashboard-offers__offer-arrow {
+  flex: 0 0 auto;
+  color: #8ba0b1;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .dashboard-offers__offer {
+    padding: 18px 16px;
+    align-items: flex-start;
+  }
+
+  .dashboard-offers__offer-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dashboard-offers__offer-arrow {
+    margin-top: 16px;
+  }
+}

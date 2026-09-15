@@ -37,7 +37,7 @@
 
       <div>
         <small>Received offers</small>
-        <strong>0</strong>
+        <strong>{{ receivedOfferCount() }}</strong>
       </div>
     </article>
 
@@ -51,7 +51,7 @@
 
       <div>
         <small>Submitted offers</small>
-        <strong>0</strong>
+        <strong>{{ submittedOfferCount() }}</strong>
       </div>
     </article>
 
@@ -65,51 +65,130 @@
 
       <div>
         <small>Under negotiation</small>
-        <strong>0</strong>
+        <strong>{{ underNegotiationCount() }}</strong>
       </div>
     </article>
   </div>
 
+  @if (offersError()) {
+    <p
+      class="dashboard-offers__error"
+      role="alert"
+    >
+      {{ offersError() }}
+    </p>
+  }
+
   <section class="dashboard-offers__panel">
-    <div class="dashboard-offers__empty">
-      <span class="dashboard-offers__empty-icon">
-        <i
-          class="fa-solid fa-file-signature"
-          aria-hidden="true"
-        ></i>
-      </span>
-
-      <p class="dashboard-offers__eyebrow">
-        No active offers
-      </p>
-
-      <h2>Your offers will appear here</h2>
-
-      <p class="dashboard-offers__empty-description">
-        When you submit an offer on a property—or a buyer
-        submits an offer on one of your listings—you will be
-        able to review its status and continue the process
-        from this page.
-      </p>
-
-      <div class="dashboard-offers__empty-actions">
-        <a routerLink="/">
-          Browse properties
-
+    @if (offersLoading()) {
+      <div class="dashboard-offers__empty">
+        <span class="dashboard-offers__empty-icon">
           <i
-            class="fa-solid fa-arrow-right"
+            class="fa-solid fa-file-signature"
             aria-hidden="true"
           ></i>
-        </a>
+        </span>
 
-        <a
-          class="dashboard-offers__secondary-action"
-          routerLink="/dashboard/listings"
-        >
-          Manage listings
-        </a>
+        <p class="dashboard-offers__eyebrow">
+          Loading offers
+        </p>
+
+        <h2>Checking your negotiations…</h2>
       </div>
-    </div>
+    } @else if (offerItems().length === 0) {
+      <div class="dashboard-offers__empty">
+        <span class="dashboard-offers__empty-icon">
+          <i
+            class="fa-solid fa-file-signature"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <p class="dashboard-offers__eyebrow">
+          No offers
+        </p>
+
+        <h2>Your offers will appear here</h2>
+
+        <p class="dashboard-offers__empty-description">
+          When you submit an offer on a property—or a buyer
+          submits an offer on one of your listings—you will be
+          able to review its status and continue the process
+          from this page.
+        </p>
+
+        <div class="dashboard-offers__empty-actions">
+          <a routerLink="/">
+            Browse properties
+
+            <i
+              class="fa-solid fa-arrow-right"
+              aria-hidden="true"
+            ></i>
+          </a>
+
+          <a
+            class="dashboard-offers__secondary-action"
+            routerLink="/dashboard/listings"
+          >
+            Manage listings
+          </a>
+        </div>
+      </div>
+    } @else {
+      <div class="dashboard-offers__list">
+        @for (item of offerItems(); track item.offer.Uid) {
+          <a
+            class="dashboard-offers__offer"
+            [routerLink]="['/offers', item.offer.Uid]"
+          >
+            <span class="dashboard-offers__offer-icon">
+              <i
+                class="fa-solid"
+                [class.fa-file-signature]="item.actionRequired"
+                [class.fa-file-contract]="!item.actionRequired"
+                aria-hidden="true"
+              ></i>
+            </span>
+
+            <div class="dashboard-offers__offer-content">
+              <div class="dashboard-offers__offer-heading">
+                <strong>
+                  @if (item.actionRequired) {
+                    Action required:
+                  }
+
+                  {{ getOfferTypeLabel(item.offer) }}
+                  {{ getOfferVersionLabel(item.offer) }}
+                </strong>
+
+                <span class="dashboard-offers__offer-role">
+                  You are the {{ item.perspective }}
+                </span>
+              </div>
+
+              <p>
+                {{ getOfferTypeLabel(item.offer) }} from:
+                {{ item.offer.currentVersionSenderName }}
+              </p>
+
+              <p class="dashboard-offers__offer-meta">
+                {{ item.offer.propertyAddress }}
+                <span aria-hidden="true">·</span>
+                {{ getOfferPrice(item.offer) }}
+                <span aria-hidden="true">·</span>
+                {{ getOfferStatusLabel(item) }}
+              </p>
+            </div>
+
+            <i
+              class="fa-solid fa-chevron-right dashboard-offers__offer-arrow"
+              aria-hidden="true"
+            ></i>
+          </a>
+        }
+      </div>
+    }
   </section>
 
   <section class="dashboard-offers__guide">
