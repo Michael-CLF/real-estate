@@ -39,6 +39,7 @@ jobs:
         run: |
           npm ci
           npm run build
+          cp .deploy-now/real-estate/.htaccess.template dist/template/browser/.htaccess
 
           
 
