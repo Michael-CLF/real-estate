@@ -43,6 +43,11 @@ export {
 } from './offers/mark-contracts-sold';
 
 export {
+  processFinalAgreementEmail,
+  processOfferNotificationEmail
+} from './offers/process-offer-notification-email';
+
+export {
   registerOfferAttachment
 } from './offers/register-offer-attachment';
 

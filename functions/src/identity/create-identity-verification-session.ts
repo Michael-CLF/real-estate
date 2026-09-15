@@ -70,6 +70,43 @@ interface ListingDraftDocument {
 }
 
 
+interface UserIdentityDocument {
+  identityStatus?: string;
+  identityVerificationStatus?: string;
+  stripeIdentityVerificationSessionId?: string;
+  identityVerificationSessionId?: string;
+
+  identityVerification?: {
+    status?: string;
+    stripeVerificationSessionId?: string;
+  };
+}
+
+
+function isIdentityVerified(
+  user: UserIdentityDocument | undefined
+): boolean {
+  return (
+    user?.identityStatus === 'verified' ||
+    user?.identityVerificationStatus === 'verified' ||
+    user?.identityVerification?.status === 'verified'
+  );
+}
+
+
+function getUserVerificationSessionId(
+  user: UserIdentityDocument | undefined
+): string | null {
+  return (
+    user?.stripeIdentityVerificationSessionId ??
+    user?.identityVerificationSessionId ??
+    user?.identityVerification
+      ?.stripeVerificationSessionId ??
+    null
+  );
+}
+
+
 export const createIdentityVerificationSession =
   onCall<
     CreateIdentityVerificationSessionRequest,
@@ -111,6 +148,11 @@ export const createIdentityVerificationSession =
 
       const firestore =
         getFirestore();
+
+      const userReference =
+        firestore
+          .collection('users')
+          .doc(sellerUid);
 
       const draftReference =
         firestore
@@ -175,6 +217,161 @@ export const createIdentityVerificationSession =
         new Stripe(
           stripeSecretKey.value()
         );
+
+      const [
+        userSnapshot,
+        sellerDraftsSnapshot,
+        sellerListingsSnapshot
+      ] = await Promise.all([
+        userReference.get(),
+
+        firestore
+          .collection('listingDrafts')
+          .where(
+            'sellerUid',
+            '==',
+            sellerUid
+          )
+          .get(),
+
+        firestore
+          .collection('listings')
+          .where(
+            'sellerUid',
+            '==',
+            sellerUid
+          )
+          .get()
+      ]);
+
+      const user =
+        userSnapshot.exists
+          ? userSnapshot.data() as
+              UserIdentityDocument
+          : undefined;
+
+      const previouslyVerifiedDraft =
+        sellerDraftsSnapshot.docs
+          .map(document => ({
+            uid: document.id,
+            data: document.data() as
+              ListingDraftDocument & {
+                publication?: {
+                  identityStatus?: string;
+                };
+              }
+          }))
+          .find(record =>
+            record.uid !== listingUid &&
+            (
+              record.data.publication
+                ?.identityStatus === 'verified' ||
+              record.data.identityVerification
+                ?.status === 'verified'
+            )
+          );
+
+      const previouslyVerifiedSessionId =
+        previouslyVerifiedDraft?.data
+          .identityVerification
+          ?.stripeVerificationSessionId ??
+        null;
+
+      const previouslyVerifiedListing =
+        sellerListingsSnapshot.docs.some(
+          document => {
+            const publishedListing =
+              document.data();
+
+            return (
+              publishedListing['workflow']
+                ?.identityVerified === true ||
+              publishedListing['identityStatus'] ===
+                'verified'
+            );
+          }
+        );
+
+      if (
+        isIdentityVerified(user) ||
+        previouslyVerifiedDraft ||
+        previouslyVerifiedListing
+      ) {
+        const verifiedSessionId =
+          getUserVerificationSessionId(user) ??
+          previouslyVerifiedSessionId;
+
+        await Promise.all([
+          draftReference.update({
+            'publication.identityStatus':
+              'verified',
+
+            'publication.status':
+              'payment_required',
+
+            'identityVerification.status':
+              'verified',
+
+            ...(verifiedSessionId
+              ? {
+                  'identityVerification.stripeVerificationSessionId':
+                    verifiedSessionId
+                }
+              : {}),
+
+            'identityVerification.updatedAt':
+              FieldValue.serverTimestamp(),
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+
+            lastSavedAt:
+              FieldValue.serverTimestamp()
+          }),
+
+          userReference.set(
+            {
+              identityStatus: 'verified',
+
+              ...(verifiedSessionId
+                ? {
+                    stripeIdentityVerificationSessionId:
+                      verifiedSessionId,
+
+                    'identityVerification.stripeVerificationSessionId':
+                      verifiedSessionId
+                  }
+                : {}),
+
+              'identityVerification.status':
+                'verified',
+
+              identityVerifiedAt:
+                FieldValue.serverTimestamp(),
+
+              updatedAt:
+                FieldValue.serverTimestamp()
+            },
+            {
+              merge: true
+            }
+          )
+        ]);
+
+        return {
+          verificationSessionId:
+            verifiedSessionId ?? '',
+
+          verificationUrl:
+            null,
+
+          status:
+            'verified',
+
+          alreadyVerified:
+            true
+        };
+      }
 
       const existingSessionId =
         draft.identityVerification

@@ -46,6 +46,8 @@ export interface DashboardState {
 
   draftListings: Listing[];
   activeListings: Listing[];
+  underContractListings: Listing[];
+  soldListings: Listing[];
 
   savedProperties:
   SavedPropertySummary[];

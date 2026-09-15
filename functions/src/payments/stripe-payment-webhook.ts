@@ -1,1415 +1,1016 @@
 import Stripe from 'stripe';
 
-import {
-    getApps,
-    initializeApp
-} from 'firebase-admin/app';
+import { getApps, initializeApp } from 'firebase-admin/app';
 
-import {
-    FieldValue,
-    getFirestore
-} from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
-import {
-    onRequest
-} from 'firebase-functions/v2/https';
+import { onRequest } from 'firebase-functions/v2/https';
 
-import {
-    defineSecret
-} from 'firebase-functions/params';
+import { defineSecret } from 'firebase-functions/params';
 
-import {
-    SENDGRID_API_KEY
-} from '../authentication/otp/otp-config';
+import { SENDGRID_API_KEY } from '../authentication/otp/otp-config';
 
-import {
-    sendListingPublishedEmailIfNeeded
-} from '../listings/listing-publication-email.service';
-
+import { sendListingPublishedEmailIfNeeded } from '../listings/listing-publication-email.service';
 
 if (getApps().length === 0) {
-    initializeApp();
+  initializeApp();
 }
 
+const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
 
-const stripeSecretKey =
-    defineSecret('STRIPE_SECRET_KEY');
-
-const stripeWebhookSecret =
-    defineSecret('STRIPE_WEBHOOK_SECRET');
-
+const stripeWebhookSecret = defineSecret('STRIPE_WEBHOOK_SECRET');
 
 interface ListingDraftDocument {
-    sellerUid?: string;
+  sellerUid?: string;
 
-    address?: {
-        addressLine1?: string;
-        addressLine2?: string;
-        city?: string;
-        state?: string;
-        zipCode?: string;
-        county?: string;
-    };
+  address?: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    county?: string;
+  };
 
-    propertyDetails?: {
-        propertyType?: string;
-        bedrooms?: number;
-        fullBathrooms?: number;
-        halfBathrooms?: number;
-        squareFeet?: number;
-        lotSize?: number;
-        yearBuilt?: number;
-        description?: string;
-
-        hoa?: {
-            hasHoa?: boolean;
-            feeAmount?: number;
-            feeFrequency?: string;
-        };
-    };
-
-    features?: Record<string, boolean>;
-
-    enhancements?: Record<
-        string,
-        string[]
-    >;
-
-    schools?: Record<
-        string,
-        unknown
-    >;
+  propertyDetails?: {
+    propertyType?: string;
+    bedrooms?: number;
+    fullBathrooms?: number;
+    halfBathrooms?: number;
+    squareFeet?: number;
+    lotSize?: number;
+    yearBuilt?: number;
+    description?: string;
 
     hoa?: {
-        hasHoa?: boolean;
-        feeAmount?: number;
-        feeFrequency?: string;
+      hasHoa?: boolean;
+      feeAmount?: number;
+      feeFrequency?: string;
     };
+  };
 
-    includedItems?: string[];
+  features?: Record<string, boolean>;
 
-    photos?: Array<Record<string, unknown>>;
+  enhancements?: Record<string, string[]>;
 
-    primaryPhotoUrl?: string;
-    photoUrls?: string[];
+  schools?: Record<string, unknown>;
 
-    pricing?: {
-        listPrice?: number;
-    };
+  hoa?: {
+    hasHoa?: boolean;
+    feeAmount?: number;
+    feeFrequency?: string;
+  };
 
-    featuredListing?: boolean;
+  includedItems?: string[];
 
-    promotion?: Record<string, unknown>;
+  photos?: Array<Record<string, unknown>>;
 
-    certification?: {
-        accepted?: boolean;
-        acceptedAt?: unknown;
-    };
+  primaryPhotoUrl?: string;
+  photoUrls?: string[];
 
-    progress?: {
-        contentStatus?: string;
-    };
+  pricing?: {
+    listPrice?: number;
+  };
 
-    publication?: {
-        status?: string;
-        identityStatus?: string;
-        paymentStatus?: string;
-        stripeCheckoutSessionId?: string;
-        publishedListingUid?: string;
-    };
+  featuredListing?: boolean;
 
-    createdAt?: unknown;
+  sellerStatements?: {
+    ownershipStatus?: string;
+
+    leadBasedPaintApplies?: boolean;
+    leadBasedPaintDisclosureDocumentUid?: string;
+
+    ownersAssociationApplies?: boolean;
+    ownersAssociationName?: string;
+    ownersAssociationDuesInCents?: number;
+    ownersAssociationDuesFrequency?: string;
+    ownersAssociationContact?: string;
+
+    fuelTankPresent?: boolean;
+    fuelTankOwnership?: string;
+
+    leasesExist?: boolean;
+    leaseAddendumDocumentUid?: string;
+  };
+
+  promotion?: Record<string, unknown>;
+
+  certification?: {
+    accepted?: boolean;
+    acceptedAt?: unknown;
+  };
+
+  progress?: {
+    contentStatus?: string;
+  };
+
+  publication?: {
+    status?: string;
+    identityStatus?: string;
+    paymentStatus?: string;
+    stripeCheckoutSessionId?: string;
+    publishedListingUid?: string;
+  };
+
+  createdAt?: unknown;
 }
 
 interface ProfessionalProfileDocument {
-    ownerUid?: string;
+  ownerUid?: string;
 
-    businessName?: string;
+  businessName?: string;
 
-    stateSlug?: string;
+  stateSlug?: string;
 
-    status?: string;
+  status?: string;
 
+  subscriptionStatus?: string;
+
+  placement?: string;
+
+  profileSlug?: string;
+
+  stripe?: {
+    checkoutSessionId?: string;
+    customerId?: string;
+    subscriptionId?: string;
     subscriptionStatus?: string;
-
-    placement?: string;
-
-    profileSlug?: string;
-
-    stripe?: {
-        checkoutSessionId?: string;
-        customerId?: string;
-        subscriptionId?: string;
-        subscriptionStatus?: string;
-    };
+  };
 }
 
-export const stripePaymentWebhook =
-    onRequest(
-        {
-            secrets: [
-                stripeSecretKey,
-                stripeWebhookSecret,
-                SENDGRID_API_KEY
-            ]
-        },
+export const stripePaymentWebhook = onRequest(
+  {
+    secrets: [stripeSecretKey, stripeWebhookSecret, SENDGRID_API_KEY],
+  },
 
-        async (request, response) => {
-            if (request.method !== 'POST') {
-                response
-                    .status(405)
-                    .send('Method Not Allowed');
+  async (request, response) => {
+    if (request.method !== 'POST') {
+      response.status(405).send('Method Not Allowed');
 
-                return;
-            }
+      return;
+    }
 
-            const signature =
-                request.headers['stripe-signature'];
+    const signature = request.headers['stripe-signature'];
 
-            if (!signature) {
-                response
-                    .status(400)
-                    .send('Missing Stripe signature.');
+    if (!signature) {
+      response.status(400).send('Missing Stripe signature.');
 
-                return;
-            }
+      return;
+    }
 
-            const stripe =
-                new Stripe(
-                    stripeSecretKey.value()
-                );
+    const stripe = new Stripe(stripeSecretKey.value());
 
-            let event: Stripe.Event;
+    let event: Stripe.Event;
 
-            try {
-                event =
-                    stripe.webhooks.constructEvent(
-                        request.rawBody,
-                        signature,
-                        stripeWebhookSecret.value()
-                    );
-            } catch (error) {
-                console.error(
-                    'Stripe webhook signature verification failed.',
-                    error
-                );
+    try {
+      event = stripe.webhooks.constructEvent(
+        request.rawBody,
+        signature,
+        stripeWebhookSecret.value(),
+      );
+    } catch (error) {
+      console.error('Stripe webhook signature verification failed.', error);
 
-                response
-                    .status(400)
-                    .send('Invalid Stripe signature.');
+      response.status(400).send('Invalid Stripe signature.');
 
-                return;
-            }
+      return;
+    }
 
-            try {
-                switch (event.type) {
-                    case 'checkout.session.completed':
-                    case 'checkout.session.async_payment_succeeded': {
-                        const checkoutSession =
-                            event.data.object as
-                            Stripe.Checkout.Session;
+    try {
+      switch (event.type) {
+        case 'checkout.session.completed':
+        case 'checkout.session.async_payment_succeeded': {
+          const checkoutSession = event.data.object as Stripe.Checkout.Session;
 
-                        if (
-                            isProfessionalProfileCheckout(
-                                checkoutSession
-                            )
-                        ) {
-                            await activateProfessionalProfile(
-                                stripe,
-                                checkoutSession
-                            );
-                        } else {
-                            await publishPaidListing(
-                                checkoutSession
-                            );
-                        }
+          if (isProfessionalProfileCheckout(checkoutSession)) {
+            await activateProfessionalProfile(stripe, checkoutSession);
+          } else {
+            await publishPaidListing(checkoutSession);
+          }
 
-                        break;
-                    }
-
-                    case 'checkout.session.async_payment_failed': {
-                        const checkoutSession =
-                            event.data.object as
-                            Stripe.Checkout.Session;
-
-                        if (
-                            isProfessionalProfileCheckout(
-                                checkoutSession
-                            )
-                        ) {
-                            await markProfessionalCheckoutFailed(
-                                checkoutSession
-                            );
-                        } else {
-                            await markPaymentFailed(
-                                checkoutSession
-                            );
-                        }
-
-                        break;
-                    }
-
-                    case 'customer.subscription.updated':
-                    case 'customer.subscription.deleted': {
-                        const subscription =
-                            event.data.object as
-                            Stripe.Subscription;
-
-                        await synchronizeProfessionalSubscription(
-                            subscription
-                        );
-
-                        break;
-                    }
-
-                    default:
-                        console.log(
-                            'Stripe webhook event did not require processing.',
-                            {
-                                eventId: event.id,
-                                eventType: event.type
-                            }
-                        );
-                }
-
-                response.status(200).json({
-                    received: true
-                });
-            } catch (error) {
-                console.error(
-                    'Stripe webhook processing failed.',
-                    {
-                        eventId: event.id,
-                        eventType: event.type,
-                        error
-                    }
-                );
-
-                response
-                    .status(500)
-                    .send('Webhook processing failed.');
-            }
+          break;
         }
-    );
 
+        case 'checkout.session.async_payment_failed': {
+          const checkoutSession = event.data.object as Stripe.Checkout.Session;
+
+          if (isProfessionalProfileCheckout(checkoutSession)) {
+            await markProfessionalCheckoutFailed(checkoutSession);
+          } else {
+            await markPaymentFailed(checkoutSession);
+          }
+
+          break;
+        }
+
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted': {
+          const subscription = event.data.object as Stripe.Subscription;
+
+          await synchronizeProfessionalSubscription(subscription);
+
+          break;
+        }
+
+        default:
+          console.log('Stripe webhook event did not require processing.', {
+            eventId: event.id,
+            eventType: event.type,
+          });
+      }
+
+      response.status(200).json({
+        received: true,
+      });
+    } catch (error) {
+      console.error('Stripe webhook processing failed.', {
+        eventId: event.id,
+        eventType: event.type,
+        error,
+      });
+
+      response.status(500).send('Webhook processing failed.');
+    }
+  },
+);
 
 function readCheckoutAmount(
-    checkoutSession: Stripe.Checkout.Session,
-    metadataKey: string
+  checkoutSession: Stripe.Checkout.Session,
+  metadataKey: string,
 ): number {
-    const rawValue =
-        checkoutSession.metadata?.[metadataKey];
+  const rawValue = checkoutSession.metadata?.[metadataKey];
 
-    if (!rawValue) {
-        return 0;
-    }
+  if (!rawValue) {
+    return 0;
+  }
 
-    const amount =
-        Number(rawValue);
+  const amount = Number(rawValue);
 
-    return Number.isFinite(amount) &&
-        amount >= 0
-        ? Math.round(amount)
-        : 0;
+  return Number.isFinite(amount) && amount >= 0 ? Math.round(amount) : 0;
 }
-
 
 async function publishPaidListing(
-    checkoutSession: Stripe.Checkout.Session
+  checkoutSession: Stripe.Checkout.Session,
 ): Promise<void> {
-    if (
-        checkoutSession.payment_status !== 'paid' &&
-        checkoutSession.payment_status !==
-        'no_payment_required'
-    ) {
-        console.log(
-            'Checkout completed without paid status.',
-            {
-                checkoutSessionId:
-                    checkoutSession.id,
-
-                paymentStatus:
-                    checkoutSession.payment_status
-            }
-        );
-
-        return;
-    }
-
-    const listingUid =
-        checkoutSession.metadata
-            ?.listingUid
-            ?.trim();
-
-    const sellerUid =
-        checkoutSession.metadata
-            ?.sellerUid
-            ?.trim();
-
-    if (!listingUid || !sellerUid) {
-        throw new Error(
-            'Stripe Checkout metadata is missing the listing or seller UID.'
-        );
-    }
-
-    const firestore =
-        getFirestore();
-
-    const draftReference =
-        firestore
-            .collection('listingDrafts')
-            .doc(listingUid);
-
-    const listingReference =
-        firestore
-            .collection('listings')
-            .doc(listingUid);
-
-    await firestore.runTransaction(
-        async transaction => {
-            const draftSnapshot =
-                await transaction.get(
-                    draftReference
-                );
-
-            if (!draftSnapshot.exists) {
-                throw new Error(
-                    `Listing draft ${listingUid} was not found.`
-                );
-            }
-
-            const draft =
-                draftSnapshot.data() as
-                ListingDraftDocument;
-
-            if (draft.sellerUid !== sellerUid) {
-                throw new Error(
-                    'Stripe seller metadata does not match the listing owner.'
-                );
-            }
-
-            const storedCheckoutSessionId =
-                draft.publication
-                    ?.stripeCheckoutSessionId;
-
-            if (
-                storedCheckoutSessionId &&
-                storedCheckoutSessionId !==
-                checkoutSession.id
-            ) {
-                throw new Error(
-                    'Stripe Checkout Session does not match the listing draft.'
-                );
-            }
-
-            if (
-                draft.publication?.status ===
-                'published' &&
-                draft.publication
-                    ?.publishedListingUid ===
-                listingUid
-            ) {
-                return;
-            }
-
-            validateDraftForPublication(
-                draft,
-                listingUid
-            );
-
-            const now =
-                FieldValue.serverTimestamp();
-
-            const paymentIntentId =
-                typeof checkoutSession
-                    .payment_intent === 'string'
-                    ? checkoutSession
-                        .payment_intent
-                    : checkoutSession
-                        .payment_intent?.id;
-
-            const stripePromotionCodeId =
-                checkoutSession.metadata
-                    ?.stripePromotionCodeId
-                    ?.trim() ?? '';
-
-            const promotionCodeUid =
-                checkoutSession.metadata
-                    ?.promotionCodeUid
-                    ?.trim() ?? '';
-
-            const promotionCode =
-                checkoutSession.metadata
-                    ?.promotionCode
-                    ?.trim() ?? '';
-
-            const listingFee =
-                readCheckoutAmount(
-                    checkoutSession,
-                    'listingFeeCents'
-                );
-
-            const featuredListingFee =
-                readCheckoutAmount(
-                    checkoutSession,
-                    'featuredListingFeeCents'
-                );
-
-            const subtotalAmount =
-                readCheckoutAmount(
-                    checkoutSession,
-                    'subtotalAmountCents'
-                );
-
-            const discountAmount =
-                readCheckoutAmount(
-                    checkoutSession,
-                    'discountAmountCents'
-                );
-
-            const totalAmount =
-                checkoutSession.amount_total ??
-                readCheckoutAmount(
-                    checkoutSession,
-                    'finalAmountCents'
-                );
-
-            const listingDocument:
-                Record<string, unknown> = {
-                Uid: listingUid,
-                sellerUid,
-
-                addressLine1:
-                    draft.address!.addressLine1!,
-
-                city:
-                    draft.address!.city!,
-
-                state:
-                    draft.address!.state!,
-
-                zipCode:
-                    draft.address!.zipCode!,
-
-                county:
-                    draft.address!.county!,
-
-                listPrice:
-                    draft.pricing!.listPrice!,
-
-                propertyType:
-                    draft.propertyDetails!
-                        .propertyType!,
-
-                bedrooms:
-                    draft.propertyDetails!
-                        .bedrooms!,
-
-                bathrooms:
-                    draft.propertyDetails!
-                        .fullBathrooms! +
-                    (
-                        draft.propertyDetails!
-                            .halfBathrooms! * 0.5
-                    ),
-
-                squareFeet:
-                    draft.propertyDetails!
-                        .squareFeet!,
-
-                features:
-                    draft.features ?? {},
-
-                enhancements:
-                    draft.enhancements ?? {},
-
-                photos:
-                    draft.photos ?? [],
-
-                photoUrls:
-                    draft.photoUrls ?? [],
-
-                featuredListing:
-                    draft.featuredListing === true,
-
-                certification:
-                    draft.certification!,
-
-                workflow: {
-                    identityVerified: true,
-                    paymentCompleted: true,
-                    published: true
-                },
-
-                status: 'active',
-                completionPercent: 100,
-                daysOnMarket: 0,
-                views: 0,
-                favorites: 0,
-
-                publishedAt: now,
-                createdAt:
-                    draft.createdAt ?? now,
-                updatedAt: now
-            };
-
-            const hoa =
-                draft.hoa ??
-                draft.propertyDetails?.hoa;
-
-            if (hoa) {
-                listingDocument['hoa'] = {
-                    ...hoa,
-                    includedItems:
-                        draft.includedItems ?? []
-                };
-            }
-
-            addOptionalField(
-                listingDocument,
-                'schools',
-                draft.schools
-            );
-
-            addOptionalField(
-                listingDocument,
-                'lotSize',
-                draft.propertyDetails?.lotSize
-            );
-
-            addOptionalField(
-                listingDocument,
-                'yearBuilt',
-                draft.propertyDetails?.yearBuilt
-            );
-
-            addOptionalField(
-                listingDocument,
-                'description',
-                draft.propertyDetails?.description
-            );
-
-            addOptionalField(
-                listingDocument,
-                'hoa',
-                draft.propertyDetails?.hoa
-            );
-
-            addOptionalField(
-                listingDocument,
-                'primaryPhotoUrl',
-                draft.primaryPhotoUrl
-            );
-
-            addOptionalField(
-                listingDocument,
-                'promotion',
-                draft.promotion
-            );
-
-            if (stripePromotionCodeId) {
-                listingDocument['promotion'] = {
-                    code:
-                        promotionCode,
-
-                    promotionCodeUid:
-                        promotionCodeUid ||
-                        null,
-
-                    stripePromotionCodeId,
-
-                    discountAmount:
-                        discountAmount / 100,
-
-                    appliedAt:
-                        now
-                };
-            }
-
-            transaction.set(
-                listingReference,
-                listingDocument
-            );
-
-            const draftUpdates:
-                Record<string, unknown> = {
-                'publication.status':
-                    'published',
-
-                'publication.paymentStatus':
-                    'paid',
-
-                'publication.stripeCheckoutSessionId':
-                    checkoutSession.id,
-
-                'publication.paymentAmount':
-                    totalAmount / 100,
-
-
-                'publication.paymentBreakdown': {
-                    listingFee:
-                        listingFee / 100,
-
-                    featuredListingFee:
-                        featuredListingFee / 100,
-
-                    subtotalAmount:
-                        subtotalAmount / 100,
-
-                    discountAmount:
-                        discountAmount / 100,
-
-                    totalAmount:
-                        totalAmount / 100,
-
-                    promotionCode:
-                        promotionCode || null,
-
-                    promotionCodeUid:
-                        promotionCodeUid || null,
-
-                    stripePromotionCodeId:
-                        stripePromotionCodeId || null
-                },
-
-                'publication.stripePaymentStatus':
-                    checkoutSession.payment_status,
-
-                'publication.paidAt':
-                    now,
-
-                'publication.publishedListingUid':
-                    listingUid,
-
-                'publication.publishedAt':
-                    now,
-
-                updatedAt:
-                    now,
-
-                lastSavedAt:
-                    now
-            };
-
-            if (paymentIntentId) {
-                draftUpdates[
-                    'publication.stripePaymentIntentId'
-                ] = paymentIntentId;
-            }
-
-            transaction.update(
-                draftReference,
-                draftUpdates
-            );
-        }
-    );
-
-    const publishedListingSnapshot =
-        await listingReference.get();
-
-    if (!publishedListingSnapshot.exists) {
-        throw new Error(
-            `Published listing ${listingUid} could not be loaded for its publication email.`
-        );
-    }
-
-    const publishedListing =
-        publishedListingSnapshot.data();
-
-    const propertyAddress =
-        [
-            publishedListing?.['addressLine1'],
-            publishedListing?.['city'],
-            publishedListing?.['state'],
-            publishedListing?.['zipCode']
-        ]
-            .filter(
-                (
-                    value
-                ): value is string =>
-                    typeof value === 'string' &&
-                    value.trim().length > 0
-            )
-            .map(
-                value =>
-                    value.trim()
-            )
-            .join(', ');
-
-    const primaryPhotoUrl =
-        typeof publishedListing?.[
-            'primaryPhotoUrl'
-        ] === 'string'
-            ? publishedListing[
-                'primaryPhotoUrl'
-            ].trim() || null
-            : null;
-
-    await sendListingPublishedEmailIfNeeded({
-        listingUid,
-        sellerUid,
-        propertyAddress,
-        primaryPhotoUrl
+  if (
+    checkoutSession.payment_status !== 'paid' &&
+    checkoutSession.payment_status !== 'no_payment_required'
+  ) {
+    console.log('Checkout completed without paid status.', {
+      checkoutSessionId: checkoutSession.id,
+
+      paymentStatus: checkoutSession.payment_status,
     });
 
-    console.log(
-        'Listing Checkout published successfully.',
-        {
-            listingUid,
-            sellerUid,
-            checkoutSessionId:
-                checkoutSession.id
-        }
+    return;
+  }
+
+  const listingUid = checkoutSession.metadata?.listingUid?.trim();
+
+  const sellerUid = checkoutSession.metadata?.sellerUid?.trim();
+
+  if (!listingUid || !sellerUid) {
+    throw new Error(
+      'Stripe Checkout metadata is missing the listing or seller UID.',
     );
-}
+  }
 
+  const firestore = getFirestore();
 
-async function markPaymentFailed(
-    checkoutSession: Stripe.Checkout.Session
-): Promise<void> {
-    const listingUid =
-        checkoutSession.metadata
-            ?.listingUid
-            ?.trim();
+  const draftReference = firestore.collection('listingDrafts').doc(listingUid);
 
-    const sellerUid =
-        checkoutSession.metadata
-            ?.sellerUid
-            ?.trim();
+  const listingReference = firestore.collection('listings').doc(listingUid);
 
-    if (!listingUid || !sellerUid) {
-        return;
-    }
-
-    const firestore =
-        getFirestore();
-
-    const draftReference =
-        firestore
-            .collection('listingDrafts')
-            .doc(listingUid);
-
-    const draftSnapshot =
-        await draftReference.get();
+  await firestore.runTransaction(async (transaction) => {
+    const draftSnapshot = await transaction.get(draftReference);
 
     if (!draftSnapshot.exists) {
-        return;
+      throw new Error(`Listing draft ${listingUid} was not found.`);
     }
 
-    const draft =
-        draftSnapshot.data() as
-        ListingDraftDocument;
+    const draft = draftSnapshot.data() as ListingDraftDocument;
 
     if (draft.sellerUid !== sellerUid) {
-        throw new Error(
-            'Stripe seller metadata does not match the listing owner.'
-        );
+      throw new Error(
+        'Stripe seller metadata does not match the listing owner.',
+      );
+    }
+
+    const storedCheckoutSessionId = draft.publication?.stripeCheckoutSessionId;
+
+    if (
+      storedCheckoutSessionId &&
+      storedCheckoutSessionId !== checkoutSession.id
+    ) {
+      throw new Error(
+        'Stripe Checkout Session does not match the listing draft.',
+      );
     }
 
     if (
-        draft.publication?.status ===
-        'published' ||
-        draft.publication?.paymentStatus ===
-        'paid'
+      draft.publication?.status === 'published' &&
+      draft.publication?.publishedListingUid === listingUid
     ) {
-        return;
+      return;
     }
 
-    if (
-        draft.publication
-            ?.stripeCheckoutSessionId !==
-        checkoutSession.id
-    ) {
-        return;
+    validateDraftForPublication(draft, listingUid);
+
+    const now = FieldValue.serverTimestamp();
+
+    const paymentIntentId =
+      typeof checkoutSession.payment_intent === 'string'
+        ? checkoutSession.payment_intent
+        : checkoutSession.payment_intent?.id;
+
+    const stripePromotionCodeId =
+      checkoutSession.metadata?.stripePromotionCodeId?.trim() ?? '';
+
+    const promotionCodeUid =
+      checkoutSession.metadata?.promotionCodeUid?.trim() ?? '';
+
+    const promotionCode = checkoutSession.metadata?.promotionCode?.trim() ?? '';
+
+    const listingFee = readCheckoutAmount(checkoutSession, 'listingFeeCents');
+
+    const featuredListingFee = readCheckoutAmount(
+      checkoutSession,
+      'featuredListingFeeCents',
+    );
+
+    const subtotalAmount = readCheckoutAmount(
+      checkoutSession,
+      'subtotalAmountCents',
+    );
+
+    const discountAmount = readCheckoutAmount(
+      checkoutSession,
+      'discountAmountCents',
+    );
+
+    const totalAmount =
+      checkoutSession.amount_total ??
+      readCheckoutAmount(checkoutSession, 'finalAmountCents');
+
+    const listingDocument: Record<string, unknown> = {
+      Uid: listingUid,
+      sellerUid,
+
+      addressLine1: draft.address!.addressLine1!,
+
+      city: draft.address!.city!,
+
+      state: draft.address!.state!,
+
+      zipCode: draft.address!.zipCode!,
+
+      county: draft.address!.county!,
+
+      listPrice: draft.pricing!.listPrice!,
+
+      propertyType: draft.propertyDetails!.propertyType!,
+
+      bedrooms: draft.propertyDetails!.bedrooms!,
+
+      bathrooms:
+        draft.propertyDetails!.fullBathrooms! +
+        draft.propertyDetails!.halfBathrooms! * 0.5,
+
+      squareFeet: draft.propertyDetails!.squareFeet!,
+
+      features: draft.features ?? {},
+
+      enhancements: draft.enhancements ?? {},
+
+      photos: draft.photos ?? [],
+
+      photoUrls: draft.photoUrls ?? [],
+
+      featuredListing: draft.featuredListing === true,
+
+      certification: draft.certification!,
+
+      sellerStatements: draft.sellerStatements!,
+
+      workflow: {
+        identityVerified: true,
+        paymentCompleted: true,
+        published: true,
+      },
+
+      status: 'active',
+      completionPercent: 100,
+      daysOnMarket: 0,
+      views: 0,
+      favorites: 0,
+
+      publishedAt: now,
+      createdAt: draft.createdAt ?? now,
+      updatedAt: now,
+    };
+
+    const hoa = draft.hoa ?? draft.propertyDetails?.hoa;
+
+    if (hoa) {
+      listingDocument['hoa'] = {
+        ...hoa,
+        includedItems: draft.includedItems ?? [],
+      };
     }
 
-    await draftReference.update({
-        'publication.status':
-            'payment_failed',
+    addOptionalField(listingDocument, 'schools', draft.schools);
 
-        'publication.paymentStatus':
-            'failed',
+    addOptionalField(
+      listingDocument,
+      'lotSize',
+      draft.propertyDetails?.lotSize,
+    );
 
-        updatedAt:
-            FieldValue.serverTimestamp(),
+    addOptionalField(
+      listingDocument,
+      'yearBuilt',
+      draft.propertyDetails?.yearBuilt,
+    );
 
-        lastSavedAt:
-            FieldValue.serverTimestamp()
-    });
+    addOptionalField(
+      listingDocument,
+      'description',
+      draft.propertyDetails?.description,
+    );
+
+    addOptionalField(listingDocument, 'hoa', draft.propertyDetails?.hoa);
+
+    addOptionalField(listingDocument, 'primaryPhotoUrl', draft.primaryPhotoUrl);
+
+    addOptionalField(listingDocument, 'promotion', draft.promotion);
+
+    if (stripePromotionCodeId) {
+      listingDocument['promotion'] = {
+        code: promotionCode,
+
+        promotionCodeUid: promotionCodeUid || null,
+
+        stripePromotionCodeId,
+
+        discountAmount: discountAmount / 100,
+
+        appliedAt: now,
+      };
+    }
+
+    transaction.set(listingReference, listingDocument);
+
+    const draftUpdates: Record<string, unknown> = {
+      'publication.status': 'published',
+
+      'publication.paymentStatus': 'paid',
+
+      'publication.stripeCheckoutSessionId': checkoutSession.id,
+
+      'publication.paymentAmount': totalAmount / 100,
+
+      'publication.paymentBreakdown': {
+        listingFee: listingFee / 100,
+
+        featuredListingFee: featuredListingFee / 100,
+
+        subtotalAmount: subtotalAmount / 100,
+
+        discountAmount: discountAmount / 100,
+
+        totalAmount: totalAmount / 100,
+
+        promotionCode: promotionCode || null,
+
+        promotionCodeUid: promotionCodeUid || null,
+
+        stripePromotionCodeId: stripePromotionCodeId || null,
+      },
+
+      'publication.stripePaymentStatus': checkoutSession.payment_status,
+
+      'publication.paidAt': now,
+
+      'publication.publishedListingUid': listingUid,
+
+      'publication.publishedAt': now,
+
+      updatedAt: now,
+
+      lastSavedAt: now,
+    };
+
+    if (paymentIntentId) {
+      draftUpdates['publication.stripePaymentIntentId'] = paymentIntentId;
+    }
+
+    transaction.update(draftReference, draftUpdates);
+  });
+
+  const publishedListingSnapshot = await listingReference.get();
+
+  if (!publishedListingSnapshot.exists) {
+    throw new Error(
+      `Published listing ${listingUid} could not be loaded for its publication email.`,
+    );
+  }
+
+  const publishedListing = publishedListingSnapshot.data();
+
+  const propertyAddress = [
+    publishedListing?.['addressLine1'],
+    publishedListing?.['city'],
+    publishedListing?.['state'],
+    publishedListing?.['zipCode'],
+  ]
+    .filter(
+      (value): value is string =>
+        typeof value === 'string' && value.trim().length > 0,
+    )
+    .map((value) => value.trim())
+    .join(', ');
+
+  const primaryPhotoUrl =
+    typeof publishedListing?.['primaryPhotoUrl'] === 'string'
+      ? publishedListing['primaryPhotoUrl'].trim() || null
+      : null;
+
+  await sendListingPublishedEmailIfNeeded({
+    listingUid,
+    sellerUid,
+    propertyAddress,
+    primaryPhotoUrl,
+  });
+
+  console.log('Listing Checkout published successfully.', {
+    listingUid,
+    sellerUid,
+    checkoutSessionId: checkoutSession.id,
+  });
 }
 
+async function markPaymentFailed(
+  checkoutSession: Stripe.Checkout.Session,
+): Promise<void> {
+  const listingUid = checkoutSession.metadata?.listingUid?.trim();
+
+  const sellerUid = checkoutSession.metadata?.sellerUid?.trim();
+
+  if (!listingUid || !sellerUid) {
+    return;
+  }
+
+  const firestore = getFirestore();
+
+  const draftReference = firestore.collection('listingDrafts').doc(listingUid);
+
+  const draftSnapshot = await draftReference.get();
+
+  if (!draftSnapshot.exists) {
+    return;
+  }
+
+  const draft = draftSnapshot.data() as ListingDraftDocument;
+
+  if (draft.sellerUid !== sellerUid) {
+    throw new Error('Stripe seller metadata does not match the listing owner.');
+  }
+
+  if (
+    draft.publication?.status === 'published' ||
+    draft.publication?.paymentStatus === 'paid'
+  ) {
+    return;
+  }
+
+  if (draft.publication?.stripeCheckoutSessionId !== checkoutSession.id) {
+    return;
+  }
+
+  await draftReference.update({
+    'publication.status': 'payment_failed',
+
+    'publication.paymentStatus': 'failed',
+
+    updatedAt: FieldValue.serverTimestamp(),
+
+    lastSavedAt: FieldValue.serverTimestamp(),
+  });
+}
 
 function validateDraftForPublication(
-    draft: ListingDraftDocument,
-    listingUid: string
+  draft: ListingDraftDocument,
+  listingUid: string,
 ): void {
-    if (
-        draft.progress?.contentStatus !==
-        'complete'
-    ) {
-        throw new Error(
-            `Listing draft ${listingUid} is not complete.`
-        );
-    }
+  if (draft.progress?.contentStatus !== 'complete') {
+    throw new Error(`Listing draft ${listingUid} is not complete.`);
+  }
 
-    if (
-        draft.publication?.identityStatus !==
-        'verified'
-    ) {
-        throw new Error(
-            `Listing draft ${listingUid} has not completed identity verification.`
-        );
-    }
+  if (draft.publication?.identityStatus !== 'verified') {
+    throw new Error(
+      `Listing draft ${listingUid} has not completed identity verification.`,
+    );
+  }
 
-    if (
-        draft.certification?.accepted !== true
-    ) {
-        throw new Error(
-            `Listing draft ${listingUid} has not accepted seller certification.`
-        );
-    }
+  if (draft.certification?.accepted !== true) {
+    throw new Error(
+      `Listing draft ${listingUid} has not accepted seller certification.`,
+    );
+  }
 
-    if (
-        !draft.address?.addressLine1 ||
-        !draft.address.city ||
-        !draft.address.state ||
-        !draft.address.zipCode ||
-        !draft.address.county
-    ) {
-        throw new Error(
-            `Listing draft ${listingUid} has an incomplete address.`
-        );
-    }
+  if (
+    !draft.address?.addressLine1 ||
+    !draft.address.city ||
+    !draft.address.state ||
+    !draft.address.zipCode ||
+    !draft.address.county
+  ) {
+    throw new Error(`Listing draft ${listingUid} has an incomplete address.`);
+  }
 
-    if (
-        !draft.propertyDetails?.propertyType ||
-        draft.propertyDetails.bedrooms ===
-        undefined ||
-        draft.propertyDetails.fullBathrooms ===
-        undefined ||
-        draft.propertyDetails.halfBathrooms ===
-        undefined ||
-        draft.propertyDetails.squareFeet ===
-        undefined
-    ) {
-        throw new Error(
-            `Listing draft ${listingUid} has incomplete property details.`
-        );
-    }
+  if (
+    !draft.propertyDetails?.propertyType ||
+    draft.propertyDetails.bedrooms === undefined ||
+    draft.propertyDetails.fullBathrooms === undefined ||
+    draft.propertyDetails.halfBathrooms === undefined ||
+    draft.propertyDetails.squareFeet === undefined
+  ) {
+    throw new Error(
+      `Listing draft ${listingUid} has incomplete property details.`,
+    );
+  }
 
-    if (
-        draft.pricing?.listPrice ===
-        undefined
-    ) {
-        throw new Error(
-            `Listing draft ${listingUid} has no listing price.`
-        );
-    }
+  if (draft.pricing?.listPrice === undefined) {
+    throw new Error(`Listing draft ${listingUid} has no listing price.`);
+  }
+
+  const sellerStatements = draft.sellerStatements;
+
+  if (!sellerStatements) {
+    throw new Error(
+      `Listing draft ${listingUid} has incomplete seller statements.`,
+    );
+  }
+
+  if (
+    sellerStatements.ownershipStatus !== 'owned_at_least_one_year' &&
+    sellerStatements.ownershipStatus !== 'owned_less_than_one_year' &&
+    sellerStatements.ownershipStatus !== 'does_not_yet_own'
+  ) {
+    throw new Error(
+      `Listing draft ${listingUid} has no valid ownership statement.`,
+    );
+  }
+
+  if (typeof sellerStatements.leadBasedPaintApplies !== 'boolean') {
+    throw new Error(
+      `Listing draft ${listingUid} has no lead-based-paint statement.`,
+    );
+  }
+
+  if (typeof sellerStatements.ownersAssociationApplies !== 'boolean') {
+    throw new Error(
+      `Listing draft ${listingUid} has no owners-association statement.`,
+    );
+  }
+
+  if (typeof sellerStatements.fuelTankPresent !== 'boolean') {
+    throw new Error(`Listing draft ${listingUid} has no fuel-tank statement.`);
+  }
+
+  if (
+    sellerStatements.fuelTankPresent &&
+    sellerStatements.fuelTankOwnership !== 'owned' &&
+    sellerStatements.fuelTankOwnership !== 'leased'
+  ) {
+    throw new Error(
+      `Listing draft ${listingUid} has no valid fuel-tank ownership statement.`,
+    );
+  }
+
+  if (typeof sellerStatements.leasesExist !== 'boolean') {
+    throw new Error(
+      `Listing draft ${listingUid} has no existing-leases statement.`,
+    );
+  }
 }
 
-
 function addOptionalField(
-    target: Record<string, unknown>,
-    fieldName: string,
-    value: unknown
+  target: Record<string, unknown>,
+  fieldName: string,
+  value: unknown,
 ): void {
-    if (
-        value !== undefined &&
-        value !== null &&
-        value !== ''
-    ) {
-        target[fieldName] = value;
-    }
+  if (value !== undefined && value !== null && value !== '') {
+    target[fieldName] = value;
+  }
 }
 
 function isProfessionalProfileCheckout(
-    checkoutSession: Stripe.Checkout.Session
+  checkoutSession: Stripe.Checkout.Session,
 ): boolean {
-    return (
-        checkoutSession.metadata
-            ?.purchaseType ===
-        'professional_profile'
-    );
+  return checkoutSession.metadata?.purchaseType === 'professional_profile';
 }
-
 
 async function activateProfessionalProfile(
-    stripe: Stripe,
-    checkoutSession: Stripe.Checkout.Session
+  stripe: Stripe,
+  checkoutSession: Stripe.Checkout.Session,
 ): Promise<void> {
-    const professionalUid =
-        checkoutSession.metadata
-            ?.professionalUid
-            ?.trim();
+  const professionalUid = checkoutSession.metadata?.professionalUid?.trim();
 
-    const ownerUid =
-        checkoutSession.metadata
-            ?.ownerUid
-            ?.trim();
+  const ownerUid = checkoutSession.metadata?.ownerUid?.trim();
 
-    if (
-        !professionalUid ||
-        !ownerUid
-    ) {
-        throw new Error(
-            'Professional Checkout metadata is missing the professional or owner UID.'
-        );
-    }
-
-    const subscriptionId =
-        getStripeResourceId(
-            checkoutSession.subscription
-        );
-
-    if (!subscriptionId) {
-        throw new Error(
-            'Stripe did not return a professional subscription ID.'
-        );
-    }
-
-    const subscription =
-        await stripe.subscriptions.retrieve(
-            subscriptionId
-        );
-
-    const subscriptionOwnerUid =
-        subscription.metadata
-            ?.ownerUid
-            ?.trim();
-
-    const subscriptionProfessionalUid =
-        subscription.metadata
-            ?.professionalUid
-            ?.trim();
-
-    if (
-        subscriptionOwnerUid !== ownerUid ||
-        subscriptionProfessionalUid !==
-        professionalUid
-    ) {
-        throw new Error(
-            'Stripe subscription metadata does not match the professional Checkout session.'
-        );
-    }
-
-    if (
-        !hasProfessionalProfileAccess(
-            subscription.status
-        )
-    ) {
-        console.log(
-            'Professional Checkout completed without an active subscription.',
-            {
-                professionalUid,
-                ownerUid,
-                subscriptionId,
-                subscriptionStatus:
-                    subscription.status
-            }
-        );
-
-        return;
-    }
-
-    const firestore =
-        getFirestore();
-
-    const professionalReference =
-        firestore
-            .collection(
-                'professionalProfiles'
-            )
-            .doc(professionalUid);
-
-    await firestore.runTransaction(
-        async transaction => {
-            const professionalSnapshot =
-                await transaction.get(
-                    professionalReference
-                );
-
-            if (
-                !professionalSnapshot.exists
-            ) {
-                throw new Error(
-                    `Professional profile ${professionalUid} was not found.`
-                );
-            }
-
-            const professional =
-                professionalSnapshot.data() as
-                ProfessionalProfileDocument;
-
-            if (
-                professional.ownerUid !==
-                ownerUid
-            ) {
-                throw new Error(
-                    'Stripe owner metadata does not match the professional listing owner.'
-                );
-            }
-
-            const storedCheckoutSessionId =
-                professional.stripe
-                    ?.checkoutSessionId;
-
-            if (
-                storedCheckoutSessionId &&
-                storedCheckoutSessionId !==
-                checkoutSession.id
-            ) {
-                throw new Error(
-                    'Stripe Checkout Session does not match the professional listing.'
-                );
-            }
-
-            const profileSlug =
-                professional.profileSlug ||
-                createProfessionalProfileSlug(
-                    professional.businessName ||
-                    'professional',
-
-                    professionalUid
-                );
-
-            const customerId =
-                getStripeResourceId(
-                    checkoutSession.customer
-                ) ||
-                getStripeResourceId(
-                    subscription.customer
-                );
-
-            const now =
-                FieldValue.serverTimestamp();
-
-            const updates:
-                Record<string, unknown> = {
-                subscriptionStatus:
-                    'profile',
-
-                profileSlug,
-
-                'stripe.checkoutSessionId':
-                    checkoutSession.id,
-
-                'stripe.subscriptionId':
-                    subscription.id,
-
-                'stripe.subscriptionStatus':
-                    subscription.status,
-
-                'stripe.cancelAtPeriodEnd':
-                    subscription.cancel_at_period_end,
-
-                'stripe.activatedAt':
-                    now,
-
-                updatedAt:
-                    now
-            };
-
-            if (customerId) {
-                updates[
-                    'stripe.customerId'
-                ] = customerId;
-            }
-
-            transaction.update(
-                professionalReference,
-                updates
-            );
-        }
+  if (!professionalUid || !ownerUid) {
+    throw new Error(
+      'Professional Checkout metadata is missing the professional or owner UID.',
     );
+  }
 
+  const subscriptionId = getStripeResourceId(checkoutSession.subscription);
+
+  if (!subscriptionId) {
+    throw new Error('Stripe did not return a professional subscription ID.');
+  }
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+  const subscriptionOwnerUid = subscription.metadata?.ownerUid?.trim();
+
+  const subscriptionProfessionalUid =
+    subscription.metadata?.professionalUid?.trim();
+
+  if (
+    subscriptionOwnerUid !== ownerUid ||
+    subscriptionProfessionalUid !== professionalUid
+  ) {
+    throw new Error(
+      'Stripe subscription metadata does not match the professional Checkout session.',
+    );
+  }
+
+  if (!hasProfessionalProfileAccess(subscription.status)) {
     console.log(
-        'Professional Full Business Profile activated.',
-        {
-            professionalUid,
-            ownerUid,
-            checkoutSessionId:
-                checkoutSession.id,
-            subscriptionId,
-            subscriptionStatus:
-                subscription.status
-        }
+      'Professional Checkout completed without an active subscription.',
+      {
+        professionalUid,
+        ownerUid,
+        subscriptionId,
+        subscriptionStatus: subscription.status,
+      },
     );
-}
 
+    return;
+  }
 
-async function synchronizeProfessionalSubscription(
-    subscription: Stripe.Subscription
-): Promise<void> {
-    if (
-        subscription.metadata
-            ?.purchaseType !==
-        'professional_profile'
-    ) {
-        return;
-    }
+  const firestore = getFirestore();
 
-    const professionalUid =
-        subscription.metadata
-            ?.professionalUid
-            ?.trim();
+  const professionalReference = firestore
+    .collection('professionalProfiles')
+    .doc(professionalUid);
 
-    const ownerUid =
-        subscription.metadata
-            ?.ownerUid
-            ?.trim();
+  await firestore.runTransaction(async (transaction) => {
+    const professionalSnapshot = await transaction.get(professionalReference);
 
-    if (
-        !professionalUid ||
-        !ownerUid
-    ) {
-        throw new Error(
-            'Professional subscription metadata is incomplete.'
-        );
-    }
-
-    const firestore =
-        getFirestore();
-
-    const professionalReference =
-        firestore
-            .collection(
-                'professionalProfiles'
-            )
-            .doc(professionalUid);
-
-    const professionalSnapshot =
-        await professionalReference.get();
-
-    if (
-        !professionalSnapshot.exists
-    ) {
-        throw new Error(
-            `Professional profile ${professionalUid} was not found.`
-        );
+    if (!professionalSnapshot.exists) {
+      throw new Error(`Professional profile ${professionalUid} was not found.`);
     }
 
     const professional =
-        professionalSnapshot.data() as
-        ProfessionalProfileDocument;
+      professionalSnapshot.data() as ProfessionalProfileDocument;
 
-    if (
-        professional.ownerUid !==
-        ownerUid
-    ) {
-        throw new Error(
-            'Stripe subscription owner does not match the professional listing owner.'
-        );
+    if (professional.ownerUid !== ownerUid) {
+      throw new Error(
+        'Stripe owner metadata does not match the professional listing owner.',
+      );
     }
 
-    const hasProfileAccess =
-        hasProfessionalProfileAccess(
-            subscription.status
-        );
+    const storedCheckoutSessionId = professional.stripe?.checkoutSessionId;
+
+    if (
+      storedCheckoutSessionId &&
+      storedCheckoutSessionId !== checkoutSession.id
+    ) {
+      throw new Error(
+        'Stripe Checkout Session does not match the professional listing.',
+      );
+    }
+
+    const profileSlug =
+      professional.profileSlug ||
+      createProfessionalProfileSlug(
+        professional.businessName || 'professional',
+
+        professionalUid,
+      );
 
     const customerId =
-        getStripeResourceId(
-            subscription.customer
-        );
+      getStripeResourceId(checkoutSession.customer) ||
+      getStripeResourceId(subscription.customer);
 
-    const updates:
-        Record<string, unknown> = {
-        subscriptionStatus:
-            hasProfileAccess
-                ? 'profile'
-                : 'free',
+    const now = FieldValue.serverTimestamp();
 
-        'stripe.subscriptionId':
-            subscription.id,
+    const updates: Record<string, unknown> = {
+      subscriptionStatus: 'profile',
 
-        'stripe.subscriptionStatus':
-            subscription.status,
+      profileSlug,
 
-        'stripe.cancelAtPeriodEnd':
-            subscription.cancel_at_period_end,
+      'stripe.checkoutSessionId': checkoutSession.id,
 
-        updatedAt:
-            FieldValue.serverTimestamp()
+      'stripe.subscriptionId': subscription.id,
+
+      'stripe.subscriptionStatus': subscription.status,
+
+      'stripe.cancelAtPeriodEnd': subscription.cancel_at_period_end,
+
+      'stripe.activatedAt': now,
+
+      updatedAt: now,
     };
 
     if (customerId) {
-        updates[
-            'stripe.customerId'
-        ] = customerId;
+      updates['stripe.customerId'] = customerId;
     }
 
-    /*
-     * Sponsored placement is separate from a paid
-     * Full Business Profile. Losing the subscription
-     * must not accidentally leave a paid-profile badge
-     * or clickable profile enabled.
-     */
-    if (!hasProfileAccess) {
-        updates['placement'] =
-            professional.placement ===
-                'sponsored'
-                ? 'sponsored'
-                : 'standard';
-    }
+    transaction.update(professionalReference, updates);
+  });
 
-    await professionalReference.update(
-        updates
-    );
-
-    console.log(
-        'Professional subscription synchronized.',
-        {
-            professionalUid,
-            ownerUid,
-            subscriptionId:
-                subscription.id,
-            subscriptionStatus:
-                subscription.status,
-            hasProfileAccess
-        }
-    );
+  console.log('Professional Full Business Profile activated.', {
+    professionalUid,
+    ownerUid,
+    checkoutSessionId: checkoutSession.id,
+    subscriptionId,
+    subscriptionStatus: subscription.status,
+  });
 }
 
+async function synchronizeProfessionalSubscription(
+  subscription: Stripe.Subscription,
+): Promise<void> {
+  if (subscription.metadata?.purchaseType !== 'professional_profile') {
+    return;
+  }
+
+  const professionalUid = subscription.metadata?.professionalUid?.trim();
+
+  const ownerUid = subscription.metadata?.ownerUid?.trim();
+
+  if (!professionalUid || !ownerUid) {
+    throw new Error('Professional subscription metadata is incomplete.');
+  }
+
+  const firestore = getFirestore();
+
+  const professionalReference = firestore
+    .collection('professionalProfiles')
+    .doc(professionalUid);
+
+  const professionalSnapshot = await professionalReference.get();
+
+  if (!professionalSnapshot.exists) {
+    throw new Error(`Professional profile ${professionalUid} was not found.`);
+  }
+
+  const professional =
+    professionalSnapshot.data() as ProfessionalProfileDocument;
+
+  if (professional.ownerUid !== ownerUid) {
+    throw new Error(
+      'Stripe subscription owner does not match the professional listing owner.',
+    );
+  }
+
+  const hasProfileAccess = hasProfessionalProfileAccess(subscription.status);
+
+  const customerId = getStripeResourceId(subscription.customer);
+
+  const updates: Record<string, unknown> = {
+    subscriptionStatus: hasProfileAccess ? 'profile' : 'free',
+
+    'stripe.subscriptionId': subscription.id,
+
+    'stripe.subscriptionStatus': subscription.status,
+
+    'stripe.cancelAtPeriodEnd': subscription.cancel_at_period_end,
+
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  if (customerId) {
+    updates['stripe.customerId'] = customerId;
+  }
+
+  /*
+   * Sponsored placement is separate from a paid
+   * Full Business Profile. Losing the subscription
+   * must not accidentally leave a paid-profile badge
+   * or clickable profile enabled.
+   */
+  if (!hasProfileAccess) {
+    updates['placement'] =
+      professional.placement === 'sponsored' ? 'sponsored' : 'standard';
+  }
+
+  await professionalReference.update(updates);
+
+  console.log('Professional subscription synchronized.', {
+    professionalUid,
+    ownerUid,
+    subscriptionId: subscription.id,
+    subscriptionStatus: subscription.status,
+    hasProfileAccess,
+  });
+}
 
 async function markProfessionalCheckoutFailed(
-    checkoutSession: Stripe.Checkout.Session
+  checkoutSession: Stripe.Checkout.Session,
 ): Promise<void> {
-    const professionalUid =
-        checkoutSession.metadata
-            ?.professionalUid
-            ?.trim();
+  const professionalUid = checkoutSession.metadata?.professionalUid?.trim();
 
-    const ownerUid =
-        checkoutSession.metadata
-            ?.ownerUid
-            ?.trim();
+  const ownerUid = checkoutSession.metadata?.ownerUid?.trim();
 
-    if (
-        !professionalUid ||
-        !ownerUid
-    ) {
-        return;
-    }
+  if (!professionalUid || !ownerUid) {
+    return;
+  }
 
-    const firestore =
-        getFirestore();
+  const firestore = getFirestore();
 
-    const professionalReference =
-        firestore
-            .collection(
-                'professionalProfiles'
-            )
-            .doc(professionalUid);
+  const professionalReference = firestore
+    .collection('professionalProfiles')
+    .doc(professionalUid);
 
-    const professionalSnapshot =
-        await professionalReference.get();
+  const professionalSnapshot = await professionalReference.get();
 
-    if (
-        !professionalSnapshot.exists
-    ) {
-        return;
-    }
+  if (!professionalSnapshot.exists) {
+    return;
+  }
 
-    const professional =
-        professionalSnapshot.data() as
-        ProfessionalProfileDocument;
+  const professional =
+    professionalSnapshot.data() as ProfessionalProfileDocument;
 
-    if (
-        professional.ownerUid !==
-        ownerUid
-    ) {
-        throw new Error(
-            'Stripe owner metadata does not match the professional listing owner.'
-        );
-    }
+  if (professional.ownerUid !== ownerUid) {
+    throw new Error(
+      'Stripe owner metadata does not match the professional listing owner.',
+    );
+  }
 
-    if (
-        professional.stripe
-            ?.checkoutSessionId !==
-        checkoutSession.id
-    ) {
-        return;
-    }
+  if (professional.stripe?.checkoutSessionId !== checkoutSession.id) {
+    return;
+  }
 
-    await professionalReference.update({
-        subscriptionStatus:
-            'free',
+  await professionalReference.update({
+    subscriptionStatus: 'free',
 
-        'stripe.subscriptionStatus':
-            'checkout_failed',
+    'stripe.subscriptionStatus': 'checkout_failed',
 
-        updatedAt:
-            FieldValue.serverTimestamp()
-    });
+    updatedAt: FieldValue.serverTimestamp(),
+  });
 }
-
 
 function hasProfessionalProfileAccess(
-    subscriptionStatus:
-        Stripe.Subscription.Status
+  subscriptionStatus: Stripe.Subscription.Status,
 ): boolean {
-    switch (subscriptionStatus) {
-        case 'active':
-        case 'trialing':
-        case 'past_due':
-            return true;
+  switch (subscriptionStatus) {
+    case 'active':
+    case 'trialing':
+    case 'past_due':
+      return true;
 
-        case 'canceled':
-        case 'incomplete':
-        case 'incomplete_expired':
-        case 'paused':
-        case 'unpaid':
-        default:
-            return false;
-    }
+    case 'canceled':
+    case 'incomplete':
+    case 'incomplete_expired':
+    case 'paused':
+    case 'unpaid':
+    default:
+      return false;
+  }
 }
-
 
 function getStripeResourceId(
-    resource:
-        | string
-        | {
-            id: string;
-        }
-        | null
-        | undefined
+  resource:
+    | string
+    | {
+        id: string;
+      }
+    | null
+    | undefined,
 ): string {
-    if (
-        typeof resource ===
-        'string'
-    ) {
-        return resource;
-    }
+  if (typeof resource === 'string') {
+    return resource;
+  }
 
-    return resource?.id ?? '';
+  return resource?.id ?? '';
 }
 
-
 function createProfessionalProfileSlug(
-    businessName: string,
-    professionalUid: string
+  businessName: string,
+  professionalUid: string,
 ): string {
-    const businessSlug =
-        businessName
-            .trim()
-            .toLowerCase()
-            .replace(
-                /[^a-z0-9]+/g,
-                '-'
-            )
-            .replace(
-                /^[-]+|[-]+$/g,
-                ''
-            );
+  const businessSlug = businessName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^[-]+|[-]+$/g, '');
 
-    const uniqueSuffix =
-        professionalUid
-            .slice(0, 8)
-            .toLowerCase();
+  const uniqueSuffix = professionalUid.slice(0, 8).toLowerCase();
 
-    return [
-        businessSlug ||
-        'professional',
-
-        uniqueSuffix
-    ].join('-');
+  return [businessSlug || 'professional', uniqueSuffix].join('-');
 }

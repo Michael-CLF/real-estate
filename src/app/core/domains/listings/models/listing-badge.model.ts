@@ -11,7 +11,7 @@ export type ListingBadgeType =
 export type ListingBadgeTone =
   | 'gold'
   | 'teal'
-  | 'navy'
+  | 'dark-green'
   | 'coral'
   | 'green';
 

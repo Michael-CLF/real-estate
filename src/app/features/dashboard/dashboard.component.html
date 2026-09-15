@@ -264,7 +264,7 @@
             </span>
 
             <div>
-              <strong>
+              <strong id="action">
                 @if (item.actionRequired) {
                   Action required:
                 }
@@ -449,6 +449,36 @@
           <span>
             <i class="fa-solid fa-circle" aria-hidden="true"></i>
 
+            Under contract
+          </span>
+
+          <strong>
+            {{
+            dashboardState.state()
+            .underContractListings.length
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            <i class="fa-solid fa-circle" aria-hidden="true"></i>
+
+            Sold
+          </span>
+
+          <strong>
+            {{
+            dashboardState.state()
+            .soldListings.length
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            <i class="fa-solid fa-circle" aria-hidden="true"></i>
+
             Saved properties
           </span>
 
@@ -461,11 +491,33 @@
         </div>
       </div>
 
+      @for (
+      listing of dashboardState.state()
+      .underContractListings;
+      track listing.Uid
+      ) {
+      <a class="dashboard-overview__listing-link" routerLink="/dashboard/listings">
+        <span>
+          <strong>Under contract:</strong>
+          {{ listing.addressLine1 }},
+          {{ listing.city }},
+          {{ listing.state }}
+          {{ listing.zipCode }}
+        </span>
+
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </a>
+      }
+
       @if (
       dashboardState.state()
       .activeListings.length === 0 &&
       dashboardState.state()
-      .draftListings.length === 0
+      .draftListings.length === 0 &&
+      dashboardState.state()
+      .underContractListings.length === 0 &&
+      dashboardState.state()
+      .soldListings.length === 0
       ) {
       <div class="dashboard-overview__empty-listings">
         <span aria-hidden="true">

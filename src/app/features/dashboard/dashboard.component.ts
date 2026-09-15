@@ -306,6 +306,12 @@ export class DashboardComponent
     const versionStatus =
       offer.currentVersionStatus;
 
+    const perspective =
+      this.offerItems().find(
+        item =>
+          item.offer.Uid === offer.Uid
+      )?.perspective;
+
     if (
       versionStatus === 'draft'
     ) {
@@ -324,6 +330,25 @@ export class DashboardComponent
         'partially_signed'
     ) {
       return 'Draft — signing in progress';
+    }
+
+    if (
+      offer.status ===
+        'closed_due_to_contract'
+    ) {
+      return perspective === 'buyer'
+        ? 'not accepted — seller accepted another offer'
+        : 'closed — another offer accepted';
+    }
+
+    if (
+      offer.status === 'countered' &&
+      offer.currentVersionInitiatedBy ===
+        'seller'
+    ) {
+      return perspective === 'seller'
+        ? 'Counteroffer sent'
+        : 'Counteroffer received';
     }
 
     return OFFER_STATUS_LABELS[

@@ -102,6 +102,9 @@
 
     <fieldset
       class="choice-group choice-group--two"
+      [class.choice-group--invalid]="
+        isInvalid('financingMethod')
+      "
     >
       <legend class="sr-only">
         Purchase funding method

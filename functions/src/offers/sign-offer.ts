@@ -1241,10 +1241,13 @@ function notifySignatureProgress(
             ? `Offer ${offer.referenceNumber}-${version.versionNumber} is ready for your response`
             : `${signer.legalName} signed the agreement`,
 
-        message:
-          delivered
-            ? `${signer.legalName} signed and sent this agreement. Review it, then accept and sign, counteroffer, or decline.`
-            : `${signer.legalName} completed a required signature.`,
+       
+       message:
+  delivered
+    ? version.versionNumber === 1
+      ? `${signer.legalName} has sent a signed offer. Review it; you can accept and sign, counteroffer, or decline.`
+      : `${signer.legalName} has sent a signed counteroffer. Review the revised terms; you can accept and sign, counteroffer, or decline.`
+    : `${signer.legalName} completed a required signature.`,
 
         propertyAddress,
 

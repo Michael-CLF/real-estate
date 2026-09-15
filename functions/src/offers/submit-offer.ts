@@ -20,6 +20,10 @@ import {
   verifyOfferSubmissionEligibility,
 } from './verify-offer-eligibility';
 
+import {
+  getListingOfferAvailabilityMessage,
+} from './listing-offer-availability';
+
 import type {
   OfferDocument,
   OfferVersionDocument,
@@ -323,7 +327,9 @@ function verifyListingStillActive(
   ) {
     throw new HttpsError(
       'failed-precondition',
-      'This property is no longer active.'
+      getListingOfferAvailabilityMessage(
+        listingData
+      )
     );
   }
 
@@ -334,7 +340,9 @@ function verifyListingStillActive(
   ) {
     throw new HttpsError(
       'failed-precondition',
-      'This property is not currently accepting offers.'
+      getListingOfferAvailabilityMessage(
+        listingData
+      )
     );
   }
 }
@@ -1044,38 +1052,11 @@ function validateSellerStatements(
     );
   }
 
-  const ownersAssociationApplies =
-    readRequiredBoolean(
-      statements,
-      'ownersAssociationApplies',
-      'Specify whether an owners association applies.'
-    );
-
-  if (ownersAssociationApplies) {
-    readRequiredString(
-      statements,
-      'ownersAssociationName',
-      'Enter the owners association name.'
-    );
-
-    validateNonNegativeMoney(
-      statements,
-      'ownersAssociationDuesInCents',
-      'The owners association dues'
-    );
-
-    readRequiredString(
-      statements,
-      'ownersAssociationDuesFrequency',
-      'Enter the owners association dues frequency.'
-    );
-
-    readRequiredString(
-      statements,
-      'ownersAssociationContact',
-      'Enter the owners association contact information.'
-    );
-  }
+  readRequiredBoolean(
+    statements,
+    'ownersAssociationApplies',
+    'Specify whether an owners association applies.'
+  );
 
   const fuelTankPresent =
     readRequiredBoolean(

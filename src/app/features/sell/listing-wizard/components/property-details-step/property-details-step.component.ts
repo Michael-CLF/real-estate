@@ -4,19 +4,33 @@ import {
   effect,
   inject,
   input,
-  output
+  output,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import {
   ListingHoaFeeFrequency,
   LotSizeUnit,
-  PropertyType
+  PropertyType,
 } from '../../../../../core/domains/listings/models/listing.model';
 
 interface PropertyTypeOption {
   value: PropertyType;
   label: string;
+}
+
+export type PropertyDetailsSellerOwnershipStatus =
+  'owned_at_least_one_year' | 'owned_less_than_one_year' | 'does_not_yet_own';
+
+export type PropertyDetailsFuelTankOwnership = 'owned' | 'leased';
+
+export interface PropertyDetailsSellerStatementsFormValue {
+  ownershipStatus: PropertyDetailsSellerOwnershipStatus | '';
+  leadBasedPaintApplies: boolean | null;
+  ownersAssociationApplies: boolean | null;
+  fuelTankPresent: boolean | null;
+  fuelTankOwnership: PropertyDetailsFuelTankOwnership | '';
+  leasesExist: boolean | null;
 }
 
 export interface PropertyDetailsFormValue {
@@ -29,10 +43,14 @@ export interface PropertyDetailsFormValue {
   lotSizeUnit: LotSizeUnit;
   description: string;
   hoa?: PropertyDetailsHoaFormValue;
+  sellerStatements: PropertyDetailsSellerStatementsFormValue;
 }
 
 export interface PropertyDetailsHoaFormValue {
   hasHoa: boolean | null;
+  associationName: string;
+  managementCompany: string;
+  contactPhone: string;
   feeAmount: number | null;
   feeFrequency: ListingHoaFeeFrequency | '';
 }
@@ -43,16 +61,14 @@ export interface PropertyDetailsHoaFormValue {
   imports: [ReactiveFormsModule],
   templateUrl: './property-details-step.component.html',
   styleUrl: './property-details-step.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class PropertyDetailsStepComponent {
   private readonly fb = inject(FormBuilder);
 
   readonly initialValue = input<PropertyDetailsFormValue | null>(null);
 
-  readonly currentYear =
-    new Date().getFullYear();
+  readonly currentYear = new Date().getFullYear();
 
   readonly validityChange = output<boolean>();
   readonly valueChange = output<PropertyDetailsFormValue>();
@@ -71,86 +87,69 @@ export class PropertyDetailsStepComponent {
     value: ListingHoaFeeFrequency;
     label: string;
   }[] = [
-      { value: 'monthly', label: 'Monthly' },
-      { value: 'quarterly', label: 'Quarterly' },
-      {
-        value: 'semi_annually',
-        label: 'Semi-Annually'
-      },
-      { value: 'annually', label: 'Annually' }
-    ];
-
-
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'quarterly', label: 'Quarterly' },
+    {
+      value: 'semi_annually',
+      label: 'Semi-Annually',
+    },
+    { value: 'annually', label: 'Annually' },
+  ];
 
   readonly form = this.fb.nonNullable.group({
-    propertyType: [
-      '' as PropertyType | '',
-      Validators.required
-    ],
+    propertyType: ['' as PropertyType | '', Validators.required],
     bedrooms: [
       null as number | null,
-      [
-        Validators.required,
-        Validators.min(0),
-        Validators.max(99)
-      ]
+      [Validators.required, Validators.min(0), Validators.max(99)],
     ],
     bathrooms: [
       null as number | null,
-      [
-        Validators.required,
-        Validators.min(0),
-        Validators.max(99)
-      ]
+      [Validators.required, Validators.min(0), Validators.max(99)],
     ],
     squareFeet: [
       null as number | null,
-      [
-        Validators.required,
-        Validators.min(1),
-        Validators.max(1000000)
-      ]
+      [Validators.required, Validators.min(1), Validators.max(1000000)],
     ],
     yearBuilt: [
       null as number | null,
       [
         Validators.required,
         Validators.min(1600),
-        Validators.max(new Date().getFullYear() + 1)
-      ]
+        Validators.max(new Date().getFullYear() + 1),
+      ],
     ],
-    lotSize: [
-      null as number | null,
-      Validators.min(0)
-    ],
-    lotSizeUnit: [
-      'square_feet' as LotSizeUnit,
-      Validators.required
-    ],
+    lotSize: [null as number | null, Validators.min(0)],
+    lotSizeUnit: ['square_feet' as LotSizeUnit, Validators.required],
     description: [
       '',
       [
         Validators.required,
         Validators.minLength(20),
-        Validators.maxLength(5000)
-      ]
+        Validators.maxLength(5000),
+      ],
     ],
     hoa: this.fb.nonNullable.group({
-      hasHoa: [
-        null as boolean | null,
-        Validators.required
-      ],
+      hasHoa: [null as boolean | null],
       feeAmount: [
         null as number | null,
-        [
-          Validators.min(0),
-          Validators.max(1000000)
-        ]
+        [Validators.min(0), Validators.max(1000000)],
       ],
-      feeFrequency: [
-        '' as ListingHoaFeeFrequency | ''
-      ]
-    })
+      feeFrequency: ['' as ListingHoaFeeFrequency | ''],
+      associationName: [''],
+      managementCompany: [''],
+      contactPhone: [''],
+    }),
+    sellerStatements: this.fb.nonNullable.group({
+      ownershipStatus: [
+        '' as PropertyDetailsSellerOwnershipStatus | '',
+        Validators.required,
+      ],
+      leadBasedPaintApplies: [null as boolean | null, Validators.required],
+      ownersAssociationApplies: [null as boolean | null, Validators.required],
+      fuelTankPresent: [null as boolean | null, Validators.required],
+      fuelTankOwnership: ['' as PropertyDetailsFuelTankOwnership | ''],
+      leasesExist: [null as boolean | null, Validators.required],
+    }),
   });
 
   constructor() {
@@ -163,76 +162,174 @@ export class PropertyDetailsStepComponent {
             ...initialValue,
             hoa: initialValue.hoa ?? {
               hasHoa: null,
+              associationName: '',
+              managementCompany: '',
+              contactPhone: '',
               feeAmount: null,
-              feeFrequency: ''
-            }
+              feeFrequency: '',
+            },
+            sellerStatements: initialValue.sellerStatements ?? {
+              ownershipStatus: '',
+              leadBasedPaintApplies: null,
+              ownersAssociationApplies: null,
+              fuelTankPresent: null,
+              fuelTankOwnership: '',
+              leasesExist: null,
+            },
           },
           {
-            emitEvent: false
-          }
+            emitEvent: false,
+          },
         );
       }
 
-      this.validityChange.emit(
-        this.form.valid
+      this.configureHoaValidators(
+        this.form.controls.hoa.controls.hasHoa.value,
+        false,
       );
-    });
 
-    this.form.controls.hoa.controls.hasHoa
-      .valueChanges
-      .subscribe(hasHoa => {
-        const feeAmount =
-          this.form.controls.hoa.controls.feeAmount;
-
-        const feeFrequency =
-          this.form.controls.hoa.controls.feeFrequency;
-
-        if (hasHoa === true) {
-          feeAmount.setValidators([
-            Validators.required,
-            Validators.min(0),
-            Validators.max(1000000)
-          ]);
-
-          feeFrequency.setValidators([
-            Validators.required
-          ]);
-        } else {
-          feeAmount.clearValidators();
-          feeFrequency.clearValidators();
-
-          feeAmount.setValue(null, {
-            emitEvent: false
-          });
-
-          feeFrequency.setValue('', {
-            emitEvent: false
-          });
-        }
-
-        feeAmount.updateValueAndValidity({
-          emitEvent: false
-        });
-
-        feeFrequency.updateValueAndValidity({
-          emitEvent: false
-        });
-
-        this.valueChange.emit(
-          this.form.getRawValue() as PropertyDetailsFormValue
-        );
-
-        this.validityChange.emit(
-          this.form.valid
-        );
-      });
-
-    this.form.valueChanges.subscribe(() => {
-      this.valueChange.emit(
-        this.form.getRawValue() as PropertyDetailsFormValue
+      this.configureFuelTankValidators(
+        this.form.controls.sellerStatements.controls.fuelTankPresent.value,
+        false,
       );
 
       this.validityChange.emit(this.form.valid);
+    });
+
+    this.form.controls.hoa.controls.hasHoa.valueChanges.subscribe((hasHoa) => {
+      this.configureHoaValidators(hasHoa, true);
+
+      if (hasHoa !== null) {
+        this.form.controls.sellerStatements.controls.ownersAssociationApplies.setValue(
+          hasHoa,
+          {
+            emitEvent: false,
+          },
+        );
+      }
+
+      this.valueChange.emit(
+        this.form.getRawValue() as PropertyDetailsFormValue,
+      );
+
+      this.validityChange.emit(this.form.valid);
+    });
+
+    this.form.controls.sellerStatements.controls.ownersAssociationApplies.valueChanges.subscribe(
+      (ownersAssociationApplies) => {
+        if (ownersAssociationApplies !== null) {
+          this.form.controls.hoa.controls.hasHoa.setValue(
+            ownersAssociationApplies,
+            {
+              emitEvent: false,
+            },
+          );
+
+          this.configureHoaValidators(
+            ownersAssociationApplies,
+            ownersAssociationApplies === false,
+          );
+        }
+
+        this.valueChange.emit(
+          this.form.getRawValue() as PropertyDetailsFormValue,
+        );
+
+        this.validityChange.emit(this.form.valid);
+      },
+    );
+
+    this.form.controls.sellerStatements.controls.fuelTankPresent.valueChanges.subscribe(
+      (fuelTankPresent) => {
+        this.configureFuelTankValidators(fuelTankPresent, true);
+
+        this.valueChange.emit(
+          this.form.getRawValue() as PropertyDetailsFormValue,
+        );
+
+        this.validityChange.emit(this.form.valid);
+      },
+    );
+
+    this.form.valueChanges.subscribe(() => {
+      this.valueChange.emit(
+        this.form.getRawValue() as PropertyDetailsFormValue,
+      );
+
+      this.validityChange.emit(this.form.valid);
+    });
+  }
+
+  private configureHoaValidators(
+    hasHoa: boolean | null,
+    clearValues: boolean,
+  ): void {
+    const controls = this.form.controls.hoa.controls;
+
+    if (hasHoa === true) {
+      controls.feeAmount.setValidators([
+        Validators.min(0),
+        Validators.max(1000000),
+      ]);
+      controls.feeFrequency.clearValidators();
+      controls.associationName.setValidators([
+        Validators.maxLength(200),
+      ]);
+      controls.managementCompany.setValidators([
+        Validators.maxLength(200),
+      ]);
+    } else {
+      controls.feeAmount.clearValidators();
+      controls.feeFrequency.clearValidators();
+      controls.associationName.clearValidators();
+      controls.managementCompany.clearValidators();
+
+      if (clearValues) {
+        controls.feeAmount.setValue(null, {
+          emitEvent: false,
+        });
+        controls.feeFrequency.setValue('', {
+          emitEvent: false,
+        });
+        controls.associationName.setValue('', {
+          emitEvent: false,
+        });
+        controls.managementCompany.setValue('', {
+          emitEvent: false,
+        });
+        controls.contactPhone.setValue('', {
+          emitEvent: false,
+        });
+      }
+    }
+
+    controls.feeAmount.updateValueAndValidity({ emitEvent: false });
+    controls.feeFrequency.updateValueAndValidity({ emitEvent: false });
+    controls.associationName.updateValueAndValidity({ emitEvent: false });
+    controls.managementCompany.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private configureFuelTankValidators(
+    fuelTankPresent: boolean | null,
+    clearValue: boolean,
+  ): void {
+    const fuelTankOwnership =
+      this.form.controls.sellerStatements.controls.fuelTankOwnership;
+
+    if (fuelTankPresent === true) {
+      fuelTankOwnership.setValidators([Validators.required]);
+    } else {
+      fuelTankOwnership.clearValidators();
+
+      if (clearValue) {
+        fuelTankOwnership.setValue('', {
+          emitEvent: false,
+        });
+      }
+    }
+
+    fuelTankOwnership.updateValueAndValidity({
+      emitEvent: false,
     });
   }
 }

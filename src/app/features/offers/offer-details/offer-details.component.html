@@ -47,6 +47,16 @@
             <div>
               <span class="label">Offer number</span>
               <strong>{{ getVersionLabel(version) }}</strong>
+              <span class="offer-summary__property">
+                {{ offer.property.addressLine1 }}
+                @if (offer.property.addressLine2) {
+                  , {{ offer.property.addressLine2 }}
+                }
+                ,
+                {{ offer.property.city }},
+                {{ offer.property.state }}
+                {{ offer.property.zipCode }}
+              </span>
             </div>
 
             <div>
@@ -70,6 +80,22 @@
             </span>
           </div>
         </section>
+
+        @if (isClosedDueToContract()) {
+          <div
+            class="message message--closed-offer"
+            role="alert"
+          >
+            <strong>This offer was not accepted.</strong>
+            <span>
+              @if (access()?.isBuyer) {
+                The seller accepted another buyer’s offer, and the property is now under contract. Your offer remains available below as part of your permanent transaction history.
+              } @else {
+                Another offer for this property was accepted, so this offer closed automatically. It remains available below as part of the permanent transaction history.
+              }
+            </span>
+          </div>
+        }
 
         @if (errorMessage()) {
           <div
@@ -351,7 +377,8 @@
                 !access()?.canSign &&
                 !access()?.canCounter &&
                 !access()?.canDecline &&
-                !access()?.canWithdraw
+                !access()?.canWithdraw &&
+                !actionNote()
               ) {
                 <p class="action-card__note">
                   No action is currently required from you. The complete offer history remains available here.

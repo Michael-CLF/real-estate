@@ -194,11 +194,46 @@ implements OnInit {
       }
     );
 
+  readonly isClosedDueToContract =
+    computed(
+      () =>
+        this.offer()?.status ===
+          'closed_due_to_contract'
+    );
+
+  readonly isPropertySold =
+    computed(
+      () =>
+        this.offer()?.status ===
+          'converted_to_contract' &&
+        this.offer()?.contract?.status ===
+          'closed'
+    );
+
   readonly actionHeading =
     computed(
       () => {
+        const offer =
+          this.offer();
+
         const version =
           this.currentVersion();
+
+        if (
+          offer?.status ===
+            'closed_due_to_contract'
+        ) {
+          return 'No action available';
+        }
+
+        if (
+          offer?.status ===
+            'converted_to_contract'
+        ) {
+          return this.isPropertySold()
+            ? 'Property sold'
+            : 'Contract effective';
+        }
 
         if (this.isReceivingParty()) {
           return 'Respond to this offer';
@@ -218,8 +253,33 @@ implements OnInit {
   readonly actionNote =
     computed(
       () => {
+        const offer =
+          this.offer();
+
         const version =
           this.currentVersion();
+
+        if (
+          offer?.status ===
+            'closed_due_to_contract'
+        ) {
+          return this.access()?.isBuyer
+            ? 'The seller accepted another buyer\u2019s offer. This offer is closed, and no further action is available.'
+            : 'Another offer for this property was accepted. This offer closed automatically, and no further action is available.';
+        }
+
+        if (
+          offer?.status ===
+            'converted_to_contract'
+        ) {
+          if (this.isPropertySold()) {
+            return 'The seller confirmed that closing was completed. No further action is required.';
+          }
+
+          return this.access()?.isSeller
+            ? 'All required parties have signed. No response is required. The property is now under contract.'
+            : 'All required parties have signed. No action is currently required from you.';
+        }
 
         if (
           this.actionHeading() !==
@@ -267,6 +327,28 @@ implements OnInit {
           return 'Draft';
         }
 
+        if (
+          offer?.status === 'countered' &&
+          version?.initiatedBy === 'seller' &&
+          this.isUserOnInitiatingSide(
+            offer,
+            version
+          )
+        ) {
+          return 'Counteroffer sent';
+        }
+
+        if (
+          offer?.status ===
+            'closed_due_to_contract'
+        ) {
+          return 'Closed — another offer accepted';
+        }
+
+        if (this.isPropertySold()) {
+          return 'Sold — closing confirmed';
+        }
+
         return offer
           ? OFFER_STATUS_LABELS[
             offer.status
@@ -306,6 +388,13 @@ implements OnInit {
           }
 
           return 'Draft';
+        }
+
+        if (
+          version?.status === 'superseded' &&
+          this.isClosedDueToContract()
+        ) {
+          return 'Closed \u2014 another offer accepted';
         }
 
         return version
@@ -443,6 +532,13 @@ implements OnInit {
       }
 
       return 'Draft';
+    }
+
+    if (
+      version.status === 'superseded' &&
+      this.isClosedDueToContract()
+    ) {
+      return 'Closed — another offer accepted';
     }
 
     return OFFER_VERSION_STATUS_LABELS[

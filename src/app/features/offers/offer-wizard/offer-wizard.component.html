@@ -208,8 +208,7 @@
             @if (!isLastSection()) {
             <button type="submit" class="button button--primary" [disabled]="
                     saving() ||
-                    submitting() ||
-                    currentSectionGroup.invalid
+                    submitting()
                   ">
               Continue
               <span aria-hidden="true">→</span>
@@ -217,8 +216,7 @@
             } @else {
             <button type="submit" class="button button--primary" [disabled]="
                     saving() ||
-                    submitting() ||
-                    currentSectionGroup.invalid
+                    submitting()
                   ">
               @if (submitting()) {
               Preparing agreement…
@@ -228,7 +226,11 @@
             </button>
             }
 
-            @if (currentSectionGroup.invalid) {
+            @if (
+              currentSectionGroup.invalid &&
+              validationAttemptedSection() ===
+                currentSection().key
+            ) {
             <p class="wizard-actions__validation-hint">
               Complete the required fields in this section to continue.
             </p>

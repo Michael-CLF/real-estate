@@ -37,6 +37,8 @@ export class DashboardStateService {
 
     draftListings: [],
     activeListings: [],
+    underContractListings: [],
+    soldListings: [],
     savedProperties: []
   });
 
@@ -58,19 +60,51 @@ export class DashboardStateService {
       userProfile,
       draftListings,
       activeListings,
+      underContractListings,
+      soldListings,
       savedProperties
     ] = await Promise.all([
-      this.dashboardService
-        .getCurrentUserProfile(),
+      this.loadDashboardValue(
+        'user profile',
+        this.dashboardService
+          .getCurrentUserProfile(),
+        null
+      ),
 
-      this.dashboardService
-        .getDraftListings(),
+      this.loadDashboardValue(
+        'listing drafts',
+        this.dashboardService
+          .getDraftListings(),
+        []
+      ),
 
-      this.dashboardService
-        .getActiveListings(),
+      this.loadDashboardValue(
+        'active listings',
+        this.dashboardService
+          .getActiveListings(),
+        []
+      ),
 
-      this.dashboardService
-        .getSavedHomes()
+      this.loadDashboardValue(
+        'under-contract listings',
+        this.dashboardService
+          .getUnderContractListings(),
+        []
+      ),
+
+      this.loadDashboardValue(
+        'sold listings',
+        this.dashboardService
+          .getSoldListings(),
+        []
+      ),
+
+      this.loadDashboardValue(
+        'saved properties',
+        this.dashboardService
+          .getSavedHomes(),
+        []
+      )
     ]);
 
     const isFirstDashboardVisit =
@@ -90,6 +124,8 @@ export class DashboardStateService {
 
       draftListings,
       activeListings,
+      underContractListings,
+      soldListings,
       savedProperties,
 
       hasDraftListings:
@@ -97,7 +133,9 @@ export class DashboardStateService {
 
       hasListings:
         draftListings.length +
-        activeListings.length > 0,
+        activeListings.length +
+        underContractListings.length +
+        soldListings.length > 0,
 
       hasSavedProperties:
         savedProperties.length > 0,
@@ -105,6 +143,8 @@ export class DashboardStateService {
       showWelcome:
         draftListings.length === 0 &&
         activeListings.length === 0 &&
+        underContractListings.length === 0 &&
+        soldListings.length === 0 &&
         savedProperties.length === 0
     }));
 
@@ -147,5 +187,22 @@ export class DashboardStateService {
           !hasSavedProperties
       };
     });
+  }
+
+  private async loadDashboardValue<T>(
+    sectionName: string,
+    request: Promise<T>,
+    fallbackValue: T
+  ): Promise<T> {
+    try {
+      return await request;
+    } catch (error: unknown) {
+      console.error(
+        `Unable to load dashboard ${sectionName}:`,
+        error
+      );
+
+      return fallbackValue;
+    }
   }
 }

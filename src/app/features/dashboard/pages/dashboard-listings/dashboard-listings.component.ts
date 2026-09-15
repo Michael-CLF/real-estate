@@ -98,47 +98,26 @@ export class DashboardListingsComponent
 
 
   protected readonly activeListings =
-    computed(() =>
-      this.dashboardState.state()
-        .activeListings
-        .filter(listing => {
-          const status =
-            String(listing.status);
-
-          return (
-            status !== 'under_contract' &&
-            status !== 'under-contract' &&
-            status !== 'sold'
-          );
-        })
+    computed(
+      () =>
+        this.dashboardState.state()
+          .activeListings
     );
 
 
   protected readonly underContractListings =
-    computed(() =>
-      this.dashboardState.state()
-        .activeListings
-        .filter(listing => {
-          const status =
-            String(listing.status);
-
-          return (
-            status === 'under_contract' ||
-            status === 'under-contract'
-          );
-        })
+    computed(
+      () =>
+        this.dashboardState.state()
+          .underContractListings
     );
 
 
   protected readonly soldListings =
-    computed(() =>
-      this.dashboardState.state()
-        .activeListings
-        .filter(
-          listing =>
-            String(listing.status) ===
-            'sold'
-        )
+    computed(
+      () =>
+        this.dashboardState.state()
+          .soldListings
     );
 
 
@@ -340,6 +319,7 @@ export class DashboardListingsComponent
           ? 'The listing draft was permanently deleted.'
           : 'The property listing and its related records were permanently deleted.'
       );
+
     } catch (error: unknown) {
       console.error(
         'Listing deletion failed:',
@@ -352,6 +332,7 @@ export class DashboardListingsComponent
           ? error.message
           : 'The listing could not be deleted.'
       );
+
     } finally {
       this.deletingListingUid.set(
         null
@@ -372,10 +353,12 @@ export class DashboardListingsComponent
         this.activeListings().length > 0
       ) {
         this.selectedTab.set('active');
+
       } else if (
         this.draftListings().length > 0
       ) {
         this.selectedTab.set('draft');
+
       } else if (
         this.underContractListings()
           .length > 0
@@ -383,11 +366,13 @@ export class DashboardListingsComponent
         this.selectedTab.set(
           'under-contract'
         );
+
       } else if (
         this.soldListings().length > 0
       ) {
         this.selectedTab.set('sold');
       }
+
     } catch (error: unknown) {
       console.error(
         'Unable to load account listings:',
@@ -398,6 +383,7 @@ export class DashboardListingsComponent
         'Your property listings could not be ' +
         'loaded. Please try again.'
       );
+
     } finally {
       this.isLoading.set(false);
     }

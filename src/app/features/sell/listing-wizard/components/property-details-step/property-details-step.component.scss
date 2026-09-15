@@ -3,7 +3,7 @@
 }
 
 .wizard-step h2 {
-  margin: 0 0 .5rem;
+  margin: 0 0 0.5rem;
   color: #154360;
   font-size: clamp(2rem, 4vw, 2.75rem);
   line-height: 1.1;
@@ -27,10 +27,42 @@ form {
   gap: 1rem;
 }
 
+.two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.hoa-contact-phone {
+  width: min(100%, 32rem);
+  margin-top: 1rem;
+}
+
+.seller-statements {
+  margin: 0.5rem 0 0;
+  padding: 1.5rem;
+  border: 1px solid #b9d7e6;
+  border-radius: 12px;
+  background: #f4fafc;
+}
+
+.seller-statements legend {
+  padding: 0 0.5rem;
+  color: #154360;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.seller-statements__description {
+  margin: 0 0 1.25rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
 .field {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .field label {
@@ -41,7 +73,7 @@ form {
 .field select,
 .field textarea {
   width: 100%;
-  padding: .75rem 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #fff;
@@ -65,13 +97,13 @@ form {
 .field select:focus,
 .field textarea:focus {
   border-color: #154360;
-  outline: 2px solid rgba(21, 67, 96, .12);
+  outline: 2px solid rgba(21, 67, 96, 0.12);
   outline-offset: 1px;
 }
 
 .optional {
   color: #64748b;
-  font-size: .875rem;
+  font-size: 0.875rem;
   font-weight: 400;
 }
 
@@ -98,22 +130,19 @@ form {
 
 .lot-size-input {
   display: grid;
-  grid-template-columns:
-    minmax(0, 1fr) minmax(125px, auto);
+  grid-template-columns: minmax(0, 1fr) minmax(125px, auto);
 
   input {
     min-width: 0;
 
-    border-radius:
-      8px 0 0 8px;
+    border-radius: 8px 0 0 8px;
   }
 
   select {
     min-width: 125px;
 
     border-left: 0;
-    border-radius:
-      0 8px 8px 0;
+    border-radius: 0 8px 8px 0;
 
     background-color: #f8fafc;
 
@@ -132,7 +161,7 @@ form {
 }
 
 .description-field {
-  margin-top: .25rem;
+  margin-top: 0.25rem;
 }
 
 .description-footer {
@@ -145,14 +174,14 @@ form {
 .character-count {
   margin-left: auto;
   color: #64748b;
-  font-size: .8rem;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .field-error {
-  margin: .25rem 0 0;
+  margin: 0.25rem 0 0;
   color: #c00000;
-  font-size: .95rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
@@ -161,9 +190,16 @@ form {
     grid-template-columns: 1fr;
   }
 
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .seller-statements {
+    padding: 1.1rem;
+  }
+
   .lot-size-input {
-    grid-template-columns:
-      minmax(0, 1fr) minmax(120px, auto);
+    grid-template-columns: minmax(0, 1fr) minmax(120px, auto);
   }
 
   .description-footer {
@@ -177,8 +213,7 @@ form {
 
   @media (max-width: 420px) {
     .lot-size-input {
-      grid-template-columns:
-        minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 0.5rem;
 
       input,

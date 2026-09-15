@@ -23,32 +23,25 @@ export type OfferNotificationChannel =
   | 'in_app'
   | 'email';
 
+export type OfferNotificationEmailStatus =
+  | 'not_requested'
+  | 'pending'
+  | 'processing'
+  | 'sent'
+  | 'failed';
+
 export interface CreateOfferNotificationInput {
   recipientUid: string;
   actorUid?: string | null;
-
   offerUid: string;
   offerVersionUid: string;
   listingUid?: string | null;
-
   type: OfferNotificationType;
-
   title: string;
   message: string;
-
   propertyAddress?: string | null;
-
   channels?: OfferNotificationChannel[];
-
-  /*
-   * Supply a stable event key when the operation may be
-   * retried. This prevents duplicate notifications.
-   *
-   * Example:
-   * seller-accepted-offer-version-123
-   */
   eventKey?: string | null;
-
   metadata?: Record<
     string,
     string | number | boolean | null
@@ -57,47 +50,33 @@ export interface CreateOfferNotificationInput {
 
 export interface OfferNotificationRecord {
   Uid: string;
-
   recipientUid: string;
   actorUid: string | null;
-
   offerUid: string;
   offerVersionUid: string;
   listingUid: string | null;
-
   type: OfferNotificationType;
-
   title: string;
   message: string;
-
   propertyAddress: string | null;
-
   channels: OfferNotificationChannel[];
-
   read: boolean;
   readAt: null;
-
   emailStatus:
-    | 'not_requested'
-    | 'pending';
-
+    OfferNotificationEmailStatus;
+  emailAttemptCount: number;
+  emailProcessingStartedAt: null;
+  emailSentAt: null;
+  emailLastError: null;
   eventKey: string | null;
-
   metadata: Record<
     string,
     string | number | boolean | null
   >;
-
   createdAt: FieldValue;
   updatedAt: FieldValue;
 }
 
-/*
- * Creates a notification immediately.
- *
- * Use this function when the notification is not being
- * created inside another Firestore transaction.
- */
 export async function createOfferNotification(
   input: CreateOfferNotificationInput
 ): Promise<string> {
@@ -120,10 +99,6 @@ export async function createOfferNotification(
       input
     );
 
-  /*
-   * merge: true makes notification creation idempotent
-   * when a stable eventKey was supplied.
-   */
   await notificationReference.set(
     notification,
     {
@@ -134,13 +109,6 @@ export async function createOfferNotification(
   return notificationUid;
 }
 
-/*
- * Adds a notification to an existing Firestore transaction.
- *
- * This should be used by offer submission, counteroffer,
- * acceptance, rejection and signature transactions so the
- * offer change and its notification are committed together.
- */
 export function addOfferNotificationToTransaction(
   transaction: Transaction,
   firestore: Firestore,
@@ -172,6 +140,23 @@ export function addOfferNotificationToTransaction(
   );
 
   return notificationUid;
+}
+
+export function createOfferNotificationUid(
+  firestore: Firestore,
+  input: Pick<
+    CreateOfferNotificationInput,
+    | 'recipientUid'
+    | 'offerUid'
+    | 'offerVersionUid'
+    | 'type'
+    | 'eventKey'
+  >
+): string {
+  return createNotificationUid(
+    firestore,
+    input
+  );
 }
 
 function buildNotificationRecord(
@@ -215,58 +200,48 @@ function buildNotificationRecord(
 
   return {
     Uid: notificationUid,
-
     recipientUid,
-
     actorUid:
       normalizeOptionalString(
         input.actorUid
       ),
-
     offerUid,
     offerVersionUid,
-
     listingUid:
       normalizeOptionalString(
         input.listingUid
       ),
-
     type:
       validateNotificationType(
         input.type
       ),
-
     title,
     message,
-
     propertyAddress:
       normalizeOptionalString(
         input.propertyAddress
       ),
-
     channels,
-
     read: false,
     readAt: null,
-
     emailStatus:
       channels.includes('email')
         ? 'pending'
         : 'not_requested',
-
+    emailAttemptCount: 0,
+    emailProcessingStartedAt: null,
+    emailSentAt: null,
+    emailLastError: null,
     eventKey:
       normalizeOptionalString(
         input.eventKey
       ),
-
     metadata:
       normalizeMetadata(
         input.metadata
       ),
-
     createdAt:
       FieldValue.serverTimestamp(),
-
     updatedAt:
       FieldValue.serverTimestamp()
   };
@@ -274,7 +249,14 @@ function buildNotificationRecord(
 
 function createNotificationUid(
   firestore: Firestore,
-  input: CreateOfferNotificationInput
+  input: Pick<
+    CreateOfferNotificationInput,
+    | 'recipientUid'
+    | 'offerUid'
+    | 'offerVersionUid'
+    | 'type'
+    | 'eventKey'
+  >
 ): string {
   const eventKey =
     normalizeOptionalString(
@@ -288,11 +270,6 @@ function createNotificationUid(
       .id;
   }
 
-  /*
-   * A deterministic ID prevents duplicate notifications
-   * if Firebase retries a function or the browser repeats
-   * the same request.
-   */
   return [
     input.recipientUid,
     input.offerUid,

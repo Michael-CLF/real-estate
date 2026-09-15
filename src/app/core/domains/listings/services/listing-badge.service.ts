@@ -36,7 +36,7 @@ export class ListingBadgeService {
           type: 'under-contract',
           label: 'Under Contract',
           icon: 'fa-solid fa-file-signature',
-          tone: 'navy',
+          tone: 'dark-green',
           priority: 120
         }
       ];
@@ -72,7 +72,7 @@ export class ListingBadgeService {
         type: 'coming-soon',
         label: 'Coming Soon',
         icon: 'fa-solid fa-clock',
-        tone: 'navy',
+        tone: 'dark-green',
         priority: 90
       });
     }

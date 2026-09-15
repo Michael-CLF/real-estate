@@ -114,6 +114,12 @@ textarea {
   font-size: 1rem;
 }
 
+.offer-summary__property {
+  color: #526570;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
 .offer-summary__sender {
   min-width: 220px;
   padding-left: 24px;
@@ -150,6 +156,23 @@ textarea {
   color: #145c47;
   background: #ebfaf5;
   border: 1px solid #a6dfcd;
+}
+
+.message--closed-offer {
+  display: grid;
+  gap: 5px;
+  color: #7a2020;
+  background: #fff1f1;
+  border: 1px solid #e2a4a4;
+}
+
+.message--closed-offer strong {
+  font-size: 1.1rem;
+}
+
+.message--closed-offer span {
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .offer-page__grid {
@@ -427,6 +450,17 @@ textarea {
   background: #edf5f8;
 }
 
+.button--sold {
+  color: #ffffff;
+  background: #17836f;
+  border-color: #17836f;
+}
+
+.button--sold:hover:not(:disabled) {
+  background: #106b5b;
+  border-color: #106b5b;
+}
+
 .button--danger {
   color: #ffffff;
   background: #a82b2b;
@@ -441,8 +475,7 @@ textarea {
 }
 
 .button--text-danger {
-  background-color: #8b1d1d;
-  color: #ffffff;
+  border-color: transparent;
 }
 
 .state-card {

@@ -759,18 +759,6 @@ export class OfferValidationService {
     if (
       statements.ownersAssociationApplies
     ) {
-      if (
-        !this.hasText(
-          statements.ownersAssociationName
-        )
-      ) {
-        this.addError(
-          issues,
-          'sellerStatements.ownersAssociationName',
-          'Enter the owners association name.'
-        );
-      }
-
       this.validateOptionalMoney(
         statements
           .ownersAssociationDuesInCents,

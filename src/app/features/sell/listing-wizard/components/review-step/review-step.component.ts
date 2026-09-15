@@ -4,124 +4,72 @@ import {
   effect,
   input,
   output,
-  signal
+  signal,
 } from '@angular/core';
 
-import {
-  DecimalPipe
-} from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 
-import {
-  AddressFormValue
-} from '../address-step/address-step.component';
+import { AddressFormValue } from '../address-step/address-step.component';
 
-import {
-  PropertyDetailsFormValue
-} from '../property-details-step/property-details-step.component';
+import { PropertyDetailsFormValue } from '../property-details-step/property-details-step.component';
 
-import {
-  PropertyFeaturesStepValue
-} from '../property-features-step/property-features-step.component';
+import { PropertyFeaturesStepValue } from '../property-features-step/property-features-step.component';
 
-import {
-  ListingPhoto
-} from '../photos-step/photos-step.component';
+import { ListingPhoto } from '../photos-step/photos-step.component';
 
-import {
-  PricingFormValue
-} from '../pricing-step/pricing-step.component';
-
+import { PricingFormValue } from '../pricing-step/pricing-step.component';
 
 @Component({
   selector: 'app-review-step',
   standalone: true,
-  imports: [
-    DecimalPipe
-  ],
-  templateUrl:
-    './review-step.component.html',
-  styleUrl:
-    './review-step.component.scss',
-  changeDetection:
-    ChangeDetectionStrategy.OnPush
+  imports: [DecimalPipe],
+  templateUrl: './review-step.component.html',
+  styleUrl: './review-step.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewStepComponent {
-  readonly address =
-    input<AddressFormValue | null>(
-      null
-    );
+  readonly address = input<AddressFormValue | null>(null);
 
-  readonly propertyDetails =
-    input<PropertyDetailsFormValue | null>(
-      null
-    );
+  readonly propertyDetails = input<PropertyDetailsFormValue | null>(null);
 
-  readonly features =
-    input<PropertyFeaturesStepValue | null>(
-      null
-    );
+  readonly features = input<PropertyFeaturesStepValue | null>(null);
 
-  readonly photos =
-    input<ListingPhoto[]>([]);
+  readonly photos = input<ListingPhoto[]>([]);
 
-  readonly pricing =
-    input<PricingFormValue | null>(
-      null
-    );
+  readonly pricing = input<PricingFormValue | null>(null);
 
-  readonly initialFeaturedListing =
-    input(false);
+  readonly initialFeaturedListing = input(false);
 
-  readonly editStep =
-    output<number>();
+  readonly editStep = output<number>();
 
-  readonly featuredListingChange =
-    output<boolean>();
+  readonly featuredListingChange = output<boolean>();
 
-  readonly certificationChange =
-    output<boolean>();
+  readonly certificationChange = output<boolean>();
 
-  readonly validityChange =
-    output<boolean>();
+  readonly validityChange = output<boolean>();
 
-  protected readonly featuredListing =
-    signal(false);
+  protected readonly featuredListing = signal(false);
 
-  protected readonly certificationAccepted =
-    signal(false);
-
+  protected readonly certificationAccepted = signal(false);
 
   constructor() {
     effect(() => {
-      this.featuredListing.set(
-        this.initialFeaturedListing()
-      );
+      this.featuredListing.set(this.initialFeaturedListing());
     });
   }
 
-
-  protected edit(
-    step: number
-  ): void {
-    this.editStep.emit(
-      step
-    );
+  protected edit(step: number): void {
+    this.editStep.emit(step);
   }
 
-
-  protected get formattedAddress():
-    string {
-    const address =
-      this.address();
+  protected get formattedAddress(): string {
+    const address = this.address();
 
     if (!address) {
       return '—';
     }
 
-    const line2 =
-      address.addressLine2
-        ? ` ${address.addressLine2}`
-        : '';
+    const line2 = address.addressLine2 ? ` ${address.addressLine2}` : '';
 
     return (
       `${address.addressLine1}` +
@@ -132,278 +80,238 @@ export class ReviewStepComponent {
     );
   }
 
-
-  protected get formattedPropertyType():
-    string {
-    const propertyType =
-      this.propertyDetails()
-        ?.propertyType;
+  protected get formattedPropertyType(): string {
+    const propertyType = this.propertyDetails()?.propertyType;
 
     if (!propertyType) {
       return '—';
     }
 
-    const labels:
-      Record<string, string> = {
-      condo:
-        'Condo',
+    const labels: Record<string, string> = {
+      condo: 'Condo',
 
-      land:
-        'Land',
+      land: 'Land',
 
-      mobile:
-        'Mobile Home',
+      mobile: 'Mobile Home',
 
-      multi_family:
-        'Multi-Family',
+      multi_family: 'Multi-Family',
 
-      pud:
-        'PUD',
+      pud: 'PUD',
 
-      single_family:
-        'Single Family',
+      single_family: 'Single Family',
 
-      townhome:
-        'Townhome'
+      townhome: 'Townhome',
     };
 
-    return (
-      labels[propertyType] ??
-      propertyType
-    );
+    return labels[propertyType] ?? propertyType;
   }
 
-
-  protected get formattedPrice():
-    string {
-    const price =
-      this.pricing()
-        ?.listPrice;
+  protected get formattedPrice(): string {
+    const price = this.pricing()?.listPrice;
 
     if (!price) {
       return '—';
     }
 
-    return new Intl.NumberFormat(
-      'en-US',
-      {
-        style:
-          'currency',
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
 
-        currency:
-          'USD',
+      currency: 'USD',
 
-        maximumFractionDigits:
-          0
-      }
-    ).format(
-      price
-    );
+      maximumFractionDigits: 0,
+    }).format(price);
   }
 
+  protected get pricePerSquareFoot(): string {
+    const price = this.pricing()?.listPrice;
 
-  protected get pricePerSquareFoot():
-    string {
-    const price =
-      this.pricing()
-        ?.listPrice;
+    const squareFeet = this.propertyDetails()?.squareFeet;
 
-    const squareFeet =
-      this.propertyDetails()
-        ?.squareFeet;
-
-    if (
-      !price ||
-      !squareFeet
-    ) {
+    if (!price || !squareFeet) {
       return '—';
     }
 
-    return new Intl.NumberFormat(
-      'en-US',
-      {
-        style:
-          'currency',
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
 
-        currency:
-          'USD',
+      currency: 'USD',
 
-        minimumFractionDigits:
-          2,
+      minimumFractionDigits: 2,
 
-        maximumFractionDigits:
-          2
-      }
-    ).format(
-      price /
-      squareFeet
-    );
+      maximumFractionDigits: 2,
+    }).format(price / squareFeet);
   }
 
+  protected get selectedFeatures(): string[] {
+    const featureData = this.features();
 
-  protected get selectedFeatures():
-    string[] {
-    const featureData =
-      this.features();
-
-    if (
-      !featureData ||
-      featureData.mode ===
-      'unselected'
-    ) {
+    if (!featureData || featureData.mode === 'unselected') {
       return [];
     }
 
-    const sectionLabels:
-      Record<
-        string,
-        string
-      > = {
-      accessibility:
-        'Accessibility',
+    const sectionLabels: Record<string, string> = {
+      accessibility: 'Accessibility',
 
-      bedroomsBathrooms:
-        'Bedrooms & Bathrooms',
+      bedroomsBathrooms: 'Bedrooms & Bathrooms',
 
-      communityAmenities:
-        'Community Amenities',
+      communityAmenities: 'Community Amenities',
 
-      construction:
-        'Construction & Exterior',
+      construction: 'Construction & Exterior',
 
-      interior:
-        'Interior & Living Spaces',
+      interior: 'Interior & Living Spaces',
 
-      kitchen:
-        'Kitchen',
+      kitchen: 'Kitchen',
 
-      outdoorLiving:
-        'Outdoor Living',
+      outdoorLiving: 'Outdoor Living',
 
-      parkingStorage:
-        'Parking & Storage',
+      parkingStorage: 'Parking & Storage',
 
-      systemsUtilities:
-        'Systems, Utilities & Efficiency',
+      systemsUtilities: 'Systems, Utilities & Efficiency',
 
-      technologySecurity:
-        'Technology & Security'
+      technologySecurity: 'Technology & Security',
     };
 
-    return Object.entries(
-      featureData.enhancements
-    )
+    return Object.entries(featureData.enhancements)
       .filter(
-        (
-          [
-            ,
-            selectedValues
-          ]
-        ) =>
-          Array.isArray(
-            selectedValues
-          ) &&
-          selectedValues.length > 0
+        ([, selectedValues]) =>
+          Array.isArray(selectedValues) && selectedValues.length > 0,
       )
-      .map(
-        (
-          [
-            sectionKey,
-            selectedValues
-          ]
-        ) => {
-          const sectionLabel =
-            sectionLabels[
-            sectionKey
-            ] ??
-            sectionKey;
+      .map(([sectionKey, selectedValues]) => {
+        const sectionLabel = sectionLabels[sectionKey] ?? sectionKey;
 
-          const selectionCount =
-            selectedValues.length;
+        const selectionCount = selectedValues.length;
 
-          return (
-            `${sectionLabel} ` +
-            `(${selectionCount})`
-          );
-        }
-      )
-      .sort(
-        (
-          firstSection,
-          secondSection
-        ) =>
-          firstSection.localeCompare(
-            secondSection
-          )
+        return `${sectionLabel} ` + `(${selectionCount})`;
+      })
+      .sort((firstSection, secondSection) =>
+        firstSection.localeCompare(secondSection),
       );
   }
 
-  protected get primaryPhoto():
-    ListingPhoto |
-    null {
-    const photos =
-      this.photos();
+  protected get primaryPhoto(): ListingPhoto | null {
+    const photos = this.photos();
 
-    return (
-      photos.find(
-        photo =>
-          photo.isPrimary
-      ) ??
-      photos[0] ??
-      null
-    );
+    return photos.find((photo) => photo.isPrimary) ?? photos[0] ?? null;
   }
 
+  protected get formattedOwnershipStatus(): string {
+    const ownershipStatus =
+      this.propertyDetails()?.sellerStatements.ownershipStatus;
 
-  protected formatNumber(
-    value:
-      number |
-      null |
-      undefined
-  ): string {
-    if (
-      value === null ||
-      value === undefined
-    ) {
+    switch (ownershipStatus) {
+      case 'owned_at_least_one_year':
+        return 'Seller has owned the property for at least one year.';
+
+      case 'owned_less_than_one_year':
+        return 'Seller has owned the property for less than one year.';
+
+      case 'does_not_yet_own':
+        return 'Seller does not yet own the property.';
+
+      default:
+        return '—';
+    }
+  }
+
+  protected get formattedLeadBasedPaintStatement(): string {
+    const applies =
+      this.propertyDetails()?.sellerStatements.leadBasedPaintApplies;
+
+    if (applies === true) {
+      return 'Applicable to this property.';
+    }
+
+    if (applies === false) {
+      return 'Not indicated as applicable.';
+    }
+
+    return '—';
+  }
+
+  protected get formattedOwnersAssociationStatement(): string {
+    const hoa = this.propertyDetails()?.hoa;
+
+    if (hoa?.hasHoa === false) {
+      return 'None indicated.';
+    }
+
+    if (hoa?.hasHoa !== true) {
       return '—';
     }
 
-    return new Intl.NumberFormat(
-      'en-US'
-    ).format(
-      value
-    );
+    const fee =
+      hoa.feeAmount === null
+        ? ''
+        : new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+          }).format(hoa.feeAmount);
+
+    const details = [
+      hoa.associationName,
+      fee && hoa.feeFrequency
+        ? `${fee} ${hoa.feeFrequency.replace('_', ' ')}`
+        : '',
+      hoa.managementCompany ? `Contact: ${hoa.managementCompany}` : '',
+      hoa.contactPhone,
+    ].filter((value) => Boolean(value));
+
+    return details.join('; ');
   }
 
+  protected get formattedFuelTankStatement(): string {
+    const statements = this.propertyDetails()?.sellerStatements;
 
-  protected toggleFeaturedListing():
-    void {
-    const selected =
-      !this.featuredListing();
+    if (statements?.fuelTankPresent === false) {
+      return 'Not present.';
+    }
 
-    this.featuredListing.set(
-      selected
-    );
+    if (statements?.fuelTankPresent !== true) {
+      return '—';
+    }
 
-    this.featuredListingChange.emit(
-      selected
-    );
+    return statements.fuelTankOwnership === 'owned'
+      ? 'Present; owned.'
+      : statements.fuelTankOwnership === 'leased'
+        ? 'Present; leased.'
+        : 'Present.';
   }
 
+  protected get formattedExistingLeasesStatement(): string {
+    const leasesExist = this.propertyDetails()?.sellerStatements.leasesExist;
 
-  protected onCertificationChange(
-    checked: boolean
-  ): void {
-    this.certificationAccepted.set(
-      checked
-    );
+    if (leasesExist === true) {
+      return 'One or more leases exist.';
+    }
 
-    this.certificationChange.emit(
-      checked
-    );
+    if (leasesExist === false) {
+      return 'None indicated.';
+    }
 
-    this.validityChange.emit(
-      checked
-    );
+    return '—';
+  }
+
+  protected formatNumber(value: number | null | undefined): string {
+    if (value === null || value === undefined) {
+      return '—';
+    }
+
+    return new Intl.NumberFormat('en-US').format(value);
+  }
+
+  protected toggleFeaturedListing(): void {
+    const selected = !this.featuredListing();
+
+    this.featuredListing.set(selected);
+
+    this.featuredListingChange.emit(selected);
+  }
+
+  protected onCertificationChange(checked: boolean): void {
+    this.certificationAccepted.set(checked);
+
+    this.certificationChange.emit(checked);
+
+    this.validityChange.emit(checked);
   }
 }

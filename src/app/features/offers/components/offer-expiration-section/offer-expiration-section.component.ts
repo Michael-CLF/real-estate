@@ -82,9 +82,7 @@ export class OfferExpirationSectionComponent {
 
     const wasInteractedWith =
       dateControl?.touched === true ||
-      dateControl?.dirty === true ||
-      timeControl?.touched === true ||
-      timeControl?.dirty === true;
+      timeControl?.touched === true;
 
     return (
       wasInteractedWith &&
@@ -139,10 +137,7 @@ export class OfferExpirationSectionComponent {
     return Boolean(
       control &&
       control.invalid &&
-      (
-        control.touched ||
-        control.dirty
-      )
+      control.touched
     );
   }
 

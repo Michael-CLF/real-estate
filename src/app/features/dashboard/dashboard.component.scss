@@ -141,7 +141,7 @@
   justify-content: flex-end;
   gap: 9px 18px;
 
-  > span {
+  >span {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -255,7 +255,7 @@
     line-height: 1;
   }
 
-  > span {
+  >span {
     overflow: hidden;
 
     color: var(--overview-muted);
@@ -308,7 +308,7 @@
     font-size: 1.1rem;
   }
 
-  > a {
+  >a {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -347,7 +347,7 @@
     border-bottom: 0;
   }
 
-  > span {
+  >span {
     display: grid;
     width: 39px;
     height: 39px;
@@ -360,9 +360,9 @@
 
   strong {
     display: block;
-
+    color: #154360;
     font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
   }
 
   p {
@@ -373,14 +373,15 @@
     line-height: 1.4;
   }
 
-  > i {
+  >i {
     color: #91a5b3;
     font-size: 0.68rem;
   }
 
   &:hover {
+
     strong,
-    > i {
+    >i {
       color: var(--overview-teal);
     }
   }
@@ -391,7 +392,7 @@
   padding: 8px 22px;
   gap: 0;
 
-  > div {
+  >div {
     display: flex;
     min-height: 58px;
     border-bottom: 1px solid #e2e9ee;
@@ -441,7 +442,7 @@
   grid-template-columns:
     40px minmax(0, 1fr) auto;
 
-  > span {
+  >span {
     display: grid;
     width: 40px;
     height: 40px;
@@ -517,7 +518,7 @@
     font-size: 1.05rem;
   }
 
-  > div > p:last-child {
+  >div>p:last-child {
     margin: 0;
 
     color: var(--overview-muted);
@@ -645,15 +646,12 @@
 
   .dashboard-overview__main-grid {
     grid-template-columns:
-      minmax(0, 1.12fr)
-      minmax(330px, 0.88fr);
+      minmax(0, 1.12fr) minmax(330px, 0.88fr);
   }
 
   .dashboard-overview__business {
     grid-template-columns:
-      minmax(280px, 1fr)
-      auto
-      auto;
+      minmax(280px, 1fr) auto auto;
   }
 
   .dashboard-overview__business-actions {

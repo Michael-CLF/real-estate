@@ -213,6 +213,9 @@ implements OnInit {
   readonly saveMessage =
     signal('');
 
+  readonly validationAttemptedSection =
+    signal<string | null>(null);
+
   readonly sections:
     readonly OfferWizardSection[] = [
       {
@@ -1322,20 +1325,10 @@ implements OnInit {
           },
 
           offerReview: {
-            informationCertified:
-              false,
-
             electronicRecordsConsent:
-              false,
-
-            electronicSignatureConsent:
-              false,
-
-            navStreetDisclaimerAccepted:
-              false,
-
-            attorneyLanguageAcknowledged:
-              false
+              offerVersion.terms
+                .delivery
+                .electronicDeliveryAuthorized
           }
         },
         {
@@ -1382,44 +1375,6 @@ implements OnInit {
       }
 
       if (
-        !hasSavedForm &&
-        offerVersion.versionNumber > 1
-      ) {
-        this.offerForm.patchValue(
-          {
-            offerExpiration: {
-              expirationDate: '',
-              expirationTime: ''
-            },
-
-            offerReview: {
-              informationCertified:
-                false,
-
-              electronicRecordsConsent:
-                false,
-
-              electronicSignatureConsent:
-                false,
-
-              navStreetDisclaimerAccepted:
-                false,
-
-              attorneyLanguageAcknowledged:
-                false
-            }
-          },
-          {
-            emitEvent: false
-          }
-        );
-      }
-
-      this.configureBuyerDisclosureAccess(
-        offerVersion
-      );
-
-      if (
         typeof savedSectionIndex ===
           'number' &&
         Number.isInteger(
@@ -1433,6 +1388,8 @@ implements OnInit {
           savedSectionIndex
         );
       }
+
+      this.resetCurrentSectionValidationState();
 
       this.startAutosave();
 
@@ -1482,31 +1439,6 @@ implements OnInit {
           void this.queueDraftSave();
         }
       );
-  }
-
-
-  private configureBuyerDisclosureAccess(
-    offerVersion: OfferVersion
-  ): void {
-    const disclosuresAddenda =
-      this.offerForm.get(
-        'disclosuresAddenda'
-      );
-
-    if (
-      offerVersion.initiatedBy ===
-        'seller'
-    ) {
-      disclosuresAddenda?.disable({
-        emitEvent: false
-      });
-
-      return;
-    }
-
-    disclosuresAddenda?.enable({
-      emitEvent: false
-    });
   }
 
   private createWizardData():
@@ -1995,6 +1927,10 @@ implements OnInit {
       sectionIndex >
       this.currentSectionIndex()
     ) {
+      this.validationAttemptedSection.set(
+        this.currentSection().key
+      );
+
       this.currentSectionGroup
         .markAllAsTouched();
 
@@ -2011,9 +1947,15 @@ implements OnInit {
 
     this.errorMessage.set('');
 
+    this.validationAttemptedSection.set(
+      null
+    );
+
     this.currentSectionIndex.set(
       sectionIndex
     );
+
+    this.resetCurrentSectionValidationState();
 
     await this.queueDraftSave();
 
@@ -2021,6 +1963,10 @@ implements OnInit {
   }
 
   async continue(): Promise<void> {
+    this.validationAttemptedSection.set(
+      this.currentSection().key
+    );
+
     this.currentSectionGroup
       .markAllAsTouched();
 
@@ -2036,6 +1982,10 @@ implements OnInit {
 
     this.errorMessage.set('');
 
+    this.validationAttemptedSection.set(
+      null
+    );
+
     if (this.isLastSection()) {
       await this.submitCurrentOffer();
       return;
@@ -2044,6 +1994,8 @@ implements OnInit {
     this.currentSectionIndex.update(
       index => index + 1
     );
+
+    this.resetCurrentSectionValidationState();
 
     await this.queueDraftSave();
 
@@ -2058,9 +2010,15 @@ implements OnInit {
 
     this.errorMessage.set('');
 
+    this.validationAttemptedSection.set(
+      null
+    );
+
     this.currentSectionIndex.update(
       index => index - 1
     );
+
+    this.resetCurrentSectionValidationState();
 
     await this.queueDraftSave();
 
@@ -2094,6 +2052,12 @@ implements OnInit {
     ]);
   }
 
+  private resetCurrentSectionValidationState():
+    void {
+    this.currentSectionGroup.markAsPristine();
+    this.currentSectionGroup.markAsUntouched();
+  }
+
   private async submitCurrentOffer():
     Promise<void> {
     if (!this.prepareForSubmission()) {
@@ -2112,21 +2076,14 @@ implements OnInit {
         this.offerVersionUid
       );
 
-      try {
-        await this.offerDocumentService
-          .generateAgreement(
-            this.offerUid,
-            this.offerVersionUid,
-            this.offerVersionNumber === 1
-              ? 'offer_agreement'
-              : 'counteroffer_agreement'
-          );
-      } catch (error: unknown) {
-        console.error(
-          'The offer was submitted, but its agreement PDF could not be prepared automatically.',
-          error
+      await this.offerDocumentService
+        .generateAgreement(
+          this.offerUid,
+          this.offerVersionUid,
+          this.offerVersionNumber === 1
+            ? 'offer_agreement'
+            : 'counteroffer_agreement'
         );
-      }
 
       await this.router.navigate([
         '/offers',
@@ -2134,14 +2091,14 @@ implements OnInit {
       ]);
     } catch (error: unknown) {
       console.error(
-        'Unable to submit the offer.',
+        'Unable to prepare the offer for signature.',
         error
       );
 
       this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Your offer could not be submitted. Please try again.'
+          : 'Your agreement could not be prepared. Please try again.'
       );
 
       this.scrollToTop();
@@ -2160,6 +2117,10 @@ implements OnInit {
 
       this.currentSectionIndex.set(
         firstInvalidSection
+      );
+
+      this.validationAttemptedSection.set(
+        this.currentSection().key
       );
 
       this.errorMessage.set(

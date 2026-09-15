@@ -31,25 +31,25 @@ export interface OfferStatusHistoryEntry {
   toStatus: OfferStatus;
 
   action:
-    | 'draft_created'
-    | 'draft_saved'
-    | 'submitted'
-    | 'viewed'
-    | 'countered'
-    | 'accepted'
-    | 'declined'
-    | 'withdrawn'
-    | 'expired'
-    | 'closed_due_to_contract'
-    | 'converted_to_contract';
+  | 'draft_created'
+  | 'draft_saved'
+  | 'submitted'
+  | 'viewed'
+  | 'countered'
+  | 'accepted'
+  | 'declined'
+  | 'withdrawn'
+  | 'expired'
+  | 'closed_due_to_contract'
+  | 'converted_to_contract';
 
   actorUid: string;
 
   actorRole:
-    | 'buyer'
-    | 'seller'
-    | 'system'
-    | 'administrator';
+  | 'buyer'
+  | 'seller'
+  | 'system'
+  | 'administrator';
 
   offerVersionUid?: string;
   offerVersionNumber?: number;
@@ -111,6 +111,8 @@ export interface Offer {
 
   /*
    * All authenticated buyers associated with the offer.
+   * Additional invited buyers may be added after their
+   * accounts are connected.
    */
   buyerUids: string[];
 
@@ -123,26 +125,16 @@ export interface Offer {
   status: OfferStatus;
 
   /*
-   * True while this complete offer transaction contributes
-   * one unit to the listing's pending-offer count.
-   */
-  pendingOfferCounted?: boolean;
-
-  /*
    * Current editable or actionable version.
    */
   currentVersionUid: string;
   currentVersionNumber: number;
 
-  currentVersionInitiatedBy:
-    | 'buyer'
-    | 'seller';
-
-  /*
-   * Most recent version signed and sent to the receiving
-   * party. The current version may still be a private draft.
-   */
   lastDeliveredVersionUid?: string;
+
+  currentVersionInitiatedBy:
+  | 'buyer'
+  | 'seller';
 
   /*
    * First buyer-created version.
@@ -174,6 +166,10 @@ export interface Offer {
 
 /*
  * Data required to create a new offer thread.
+ *
+ * The backend obtains seller and property information from
+ * the published listing rather than trusting values sent
+ * by the browser.
  */
 export interface CreateOfferDraftInput {
   listingUid: string;
@@ -218,13 +214,12 @@ export interface OfferSummary {
   lastDeliveredVersionUid?: string;
 
   currentVersionInitiatedBy:
-    | 'buyer'
-    | 'seller';
+  | 'buyer'
+  | 'seller';
 
   currentVersionSenderName: string;
 
-  currentVersionStatus:
-    OfferVersionStatus;
+  currentVersionStatus: OfferVersionStatus;
 
   purchasePriceInCents: number;
 
@@ -241,8 +236,8 @@ export interface OfferSummary {
  */
 export interface OfferSearchFilters {
   role:
-    | 'buyer'
-    | 'seller';
+  | 'buyer'
+  | 'seller';
 
   statuses?: OfferStatus[];
 
@@ -253,7 +248,11 @@ export interface OfferSearchFilters {
 
 
 /*
- * Complete offer thread with its ordered version UIDs.
+ * Complete offer thread with its ordered versions.
+ *
+ * The version type is imported by consumers only when the
+ * full history is needed, helping avoid circular model
+ * imports here.
  */
 export interface OfferWithVersionUids {
   offer: Offer;

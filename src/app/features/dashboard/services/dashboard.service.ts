@@ -116,6 +116,31 @@ export class DashboardService {
   async getActiveListings():
     Promise<Listing[]> {
 
+    return this.getListingsByStatus(
+      'active'
+    );
+  }
+
+  async getUnderContractListings():
+    Promise<Listing[]> {
+
+    return this.getListingsByStatus(
+      'under_contract'
+    );
+  }
+
+  async getSoldListings():
+    Promise<Listing[]> {
+
+    return this.getListingsByStatus(
+      'sold'
+    );
+  }
+
+  private async getListingsByStatus(
+    status: string
+  ): Promise<Listing[]> {
+
     const listingsRef =
       collection(
         firestore,
@@ -135,7 +160,7 @@ export class DashboardService {
         where(
           'status',
           '==',
-          'active'
+          status
         )
       );
 

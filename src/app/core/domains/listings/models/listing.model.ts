@@ -55,6 +55,7 @@ export interface Listing {
 
   // Seller certification
   certification: ListingCertification;
+  sellerStatements?: ListingSellerStatements;
 
   // Workflow
   workflow: ListingWorkflow;
@@ -500,6 +501,30 @@ export interface ListingCertification {
   acceptedAt?: Date;
 }
 
+export type ListingSellerOwnershipStatus =
+  'owned_at_least_one_year' | 'owned_less_than_one_year' | 'does_not_yet_own';
+
+export type ListingFuelTankOwnership = 'owned' | 'leased';
+
+export interface ListingSellerStatements {
+  ownershipStatus: ListingSellerOwnershipStatus;
+
+  leadBasedPaintApplies: boolean;
+  leadBasedPaintDisclosureDocumentUid?: string;
+
+  ownersAssociationApplies: boolean;
+  ownersAssociationName?: string;
+  ownersAssociationDuesInCents?: number;
+  ownersAssociationDuesFrequency?: string;
+  ownersAssociationContact?: string;
+
+  fuelTankPresent: boolean;
+  fuelTankOwnership?: ListingFuelTankOwnership;
+
+  leasesExist: boolean;
+  leaseAddendumDocumentUid?: string;
+}
+
 export interface ListingWorkflow {
   identityVerified: boolean;
   paymentCompleted: boolean;
@@ -557,6 +582,7 @@ export interface ListingDraft {
   promotion?: ListingPromotion;
 
   certification: ListingCertification;
+  sellerStatements?: ListingSellerStatements;
 
   progress: ListingDraftProgress;
   publication: ListingPublicationWorkflow;
@@ -611,9 +637,7 @@ export interface ListingDraftProgress {
   completedSteps: ListingDraftStep[];
   completionPercent: number;
 
-  contentStatus:
-    | 'in_progress'
-    | 'complete';
+  contentStatus: 'in_progress' | 'complete';
 }
 
 export interface ListingPublicationWorkflow {
@@ -689,15 +713,9 @@ export type ListingIdentityStatus =
   | 'requires_input';
 
 export type ListingPaymentStatus =
-  | 'not_started'
-  | 'pending'
-  | 'paid'
-  | 'failed'
-  | 'refunded';
+  'not_started' | 'pending' | 'paid' | 'failed' | 'refunded';
 
-export type LotSizeUnit =
-  | 'acres'
-  | 'square_feet';
+export type LotSizeUnit = 'acres' | 'square_feet';
 
 export type ArchitecturalStyle =
   | 'a_frame'
@@ -742,19 +760,10 @@ export type RoofType =
   | 'other';
 
 export type FoundationType =
-  | 'basement'
-  | 'crawl_space'
-  | 'pier_and_beam'
-  | 'raised'
-  | 'slab'
-  | 'other';
+  'basement' | 'crawl_space' | 'pier_and_beam' | 'raised' | 'slab' | 'other';
 
 export type BasementType =
-  | 'none'
-  | 'unfinished'
-  | 'partially_finished'
-  | 'finished'
-  | 'walkout';
+  'none' | 'unfinished' | 'partially_finished' | 'finished' | 'walkout';
 
 export type FlooringType =
   | 'bamboo'
@@ -770,25 +779,12 @@ export type FlooringType =
   | 'vinyl'
   | 'other';
 
-export type FloorPlanType =
-  | 'open'
-  | 'traditional'
-  | 'split_level'
-  | 'other';
+export type FloorPlanType = 'open' | 'traditional' | 'split_level' | 'other';
 
 export type CeilingFeature =
-  | 'cathedral'
-  | 'coffered'
-  | 'high'
-  | 'standard'
-  | 'tray'
-  | 'vaulted';
+  'cathedral' | 'coffered' | 'high' | 'standard' | 'tray' | 'vaulted';
 
-export type FireplaceType =
-  | 'electric'
-  | 'gas'
-  | 'pellet'
-  | 'wood_burning';
+export type FireplaceType = 'electric' | 'gas' | 'pellet' | 'wood_burning';
 
 export type InteriorFeature =
   | 'built_in_cabinetry'
@@ -813,11 +809,7 @@ export type LaundryLocation =
   | 'upper_floor'
   | 'utility_room';
 
-export type PrimaryBedroomFloor =
-  | 'basement'
-  | 'main'
-  | 'second'
-  | 'third';
+export type PrimaryBedroomFloor = 'basement' | 'main' | 'second' | 'third';
 
 export type CountertopMaterial =
   | 'butcher_block'
@@ -833,29 +825,14 @@ export type CountertopMaterial =
   | 'other';
 
 export type GarageType =
-  | 'none'
-  | 'attached'
-  | 'detached'
-  | 'built_in'
-  | 'tandem';
+  'none' | 'attached' | 'detached' | 'built_in' | 'tandem';
 
-export type DrivewayType =
-  | 'standard'
-  | 'circular'
-  | 'shared'
-  | 'gated';
+export type DrivewayType = 'standard' | 'circular' | 'shared' | 'gated';
 
 export type DrivewaySurface =
-  | 'asphalt'
-  | 'concrete'
-  | 'gravel'
-  | 'paver'
-  | 'other';
+  'asphalt' | 'concrete' | 'gravel' | 'paver' | 'other';
 
-export type EvChargingStatus =
-  | 'none'
-  | 'ready'
-  | 'installed';
+export type EvChargingStatus = 'none' | 'ready' | 'installed';
 
 export type HeatingType =
   | 'baseboard'
@@ -880,25 +857,12 @@ export type CoolingType =
   | 'other';
 
 export type WaterHeaterType =
-  | 'electric'
-  | 'gas'
-  | 'heat_pump'
-  | 'propane'
-  | 'solar'
-  | 'tankless';
+  'electric' | 'gas' | 'heat_pump' | 'propane' | 'solar' | 'tankless';
 
-export type ElectricSource =
-  | 'public'
-  | 'solar'
-  | 'generator'
-  | 'off_grid';
+export type ElectricSource = 'public' | 'solar' | 'generator' | 'off_grid';
 
 export type WaterSource =
-  | 'municipal'
-  | 'private_well'
-  | 'shared_well'
-  | 'community_system'
-  | 'other';
+  'municipal' | 'private_well' | 'shared_well' | 'community_system' | 'other';
 
 export type SewerType =
   | 'municipal'
@@ -908,24 +872,13 @@ export type SewerType =
   | 'other';
 
 export type InternetType =
-  | 'cable'
-  | 'dsl'
-  | 'fiber'
-  | 'fixed_wireless'
-  | 'satellite'
-  | 'none';
+  'cable' | 'dsl' | 'fiber' | 'fixed_wireless' | 'satellite' | 'none';
 
 export type TrashServiceType =
-  | 'municipal'
-  | 'private'
-  | 'hoa'
-  | 'self_disposal';
+  'municipal' | 'private' | 'hoa' | 'self_disposal';
 
 export type ListingHoaFeeFrequency =
-  | 'monthly'
-  | 'quarterly'
-  | 'semi_annually'
-  | 'annually';
+  'monthly' | 'quarterly' | 'semi_annually' | 'annually';
 
 export type ListingHoaIncludedItem =
   | 'amenities'
@@ -981,8 +934,4 @@ export type AccessibilityFeature =
   | 'zero_step_entry'
   | 'other';
 
-export type SchoolType =
-  | 'public'
-  | 'charter'
-  | 'magnet'
-  | 'private';
+export type SchoolType = 'public' | 'charter' | 'magnet' | 'private';

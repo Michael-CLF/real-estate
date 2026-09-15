@@ -248,6 +248,53 @@ export class OfferReviewSectionComponent {
     );
   }
 
+  get sellerStatementsIncluded(): boolean {
+    return this.offerForm.get(
+      'disclosuresAddenda.sellerStatements'
+    )?.enabled === true;
+  }
+
+  get sellerOwnershipLabel(): string {
+    switch (
+    this.value(
+      'disclosuresAddenda.sellerStatements.ownershipStatus'
+    )
+    ) {
+      case 'owned_at_least_one_year':
+        return 'Owned for at least one year';
+
+      case 'owned_less_than_one_year':
+        return 'Owned for less than one year';
+
+      case 'does_not_yet_own':
+        return 'Seller does not yet own the property';
+
+      default:
+        return 'Not selected';
+    }
+  }
+
+  get fuelTankLabel(): string {
+    if (
+      !this.booleanValue(
+        'disclosuresAddenda.sellerStatements.fuelTankPresent'
+      )
+    ) {
+      return 'No';
+    }
+
+    const ownership =
+      this.value(
+        'disclosuresAddenda.sellerStatements.fuelTankOwnership'
+      );
+
+    return ownership === 'leased'
+      ? 'Yes—leased'
+      : ownership === 'owned'
+        ? 'Yes—owned'
+        : 'Yes—ownership not selected';
+  }
+
   get additionalTermsLabel(): string {
     if (
       !this.booleanValue(
@@ -302,6 +349,34 @@ export class OfferReviewSectionComponent {
       );
     }
 
+    if (
+      this.sellerStatementsIncluded &&
+      this.booleanValue(
+        'disclosuresAddenda.sellerStatements.leadBasedPaintApplies'
+      ) &&
+      !this.hasText(
+        'disclosuresAddenda.sellerStatements.leadBasedPaintDisclosureDocumentUid'
+      )
+    ) {
+      issues.push(
+        'Lead-based-paint disclosure'
+      );
+    }
+
+    if (
+      this.sellerStatementsIncluded &&
+      this.booleanValue(
+        'disclosuresAddenda.sellerStatements.leasesExist'
+      ) &&
+      !this.hasText(
+        'disclosuresAddenda.sellerStatements.leaseAddendumDocumentUid'
+      )
+    ) {
+      issues.push(
+        'Applicable lease addendum'
+      );
+    }
+
     return issues;
   }
 
@@ -338,7 +413,7 @@ export class OfferReviewSectionComponent {
       },
       {
         controlName: 'disclosuresAddenda',
-        label: 'Section 7 — Buyer Disclosure Acknowledgements'
+        label: 'Section 7 — Disclosures and Seller Statements'
       },
       {
         controlName: 'additionalTerms',
