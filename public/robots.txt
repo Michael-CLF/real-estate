@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+Disallow: /administration/
+Disallow: /dashboard/
+Disallow: /sell/
+Disallow: /education/
+Disallow: /calculators/
+Disallow: /find-a-pro/
+Disallow: /register
+Disallow: /sign-in
+Disallow: /offers/
+Disallow: /h/
+Disallow: /listings/*/offer
+Disallow: /professionals/*/profile/setup
+
+Sitemap: https://navstreet.com/sitemap.xml
