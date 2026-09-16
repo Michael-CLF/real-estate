@@ -229,11 +229,6 @@ export const PUBLIC_ROUTES:
         {
           path: 'calculators',
 
-          canActivate: [
-            authGuard,
-            accountGuard
-          ],
-
           children: [
             /*
              * Calculator center

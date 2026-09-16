@@ -5,7 +5,6 @@ Disallow: /administration/
 Disallow: /dashboard/
 Disallow: /sell/
 Disallow: /education/
-Disallow: /calculators/
 Disallow: /find-a-pro/
 Disallow: /register
 Disallow: /sign-in
