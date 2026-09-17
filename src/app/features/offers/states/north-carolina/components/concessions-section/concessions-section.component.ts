@@ -25,7 +25,7 @@ import {
 
 import {
   CurrencyInputDirective
-} from '../../directives/currency-input.directive';
+} from '../../../../../offers/directives/currency-input.directive';
 
 
 @Component({

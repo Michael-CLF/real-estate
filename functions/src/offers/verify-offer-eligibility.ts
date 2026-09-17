@@ -14,11 +14,10 @@ import type {
   OfferEligibleListing,
 } from './offer-types';
 
+import {
+  requireEnabledStateContractPackage,
+} from './state-contracts/state-contract-registry';
 
-const SUPPORTED_OFFER_STATES =
-  new Set([
-    'NC',
-  ]);
 
 
 /*
@@ -118,12 +117,9 @@ export async function verifyOfferEligibility(
       .trim()
       .toUpperCase();
 
-  if (!SUPPORTED_OFFER_STATES.has(stateCode)) {
-    throw new HttpsError(
-      'failed-precondition',
-      `NavStreet offers are not yet available in ${stateCode}.`
-    );
-  }
+requireEnabledStateContractPackage(
+  stateCode
+);
 
   const listPrice =
     readRequiredNumber(

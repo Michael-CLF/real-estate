@@ -33,71 +33,71 @@ import {
 
 import {
   AdditionalTermsSectionComponent
-} from '../components/additional-terms-section/additional-terms-section.component';
+} from '../../north-carolina/components/additional-terms-section/additional-terms-section.component';
 
 import {
   BuyerPropertySectionComponent
-} from '../components/buyer-property-section/buyer-property-section.component';
+} from '../../north-carolina/components/buyer-property-section/buyer-property-section.component';
 
 import {
   ConcessionsSectionComponent
-} from '../components/concessions-section/concessions-section.component';
+} from '../../north-carolina/components/concessions-section/concessions-section.component';
 
 import {
   DepositsDueDiligenceSectionComponent
-} from '../components/deposits-due-diligence-section/deposits-due-diligence-section.component';
+} from '../../north-carolina/components/deposits-due-diligence-section/deposits-due-diligence-section.component';
 
 import {
   DisclosuresAddendaSectionComponent
-} from '../components/disclosures-addenda-section/disclosures-addenda-section.component';
+} from '../../north-carolina/components/disclosures-addenda-section/disclosures-addenda-section.component';
 
 import {
   OfferExpirationSectionComponent
-} from '../components/offer-expiration-section/offer-expiration-section.component';
+} from '../../north-carolina/components/offer-expiration-section/offer-expiration-section.component';
 
 import {
   OfferReviewSectionComponent
-} from '../components/offer-review-section/offer-review-section.component';
+} from '../../north-carolina/components/offer-review-section/offer-review-section.component';
 
 import {
   PriceFinancingSectionComponent
-} from '../components/price-financing-section/price-financing-section.component';
+} from '../../north-carolina/components/price-financing-section/price-financing-section.component';
 
 import {
   PropertyInclusionsSectionComponent
-} from '../components/property-inclusions-section/property-inclusions-section.component';
+} from '../../north-carolina/components/property-inclusions-section/property-inclusions-section.component';
 
 import {
   SettlementPossessionSectionComponent
-} from '../components/settlement-possession-section/settlement-possession-section.component';
+} from '../../north-carolina/components/settlement-possession-section/settlement-possession-section.component';
 
 import {
   AccountState
-} from '../../../core/authentication/state/account.state';
+} from '../../../../../core/authentication/state/account.state';
 
 import {
   MarketplaceListingRepository
-} from '../../../core/domains/marketplace/repositories/marketplace-listing.repository';
+} from '../../../../../core/domains/marketplace/repositories/marketplace-listing.repository';
 
 import {
   FirestoreMarketplaceListingRepository
-} from '../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
+} from '../../../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
 
 import {
   OfferTerms
-} from '../../../core/domains/offers/models/offer-terms.model';
+} from '../../../../../core/domains/offers/models/offer-terms.model';
 
 import {
   OfferVersion
-} from '../../../core/domains/offers/models/offer-version.model';
+} from '../../../../../core/domains/offers/models/offer-version.model';
 
 import {
   OfferService
-} from '../../../core/domains/offers/services/offer.service';
+} from '../../../../../core/domains/offers/services/offer.service';
 
 import {
   OfferDocumentService
-} from '../../../core/domains/offers/services/offer-document.service';
+} from '../../../../../core/domains/offers/services/offer-document.service';
 
 
 export interface OfferWizardSection {

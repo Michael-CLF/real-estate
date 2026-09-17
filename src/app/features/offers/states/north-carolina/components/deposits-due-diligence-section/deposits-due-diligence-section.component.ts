@@ -25,12 +25,12 @@ import {
 
 import {
   CurrencyInputDirective
-} from '../../directives/currency-input.directive';
+} from '../../../../../offers/directives/currency-input.directive';
 
 
 @Component({
   selector:
-    'app-price-financing-section',
+    'app-deposits-due-diligence-section',
 
   standalone: true,
 
@@ -40,10 +40,10 @@ import {
   ],
 
   templateUrl:
-    './price-financing-section.component.html',
+    './deposits-due-diligence-section.component.html',
 
   styleUrl:
-    './price-financing-section.component.scss',
+    './deposits-due-diligence-section.component.scss',
 
   viewProviders: [
     {
@@ -58,7 +58,7 @@ import {
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
-export class PriceFinancingSectionComponent
+export class DepositsDueDiligenceSectionComponent
 implements OnInit {
 
   private readonly parentFormDirective =
@@ -72,42 +72,35 @@ implements OnInit {
       this.parentFormDirective
         .form
         .get(
-          'priceFinancing'
+          'depositsDueDiligence'
         );
 
     if (!(section instanceof FormGroup)) {
       throw new Error(
-        'The priceFinancing offer section is unavailable.'
+        'The depositsDueDiligence offer section is unavailable.'
       );
     }
 
     return section;
   }
 
-  get financingMethod(): string {
+  get deadlineType(): string {
     return String(
       this.control(
-        'financingMethod'
+        'dueDiligenceDeadlineType'
       )?.value ?? ''
     );
   }
 
-  get otherPropertyWillFundPurchase():
-    boolean {
-    return this.control(
-      'otherPropertyWillFundPurchase'
-    )?.value === true;
-  }
-
   ngOnInit(): void {
     this.control(
-      'otherPropertyWillFundPurchase'
+      'dueDiligenceDeadlineType'
     )
       ?.valueChanges
       .pipe(
         startWith(
           this.control(
-            'otherPropertyWillFundPurchase'
+            'dueDiligenceDeadlineType'
           )?.value
         ),
 
@@ -117,7 +110,7 @@ implements OnInit {
       )
       .subscribe(
         () => {
-          this.updateOtherPropertyValidator();
+          this.updateDeadlineValidators();
         }
       );
   }
@@ -165,11 +158,24 @@ implements OnInit {
     }
 
     if (control.hasError('pattern')) {
-      return 'Select cash or loan.';
+      return controlName ===
+        'depositDeliveryDays'
+        ? 'Enter a whole number of calendar days.'
+        : 'Select a valid due-diligence deadline.';
     }
 
     if (control.hasError('min')) {
-      return 'Enter an amount greater than zero.';
+      return controlName ===
+        'depositDeliveryDays'
+        ? 'Enter at least 1 calendar day.'
+        : 'Enter zero or a greater amount.';
+    }
+
+    if (control.hasError('max')) {
+      return controlName ===
+        'depositDeliveryDays'
+        ? 'The delivery period cannot exceed 30 days.'
+        : 'The number of days cannot exceed 365.';
     }
 
     if (control.hasError('maxlength')) {
@@ -179,29 +185,56 @@ implements OnInit {
     return 'Review the information entered in this field.';
   }
 
-  private updateOtherPropertyValidator():
+  private updateDeadlineValidators():
     void {
-    const descriptionControl =
+    const dateControl =
       this.control(
-        'otherPropertyDescription'
+        'dueDiligenceEndDate'
+      );
+
+    const daysControl =
+      this.control(
+        'dueDiligenceDaysAfterEffectiveDate'
       );
 
     if (
-      this.otherPropertyWillFundPurchase
+      this.deadlineType ===
+        'specific_date'
     ) {
-      descriptionControl
-        ?.setValidators([
-          Validators.required,
-          Validators.maxLength(500)
-        ]);
+      dateControl?.setValidators([
+        Validators.required
+      ]);
+
+      daysControl?.setValidators([
+        Validators.min(1),
+        Validators.max(365)
+      ]);
+    } else if (
+      this.deadlineType ===
+        'days_after_effective_date'
+    ) {
+      dateControl?.clearValidators();
+
+      daysControl?.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(365)
+      ]);
     } else {
-      descriptionControl
-        ?.setValidators([
-          Validators.maxLength(500)
-        ]);
+      dateControl?.clearValidators();
+
+      daysControl?.setValidators([
+        Validators.min(1),
+        Validators.max(365)
+      ]);
     }
 
-    descriptionControl
+    dateControl
+      ?.updateValueAndValidity({
+        emitEvent: false
+      });
+
+    daysControl
       ?.updateValueAndValidity({
         emitEvent: false
       });

@@ -8,6 +8,10 @@ import { callableFunctionOptions } from '../shared/function-options';
 
 import { verifyOfferEligibility } from './verify-offer-eligibility';
 
+import {
+  requireEnabledStateContractPackage,
+} from './state-contracts/state-contract-registry';
+
 import { getListingOfferAvailabilityMessage } from './listing-offer-availability';
 
 import type {
@@ -15,7 +19,6 @@ import type {
   CreateOfferDraftResponse,
   OfferEligibleListing,
   OfferPropertySnapshotDocument,
-  OfferTermsDocument,
   OfferUserProfile,
   OfferVersionPartySnapshotDocument,
 } from './offer-types';
@@ -44,13 +47,26 @@ export const createOfferDraft = onCall<
     );
   }
 
-  const listingUid = requireIdentifier(request.data?.listingUid, 'listingUid');
+  const listingUid =
+    requireIdentifier(
+      request.data?.listingUid,
+      'listingUid'
+    );
 
   /*
    * Initial eligibility check provides clear errors
    * before user-profile and transaction work begins.
    */
-  const eligibleListing = await verifyOfferEligibility(listingUid, buyerUid);
+  const eligibleListing =
+    await verifyOfferEligibility(
+      listingUid,
+      buyerUid
+    );
+
+  const stateContractPackage =
+    requireEnabledStateContractPackage(
+      eligibleListing.state
+    );
 
   const [buyerProfile, sellerProfile, buyerAuthUser, sellerAuthUser] =
     await Promise.all([
@@ -73,11 +89,12 @@ export const createOfferDraft = onCall<
 
   const now = Timestamp.now();
 
-  const referenceNumber = createReferenceNumber(
-    eligibleListing.state,
-    offerReference.id,
-    now.toDate(),
-  );
+  const referenceNumber =
+    createReferenceNumber(
+      stateContractPackage.stateCode,
+      offerReference.id,
+      now.toDate()
+    );
 
   const result = await adminFirestore.runTransaction(async (transaction) => {
     const listingReference = adminFirestore
@@ -133,6 +150,25 @@ export const createOfferDraft = onCall<
       throw new HttpsError(
         'failed-precondition',
         getListingOfferAvailabilityMessage(currentListingData),
+      );
+    }
+
+    const currentStateCode =
+      readRequiredString(
+        currentListingData,
+        'state',
+        'The listing does not identify its state.'
+      )
+        .trim()
+        .toUpperCase();
+
+    if (
+      currentStateCode !==
+      stateContractPackage.stateCode
+    ) {
+      throw new HttpsError(
+        'aborted',
+        'The listing state changed while the offer was being created. Please try again.'
       );
     }
 
@@ -255,12 +291,21 @@ export const createOfferDraft = onCall<
       now,
     });
 
-    const initialTerms = createInitialOfferTerms(
-      propertySnapshot,
-      buyerParty,
-      sellerParty,
-      createSellerStatementsSnapshot(currentListingData),
-    );
+    const initialTerms =
+      stateContractPackage
+        .createInitialOfferTerms({
+          property:
+            propertySnapshot,
+
+          buyer:
+            buyerParty,
+
+          seller:
+            sellerParty,
+
+          listingData:
+            currentListingData,
+        });
 
     const offerData = removeUndefinedValues({
       Uid: offerReference.id,
@@ -268,7 +313,8 @@ export const createOfferDraft = onCall<
       referenceNumber,
 
       listingUid,
-      stateCode: eligibleListing.state,
+      stateCode:
+        stateContractPackage.stateCode,
 
       property: propertySnapshot,
 
@@ -326,7 +372,8 @@ export const createOfferDraft = onCall<
 
       status: 'draft',
 
-      stateCode: eligibleListing.state,
+      stateCode:
+        stateContractPackage.stateCode,
 
       terms: initialTerms,
 
@@ -528,93 +575,6 @@ function createPartySnapshot(input: {
   }) as unknown as OfferVersionPartySnapshotDocument;
 }
 
-function createInitialOfferTerms(
-  property: OfferPropertySnapshotDocument,
-
-  buyer: OfferVersionPartySnapshotDocument,
-
-  seller: OfferVersionPartySnapshotDocument,
-
-  sellerStatements: OfferTermsDocument['sellerStatements'],
-): OfferTermsDocument {
-  const listPriceInCents = property.listPriceInCents;
-
-  return {
-    stateCode: 'NC',
-
-    property,
-
-    propertyTerms: {
-      manufacturedHomeIncluded: false,
-
-      separatePropertyIncluded: false,
-    },
-
-    purchase: {
-      purchasePriceInCents: listPriceInCents,
-
-      financingType: 'unselected',
-
-      otherPropertyWillFundPurchase: false,
-    },
-
-    deposits: {
-      depositInCents: 0,
-
-      depositDeliveryDays: 4,
-
-      escrowAgentName: '',
-
-      dueDiligenceDeadlineType: 'unselected',
-
-      dueDiligenceEndTime: '17:00',
-    },
-
-    concessions: {
-      concessionType: 'none',
-
-      homeWarrantyRequested: false,
-    },
-
-    settlement: {
-      settlementDate: '',
-
-      possessionTiming: 'at_closing',
-    },
-
-    buyerDisclosures: {
-      residentialProperty: {
-        status: 'unselected',
-        acknowledged: false,
-      },
-
-      mineralOilGasRights: {
-        status: 'unselected',
-        acknowledged: false,
-      },
-    },
-
-    sellerStatements,
-
-    addenda: [],
-
-    additionalTermsExhibit: {
-      included: false,
-    },
-
-    delivery: {
-      expiresAt: '',
-
-      timeZone: 'America/New_York',
-
-      buyerDeliveryEmail: buyer.email,
-
-      sellerDeliveryEmail: seller.email,
-
-      electronicDeliveryAuthorized: false,
-    },
-  };
-}
 
 async function loadUserProfile(
   userUid: string,
@@ -736,20 +696,6 @@ function readOptionalString(
   return normalizedValue.length > 0 ? normalizedValue : undefined;
 }
 
-function readRequiredBoolean(
-  data: Record<string, unknown>,
-  fieldName: string,
-  errorMessage: string,
-): boolean {
-  const value = data[fieldName];
-
-  if (typeof value !== 'boolean') {
-    throw new HttpsError('failed-precondition', errorMessage);
-  }
-
-  return value;
-}
-
 function readFirstOptionalString(
   data: Record<string, unknown>,
   fieldNames: string[],
@@ -784,139 +730,6 @@ function removeUndefinedValues<T>(value: T): T {
   }
 
   return value;
-}
-
-function createSellerStatementsSnapshot(
-  listingData: Record<string, unknown>,
-): OfferTermsDocument['sellerStatements'] {
-  const value = listingData['sellerStatements'];
-
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The seller must complete the listing representations before this property can receive offers.',
-    );
-  }
-
-  const statements = value as Record<string, unknown>;
-
-  const ownershipStatus = readRequiredString(
-    statements,
-    'ownershipStatus',
-    'The listing does not contain a valid seller ownership statement.',
-  );
-
-  if (
-    ownershipStatus !== 'owned_at_least_one_year' &&
-    ownershipStatus !== 'owned_less_than_one_year' &&
-    ownershipStatus !== 'does_not_yet_own'
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The listing does not contain a valid seller ownership statement.',
-    );
-  }
-
-  const leadBasedPaintApplies = readRequiredBoolean(
-    statements,
-    'leadBasedPaintApplies',
-    'The listing does not contain a lead-based-paint statement.',
-  );
-
-  const ownersAssociationApplies = readRequiredBoolean(
-    statements,
-    'ownersAssociationApplies',
-    'The listing does not contain an owners-association statement.',
-  );
-
-  const fuelTankPresent = readRequiredBoolean(
-    statements,
-    'fuelTankPresent',
-    'The listing does not contain a fuel-tank statement.',
-  );
-
-  const leasesExist = readRequiredBoolean(
-    statements,
-    'leasesExist',
-    'The listing does not contain an existing-leases statement.',
-  );
-
-  const fuelTankOwnership = readOptionalString(statements, 'fuelTankOwnership');
-
-  if (
-    fuelTankPresent &&
-    fuelTankOwnership !== 'owned' &&
-    fuelTankOwnership !== 'leased'
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The listing does not contain a valid fuel-tank ownership statement.',
-    );
-  }
-
-  const ownersAssociationDuesInCents =
-    statements['ownersAssociationDuesInCents'];
-
-  if (
-    ownersAssociationDuesInCents !== undefined &&
-    (typeof ownersAssociationDuesInCents !== 'number' ||
-      !Number.isFinite(ownersAssociationDuesInCents) ||
-      ownersAssociationDuesInCents < 0)
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'The listing does not contain valid owners-association dues.',
-    );
-  }
-
-  const sellerStatements = {
-    ownershipStatus,
-    leadBasedPaintApplies,
-
-    leadBasedPaintDisclosureDocumentUid: readOptionalString(
-      statements,
-      'leadBasedPaintDisclosureDocumentUid',
-    ),
-
-    ownersAssociationApplies,
-
-    ownersAssociationName:
-      readOptionalString(
-        statements,
-        'ownersAssociationName',
-      ),
-
-    ownersAssociationDuesInCents:
-      typeof ownersAssociationDuesInCents === 'number'
-      ? Math.round(ownersAssociationDuesInCents as number)
-      : undefined,
-
-    ownersAssociationDuesFrequency:
-      readOptionalString(
-        statements,
-        'ownersAssociationDuesFrequency',
-      ),
-
-    ownersAssociationContact:
-      readOptionalString(
-        statements,
-        'ownersAssociationContact',
-      ),
-
-    fuelTankPresent,
-    fuelTankOwnership: fuelTankPresent ? fuelTankOwnership : undefined,
-
-    leasesExist,
-
-    leaseAddendumDocumentUid: readOptionalString(
-      statements,
-      'leaseAddendumDocumentUid',
-    ),
-  };
-
-  return removeUndefinedValues(
-    sellerStatements,
-  ) as OfferTermsDocument['sellerStatements'];
 }
 
 function refreshDraftBuyerIdentity(

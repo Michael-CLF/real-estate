@@ -16,7 +16,7 @@ import {
 
 import {
   OfferDocumentService
-} from '../../../../core/domains/offers/services/offer-document.service';
+} from '../../../../../../core/domains/offers/services/offer-document.service';
 
 
 @Component({

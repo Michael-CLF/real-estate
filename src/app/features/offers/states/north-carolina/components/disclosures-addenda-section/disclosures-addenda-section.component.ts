@@ -28,15 +28,15 @@ import {
 
 import {
   ListingDisclosureDocument
-} from '../../../../core/domains/disclosures/models/listing-disclosure-document.model';
+} from '../../../../../../core/domains/disclosures/models/listing-disclosure-document.model';
 
 import {
   ListingDisclosureService
-} from '../../../../core/domains/disclosures/services/listing-disclosure.service';
+} from '../../../../../../core/domains/disclosures/services/listing-disclosure.service';
 
 import {
   DisclosureDocumentType
-} from '../../../../core/domains/disclosures/state-disclosure-requirement.model';
+} from '../../../../../../core/domains/disclosures/state-disclosure-requirement.model';
 
 
 @Component({

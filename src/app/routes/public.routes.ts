@@ -612,11 +612,10 @@ export const PUBLIC_ROUTES:
 
           loadComponent: () =>
             import(
-              '../features/offers/offer-wizard/offer-wizard.component'
+              '../features/offers/states/north-carolina/offer-wizard/offer-wizard.component'
             ).then(
               component =>
-                component
-                  .OfferWizardComponent
+                component.OfferWizardComponent
             )
         },
 
