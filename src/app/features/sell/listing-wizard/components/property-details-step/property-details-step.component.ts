@@ -31,6 +31,10 @@ export interface PropertyDetailsSellerStatementsFormValue {
   fuelTankPresent: boolean | null;
   fuelTankOwnership: PropertyDetailsFuelTankOwnership | '';
   leasesExist: boolean | null;
+  additionalSellerIncluded: boolean;
+  additionalSellerLegalName: string;
+  additionalSellerEmail: string;
+  additionalSellerPhone: string;
 }
 
 export interface PropertyDetailsFormValue {
@@ -41,6 +45,10 @@ export interface PropertyDetailsFormValue {
   yearBuilt: number | null;
   lotSize: number | null;
   lotSizeUnit: LotSizeUnit;
+  lotNumber: string;
+  blockNumber: string;
+  subdivisionName: string;
+  legalDescription: string;
   description: string;
   hoa?: PropertyDetailsHoaFormValue;
   sellerStatements: PropertyDetailsSellerStatementsFormValue;
@@ -67,6 +75,7 @@ export class PropertyDetailsStepComponent {
   private readonly fb = inject(FormBuilder);
 
   readonly initialValue = input<PropertyDetailsFormValue | null>(null);
+  readonly stateCode = input('');
 
   readonly currentYear = new Date().getFullYear();
 
@@ -120,6 +129,10 @@ export class PropertyDetailsStepComponent {
     ],
     lotSize: [null as number | null, Validators.min(0)],
     lotSizeUnit: ['square_feet' as LotSizeUnit, Validators.required],
+    lotNumber: ['', Validators.maxLength(200)],
+    blockNumber: ['', Validators.maxLength(200)],
+    subdivisionName: ['', Validators.maxLength(500)],
+    legalDescription: ['', Validators.maxLength(5000)],
     description: [
       '',
       [
@@ -149,6 +162,10 @@ export class PropertyDetailsStepComponent {
       fuelTankPresent: [null as boolean | null, Validators.required],
       fuelTankOwnership: ['' as PropertyDetailsFuelTankOwnership | ''],
       leasesExist: [null as boolean | null, Validators.required],
+      additionalSellerIncluded: [false],
+      additionalSellerLegalName: [''],
+      additionalSellerEmail: [''],
+      additionalSellerPhone: [''],
     }),
   });
 
@@ -175,6 +192,10 @@ export class PropertyDetailsStepComponent {
               fuelTankPresent: null,
               fuelTankOwnership: '',
               leasesExist: null,
+              additionalSellerIncluded: false,
+              additionalSellerLegalName: '',
+              additionalSellerEmail: '',
+              additionalSellerPhone: '',
             },
           },
           {
@@ -190,6 +211,11 @@ export class PropertyDetailsStepComponent {
 
       this.configureFuelTankValidators(
         this.form.controls.sellerStatements.controls.fuelTankPresent.value,
+        false,
+      );
+
+      this.configureAdditionalSellerValidators(
+        this.form.controls.sellerStatements.controls.additionalSellerIncluded.value,
         false,
       );
 
@@ -247,6 +273,16 @@ export class PropertyDetailsStepComponent {
           this.form.getRawValue() as PropertyDetailsFormValue,
         );
 
+        this.validityChange.emit(this.form.valid);
+      },
+    );
+
+    this.form.controls.sellerStatements.controls.additionalSellerIncluded.valueChanges.subscribe(
+      (included) => {
+        this.configureAdditionalSellerValidators(included, true);
+        this.valueChange.emit(
+          this.form.getRawValue() as PropertyDetailsFormValue,
+        );
         this.validityChange.emit(this.form.valid);
       },
     );
@@ -331,5 +367,42 @@ export class PropertyDetailsStepComponent {
     fuelTankOwnership.updateValueAndValidity({
       emitEvent: false,
     });
+  }
+
+  private configureAdditionalSellerValidators(
+    included: boolean,
+    clearValues: boolean,
+  ): void {
+    const controls = this.form.controls.sellerStatements.controls;
+    const fields = [
+      controls.additionalSellerLegalName,
+      controls.additionalSellerEmail,
+      controls.additionalSellerPhone,
+    ];
+
+    if (included) {
+      controls.additionalSellerLegalName.setValidators([
+        Validators.required,
+        Validators.maxLength(300),
+      ]);
+      controls.additionalSellerEmail.setValidators([
+        Validators.required,
+        Validators.email,
+        Validators.maxLength(320),
+      ]);
+      controls.additionalSellerPhone.setValidators([
+        Validators.required,
+        Validators.maxLength(50),
+      ]);
+    } else {
+      fields.forEach(control => control.clearValidators());
+      if (clearValues) {
+        fields.forEach(control => control.setValue('', { emitEvent: false }));
+      }
+    }
+
+    fields.forEach(control =>
+      control.updateValueAndValidity({ emitEvent: false })
+    );
   }
 }

@@ -13,16 +13,23 @@ import {
   OfferVersionDraftChanges
 } from '../models/offer-version.model';
 
+import {
+  OfferTerms,
+  StateOfferTerms
+} from '../models/offer-terms.model';
+
 
 /*
  * Request used to save changes to an editable draft
  * version.
  */
-export interface SaveOfferDraftRequest {
+export interface SaveOfferDraftRequest<
+  TTerms extends StateOfferTerms = OfferTerms
+> {
   offerUid: string;
   offerVersionUid: string;
 
-  changes: OfferVersionDraftChanges;
+  changes: OfferVersionDraftChanges<TTerms>;
 }
 
 
@@ -158,20 +165,26 @@ export abstract class OfferRepository {
    * OFFER VERSIONS
    */
 
-  abstract getOfferVersionByUid(
+  abstract getOfferVersionByUid<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string,
     offerVersionUid: string
-  ): Promise<OfferVersion | null>;
+  ): Promise<OfferVersion<TTerms> | null>;
 
 
-  abstract getCurrentOfferVersion(
+  abstract getCurrentOfferVersion<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string
-  ): Promise<OfferVersion | null>;
+  ): Promise<OfferVersion<TTerms> | null>;
 
 
-  abstract getOfferVersions(
+  abstract getOfferVersions<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string
-  ): Promise<OfferVersion[]>;
+  ): Promise<OfferVersion<TTerms>[]>;
 
 
   /*
@@ -183,7 +196,8 @@ export abstract class OfferRepository {
    */
 
   abstract createOrResumeOfferDraft(
-    listingUid: string
+    listingUid: string,
+    contractType?: string
   ): Promise<{
     offerUid: string;
     offerVersionUid: string;
@@ -192,8 +206,10 @@ export abstract class OfferRepository {
   }>;
 
 
-  abstract saveOfferDraft(
-    request: SaveOfferDraftRequest
+  abstract saveOfferDraft<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
+    request: SaveOfferDraftRequest<TTerms>
   ): Promise<void>;
 
 
@@ -226,3 +242,4 @@ export abstract class OfferRepository {
     offerVersionUid: string
   ): Promise<void>;
 }
+

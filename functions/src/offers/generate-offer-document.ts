@@ -25,13 +25,18 @@ import {
 } from '../shared/function-options';
 
 import {
-    generateOfferPdf,
-} from './offer-pdf.service';
+    requireStateContractPackage,
+} from './state-contracts/state-contract-registry';
 
 import type {
     OfferDocument,
     OfferVersionDocument,
 } from './offer-types';
+
+import type {
+    StateContractTerms,
+    StateOfferVersionDocument,
+} from './state-contracts/state-contract-package';
 
 
 type GeneratedAgreementType =
@@ -169,6 +174,21 @@ export const generateOfferDocument =
                 documentType
             );
 
+            const stateContractPackage =
+                requireStateContractPackage(
+                    offer.stateCode
+                );
+
+            if (
+                version.stateCode !==
+                stateContractPackage.stateCode
+            ) {
+                throw new HttpsError(
+                    'failed-precondition',
+                    'The offer version state does not match its contract package.'
+                );
+            }
+
             /*
              * The same immutable version and document type always
              * resolve to the same permanent document.
@@ -255,13 +275,24 @@ export const generateOfferDocument =
             const documentTitle =
                 getDocumentTitle(
                     documentType,
-                    version.versionNumber
+                    version.versionNumber,
+                    stateContractPackage
+                        .agreementTemplate
+                        .templateName,
+                    stateContractPackage
+                        .stateCode
                 );
 
             const generatedPdf =
-                await generateOfferPdf({
+                await stateContractPackage
+                    .generateAgreement({
                     offer,
-                    version,
+
+                    version:
+                        version as
+                        StateOfferVersionDocument<
+                            StateContractTerms
+                        >,
 
                     documentTitle,
 
@@ -269,7 +300,7 @@ export const generateOfferDocument =
 
                     documentStatus:
                         'approved',
-                });
+                    });
 
             const hashValue =
                 createHash('sha256')
@@ -334,16 +365,24 @@ export const generateOfferDocument =
 
             const template = {
                 stateCode:
-                    offer.stateCode,
+                    stateContractPackage
+                        .agreementTemplate
+                        .stateCode,
 
                 templateUid:
-                    'navstreet-nc-residential-purchase-agreement',
+                    stateContractPackage
+                        .agreementTemplate
+                        .templateUid,
 
                 templateName:
-                    'NavStreet North Carolina Residential Purchase Agreement',
+                    stateContractPackage
+                        .agreementTemplate
+                        .templateName,
 
                 templateVersion:
-                    '1.0.0',
+                    stateContractPackage
+                        .agreementTemplate
+                        .templateVersion,
 
                 effectiveDate:
                     generatedAt
@@ -782,17 +821,28 @@ function requireDocumentType(
 function getDocumentTitle(
     documentType:
         GeneratedAgreementType,
-    versionNumber: number
+    versionNumber: number,
+    templateName: string,
+    stateCode: string
 ): string {
+    /*
+     * Keep North Carolina's existing titles byte-for-byte unchanged.
+     * Other states use the official package template name.
+     */
+    const agreementName =
+        stateCode === 'NC'
+            ? 'Residential Purchase and Sale Agreement'
+            : templateName;
+
     switch (documentType) {
         case 'offer_agreement':
-            return 'Residential Purchase and Sale Agreement — Offer';
+            return `${agreementName} — Offer`;
 
         case 'counteroffer_agreement':
-            return `Residential Purchase and Sale Agreement — Counteroffer Version ${versionNumber}`;
+            return `${agreementName} — Counteroffer Version ${versionNumber}`;
 
         case 'accepted_agreement':
-            return 'Residential Purchase and Sale Agreement — Final Accepted';
+            return `${agreementName} — Final Accepted`;
     }
 }
 

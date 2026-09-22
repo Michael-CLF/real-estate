@@ -3,7 +3,8 @@ import {
 } from './offer-party.model';
 
 import {
-  OfferTerms
+  OfferTerms,
+  StateOfferTerms
 } from './offer-terms.model';
 
 import {
@@ -200,7 +201,9 @@ export interface OfferVersionPartySnapshot {
  * Draft versions may be edited until submitted for
  * signature. Once submitted, the version is frozen.
  */
-export interface OfferVersion {
+export interface OfferVersion<
+  TTerms extends StateOfferTerms = OfferTerms
+> {
   Uid: string;
 
   offerUid: string;
@@ -230,7 +233,7 @@ export interface OfferVersion {
    * then changes only the fields selected by the
    * countering party.
    */
-  terms: OfferTerms;
+  terms: TTerms;
     /*
    * Draft-only snapshot of the Angular offer wizard.
    *
@@ -297,14 +300,16 @@ export interface OfferVersion {
  * Information needed to create the first editable buyer
  * offer version.
  */
-export interface InitialBuyerOfferVersion {
+export interface InitialBuyerOfferVersion<
+  TTerms extends StateOfferTerms = OfferTerms
+> {
   offerUid: string;
 
   initiatedByUid: string;
 
   stateCode: string;
 
-  terms: OfferTerms;
+  terms: TTerms;
 
   buyers: OfferParty[];
   sellers: OfferParty[];
@@ -316,7 +321,9 @@ export interface InitialBuyerOfferVersion {
 /*
  * Information needed to create a counteroffer version.
  */
-export interface InitialCounterofferVersion {
+export interface InitialCounterofferVersion<
+  TTerms extends StateOfferTerms = OfferTerms
+> {
   offerUid: string;
 
   parentVersionUid: string;
@@ -328,7 +335,7 @@ export interface InitialCounterofferVersion {
 
   stateCode: string;
 
-  terms: OfferTerms;
+  terms: TTerms;
 
   buyers: OfferParty[];
   sellers: OfferParty[];
@@ -344,9 +351,11 @@ export interface InitialCounterofferVersion {
  * Submitted or immutable versions must never be updated
  * using this type.
  */
-export type OfferVersionDraftChanges = Partial<
+export type OfferVersionDraftChanges<
+  TTerms extends StateOfferTerms = OfferTerms
+> = Partial<
   Pick<
-    OfferVersion,
+    OfferVersion<TTerms>,
     | 'terms'
     | 'wizardData'
     | 'buyers'
@@ -354,3 +363,4 @@ export type OfferVersionDraftChanges = Partial<
     | 'expiresAt'
   >
 >;
+

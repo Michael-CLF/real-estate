@@ -1,0 +1,676 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated()
+        && request.auth.uid == userId;
+
+      allow create: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid;
+
+      allow update: if isAuthenticated()
+        && request.auth.uid == userId
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == request.auth.uid;
+
+      allow delete: if false;
+    }
+
+    match /users/{userId}/savedListings/{listingUid} {
+      allow read: if isAuthenticated()
+        && request.auth.uid == userId;
+
+      allow create: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.listingUid == listingUid
+        && request.resource.data.keys().hasAll([
+          'listingUid',
+          'sellerUid',
+          'address',
+          'city',
+          'state',
+          'price',
+          'primaryPhotoUrl',
+          'daysOnMarket',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'listingUid',
+          'sellerUid',
+          'address',
+          'city',
+          'state',
+          'price',
+          'primaryPhotoUrl',
+          'daysOnMarket',
+          'createdAt'
+        ])
+        && request.resource.data.sellerUid is string
+        && request.resource.data.address is string
+        && request.resource.data.city is string
+        && request.resource.data.state is string
+        && request.resource.data.price is number
+        && (
+          request.resource.data.primaryPhotoUrl == null
+          || request.resource.data.primaryPhotoUrl is string
+        )
+        && request.resource.data.daysOnMarket is int
+        && request.resource.data.daysOnMarket >= 0
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if false;
+
+      allow delete: if isAuthenticated()
+        && request.auth.uid == userId;
+    }
+
+    match /professionalProfiles/{professionalUid} {
+      allow read: if isAuthenticated()
+        && (
+          resource.data.status == 'active'
+          || resource.data.ownerUid == request.auth.uid
+        );
+
+      allow create: if false;
+
+      allow update: if isAuthenticated()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid
+          == resource.data.ownerUid
+        && request.resource.data.subscriptionStatus
+          == resource.data.subscriptionStatus
+        && request.resource.data.placement
+          == resource.data.placement
+        && request.resource.data.status
+          == resource.data.status
+        && request.resource.data.submissionCertifiedAt
+          == resource.data.submissionCertifiedAt
+        && request.resource.data.createdAt
+          == resource.data.createdAt
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'businessName',
+            'category',
+            'professionalType',
+            'specialties',
+            'stateName',
+            'stateAbbreviation',
+            'stateSlug',
+            'serviceAreaType',
+            'counties',
+            'cities',
+            'phone',
+            'email',
+            'submissionCertified',
+            'website',
+            'description',
+            'logoUrl',
+            'updatedAt'
+          ])
+        && request.resource.data.businessName is string
+        && request.resource.data.category is string
+        && request.resource.data.professionalType is string
+        && request.resource.data.specialties is list
+        && request.resource.data.stateName is string
+        && request.resource.data.stateAbbreviation is string
+        && request.resource.data.stateSlug is string
+        && request.resource.data.serviceAreaType in [
+          'statewide',
+          'counties',
+          'cities'
+        ]
+        && request.resource.data.counties is list
+        && request.resource.data.cities is list
+        && request.resource.data.phone is string
+        && request.resource.data.email is string
+        && request.resource.data.submissionCertified == true
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    match /professionalOwnerClaims/{ownerUid} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /listingDrafts/{listingUid} {
+      allow create: if isAuthenticated()
+        && request.resource.data.sellerUid == request.auth.uid
+        && request.resource.data.progress.contentStatus
+          == 'in_progress'
+        && request.resource.data.progress.currentStep
+          == 'address'
+        && request.resource.data.progress.completionPercent == 0
+        && request.resource.data.publication.status
+          == 'content_incomplete'
+        && request.resource.data.publication.identityStatus
+          == 'not_started'
+        && request.resource.data.publication.paymentStatus
+          == 'not_started';
+
+      allow read: if isAuthenticated()
+        && resource.data.sellerUid == request.auth.uid;
+
+      allow update: if isAuthenticated()
+        && resource.data.sellerUid == request.auth.uid
+        && request.resource.data.sellerUid == request.auth.uid
+        && request.resource.data.publication.paymentStatus
+          != 'paid'
+        && request.resource.data.publication.status
+          != 'ready_to_publish'
+        && request.resource.data.publication.status
+          != 'published'
+        && !request.resource.data.publication
+          .keys()
+          .hasAny([
+            'publishedListingUid',
+            'publishedAt'
+          ]);
+
+      allow delete: if false;
+    }
+
+    match /listings/{listingUid} {
+      allow read: if resource.data.status in [
+          'active',
+          'under_contract',
+          'sold'
+        ]
+        || (
+          isAuthenticated()
+          && resource.data.sellerUid == request.auth.uid
+        );
+
+      allow create: if false;
+
+      allow update: if isAuthenticated()
+        && resource.data.sellerUid == request.auth.uid
+        && request.resource.data.sellerUid
+          == resource.data.sellerUid
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'enhancements',
+            'schools',
+            'photos',
+            'photoUrls',
+            'primaryPhotoUrl',
+            'updatedAt'
+          ])
+        && (
+          !request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasAny([
+              'enhancements'
+            ])
+          || (
+            request.resource.data.enhancements is map
+            && request.resource.data.enhancements
+              .keys()
+              .hasOnly([
+                'construction',
+                'interior',
+                'kitchen',
+                'bedroomsBathrooms',
+                'parkingStorage',
+                'outdoorLiving',
+                'systemsUtilities',
+                'technologySecurity',
+                'accessibility',
+                'communityAmenities'
+              ])
+          )
+        )
+        && (
+          !request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasAny([
+              'schools'
+            ])
+          || (
+            request.resource.data.schools is map
+            && request.resource.data.schools
+              .keys()
+              .hasAll([
+                'assignedSchoolsVerified'
+              ])
+            && request.resource.data.schools
+              .keys()
+              .hasOnly([
+                'districtName',
+                'elementarySchool',
+                'middleSchool',
+                'highSchool',
+                'assignedSchoolsVerified'
+              ])
+            && request.resource.data
+              .schools
+              .assignedSchoolsVerified is bool
+          )
+        )
+        && (
+          !request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasAny([
+              'photos',
+              'photoUrls',
+              'primaryPhotoUrl'
+            ])
+          || (
+            request.resource.data.photos is list
+            && request.resource.data.photoUrls is list
+            && request.resource.data.photos.size() >= 1
+            && request.resource.data.photos.size() <= 20
+            && request.resource.data.photoUrls.size()
+              == request.resource.data.photos.size()
+            && request.resource.data.primaryPhotoUrl is string
+            && request.resource.data.primaryPhotoUrl
+              in request.resource.data.photoUrls
+          )
+        )
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    match /listings/{listingUid}/disclosures/{documentType} {
+      allow read: if isAuthenticated()
+        && exists(
+          /databases/$(database)/documents/listings/$(listingUid)
+        )
+        && (
+          get(
+            /databases/$(database)/documents/listings/$(listingUid)
+          ).data.sellerUid == request.auth.uid
+          || get(
+            /databases/$(database)/documents/listings/$(listingUid)
+          ).data.status == 'active'
+        );
+
+      allow create, update: if isAuthenticated()
+        && exists(
+          /databases/$(database)/documents/listings/$(listingUid)
+        )
+        && get(
+          /databases/$(database)/documents/listings/$(listingUid)
+        ).data.sellerUid == request.auth.uid
+        && documentType in [
+          'residential-property-owners-association',
+          'mineral-oil-gas-rights',
+          'texas-seller-disclosure-notice'
+        ]
+        && request.resource.data.keys().hasAll([
+          'documentType',
+          'currentDocument',
+          'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'documentType',
+          'currentDocument',
+          'updatedAt'
+        ])
+        && request.resource.data.documentType == documentType
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.currentDocument is map
+        && request.resource.data.currentDocument
+          .keys()
+          .hasAll([
+            'id',
+            'listingUid',
+            'sellerUid',
+            'documentType',
+            'stateAbbreviation',
+            'originalFileName',
+            'storagePath',
+            'contentType',
+            'sizeBytes',
+            'version',
+            'versionId',
+            'uploadedAt',
+            'uploadedByUid'
+          ])
+        && request.resource.data.currentDocument
+          .keys()
+          .hasOnly([
+            'id',
+            'listingUid',
+            'sellerUid',
+            'documentType',
+            'stateAbbreviation',
+            'originalFileName',
+            'storagePath',
+            'contentType',
+            'sizeBytes',
+            'version',
+            'versionId',
+            'uploadedAt',
+            'uploadedByUid'
+          ])
+        && request.resource.data.currentDocument.listingUid
+          == listingUid
+        && request.resource.data.currentDocument.sellerUid
+          == request.auth.uid
+        && request.resource.data.currentDocument.uploadedByUid
+          == request.auth.uid
+        && request.resource.data.currentDocument.documentType
+          == documentType
+        && request.resource.data.currentDocument.contentType
+          == 'application/pdf'
+        && request.resource.data.currentDocument.originalFileName
+          is string
+        && request.resource.data.currentDocument.storagePath
+          is string
+        && request.resource.data.currentDocument.stateAbbreviation
+          is string
+        && request.resource.data.currentDocument.sizeBytes is int
+        && request.resource.data.currentDocument.sizeBytes > 0
+        && request.resource.data.currentDocument.sizeBytes
+          <= 15 * 1024 * 1024
+        && request.resource.data.currentDocument.version is int
+        && request.resource.data.currentDocument.version >= 1
+        && request.resource.data.currentDocument.uploadedAt
+          is timestamp;
+
+      allow delete: if false;
+
+      match /versions/{versionId} {
+        allow read: if isAuthenticated()
+          && exists(
+            /databases/$(database)/documents/listings/$(listingUid)
+          )
+          && (
+            get(
+              /databases/$(database)/documents/listings/$(listingUid)
+            ).data.sellerUid == request.auth.uid
+            || get(
+              /databases/$(database)/documents/listings/$(listingUid)
+            ).data.status == 'active'
+          );
+
+        allow create: if isAuthenticated()
+          && exists(
+            /databases/$(database)/documents/listings/$(listingUid)
+          )
+          && get(
+            /databases/$(database)/documents/listings/$(listingUid)
+          ).data.sellerUid == request.auth.uid
+          && documentType in [
+            'residential-property-owners-association',
+            'mineral-oil-gas-rights',
+            'texas-seller-disclosure-notice'
+          ]
+          && request.resource.data.keys().hasAll([
+            'id',
+            'listingUid',
+            'sellerUid',
+            'documentType',
+            'stateAbbreviation',
+            'originalFileName',
+            'storagePath',
+            'contentType',
+            'sizeBytes',
+            'version',
+            'versionId',
+            'uploadedAt',
+            'uploadedByUid'
+          ])
+          && request.resource.data.keys().hasOnly([
+            'id',
+            'listingUid',
+            'sellerUid',
+            'documentType',
+            'stateAbbreviation',
+            'originalFileName',
+            'storagePath',
+            'contentType',
+            'sizeBytes',
+            'version',
+            'versionId',
+            'uploadedAt',
+            'uploadedByUid'
+          ])
+          && request.resource.data.id == versionId
+          && request.resource.data.versionId == versionId
+          && request.resource.data.listingUid == listingUid
+          && request.resource.data.sellerUid == request.auth.uid
+          && request.resource.data.uploadedByUid
+            == request.auth.uid
+          && request.resource.data.documentType == documentType
+          && request.resource.data.contentType
+            == 'application/pdf'
+          && request.resource.data.originalFileName is string
+          && request.resource.data.storagePath is string
+          && request.resource.data.stateAbbreviation is string
+          && request.resource.data.sizeBytes is int
+          && request.resource.data.sizeBytes > 0
+          && request.resource.data.sizeBytes
+            <= 15 * 1024 * 1024
+          && request.resource.data.version is int
+          && request.resource.data.version >= 1
+          && request.resource.data.uploadedAt is timestamp;
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /showingAvailability/{listingUid} {
+      allow read: if exists(
+        /databases/$(database)/documents/listings/$(listingUid)
+      )
+      && (
+        get(
+          /databases/$(database)/documents/listings/$(listingUid)
+        ).data.status == 'active'
+        || (
+          isAuthenticated()
+          && get(
+            /databases/$(database)/documents/listings/$(listingUid)
+          ).data.sellerUid == request.auth.uid
+        )
+      );
+
+      allow create: if isAuthenticated()
+        && exists(
+          /databases/$(database)/documents/listings/$(listingUid)
+        )
+        && request.resource.data.listingUid == listingUid
+        && get(
+          /databases/$(database)/documents/listings/$(listingUid)
+        ).data.sellerUid == request.auth.uid
+        && request.resource.data.sellerUid == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'listingUid',
+          'sellerUid',
+          'acceptingRequests',
+          'timeZone',
+          'appointmentDurationMinutes',
+          'bufferMinutes',
+          'minimumNoticeHours',
+          'bookingWindowDays',
+          'weeklyAvailability',
+          'exceptions',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'listingUid',
+          'sellerUid',
+          'acceptingRequests',
+          'timeZone',
+          'appointmentDurationMinutes',
+          'bufferMinutes',
+          'minimumNoticeHours',
+          'bookingWindowDays',
+          'weeklyAvailability',
+          'exceptions',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.acceptingRequests is bool
+        && request.resource.data.timeZone is string
+        && request.resource.data.appointmentDurationMinutes is int
+        && request.resource.data.appointmentDurationMinutes > 0
+        && request.resource.data.bufferMinutes is int
+        && request.resource.data.bufferMinutes >= 0
+        && request.resource.data.minimumNoticeHours is int
+        && request.resource.data.minimumNoticeHours >= 0
+        && request.resource.data.bookingWindowDays is int
+        && request.resource.data.bookingWindowDays > 0
+        && request.resource.data.bookingWindowDays <= 365
+        && request.resource.data.weeklyAvailability is list
+        && request.resource.data.exceptions is list
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isAuthenticated()
+        && exists(
+          /databases/$(database)/documents/listings/$(listingUid)
+        )
+        && resource.data.sellerUid == request.auth.uid
+        && get(
+          /databases/$(database)/documents/listings/$(listingUid)
+        ).data.sellerUid == request.auth.uid
+        && request.resource.data.listingUid
+          == resource.data.listingUid
+        && request.resource.data.sellerUid
+          == resource.data.sellerUid
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'acceptingRequests',
+            'timeZone',
+            'appointmentDurationMinutes',
+            'bufferMinutes',
+            'minimumNoticeHours',
+            'bookingWindowDays',
+            'weeklyAvailability',
+            'exceptions',
+            'updatedAt'
+          ])
+        && request.resource.data.acceptingRequests is bool
+        && request.resource.data.timeZone is string
+        && request.resource.data.appointmentDurationMinutes is int
+        && request.resource.data.appointmentDurationMinutes > 0
+        && request.resource.data.bufferMinutes is int
+        && request.resource.data.bufferMinutes >= 0
+        && request.resource.data.minimumNoticeHours is int
+        && request.resource.data.minimumNoticeHours >= 0
+        && request.resource.data.bookingWindowDays is int
+        && request.resource.data.bookingWindowDays > 0
+        && request.resource.data.bookingWindowDays <= 365
+        && request.resource.data.weeklyAvailability is list
+        && request.resource.data.exceptions is list
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    match /showingSchedules/{listingUid}/dates/{date} {
+      allow read: if exists(
+        /databases/$(database)/documents/listings/$(listingUid)
+      )
+      && get(
+        /databases/$(database)/documents/listings/$(listingUid)
+      ).data.status == 'active';
+
+      allow create, update, delete: if false;
+    }
+
+    match /showingRequests/{showingRequestUid} {
+      allow read: if isAuthenticated()
+        && (
+          resource.data.sellerUid == request.auth.uid
+          || resource.data.buyerUid == request.auth.uid
+          || (
+            exists(
+              /databases/$(database)/documents/listings/$(resource.data.listingUid)
+            )
+            && get(
+              /databases/$(database)/documents/listings/$(resource.data.listingUid)
+            ).data.sellerUid == request.auth.uid
+          )
+        );
+
+      allow create, update, delete: if false;
+    }
+
+    /*
+     * OFFERS
+     *
+     * This restores the participant-based access model
+     * used before the incompatible version-visibility
+     * restrictions were introduced.
+     */
+    match /offers/{offerUid} {
+      allow read: if isAuthenticated()
+        && (
+          request.auth.uid in resource.data.buyerUids
+          || request.auth.uid in resource.data.sellerUids
+        );
+
+      allow create, update, delete: if false;
+
+      match /versions/{offerVersionUid} {
+        allow read: if isAuthenticated()
+          && (
+            request.auth.uid in get(
+              /databases/$(database)/documents/offers/$(offerUid)
+            ).data.buyerUids
+            || request.auth.uid in get(
+              /databases/$(database)/documents/offers/$(offerUid)
+            ).data.sellerUids
+          );
+
+        allow create, update, delete: if false;
+      }
+
+      match /documents/{documentUid} {
+        allow read: if isAuthenticated()
+          && (
+            request.auth.uid in get(
+              /databases/$(database)/documents/offers/$(offerUid)
+            ).data.buyerUids
+            || request.auth.uid in get(
+              /databases/$(database)/documents/offers/$(offerUid)
+            ).data.sellerUids
+          );
+
+        allow create, update, delete: if false;
+      }
+    }
+
+    match /listingInquiries/{inquiryUid} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /listingInquiryRateLimits/{rateLimitUid} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /listingViewSessions/{viewSessionUid} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /listingTransactions/{listingUid} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

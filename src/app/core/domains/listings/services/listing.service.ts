@@ -698,6 +698,18 @@ export class ListingService {
       throw new Error('Specify whether any leases exist.');
     }
 
+    const additionalSeller = sellerStatements.additionalSeller;
+    if (
+      additionalSeller &&
+      (
+        !additionalSeller.legalName.trim() ||
+        !/^\S+@\S+\.\S+$/.test(additionalSeller.email.trim()) ||
+        !additionalSeller.phone.trim()
+      )
+    ) {
+      throw new Error('Complete the co-seller name, email, and phone.');
+    }
+
     return sellerStatements;
   }
 }

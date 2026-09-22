@@ -24,6 +24,61 @@ import {
     MarketplaceListingRepository
 } from './marketplace-listing.repository';
 
+const STATE_NAME_BY_ABBREVIATION:
+    Readonly<Record<string, string>> = {
+        AL: 'Alabama',
+        AK: 'Alaska',
+        AZ: 'Arizona',
+        AR: 'Arkansas',
+        CA: 'California',
+        CO: 'Colorado',
+        CT: 'Connecticut',
+        DE: 'Delaware',
+        FL: 'Florida',
+        GA: 'Georgia',
+        HI: 'Hawaii',
+        ID: 'Idaho',
+        IL: 'Illinois',
+        IN: 'Indiana',
+        IA: 'Iowa',
+        KS: 'Kansas',
+        KY: 'Kentucky',
+        LA: 'Louisiana',
+        ME: 'Maine',
+        MD: 'Maryland',
+        MA: 'Massachusetts',
+        MI: 'Michigan',
+        MN: 'Minnesota',
+        MS: 'Mississippi',
+        MO: 'Missouri',
+        MT: 'Montana',
+        NE: 'Nebraska',
+        NV: 'Nevada',
+        NH: 'New Hampshire',
+        NJ: 'New Jersey',
+        NM: 'New Mexico',
+        NY: 'New York',
+        NC: 'North Carolina',
+        ND: 'North Dakota',
+        OH: 'Ohio',
+        OK: 'Oklahoma',
+        OR: 'Oregon',
+        PA: 'Pennsylvania',
+        RI: 'Rhode Island',
+        SC: 'South Carolina',
+        SD: 'South Dakota',
+        TN: 'Tennessee',
+        TX: 'Texas',
+        UT: 'Utah',
+        VT: 'Vermont',
+        VA: 'Virginia',
+        WA: 'Washington',
+        WV: 'West Virginia',
+        WI: 'Wisconsin',
+        WY: 'Wyoming',
+        DC: 'District of Columbia'
+    };
+
 @Injectable()
 export class FirestoreMarketplaceListingRepository
     extends MarketplaceListingRepository {
@@ -207,6 +262,7 @@ export class FirestoreMarketplaceListingRepository
                         listing.address.city,
                         listing.address.state,
                         listing.address.stateAbbreviation,
+                        listing.address.stateSlug,
                         listing.address.postalCode,
                         listing.address.county ?? ''
                     ]
@@ -1194,37 +1250,49 @@ export class FirestoreMarketplaceListingRepository
     private getStateAbbreviation(
         state: string
     ): string {
-        const normalizedState =
-            state.trim().toLowerCase();
+        const normalizedState = state.trim();
+        const possibleAbbreviation =
+            normalizedState.toUpperCase();
 
         if (
-            normalizedState === 'nc' ||
-            normalizedState ===
-            'north carolina'
+            STATE_NAME_BY_ABBREVIATION[
+                possibleAbbreviation
+            ]
         ) {
-            return 'NC';
+            return possibleAbbreviation;
         }
 
-        return state.length === 2
-            ? state.toUpperCase()
-            : state;
+        const matchingState = Object.entries(
+            STATE_NAME_BY_ABBREVIATION
+        ).find(
+            ([, stateName]) =>
+                stateName.toLowerCase() ===
+                normalizedState.toLowerCase()
+        );
+
+        return matchingState?.[0] ?? normalizedState;
     }
 
     private getStateName(
         state: string
     ): string {
-        const normalizedState =
-            state.trim().toLowerCase();
+        const normalizedState = state.trim();
+        const stateName =
+            STATE_NAME_BY_ABBREVIATION[
+                normalizedState.toUpperCase()
+            ];
 
-        if (
-            normalizedState === 'nc' ||
-            normalizedState ===
-            'north carolina'
-        ) {
-            return 'North Carolina';
+        if (stateName) {
+            return stateName;
         }
 
-        return state;
+        return Object.values(
+            STATE_NAME_BY_ABBREVIATION
+        ).find(
+            candidate =>
+                candidate.toLowerCase() ===
+                normalizedState.toLowerCase()
+        ) ?? normalizedState;
     }
 
     private createStateSlug(

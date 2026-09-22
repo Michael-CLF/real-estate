@@ -23,7 +23,8 @@ import {
 } from '../models/offer-status.model';
 
 import {
-  OfferTerms
+  OfferTerms,
+  StateOfferTerms
 } from '../models/offer-terms.model';
 
 import {
@@ -95,16 +96,25 @@ export class OfferService {
 
 
   async createOrResumeDraft(
-    listingUid: string
+    listingUid: string,
+    contractType?: string
   ): Promise<CreateOfferDraftResult> {
     this.requireText(
       listingUid,
       'A listing identifier is required.'
     );
 
+    if (contractType !== undefined) {
+      this.requireText(
+        contractType,
+        'A contract type is required.'
+      );
+    }
+
     return this.offerRepository
       .createOrResumeOfferDraft(
-        listingUid
+        listingUid,
+        contractType?.trim()
       );
   }
 
@@ -139,25 +149,29 @@ export class OfferService {
   }
 
 
-  async getCurrentVersion(
+  async getCurrentVersion<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string
-  ): Promise<OfferVersion | null> {
+  ): Promise<OfferVersion<TTerms> | null> {
     this.requireText(
       offerUid,
       'An offer identifier is required.'
     );
 
     return this.offerRepository
-      .getCurrentOfferVersion(
+      .getCurrentOfferVersion<TTerms>(
         offerUid
       );
   }
 
 
-  async getVersion(
+  async getVersion<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string,
     offerVersionUid: string
-  ): Promise<OfferVersion | null> {
+  ): Promise<OfferVersion<TTerms> | null> {
     this.requireText(
       offerUid,
       'An offer identifier is required.'
@@ -169,23 +183,25 @@ export class OfferService {
     );
 
     return this.offerRepository
-      .getOfferVersionByUid(
+      .getOfferVersionByUid<TTerms>(
         offerUid,
         offerVersionUid
       );
   }
 
 
-  async getVersionHistory(
+  async getVersionHistory<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string
-  ): Promise<OfferVersion[]> {
+  ): Promise<OfferVersion<TTerms>[]> {
     this.requireText(
       offerUid,
       'An offer identifier is required.'
     );
 
     return this.offerRepository
-      .getOfferVersions(
+      .getOfferVersions<TTerms>(
         offerUid
       );
   }
@@ -234,10 +250,12 @@ export class OfferService {
   }
 
 
-  async saveDraft(
+  async saveDraft<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string,
     offerVersionUid: string,
-    changes: OfferVersionDraftChanges
+    changes: OfferVersionDraftChanges<TTerms>
   ): Promise<void> {
     this.requireText(
       offerUid,
@@ -256,7 +274,7 @@ export class OfferService {
     }
 
     await this.offerRepository
-      .saveOfferDraft({
+      .saveOfferDraft<TTerms>({
         offerUid,
         offerVersionUid,
         changes
@@ -581,3 +599,4 @@ export class OfferService {
     }
   }
 }
+

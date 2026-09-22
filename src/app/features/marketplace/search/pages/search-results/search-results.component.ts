@@ -74,27 +74,27 @@ export class SearchResultsComponent {
     label: string;
     value: ListingSortOption;
   }> = [
-      {
-        label: 'Newest listings',
-        value: 'newest'
-      },
-      {
-        label: 'Price: Low to high',
-        value: 'price_low_to_high'
-      },
-      {
-        label: 'Price: High to low',
-        value: 'price_high_to_low'
-      },
-      {
-        label: 'Most bedrooms',
-        value: 'bedrooms_high_to_low'
-      },
-      {
-        label: 'Largest square footage',
-        value: 'square_feet_high_to_low'
-      }
-    ];
+    {
+      label: 'Newest listings',
+      value: 'newest'
+    },
+    {
+      label: 'Price: Low to high',
+      value: 'price_low_to_high'
+    },
+    {
+      label: 'Price: High to low',
+      value: 'price_high_to_low'
+    },
+    {
+      label: 'Most bedrooms',
+      value: 'bedrooms_high_to_low'
+    },
+    {
+      label: 'Largest square footage',
+      value: 'square_feet_high_to_low'
+    }
+  ];
 
   readonly viewModel$: Observable<SearchResultsViewModel> =
     this.route.queryParamMap.pipe(
@@ -103,10 +103,12 @@ export class SearchResultsComponent {
           searchTerm:
             queryParams.get('query')?.trim() || undefined,
 
+          // No default state: opening Homes must show listings
+          // from every state.
           stateSlug:
-            queryParams.get('state')?.trim() ||
-            'north-carolina',
+            queryParams.get('state')?.trim() || undefined,
 
+          // Retained temporarily for old bookmarked URLs.
           city:
             queryParams.get('city')?.trim() || undefined,
 
@@ -147,6 +149,7 @@ export class SearchResultsComponent {
 
         return filters;
       }),
+
       switchMap(filters =>
         this.listingRepository.searchListings(filters).pipe(
           map(result => ({
@@ -155,6 +158,7 @@ export class SearchResultsComponent {
             heading: this.createPageHeading(filters),
             hasError: false
           })),
+
           catchError(() =>
             of({
               result: this.createEmptyResult(filters),
@@ -165,6 +169,7 @@ export class SearchResultsComponent {
           )
         )
       ),
+
       shareReplay({
         bufferSize: 1,
         refCount: true
@@ -209,40 +214,55 @@ export class SearchResultsComponent {
   }
 
   private parsePropertyTypes(
-  value: string | null
-): PropertyType[] | undefined {
-  switch (value) {
-    case 'single_family':
-    case 'condominium':
-    case 'townhouse':
-    case 'multifamily':
-    case 'manufactured':
-    case 'land':
-    case 'farm':
-    case 'other':
-      return [value];
+    value: string | null
+  ): PropertyType[] | undefined {
+    switch (value) {
+      case 'single_family':
+      case 'condominium':
+      case 'townhouse':
+      case 'multifamily':
+      case 'manufactured':
+      case 'land':
+      case 'farm':
+      case 'other':
+        return [value];
 
-    default:
-      return undefined;
+      default:
+        return undefined;
+    }
   }
-}
 
   private createPageHeading(
     filters: ListingSearchFilters
   ): string {
+    if (filters.stateSlug) {
+      return `Listings for the State of ${
+        this.stateNameFromSlug(filters.stateSlug)
+      }`;
+    }
+
+    if (filters.searchTerm) {
+      return `Listings in ${filters.searchTerm}`;
+    }
+
     if (filters.city) {
-      return `Homes for sale in ${filters.city}`;
+      return `Listings in ${filters.city}`;
     }
 
     if (filters.postalCode) {
-      return `Homes for sale in ${filters.postalCode}`;
+      return `Listings in ${filters.postalCode}`;
     }
 
-    if (filters.stateSlug === 'north-carolina') {
-      return 'Homes for sale in North Carolina';
-    }
+    return 'All Listings';
+  }
 
-    return 'Homes for sale';
+  private stateNameFromSlug(stateSlug: string): string {
+    return stateSlug
+      .split('-')
+      .map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+      )
+      .join(' ');
   }
 
   private createEmptyResult(

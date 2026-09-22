@@ -19,6 +19,10 @@ export interface Listing {
   squareFeet: number;
   lotSize?: number;
   lotSizeUnit?: LotSizeUnit;
+  lotNumber?: string;
+  blockNumber?: string;
+  subdivisionName?: string;
+  legalDescription?: string;
   yearBuilt?: number;
   description?: string;
   stories?: number;
@@ -523,6 +527,12 @@ export interface ListingSellerStatements {
 
   leasesExist: boolean;
   leaseAddendumDocumentUid?: string;
+
+  additionalSeller?: {
+    legalName: string;
+    email: string;
+    phone: string;
+  };
 }
 
 export interface ListingWorkflow {
@@ -613,6 +623,10 @@ export interface ListingDraftPropertyDetails {
   squareFeet: number;
   lotSize?: number;
   lotSizeUnit?: LotSizeUnit;
+  lotNumber?: string;
+  blockNumber?: string;
+  subdivisionName?: string;
+  legalDescription?: string;
 
   yearBuilt: number;
   stories?: number;

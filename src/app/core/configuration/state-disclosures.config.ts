@@ -39,6 +39,21 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
         title:
           'Mineral and Oil and Gas Rights Mandatory Disclosure Statement'
       }
+    ],
+    TX: [
+      {
+        description:
+          'Upload the completed Texas Seller’s Disclosure Notice when the property is not exempt from the statutory disclosure requirement.',
+        documentType:
+          'texas-seller-disclosure-notice',
+        formCode: 'TREC OP-H',
+        officialFormUrl:
+          'https://www.trec.texas.gov/sites/default/files/pdf-forms/OP-H.pdf',
+        required: true,
+        shortTitle: 'Seller Disclosure',
+        sortOrder: 1,
+        title: 'Texas Seller’s Disclosure Notice'
+      }
     ]
   };
 

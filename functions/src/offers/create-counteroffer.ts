@@ -16,6 +16,10 @@ import {
   callableFunctionOptions
 } from '../shared/function-options';
 
+import {
+  requireStateContractPackage
+} from './state-contracts/state-contract-registry';
+
 import type {
   CreateCounterofferData,
   CreateCounterofferResponse,
@@ -124,6 +128,23 @@ export const createCounteroffer =
               sourceVersionSnapshot.data() as
                 OfferVersionDocument;
 
+            const stateContractPackage =
+              requireStateContractPackage(
+                offer.stateCode
+              );
+
+            if (
+              sourceVersion.stateCode !==
+                stateContractPackage.stateCode ||
+              sourceVersion.terms.stateCode !==
+                stateContractPackage.stateCode
+            ) {
+              throw new HttpsError(
+                'data-loss',
+                'The offer state does not match its current contract version.'
+              );
+            }
+
             verifyCounterofferAccess(
               offer,
               sourceVersion,
@@ -175,7 +196,7 @@ export const createCounteroffer =
                   'draft',
 
                 stateCode:
-                  sourceVersion.stateCode,
+                  stateContractPackage.stateCode,
 
                 terms:
                   createCounterofferTerms(

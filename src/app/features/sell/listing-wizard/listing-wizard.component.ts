@@ -260,6 +260,11 @@ export class ListingWizardComponent implements OnInit {
 
         lotSizeUnit: draft.propertyDetails.lotSizeUnit ?? 'acres',
 
+        lotNumber: draft.propertyDetails.lotNumber ?? '',
+        blockNumber: draft.propertyDetails.blockNumber ?? '',
+        subdivisionName: draft.propertyDetails.subdivisionName ?? '',
+        legalDescription: draft.propertyDetails.legalDescription ?? '',
+
         description: draft.propertyDetails.description ?? '',
 
         hoa: draft.hoa
@@ -301,6 +306,15 @@ export class ListingWizardComponent implements OnInit {
           fuelTankOwnership: draft.sellerStatements?.fuelTankOwnership ?? '',
 
           leasesExist: draft.sellerStatements?.leasesExist ?? null,
+
+          additionalSellerIncluded:
+            !!draft.sellerStatements?.additionalSeller,
+          additionalSellerLegalName:
+            draft.sellerStatements?.additionalSeller?.legalName ?? '',
+          additionalSellerEmail:
+            draft.sellerStatements?.additionalSeller?.email ?? '',
+          additionalSellerPhone:
+            draft.sellerStatements?.additionalSeller?.phone ?? '',
         },
       });
 
@@ -802,6 +816,19 @@ export class ListingWizardComponent implements OnInit {
             : {}),
 
           leasesExist: statements.leasesExist,
+
+          ...(statements.additionalSellerIncluded
+            ? {
+              additionalSeller: {
+                legalName:
+                  statements.additionalSellerLegalName.trim(),
+                email:
+                  statements.additionalSellerEmail.trim().toLowerCase(),
+                phone:
+                  statements.additionalSellerPhone.trim(),
+              },
+            }
+            : {}),
         };
 
         await this.listingService.savePropertyDetailsStep(
@@ -826,6 +853,13 @@ export class ListingWizardComponent implements OnInit {
               propertyDetails.lotSize !== null
                 ? propertyDetails.lotSizeUnit
                 : undefined,
+
+            lotNumber: propertyDetails.lotNumber.trim() || undefined,
+            blockNumber: propertyDetails.blockNumber.trim() || undefined,
+            subdivisionName:
+              propertyDetails.subdivisionName.trim() || undefined,
+            legalDescription:
+              propertyDetails.legalDescription.trim() || undefined,
 
             description: propertyDetails.description,
           },

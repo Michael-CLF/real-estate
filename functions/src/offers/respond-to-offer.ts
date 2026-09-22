@@ -20,6 +20,10 @@ import {
   addOfferNotificationToTransaction,
 } from './offer-notification.service';
 
+import {
+  requireStateContractPackage,
+} from './state-contracts/state-contract-registry';
+
 import type {
   OfferDocument,
   OfferVersionDocument,
@@ -129,6 +133,23 @@ export const respondToOffer =
           const version =
             versionSnapshot.data() as
               OfferVersionDocument;
+
+          const stateContractPackage =
+            requireStateContractPackage(
+              offer.stateCode
+            );
+
+          if (
+            version.stateCode !==
+              stateContractPackage.stateCode ||
+            version.terms.stateCode !==
+              stateContractPackage.stateCode
+          ) {
+            throw new HttpsError(
+              'data-loss',
+              'The offer state does not match its current contract version.'
+            );
+          }
 
           if (
             offer.status === 'declined' &&

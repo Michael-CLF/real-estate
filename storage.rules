@@ -1,0 +1,128 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /listing-images/{sellerUid}/{listingUid}/{photoUid}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == sellerUid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == sellerUid
+        && request.resource.size > 0
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == sellerUid;
+    }
+
+    match /professional-images/{ownerUid}/{professionalUid}/{fileName} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.auth.uid == ownerUid
+        && firestore.exists(/databases/(default)/documents/professionalProfiles/$(professionalUid))
+        && firestore.get(/databases/(default)/documents/professionalProfiles/$(professionalUid)).data.ownerUid == request.auth.uid
+        && firestore.get(/databases/(default)/documents/professionalProfiles/$(professionalUid)).data.status == 'active'
+        && firestore.get(/databases/(default)/documents/professionalProfiles/$(professionalUid)).data.subscriptionStatus == 'profile'
+        && fileName.matches('logo\\.(jpg|png|webp)')
+        && request.resource.size > 0
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if request.auth != null
+        && request.auth.uid == ownerUid
+        && firestore.exists(/databases/(default)/documents/professionalProfiles/$(professionalUid))
+        && firestore.get(/databases/(default)/documents/professionalProfiles/$(professionalUid)).data.ownerUid == request.auth.uid;
+    }
+
+    match /listing-disclosures/{sellerUid}/{listingUid}/{documentType}/{fileName} {
+      allow read: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/listings/$(listingUid))
+        && ((request.auth.uid == sellerUid
+          && firestore.get(/databases/(default)/documents/listings/$(listingUid)).data.sellerUid == request.auth.uid)
+          || firestore.get(/databases/(default)/documents/listings/$(listingUid)).data.status == 'active');
+
+      allow create: if request.auth != null
+        && request.auth.uid == sellerUid
+        && firestore.exists(/databases/(default)/documents/listings/$(listingUid))
+        && firestore.get(/databases/(default)/documents/listings/$(listingUid)).data.sellerUid == request.auth.uid
+        && documentType in [
+          'residential-property-owners-association',
+          'mineral-oil-gas-rights',
+          'texas-seller-disclosure-notice'
+        ]
+        && fileName.matches('.*\\.pdf')
+        && request.resource.size > 0
+        && request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
+
+      allow update: if false;
+      allow delete: if request.auth != null
+        && request.auth.uid == sellerUid
+        && firestore.exists(/databases/(default)/documents/listings/$(listingUid))
+        && firestore.get(/databases/(default)/documents/listings/$(listingUid)).data.sellerUid == request.auth.uid;
+    }
+
+    match /offers/{offerUid}/versions/{offerVersionUid}/{filePath=**} {
+      allow read: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/offers/$(offerUid))
+        && firestore.exists(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid))
+        && (request.auth.uid in firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.buyerUids
+          || request.auth.uid in firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.sellerUids)
+        && ((firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.initiatedBy == 'buyer'
+          && request.auth.uid in firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.buyerUids)
+          || (firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.initiatedBy == 'seller'
+          && request.auth.uid in firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.sellerUids)
+          || firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.keys().hasAny(['deliveredAt']));
+      allow write: if false;
+    }
+
+    match /offers/{offerUid}/versions/{offerVersionUid}/attachments/{fileName} {
+      allow create: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/offers/$(offerUid))
+        && firestore.exists(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid))
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.currentVersionUid == offerVersionUid
+        && (request.auth.uid in firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.buyerUids
+          || request.auth.uid in firestore.get(/databases/(default)/documents/offers/$(offerUid)).data.sellerUids)
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.status == 'draft'
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.immutable == false
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.initiatedByUid == request.auth.uid
+        && request.resource.size > 0
+        && request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf'
+        && request.resource.metadata.offerUid == offerUid
+        && request.resource.metadata.offerVersionUid == offerVersionUid
+        && request.resource.metadata.uploaderUid == request.auth.uid
+        && request.resource.metadata.documentUid is string
+        && request.resource.metadata.attachmentType in [
+          'possession_agreement',
+          'additional_terms_exhibit',
+          'legal_description_exhibit',
+          'reservation_addendum',
+          'residential_lease_addendum',
+          'fixture_lease_addendum',
+          'association_addendum',
+          'property_condition_disclosure',
+          'water_rights_disclosure',
+          'lead_based_paint_addendum',
+          'temporary_residential_lease',
+          'contract_addendum',
+          'plans_and_specifications',
+          'buyer_selection_documents',
+          'builder_warranty',
+          'third_party_warranty'
+        ]
+        && fileName == request.resource.metadata.documentUid + '.pdf';
+
+      allow update: if false;
+      allow delete: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/offers/$(offerUid))
+        && firestore.exists(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid))
+        && resource.metadata.uploaderUid == request.auth.uid
+        && resource.metadata.documentUid is string
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.status == 'draft'
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.immutable == false
+        && firestore.get(/databases/(default)/documents/offers/$(offerUid)/versions/$(offerVersionUid)).data.initiatedByUid == request.auth.uid
+        && !firestore.exists(/databases/(default)/documents/offers/$(offerUid)/documents/$(resource.metadata.documentUid));
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

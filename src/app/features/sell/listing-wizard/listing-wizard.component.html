@@ -175,7 +175,7 @@
       @case (2) {
       <app-property-details-step [initialValue]="
                 propertyDetailsData()
-              " (valueChange)="
+              " [stateCode]="addressData()?.state ?? ''" (valueChange)="
                 onPropertyDetailsChange($event)
               " (validityChange)="
                 onStepValidityChange(2, $event)

@@ -39,6 +39,8 @@ interface EffectiveContractDocument {
   status: string;
   transactionPhase: string;
 
+  timeZone?: string;
+
   anticipatedClosingDate: string;
 }
 
@@ -57,9 +59,10 @@ const MAXIMUM_CONTRACTS_PER_RUN = 200;
 export const markContractsSold =
   onSchedule(
     {
-      schedule: '15 0 * * *',
+      schedule:
+        'every 60 minutes',
       timeZone:
-        'America/New_York',
+        'UTC',
       region:
         FUNCTION_REGION,
       maxInstances: 1,
@@ -67,10 +70,8 @@ export const markContractsSold =
       memory: '256MiB',
     },
     async () => {
-      const easternDate =
-        getEasternDateKey(
-          new Date()
-        );
+      const runAt =
+        new Date();
 
       const candidatesSnapshot =
         await adminFirestore
@@ -97,7 +98,7 @@ export const markContractsSold =
           const markedSold =
             await markContractSoldIfDue(
               candidateSnapshot.id,
-              easternDate
+              runAt
             );
 
           if (markedSold) {
@@ -122,7 +123,9 @@ export const markContractsSold =
       logger.info(
         'Contract closing-date status run completed.',
         {
-          easternDate,
+          runAt:
+            runAt.toISOString(),
+
           candidateCount:
             candidatesSnapshot.size,
           soldCount,
@@ -136,7 +139,7 @@ export const markContractsSold =
 
 async function markContractSoldIfDue(
   contractUid: string,
-  easternDate: string
+  runAt: Date
 ): Promise<boolean> {
   const contractReference =
     adminFirestore
@@ -158,13 +161,24 @@ async function markContractSoldIfDue(
         contractSnapshot.data() as
           EffectiveContractDocument;
 
+      const contractTimeZone =
+        resolveContractTimeZone(
+          contract.timeZone
+        );
+
+      const contractDate =
+        getDateKey(
+          runAt,
+          contractTimeZone
+        );
+
       if (
         contract.status !== 'effective' ||
         !isDateKey(
           contract.anticipatedClosingDate
         ) ||
         contract.anticipatedClosingDate >
-          easternDate
+          contractDate
       ) {
         return false;
       }
@@ -344,19 +358,19 @@ async function markContractSoldIfDue(
 }
 
 
-function getEasternDateKey(
-  date: Date
+function getDateKey(
+  date: Date,
+  timeZone: string
 ): string {
   const parts =
     new Intl.DateTimeFormat(
-    'en-CA',
-    {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone:
-        'America/New_York',
-    }
+      'en-CA',
+      {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone,
+      }
     ).formatToParts(date);
 
   const year =
@@ -376,11 +390,43 @@ function getEasternDateKey(
 
   if (!year || !month || !day) {
     throw new Error(
-      'The Eastern date could not be determined.'
+      `The date could not be determined for ${timeZone}.`
     );
   }
 
   return `${year}-${month}-${day}`;
+}
+
+
+function resolveContractTimeZone(
+  value: unknown
+): string {
+  /*
+   * Existing North Carolina contracts created before
+   * timezone-aware milestones do not contain this field.
+   */
+  const timeZone =
+    typeof value === 'string' &&
+    value.trim().length > 0
+      ? value.trim()
+      : 'America/New_York';
+
+  try {
+    new Intl.DateTimeFormat(
+      'en-US',
+      {
+        timeZone,
+      }
+    ).format(
+      new Date(0)
+    );
+  } catch {
+    throw new Error(
+      `The contract timezone ${timeZone} is invalid.`
+    );
+  }
+
+  return timeZone;
 }
 
 
@@ -428,3 +474,4 @@ function requireIdentifier(
 
   return value;
 }
+

@@ -39,6 +39,10 @@ interface ListingDraftDocument {
     halfBathrooms?: number;
     squareFeet?: number;
     lotSize?: number;
+    lotNumber?: string;
+    blockNumber?: string;
+    subdivisionName?: string;
+    legalDescription?: string;
     yearBuilt?: number;
     description?: string;
 
@@ -54,6 +58,14 @@ interface ListingDraftDocument {
   enhancements?: Record<string, string[]>;
 
   schools?: Record<string, unknown>;
+
+  parcelAndTaxes?: {
+    parcelNumber?: string;
+    legalDescription?: string;
+    subdivisionName?: string;
+    lotNumber?: string;
+    blockNumber?: string;
+  };
 
   hoa?: {
     hasHoa?: boolean;
@@ -91,6 +103,12 @@ interface ListingDraftDocument {
 
     leasesExist?: boolean;
     leaseAddendumDocumentUid?: string;
+
+    additionalSeller?: {
+      legalName?: string;
+      email?: string;
+      phone?: string;
+    };
   };
 
   promotion?: Record<string, unknown>;
@@ -422,6 +440,58 @@ async function publishPaidListing(
 
     addOptionalField(
       listingDocument,
+      'parcelAndTaxes',
+      draft.parcelAndTaxes,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'parcelIdentificationNumber',
+      draft.parcelAndTaxes?.parcelNumber,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'legalDescription',
+      draft.parcelAndTaxes?.legalDescription,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'subdivisionName',
+      draft.parcelAndTaxes?.subdivisionName,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'lot',
+      draft.propertyDetails?.lotNumber ??
+        draft.parcelAndTaxes?.lotNumber,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'block',
+      draft.propertyDetails?.blockNumber ??
+        draft.parcelAndTaxes?.blockNumber,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'subdivisionName',
+      draft.propertyDetails?.subdivisionName ??
+        draft.parcelAndTaxes?.subdivisionName,
+    );
+
+    addOptionalField(
+      listingDocument,
+      'legalDescription',
+      draft.propertyDetails?.legalDescription ??
+        draft.parcelAndTaxes?.legalDescription,
+    );
+
+    addOptionalField(
+      listingDocument,
       'lotSize',
       draft.propertyDetails?.lotSize,
     );
@@ -691,6 +761,21 @@ function validateDraftForPublication(
   if (typeof sellerStatements.leasesExist !== 'boolean') {
     throw new Error(
       `Listing draft ${listingUid} has no existing-leases statement.`,
+    );
+  }
+
+  const additionalSeller = sellerStatements.additionalSeller;
+
+  if (
+    additionalSeller &&
+    (
+      !additionalSeller.legalName?.trim() ||
+      !additionalSeller.email?.trim() ||
+      !additionalSeller.phone?.trim()
+    )
+  ) {
+    throw new Error(
+      `Listing draft ${listingUid} has incomplete co-seller information.`,
     );
   }
 }

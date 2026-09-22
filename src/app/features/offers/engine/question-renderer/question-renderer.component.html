@@ -1,0 +1,291 @@
+<section
+  class="offer-question"
+  [class.offer-question--invalid]="validationMessage()"
+  [attr.aria-labelledby]="controlId() + '-label'"
+>
+  @if (question().type !== 'information') {
+    <div class="offer-question__heading">
+      <label
+        [id]="controlId() + '-label'"
+        [for]="controlId()"
+      >
+        {{ question().label }}
+
+        @if (question().validation?.required) {
+          <span
+            class="offer-question__required"
+            aria-hidden="true"
+          >*</span>
+        }
+      </label>
+
+      @if (question().description) {
+        <p>{{ question().description }}</p>
+      }
+    </div>
+  }
+
+  @switch (question().type) {
+    @case ('text') {
+      <input
+        [id]="controlId()"
+        type="text"
+        [value]="textValue()"
+        [disabled]="disabled()"
+        [attr.required]="question().validation?.required ? '' : null"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        (input)="onTextInput($event)"
+      />
+    }
+
+    @case ('textarea') {
+      <textarea
+        [id]="controlId()"
+        rows="5"
+        [value]="textValue()"
+        [disabled]="disabled()"
+        [attr.required]="question().validation?.required ? '' : null"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        (input)="onTextInput($event)"
+      ></textarea>
+    }
+
+    @case ('currency') {
+      <div class="offer-question__currency">
+        <span aria-hidden="true">$</span>
+        <input
+          [id]="controlId()"
+          type="number"
+          inputmode="decimal"
+          step="0.01"
+          min="0"
+          [value]="currencyValue() ?? ''"
+          [disabled]="disabled()"
+          [attr.required]="question().validation?.required ? '' : null"
+          [attr.aria-invalid]="validationMessage() ? 'true' : null"
+          (input)="onCurrencyInput($event)"
+        />
+      </div>
+    }
+
+    @case ('number') {
+      <input
+        [id]="controlId()"
+        type="number"
+        inputmode="decimal"
+        [value]="numericValue() ?? ''"
+        [disabled]="disabled()"
+        [attr.min]="question().validation?.minimum ?? null"
+        [attr.max]="question().validation?.maximum ?? null"
+        [attr.required]="question().validation?.required ? '' : null"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        (input)="onNumberInput($event)"
+      />
+    }
+
+    @case ('date') {
+      <input
+        [id]="controlId()"
+        type="date"
+        [value]="textValue()"
+        [disabled]="disabled()"
+        [attr.required]="question().validation?.required ? '' : null"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        (input)="onTextInput($event)"
+      />
+    }
+
+    @case ('date_time') {
+      <input
+        [id]="controlId()"
+        type="datetime-local"
+        [value]="textValue()"
+        [disabled]="disabled()"
+        [attr.required]="question().validation?.required ? '' : null"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        (input)="onTextInput($event)"
+      />
+    }
+
+    @case ('yes_no') {
+      <div class="offer-question__choices offer-question__choices--inline">
+        <label>
+          <input
+            [name]="controlId()"
+            type="radio"
+            [checked]="booleanValue() === true"
+            [disabled]="disabled()"
+            (change)="onBooleanInput(true)"
+          />
+          <span>Yes</span>
+        </label>
+
+        <label>
+          <input
+            [name]="controlId()"
+            type="radio"
+            [checked]="booleanValue() === false"
+            [disabled]="disabled()"
+            (change)="onBooleanInput(false)"
+          />
+          <span>No</span>
+        </label>
+      </div>
+    }
+
+    @case ('acknowledgement') {
+      <label class="offer-question__acknowledgement">
+        <input
+          [id]="controlId()"
+          type="checkbox"
+          [checked]="booleanValue() === true"
+          [disabled]="disabled()"
+          (change)="onAcknowledgementInput($event)"
+        />
+        <span>{{ question().label }}</span>
+      </label>
+    }
+
+    @case ('single_choice') {
+      <select
+        [id]="controlId()"
+        [value]="textValue()"
+        [disabled]="disabled()"
+        [attr.required]="question().validation?.required ? '' : null"
+        [attr.aria-invalid]="validationMessage() ? 'true' : null"
+        (change)="onSingleChoiceInput($event)"
+      >
+        <option value="">Select an option</option>
+
+        @for (option of choiceOptions(); track option.value) {
+          <option [value]="option.value">
+            {{ option.label }}
+          </option>
+        }
+      </select>
+    }
+
+    @case ('multiple_choice') {
+      <div class="offer-question__choices">
+        @for (option of choiceOptions(); track option.value) {
+          <label>
+            <input
+              type="checkbox"
+              [checked]="isMultipleChoiceSelected(option.value)"
+              [disabled]="disabled()"
+              (change)="onMultipleChoiceInput(option.value, $event)"
+            />
+
+            <span>
+              <strong>{{ option.label }}</strong>
+
+              @if (option.description) {
+                <small>{{ option.description }}</small>
+              }
+            </span>
+          </label>
+        }
+      </div>
+    }
+
+    @case ('address') {
+      <div class="offer-question__address">
+        <input
+          [id]="controlId()"
+          type="text"
+          autocomplete="address-line1"
+          placeholder="Street address"
+          [value]="addressField('addressLine1')"
+          [disabled]="disabled()"
+          (input)="onAddressInput('addressLine1', $event)"
+        />
+
+        <input
+          type="text"
+          autocomplete="address-line2"
+          placeholder="Address line 2"
+          [value]="addressField('addressLine2')"
+          [disabled]="disabled()"
+          (input)="onAddressInput('addressLine2', $event)"
+        />
+
+        <div class="offer-question__address-row">
+          <input
+            type="text"
+            autocomplete="address-level2"
+            placeholder="City"
+            [value]="addressField('city')"
+            [disabled]="disabled()"
+            (input)="onAddressInput('city', $event)"
+          />
+
+          <input
+            type="text"
+            autocomplete="address-level1"
+            placeholder="State"
+            [value]="addressField('state')"
+            [disabled]="disabled()"
+            (input)="onAddressInput('state', $event)"
+          />
+
+          <input
+            type="text"
+            autocomplete="postal-code"
+            placeholder="ZIP code"
+            [value]="addressField('zipCode')"
+            [disabled]="disabled()"
+            (input)="onAddressInput('zipCode', $event)"
+          />
+        </div>
+      </div>
+    }
+
+    @case ('document_upload') {
+      <div class="offer-question__document">
+        <input
+          [id]="controlId()"
+          type="file"
+          [accept]="acceptedFileTypes()"
+          [disabled]="disabled()"
+          (change)="onDocumentInput($event)"
+        />
+
+        <small>{{ maximumFileSizeLabel() }}</small>
+
+        @if (hasAttachedDocument()) {
+          <span class="offer-question__attached">
+            Document attached
+          </span>
+        }
+      </div>
+    }
+
+    @case ('information') {
+      <aside
+        class="offer-question__information"
+        [attr.data-tone]="informationTone()"
+      >
+        <strong>{{ question().label }}</strong>
+
+        @if (question().description) {
+          <p>{{ question().description }}</p>
+        }
+      </aside>
+    }
+  }
+
+  @if (question().helpText) {
+    <p class="offer-question__help">
+      {{ question().helpText }}
+    </p>
+  }
+
+  @if (validationMessage()) {
+    <p
+      class="offer-question__error"
+      role="alert"
+    >
+      {{ validationMessage() }}
+    </p>
+  }
+</section>

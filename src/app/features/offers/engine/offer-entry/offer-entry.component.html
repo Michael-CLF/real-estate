@@ -1,0 +1,52 @@
+
+@if (loading()) {
+  <main
+    class="offer-entry"
+    aria-live="polite"
+  >
+    <section class="offer-entry__card">
+      <div
+        class="offer-entry__spinner"
+        aria-hidden="true"
+      ></div>
+
+      <h1>Opening your offer</h1>
+
+      <p>
+        NavStreet is loading the contract process for this property.
+      </p>
+    </section>
+  </main>
+} @else if (errorMessage()) {
+  <main class="offer-entry">
+    <section
+      class="offer-entry__card offer-entry__card--error"
+      role="alert"
+    >
+      <span
+        class="offer-entry__icon"
+        aria-hidden="true"
+      >
+        !
+      </span>
+
+      <h1>Offer unavailable</h1>
+
+      <p>
+        {{ errorMessage() }}
+      </p>
+
+      <button
+        type="button"
+        class="offer-entry__button"
+        (click)="returnToListing()"
+      >
+        Return to property details
+      </button>
+    </section>
+  </main>
+} @else if (offerComponent(); as component) {
+  <ng-container
+    *ngComponentOutlet="component"
+  />
+}

@@ -1,6 +1,7 @@
 export type DisclosureDocumentType =
   | 'residential-property-owners-association'
-  | 'mineral-oil-gas-rights';
+  | 'mineral-oil-gas-rights'
+  | 'texas-seller-disclosure-notice';
 
 export interface StateDisclosureRequirement {
   readonly description: string;

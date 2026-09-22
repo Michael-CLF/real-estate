@@ -168,6 +168,33 @@
       </div>
     </div>
 
+    @if (stateCode().trim().toUpperCase() === 'TX') {
+      <fieldset class="seller-statements">
+        <legend>Texas legal property description</legend>
+        <p class="seller-statements__description">
+          Enter these details from the deed, survey, or county property record. They will be carried into a buyer’s Texas offer so the buyer does not have to research them.
+        </p>
+        <div class="three-column">
+          <div class="field">
+            <label for="lotNumber">Lot <span class="optional">(optional)</span></label>
+            <input id="lotNumber" type="text" formControlName="lotNumber" maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="blockNumber">Block <span class="optional">(optional)</span></label>
+            <input id="blockNumber" type="text" formControlName="blockNumber" maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="subdivisionName">Addition or subdivision <span class="optional">(optional)</span></label>
+            <input id="subdivisionName" type="text" formControlName="subdivisionName" maxlength="500" />
+          </div>
+        </div>
+        <div class="field description-field">
+          <label for="legalDescription">Complete legal description <span class="optional">(optional)</span></label>
+          <textarea id="legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"></textarea>
+        </div>
+      </fieldset>
+    }
+
     <div formGroupName="hoa">
       <div class="three-column">
         <div class="field">
@@ -403,6 +430,28 @@
           }
         </div>
       </div>
+
+      <label class="seller-statements__description">
+        <input type="checkbox" formControlName="additionalSellerIncluded" />
+        Add a co-seller who must appear on offers and sign the agreement
+      </label>
+
+      @if (form.controls.sellerStatements.controls.additionalSellerIncluded.value) {
+        <div class="three-column">
+          <div class="field">
+            <label for="additionalSellerLegalName">Co-seller legal name</label>
+            <input id="additionalSellerLegalName" type="text" formControlName="additionalSellerLegalName" maxlength="300" />
+          </div>
+          <div class="field">
+            <label for="additionalSellerEmail">Co-seller email</label>
+            <input id="additionalSellerEmail" type="email" formControlName="additionalSellerEmail" maxlength="320" />
+          </div>
+          <div class="field">
+            <label for="additionalSellerPhone">Co-seller phone</label>
+            <input id="additionalSellerPhone" type="tel" formControlName="additionalSellerPhone" maxlength="50" />
+          </div>
+        </div>
+      }
     </fieldset>
 
     <div class="field description-field">

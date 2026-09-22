@@ -1,6 +1,22 @@
 import {
+  createNorthCarolinaContractMilestones,
+} from './north-carolina-contract-milestones';
+
+import {
+  sanitizeNorthCarolinaDraftTerms,
+} from './north-carolina-draft-terms-sanitizer';
+
+import {
   createNorthCarolinaInitialOfferTerms,
 } from './north-carolina-initial-terms';
+
+import {
+  generateOfferPdf,
+} from './north-carolina-offer-pdf.service';
+
+import {
+  validateNorthCarolinaSubmission,
+} from './north-carolina-submission-validator';
 
 import type {
   StateContractPackage,
@@ -21,6 +37,14 @@ export const northCarolinaStateContractPackage:
 
     offerCreationEnabled: true,
 
+    /*
+     * North Carolina currently has one NavStreet contract
+     * package, so callers must not select a contract type.
+     */
+    contractTypes: [],
+
+    contractTypeRequired: false,
+
     defaultTimeZone:
       NORTH_CAROLINA_DEFAULT_TIME_ZONE,
 
@@ -39,7 +63,7 @@ export const northCarolinaStateContractPackage:
     },
 
     createInitialOfferTerms:
-      (input) =>
+      input =>
         createNorthCarolinaInitialOfferTerms(
           input,
           {
@@ -49,5 +73,43 @@ export const northCarolinaStateContractPackage:
             defaultTimeZone:
               NORTH_CAROLINA_DEFAULT_TIME_ZONE,
           }
+        ),
+
+    generateAgreement:
+      input =>
+        generateOfferPdf(
+          input
+        ),
+
+    validateSubmission:
+      input =>
+        validateNorthCarolinaSubmission(
+          input,
+          {
+            stateCode:
+              NORTH_CAROLINA_STATE_CODE,
+
+            defaultTimeZone:
+              NORTH_CAROLINA_DEFAULT_TIME_ZONE,
+          }
+        ),
+
+    sanitizeDraftTerms:
+      input =>
+        sanitizeNorthCarolinaDraftTerms(
+          input,
+          {
+            stateCode:
+              NORTH_CAROLINA_STATE_CODE,
+
+            defaultTimeZone:
+              NORTH_CAROLINA_DEFAULT_TIME_ZONE,
+          }
+        ),
+
+    createContractMilestones:
+      input =>
+        createNorthCarolinaContractMilestones(
+          input
         ),
   };

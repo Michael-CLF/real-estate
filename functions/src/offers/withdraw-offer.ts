@@ -1,6 +1,5 @@
 import {
   FieldValue,
-  getFirestore,
   type DocumentReference
 } from 'firebase-admin/firestore';
 
@@ -10,8 +9,25 @@ import {
 } from 'firebase-functions/v2/https';
 
 import {
+  adminFirestore
+} from '../shared/firebase-admin';
+
+import {
+  callableFunctionOptions
+} from '../shared/function-options';
+
+import {
   addOfferNotificationToTransaction
 } from './offer-notification.service';
+
+import {
+  requireStateContractPackage
+} from './state-contracts/state-contract-registry';
+
+import type {
+  OfferDocument,
+  OfferVersionDocument
+} from './offer-types';
 
 
 interface WithdrawOfferRequest {
@@ -27,29 +43,6 @@ interface WithdrawOfferResponse {
   alreadyWithdrawn: boolean;
 }
 
-interface OfferRecord {
-  Uid?: string;
-
-  primaryBuyerUid?: string;
-  buyerUids?: string[];
-
-  primarySellerUid?: string;
-  sellerUids?: string[];
-
-  listingUid?: string;
-  currentVersionUid?: string;
-  lastDeliveredVersionUid?: string;
-
-  status?: string;
-  pendingOfferCounted?: boolean;
-}
-
-interface OfferVersionRecord {
-  Uid?: string;
-  versionNumber?: number;
-  initiatedBy?: 'buyer' | 'seller';
-  status?: string;
-}
 
 const withdrawableOfferStatuses =
   new Set([
@@ -71,9 +64,7 @@ export const withdrawOffer = onCall<
   WithdrawOfferRequest,
   Promise<WithdrawOfferResponse>
 >(
-  {
-    region: 'us-east1'
-  },
+  callableFunctionOptions,
 
   async request => {
     const userUid =
@@ -103,7 +94,7 @@ export const withdrawOffer = onCall<
       );
 
     const firestore =
-      getFirestore();
+      adminFirestore;
 
     const offerReference =
       firestore
@@ -126,7 +117,7 @@ export const withdrawOffer = onCall<
 
         const offer =
           offerSnapshot.data() as
-            OfferRecord | undefined;
+            OfferDocument | undefined;
 
         if (!offer) {
           throw new HttpsError(
@@ -134,6 +125,11 @@ export const withdrawOffer = onCall<
             'The stored offer contains no data.'
           );
         }
+
+        const stateContractPackage =
+          requireStateContractPackage(
+            offer.stateCode
+          );
 
         const offerVersionUid =
           requireNonEmptyString(
@@ -184,12 +180,24 @@ export const withdrawOffer = onCall<
 
         const version =
           versionSnapshot.data() as
-            OfferVersionRecord | undefined;
+            OfferVersionDocument | undefined;
 
         if (!version) {
           throw new HttpsError(
             'data-loss',
             'The current offer version contains no data.'
+          );
+        }
+
+        if (
+          version.stateCode !==
+            stateContractPackage.stateCode ||
+          version.terms.stateCode !==
+            stateContractPackage.stateCode
+        ) {
+          throw new HttpsError(
+            'data-loss',
+            'The offer state does not match its current contract version.'
           );
         }
 
@@ -404,8 +412,8 @@ export const withdrawOffer = onCall<
 
 
 function verifyInitiatingPartyAccess(
-  offer: OfferRecord,
-  version: OfferVersionRecord,
+  offer: OfferDocument,
+  version: OfferVersionDocument,
   userUid: string
 ): 'buyer' | 'seller' {
   const buyerUids =
@@ -436,7 +444,7 @@ function verifyInitiatingPartyAccess(
 
 
 function verifyOfferCanBeWithdrawn(
-  offer: OfferRecord
+  offer: OfferDocument
 ): void {
   if (!offer.status) {
     throw new HttpsError(
@@ -459,7 +467,7 @@ function verifyOfferCanBeWithdrawn(
 
 
 function getBuyerUids(
-  offer: OfferRecord
+  offer: OfferDocument
 ): string[] {
   return uniqueStrings([
     ...(offer.buyerUids ?? []),
@@ -469,7 +477,7 @@ function getBuyerUids(
 
 
 function getSellerUids(
-  offer: OfferRecord
+  offer: OfferDocument
 ): string[] {
   return uniqueStrings([
     ...(offer.sellerUids ?? []),

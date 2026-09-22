@@ -57,6 +57,12 @@ export type TransactionPhase =
 
 export interface CreateOfferDraftData {
   listingUid: string;
+
+  /*
+   * Required only for state packages that support multiple
+   * contract forms. North Carolina callers omit it.
+   */
+  contractType?: string;
 }
 
 
@@ -632,7 +638,7 @@ export interface OfferAdditionalTermsExhibitDocument {
 export interface OfferDeliveryTermsDocument {
   expiresAt: string;
 
-  timeZone: 'America/New_York';
+  timeZone: string;
 
   buyerDeliveryEmail: string;
   sellerDeliveryEmail: string;
@@ -642,7 +648,7 @@ export interface OfferDeliveryTermsDocument {
 
 
 export interface OfferTermsDocument {
-  stateCode: 'NC';
+  stateCode: string;
 
   property: OfferPropertySnapshotDocument;
   propertyTerms: OfferPropertyTermsDocument;
@@ -890,3 +896,4 @@ export interface OfferVersionStatusHistoryDocument {
 
   occurredAt: Timestamp;
 }
+

@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.texas-offer-entry {
+  min-height: 100%;
+}
+
+.texas-offer-entry__status-card {
+  width: min(680px, calc(100% - 2rem));
+  margin: 4rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #d8e1e6;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgb(21 67 96 / 10%);
+
+  h1 {
+    margin: 0 0 0.75rem;
+    color: #154360;
+  }
+
+  p {
+    margin: 0;
+    color: #52636d;
+  }
+
+  button {
+    margin-top: 1.25rem;
+    padding: 0.75rem 1.1rem;
+    color: #fff;
+    background: #154360;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+}
+
+.texas-offer-entry__status-card--error {
+  border-color: #b5473c;
+}
+
+.texas-offer-entry__spinner {
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0 auto 1rem;
+  border: 3px solid #d8e1e6;
+  border-top-color: #154360;
+  border-radius: 50%;
+  animation: texas-offer-spin 0.8s linear infinite;
+}
+
+.texas-offer-entry__error,
+.texas-offer-entry__notice {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 1rem auto;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+}
+
+.texas-offer-entry__error {
+  color: #7c2018;
+  background: #fff2f0;
+  border: 1px solid #e3a39d;
+}
+
+.texas-offer-entry__notice {
+  color: #154360;
+  background: #edf5f7;
+  border: 1px solid #a8c7d3;
+}
+
+@keyframes texas-offer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

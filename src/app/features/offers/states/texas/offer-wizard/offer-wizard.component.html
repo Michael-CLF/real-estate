@@ -1,0 +1,38 @@
+@if (terms(); as currentTerms) {
+  <section class="texas-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="texas-offer-wizard__contract">
+        <span>Selected Texas contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          TREC {{ contract.formId }} · Effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    <app-offer-wizard-shell
+      stateName="Texas"
+      title="Texas purchase offer"
+      description="Complete the questions for the selected Texas contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [sellers]="sellers()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+    />
+  </section>
+} @else {
+  <app-texas-contract-selection
+    [disabled]="busy()"
+    (contractSelected)="onContractSelected($event)"
+  />
+}

@@ -1,0 +1,229 @@
+<main class="offer-wizard-shell">
+  <header class="offer-wizard-shell__header">
+    <div class="offer-wizard-shell__header-content">
+      <button
+        type="button"
+        class="offer-wizard-shell__return"
+        [disabled]="busy()"
+        (click)="returnToListingRequested.emit()"
+      >
+        <span aria-hidden="true">←</span>
+        Property details
+      </button>
+
+      <div>
+        <p class="offer-wizard-shell__eyebrow">
+          {{ stateName() }} offer
+        </p>
+
+        <h1>{{ title() }}</h1>
+
+        <p class="offer-wizard-shell__description">
+          {{ description() }}
+        </p>
+      </div>
+    </div>
+  </header>
+
+  @if (visibleSections().length > 0) {
+    <section
+      class="offer-wizard-shell__progress"
+      aria-label="Offer progress"
+    >
+      <div class="offer-wizard-shell__progress-summary">
+        <span>
+          Section {{ normalizedSectionIndex() + 1 }}
+          of {{ visibleSections().length }}
+        </span>
+
+        <strong>{{ progressPercent() }}%</strong>
+      </div>
+
+      <div
+        class="offer-wizard-shell__progress-track"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="progressPercent()"
+      >
+        <span
+          [style.width.%]="progressPercent()"
+        ></span>
+      </div>
+
+      <ol class="offer-wizard-shell__section-list">
+        @for (
+          section of visibleSections();
+          track section.id;
+          let index = $index
+        ) {
+          <li
+            [class.is-current]="index === normalizedSectionIndex()"
+            [class.is-complete]="isSectionComplete(section.id)"
+            [class.has-errors]="shouldShowSectionErrors(section.id)"
+            [attr.aria-current]="index === normalizedSectionIndex() ? 'step' : null"
+          >
+            <span>
+              @if (isSectionComplete(section.id)) {
+                <span aria-hidden="true">✓</span>
+                <span class="offer-wizard-shell__sr-only">Completed</span>
+              } @else {
+                {{ index + 1 }}
+              }
+            </span>
+            {{ section.shortTitle ?? section.title }}
+          </li>
+        }
+      </ol>
+    </section>
+
+    @if (currentSection(); as section) {
+      <section class="offer-wizard-shell__section">
+        <header>
+          <p class="offer-wizard-shell__section-number">
+            Section {{ normalizedSectionIndex() + 1 }}
+          </p>
+
+          <h2>{{ section.title }}</h2>
+
+          @if (section.description) {
+            <p>{{ section.description }}</p>
+          }
+        </header>
+
+        @if (section.id === 'parties') {
+          <div class="offer-wizard-shell__party-grid">
+            <section>
+              <h3>Buyer</h3>
+              @for (buyer of buyers(); track buyer.Uid) {
+                <article class="offer-wizard-shell__party-card">
+                  <strong>{{ buyer.legalName }}</strong>
+                  <span>{{ buyer.email }}</span>
+                  <span>{{ buyer.phone }}</span>
+                </article>
+              }
+            </section>
+            <section>
+              <h3>Seller</h3>
+              @for (seller of sellers(); track seller.Uid) {
+                <article class="offer-wizard-shell__party-card">
+                  <strong>{{ seller.legalName }}</strong>
+                  <span>{{ seller.email }}</span>
+                  <span>{{ seller.phone }}</span>
+                </article>
+              }
+            </section>
+          </div>
+          <p class="offer-wizard-shell__locked-note">
+            Primary party information is populated from NavStreet records and locked for this offer.
+          </p>
+
+          @if (buyers().length === 1 || addingCoBuyer()) {
+            <label class="offer-wizard-shell__co-buyer-toggle">
+              <input
+                type="checkbox"
+                [checked]="addingCoBuyer()"
+                [disabled]="busy()"
+                (change)="toggleCoBuyer(($any($event.target)).checked)"
+              />
+              Add one co-buyer to this first offer
+            </label>
+
+            @if (addingCoBuyer()) {
+              <div class="offer-wizard-shell__co-buyer-form">
+                <label>
+                  <span>Co-buyer legal name</span>
+                  <input type="text" [value]="coBuyerLegalName()" (input)="updateCoBuyerField('legalName', $event)" />
+                </label>
+                <label>
+                  <span>Co-buyer email</span>
+                  <input type="email" [value]="coBuyerEmail()" (input)="updateCoBuyerField('email', $event)" />
+                </label>
+                <label>
+                  <span>Co-buyer phone</span>
+                  <input type="tel" [value]="coBuyerPhone()" (input)="updateCoBuyerField('phone', $event)" />
+                </label>
+              </div>
+            }
+          }
+        }
+
+        @if (section.id === 'property') {
+          <div class="offer-wizard-shell__property-summary">
+            <strong>Property from the listing</strong>
+            <span>{{ propertyValue('addressLine1') }}</span>
+            <span>{{ propertyValue('city') }}, {{ propertyValue('state') }} {{ propertyValue('zipCode') }}</span>
+            <span>{{ propertyValue('county') }} County</span>
+          </div>
+        }
+
+        <div class="offer-wizard-shell__questions">
+          @for (
+            question of section.questions;
+            track question.id
+          ) {
+            @if (isQuestionVisible(question)) {
+              <app-offer-question-renderer
+                [class.offer-wizard-shell__question--full-width]="
+                  question.type === 'textarea' ||
+                  question.type === 'document_upload' ||
+                  question.type === 'information' ||
+                  question.type === 'multiple_choice'
+                "
+                [question]="question"
+                [value]="questionValue(question)"
+                [disabled]="busy()"
+                [validationMessage]="validationMessageFor(question)"
+                (valueChange)="onValueChange(question, $event)"
+                (documentSelected)="onDocumentSelected($event)"
+              />
+            }
+          }
+        </div>
+      </section>
+    }
+
+    <footer class="offer-wizard-shell__actions">
+      <button
+        type="button"
+        class="offer-wizard-shell__secondary"
+        [disabled]="busy() || normalizedSectionIndex() === 0"
+        (click)="goToPreviousSection()"
+      >
+        Previous
+      </button>
+
+      <div class="offer-wizard-shell__action-status">
+        @if (saving()) {
+          <span role="status">Saving…</span>
+        }
+
+        @if (shouldShowCurrentSectionError()) {
+          <span class="offer-wizard-shell__error" role="alert">
+            Complete the required information before continuing.
+          </span>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="offer-wizard-shell__primary"
+        [disabled]="busy()"
+        (click)="continueOrSubmit()"
+      >
+        @if (submitting()) {
+          Submitting…
+        } @else if (isLastSection()) {
+          {{ submitLabel() }}
+        } @else {
+          Continue
+        }
+      </button>
+    </footer>
+  } @else {
+    <section class="offer-wizard-shell__empty" role="alert">
+      <h2>The offer process is unavailable</h2>
+      <p>No offer sections are configured for this contract.</p>
+    </section>
+  }
+</main>

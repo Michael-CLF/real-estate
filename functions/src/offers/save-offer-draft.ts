@@ -16,9 +16,16 @@ import {
   callableFunctionOptions,
 } from '../shared/function-options';
 
+import {
+  requireStateContractPackage,
+} from './state-contracts/state-contract-registry';
+
+import type {
+  StateContractTerms,
+} from './state-contracts/state-contract-package';
+
 import type {
   OfferDocument,
-  OfferTermsDocument,
   OfferVersionDocument,
   OfferVersionPartySnapshotDocument,
   SaveOfferDraftData,
@@ -28,14 +35,6 @@ import type {
 
 const MAX_SAVE_PAYLOAD_BYTES =
   750_000;
-
-const EDITABLE_DRAFT_OFFER_STATUSES =
-  new Set([
-    'draft',
-    'submitted',
-    'viewed',
-    'countered'
-  ]);
 
 
 /*
@@ -186,11 +185,8 @@ export const saveOfferDraft =
 
               statusHistory:
                 FieldValue.arrayUnion({
-                  fromStatus:
-                    offer.status,
-
-                  toStatus:
-                    offer.status,
+                  fromStatus: 'draft',
+                  toStatus: 'draft',
 
                   action: 'draft_saved',
 
@@ -234,9 +230,8 @@ function verifyDraftOwnership(
   }
 
   if (
-    !EDITABLE_DRAFT_OFFER_STATUSES.has(
-      offer.status
-    )
+    offer.status !== 'draft' &&
+    offer.status !== 'countered'
   ) {
     throw new HttpsError(
       'failed-precondition',
@@ -296,11 +291,16 @@ function sanitizeDraftChanges(
     )
   ) {
     sanitized['terms'] =
-      sanitizeTerms(
-        changes['terms'],
-        currentVersion.terms,
-        currentVersion.initiatedBy
-      );
+      requireStateContractPackage(
+        currentVersion.stateCode
+      ).sanitizeDraftTerms({
+        requestedTerms:
+          changes['terms'],
+        currentTerms:
+          currentVersion.terms as unknown as StateContractTerms,
+        initiatedBy:
+          currentVersion.initiatedBy,
+      });
   }
 
   if (
@@ -311,8 +311,7 @@ function sanitizeDraftChanges(
   ) {
     sanitized['wizardData'] =
       sanitizeWizardData(
-        changes['wizardData'],
-        currentVersion
+        changes['wizardData']
       );
   }
 
@@ -384,106 +383,8 @@ function sanitizeDraftChanges(
 }
 
 
-function sanitizeTerms(
-  requestedTerms: unknown,
-  currentTerms: OfferTermsDocument,
-  initiatedBy: 'buyer' | 'seller'
-): OfferTermsDocument {
-  if (
-    requestedTerms === null ||
-    typeof requestedTerms !== 'object' ||
-    Array.isArray(requestedTerms)
-  ) {
-    throw new HttpsError(
-      'invalid-argument',
-      'Offer terms must be an object.'
-    );
-  }
-
-  const terms =
-    structuredCloneSafe(
-      requestedTerms as
-      Record<string, unknown>
-    );
-
-  /*
-   * The property and contract state are trusted backend
-   * snapshots. A browser may never replace them.
-   */
-  terms['stateCode'] =
-    currentTerms.stateCode;
-
-  terms['property'] =
-    currentTerms.property;
-
-  /*
-   * The due-diligence deadline time comes directly from
-   * the agreement and is not an editable browser field.
-   */
-  const requestedDeposits =
-    requireObject(
-      terms['deposits'],
-      'Deposit terms must be an object.'
-    );
-
-  requestedDeposits[
-    'dueDiligenceEndTime'
-  ] = '17:00';
-
-  const requestedDelivery =
-    requireObject(
-      terms['delivery'],
-      'Delivery terms must be an object.'
-    );
-
-  /*
-   * Party delivery addresses are populated from the
-   * NavStreet account snapshots and cannot be replaced by
-   * the browser.
-   */
-  requestedDelivery[
-    'buyerDeliveryEmail'
-  ] = currentTerms
-    .delivery
-    .buyerDeliveryEmail;
-
-  requestedDelivery[
-    'sellerDeliveryEmail'
-  ] = currentTerms
-    .delivery
-    .sellerDeliveryEmail;
-
-  requestedDelivery['timeZone'] =
-    'America/New_York';
-
-  if (initiatedBy === 'buyer') {
-    /*
-     * A buyer cannot answer or overwrite the seller's
-     * Section 6 statements.
-     */
-    terms['sellerStatements'] =
-      currentTerms.sellerStatements;
-  } else {
-    /*
-     * A seller cannot rewrite disclosure selections that
-     * the buyer previously made and acknowledged.
-     */
-    terms['buyerDisclosures'] =
-      currentTerms.buyerDisclosures;
-  }
-
-  rejectUnsafeObjectKeys(
-    terms
-  );
-
-  return removeUndefinedValues(
-    terms
-  ) as unknown as OfferTermsDocument;
-}
-
 function sanitizeWizardData(
-  requestedWizardData: unknown,
-  currentVersion: OfferVersionDocument
+  requestedWizardData: unknown
 ): Record<string, unknown> {
   if (
     requestedWizardData === null ||
@@ -503,16 +404,6 @@ function sanitizeWizardData(
       Record<string, unknown>
     );
 
-  if (
-    currentVersion.initiatedBy ===
-      'seller'
-  ) {
-    preserveBuyerDisclosureWizardData(
-      wizardData,
-      currentVersion.terms
-    );
-  }
-
   rejectUnsafeObjectKeys(
     wizardData
   );
@@ -520,78 +411,6 @@ function sanitizeWizardData(
   return removeUndefinedValues(
     wizardData
   );
-}
-
-
-function preserveBuyerDisclosureWizardData(
-  wizardData: Record<string, unknown>,
-  terms: OfferTermsDocument
-): void {
-  const form =
-    wizardData['form'];
-
-  if (
-    form === null ||
-    typeof form !== 'object' ||
-    Array.isArray(form)
-  ) {
-    return;
-  }
-
-  const formData =
-    form as Record<string, unknown>;
-
-  const residentialProperty =
-    terms.buyerDisclosures
-      .residentialProperty;
-
-  const mineralOilGasRights =
-    terms.buyerDisclosures
-      .mineralOilGasRights;
-
-  formData['disclosuresAddenda'] = {
-    residentialPropertyStatus:
-      residentialProperty.status ===
-        'unselected'
-        ? ''
-        : residentialProperty.status,
-
-    residentialPropertyDocumentUid:
-      residentialProperty.documentUid ??
-      '',
-
-    residentialPropertyDocumentVersionId:
-      residentialProperty.documentVersionId ??
-      '',
-
-    residentialPropertyExemptionReason:
-      residentialProperty.exemptionReason ??
-      '',
-
-    residentialPropertyAcknowledged:
-      residentialProperty.acknowledged,
-
-    mineralOilGasRightsStatus:
-      mineralOilGasRights.status ===
-        'unselected'
-        ? ''
-        : mineralOilGasRights.status,
-
-    mineralOilGasRightsDocumentUid:
-      mineralOilGasRights.documentUid ??
-      '',
-
-    mineralOilGasRightsDocumentVersionId:
-      mineralOilGasRights.documentVersionId ??
-      '',
-
-    mineralOilGasRightsExemptionReason:
-      mineralOilGasRights.exemptionReason ??
-      '',
-
-    mineralOilGasRightsAcknowledged:
-      mineralOilGasRights.acknowledged
-  };
 }
 
 
@@ -661,18 +480,18 @@ function sanitizeInitiatingParty(
     );
   }
 
-  /*
-   * The MVP supports one buyer and one seller. Party names,
-   * email addresses and signature identities come from the
-   * trusted Firebase snapshots and are not browser-editable.
-   */
+  const addingOneCoBuyer =
+    expectedRole === 'buyer' &&
+    existingParties.length === 1 &&
+    requestedParties.length === 2;
+
   if (
-    requestedParties.length !==
-    existingParties.length
+    requestedParties.length !== existingParties.length &&
+    !addingOneCoBuyer
   ) {
     throw new HttpsError(
       'failed-precondition',
-      'Offer parties cannot be added or removed through draft autosave.'
+      'Only one co-buyer may be added to the first buyer offer.'
     );
   }
 
@@ -713,11 +532,11 @@ function sanitizeInitiatingParty(
             return false;
           }
 
+          const record = party as Record<string, unknown>;
           return (
-            party as
-              Record<string, unknown>
-          )['partyUid'] ===
-            existingParty.partyUid;
+            record['partyUid'] === existingParty.partyUid ||
+            record['Uid'] === existingParty.partyUid
+          );
         }
       );
 
@@ -729,7 +548,99 @@ function sanitizeInitiatingParty(
     }
   }
 
-  return existingParties;
+  if (!addingOneCoBuyer) {
+    return existingParties;
+  }
+
+  const requestedCoBuyer = requestedParties[1];
+
+  if (
+    requestedCoBuyer === null ||
+    typeof requestedCoBuyer !== 'object' ||
+    Array.isArray(requestedCoBuyer)
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      'The co-buyer information is invalid.'
+    );
+  }
+
+  const record = requestedCoBuyer as Record<string, unknown>;
+  const legalName = requirePartyText(record, 'legalName', 300);
+  const email = requirePartyText(record, 'email', 320).toLowerCase();
+  const phone = requirePartyText(record, 'phone', 50);
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    throw new HttpsError(
+      'invalid-argument',
+      'Enter a valid co-buyer email address.'
+    );
+  }
+
+  const partyUid = requireIdentifier(
+    record['partyUid'] ?? record['Uid'],
+    'coBuyerUid'
+  );
+
+  const nameParts = legalName.split(/\s+/);
+  const coBuyer: OfferVersionPartySnapshotDocument = {
+    partyUid,
+    role: 'buyer',
+    capacity: 'individual',
+    firstName: nameParts[0] ?? legalName,
+    lastName: nameParts.slice(1).join(' '),
+    legalName,
+    email,
+    phone,
+    mailingAddress: {
+      ...existingParties[0].mailingAddress,
+    },
+    sequence: 2,
+    primaryParty: false,
+    proposedDeedName: legalName,
+    requiredSigner: true,
+    identityVerification: {
+      status: 'not_started',
+      provider: 'stripe_identity',
+      legalNameApplied: false,
+    },
+    signature: {
+      status: 'not_started',
+    },
+    electronicTransactionsConsentAccepted: false,
+  };
+
+  return [
+    ...existingParties,
+    coBuyer,
+  ];
+}
+
+
+function requirePartyText(
+  record: Record<string, unknown>,
+  fieldName: string,
+  maximumLength: number
+): string {
+  const value = record[fieldName];
+
+  if (typeof value !== 'string') {
+    throw new HttpsError(
+      'invalid-argument',
+      `Co-buyer ${fieldName} is required.`
+    );
+  }
+
+  const normalized = value.trim();
+
+  if (!normalized || normalized.length > maximumLength) {
+    throw new HttpsError(
+      'invalid-argument',
+      `Co-buyer ${fieldName} is invalid.`
+    );
+  }
+
+  return normalized;
 }
 
 
@@ -776,26 +687,6 @@ function requireChanges(
   }
 
   return changes;
-}
-
-
-function requireObject(
-  value: unknown,
-  message: string
-): Record<string, unknown> {
-  if (
-    value === null ||
-    typeof value !== 'object' ||
-    Array.isArray(value)
-  ) {
-    throw new HttpsError(
-      'invalid-argument',
-      message
-    );
-  }
-
-  return value as
-    Record<string, unknown>;
 }
 
 

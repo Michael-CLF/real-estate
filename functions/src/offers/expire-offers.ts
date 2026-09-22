@@ -57,7 +57,7 @@ export const expireOffers =
     {
       schedule: 'every 15 minutes',
       timeZone:
-        'America/New_York',
+        'UTC',
       region:
         FUNCTION_REGION,
       maxInstances: 1,

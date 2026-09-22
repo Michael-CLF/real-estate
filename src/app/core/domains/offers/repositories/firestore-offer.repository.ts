@@ -38,6 +38,11 @@ import {
 } from '../models/offer-version.model';
 
 import {
+  OfferTerms,
+  StateOfferTerms
+} from '../models/offer-terms.model';
+
+import {
   CreateCounterofferRequest,
   CreateCounterofferResult,
   OfferRepository,
@@ -52,6 +57,52 @@ import {
 
 interface CreateOfferDraftFunctionRequest {
   listingUid: string;
+  contractType?: string;
+}
+
+
+function readPurchasePriceInCents(
+  terms: unknown
+): number {
+  if (
+    terms === null ||
+    typeof terms !== 'object' ||
+    Array.isArray(terms)
+  ) {
+    return 0;
+  }
+
+  const record = terms as Record<string, unknown>;
+  const purchase = record['purchase'];
+  const salesPrice = record['salesPrice'];
+
+  const value =
+    readNestedNumber(purchase, 'purchasePriceInCents') ??
+    readNestedNumber(salesPrice, 'salesPriceInCents');
+
+  return value ?? 0;
+}
+
+
+function readNestedNumber(
+  value: unknown,
+  fieldName: string
+): number | undefined {
+  if (
+    value === null ||
+    typeof value !== 'object' ||
+    Array.isArray(value)
+  ) {
+    return undefined;
+  }
+
+  const candidate =
+    (value as Record<string, unknown>)[fieldName];
+
+  return typeof candidate === 'number' &&
+    Number.isFinite(candidate)
+      ? candidate
+      : undefined;
 }
 
 
@@ -104,7 +155,7 @@ export class FirestoreOfferRepository
 
   private readonly saveOfferDraftFunction =
     httpsCallable<
-      SaveOfferDraftRequest,
+      SaveOfferDraftRequest<StateOfferTerms>,
       SaveOfferDraftFunctionResponse
     >(
       functions,
@@ -387,10 +438,12 @@ export class FirestoreOfferRepository
   }
 
 
-  override async getOfferVersionByUid(
+  override async getOfferVersionByUid<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string,
     offerVersionUid: string
-  ): Promise<OfferVersion | null> {
+  ): Promise<OfferVersion<TTerms> | null> {
     const versionReference = doc(
       firestore,
       'offers',
@@ -406,16 +459,20 @@ export class FirestoreOfferRepository
       return null;
     }
 
-    return this.mapDocumentData<OfferVersion>(
+    return this.mapDocumentData<
+      OfferVersion<TTerms>
+    >(
       snapshot.id,
       snapshot.data()
     );
   }
 
 
-  override async getCurrentOfferVersion(
+  override async getCurrentOfferVersion<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string
-  ): Promise<OfferVersion | null> {
+  ): Promise<OfferVersion<TTerms> | null> {
     const offer =
       await this.getOfferByUid(
         offerUid
@@ -425,16 +482,18 @@ export class FirestoreOfferRepository
       return null;
     }
 
-    return this.getOfferVersionByUid(
+    return this.getOfferVersionByUid<TTerms>(
       offerUid,
       offer.currentVersionUid
     );
   }
 
 
-  override async getOfferVersions(
+  override async getOfferVersions<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
     offerUid: string
-  ): Promise<OfferVersion[]> {
+  ): Promise<OfferVersion<TTerms>[]> {
     const versionsReference =
       collection(
         firestore,
@@ -456,7 +515,9 @@ export class FirestoreOfferRepository
 
     return snapshot.docs.map(
       versionDocument =>
-        this.mapDocumentData<OfferVersion>(
+        this.mapDocumentData<
+          OfferVersion<TTerms>
+        >(
           versionDocument.id,
           versionDocument.data()
         )
@@ -465,19 +526,27 @@ export class FirestoreOfferRepository
 
 
   override async createOrResumeOfferDraft(
-    listingUid: string
+    listingUid: string,
+    contractType?: string
   ): Promise<CreateOfferDraftFunctionResponse> {
     const result =
       await this.createOfferDraftFunction({
-        listingUid
+        listingUid,
+        ...(
+          contractType
+            ? { contractType }
+            : {}
+        )
       });
 
     return result.data;
   }
 
 
-  override async saveOfferDraft(
-    request: SaveOfferDraftRequest
+  override async saveOfferDraft<
+    TTerms extends StateOfferTerms = OfferTerms
+  >(
+    request: SaveOfferDraftRequest<TTerms>
   ): Promise<void> {
     await this.saveOfferDraftFunction(
       request
@@ -677,8 +746,9 @@ export class FirestoreOfferRepository
         version.status,
 
       purchasePriceInCents:
-        version.terms.purchase
-          .purchasePriceInCents,
+        readPurchasePriceInCents(
+          version.terms
+        ),
 
 
 
@@ -775,3 +845,4 @@ export class FirestoreOfferRepository
     return value;
   }
 }
+

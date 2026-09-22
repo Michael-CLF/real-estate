@@ -12,6 +12,11 @@ import {
   requireEnabledStateContractPackage,
 } from './state-contracts/state-contract-registry';
 
+import type {
+  StateContractPackage,
+  StateContractTerms,
+} from './state-contracts/state-contract-package';
+
 import { getListingOfferAvailabilityMessage } from './listing-offer-availability';
 
 import type {
@@ -66,6 +71,12 @@ export const createOfferDraft = onCall<
   const stateContractPackage =
     requireEnabledStateContractPackage(
       eligibleListing.state
+    );
+
+  const requestedContractType =
+    normalizeRequestedContractType(
+      request.data?.contractType,
+      stateContractPackage
     );
 
   const [buyerProfile, sellerProfile, buyerAuthUser, sellerAuthUser] =
@@ -210,6 +221,12 @@ export const createOfferDraft = onCall<
 
         const existingVersionData = existingVersionSnapshot.data();
 
+        assertExistingDraftContractType(
+          existingVersionData,
+          requestedContractType,
+          stateContractPackage
+        );
+
         if (
           existingVersionData?.['status'] === 'draft' &&
           existingVersionData?.['immutable'] !== true
@@ -291,9 +308,28 @@ export const createOfferDraft = onCall<
       now,
     });
 
+    const additionalSellerParty =
+      createAdditionalSellerSnapshot(
+        currentListingData,
+        offerReference.collection('parties').doc().id,
+        sellerParty
+      );
+
+    const sellerParties = additionalSellerParty
+      ? [sellerParty, additionalSellerParty]
+      : [sellerParty];
+
+    const contractType =
+      requireContractTypeForNewDraft(
+        requestedContractType,
+        stateContractPackage
+      );
+
     const initialTerms =
       stateContractPackage
         .createInitialOfferTerms({
+          contractType,
+
           property:
             propertySnapshot,
 
@@ -385,7 +421,7 @@ export const createOfferDraft = onCall<
 
       buyers: [buyerParty],
 
-      sellers: [sellerParty],
+      sellers: sellerParties,
 
       changesFromPreviousVersion: [],
 
@@ -576,6 +612,71 @@ function createPartySnapshot(input: {
 }
 
 
+function createAdditionalSellerSnapshot(
+  listingData: Record<string, unknown>,
+  partyUid: string,
+  primarySeller: OfferVersionPartySnapshotDocument
+): OfferVersionPartySnapshotDocument | null {
+  const statements = listingData['sellerStatements'];
+
+  if (
+    statements === null ||
+    typeof statements !== 'object' ||
+    Array.isArray(statements)
+  ) {
+    return null;
+  }
+
+  const additional =
+    (statements as Record<string, unknown>)['additionalSeller'];
+
+  if (
+    additional === null ||
+    typeof additional !== 'object' ||
+    Array.isArray(additional)
+  ) {
+    return null;
+  }
+
+  const record = additional as Record<string, unknown>;
+  const legalName = readOptionalString(record, 'legalName')?.trim();
+  const email = readOptionalString(record, 'email')?.trim().toLowerCase();
+  const phone = readOptionalString(record, 'phone')?.trim();
+
+  if (!legalName || !email || !phone) {
+    return null;
+  }
+
+  const nameParts = legalName.split(/\s+/);
+
+  return {
+    partyUid,
+    role: 'seller',
+    capacity: 'individual',
+    firstName: nameParts[0] ?? legalName,
+    lastName: nameParts.slice(1).join(' '),
+    legalName,
+    email,
+    phone,
+    mailingAddress: {
+      ...primarySeller.mailingAddress,
+    },
+    sequence: 2,
+    primaryParty: false,
+    requiredSigner: true,
+    identityVerification: {
+      status: 'not_started',
+      provider: 'stripe_identity',
+      legalNameApplied: false,
+    },
+    signature: {
+      status: 'not_started',
+    },
+    electronicTransactionsConsentAccepted: false,
+  };
+}
+
+
 async function loadUserProfile(
   userUid: string,
 ): Promise<OfferUserProfile | null> {
@@ -665,6 +766,123 @@ function requireIdentifier(value: unknown, fieldName: string): string {
   }
 
   return normalizedValue;
+}
+
+function normalizeRequestedContractType(
+  value: unknown,
+  stateContractPackage:
+    StateContractPackage<StateContractTerms>
+): string | undefined {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ''
+  ) {
+    return undefined;
+  }
+
+  if (typeof value !== 'string') {
+    throw new HttpsError(
+      'invalid-argument',
+      'contractType must be a string.'
+    );
+  }
+
+  const normalizedValue =
+    value.trim();
+
+  if (
+    normalizedValue.length === 0 ||
+    normalizedValue.length > 100 ||
+    normalizedValue.includes('/')
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      'contractType is invalid.'
+    );
+  }
+
+  if (
+    !(stateContractPackage.contractTypes ?? [])
+      .includes(normalizedValue)
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      `The ${normalizedValue} contract is not supported for ${stateContractPackage.stateCode}.`
+    );
+  }
+
+  return normalizedValue;
+}
+
+function requireContractTypeForNewDraft(
+  requestedContractType: string | undefined,
+  stateContractPackage:
+    StateContractPackage<StateContractTerms>
+): string | undefined {
+  if (
+    stateContractPackage.contractTypeRequired === true &&
+    !requestedContractType
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      `A contract type is required before creating an offer in ${stateContractPackage.stateCode}.`
+    );
+  }
+
+  return requestedContractType;
+}
+
+function assertExistingDraftContractType(
+  versionData:
+    Record<string, unknown> |
+    undefined,
+  requestedContractType: string | undefined,
+  stateContractPackage:
+    StateContractPackage<StateContractTerms>
+): void {
+  if (
+    stateContractPackage.contractTypeRequired !== true
+  ) {
+    return;
+  }
+
+  const terms =
+    versionData?.['terms'];
+
+  if (
+    !terms ||
+    typeof terms !== 'object'
+  ) {
+    throw new HttpsError(
+      'data-loss',
+      'The existing offer draft does not contain contract terms.'
+    );
+  }
+
+  const storedContractType =
+    readOptionalString(
+      terms as Record<string, unknown>,
+      'contractType'
+    );
+
+  if (!storedContractType) {
+    throw new HttpsError(
+      'data-loss',
+      'The existing offer draft does not identify its contract type.'
+    );
+  }
+
+  if (
+    requestedContractType &&
+    requestedContractType !==
+    storedContractType
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'An existing draft already uses a different contract form.'
+    );
+  }
 }
 
 function readRequiredString(
@@ -780,3 +998,4 @@ function isProfileIdentityVerified(profile: OfferUserProfile | null): boolean {
       Boolean(profile?.verifiedLastName?.trim()))
   );
 }
+

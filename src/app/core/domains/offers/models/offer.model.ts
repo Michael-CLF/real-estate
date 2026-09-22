@@ -173,6 +173,12 @@ export interface Offer {
  */
 export interface CreateOfferDraftInput {
   listingUid: string;
+
+  /*
+   * Selected state-contract identifier. It remains omitted
+   * for single-contract states such as North Carolina.
+   */
+  contractType?: string;
 }
 
 
@@ -258,3 +264,4 @@ export interface OfferWithVersionUids {
   offer: Offer;
   orderedVersionUids: string[];
 }
+

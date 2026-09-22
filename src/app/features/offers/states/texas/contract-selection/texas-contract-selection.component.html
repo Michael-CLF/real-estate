@@ -1,0 +1,156 @@
+<main class="texas-contract-selection">
+  <section class="texas-contract-selection__card">
+    <header>
+      <p class="texas-contract-selection__eyebrow">
+        Texas offer
+      </p>
+
+      <h1>Select the property type</h1>
+
+      <p>
+        NavStreet uses these property details to select the appropriate Texas contract form.
+      </p>
+    </header>
+
+    <fieldset [disabled]="disabled()">
+      <legend>Is the property improved?</legend>
+
+      <div class="texas-contract-selection__choices">
+        <label>
+          <input
+            name="improved-property"
+            type="radio"
+            [checked]="improvedProperty() === true"
+            (change)="selectImprovedProperty(true)"
+          />
+          <span>Yes, the property has improvements</span>
+        </label>
+
+        <label>
+          <input
+            name="improved-property"
+            type="radio"
+            [checked]="improvedProperty() === false"
+            (change)="selectImprovedProperty(false)"
+          />
+          <span>No, it is unimproved property</span>
+        </label>
+      </div>
+    </fieldset>
+
+    @if (showCategory()) {
+      <fieldset [disabled]="disabled()">
+        <legend>Which description best fits the property?</legend>
+
+        <div class="texas-contract-selection__choices">
+          <label>
+            <input
+              name="property-category"
+              type="radio"
+              [checked]="propertyCategory() === 'standard_residential'"
+              (change)="selectCategory('standard_residential')"
+            />
+            <span>Existing residential property</span>
+          </label>
+
+          <label>
+            <input
+              name="property-category"
+              type="radio"
+              [checked]="propertyCategory() === 'condominium'"
+              (change)="selectCategory('condominium')"
+            />
+            <span>Condominium resale</span>
+          </label>
+
+          <label>
+            <input
+              name="property-category"
+              type="radio"
+              [checked]="propertyCategory() === 'farm_and_ranch'"
+              (change)="selectCategory('farm_and_ranch')"
+            />
+            <span>Farm or ranch</span>
+          </label>
+
+          <label>
+            <input
+              name="property-category"
+              type="radio"
+              [checked]="propertyCategory() === 'builder_sale'"
+              (change)="selectCategory('builder_sale')"
+            />
+            <span>New-home builder sale</span>
+          </label>
+        </div>
+      </fieldset>
+    }
+
+    @if (showConstructionStatus()) {
+      <fieldset [disabled]="disabled()">
+        <legend>Is construction complete?</legend>
+
+        <div class="texas-contract-selection__choices texas-contract-selection__choices--inline">
+          <label>
+            <input
+              name="construction-complete"
+              type="radio"
+              [checked]="constructionComplete() === true"
+              (change)="selectConstructionStatus(true)"
+            />
+            <span>Yes</span>
+          </label>
+
+          <label>
+            <input
+              name="construction-complete"
+              type="radio"
+              [checked]="constructionComplete() === false"
+              (change)="selectConstructionStatus(false)"
+            />
+            <span>No</span>
+          </label>
+        </div>
+      </fieldset>
+    }
+
+    @if (showDwellingUnits()) {
+      <label class="texas-contract-selection__number">
+        <span>Number of dwelling units</span>
+
+        <input
+          type="number"
+          min="1"
+          max="4"
+          step="1"
+          [value]="dwellingUnitCount() ?? ''"
+          [disabled]="disabled()"
+          (input)="updateDwellingUnitCount($event)"
+        />
+
+        <small>
+          The resale contract supports one to four dwelling units.
+        </small>
+      </label>
+    }
+
+    @if (errorMessage()) {
+      <p
+        class="texas-contract-selection__error"
+        role="alert"
+      >
+        {{ errorMessage() }}
+      </p>
+    }
+
+    <footer>
+      <button
+        type="button"
+        [disabled]="disabled() || !canContinue()"
+        (click)="continue()"
+      >
+        Continue to offer
+      </button>
+    </footer>
+  </section>
+</main>

@@ -19,6 +19,10 @@ import {
 } from '../shared/function-options';
 
 import {
+  requireStateContractPackage,
+} from './state-contracts/state-contract-registry';
+
+import {
   addOfferNotificationToTransaction,
 } from './offer-notification.service';
 
@@ -227,6 +231,23 @@ export const signOffer =
           const document =
             documentSnapshot.data() as
               GeneratedOfferDocument;
+
+          const stateContractPackage =
+            requireStateContractPackage(
+              offer.stateCode
+            );
+
+          if (
+            version.stateCode !==
+              stateContractPackage.stateCode ||
+            version.terms.stateCode !==
+              stateContractPackage.stateCode
+          ) {
+            throw new HttpsError(
+              'data-loss',
+              'The offer state does not match its current contract version.'
+            );
+          }
 
           verifySignableVersion(
             offer,
@@ -703,16 +724,14 @@ export const signOffer =
           );
 
           if (fullyExecuted) {
-            const dueDiligenceEndsAt =
-              resolveDueDiligenceEndDate(
-                version,
-                now
-              );
+            const contractMilestones =
+              stateContractPackage
+                .createContractMilestones({
+                  version,
 
-            const anticipatedClosingDate =
-              version.terms
-                .settlement
-                .settlementDate;
+                  effectiveAt:
+                    now.toDate(),
+                });
 
             const contract = {
               contractUid,
@@ -724,12 +743,10 @@ export const signOffer =
                 version.versionNumber,
 
               status: 'effective',
-              transactionPhase:
-                'due_diligence',
 
               effectiveAt: now,
-              dueDiligenceEndsAt,
-              anticipatedClosingDate,
+
+              ...contractMilestones,
             };
 
             transaction.update(
@@ -799,12 +816,10 @@ export const signOffer =
                   offer.sellerUids,
 
                 status: 'effective',
-                transactionPhase:
-                  'due_diligence',
 
                 effectiveAt: now,
-                dueDiligenceEndsAt,
-                anticipatedClosingDate,
+
+                ...contractMilestones,
 
                 createdAt: now,
                 updatedAt: now,
@@ -1241,13 +1256,10 @@ function notifySignatureProgress(
             ? `Offer ${offer.referenceNumber}-${version.versionNumber} is ready for your response`
             : `${signer.legalName} signed the agreement`,
 
-       
-       message:
-  delivered
-    ? version.versionNumber === 1
-      ? `${signer.legalName} has sent a signed offer. Review it; you can accept and sign, counteroffer, or decline.`
-      : `${signer.legalName} has sent a signed counteroffer. Review the revised terms; you can accept and sign, counteroffer, or decline.`
-    : `${signer.legalName} completed a required signature.`,
+        message:
+          delivered
+            ? `${signer.legalName} signed and sent this agreement. Review it, then accept and sign, counteroffer, or decline.`
+            : `${signer.legalName} completed a required signature.`,
 
         propertyAddress,
 
@@ -1500,45 +1512,6 @@ function closeCompetingOffers(
       );
     }
   }
-}
-
-
-function resolveDueDiligenceEndDate(
-  version: OfferVersionDocument,
-  effectiveAt: Timestamp
-): string | undefined {
-  const deposits =
-    version.terms.deposits;
-
-  if (
-    deposits.dueDiligenceDeadlineType ===
-    'specific_date'
-  ) {
-    return deposits.dueDiligenceEndDate;
-  }
-
-  if (
-    deposits.dueDiligenceDeadlineType ===
-      'days_after_effective_date' &&
-    typeof deposits
-      .dueDiligenceDaysAfterEffectiveDate ===
-      'number'
-  ) {
-    const date =
-      effectiveAt.toDate();
-
-    date.setUTCDate(
-      date.getUTCDate() +
-      deposits
-        .dueDiligenceDaysAfterEffectiveDate
-    );
-
-    return date
-      .toISOString()
-      .slice(0, 10);
-  }
-
-  return undefined;
 }
 
 

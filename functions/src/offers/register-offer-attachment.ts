@@ -24,6 +24,10 @@ import {
   callableFunctionOptions,
 } from '../shared/function-options';
 
+import {
+  requireStateContractPackage,
+} from './state-contracts/state-contract-registry';
+
 import type {
   OfferDocument,
   OfferVersionDocument,
@@ -32,7 +36,84 @@ import type {
 
 type OfferAttachmentType =
   | 'possession_agreement'
-  | 'additional_terms_exhibit';
+  | 'additional_terms_exhibit'
+  | 'legal_description_exhibit'
+  | 'reservation_addendum'
+  | 'residential_lease_addendum'
+  | 'fixture_lease_addendum'
+  | 'association_addendum'
+  | 'property_condition_disclosure'
+  | 'water_rights_disclosure'
+  | 'lead_based_paint_addendum'
+  | 'temporary_residential_lease'
+  | 'plans_and_specifications'
+  | 'buyer_selection_documents'
+  | 'builder_warranty'
+  | 'third_party_warranty'
+  | 'contract_addendum';
+
+
+const NORTH_CAROLINA_ATTACHMENT_TYPES =
+  new Set<OfferAttachmentType>([
+    'possession_agreement',
+    'additional_terms_exhibit',
+  ]);
+
+
+const TEXAS_ATTACHMENT_TYPES =
+  new Set<OfferAttachmentType>([
+    'legal_description_exhibit',
+    'reservation_addendum',
+    'residential_lease_addendum',
+    'fixture_lease_addendum',
+    'association_addendum',
+    'property_condition_disclosure',
+    'water_rights_disclosure',
+    'lead_based_paint_addendum',
+    'temporary_residential_lease',
+    'plans_and_specifications',
+    'buyer_selection_documents',
+    'builder_warranty',
+    'third_party_warranty',
+    'contract_addendum',
+  ]);
+
+
+const ATTACHMENT_TITLES:
+  Readonly<Record<OfferAttachmentType, string>> = {
+    possession_agreement:
+      'Separate Possession Agreement',
+    additional_terms_exhibit:
+      'Additional Terms Exhibit',
+    legal_description_exhibit:
+      'Legal Description Exhibit',
+    reservation_addendum:
+      'Reservation Addendum',
+    residential_lease_addendum:
+      'Residential Lease Addendum',
+    fixture_lease_addendum:
+      'Fixture Lease Addendum',
+    association_addendum:
+      'Property Owners Association Addendum',
+    property_condition_disclosure:
+      'Property Condition Disclosure',
+    water_rights_disclosure:
+      'Water Rights Disclosure',
+    lead_based_paint_addendum:
+      'Lead-Based Paint Addendum',
+    temporary_residential_lease:
+      'Temporary Residential Lease',
+    plans_and_specifications:
+      'Plans and Specifications',
+    buyer_selection_documents:
+      'Buyer Selection Documents',
+    builder_warranty:
+      'Builder Warranty',
+    third_party_warranty:
+      'Third-Party Warranty',
+    contract_addendum:
+      'Contract Addendum',
+  };
 
 
 interface RegisterOfferAttachmentData {
@@ -172,6 +253,16 @@ export const registerOfferAttachment =
         versionSnapshot.data() as
           OfferVersionDocument;
 
+      verifyStateContractConsistency(
+        offer,
+        version
+      );
+
+      verifyAttachmentTypeForState(
+        offer.stateCode,
+        attachmentType
+      );
+
       verifyUploadAccess(
         offer,
         version,
@@ -290,10 +381,9 @@ export const registerOfferAttachment =
       };
 
       const title =
-        attachmentType ===
-          'possession_agreement'
-          ? 'Separate Possession Agreement'
-          : 'Additional Terms Exhibit';
+        ATTACHMENT_TITLES[
+          attachmentType
+        ];
 
       const documentData = {
         Uid: documentUid,
@@ -381,6 +471,16 @@ export const registerOfferAttachment =
             currentVersionSnapshot.data() as
               OfferVersionDocument;
 
+          verifyStateContractConsistency(
+            currentOffer,
+            currentVersion
+          );
+
+          verifyAttachmentTypeForState(
+            currentOffer.stateCode,
+            attachmentType
+          );
+
           verifyUploadAccess(
             currentOffer,
             currentVersion,
@@ -430,6 +530,29 @@ export const registerOfferAttachment =
       };
     }
   );
+
+
+function verifyStateContractConsistency(
+  offer: OfferDocument,
+  version: OfferVersionDocument
+): void {
+  const stateContractPackage =
+    requireStateContractPackage(
+      offer.stateCode
+    );
+
+  if (
+    version.stateCode !==
+      stateContractPackage.stateCode ||
+    version.terms.stateCode !==
+      stateContractPackage.stateCode
+  ) {
+    throw new HttpsError(
+      'data-loss',
+      'The offer state does not match its current contract version.'
+    );
+  }
+}
 
 
 function verifyUploadAccess(
@@ -496,8 +619,8 @@ function requireAttachmentType(
   value: unknown
 ): OfferAttachmentType {
   if (
-    value !== 'possession_agreement' &&
-    value !== 'additional_terms_exhibit'
+    typeof value !== 'string' ||
+    !(value in ATTACHMENT_TITLES)
   ) {
     throw new HttpsError(
       'invalid-argument',
@@ -505,7 +628,35 @@ function requireAttachmentType(
     );
   }
 
-  return value;
+  return value as OfferAttachmentType;
+}
+
+
+function verifyAttachmentTypeForState(
+  stateCode: string,
+  attachmentType: OfferAttachmentType
+): void {
+  const normalizedStateCode =
+    stateCode
+      .trim()
+      .toUpperCase();
+
+  const allowedTypes =
+    normalizedStateCode === 'NC'
+      ? NORTH_CAROLINA_ATTACHMENT_TYPES
+      : normalizedStateCode === 'TX'
+        ? TEXAS_ATTACHMENT_TYPES
+        : null;
+
+  if (
+    !allowedTypes ||
+    !allowedTypes.has(attachmentType)
+  ) {
+    throw new HttpsError(
+      'invalid-argument',
+      `The selected attachment type is not supported for ${normalizedStateCode}.`
+    );
+  }
 }
 
 

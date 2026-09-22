@@ -65,7 +65,21 @@ export interface GenerateOfferDocumentResponse {
 
 export type OfferAttachmentType =
   | 'possession_agreement'
-  | 'additional_terms_exhibit';
+  | 'additional_terms_exhibit'
+  | 'legal_description_exhibit'
+  | 'reservation_addendum'
+  | 'residential_lease_addendum'
+  | 'fixture_lease_addendum'
+  | 'association_addendum'
+  | 'property_condition_disclosure'
+  | 'water_rights_disclosure'
+  | 'lead_based_paint_addendum'
+  | 'temporary_residential_lease'
+  | 'plans_and_specifications'
+  | 'buyer_selection_documents'
+  | 'builder_warranty'
+  | 'third_party_warranty'
+  | 'contract_addendum';
 
 
 export interface RegisterOfferAttachmentRequest {
@@ -538,3 +552,4 @@ export class OfferDocumentService {
     }
   }
 }
+

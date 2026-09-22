@@ -1,0 +1,38 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background: #f4f7f9;
+}
+
+.texas-offer-wizard {
+  min-height: 100%;
+}
+
+.texas-offer-wizard__contract {
+  display: grid;
+  gap: 0.2rem;
+  width: min(calc(100% - 2rem), 76rem);
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid #c8d8e2;
+  border-top: 0;
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: #edf5f9;
+  color: #154360;
+}
+
+.texas-offer-wizard__contract span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.texas-offer-wizard__contract strong {
+  font-family: 'Barlow Semi Condensed', sans-serif;
+  font-size: 1.15rem;
+}
+
+.texas-offer-wizard__contract small {
+  color: #526874;
+}
