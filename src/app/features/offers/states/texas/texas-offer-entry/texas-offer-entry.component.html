@@ -67,16 +67,17 @@
       [property]="propertySnapshot"
       [buyers]="buyers()"
       [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
       [expiresAt]="expiresAt()"
       [timeZone]="timeZone()"
       [initialTerms]="initialTerms()"
       [saving]="saving() || creating() || uploading()"
       [submitting]="submitting()"
-      (contractSelected)="onContractSelected($event)"
       (draftChanged)="onDraftChanged($event)"
       (documentSelected)="onDocumentSelected($event)"
       (submitRequested)="onSubmitRequested($event)"
       (returnToListingRequested)="returnToListing()"
+      (listingDisclosureRequested)="openListingDisclosure($event)"
     />
   </main>
 }

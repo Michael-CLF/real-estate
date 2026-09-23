@@ -1,10 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
+  OnInit,
   output,
+  signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -13,6 +16,17 @@ import {
   LotSizeUnit,
   PropertyType,
 } from '../../../../../core/domains/listings/models/listing.model';
+import { auth } from '../../../../../core/infrastructure/firebase/firebase';
+import type { ListingDisclosureDocument } from '../../../../../core/domains/disclosures/models/listing-disclosure-document.model';
+import type { DisclosureDocumentType } from '../../../../../core/domains/disclosures/models/state-disclosure-requirement.model';
+import { ListingDisclosureService } from '../../../../../core/domains/disclosures/services/listing-disclosure.service';
+
+type TexasLeaseDocumentType = Extract<
+  DisclosureDocumentType,
+  | 'texas-residential-leases'
+  | 'texas-fixture-leases'
+  | 'texas-natural-resource-leases'
+>;
 
 interface PropertyTypeOption {
   value: PropertyType;
@@ -31,6 +45,9 @@ export interface PropertyDetailsSellerStatementsFormValue {
   fuelTankPresent: boolean | null;
   fuelTankOwnership: PropertyDetailsFuelTankOwnership | '';
   leasesExist: boolean | null;
+  residentialLeasesExist: boolean | null;
+  fixtureLeasesExist: boolean | null;
+  naturalResourceLeasesExist: boolean | null;
   additionalSellerIncluded: boolean;
   additionalSellerLegalName: string;
   additionalSellerEmail: string;
@@ -71,16 +88,31 @@ export interface PropertyDetailsHoaFormValue {
   styleUrl: './property-details-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PropertyDetailsStepComponent {
+export class PropertyDetailsStepComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly disclosureService = inject(ListingDisclosureService);
 
   readonly initialValue = input<PropertyDetailsFormValue | null>(null);
+  readonly listingUid = input<string | null>(null);
   readonly stateCode = input('');
+  readonly isTexasListing = computed(
+    () => this.stateCode().trim().toUpperCase() === 'TX'
+  );
 
   readonly currentYear = new Date().getFullYear();
 
   readonly validityChange = output<boolean>();
   readonly valueChange = output<PropertyDetailsFormValue>();
+
+  protected readonly leaseDocuments = signal<
+    Partial<Record<TexasLeaseDocumentType, ListingDisclosureDocument>>
+  >({});
+  protected readonly selectedLeaseFiles = signal<
+    Partial<Record<TexasLeaseDocumentType, File>>
+  >({});
+  protected readonly uploadingLeaseType = signal<TexasLeaseDocumentType | null>(null);
+  protected readonly leaseDocumentError = signal('');
+  protected readonly leaseDocumentMessage = signal('');
 
   readonly propertyTypes: PropertyTypeOption[] = [
     { value: 'condo', label: 'Condo' },
@@ -161,7 +193,10 @@ export class PropertyDetailsStepComponent {
       ownersAssociationApplies: [null as boolean | null, Validators.required],
       fuelTankPresent: [null as boolean | null, Validators.required],
       fuelTankOwnership: ['' as PropertyDetailsFuelTankOwnership | ''],
-      leasesExist: [null as boolean | null, Validators.required],
+      leasesExist: [null as boolean | null],
+      residentialLeasesExist: [null as boolean | null],
+      fixtureLeasesExist: [null as boolean | null],
+      naturalResourceLeasesExist: [null as boolean | null],
       additionalSellerIncluded: [false],
       additionalSellerLegalName: [''],
       additionalSellerEmail: [''],
@@ -192,6 +227,9 @@ export class PropertyDetailsStepComponent {
               fuelTankPresent: null,
               fuelTankOwnership: '',
               leasesExist: null,
+              residentialLeasesExist: null,
+              fixtureLeasesExist: null,
+              naturalResourceLeasesExist: null,
               additionalSellerIncluded: false,
               additionalSellerLegalName: '',
               additionalSellerEmail: '',
@@ -212,6 +250,10 @@ export class PropertyDetailsStepComponent {
       this.configureFuelTankValidators(
         this.form.controls.sellerStatements.controls.fuelTankPresent.value,
         false,
+      );
+
+      this.configureLeaseValidators(
+        this.isTexasListing()
       );
 
       this.configureAdditionalSellerValidators(
@@ -296,6 +338,159 @@ export class PropertyDetailsStepComponent {
     });
   }
 
+  ngOnInit(): void {
+    if (this.isTexasListing()) {
+      void this.loadLeaseDocuments();
+    }
+  }
+
+  protected leaseDocumentFor(
+    documentType: TexasLeaseDocumentType
+  ): ListingDisclosureDocument | null {
+    return this.leaseDocuments()[documentType] ?? null;
+  }
+
+  protected selectedLeaseFileFor(
+    documentType: TexasLeaseDocumentType
+  ): File | null {
+    return this.selectedLeaseFiles()[documentType] ?? null;
+  }
+
+  protected onLeaseFileSelected(
+    event: Event,
+    documentType: TexasLeaseDocumentType
+  ): void {
+    const inputElement = event.target as HTMLInputElement;
+    const file = inputElement.files?.[0];
+
+    this.leaseDocumentError.set('');
+    this.leaseDocumentMessage.set('');
+
+    if (!file) {
+      this.removeSelectedLeaseFile(documentType);
+      return;
+    }
+
+    if (file.type !== 'application/pdf') {
+      inputElement.value = '';
+      this.removeSelectedLeaseFile(documentType);
+      this.leaseDocumentError.set('Lease documents must be PDF files.');
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      inputElement.value = '';
+      this.removeSelectedLeaseFile(documentType);
+      this.leaseDocumentError.set('A lease PDF cannot exceed 15 MB.');
+      return;
+    }
+
+    this.selectedLeaseFiles.update(current => ({
+      ...current,
+      [documentType]: file,
+    }));
+  }
+
+  protected async uploadLeaseDocument(
+    documentType: TexasLeaseDocumentType
+  ): Promise<void> {
+    const listingUid = this.listingUid();
+    const sellerUid = auth.currentUser?.uid;
+    const file = this.selectedLeaseFileFor(documentType);
+
+    if (!listingUid || !sellerUid || !file || this.uploadingLeaseType()) {
+      return;
+    }
+
+    this.leaseDocumentError.set('');
+    this.leaseDocumentMessage.set('');
+    this.uploadingLeaseType.set(documentType);
+
+    try {
+      const uploadedDocument = await this.disclosureService.uploadDisclosure(
+        sellerUid,
+        listingUid,
+        'TX',
+        documentType,
+        file
+      );
+
+      this.leaseDocuments.update(current => ({
+        ...current,
+        [documentType]: uploadedDocument,
+      }));
+      this.removeSelectedLeaseFile(documentType);
+      this.leaseDocumentMessage.set('Lease document uploaded successfully.');
+    } catch (error: unknown) {
+      this.leaseDocumentError.set(
+        error instanceof Error
+          ? error.message
+          : 'The lease document could not be uploaded.'
+      );
+    } finally {
+      this.uploadingLeaseType.set(null);
+    }
+  }
+
+  protected async openLeaseDocument(
+    document: ListingDisclosureDocument
+  ): Promise<void> {
+    this.leaseDocumentError.set('');
+
+    try {
+      await this.disclosureService.openDisclosure(document);
+    } catch (error: unknown) {
+      this.leaseDocumentError.set(
+        error instanceof Error
+          ? error.message
+          : 'The lease document could not be opened.'
+      );
+    }
+  }
+
+  private async loadLeaseDocuments(): Promise<void> {
+    const listingUid = this.listingUid();
+
+    if (!listingUid) {
+      return;
+    }
+
+    try {
+      const summaries = await this.disclosureService.getListingDisclosures(listingUid);
+      const leaseTypes = new Set<TexasLeaseDocumentType>([
+        'texas-residential-leases',
+        'texas-fixture-leases',
+        'texas-natural-resource-leases',
+      ]);
+      const documents: Partial<
+        Record<TexasLeaseDocumentType, ListingDisclosureDocument>
+      > = {};
+
+      for (const summary of summaries) {
+        if (leaseTypes.has(summary.documentType as TexasLeaseDocumentType)) {
+          documents[summary.documentType as TexasLeaseDocumentType] =
+            summary.currentDocument;
+        }
+      }
+
+      this.leaseDocuments.set(documents);
+    } catch (error: unknown) {
+      this.leaseDocumentError.set(
+        error instanceof Error
+          ? error.message
+          : 'Existing lease documents could not be loaded.'
+      );
+    }
+  }
+
+  private removeSelectedLeaseFile(documentType: TexasLeaseDocumentType): void {
+    this.selectedLeaseFiles.update(current => {
+      const next = { ...current };
+      delete next[documentType];
+      return next;
+    });
+  }
+
   private configureHoaValidators(
     hasHoa: boolean | null,
     clearValues: boolean,
@@ -367,6 +562,37 @@ export class PropertyDetailsStepComponent {
     fuelTankOwnership.updateValueAndValidity({
       emitEvent: false,
     });
+  }
+
+  private configureLeaseValidators(
+    isTexasListing: boolean
+  ): void {
+    const controls =
+      this.form.controls.sellerStatements.controls;
+    const texasLeaseControls = [
+      controls.residentialLeasesExist,
+      controls.fixtureLeasesExist,
+      controls.naturalResourceLeasesExist,
+    ];
+
+    if (isTexasListing) {
+      controls.leasesExist.clearValidators();
+      texasLeaseControls.forEach(control =>
+        control.setValidators([Validators.required])
+      );
+    } else {
+      controls.leasesExist.setValidators([Validators.required]);
+      texasLeaseControls.forEach(control =>
+        control.clearValidators()
+      );
+    }
+
+    controls.leasesExist.updateValueAndValidity({
+      emitEvent: false,
+    });
+    texasLeaseControls.forEach(control =>
+      control.updateValueAndValidity({ emitEvent: false })
+    );
   }
 
   private configureAdditionalSellerValidators(

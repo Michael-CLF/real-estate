@@ -70,6 +70,11 @@ implements StateOfferValidator<TexasOfferTerms> {
       issues
     );
 
+    this.validateExpenses(
+      terms,
+      issues
+    );
+
     this.validateDelivery(
       terms,
       context,
@@ -311,7 +316,11 @@ implements StateOfferValidator<TexasOfferTerms> {
         continue;
       }
 
-      for (const question of section.questions) {
+      const questions = section.questionGroups?.length
+        ? section.questionGroups.flatMap(group => group.questions)
+        : section.questions;
+
+      for (const question of questions) {
         this.validateQuestion(
           terms,
           question,
@@ -549,6 +558,62 @@ implements StateOfferValidator<TexasOfferTerms> {
         'delivery.electronicDeliveryAuthorized',
         'Electronic delivery authorization is required.'
       );
+    }
+  }
+
+
+  private validateExpenses(
+    terms: TexasOfferTerms,
+    issues: OfferValidationIssue[]
+  ): void {
+    const expenses = terms.expenses;
+
+    if (
+      expenses.sellerContributionToBuyerExpensesType === 'amount' &&
+      (!Number.isSafeInteger(
+        expenses.sellerContributionToBuyerExpensesInCents
+      ) ||
+        (expenses.sellerContributionToBuyerExpensesInCents ?? 0) <= 0)
+    ) {
+      this.addError(
+        issues,
+        'expenses.sellerContributionToBuyerExpensesInCents',
+        'Enter a seller contribution amount greater than zero.'
+      );
+    }
+
+    for (const [fieldPath, contribution] of [
+      [
+        'expenses.sellerContributionToBuyerBroker',
+        expenses.sellerContributionToBuyerBroker,
+      ],
+      [
+        'expenses.buyerContributionToSellerBroker',
+        expenses.buyerContributionToSellerBroker,
+      ],
+    ] as const) {
+      if (
+        contribution.contributionType === 'amount' &&
+        (contribution.amountInCents ?? 0) <= 0
+      ) {
+        this.addError(
+          issues,
+          `${fieldPath}.amountInCents`,
+          'Enter a contribution amount greater than zero.'
+        );
+      }
+
+      if (
+        contribution.contributionType === 'percentage' &&
+        ((contribution.percentageOfSalesPrice ?? 0) <= 0 ||
+          (contribution.percentageOfSalesPrice ?? 0) > 100)
+      ) {
+        this.addError(
+          issues,
+          `${fieldPath}.percentageOfSalesPrice`,
+          'Enter a contribution percentage from 0.01 through 100.'
+        );
+      }
     }
   }
 

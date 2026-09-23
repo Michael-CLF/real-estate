@@ -139,6 +139,7 @@ export const saveOfferDraft =
             sanitizeDraftChanges(
               requestedChanges,
               version,
+              offer,
               userUid
             );
 
@@ -279,10 +280,27 @@ function verifyDraftOwnership(
 function sanitizeDraftChanges(
   changes: Record<string, unknown>,
   currentVersion: OfferVersionDocument,
+  offer: OfferDocument,
   userUid: string
 ): Record<string, unknown> {
   const sanitized:
     Record<string, unknown> = {};
+
+  const versionStateCode =
+    normalizeStateCode(currentVersion.stateCode);
+  const offerStateCode =
+    normalizeStateCode(offer.stateCode);
+
+  if (
+    !versionStateCode ||
+    !offerStateCode ||
+    versionStateCode !== offerStateCode
+  ) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This draft has inconsistent state-contract data and cannot be saved. Delete the stale draft and start a new offer.'
+    );
+  }
 
   if (
     Object.prototype.hasOwnProperty.call(
@@ -290,12 +308,32 @@ function sanitizeDraftChanges(
       'terms'
     )
   ) {
+    const requestedTerms = changes['terms'];
+    const requestedTermsStateCode =
+      requestedTerms !== null &&
+      typeof requestedTerms === 'object' &&
+      !Array.isArray(requestedTerms)
+        ? normalizeStateCode(
+            (requestedTerms as Record<string, unknown>)['stateCode']
+          )
+        : '';
+
+    if (
+      !requestedTermsStateCode ||
+      requestedTermsStateCode !== versionStateCode
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'This draft is linked to the wrong state contract. Delete the stale draft and start a new offer.'
+      );
+    }
+
     sanitized['terms'] =
       requireStateContractPackage(
-        currentVersion.stateCode
+        versionStateCode
       ).sanitizeDraftTerms({
         requestedTerms:
-          changes['terms'],
+          requestedTerms,
         currentTerms:
           currentVersion.terms as unknown as StateContractTerms,
         initiatedBy:
@@ -614,6 +652,13 @@ function sanitizeInitiatingParty(
     ...existingParties,
     coBuyer,
   ];
+}
+
+
+function normalizeStateCode(value: unknown): string {
+  return typeof value === 'string'
+    ? value.trim().toUpperCase()
+    : '';
 }
 
 

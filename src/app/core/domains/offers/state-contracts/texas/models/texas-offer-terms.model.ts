@@ -109,10 +109,14 @@ export interface TexasSalesPriceTerms {
 
 export interface TexasLeaseTerms {
   residentialLeasesExist: boolean | null;
+  residentialLeasesReceived: boolean | null;
   residentialLeasesAddendumDocumentUid?: string;
 
   fixtureLeasesExist: boolean | null;
+  fixtureLeasesReceived: boolean | null;
   fixtureLeasesAddendumDocumentUid?: string;
+
+  naturalResourceLeasesExist: boolean | null;
 
   naturalResourceLeaseStatus:
     TexasNaturalResourceLeaseStatus;
@@ -167,6 +171,10 @@ export interface TexasSurveyTerms {
 
 export interface TexasPropertyAssociationTerms {
   mandatoryMembership: boolean | null;
+  associationName?: string;
+  duesInCents?: MoneyInCents;
+  duesFrequency?: string;
+  associationContact?: string;
   associationAddendumDocumentUid?: string;
 }
 
@@ -228,6 +236,9 @@ export interface TexasBrokerageContributionTerms {
 
 
 export interface TexasExpenseTerms {
+  sellerContributionToBuyerExpensesType:
+    'unselected' | 'none' | 'amount';
+
   sellerContributionToBuyerExpensesInCents?:
     MoneyInCents;
 

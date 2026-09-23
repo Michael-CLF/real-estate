@@ -31,7 +31,7 @@ import {
 
 import {
   DisclosureDocumentType
-} from '../state-disclosure-requirement.model';
+} from '../models/state-disclosure-requirement.model';
 
 const MAXIMUM_DISCLOSURE_SIZE_BYTES =
   15 * 1024 * 1024;

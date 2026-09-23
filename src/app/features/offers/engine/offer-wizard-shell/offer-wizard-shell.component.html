@@ -77,7 +77,69 @@
       </ol>
     </section>
 
-    @if (currentSection(); as section) {
+    @if (reviewing()) {
+      <section class="offer-wizard-shell__section offer-wizard-shell__review">
+        <header>
+          <p class="offer-wizard-shell__section-number">Final review</p>
+          <h2>Review your offer before submitting</h2>
+          <p>Submitting locks this draft and prepares the Texas agreement for delivery and signature.</p>
+        </header>
+
+        <div class="offer-wizard-shell__review-sections">
+          @for (
+            section of visibleSections();
+            track section.id;
+            let sectionIndex = $index
+          ) {
+            <article class="offer-wizard-shell__review-card">
+              <header>
+                <div>
+                  <span>Section {{ sectionIndex + 1 }}</span>
+                  <h3>{{ section.title }}</h3>
+                </div>
+
+                <button
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="editReviewSection(sectionIndex)"
+                >
+                  Edit section
+                </button>
+              </header>
+
+              @if (section.id === 'parties') {
+                <dl class="offer-wizard-shell__review-list">
+                  <div>
+                    <dt>Buyer</dt>
+                    <dd>{{ reviewPartyItems(buyers()) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Seller</dt>
+                    <dd>{{ reviewPartyItems(sellers()) }}</dd>
+                  </div>
+                </dl>
+              } @else {
+                <dl class="offer-wizard-shell__review-list">
+                  @for (
+                    item of reviewItemsForSection(section);
+                    track $index
+                  ) {
+                    <div>
+                      <dt>{{ item.label }}</dt>
+                      <dd>{{ item.value }}</dd>
+                    </div>
+                  }
+                </dl>
+              }
+            </article>
+          }
+        </div>
+
+        <p class="offer-wizard-shell__review-warning">
+          Review every section carefully. After submission, changes require a counteroffer or a new version.
+        </p>
+      </section>
+    } @else if (currentSection(); as section) {
       <section class="offer-wizard-shell__section">
         <header>
           <p class="offer-wizard-shell__section-number">
@@ -91,6 +153,20 @@
           }
         </header>
 
+        @if (currentSectionHasMissingSellerInformation()) {
+          <aside
+            class="offer-wizard-shell__listing-blocker"
+            role="alert"
+          >
+            <strong>Required seller information is missing from this offer.</strong>
+            <span>
+              The seller must complete the missing answers in the Texas listing.
+              After the listing is saved, discard this draft and start a new offer
+              so the corrected listing answers are copied into the contract.
+            </span>
+          </aside>
+        }
+
         @if (section.id === 'parties') {
           <div class="offer-wizard-shell__party-grid">
             <section>
@@ -99,7 +175,7 @@
                 <article class="offer-wizard-shell__party-card">
                   <strong>{{ buyer.legalName }}</strong>
                   <span>{{ buyer.email }}</span>
-                  <span>{{ buyer.phone }}</span>
+                  <span>{{ formatPhone(buyer.phone) }}</span>
                 </article>
               }
             </section>
@@ -109,7 +185,7 @@
                 <article class="offer-wizard-shell__party-card">
                   <strong>{{ seller.legalName }}</strong>
                   <span>{{ seller.email }}</span>
-                  <span>{{ seller.phone }}</span>
+                  <span>{{ formatPhone(seller.phone) }}</span>
                 </article>
               }
             </section>
@@ -132,16 +208,43 @@
             @if (addingCoBuyer()) {
               <div class="offer-wizard-shell__co-buyer-form">
                 <label>
-                  <span>Co-buyer legal name</span>
-                  <input type="text" [value]="coBuyerLegalName()" (input)="updateCoBuyerField('legalName', $event)" />
+                  <span>Co-buyer legal name <b aria-hidden="true">*</b></span>
+                  <input
+                    type="text"
+                    [value]="coBuyerLegalName()"
+                    [attr.aria-invalid]="coBuyerValidationMessage('legalName') ? 'true' : null"
+                    (input)="updateCoBuyerField('legalName', $event)"
+                    (blur)="markCoBuyerFieldTouched('legalName')"
+                  />
+                  @if (coBuyerValidationMessage('legalName'); as message) {
+                    <small class="offer-wizard-shell__field-error">{{ message }}</small>
+                  }
                 </label>
                 <label>
-                  <span>Co-buyer email</span>
-                  <input type="email" [value]="coBuyerEmail()" (input)="updateCoBuyerField('email', $event)" />
+                  <span>Co-buyer email <b aria-hidden="true">*</b></span>
+                  <input
+                    type="email"
+                    [value]="coBuyerEmail()"
+                    [attr.aria-invalid]="coBuyerValidationMessage('email') ? 'true' : null"
+                    (input)="updateCoBuyerField('email', $event)"
+                    (blur)="markCoBuyerFieldTouched('email')"
+                  />
+                  @if (coBuyerValidationMessage('email'); as message) {
+                    <small class="offer-wizard-shell__field-error">{{ message }}</small>
+                  }
                 </label>
                 <label>
-                  <span>Co-buyer phone</span>
-                  <input type="tel" [value]="coBuyerPhone()" (input)="updateCoBuyerField('phone', $event)" />
+                  <span>Co-buyer phone <b aria-hidden="true">*</b></span>
+                  <input
+                    type="tel"
+                    [value]="coBuyerPhone()"
+                    [attr.aria-invalid]="coBuyerValidationMessage('phone') ? 'true' : null"
+                    (input)="updateCoBuyerField('phone', $event)"
+                    (blur)="markCoBuyerFieldTouched('phone')"
+                  />
+                  @if (coBuyerValidationMessage('phone'); as message) {
+                    <small class="offer-wizard-shell__field-error">{{ message }}</small>
+                  }
                 </label>
               </div>
             }
@@ -150,36 +253,114 @@
 
         @if (section.id === 'property') {
           <div class="offer-wizard-shell__property-summary">
-            <strong>Property from the listing</strong>
+            <strong>Property Address</strong>
             <span>{{ propertyValue('addressLine1') }}</span>
             <span>{{ propertyValue('city') }}, {{ propertyValue('state') }} {{ propertyValue('zipCode') }}</span>
             <span>{{ propertyValue('county') }} County</span>
           </div>
+
+          @if (hasValue('propertyAssociation.associationName')) {
+            <div class="offer-wizard-shell__property-summary offer-wizard-shell__association-summary">
+              <strong>Property owners association from the listing</strong>
+              <span>{{ reviewText('propertyAssociation.associationName') }}</span>
+              @if (hasValue('propertyAssociation.duesInCents')) {
+                <span>
+                  Dues: {{ reviewMoney('propertyAssociation.duesInCents') }}
+                  {{ reviewText('propertyAssociation.duesFrequency') }}
+                </span>
+              }
+              @if (hasValue('propertyAssociation.associationContact')) {
+                <span>Contact: {{ reviewText('propertyAssociation.associationContact') }}</span>
+              }
+            </div>
+          }
         }
 
-        <div class="offer-wizard-shell__questions">
-          @for (
-            question of section.questions;
-            track question.id
-          ) {
-            @if (isQuestionVisible(question)) {
-              <app-offer-question-renderer
-                [class.offer-wizard-shell__question--full-width]="
-                  question.type === 'textarea' ||
-                  question.type === 'document_upload' ||
-                  question.type === 'information' ||
-                  question.type === 'multiple_choice'
-                "
-                [question]="question"
-                [value]="questionValue(question)"
+        @if (listingDocumentsForSection(section.id); as sectionDocuments) {
+          @if (sectionDocuments.length) {
+          <section class="offer-wizard-shell__seller-documents">
+            <h3>
+              {{ section.id === 'leases'
+                ? 'Seller lease documents available from the listing'
+                : 'Seller documents available from the listing' }}
+            </h3>
+            <p>Open each applicable document before answering whether it has been received.</p>
+            @for (document of sectionDocuments; track document.id) {
+              <button
+                type="button"
                 [disabled]="busy()"
-                [validationMessage]="validationMessageFor(question)"
-                (valueChange)="onValueChange(question, $event)"
-                (documentSelected)="onDocumentSelected($event)"
-              />
+                (click)="listingDisclosureRequested.emit(document)"
+              >
+                <span>{{ document.originalFileName }}</span>
+                <strong>Open PDF</strong>
+              </button>
             }
+          </section>
           }
-        </div>
+        }
+
+        @if (section.questionGroups?.length) {
+          <div class="offer-wizard-shell__groups">
+            @for (group of section.questionGroups; track group.id) {
+              <section
+                class="offer-wizard-shell__group"
+                [class.offer-wizard-shell__group--notice]="group.id === 'deposit-delivery-deadline'"
+                [class.offer-wizard-shell__group--one-column]="group.columns === 1"
+                [class.offer-wizard-shell__group--three-columns]="group.columns === 3"
+              >
+                <header>
+                  <h3>{{ group.title }}</h3>
+                  @if (group.description) {
+                    <p>{{ group.description }}</p>
+                  }
+                </header>
+                <div class="offer-wizard-shell__questions">
+                  @for (question of group.questions; track question.id) {
+                    @if (isQuestionVisible(question)) {
+                      <app-offer-question-renderer
+                        [class.offer-wizard-shell__question--full-width]="
+                          question.type === 'textarea' ||
+                          question.type === 'document_upload' ||
+                          question.type === 'information' ||
+                          question.type === 'multiple_choice'
+                        "
+                        [question]="question"
+                        [value]="questionValue(question)"
+                        [disabled]="busy()"
+                        [validationMessage]="validationMessageFor(question)"
+                        (valueChange)="onValueChange(question, $event)"
+                        (fieldTouched)="onFieldTouched(question)"
+                        (documentSelected)="onDocumentSelected($event)"
+                      />
+                    }
+                  }
+                </div>
+              </section>
+            }
+          </div>
+        } @else {
+          <div class="offer-wizard-shell__questions">
+            @for (question of section.questions; track question.id) {
+              @if (isQuestionVisible(question)) {
+                <app-offer-question-renderer
+                  [class.offer-wizard-shell__question--full-width]="
+                    question.type === 'textarea' ||
+                    question.type === 'document_upload' ||
+                    question.type === 'information' ||
+                    question.type === 'multiple_choice'
+                  "
+                  [question]="question"
+                  [value]="questionValue(question)"
+                  [disabled]="busy()"
+                  [validationMessage]="validationMessageFor(question)"
+                  (valueChange)="onValueChange(question, $event)"
+                  (fieldTouched)="onFieldTouched(question)"
+                  (documentSelected)="onDocumentSelected($event)"
+                />
+              }
+            }
+          </div>
+        }
       </section>
     }
 
@@ -187,10 +368,10 @@
       <button
         type="button"
         class="offer-wizard-shell__secondary"
-        [disabled]="busy() || normalizedSectionIndex() === 0"
-        (click)="goToPreviousSection()"
+        [disabled]="busy() || (!reviewing() && normalizedSectionIndex() === 0)"
+        (click)="reviewing() ? returnToCertification() : goToPreviousSection()"
       >
-        Previous
+        {{ reviewing() ? 'Back to certification' : 'Previous' }}
       </button>
 
       <div class="offer-wizard-shell__action-status">
@@ -198,9 +379,15 @@
           <span role="status">Saving…</span>
         }
 
-        @if (shouldShowCurrentSectionError()) {
+        @if (!reviewing() && currentSectionHasVisibleErrors()) {
           <span class="offer-wizard-shell__error" role="alert">
-            Complete the required information before continuing.
+            Correct the highlighted fields above.
+          </span>
+        }
+
+        @if (reviewing() && !allSectionsValid()) {
+          <span class="offer-wizard-shell__error" role="alert">
+            Return to each highlighted section and correct its required fields.
           </span>
         }
       </div>
@@ -208,11 +395,16 @@
       <button
         type="button"
         class="offer-wizard-shell__primary"
-        [disabled]="busy()"
-        (click)="continueOrSubmit()"
+        [disabled]="
+          busy() ||
+          (reviewing() ? !allSectionsValid() : !currentSectionValid())
+        "
+        (click)="reviewing() ? confirmSubmit() : continueOrSubmit()"
       >
         @if (submitting()) {
           Submitting…
+        } @else if (reviewing()) {
+          Submit offer
         } @else if (isLastSection()) {
           {{ submitLabel() }}
         } @else {

@@ -103,6 +103,9 @@ interface ListingDraftDocument {
 
     leasesExist?: boolean;
     leaseAddendumDocumentUid?: string;
+    residentialLeasesExist?: boolean;
+    fixtureLeasesExist?: boolean;
+    naturalResourceLeasesExist?: boolean;
 
     additionalSeller?: {
       legalName?: string;
@@ -758,7 +761,23 @@ function validateDraftForPublication(
     );
   }
 
-  if (typeof sellerStatements.leasesExist !== 'boolean') {
+  const isTexasListing =
+    draft.address.state.trim().toUpperCase() === 'TX';
+
+  if (
+    isTexasListing &&
+    (
+      typeof sellerStatements.residentialLeasesExist !== 'boolean' ||
+      typeof sellerStatements.fixtureLeasesExist !== 'boolean' ||
+      typeof sellerStatements.naturalResourceLeasesExist !== 'boolean'
+    )
+  ) {
+    throw new Error(
+      `Listing draft ${listingUid} has incomplete Texas lease statements.`,
+    );
+  }
+
+  if (!isTexasListing && typeof sellerStatements.leasesExist !== 'boolean') {
     throw new Error(
       `Listing draft ${listingUid} has no existing-leases statement.`,
     );

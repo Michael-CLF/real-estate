@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
+  signal,
 } from '@angular/core';
 
 import type {
@@ -51,13 +53,22 @@ export class OfferQuestionRendererComponent {
 
   readonly disabled = input(false);
 
+  protected readonly controlDisabled = computed(
+    () => this.disabled() || this.question().readOnly === true
+  );
+
   readonly validationMessage =
     input<string | null>(null);
 
   readonly valueChange = output<unknown>();
 
+  readonly fieldTouched = output<void>();
+
   readonly documentSelected =
     output<OfferDocumentSelection>();
+
+  private readonly currencyEditing = signal(false);
+  protected readonly currencyInputValue = signal('');
 
 
   protected readonly controlId = computed(
@@ -123,6 +134,23 @@ export class OfferQuestionRendererComponent {
   );
 
 
+  constructor() {
+    effect(() => {
+      const question = this.question();
+      const value = this.value();
+
+      if (
+        question.type === 'currency' &&
+        !this.currencyEditing()
+      ) {
+        this.currencyInputValue.set(
+          formatCurrencyInput(value)
+        );
+      }
+    });
+  }
+
+
   protected textValue(): string {
     const value = this.value();
 
@@ -153,6 +181,67 @@ export class OfferQuestionRendererComponent {
   }
 
 
+  protected dateTimeValue(): string {
+    const value = this.textValue();
+    const parsed = new Date(value);
+
+    if (!value || !Number.isFinite(parsed.getTime())) {
+      return '';
+    }
+
+    const local = new Date(
+      parsed.getTime() - parsed.getTimezoneOffset() * 60_000
+    );
+
+    return local.toISOString().slice(0, 16);
+  }
+
+
+  protected currencyDisplayValue(): string {
+    const value = this.currencyValue();
+
+    return value === null
+      ? ''
+      : new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(value);
+  }
+
+
+  protected onCurrencyFocus(event: Event): void {
+    const input = readInputElement(event);
+    const value = this.currencyValue();
+
+    this.currencyEditing.set(true);
+
+    const editableValue = value === null
+      ? ''
+      : value.toFixed(2);
+
+    this.currencyInputValue.set(editableValue);
+    input.value = editableValue;
+    input.select();
+  }
+
+
+  protected onCurrencyBlur(event: Event): void {
+    this.currencyEditing.set(false);
+
+    const displayValue = this.currencyDisplayValue();
+    this.currencyInputValue.set(displayValue);
+    readInputElement(event).value = displayValue;
+    this.markTouched();
+  }
+
+
+  protected markTouched(): void {
+    if (!this.controlDisabled()) {
+      this.fieldTouched.emit();
+    }
+  }
+
+
   protected booleanValue(): boolean | null {
     const value = this.value();
 
@@ -169,6 +258,18 @@ export class OfferQuestionRendererComponent {
   }
 
 
+  protected onDateTimeInput(event: Event): void {
+    const value = readInputElement(event).value;
+    const parsed = new Date(value);
+
+    this.valueChange.emit(
+      value && Number.isFinite(parsed.getTime())
+        ? parsed.toISOString()
+        : ''
+    );
+  }
+
+
   protected onNumberInput(event: Event): void {
     this.valueChange.emit(
       parseOptionalNumber(
@@ -179,8 +280,11 @@ export class OfferQuestionRendererComponent {
 
 
   protected onCurrencyInput(event: Event): void {
+    const inputValue = readInputElement(event).value;
+    this.currencyInputValue.set(inputValue);
+
     const dollars = parseOptionalNumber(
-      readInputElement(event).value
+      inputValue.replace(/[$,\s]/g, '')
     );
 
     this.valueChange.emit(
@@ -193,6 +297,7 @@ export class OfferQuestionRendererComponent {
 
   protected onBooleanInput(value: boolean): void {
     this.valueChange.emit(value);
+    this.markTouched();
   }
 
 
@@ -202,6 +307,7 @@ export class OfferQuestionRendererComponent {
     this.valueChange.emit(
       readInputElement(event).checked
     );
+    this.markTouched();
   }
 
 
@@ -215,6 +321,7 @@ export class OfferQuestionRendererComponent {
         ? value
         : null
     );
+    this.markTouched();
   }
 
 
@@ -223,6 +330,14 @@ export class OfferQuestionRendererComponent {
   ): boolean {
     return this.selectedChoiceValues()
       .includes(value);
+  }
+
+
+  protected isChoiceDisabled(value: string): boolean {
+    const question = this.question();
+    return this.controlDisabled() ||
+      (question.type === 'multiple_choice' &&
+        question.disabledValues?.includes(value) === true);
   }
 
 
@@ -248,6 +363,7 @@ export class OfferQuestionRendererComponent {
       );
 
     this.valueChange.emit(nextValues);
+    this.markTouched();
   }
 
 
@@ -306,6 +422,7 @@ export class OfferQuestionRendererComponent {
       fieldPath: question.fieldPath,
       file,
     });
+    this.markTouched();
   }
 
 
@@ -379,6 +496,21 @@ export class OfferQuestionRendererComponent {
         : [];
     });
   }
+}
+
+
+function formatCurrencyInput(value: unknown): string {
+  if (
+    typeof value !== 'number' ||
+    !Number.isFinite(value)
+  ) {
+    return '';
+  }
+
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value / 100);
 }
 
 

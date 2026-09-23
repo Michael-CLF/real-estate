@@ -128,50 +128,68 @@ export const TEXAS_LEASES_SECTION:
     id: 'leases',
     title: 'Leases',
     questions: [
+      {
+        ...yesNoQuestion(
+          'residential-leases-exist',
+          'leases.residentialLeasesExist',
+          'Residential leases disclosed by the seller'
+        ),
+        readOnly: true,
+      },
       yesNoQuestion(
-        'residential-leases-exist',
-        'leases.residentialLeasesExist',
-        'Are there any residential leases?'
-      ),
-      documentQuestion(
-        'residential-leases-document',
-        'leases.residentialLeasesAddendumDocumentUid',
-        'Residential-leases addendum',
+        'residential-leases-received',
+        'leases.residentialLeasesReceived',
+        'Did you receive the residential leases from the seller?',
         undefined,
-        visibleWhenTrue('leases.residentialLeasesExist'),
-        true
+        visibleWhenEquals(
+          'leases.residentialLeasesExist',
+          true
+        )
       ),
+      {
+        ...yesNoQuestion(
+          'fixture-leases-exist',
+          'leases.fixtureLeasesExist',
+          'Fixture leases disclosed by the seller'
+        ),
+        readOnly: true,
+      },
       yesNoQuestion(
-        'fixture-leases-exist',
-        'leases.fixtureLeasesExist',
-        'Are there any fixture leases?'
-      ),
-      documentQuestion(
-        'fixture-leases-document',
-        'leases.fixtureLeasesAddendumDocumentUid',
-        'Fixture-leases addendum',
+        'fixture-leases-received',
+        'leases.fixtureLeasesReceived',
+        'Did you receive the fixture leases from the seller?',
         undefined,
-        visibleWhenTrue('leases.fixtureLeasesExist'),
-        true
+        visibleWhenEquals(
+          'leases.fixtureLeasesExist',
+          true
+        )
       ),
+      {
+        ...yesNoQuestion(
+          'natural-resource-leases-exist',
+          'leases.naturalResourceLeasesExist',
+          'Natural-resource leases disclosed by the seller'
+        ),
+        readOnly: true,
+      },
       choiceQuestion(
         'natural-resource-lease-status',
         'leases.naturalResourceLeaseStatus',
-        'Natural-resource lease status',
+        'Did you receive all natural-resource leases from the seller?',
         [
           {
-            value: 'none',
-            label: 'No natural-resource leases',
-          },
-          {
             value: 'delivered',
-            label: 'Lease information delivered',
+            label: 'Yes, I received all natural-resource leases',
           },
           {
             value: 'not_delivered',
-            label: 'Lease information not yet delivered',
+            label: 'No, I have not received all natural-resource leases',
           },
-        ]
+        ],
+        visibleWhenEquals(
+          'leases.naturalResourceLeasesExist',
+          true
+        )
       ),
       numberQuestion(
         'natural-resource-delivery-days',
@@ -193,6 +211,13 @@ export const TEXAS_LEASES_SECTION:
           'not_delivered'
         )
       ),
+      {
+        id: 'seller-lease-source-note',
+        type: 'information',
+        label: 'Seller-provided lease information',
+        description:
+          'Lease facts and seller documents come from the listing. The buyer confirms the contract choices here and does not upload the seller’s documents again.',
+      },
     ],
   };
 
@@ -238,10 +263,10 @@ export const TEXAS_SURVEY_SECTION:
           'seller_existing_survey'
         )
       ),
-      textQuestion(
+      textAreaQuestion(
         'survey-prohibited-use',
         'survey.prohibitedUseOrActivity',
-        'Prohibited use or activity identified by the buyer'
+        'Intended use or activity that title restrictions must not prohibit'
       ),
       numberQuestion(
         'title-objection-days',
@@ -277,7 +302,7 @@ export const TEXAS_DISCLOSURES_SECTION:
       choiceQuestion(
         'property-condition-disclosure-status',
         'disclosures.propertyCondition.status',
-        'Seller property-condition disclosure',
+        'Seller’s disclosure of property condition',
         DELIVERY_STATUS_OPTIONS
       ),
       numberQuestion(
@@ -293,7 +318,7 @@ export const TEXAS_DISCLOSURES_SECTION:
       choiceQuestion(
         'water-rights-disclosure-status',
         'disclosures.waterRights.status',
-        'Water and mineral-rights disclosure',
+        'Seller’s water and mineral-rights disclosure',
         DELIVERY_STATUS_OPTIONS
       ),
       numberQuestion(
@@ -316,7 +341,7 @@ export const TEXAS_DISCLOSURES_SECTION:
         type: 'information',
         label: 'Seller-provided documents',
         description:
-          'Disclosure documents are supplied by the seller with the listing. Select whether you received each disclosure; do not upload the seller’s documents again.',
+          'Choose Received, Not received, or Not required for each disclosure. If Not received is selected, the delivery-days blank states how many days after the Effective Date the buyer will allow the seller to deliver it. Seller documents come from the listing; the buyer does not upload them again.',
       },
     ],
   };
@@ -459,6 +484,95 @@ const TEXAS_ADDENDUM_OPTIONS:
     option('back-up-contract', 'Back-Up Contract Addendum'),
     option('mineral-reservation', 'Mineral Reservation Addendum'),
     option('other', 'Other Addendum'),
+  ].sort((first, second) =>
+    first.label.localeCompare(second.label)
+  );
+
+
+const TEXAS_DEPOSIT_DELIVERY_QUESTIONS:
+  readonly OfferQuestionDefinition[] = [
+    {
+      id: 'deposit-effective-date-note',
+      type: 'information',
+      label: 'Delivery deadline',
+      description:
+        'Earnest money and any termination option fee are due within 3 days after the Effective Date. The termination option period entered below determines how long the buyer has the unrestricted right to terminate the contract.',
+      tone: 'important',
+    },
+  ];
+
+
+const TEXAS_ESCROW_AGENT_QUESTIONS:
+  readonly OfferQuestionDefinition[] = [
+    textQuestion(
+      'escrow-agent-name',
+      'earnestMoneyAndOption.escrowAgentName',
+      'Escrow agent or title company',
+      REQUIRED
+    ),
+    textQuestion(
+      'escrow-agent-address',
+      'earnestMoneyAndOption.escrowAgentAddress',
+      'Escrow-agent address',
+      REQUIRED
+    ),
+  ];
+
+
+const TEXAS_EARNEST_MONEY_QUESTIONS:
+  readonly OfferQuestionDefinition[] = [
+    {
+      id: 'earnest-money',
+      type: 'currency',
+      fieldPath: 'earnestMoneyAndOption.earnestMoneyInCents',
+      label: 'Earnest money',
+      validation: {
+        required: true,
+        minimum: 1,
+        message: 'Enter earnest money greater than $0.',
+      },
+    },
+    currencyQuestion(
+      'additional-earnest-money',
+      'earnestMoneyAndOption.additionalEarnestMoneyInCents',
+      'Additional earnest money',
+      undefined,
+      false
+    ),
+    numberQuestion(
+      'additional-earnest-delivery-days',
+      'earnestMoneyAndOption.additionalEarnestMoneyDeliveryDays',
+      'Additional earnest-money delivery period in days',
+      POSITIVE_DAYS,
+      visibleWhenGreaterThanZero(
+        'earnestMoneyAndOption.additionalEarnestMoneyInCents'
+      )
+    ),
+  ];
+
+
+const TEXAS_TERMINATION_OPTION_QUESTIONS:
+  readonly OfferQuestionDefinition[] = [
+    {
+      id: 'option-fee',
+      type: 'currency',
+      fieldPath: 'earnestMoneyAndOption.optionFeeInCents',
+      label: 'Termination option fee',
+      validation: {
+        required: true,
+        minimum: 1,
+        message: 'Enter a termination option fee greater than $0.',
+      },
+    },
+    numberQuestion(
+      'option-period-days',
+      'earnestMoneyAndOption.optionPeriodDays',
+      'Termination option period (days)',
+      POSITIVE_DAYS,
+      visibleWhenGreaterThanZero(
+        'earnestMoneyAndOption.optionFeeInCents'
+      )
+    ),
   ];
 
 
@@ -466,24 +580,29 @@ export const TEXAS_SHARED_TRANSACTION_SECTIONS:
   readonly OfferSectionDefinition[] = [
     {
       id: 'price-financing',
-      title: 'Price and financing',
+      title: 'Price, financing and property terms',
       shortTitle: 'Price',
       questions: [
         currencyQuestion(
-          'cash-portion',
-          'salesPrice.cashPortionInCents',
-          'Cash portion'
+          'total-sales-price',
+          'salesPrice.salesPriceInCents',
+          'Total sales price'
         ),
         currencyQuestion(
           'financing-portion',
           'salesPrice.financingInCents',
           'Financing portion'
         ),
-        currencyQuestion(
-          'total-sales-price',
-          'salesPrice.salesPriceInCents',
-          'Total sales price'
-        ),
+        {
+          ...currencyQuestion(
+            'cash-portion',
+            'salesPrice.cashPortionInCents',
+            'Cash portion'
+          ),
+          description:
+            'Calculated automatically as total sales price minus financing.',
+          readOnly: true,
+        },
         multipleChoiceQuestion(
           'financing-addenda',
           'salesPrice.financingAddenda',
@@ -507,54 +626,39 @@ export const TEXAS_SHARED_TRANSACTION_SECTIONS:
     },
     {
       id: 'earnest-money-option',
-      title: 'Earnest money and option fee',
+      title: 'Earnest money and termination option',
       shortTitle: 'Deposits',
       questions: [
-        textQuestion(
-          'escrow-agent-name',
-          'earnestMoneyAndOption.escrowAgentName',
-          'Escrow agent or title company (optional)'
-        ),
-        textQuestion(
-          'escrow-agent-address',
-          'earnestMoneyAndOption.escrowAgentAddress',
-          'Escrow-agent address (optional)'
-        ),
-        currencyQuestion(
-          'earnest-money',
-          'earnestMoneyAndOption.earnestMoneyInCents',
-          'Earnest money'
-        ),
-        currencyQuestion(
-          'option-fee',
-          'earnestMoneyAndOption.optionFeeInCents',
-          'Option fee'
-        ),
-        numberQuestion(
-          'option-period-days',
-          'earnestMoneyAndOption.optionPeriodDays',
-          'Option period in days',
-          POSITIVE_DAYS,
-          visibleWhenGreaterThanZero(
-            'earnestMoneyAndOption.optionFeeInCents'
-          )
-        ),
-        currencyQuestion(
-          'additional-earnest-money',
-          'earnestMoneyAndOption.additionalEarnestMoneyInCents',
-          'Additional earnest money',
-          undefined,
-          false
-        ),
-        numberQuestion(
-          'additional-earnest-delivery-days',
-          'earnestMoneyAndOption.additionalEarnestMoneyDeliveryDays',
-          'Additional earnest-money delivery period in days',
-          POSITIVE_DAYS,
-          visibleWhenGreaterThanZero(
-            'earnestMoneyAndOption.additionalEarnestMoneyInCents'
-          )
-        ),
+        ...TEXAS_DEPOSIT_DELIVERY_QUESTIONS,
+        ...TEXAS_ESCROW_AGENT_QUESTIONS,
+        ...TEXAS_EARNEST_MONEY_QUESTIONS,
+        ...TEXAS_TERMINATION_OPTION_QUESTIONS,
+      ],
+      questionGroups: [
+        {
+          id: 'deposit-delivery-deadline',
+          title: 'Delivery deadline',
+          columns: 1,
+          questions: TEXAS_DEPOSIT_DELIVERY_QUESTIONS,
+        },
+        {
+          id: 'escrow-agent',
+          title: 'Escrow agent or title company',
+          columns: 2,
+          questions: TEXAS_ESCROW_AGENT_QUESTIONS,
+        },
+        {
+          id: 'earnest-money-deposit',
+          title: 'Earnest money',
+          columns: 2,
+          questions: TEXAS_EARNEST_MONEY_QUESTIONS,
+        },
+        {
+          id: 'termination-option',
+          title: 'Termination option',
+          columns: 2,
+          questions: TEXAS_TERMINATION_OPTION_QUESTIONS,
+        },
       ],
     },
     {
@@ -675,12 +779,23 @@ export const TEXAS_SHARED_TRANSACTION_SECTIONS:
       title: 'Expenses and brokerage contributions',
       shortTitle: 'Expenses',
       questions: [
+        choiceQuestion(
+          'seller-buyer-expenses-type',
+          'expenses.sellerContributionToBuyerExpensesType',
+          'Seller contribution to buyer expenses',
+          [
+            { value: 'none', label: 'None' },
+            { value: 'amount', label: 'Dollar amount' },
+          ]
+        ),
         currencyQuestion(
           'seller-buyer-expenses',
           'expenses.sellerContributionToBuyerExpensesInCents',
-          'Seller contribution to buyer expenses',
-          undefined,
-          false
+          'Contribution amount',
+          visibleWhenEquals(
+            'expenses.sellerContributionToBuyerExpensesType',
+            'amount'
+          )
         ),
         ...brokerageContributionQuestions(
           'seller-to-buyer-broker',
@@ -782,20 +897,19 @@ function createTexasAddendaSection():
           valueKey: 'formId',
           selectedKey: 'included',
         },
+        disabledValues: [
+          'third-party-financing',
+          'loan-assumption',
+          'seller-financing',
+          'residential-leases',
+          'fixture-leases',
+          'mineral-reservation',
+          'mandatory-poa-membership',
+          'lead-based-paint',
+        ],
+        description:
+          'Required addenda selected by your earlier answers are included automatically. Select any additional addenda that apply.',
       },
-      ...TEXAS_ADDENDUM_OPTIONS.map(
-        option =>
-          documentQuestion(
-            `addendum-${option.value}`,
-            `addenda.${option.value}.documentUid`,
-            option.label,
-            'Attach the completed addendum.',
-            visibleWhenTrue(
-              `addenda.${option.value}.included`
-            ),
-            true
-          )
-      ),
     ],
   };
 }
@@ -946,14 +1060,18 @@ function dateQuestion(
 function yesNoQuestion(
   id: string,
   fieldPath: string,
-  label: string
+  label: string,
+  description?: string,
+  visibleWhen?: OfferQuestionDefinition['visibleWhen']
 ): OfferQuestionDefinition {
   return {
     id,
     type: 'yes_no',
     fieldPath,
     label,
+    ...(description ? { description } : {}),
     validation: REQUIRED,
+    ...(visibleWhen ? { visibleWhen } : {}),
   };
 }
 

@@ -306,6 +306,12 @@ export class ListingWizardComponent implements OnInit {
           fuelTankOwnership: draft.sellerStatements?.fuelTankOwnership ?? '',
 
           leasesExist: draft.sellerStatements?.leasesExist ?? null,
+          residentialLeasesExist:
+            draft.sellerStatements?.residentialLeasesExist ?? null,
+          fixtureLeasesExist:
+            draft.sellerStatements?.fixtureLeasesExist ?? null,
+          naturalResourceLeasesExist:
+            draft.sellerStatements?.naturalResourceLeasesExist ?? null,
 
           additionalSellerIncluded:
             !!draft.sellerStatements?.additionalSeller,
@@ -701,7 +707,23 @@ export class ListingWizardComponent implements OnInit {
           );
         }
 
-        if (statements.leasesExist === null) {
+        const isTexasListing =
+          this.addressData()?.state?.trim().toUpperCase() === 'TX';
+
+        if (
+          isTexasListing &&
+          (
+            statements.residentialLeasesExist === null ||
+            statements.fixtureLeasesExist === null ||
+            statements.naturalResourceLeasesExist === null
+          )
+        ) {
+          throw new Error(
+            'Please complete all three Texas lease statements.'
+          );
+        }
+
+        if (!isTexasListing && statements.leasesExist === null) {
           throw new Error('Please specify whether any leases exist.');
         }
 
@@ -815,7 +837,22 @@ export class ListingWizardComponent implements OnInit {
               }
             : {}),
 
-          leasesExist: statements.leasesExist,
+          leasesExist: isTexasListing
+            ? statements.residentialLeasesExist === true ||
+              statements.fixtureLeasesExist === true ||
+              statements.naturalResourceLeasesExist === true
+            : statements.leasesExist === true,
+
+          ...(isTexasListing
+            ? {
+                residentialLeasesExist:
+                  statements.residentialLeasesExist === true,
+                fixtureLeasesExist:
+                  statements.fixtureLeasesExist === true,
+                naturalResourceLeasesExist:
+                  statements.naturalResourceLeasesExist === true,
+              }
+            : {}),
 
           ...(statements.additionalSellerIncluded
             ? {

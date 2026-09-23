@@ -26,6 +26,23 @@ const STATE_MORTGAGE_COST_ASSUMPTIONS:
        * as a percentage of the property value.
        */
       homeownersInsuranceRate: 0.009
+    },
+
+    'texas': {
+      /*
+       * Texas has no state property tax. Local taxing
+       * units set the rates. Use a practical Texas buyer
+       * payment estimate that better reflects the combined
+       * local tax burden shown for the listing market.
+       */
+      propertyTaxRate: 0.01881,
+
+      /*
+       * Estimated basic Texas homeowners insurance as a
+       * percentage of the home's purchase price. Buyers can
+       * replace this estimate with an actual insurance quote.
+       */
+      homeownersInsuranceRate: 0.0092
     }
   };
 

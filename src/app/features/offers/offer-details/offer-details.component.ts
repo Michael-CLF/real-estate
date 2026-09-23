@@ -316,9 +316,7 @@ implements OnInit {
         if (
           offer &&
           version &&
-          this.isPrivatePreparedVersion(
-            version
-          ) &&
+          version.status === 'draft' &&
           this.isUserOnInitiatingSide(
             offer,
             version
@@ -377,7 +375,7 @@ implements OnInit {
             version.status ===
               'awaiting_signatures'
           ) {
-            return 'Ready to sign';
+            return 'Awaiting your signature';
           }
 
           if (
@@ -521,7 +519,7 @@ implements OnInit {
         version.status ===
           'awaiting_signatures'
       ) {
-        return 'Ready to sign';
+        return 'Awaiting your signature';
       }
 
       if (
@@ -575,6 +573,253 @@ implements OnInit {
     }
 
     return 'Not selected';
+  }
+
+
+  isTexasVersion(
+    version: OfferVersion
+  ): boolean {
+    return version.stateCode === 'TX' ||
+      readNestedText(
+        version.terms,
+        'stateCode'
+      ) === 'TX';
+  }
+
+
+  getPurchasePriceInCents(
+    version: OfferVersion
+  ): number {
+    return readNestedNumber(
+      version.terms,
+      'purchase',
+      'purchasePriceInCents'
+    ) ?? readNestedNumber(
+      version.terms,
+      'salesPrice',
+      'salesPriceInCents'
+    ) ?? 0;
+  }
+
+
+  getFundingLabel(
+    version: OfferVersion
+  ): string {
+    if (!this.isTexasVersion(version)) {
+      return readNestedText(
+        version.terms,
+        'purchase',
+        'financingType'
+      ) === 'cash'
+        ? 'Cash'
+        : 'Loan';
+    }
+
+    const financingInCents =
+      readNestedNumber(
+        version.terms,
+        'salesPrice',
+        'financingInCents'
+      ) ?? 0;
+
+    if (financingInCents <= 0) {
+      return 'Cash';
+    }
+
+    const addenda =
+      readNestedStringArray(
+        version.terms,
+        'salesPrice',
+        'financingAddenda'
+      );
+
+    const labels:
+      Readonly<Record<string, string>> = {
+        third_party_financing:
+          'Third-party financing',
+        loan_assumption:
+          'Loan assumption',
+        seller_financing:
+          'Seller financing',
+      };
+
+    return addenda.length
+      ? addenda
+          .map(value => labels[value] ?? value)
+          .join(', ')
+      : 'Financed';
+  }
+
+
+  getDepositLabel(
+    version: OfferVersion
+  ): string {
+    return this.isTexasVersion(version)
+      ? 'Earnest money'
+      : 'Deposit';
+  }
+
+
+  getDepositInCents(
+    version: OfferVersion
+  ): number {
+    return readNestedNumber(
+      version.terms,
+      'deposits',
+      'depositInCents'
+    ) ?? readNestedNumber(
+      version.terms,
+      'earnestMoneyAndOption',
+      'earnestMoneyInCents'
+    ) ?? 0;
+  }
+
+
+  getDepositDelivery(
+    version: OfferVersion
+  ): string {
+    if (this.isTexasVersion(version)) {
+      return 'Within 3 days after the Effective Date';
+    }
+
+    const days = readNestedNumber(
+      version.terms,
+      'deposits',
+      'depositDeliveryDays'
+    );
+
+    if (days === undefined) {
+      return 'Not provided';
+    }
+
+    return `Within ${days} ${
+      days === 1
+        ? 'calendar day'
+        : 'calendar days'
+    } after the Effective Date`;
+  }
+
+
+  getEscrowAgent(
+    version: OfferVersion
+  ): string {
+    return readNestedText(
+      version.terms,
+      'deposits',
+      'escrowAgentName'
+    ) ?? readNestedText(
+      version.terms,
+      'earnestMoneyAndOption',
+      'escrowAgentName'
+    ) ?? 'Not provided';
+  }
+
+
+  getDeadlineLabel(
+    version: OfferVersion
+  ): string {
+    return this.isTexasVersion(version)
+      ? 'Termination option period'
+      : 'Due-diligence deadline';
+  }
+
+
+  getDeadline(
+    version: OfferVersion
+  ): string {
+    if (!this.isTexasVersion(version)) {
+      return this.getDueDiligenceDeadline(
+        version
+      );
+    }
+
+    const days = readNestedNumber(
+      version.terms,
+      'earnestMoneyAndOption',
+      'optionPeriodDays'
+    );
+
+    return days === undefined
+      ? 'No termination option selected'
+      : `${days} ${days === 1 ? 'day' : 'days'} after the Effective Date`;
+  }
+
+
+  getClosingDateLabel(
+    version: OfferVersion
+  ): string {
+    return this.isTexasVersion(version)
+      ? 'Closing date'
+      : 'Settlement date';
+  }
+
+
+  getClosingDate(
+    version: OfferVersion
+  ): string | undefined {
+    return readNestedText(
+      version.terms,
+      'settlement',
+      'settlementDate'
+    ) ?? readNestedText(
+      version.terms,
+      'closingAndPossession',
+      'closingDate'
+    );
+  }
+
+
+  getPossessionLabel(
+    version: OfferVersion
+  ): string {
+    const possession =
+      readNestedText(
+        version.terms,
+        'settlement',
+        'possessionTiming'
+      ) ?? readNestedText(
+        version.terms,
+        'closingAndPossession',
+        'possession'
+      );
+
+    switch (possession) {
+      case 'at_closing':
+        return 'At closing';
+      case 'upon_closing_and_funding':
+        return 'Upon closing and funding';
+      case 'temporary_residential_lease':
+        return 'Temporary residential lease';
+      case 'other':
+        return 'Other — separate agreement attached';
+      default:
+        return 'Not provided';
+    }
+  }
+
+
+  getBuyers(
+    version: OfferVersion
+  ): readonly OfferVersionPartySnapshot[] {
+    return Array.isArray(version.buyers)
+      ? version.buyers
+      : [];
+  }
+
+
+  getSellers(
+    version: OfferVersion
+  ): readonly OfferVersionPartySnapshot[] {
+    return Array.isArray(version.sellers)
+      ? version.sellers
+      : [];
+  }
+
+
+  partyHasSigned(
+    party: OfferVersionPartySnapshot
+  ): boolean {
+    return party.signature?.status === 'signed';
   }
 
 
@@ -1234,4 +1479,78 @@ implements OnInit {
 
     return 'The offer action could not be completed. Please try again.';
   }
+}
+
+
+function readNestedText(
+  value: unknown,
+  ...path: readonly string[]
+): string | undefined {
+  const result = readNestedValue(
+    value,
+    path
+  );
+
+  return typeof result === 'string' &&
+    result.trim().length > 0
+      ? result
+      : undefined;
+}
+
+
+function readNestedNumber(
+  value: unknown,
+  ...path: readonly string[]
+): number | undefined {
+  const result = readNestedValue(
+    value,
+    path
+  );
+
+  return typeof result === 'number' &&
+    Number.isFinite(result)
+      ? result
+      : undefined;
+}
+
+
+function readNestedStringArray(
+  value: unknown,
+  ...path: readonly string[]
+): string[] {
+  const result = readNestedValue(
+    value,
+    path
+  );
+
+  return Array.isArray(result)
+    ? result.filter(
+        (item): item is string =>
+          typeof item === 'string'
+      )
+    : [];
+}
+
+
+function readNestedValue(
+  value: unknown,
+  path: readonly string[]
+): unknown {
+  let current = value;
+
+  for (const segment of path) {
+    if (
+      current === null ||
+      typeof current !== 'object' ||
+      Array.isArray(current)
+    ) {
+      return undefined;
+    }
+
+    current = (
+      current as Record<string, unknown>
+    )[segment];
+  }
+
+  return current;
 }

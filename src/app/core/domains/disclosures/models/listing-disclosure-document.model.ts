@@ -1,6 +1,6 @@
 import {
   DisclosureDocumentType
-} from '../state-disclosure-requirement.model';
+} from './state-disclosure-requirement.model';
 
 export interface ListingDisclosureDocument {
   readonly id: string;

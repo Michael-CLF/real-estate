@@ -411,24 +411,164 @@
           </div>
         }
 
-        <div class="field">
-          <label for="leasesExist">Existing Leases</label>
+        @if (isTexasListing()) {
+          <section class="texas-lease-card">
+            <div class="field">
+              <label for="residentialLeasesExist">Residential Leases</label>
+              <select id="residentialLeasesExist" formControlName="residentialLeasesExist">
+                <option [ngValue]="null">Select an option</option>
+                <option [ngValue]="true">One or more residential leases exist</option>
+                <option [ngValue]="false">No residential leases</option>
+              </select>
+              @if (
+                form.controls.sellerStatements.controls.residentialLeasesExist.touched &&
+                form.controls.sellerStatements.controls.residentialLeasesExist.hasError('required')
+              ) {
+                <p class="field-error">Specify whether residential leases exist.</p>
+              }
+            </div>
 
-          <select id="leasesExist" formControlName="leasesExist">
-            <option [ngValue]="null">Select an option</option>
-            <option [ngValue]="true">One or more leases exist</option>
-            <option [ngValue]="false">No leases exist</option>
-          </select>
+            @if (form.controls.sellerStatements.controls.residentialLeasesExist.value === true) {
+              <div class="texas-lease-document">
+                <p>Upload the residential leases or the residential-leases addendum supplied with the listing.</p>
+                @if (leaseDocumentFor('texas-residential-leases'); as document) {
+                  <button type="button" class="document-link" (click)="openLeaseDocument(document)">
+                    Review {{ document.originalFileName }}
+                  </button>
+                }
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  [disabled]="uploadingLeaseType() !== null"
+                  (change)="onLeaseFileSelected($event, 'texas-residential-leases')"
+                />
+                <button
+                  type="button"
+                  class="document-upload"
+                  [disabled]="!selectedLeaseFileFor('texas-residential-leases') || uploadingLeaseType() !== null"
+                  (click)="uploadLeaseDocument('texas-residential-leases')"
+                >
+                  {{ uploadingLeaseType() === 'texas-residential-leases' ? 'Uploading…' : 'Upload residential lease PDF' }}
+                </button>
+              </div>
+            }
+          </section>
 
-          @if (
-            form.controls.sellerStatements.controls.leasesExist.touched &&
-            form.controls.sellerStatements.controls.leasesExist.hasError(
-              'required'
-            )
-          ) {
-            <p class="field-error">Specify whether any leases exist.</p>
+          <section class="texas-lease-card">
+            <div class="field">
+              <label for="fixtureLeasesExist">Fixture Leases</label>
+              <select id="fixtureLeasesExist" formControlName="fixtureLeasesExist">
+                <option [ngValue]="null">Select an option</option>
+                <option [ngValue]="true">One or more fixture leases exist</option>
+                <option [ngValue]="false">No fixture leases</option>
+              </select>
+              @if (
+                form.controls.sellerStatements.controls.fixtureLeasesExist.touched &&
+                form.controls.sellerStatements.controls.fixtureLeasesExist.hasError('required')
+              ) {
+                <p class="field-error">Specify whether fixture leases exist.</p>
+              }
+            </div>
+
+            @if (form.controls.sellerStatements.controls.fixtureLeasesExist.value === true) {
+              <div class="texas-lease-document">
+                <p>Upload the fixture leases or the fixture-leases addendum supplied with the listing.</p>
+                @if (leaseDocumentFor('texas-fixture-leases'); as document) {
+                  <button type="button" class="document-link" (click)="openLeaseDocument(document)">
+                    Review {{ document.originalFileName }}
+                  </button>
+                }
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  [disabled]="uploadingLeaseType() !== null"
+                  (change)="onLeaseFileSelected($event, 'texas-fixture-leases')"
+                />
+                <button
+                  type="button"
+                  class="document-upload"
+                  [disabled]="!selectedLeaseFileFor('texas-fixture-leases') || uploadingLeaseType() !== null"
+                  (click)="uploadLeaseDocument('texas-fixture-leases')"
+                >
+                  {{ uploadingLeaseType() === 'texas-fixture-leases' ? 'Uploading…' : 'Upload fixture lease PDF' }}
+                </button>
+              </div>
+            }
+          </section>
+
+          <section class="texas-lease-card">
+            <div class="field">
+              <label for="naturalResourceLeasesExist">Natural-Resource Leases</label>
+              <select id="naturalResourceLeasesExist" formControlName="naturalResourceLeasesExist">
+                <option [ngValue]="null">Select an option</option>
+                <option [ngValue]="true">One or more natural-resource leases exist</option>
+                <option [ngValue]="false">No natural-resource leases</option>
+              </select>
+              @if (
+                form.controls.sellerStatements.controls.naturalResourceLeasesExist.touched &&
+                form.controls.sellerStatements.controls.naturalResourceLeasesExist.hasError('required')
+              ) {
+                <p class="field-error">Specify whether natural-resource leases exist.</p>
+              }
+            </div>
+
+            @if (form.controls.sellerStatements.controls.naturalResourceLeasesExist.value === true) {
+              <div class="texas-lease-document">
+                <p>Upload all natural-resource leases currently available from the seller.</p>
+                @if (leaseDocumentFor('texas-natural-resource-leases'); as document) {
+                  <button type="button" class="document-link" (click)="openLeaseDocument(document)">
+                    Review {{ document.originalFileName }}
+                  </button>
+                }
+                <input
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  [disabled]="uploadingLeaseType() !== null"
+                  (change)="onLeaseFileSelected($event, 'texas-natural-resource-leases')"
+                />
+                <button
+                  type="button"
+                  class="document-upload"
+                  [disabled]="!selectedLeaseFileFor('texas-natural-resource-leases') || uploadingLeaseType() !== null"
+                  (click)="uploadLeaseDocument('texas-natural-resource-leases')"
+                >
+                  {{ uploadingLeaseType() === 'texas-natural-resource-leases' ? 'Uploading…' : 'Upload natural-resource lease PDF' }}
+                </button>
+              </div>
+            }
+          </section>
+
+          @if (leaseDocumentError()) {
+            <p class="lease-document-status lease-document-status--error" role="alert">
+              {{ leaseDocumentError() }}
+            </p>
           }
-        </div>
+
+          @if (leaseDocumentMessage()) {
+            <p class="lease-document-status lease-document-status--success" role="status">
+              {{ leaseDocumentMessage() }}
+            </p>
+          }
+        } @else {
+          <div class="field">
+            <label for="leasesExist">Existing Leases</label>
+
+            <select id="leasesExist" formControlName="leasesExist">
+              <option [ngValue]="null">Select an option</option>
+              <option [ngValue]="true">One or more leases exist</option>
+              <option [ngValue]="false">No leases exist</option>
+            </select>
+
+            @if (
+              form.controls.sellerStatements.controls.leasesExist.touched &&
+              form.controls.sellerStatements.controls.leasesExist.hasError(
+                'required'
+              )
+            ) {
+              <p class="field-error">Specify whether any leases exist.</p>
+            }
+          </div>
+        }
       </div>
 
       <label class="seller-statements__description">

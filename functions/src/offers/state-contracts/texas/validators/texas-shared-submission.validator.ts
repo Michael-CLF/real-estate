@@ -363,6 +363,23 @@ function validateExpenses(
 ): void {
   const expenses = terms.expenses;
 
+  requireCondition(
+    expenses.sellerContributionToBuyerExpensesType !== 'unselected',
+    'Select whether the seller will contribute to buyer expenses.'
+  );
+
+  if (
+    expenses.sellerContributionToBuyerExpensesType === 'amount'
+  ) {
+    requireCondition(
+      expenses.sellerContributionToBuyerExpensesInCents !== undefined &&
+        isPositiveMoney(
+          expenses.sellerContributionToBuyerExpensesInCents
+        ),
+      'Enter a seller contribution to buyer expenses greater than zero.'
+    );
+  }
+
   if (expenses.sellerContributionToBuyerExpensesInCents !== undefined) {
     requireNonNegativeMoney(
       expenses.sellerContributionToBuyerExpensesInCents,
@@ -455,10 +472,6 @@ function validateAddenda(
 
     if (addendum.included) {
       requireText(addendum.title, 'Every included addendum must have a title.');
-      requireText(
-        addendum.documentUid,
-        `Attach the included ${addendum.title || 'addendum'}.`
-      );
     }
   });
 
@@ -581,12 +594,6 @@ export function validatePropertyTerms(
     'Select whether a mineral, water, or timber reservation applies.'
   );
 
-  if (propertyTerms.mineralWaterTimberReservationApplies) {
-    requireText(
-      propertyTerms.reservationAddendumDocumentUid,
-      'Attach the applicable reservation addendum.'
-    );
-  }
 }
 
 
@@ -597,29 +604,40 @@ export function validateLeaseTerms(
     leases.residentialLeasesExist !== null,
     'Select whether residential leases exist.'
   );
-  if (leases.residentialLeasesExist) {
-    requireText(
-      leases.residentialLeasesAddendumDocumentUid,
-      'Attach the residential leases addendum.'
-    );
-  }
 
   requireCondition(
     leases.fixtureLeasesExist !== null,
     'Select whether fixture leases exist.'
   );
+
+  if (leases.residentialLeasesExist) {
+    requireCondition(
+      leases.residentialLeasesReceived !== null,
+      'Indicate whether the residential leases were received.'
+    );
+  }
+
   if (leases.fixtureLeasesExist) {
-    requireText(
-      leases.fixtureLeasesAddendumDocumentUid,
-      'Attach the fixture leases addendum.'
+    requireCondition(
+      leases.fixtureLeasesReceived !== null,
+      'Indicate whether the fixture leases were received.'
     );
   }
 
   requireCondition(
-    leases.naturalResourceLeaseStatus !== 'unselected',
+    leases.naturalResourceLeasesExist !== null,
+    'The seller must complete the natural-resource lease statement.'
+  );
+
+  requireCondition(
+    leases.naturalResourceLeasesExist !== true ||
+      leases.naturalResourceLeaseStatus !== 'unselected',
     'Select the natural-resource lease status.'
   );
-  if (leases.naturalResourceLeaseStatus === 'not_delivered') {
+  if (
+    leases.naturalResourceLeasesExist === true &&
+    leases.naturalResourceLeaseStatus === 'not_delivered'
+  ) {
     requirePositiveDays(
       leases.naturalResourceLeaseDeliveryDays,
       'Enter the natural-resource lease delivery period.'

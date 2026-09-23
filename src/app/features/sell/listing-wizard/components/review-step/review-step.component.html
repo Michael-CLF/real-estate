@@ -134,12 +134,35 @@
             </span>
           </div>
 
-          <div class="review-detail">
-            <span class="review-detail__label">Existing Leases</span>
-            <span class="review-detail__value">
-              {{ formattedExistingLeasesStatement }}
-            </span>
-          </div>
+          @if (isTexasListing) {
+            <div class="review-detail">
+              <span class="review-detail__label">Residential Leases</span>
+              <span class="review-detail__value">
+                {{ formatTexasLeaseStatement('residential') }}
+              </span>
+            </div>
+
+            <div class="review-detail">
+              <span class="review-detail__label">Fixture Leases</span>
+              <span class="review-detail__value">
+                {{ formatTexasLeaseStatement('fixture') }}
+              </span>
+            </div>
+
+            <div class="review-detail">
+              <span class="review-detail__label">Natural-Resource Leases</span>
+              <span class="review-detail__value">
+                {{ formatTexasLeaseStatement('naturalResource') }}
+              </span>
+            </div>
+          } @else {
+            <div class="review-detail">
+              <span class="review-detail__label">Existing Leases</span>
+              <span class="review-detail__value">
+                {{ formattedExistingLeasesStatement }}
+              </span>
+            </div>
+          }
         </div>
       </div>
     </div>

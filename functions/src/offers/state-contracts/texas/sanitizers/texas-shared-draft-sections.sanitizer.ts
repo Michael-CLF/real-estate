@@ -235,6 +235,14 @@ export function sanitizeTexasSharedSections(
     },
 
     expenses: {
+      sellerContributionToBuyerExpensesType:
+        enumValue(
+          expenses,
+          'sellerContributionToBuyerExpensesType',
+          current.expenses.sellerContributionToBuyerExpensesType ??
+            'unselected',
+          ['unselected', 'none', 'amount'] as const
+        ),
       sellerContributionToBuyerExpensesInCents:
         optionalNonNegativeInteger(
           expenses,
@@ -375,26 +383,32 @@ export function sanitizeLeaseTerms(
   current: TexasLeaseTermsDocument
 ): TexasLeaseTermsDocument {
   return {
-    residentialLeasesExist: nullableBoolean(
+    residentialLeasesExist:
+      current.residentialLeasesExist,
+    residentialLeasesReceived: nullableBoolean(
       requested,
-      'residentialLeasesExist',
-      current.residentialLeasesExist
+      'residentialLeasesReceived',
+      current.residentialLeasesReceived
     ),
     residentialLeasesAddendumDocumentUid: optionalIdentifier(
       requested,
       'residentialLeasesAddendumDocumentUid',
       current.residentialLeasesAddendumDocumentUid
     ),
-    fixtureLeasesExist: nullableBoolean(
+    fixtureLeasesExist:
+      current.fixtureLeasesExist,
+    fixtureLeasesReceived: nullableBoolean(
       requested,
-      'fixtureLeasesExist',
-      current.fixtureLeasesExist
+      'fixtureLeasesReceived',
+      current.fixtureLeasesReceived
     ),
     fixtureLeasesAddendumDocumentUid: optionalIdentifier(
       requested,
       'fixtureLeasesAddendumDocumentUid',
       current.fixtureLeasesAddendumDocumentUid
     ),
+    naturalResourceLeasesExist:
+      current.naturalResourceLeasesExist,
     naturalResourceLeaseStatus: enumValue(
       requested,
       'naturalResourceLeaseStatus',

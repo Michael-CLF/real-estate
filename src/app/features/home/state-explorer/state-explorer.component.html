@@ -28,7 +28,8 @@
               ? 'Browse listings in ' + state.name
               : 'Learn more about our plans for ' + state.name
           "
-          [routerLink]="['/states', state.slug]"
+          [routerLink]="state.isActive ? ['/homes'] : ['/states', state.slug]"
+          [queryParams]="state.isActive ? { state: state.slug } : null"
         >
           <span class="state-card__abbreviation">
             {{ state.abbreviation }}

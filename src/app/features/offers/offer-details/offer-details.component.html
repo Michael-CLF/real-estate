@@ -133,57 +133,52 @@
                 <div>
                   <dt>Purchase price</dt>
                   <dd>
-                    {{ dollarsFromCents(version.terms.purchase.purchasePriceInCents) | currency:'USD':'symbol':'1.2-2' }}
+                    {{ dollarsFromCents(getPurchasePriceInCents(version)) | currency:'USD':'symbol':'1.2-2' }}
                   </dd>
                 </div>
 
                 <div>
                   <dt>Funding</dt>
                   <dd>
-                    {{ version.terms.purchase.financingType === 'cash' ? 'Cash' : 'Loan' }}
+                    {{ getFundingLabel(version) }}
                   </dd>
                 </div>
 
                 <div>
-                  <dt>Deposit</dt>
+                  <dt>{{ getDepositLabel(version) }}</dt>
                   <dd>
-                    {{ dollarsFromCents(version.terms.deposits.depositInCents) | currency:'USD':'symbol':'1.2-2' }}
+                    {{ dollarsFromCents(getDepositInCents(version)) | currency:'USD':'symbol':'1.2-2' }}
                   </dd>
                 </div>
 
                 <div>
                   <dt>Deposit delivery</dt>
                   <dd>
-                    Within {{ version.terms.deposits.depositDeliveryDays }}
-                    {{ version.terms.deposits.depositDeliveryDays === 1 ? 'calendar day' : 'calendar days' }}
-                    after the Effective Date
+                    {{ getDepositDelivery(version) }}
                   </dd>
                 </div>
 
                 <div>
                   <dt>Escrow agent</dt>
                   <dd>
-                    {{
-                      version.terms.deposits.escrowAgentName ||
-                      'Not provided'
-                    }}
+                    {{ getEscrowAgent(version) }}
                   </dd>
                 </div>
 
                 <div>
-                  <dt>Due-diligence deadline</dt>
-                  <dd>{{ getDueDiligenceDeadline(version) }}</dd>
+                  <dt>{{ getDeadlineLabel(version) }}</dt>
+                  <dd>{{ getDeadline(version) }}</dd>
                 </div>
 
                 <div>
-                  <dt>Settlement date</dt>
-                  <dd>{{ version.terms.settlement.settlementDate | date:'MMMM d, y':'UTC' }}</dd>
+                  <dt>{{ getClosingDateLabel(version) }}</dt>
+                  <dd>{{ getClosingDate(version) | date:'MMMM d, y':'UTC' }}</dd>
                 </div>
 
                 <div>
                   <dt>Possession</dt>
                   <dd>
-                    {{ version.terms.settlement.possessionTiming === 'at_closing' ? 'At closing' : 'Other — separate agreement attached' }}
+                    {{ getPossessionLabel(version) }}
                   </dd>
                 </div>
 
@@ -279,7 +274,7 @@
 
                       <div class="history-item__facts">
                         <span>
-                          {{ dollarsFromCents(historyVersion.terms.purchase.purchasePriceInCents) | currency:'USD':'symbol':'1.2-2' }}
+                          {{ dollarsFromCents(getPurchasePriceInCents(historyVersion)) | currency:'USD':'symbol':'1.2-2' }}
                         </span>
 
                         @if (historyVersion.submittedAt) {
@@ -392,11 +387,11 @@
 
               <div class="participant-group">
                 <span class="label">Buyer</span>
-                @for (buyer of version.buyers; track buyer.partyUid) {
+                @for (buyer of getBuyers(version); track buyer.partyUid) {
                   <div class="participant">
                     <strong>{{ buyer.legalName }}</strong>
-                    <span [class.signed]="buyer.signature.status === 'signed'">
-                      {{ buyer.signature.status === 'signed' ? 'Signed' : 'Signature pending' }}
+                    <span [class.signed]="partyHasSigned(buyer)">
+                      {{ partyHasSigned(buyer) ? 'Signed' : 'Signature pending' }}
                     </span>
                   </div>
                 }
@@ -404,11 +399,11 @@
 
               <div class="participant-group">
                 <span class="label">Seller</span>
-                @for (seller of version.sellers; track seller.partyUid) {
+                @for (seller of getSellers(version); track seller.partyUid) {
                   <div class="participant">
                     <strong>{{ seller.legalName }}</strong>
-                    <span [class.signed]="seller.signature.status === 'signed'">
-                      {{ seller.signature.status === 'signed' ? 'Signed' : 'Signature pending' }}
+                    <span [class.signed]="partyHasSigned(seller)">
+                      {{ partyHasSigned(seller) ? 'Signed' : 'Signature pending' }}
                     </span>
                   </div>
                 }

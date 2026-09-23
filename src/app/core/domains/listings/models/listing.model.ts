@@ -528,6 +528,10 @@ export interface ListingSellerStatements {
   leasesExist: boolean;
   leaseAddendumDocumentUid?: string;
 
+  residentialLeasesExist?: boolean;
+  fixtureLeasesExist?: boolean;
+  naturalResourceLeasesExist?: boolean;
+
   additionalSeller?: {
     legalName: string;
     email: string;

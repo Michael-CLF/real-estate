@@ -14,10 +14,23 @@ export interface OfferSectionDefinition {
   readonly questions:
     readonly OfferQuestionDefinition[];
 
+  readonly questionGroups?:
+    readonly OfferSectionQuestionGroup[];
+
   readonly visibleWhen?:
     OfferQuestionVisibilityRule;
 
   readonly reviewGroup?: string;
+}
+
+
+export interface OfferSectionQuestionGroup {
+  readonly id: string;
+  readonly title: string;
+  readonly description?: string;
+  readonly columns?: 1 | 2 | 3;
+  readonly questions:
+    readonly OfferQuestionDefinition[];
 }
 
 

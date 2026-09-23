@@ -18,6 +18,7 @@
       [terms]="currentTerms"
       [buyers]="draftBuyers()"
       [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
       [validationIssues]="validationIssues()"
       [saving]="saving()"
       [submitting]="submitting()"
@@ -28,11 +29,11 @@
       (documentSelected)="documentSelected.emit($event)"
       (submitRequested)="onSubmitRequested()"
       (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
     />
   </section>
 } @else {
-  <app-texas-contract-selection
-    [disabled]="busy()"
-    (contractSelected)="onContractSelected($event)"
-  />
+  <section class="texas-offer-wizard__loading" aria-live="polite">
+    Preparing the Texas resale contract from the property listing…
+  </section>
 }

@@ -21,6 +21,14 @@ import type {
   MarketplaceListing,
 } from '../../../../../core/domains/marketplace/models/marketplace-listing.model';
 
+import type {
+  ListingDisclosureDocument,
+} from '../../../../../core/domains/disclosures/models/listing-disclosure-document.model';
+
+import {
+  ListingDisclosureService,
+} from '../../../../../core/domains/disclosures/services/listing-disclosure.service';
+
 import {
   MarketplaceListingRepository,
 } from '../../../../../core/domains/marketplace/repositories/marketplace-listing.repository';
@@ -45,10 +53,6 @@ import type {
   OfferVersion,
   OfferVersionPartySnapshot,
 } from '../../../../../core/domains/offers/models/offer-version.model';
-
-import type {
-  TexasContractDefinition,
-} from '../../../../../core/domains/offers/state-contracts/texas/models/texas-contract-type.model';
 
 import type {
   TexasOfferTerms,
@@ -135,6 +139,9 @@ implements OnInit {
   private readonly offerDocumentService =
     inject(OfferDocumentService);
 
+  private readonly listingDisclosureService =
+    inject(ListingDisclosureService);
+
   private readonly wizard =
     viewChild(OfferWizardComponent);
 
@@ -158,6 +165,9 @@ implements OnInit {
 
   protected readonly listing =
     signal<MarketplaceListing | null>(null);
+
+  protected readonly listingDisclosures =
+    signal<readonly ListingDisclosureDocument[]>([]);
 
   protected readonly property =
     signal<OfferPropertySnapshot | null>(null);
@@ -278,7 +288,31 @@ implements OnInit {
         createPropertySnapshot(listing)
       );
 
+      const disclosureSummaries =
+        await this.listingDisclosureService
+          .getListingDisclosures(this.listingUid);
+      this.listingDisclosures.set(
+        disclosureSummaries.map(summary => summary.currentDocument)
+      );
+
       await this.resumeExistingDraft();
+
+      if (!this.currentVersion()) {
+        await this.createInitialDraft();
+      }
+
+      if (
+        ![
+          'single_family',
+          'townhome',
+          'pud',
+          'multi_family',
+        ].includes(String(listing.propertyType))
+      ) {
+        throw new Error(
+          'This listing requires a Texas contract form that is not yet enabled. NavStreet will not substitute the One to Four Family Residential Contract.'
+        );
+      }
     } catch (error) {
       this.setError(
         error,
@@ -290,9 +324,7 @@ implements OnInit {
   }
 
 
-  protected async onContractSelected(
-    definition: TexasContractDefinition
-  ): Promise<void> {
+  private async createInitialDraft(): Promise<void> {
     if (
       this.busy() ||
       this.currentVersion()
@@ -308,13 +340,13 @@ implements OnInit {
         await this.offerService
           .createOrResumeDraft(
             this.listingUid,
-            definition.contractType
+            'one_to_four_family_resale'
           );
 
       await this.loadOfferSession(
         result.offerUid,
         result.offerVersionUid,
-        definition.contractType
+        'one_to_four_family_resale'
       );
     } catch (error) {
       this.setError(
@@ -647,6 +679,20 @@ implements OnInit {
       createdAt: new Date(0),
       updatedAt: new Date(0),
     }));
+  }
+
+
+  protected async openListingDisclosure(
+    disclosure: ListingDisclosureDocument
+  ): Promise<void> {
+    try {
+      await this.listingDisclosureService.openDisclosure(disclosure);
+    } catch (error) {
+      this.setError(
+        error,
+        'The seller disclosure could not be opened.'
+      );
+    }
   }
 
 

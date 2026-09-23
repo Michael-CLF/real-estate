@@ -13,16 +13,16 @@ import type {
 } from '../../../../../core/domains/offers/models/offer-party.model';
 
 import type {
+  ListingDisclosureDocument,
+} from '../../../../../core/domains/disclosures/models/listing-disclosure-document.model';
+
+import type {
   OfferPropertySnapshot,
 } from '../../../../../core/domains/offers/models/offer-terms.model';
 
 import type {
   OfferValidationIssue,
 } from '../../../../../core/domains/offers/models/offer-validation.model';
-
-import type {
-  TexasContractDefinition,
-} from '../../../../../core/domains/offers/state-contracts/texas/models/texas-contract-type.model';
 
 import type {
   TexasOfferTerms,
@@ -40,14 +40,6 @@ import type {
 import type {
   OfferDocumentSelection,
 } from '../../../engine/question-renderer/question-renderer.component';
-
-import {
-  TexasContractSelectionComponent,
-} from '../contract-selection/texas-contract-selection.component';
-
-import type {
-  TexasContractSelection,
-} from '../contract-selection/texas-contract-selection.component';
 
 import {
   updateTexasOfferTerms,
@@ -71,7 +63,6 @@ export interface TexasOfferDraftChange {
 
   imports: [
     OfferWizardShellComponent,
-    TexasContractSelectionComponent,
   ],
 
   templateUrl:
@@ -93,6 +84,9 @@ export class OfferWizardComponent {
   readonly sellers =
     input<readonly OfferParty[]>([]);
 
+  readonly listingDisclosures =
+    input<readonly ListingDisclosureDocument[]>([]);
+
   readonly expiresAt = input.required<string>();
   readonly timeZone = input.required<string>();
 
@@ -108,14 +102,14 @@ export class OfferWizardComponent {
   readonly documentSelected =
     output<OfferDocumentSelection>();
 
-  readonly contractSelected =
-    output<TexasContractDefinition>();
-
   readonly submitRequested =
     output<TexasOfferDraftChange>();
 
   readonly returnToListingRequested =
     output<void>();
+
+  readonly listingDisclosureRequested =
+    output<ListingDisclosureDocument>();
 
   protected readonly terms =
     signal<TexasOfferTerms | null>(null);
@@ -208,33 +202,6 @@ export class OfferWizardComponent {
   }
 
 
-  protected onContractSelected(
-    selection: TexasContractSelection
-  ): void {
-    if (this.busy()) {
-      return;
-    }
-
-    const terms =
-      TEXAS_OFFER_PACKAGE.createInitialTerms({
-        contractType:
-          selection.definition.contractType,
-        property: this.property(),
-        expiresAt: this.expiresAt(),
-        timeZone: this.timeZone(),
-      });
-
-    this.terms.set(terms);
-    this.submissionAttempted.set(false);
-
-    this.contractSelected.emit(
-      selection.definition
-    );
-
-    this.emitDraftChange(terms);
-  }
-
-
   protected onFieldValueChange(
     change: OfferFieldValueChange
   ): void {
@@ -244,12 +211,58 @@ export class OfferWizardComponent {
       return;
     }
 
-    const updatedTerms =
+    const selectedAddenda = Array.isArray(change.value)
+      ? change.value
+      : [];
+
+    const normalizedValue =
+      change.fieldPath === 'addenda' &&
+      Array.isArray(change.value)
+        ? currentTerms.addenda.map(addendum => ({
+            ...addendum,
+            included: selectedAddenda.includes(addendum.formId),
+          }))
+        : change.value;
+
+    let updatedTerms =
       updateTexasOfferTerms(
         currentTerms,
         change.fieldPath,
-        change.value
+        normalizedValue
       );
+
+    if (
+      change.fieldPath === 'salesPrice.salesPriceInCents' ||
+      change.fieldPath === 'salesPrice.financingInCents'
+    ) {
+      updatedTerms = {
+        ...updatedTerms,
+        salesPrice: {
+          ...updatedTerms.salesPrice,
+          cashPortionInCents: Math.max(
+            updatedTerms.salesPrice.salesPriceInCents -
+              updatedTerms.salesPrice.financingInCents,
+            0
+          ),
+        },
+      };
+    }
+
+    if (
+      change.fieldPath ===
+        'expenses.sellerContributionToBuyerExpensesType' &&
+      normalizedValue === 'none'
+    ) {
+      updatedTerms = {
+        ...updatedTerms,
+        expenses: {
+          ...updatedTerms.expenses,
+          sellerContributionToBuyerExpensesInCents: 0,
+        },
+      };
+    }
+
+    updatedTerms = syncRequiredAddenda(updatedTerms);
 
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
@@ -384,4 +397,61 @@ export class OfferWizardComponent {
       buyers: this.draftBuyers(),
     });
   }
+}
+
+
+function syncRequiredAddenda(
+  terms: TexasOfferTerms
+): TexasOfferTerms {
+  const requiredIds = new Set<string>();
+  const automaticallyManagedIds = new Set([
+    'third-party-financing',
+    'loan-assumption',
+    'seller-financing',
+    'residential-leases',
+    'fixture-leases',
+    'mineral-reservation',
+    'mandatory-poa-membership',
+    'lead-based-paint',
+  ]);
+  const financingIds: Readonly<Record<string, string>> = {
+    third_party_financing: 'third-party-financing',
+    loan_assumption: 'loan-assumption',
+    seller_financing: 'seller-financing',
+  };
+
+  terms.salesPrice.financingAddenda.forEach(value => {
+    const formId = financingIds[value];
+    if (formId) {
+      requiredIds.add(formId);
+    }
+  });
+
+  if (terms.leases.residentialLeasesExist) {
+    requiredIds.add('residential-leases');
+  }
+  if (terms.leases.fixtureLeasesExist) {
+    requiredIds.add('fixture-leases');
+  }
+  if (terms.propertyTerms.mineralWaterTimberReservationApplies) {
+    requiredIds.add('mineral-reservation');
+  }
+  if (terms.propertyAssociation.mandatoryMembership) {
+    requiredIds.add('mandatory-poa-membership');
+  }
+  if (terms.disclosures.leadBasedPaintApplies) {
+    requiredIds.add('lead-based-paint');
+  }
+
+  return {
+    ...terms,
+    addenda: terms.addenda.map(addendum =>
+      automaticallyManagedIds.has(addendum.formId)
+        ? {
+            ...addendum,
+            included: requiredIds.has(addendum.formId),
+          }
+        : addendum
+    ),
+  };
 }

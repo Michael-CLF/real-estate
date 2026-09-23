@@ -185,6 +185,76 @@ form {
   font-weight: 600;
 }
 
+.texas-lease-card {
+  display: grid;
+  gap: 1rem;
+  grid-column: 1 / -1;
+  padding: 1.15rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.texas-lease-document {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dce5ea;
+}
+
+.texas-lease-document p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.document-link,
+.document-upload {
+  justify-self: start;
+  min-height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+}
+
+.document-link {
+  border: 1px solid #154360;
+  background: #fff;
+  color: #154360;
+}
+
+.document-upload {
+  border: 1px solid #154360;
+  background: #154360;
+  color: #fff;
+}
+
+.document-link:disabled,
+.document-upload:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.lease-document-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.lease-document-status--error {
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.lease-document-status--success {
+  background: #ecfdf3;
+  color: #067647;
+}
+
 @media (max-width: 768px) {
   .three-column {
     grid-template-columns: 1fr;

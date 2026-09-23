@@ -479,15 +479,12 @@ implements StateOfferValidator<
 
     if (
       leases.residentialLeasesExist === true &&
-      !this.hasText(
-        leases
-          .residentialLeasesAddendumDocumentUid
-      )
+      leases.residentialLeasesReceived === null
     ) {
       this.addError(
         issues,
-        'leases.residentialLeasesAddendumDocumentUid',
-        'Attach the residential leases addendum.'
+        'leases.residentialLeasesReceived',
+        'Indicate whether you received the residential leases from the seller.'
       );
     }
 
@@ -501,20 +498,26 @@ implements StateOfferValidator<
 
     if (
       leases.fixtureLeasesExist === true &&
-      !this.hasText(
-        leases.fixtureLeasesAddendumDocumentUid
-      )
+      leases.fixtureLeasesReceived === null
     ) {
       this.addError(
         issues,
-        'leases.fixtureLeasesAddendumDocumentUid',
-        'Attach the fixture leases addendum.'
+        'leases.fixtureLeasesReceived',
+        'Indicate whether you received the fixture leases from the seller.'
+      );
+    }
+
+    if (leases.naturalResourceLeasesExist === null) {
+      this.addError(
+        issues,
+        'leases.naturalResourceLeasesExist',
+        'The seller must complete the natural-resource lease statement.'
       );
     }
 
     if (
-      leases.naturalResourceLeaseStatus ===
-        'unselected'
+      leases.naturalResourceLeasesExist === true &&
+      leases.naturalResourceLeaseStatus === 'unselected'
     ) {
       this.addError(
         issues,
@@ -524,6 +527,7 @@ implements StateOfferValidator<
     }
 
     if (
+      leases.naturalResourceLeasesExist === true &&
       leases.naturalResourceLeaseStatus ===
         'not_delivered'
     ) {

@@ -66,7 +66,10 @@ export function createTexasInitialOfferTerms(
 
     leases: {
       residentialLeasesExist: null,
+      residentialLeasesReceived: null,
       fixtureLeasesExist: null,
+      fixtureLeasesReceived: null,
+      naturalResourceLeasesExist: null,
       naturalResourceLeaseStatus:
         'unselected',
     },
@@ -116,6 +119,8 @@ export function createTexasInitialOfferTerms(
     },
 
     expenses: {
+      sellerContributionToBuyerExpensesType:
+        'unselected',
       sellerContributionToBuyerBroker: {
         contributionType: 'unselected',
       },

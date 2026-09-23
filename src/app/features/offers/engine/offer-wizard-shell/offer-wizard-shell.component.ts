@@ -13,10 +13,15 @@ import type {
 } from '../../../../core/domains/offers/models/offer-party.model';
 
 import type {
+  ListingDisclosureDocument,
+} from '../../../../core/domains/disclosures/models/listing-disclosure-document.model';
+
+import type {
   OfferValidationIssue,
 } from '../../../../core/domains/offers/models/offer-validation.model';
 
 import type {
+  OfferChoiceQuestion,
   OfferQuestionCondition,
   OfferQuestionDefinition,
   OfferQuestionVisibilityRule,
@@ -45,6 +50,11 @@ export interface OfferCoBuyerChange {
   readonly legalName: string;
   readonly email: string;
   readonly phone: string;
+}
+
+interface OfferReviewItem {
+  readonly label: string;
+  readonly value: string;
 }
 
 
@@ -85,6 +95,9 @@ export class OfferWizardShellComponent {
   readonly buyers = input<readonly OfferParty[]>([]);
   readonly sellers = input<readonly OfferParty[]>([]);
 
+  readonly listingDisclosures =
+    input<readonly ListingDisclosureDocument[]>([]);
+
   readonly validationIssues =
     input<readonly OfferValidationIssue[]>([]);
 
@@ -111,16 +124,26 @@ export class OfferWizardShellComponent {
   readonly returnToListingRequested =
     output<void>();
 
+  readonly listingDisclosureRequested =
+    output<ListingDisclosureDocument>();
+
   private readonly attemptedSectionIds =
     signal<ReadonlySet<string>>(new Set());
 
   private readonly completedSectionIds =
     signal<ReadonlySet<string>>(new Set());
 
+  private readonly touchedFieldPaths =
+    signal<ReadonlySet<string>>(new Set());
+
+  protected readonly reviewing = signal(false);
+
   protected readonly addingCoBuyer = signal(false);
   protected readonly coBuyerLegalName = signal('');
   protected readonly coBuyerEmail = signal('');
   protected readonly coBuyerPhone = signal('');
+  private readonly touchedCoBuyerFields =
+    signal<ReadonlySet<'legalName' | 'email' | 'phone'>>(new Set());
 
 
   protected readonly visibleSections = computed(
@@ -208,6 +231,42 @@ export class OfferWizardShellComponent {
   );
 
 
+  protected readonly currentSectionValid = computed(
+    () => this.currentSectionErrorCount() === 0
+  );
+
+
+  protected readonly allSectionsValid = computed(
+    () =>
+      this.visibleSections().every(
+        section => this.sectionErrorCount(section) === 0
+      )
+  );
+
+
+  protected readonly currentSectionHasMissingSellerInformation = computed(
+    () => {
+      const section = this.currentSection();
+
+      if (!section) {
+        return false;
+      }
+
+      return questionsForSection(section).some(
+        question =>
+          question.readOnly === true &&
+          question.validation?.required === true &&
+          this.isQuestionVisible(question) &&
+          question.fieldPath !== undefined &&
+          isRequiredValueMissing(
+            readPath(this.terms(), question.fieldPath),
+            question
+          )
+      );
+    }
+  );
+
+
   protected readonly busy = computed(
     () => this.saving() || this.submitting()
   );
@@ -247,16 +306,67 @@ export class OfferWizardShellComponent {
     if (
       !question.fieldPath ||
       !section ||
-      !this.attemptedSectionIds().has(section.id)
+      !this.isQuestionVisible(question) ||
+      (
+        !this.touchedFieldPaths().has(question.fieldPath) &&
+        !this.attemptedSectionIds().has(section.id)
+      )
     ) {
       return null;
     }
 
-    return this.validationIssues().find(
+    const issue = this.validationIssues().find(
       issue =>
         issue.severity === 'error' &&
-        issue.fieldPath === question.fieldPath
-    )?.message ?? null;
+        (
+          issue.fieldPath === question.fieldPath ||
+          issue.fieldPath.startsWith(`${question.fieldPath}.`)
+        )
+    );
+
+    if (issue) {
+      return issue.message;
+    }
+
+    if (
+      question.validation?.required === true &&
+      isRequiredValueMissing(
+        readPath(this.terms(), question.fieldPath),
+        question
+      )
+    ) {
+      return question.validation.message ??
+        `${question.label} is required.`;
+    }
+
+    return null;
+  }
+
+
+  protected currentSectionHasVisibleErrors(): boolean {
+    const section = this.currentSection();
+
+    if (!section) {
+      return false;
+    }
+
+    if (
+      section.id === 'parties' &&
+      this.addingCoBuyer() &&
+      (
+        this.coBuyerValidationMessage('legalName') ||
+        this.coBuyerValidationMessage('email') ||
+        this.coBuyerValidationMessage('phone')
+      )
+    ) {
+      return true;
+    }
+
+    return questionsForSection(section).some(
+      question =>
+        this.isQuestionVisible(question) &&
+        this.validationMessageFor(question) !== null
+    );
   }
 
 
@@ -311,6 +421,44 @@ export class OfferWizardShellComponent {
     this.emitCoBuyer();
   }
 
+
+  protected markCoBuyerFieldTouched(
+    field: 'legalName' | 'email' | 'phone'
+  ): void {
+    this.touchedCoBuyerFields.set(
+      new Set([...this.touchedCoBuyerFields(), field])
+    );
+  }
+
+
+  protected coBuyerValidationMessage(
+    field: 'legalName' | 'email' | 'phone'
+  ): string | null {
+    if (
+      !this.addingCoBuyer() ||
+      !this.touchedCoBuyerFields().has(field)
+    ) {
+      return null;
+    }
+
+    if (field === 'legalName') {
+      return this.coBuyerLegalName().trim()
+        ? null
+        : 'Co-buyer legal name is required.';
+    }
+
+    if (field === 'email') {
+      const email = this.coBuyerEmail().trim();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ? null
+        : 'Enter a valid co-buyer email address.';
+    }
+
+    return this.coBuyerPhone().replace(/\D/g, '').length >= 10
+      ? null
+      : 'Enter a valid co-buyer phone number.';
+  }
+
   private emitCoBuyer(): void {
     if (!this.addingCoBuyer()) {
       this.coBuyerChange.emit(null);
@@ -362,7 +510,7 @@ export class OfferWizardShellComponent {
     );
 
     if (this.isLastSection()) {
-      this.submitRequested.emit();
+      this.reviewing.set(true);
       return;
     }
 
@@ -380,6 +528,8 @@ export class OfferWizardShellComponent {
       return;
     }
 
+    this.reviewing.set(false);
+
     const section = this.currentSection();
     if (section) {
       const completed = new Set(this.completedSectionIds());
@@ -391,6 +541,372 @@ export class OfferWizardShellComponent {
       fieldPath: question.fieldPath,
       value,
     });
+  }
+
+
+  protected onFieldTouched(
+    question: OfferQuestionDefinition
+  ): void {
+    if (!question.fieldPath) {
+      return;
+    }
+
+    this.touchedFieldPaths.set(
+      new Set([
+        ...this.touchedFieldPaths(),
+        question.fieldPath,
+      ])
+    );
+  }
+
+
+  protected returnToCertification(): void {
+    this.reviewing.set(false);
+  }
+
+
+  protected editReviewSection(index: number): void {
+    if (this.busy()) {
+      return;
+    }
+
+    this.reviewing.set(false);
+    this.setSectionIndex(index);
+  }
+
+
+  protected confirmSubmit(): void {
+    if (this.busy() || !this.allSectionsValid()) {
+      return;
+    }
+
+    this.submitRequested.emit();
+  }
+
+
+  protected reviewItemsForSection(
+    section: OfferSectionDefinition
+  ): readonly OfferReviewItem[] {
+    const items: OfferReviewItem[] = [];
+
+    if (section.id === 'property') {
+      items.push({
+        label: 'Property address',
+        value: this.reviewPropertyAddress(),
+      });
+    }
+
+    for (const question of questionsForSection(section)) {
+      if (
+        question.type === 'information' ||
+        !question.fieldPath ||
+        !this.isQuestionVisible(question)
+      ) {
+        continue;
+      }
+
+      items.push({
+        label: question.label,
+        value: this.formatReviewQuestionValue(question),
+      });
+    }
+
+    const documents = this.listingDocumentsForSection(section.id);
+    if (documents.length > 0) {
+      items.push({
+        label: 'Seller-provided documents',
+        value: documents
+          .map(document => document.originalFileName)
+          .join(', '),
+      });
+    }
+
+    return items;
+  }
+
+
+  protected reviewPartyItems(
+    parties: readonly OfferParty[]
+  ): string {
+    if (parties.length === 0) {
+      return 'Not provided';
+    }
+
+    return parties
+      .map(party => {
+        const contact = [
+          party.email,
+          this.formatPhone(party.phone),
+        ].filter(Boolean).join(' · ');
+
+        return contact
+          ? `${party.legalName} — ${contact}`
+          : party.legalName;
+      })
+      .join('; ');
+  }
+
+
+  protected reviewMoney(fieldPath: string): string {
+    const value = readPath(this.terms(), fieldPath);
+    const cents = typeof value === 'number' ? value : 0;
+
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(cents / 100);
+  }
+
+
+  protected formatPhone(value: string): string {
+    const digits = value.replace(/\D/g, '');
+
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+
+    if (digits.length === 11 && digits.startsWith('1')) {
+      return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+
+    return value;
+  }
+
+
+  protected reviewText(fieldPath: string): string {
+    const value = readPath(this.terms(), fieldPath);
+    return typeof value === 'string' && value.trim()
+      ? value
+      : 'Not provided';
+  }
+
+
+  protected hasValue(fieldPath: string): boolean {
+    const value = readPath(this.terms(), fieldPath);
+    return value !== undefined && value !== null && value !== '';
+  }
+
+
+  private reviewPropertyAddress(): string {
+    const street = this.propertyValue('addressLine1');
+    const city = this.propertyValue('city');
+    const state = this.propertyValue('state');
+    const zipCode = this.propertyValue('zipCode');
+    const county = this.propertyValue('county');
+
+    return [
+      street,
+      [city, state, zipCode].filter(Boolean).join(' '),
+      county ? `${county} County` : '',
+    ].filter(Boolean).join(', ') || 'Not provided';
+  }
+
+
+  private formatReviewQuestionValue(
+    question: OfferQuestionDefinition
+  ): string {
+    if (!question.fieldPath) {
+      return 'Not provided';
+    }
+
+    const value = readPath(this.terms(), question.fieldPath);
+
+    switch (question.type) {
+      case 'currency':
+        return typeof value === 'number' && Number.isFinite(value)
+          ? new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(value / 100)
+          : 'Not provided';
+
+      case 'number':
+        return typeof value === 'number' && Number.isFinite(value)
+          ? `${value}${question.suffix ? ` ${question.suffix}` : ''}`
+          : 'Not provided';
+
+      case 'yes_no':
+      case 'acknowledgement':
+        return value === true
+          ? 'Yes'
+          : value === false
+            ? 'No'
+            : 'Not provided';
+
+      case 'single_choice': {
+        const selected = question.options.find(
+          option => option.value === value
+        );
+        return selected?.label ?? 'Not provided';
+      }
+
+      case 'multiple_choice': {
+        const selectedValues = this.reviewSelectedChoiceValues(
+          question,
+          value
+        );
+        const labels = selectedValues.map(
+          selectedValue =>
+            question.options.find(
+              option => option.value === selectedValue
+            )?.label ?? selectedValue
+        );
+        return labels.length > 0
+          ? labels.join(', ')
+          : 'None selected';
+      }
+
+      case 'date':
+        return this.formatReviewDate(value);
+
+      case 'date_time':
+        return this.formatReviewDateTime(value);
+
+      case 'address':
+        return this.formatReviewAddress(value);
+
+      case 'document_upload':
+        return typeof value === 'string' && value.trim()
+          ? 'Attached'
+          : 'Not attached';
+
+      case 'text':
+      case 'textarea':
+        return typeof value === 'string' && value.trim()
+          ? value.trim()
+          : 'Not provided';
+
+      default:
+        return 'Not provided';
+    }
+  }
+
+
+  private reviewSelectedChoiceValues(
+    question: OfferChoiceQuestion,
+    value: unknown
+  ): readonly string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    if (!question.objectSelection) {
+      return value.filter(
+        item => typeof item === 'string'
+      ) as string[];
+    }
+
+    const selectedKey =
+      question.objectSelection.selectedKey ?? 'included';
+
+    return value.flatMap(item => {
+      if (
+        item === null ||
+        typeof item !== 'object' ||
+        Array.isArray(item)
+      ) {
+        return [];
+      }
+
+      const record = item as Record<string, unknown>;
+      const selectedValue = record[question.objectSelection!.valueKey];
+
+      return record[selectedKey] === true &&
+        typeof selectedValue === 'string'
+        ? [selectedValue]
+        : [];
+    });
+  }
+
+
+  private formatReviewDate(value: unknown): string {
+    if (typeof value !== 'string' || !value.trim()) {
+      return 'Not provided';
+    }
+
+    const parts = value.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(part => !Number.isFinite(part))) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(parts[0], parts[1] - 1, parts[2]));
+  }
+
+
+  private formatReviewDateTime(value: unknown): string {
+    if (typeof value !== 'string' || !value.trim()) {
+      return 'Not provided';
+    }
+
+    const parsed = new Date(value);
+    if (!Number.isFinite(parsed.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(parsed);
+  }
+
+
+  private formatReviewAddress(value: unknown): string {
+    if (
+      value === null ||
+      typeof value !== 'object' ||
+      Array.isArray(value)
+    ) {
+      return 'Not provided';
+    }
+
+    const address = value as Record<string, unknown>;
+    const text = [
+      address['addressLine1'],
+      address['addressLine2'],
+      [
+        address['city'],
+        address['state'],
+        address['zipCode'],
+      ].filter(item => typeof item === 'string' && item.trim()).join(' '),
+      address['county'],
+    ].filter(item => typeof item === 'string' && item.trim());
+
+    return text.length > 0
+      ? text.join(', ')
+      : 'Not provided';
+  }
+
+
+  protected listingDocumentsForSection(
+    sectionId: string
+  ): readonly ListingDisclosureDocument[] {
+    if (sectionId === 'leases') {
+      const leaseDocumentRules: Readonly<Record<string, string>> = {
+        'texas-residential-leases': 'leases.residentialLeasesExist',
+        'texas-fixture-leases': 'leases.fixtureLeasesExist',
+        'texas-natural-resource-leases': 'leases.naturalResourceLeasesExist',
+      };
+
+      return this.listingDisclosures().filter(document => {
+        const fieldPath = leaseDocumentRules[document.documentType];
+        return fieldPath
+          ? readPath(this.terms(), fieldPath) === true
+          : false;
+      });
+    }
+
+    if (sectionId === 'disclosures') {
+      return this.listingDisclosures().filter(
+        document => !document.documentType.startsWith('texas-') ||
+          !document.documentType.endsWith('-leases')
+      );
+    }
+
+    return [];
   }
 
 
@@ -420,29 +936,48 @@ export class OfferWizardShellComponent {
       ).length;
     }
 
-    const fieldPaths = new Set(
-      section.questions
-        .filter(
-          question =>
-            this.isQuestionVisible(question) &&
-            question.fieldPath
-        )
-        .map(
-          question => question.fieldPath as string
-        )
+    const visibleQuestions = questionsForSection(section).filter(
+      question =>
+        this.isQuestionVisible(question) &&
+        question.fieldPath
     );
 
-    return this.validationIssues().filter(
-      issue =>
-        issue.severity === 'error' &&
-        Array.from(fieldPaths).some(
-          fieldPath =>
-            issue.fieldPath === fieldPath ||
-            issue.fieldPath.startsWith(
-              `${fieldPath}.`
+    const fieldPaths = new Set(
+      visibleQuestions.map(
+        question => question.fieldPath as string
+      )
+    );
+
+    const errorKeys = new Set(
+      this.validationIssues()
+        .filter(
+          issue =>
+            issue.severity === 'error' &&
+            Array.from(fieldPaths).some(
+              fieldPath =>
+                issue.fieldPath === fieldPath ||
+                issue.fieldPath.startsWith(
+                  `${fieldPath}.`
+                )
             )
         )
-    ).length;
+        .map(issue => issue.fieldPath)
+    );
+
+    for (const question of visibleQuestions) {
+      if (
+        question.validation?.required === true &&
+        question.fieldPath &&
+        isRequiredValueMissing(
+          readPath(this.terms(), question.fieldPath),
+          question
+        )
+      ) {
+        errorKeys.add(question.fieldPath);
+      }
+    }
+
+    return errorKeys.size;
   }
 
 
@@ -467,6 +1002,15 @@ export class OfferWizardShellComponent {
       ? results.every(Boolean)
       : results.some(Boolean);
   }
+}
+
+
+function questionsForSection(
+  section: OfferSectionDefinition
+): readonly OfferQuestionDefinition[] {
+  return section.questionGroups?.length
+    ? section.questionGroups.flatMap(group => group.questions)
+    : section.questions;
 }
 
 
@@ -565,6 +1109,45 @@ function isEmpty(value: unknown): boolean {
   return value === null ||
     value === undefined ||
     value === '' ||
+    (
+      Array.isArray(value) &&
+      value.length === 0
+    );
+}
+
+
+function isRequiredValueMissing(
+  value: unknown,
+  question: OfferQuestionDefinition
+): boolean {
+  if (question.type === 'acknowledgement') {
+    return value !== true;
+  }
+
+  if (
+    question.type === 'multiple_choice' &&
+    question.objectSelection &&
+    Array.isArray(value)
+  ) {
+    const selectedKey =
+      question.objectSelection.selectedKey ?? 'included';
+
+    return !value.some(
+      item =>
+        item !== null &&
+        typeof item === 'object' &&
+        !Array.isArray(item) &&
+        (item as Record<string, unknown>)[selectedKey] === true
+    );
+  }
+
+  return value === undefined ||
+    value === null ||
+    value === 'unselected' ||
+    (
+      typeof value === 'string' &&
+      value.trim().length === 0
+    ) ||
     (
       Array.isArray(value) &&
       value.length === 0

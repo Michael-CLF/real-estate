@@ -197,11 +197,13 @@ export function sanitizeTexasDraftTerms(
 
     leases: {
       residentialLeasesExist:
+        current.leases.residentialLeasesExist,
+      residentialLeasesReceived:
         nullableBoolean(
           leases,
-          'residentialLeasesExist',
+          'residentialLeasesReceived',
           current.leases
-            .residentialLeasesExist
+            .residentialLeasesReceived
         ),
       residentialLeasesAddendumDocumentUid:
         optionalIdentifier(
@@ -210,10 +212,12 @@ export function sanitizeTexasDraftTerms(
           current.leases
             .residentialLeasesAddendumDocumentUid
         ),
-      fixtureLeasesExist: nullableBoolean(
+      fixtureLeasesExist:
+        current.leases.fixtureLeasesExist,
+      fixtureLeasesReceived: nullableBoolean(
         leases,
-        'fixtureLeasesExist',
-        current.leases.fixtureLeasesExist
+        'fixtureLeasesReceived',
+        current.leases.fixtureLeasesReceived
       ),
       fixtureLeasesAddendumDocumentUid:
         optionalIdentifier(
@@ -222,6 +226,8 @@ export function sanitizeTexasDraftTerms(
           current.leases
             .fixtureLeasesAddendumDocumentUid
         ),
+      naturalResourceLeasesExist:
+        current.leases.naturalResourceLeasesExist,
       naturalResourceLeaseStatus: enumValue(
         leases,
         'naturalResourceLeaseStatus',
@@ -391,9 +397,17 @@ export function sanitizeTexasDraftTerms(
       mandatoryMembership: nullableBoolean(
         propertyAssociation,
         'mandatoryMembership',
-        current.propertyAssociation
-          .mandatoryMembership
+          current.propertyAssociation
+            .mandatoryMembership
       ),
+      associationName:
+        current.propertyAssociation.associationName,
+      duesInCents:
+        current.propertyAssociation.duesInCents,
+      duesFrequency:
+        current.propertyAssociation.duesFrequency,
+      associationContact:
+        current.propertyAssociation.associationContact,
       associationAddendumDocumentUid:
         optionalIdentifier(
           propertyAssociation,
@@ -500,6 +514,14 @@ export function sanitizeTexasDraftTerms(
     },
 
     expenses: {
+      sellerContributionToBuyerExpensesType:
+        enumValue(
+          expenses,
+          'sellerContributionToBuyerExpensesType',
+          current.expenses
+            .sellerContributionToBuyerExpensesType ?? 'unselected',
+          ['unselected', 'none', 'amount'] as const
+        ),
       sellerContributionToBuyerExpensesInCents:
         optionalNonNegativeInteger(
           expenses,

@@ -30,7 +30,7 @@ import {
 import {
   DisclosureDocumentType,
   StateDisclosureRequirement
-} from '../../../core/domains/disclosures/state-disclosure-requirement.model';
+} from '../../../core/domains/disclosures/models/state-disclosure-requirement.model';
 
 import {
   ListingDisclosureService

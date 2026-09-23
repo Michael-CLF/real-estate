@@ -173,7 +173,7 @@
       }
 
       @case (2) {
-      <app-property-details-step [initialValue]="
+      <app-property-details-step [listingUid]="listingUid()" [initialValue]="
                 propertyDetailsData()
               " [stateCode]="addressData()?.state ?? ''" (valueChange)="
                 onPropertyDetailsChange($event)

@@ -1,6 +1,6 @@
 import {
   StateDisclosureRequirement
-} from '../domains/disclosures/state-disclosure-requirement.model';
+} from '../domains/disclosures/models/state-disclosure-requirement.model';
 
 export const STATE_DISCLOSURE_REQUIREMENTS:
   Readonly<

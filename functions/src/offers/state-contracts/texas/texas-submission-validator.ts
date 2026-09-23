@@ -103,6 +103,36 @@ function validateOneToFourFamilyResale(
   validateDisclosureTerms(terms.disclosures);
   validateAssociationAddendum(terms);
   validateDisclosureAddenda(terms);
+  validateResaleAddenda(terms);
+}
+
+
+function validateResaleAddenda(
+  terms: TexasOneToFourFamilyResaleOfferTermsDocument
+): void {
+  if (terms.propertyTerms.mineralWaterTimberReservationApplies) {
+    requireIncludedAddendum(
+      terms,
+      'mineral-reservation',
+      'Include the mineral reservation addendum.'
+    );
+  }
+
+  if (terms.leases.residentialLeasesExist) {
+    requireIncludedAddendum(
+      terms,
+      'residential-leases',
+      'Include the residential leases addendum.'
+    );
+  }
+
+  if (terms.leases.fixtureLeasesExist) {
+    requireIncludedAddendum(
+      terms,
+      'fixture-leases',
+      'Include the fixture leases addendum.'
+    );
+  }
 }
 
 

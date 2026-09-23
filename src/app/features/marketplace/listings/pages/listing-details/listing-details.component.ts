@@ -102,7 +102,7 @@ import {
 
 import {
   DisclosureDocumentType
-} from '../../../../../core/domains/disclosures/state-disclosure-requirement.model';
+} from '../../../../../core/domains/disclosures/models/state-disclosure-requirement.model';
 
 import {
   ListingDisclosureService

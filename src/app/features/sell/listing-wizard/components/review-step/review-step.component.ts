@@ -291,6 +291,31 @@ export class ReviewStepComponent {
     return '—';
   }
 
+  protected get isTexasListing(): boolean {
+    return this.address()?.state.trim().toUpperCase() === 'TX';
+  }
+
+  protected formatTexasLeaseStatement(
+    leaseType: 'residential' | 'fixture' | 'naturalResource'
+  ): string {
+    const statements = this.propertyDetails()?.sellerStatements;
+    const value = leaseType === 'residential'
+      ? statements?.residentialLeasesExist
+      : leaseType === 'fixture'
+        ? statements?.fixtureLeasesExist
+        : statements?.naturalResourceLeasesExist;
+
+    if (value === true) {
+      return 'One or more leases disclosed.';
+    }
+
+    if (value === false) {
+      return 'No leases disclosed.';
+    }
+
+    return '—';
+  }
+
   protected formatNumber(value: number | null | undefined): string {
     if (value === null || value === undefined) {
       return '—';

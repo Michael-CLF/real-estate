@@ -81,6 +81,13 @@ interface OfferQuestionBase {
 
   readonly validation?:
     OfferQuestionValidationRule;
+
+  /*
+   * Read-only questions display a contract value that is derived from
+   * another answer. They remain part of validation and review, but the
+   * user cannot edit them directly.
+   */
+  readonly readOnly?: boolean;
 }
 
 
@@ -140,6 +147,9 @@ export interface OfferChoiceQuestion
 
   readonly options:
     readonly OfferQuestionOption[];
+
+  readonly disabledValues?:
+    readonly string[];
 
   /*
    * Allows a choice control to read selections stored as objects.

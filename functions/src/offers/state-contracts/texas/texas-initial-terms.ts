@@ -30,6 +30,19 @@ export function createTexasInitialOfferTerms(
   input: CreateInitialOfferTermsInput,
   options: CreateTexasInitialTermsOptions = {}
 ): TexasOneToFourFamilyResaleOfferTermsDocument {
+  const supportedPropertyTypes = new Set([
+    'single_family',
+    'townhome',
+    'pud',
+    'multi_family',
+  ]);
+
+  if (!supportedPropertyTypes.has(input.property.propertyType)) {
+    throw new Error(
+      'The listing property type does not support the TREC 20-19 One to Four Family Residential Contract.'
+    );
+  }
+
   const now = options.now ?? new Date();
 
   const expirationHours =
@@ -45,6 +58,27 @@ export function createTexasInitialOfferTerms(
   const timeZone =
     getTexasPropertyTimeZone(
       input.property.county
+    );
+
+  const residentialLeasesExist =
+    readNestedListingBoolean(
+      input.listingData,
+      'sellerStatements',
+      'residentialLeasesExist'
+    );
+
+  const fixtureLeasesExist =
+    readNestedListingBoolean(
+      input.listingData,
+      'sellerStatements',
+      'fixtureLeasesExist'
+    );
+
+  const naturalResourceLeasesExist =
+    readNestedListingBoolean(
+      input.listingData,
+      'sellerStatements',
+      'naturalResourceLeasesExist'
     );
 
   return {
@@ -98,15 +132,15 @@ export function createTexasInitialOfferTerms(
     },
 
     leases: {
-      residentialLeasesExist:
-        readNestedListingBoolean(
-          input.listingData,
-          'sellerStatements',
-          'leasesExist'
-        ),
-      fixtureLeasesExist: null,
+      residentialLeasesExist,
+      residentialLeasesReceived: null,
+      fixtureLeasesExist,
+      fixtureLeasesReceived: null,
+      naturalResourceLeasesExist,
       naturalResourceLeaseStatus:
-        'unselected',
+        naturalResourceLeasesExist === false
+          ? 'none'
+          : 'unselected',
     },
 
     earnestMoneyAndOption: {
@@ -137,6 +171,42 @@ export function createTexasInitialOfferTerms(
           'sellerStatements',
           'ownersAssociationApplies'
         ),
+      associationName:
+        readFirstNestedListingText(
+          input.listingData,
+          [
+            ['sellerStatements', 'ownersAssociationName'],
+            ['hoa', 'associationName'],
+          ]
+        ),
+      duesInCents:
+        readNestedListingNumber(
+          input.listingData,
+          'sellerStatements',
+          'ownersAssociationDuesInCents'
+        ) ?? toOptionalCents(
+          readNestedListingNumber(
+            input.listingData,
+            'hoa',
+            'feeAmount'
+          )
+        ),
+      duesFrequency:
+        readFirstNestedListingText(
+          input.listingData,
+          [
+            ['sellerStatements', 'ownersAssociationDuesFrequency'],
+            ['hoa', 'feeFrequency'],
+          ]
+        ),
+      associationContact:
+        readFirstNestedListingText(
+          input.listingData,
+          [
+            ['sellerStatements', 'ownersAssociationContact'],
+            ['hoa', 'managementCompany'],
+          ]
+        ),
     },
 
     disclosures: {
@@ -164,6 +234,8 @@ export function createTexasInitialOfferTerms(
     },
 
     expenses: {
+      sellerContributionToBuyerExpensesType:
+        'unselected',
       sellerContributionToBuyerBroker: {
         contributionType: 'unselected',
       },
@@ -188,7 +260,14 @@ export function createTexasInitialOfferTerms(
     attorneys: {},
 
     addenda:
-      createTexasApprovedAddendaCatalog(),
+      createTexasApprovedAddendaCatalog()
+        .map(addendum => ({
+          ...addendum,
+          included: isListingRequiredAddendum(
+            addendum.formId,
+            input.listingData
+          ),
+        })),
 
     delivery: {
       expiresAt,
@@ -438,6 +517,38 @@ function readListingText(
 }
 
 
+function isListingRequiredAddendum(
+  formId: string,
+  listingData: Record<string, unknown>
+): boolean {
+  switch (formId) {
+    case 'mandatory-poa-membership':
+      return readNestedListingBoolean(
+        listingData,
+        'sellerStatements',
+        'ownersAssociationApplies'
+      ) === true;
+
+    case 'residential-leases':
+      return readNestedListingBoolean(
+        listingData,
+        'sellerStatements',
+        'leasesExist'
+      ) === true;
+
+    case 'lead-based-paint':
+      return readNestedListingBoolean(
+        listingData,
+        'sellerStatements',
+        'leadBasedPaintApplies'
+      ) === true;
+
+    default:
+      return false;
+  }
+}
+
+
 function readNestedListingBoolean(
   listingData: Record<string, unknown>,
   objectFieldName: string,
@@ -459,6 +570,46 @@ function readNestedListingBoolean(
   return typeof value === 'boolean'
     ? value
     : null;
+}
+
+
+function readFirstNestedListingText(
+  listingData: Record<string, unknown>,
+  paths: ReadonlyArray<readonly [string, string]>
+): string | undefined {
+  for (const [objectFieldName, fieldName] of paths) {
+    const nested = listingData[objectFieldName];
+    if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+      const value = (nested as Record<string, unknown>)[fieldName];
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
+    }
+  }
+  return undefined;
+}
+
+
+function readNestedListingNumber(
+  listingData: Record<string, unknown>,
+  objectFieldName: string,
+  fieldName: string
+): number | undefined {
+  const nested = listingData[objectFieldName];
+  if (!nested || typeof nested !== 'object' || Array.isArray(nested)) {
+    return undefined;
+  }
+  const value = (nested as Record<string, unknown>)[fieldName];
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+
+function toOptionalCents(value: number | undefined): number | undefined {
+  return value === undefined
+    ? undefined
+    : Math.round(value * 100);
 }
 
 
