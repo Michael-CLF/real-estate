@@ -107,6 +107,9 @@ export class OfferWizardShellComponent {
   readonly validationIssues =
     input<readonly OfferValidationIssue[]>([]);
 
+  /** Opt in per state so existing state wizards retain their current navigation. */
+  readonly requireCompleteSection = input(false);
+
   readonly currentSectionIndex = model(0);
 
   readonly saving = input(false);
@@ -135,6 +138,12 @@ export class OfferWizardShellComponent {
 
   private readonly attemptedSectionIds =
     signal<ReadonlySet<string>>(new Set());
+
+  private readonly touchedFieldPaths =
+    signal<ReadonlySet<string>>(new Set());
+
+  private readonly touchedCoBuyerFields =
+    signal<ReadonlySet<'legalName' | 'email' | 'phone'>>(new Set());
 
   private readonly completedSectionIds =
     signal<ReadonlySet<string>>(new Set());
@@ -322,16 +331,30 @@ export class OfferWizardShellComponent {
     if (
       !question.fieldPath ||
       !section ||
-      !this.attemptedSectionIds().has(section.id)
+      (!this.attemptedSectionIds().has(section.id) &&
+        !(this.requireCompleteSection() && this.touchedFieldPaths().has(question.fieldPath)))
     ) {
       return null;
     }
 
-    return this.validationIssues().find(
+    const issue = this.validationIssues().find(
       issue =>
         issue.severity === 'error' &&
         issue.fieldPath === question.fieldPath
-    )?.message ?? null;
+    );
+
+    if (issue) return issue.message;
+    if (question.validation?.required &&
+      isRequiredValueMissing(this.questionValue(question), question)) {
+      return question.validation.message ?? 'Complete this field.';
+    }
+    return null;
+  }
+
+  protected onFieldTouched(question: OfferQuestionDefinition): void {
+    if (question.fieldPath) {
+      this.touchedFieldPaths.set(new Set([...this.touchedFieldPaths(), question.fieldPath]));
+    }
   }
 
 
@@ -366,7 +389,23 @@ export class OfferWizardShellComponent {
 
   protected toggleCoBuyer(enabled: boolean): void {
     this.addingCoBuyer.set(enabled);
+    this.touchedCoBuyerFields.set(new Set());
     this.emitCoBuyer();
+  }
+
+  protected touchCoBuyerField(field: 'legalName' | 'email' | 'phone'): void {
+    this.touchedCoBuyerFields.set(new Set([...this.touchedCoBuyerFields(), field]));
+  }
+
+  protected coBuyerError(field: 'legalName' | 'email' | 'phone'): string | null {
+    if (!this.requireCompleteSection() || !this.addingCoBuyer() ||
+        !this.touchedCoBuyerFields().has(field)) return null;
+    const value = field === 'legalName' ? this.coBuyerLegalName() :
+      field === 'email' ? this.coBuyerEmail() : this.coBuyerPhone();
+    if (!value.trim()) return `Enter the co-buyer’s ${field === 'legalName' ? 'legal name' : field}.`;
+    if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
+      return 'Enter a valid co-buyer email address.';
+    return null;
   }
 
   protected updateCoBuyerField(

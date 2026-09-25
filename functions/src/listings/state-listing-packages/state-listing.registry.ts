@@ -19,6 +19,8 @@ import {
   utahListingPackage,
 } from './utah-listing.package';
 
+import { wisconsinListingPackage } from './wisconsin-listing.package';
+
 const PACKAGES =
   new Map<
     string,
@@ -40,6 +42,10 @@ const PACKAGES =
     [
       'UT',
       utahListingPackage,
+    ],
+    [
+      'WI',
+      wisconsinListingPackage,
     ],
   ]);
 

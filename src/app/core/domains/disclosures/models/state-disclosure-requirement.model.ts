@@ -11,7 +11,9 @@ export type DisclosureDocumentType =
   | 'oklahoma-property-condition-exemption'
   | 'utah-seller-property-condition'
   | 'utah-hoa-governing-documents'
-  | 'utah-methamphetamine-contamination';
+  | 'utah-methamphetamine-contamination'
+  | 'wisconsin-real-estate-condition-report'
+  | 'wisconsin-association-documents';
 
 export interface StateDisclosureRequirement {
   readonly description: string;

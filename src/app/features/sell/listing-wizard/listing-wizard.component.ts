@@ -701,6 +701,10 @@ export class ListingWizardComponent implements OnInit {
         const statePackage =
           getStateListingPackage(stateCode);
 
+        if (stateCode === 'WI' && !propertyDetails.legalDescription.trim()) {
+          throw new Error('Enter the Wisconsin property legal description from the deed or county record.');
+        }
+
         if (
           requiresStateListingField(
             statePackage,

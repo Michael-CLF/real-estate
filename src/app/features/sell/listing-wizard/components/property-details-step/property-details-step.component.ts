@@ -177,6 +177,10 @@ export class PropertyDetailsStepComponent
         .toUpperCase() === 'TX',
   );
 
+  readonly isWisconsinListing = computed(
+    () => this.stateCode().trim().toUpperCase() === 'WI',
+  );
+
   readonly currentYear =
     new Date().getFullYear();
 
@@ -483,6 +487,8 @@ export class PropertyDetailsStepComponent
       );
 
       this.configureStateStatementValidators();
+
+      this.configureLegalDescriptionValidators();
 
       this.configureFuelTankValidators(
         this.form.controls.sellerStatements
@@ -929,6 +935,15 @@ export class PropertyDetailsStepComponent
     fuelTankOwnership.updateValueAndValidity({
       emitEvent: false,
     });
+  }
+
+  private configureLegalDescriptionValidators(): void {
+    const control = this.form.controls.legalDescription;
+    control.setValidators([
+      ...(this.isWisconsinListing() ? [Validators.required, Validators.pattern(/\S/)] : []),
+      Validators.maxLength(5000),
+    ]);
+    control.updateValueAndValidity({ emitEvent: false });
   }
 
   private configureLeaseValidators(

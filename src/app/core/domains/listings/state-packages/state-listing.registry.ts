@@ -14,6 +14,7 @@ import {
   texasListingPackage,
 } from './texas/texas-listing.package';
 import { utahListingPackage } from './utah/utah-listing.package';
+import { wisconsinListingPackage } from './wisconsin/wisconsin-listing.package';
 
 const PACKAGES =
   new Map<string, StateListingPackage>([
@@ -21,6 +22,7 @@ const PACKAGES =
     ['OK', oklahomaListingPackage],
     ['TX', texasListingPackage],
     ['UT', utahListingPackage],
+    ['WI', wisconsinListingPackage],
   ]);
 
 export function getStateListingPackage(

@@ -79,6 +79,37 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
         title: 'Current methamphetamine contamination disclosure',
       },
     ],
+    WI: [
+      {
+        description: 'Upload the completed and seller-signed Wisconsin real estate condition report. The report must contain all information required by current Wis. Stat. § 709.03; upload changes as new versions.',
+        documentType: 'wisconsin-real-estate-condition-report',
+        formCode: 'WIS. STAT. 709.03',
+        officialFormUrl: 'https://docs.legis.wisconsin.gov/document/statutes/709.03',
+        required: true,
+        shortTitle: 'Condition report',
+        sortOrder: 1,
+        title: 'Wisconsin Real Estate Condition Report',
+      },
+      {
+        description: 'For most pre-1978 housing, upload the signed lead disclosure, provide available records, and deliver the EPA pamphlet before the buyer is bound.',
+        documentType: 'lead-based-paint',
+        formCode: 'FED-LEAD',
+        officialFormUrl: 'https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards',
+        required: false,
+        shortTitle: 'Lead disclosure',
+        sortOrder: 2,
+        title: 'Lead-Based Paint Disclosure',
+      },
+      {
+        description: 'If the property is in an owners association, provide any applicable recorded covenants and association documents.',
+        documentType: 'wisconsin-association-documents',
+        formCode: 'WI-ASSOCIATION-DOCS',
+        required: false,
+        shortTitle: 'Association documents',
+        sortOrder: 3,
+        title: 'Wisconsin Association Documents',
+      },
+    ],
     TX: [
       {
         description:

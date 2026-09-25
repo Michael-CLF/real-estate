@@ -161,15 +161,18 @@
     <div class="offer-wizard-shell__co-buyer-form">
       <label>
         <span>Co-buyer legal name</span>
-        <input type="text" [value]="coBuyerLegalName()" (input)="updateCoBuyerField('legalName', $event)" />
+        <input type="text" [value]="coBuyerLegalName()" [attr.aria-invalid]="coBuyerError('legalName') ? 'true' : null" (input)="updateCoBuyerField('legalName', $event)" (blur)="touchCoBuyerField('legalName')" />
+        @if (coBuyerError('legalName'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
       </label>
       <label>
         <span>Co-buyer email</span>
-        <input type="email" [value]="coBuyerEmail()" (input)="updateCoBuyerField('email', $event)" />
+        <input type="email" [value]="coBuyerEmail()" [attr.aria-invalid]="coBuyerError('email') ? 'true' : null" (input)="updateCoBuyerField('email', $event)" (blur)="touchCoBuyerField('email')" />
+        @if (coBuyerError('email'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
       </label>
       <label>
         <span>Co-buyer phone</span>
-        <input type="tel" [value]="coBuyerPhone()" (input)="updateCoBuyerField('phone', $event)" />
+        <input type="tel" [value]="coBuyerPhone()" [attr.aria-invalid]="coBuyerError('phone') ? 'true' : null" (input)="updateCoBuyerField('phone', $event)" (blur)="touchCoBuyerField('phone')" />
+        @if (coBuyerError('phone'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
       </label>
     </div>
     }
@@ -241,7 +244,7 @@
                           question.type === 'multiple_choice'
                         " [question]="question" [value]="questionValue(question)" [disabled]="busy()"
             [validationMessage]="validationMessageFor(question)" (valueChange)="onValueChange(question, $event)"
-            (documentSelected)="onDocumentSelected($event)" />
+            (fieldTouched)="onFieldTouched(question)" (documentSelected)="onDocumentSelected($event)" />
           }
           }
         </div>
@@ -259,7 +262,7 @@
                     question.type === 'multiple_choice'
                   " [question]="question" [value]="questionValue(question)" [disabled]="busy()"
         [validationMessage]="validationMessageFor(question)" (valueChange)="onValueChange(question, $event)"
-        (documentSelected)="onDocumentSelected($event)" />
+        (fieldTouched)="onFieldTouched(question)" (documentSelected)="onDocumentSelected($event)" />
       }
       }
     </div>
@@ -280,7 +283,7 @@
       }
     </div>
 
-    <button type="button" class="offer-wizard-shell__primary" [disabled]="busy()"
+    <button type="button" class="offer-wizard-shell__primary" [disabled]="busy() || (requireCompleteSection() && !reviewing() && !currentSectionValid())"
       (click)="reviewing() ? confirmSubmit() : continueOrSubmit()">
       @if (submitting()) {
       Submitting…

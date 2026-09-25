@@ -207,11 +207,35 @@ export const submitOffer =
             );
           }
 
-          stateContractPackage
-            .validateSubmission({
-              offer,
-              version,
+          stateContractPackage.validateSubmission({ offer, version });
+          const requiredDisclosureTypes = stateContractPackage.requiredListingDisclosures?.({ offer, version }) ?? [];
+          const listingDisclosureSnapshots: Array<{
+            documentType: string;
+            versionId: string;
+            storagePath: string;
+          }> = [];
+          for (const documentType of requiredDisclosureTypes) {
+            const disclosureSnapshot = await transaction.get(
+              listingReference.collection('disclosures').doc(documentType)
+            );
+            const currentDocument = disclosureSnapshot.data()?.['currentDocument'] as Record<string, unknown> | undefined;
+            if (!currentDocument ||
+              currentDocument['listingUid'] !== offer.listingUid ||
+              currentDocument['stateAbbreviation'] !== offer.stateCode ||
+              typeof currentDocument['storagePath'] !== 'string' ||
+              !currentDocument['storagePath']) {
+              throw new HttpsError('failed-precondition', `Upload the ${documentType.replace(/-/g, ' ')} disclosure before submitting.`);
+            }
+            if (typeof currentDocument['versionId'] !== 'string' || !currentDocument['versionId']) {
+              throw new HttpsError('failed-precondition', `The ${documentType.replace(/-/g, ' ')} disclosure has no immutable version.`);
+            }
+            listingDisclosureSnapshots.push({
+              documentType,
+              versionId: currentDocument['versionId'],
+              storagePath: currentDocument['storagePath'],
             });
+          }
+
 
           const now =
             Timestamp.now();
@@ -226,6 +250,8 @@ export const submitOffer =
                 'awaiting_signatures',
 
               immutable: true,
+
+              ...(listingDisclosureSnapshots.length ? { listingDisclosureSnapshots } : {}),
 
               lockedAt: now,
               lockedByUid: userUid,

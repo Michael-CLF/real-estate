@@ -374,6 +374,17 @@ h2 {
   border: 1px solid #aeb9c2;
   border-radius: 0.4rem;
   padding: 0.65rem;
+
+  &[aria-invalid='true'] {
+    border: 2px solid #b42318;
+    outline-color: #b42318;
+  }
+}
+
+.offer-wizard-shell__field-error {
+  color: #b42318;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .offer-wizard-shell__sr-only {

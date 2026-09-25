@@ -6,13 +6,12 @@ import type {
   TexasOfferTerms,
 } from '../state-contracts/texas/models/texas-offer-terms.model';
 
+import type { UtahOfferTerms } from '../state-contracts/utah/models/utah-offer-terms.model';
+import type { WisconsinOfferTerms } from '../state-contracts/wisconsin/models/wisconsin-offer-terms.model';
+
 import type {
   OklahomaOfferTerms,
 } from '../state-contracts/oklahoma/models/oklahoma-offer-terms.model';
-
-import type {
-  UtahOfferTerms,
-} from '../state-contracts/utah/models/utah-offer-terms.model';
 
 
 /*
@@ -91,7 +90,8 @@ export type StateOfferTerms =
   | NorthCarolinaOfferTerms
   | TexasOfferTerms
   | OklahomaOfferTerms
-  | UtahOfferTerms;
+  | UtahOfferTerms
+  | WisconsinOfferTerms;
 
 
 /*

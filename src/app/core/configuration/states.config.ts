@@ -56,6 +56,6 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'VA', isActive: false, name: 'Virginia', slug: 'virginia' },
   { abbreviation: 'WA', isActive: false, name: 'Washington', slug: 'washington' },
   { abbreviation: 'WV', isActive: false, name: 'West Virginia', slug: 'west-virginia' },
-  { abbreviation: 'WI', isActive: false, name: 'Wisconsin', slug: 'wisconsin' },
+  { abbreviation: 'WI', isActive: true, name: 'Wisconsin', slug: 'wisconsin' },
   { abbreviation: 'WY', isActive: false, name: 'Wyoming', slug: 'wyoming' }
 ];

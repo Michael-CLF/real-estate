@@ -1,22 +1,25 @@
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
-import type { UtahContractType, UtahOfferTerms } from '../models/utah-offer-terms.model';
+import type { WisconsinContractType, WisconsinOfferTerms } from '../models/wisconsin-offer-terms.model';
 
-export interface CreateUtahInitialOfferTermsInput {
-  contractType: UtahContractType;
+export interface CreateWisconsinInitialOfferTermsInput {
+  contractType: WisconsinContractType;
   property: OfferPropertySnapshot;
   expiresAt: string;
   timeZone: string;
 }
 
-export function createUtahInitialOfferTerms(
-  input: CreateUtahInitialOfferTermsInput
-): UtahOfferTerms {
-  if (input.contractType !== 'navstreet_utah_residential_sale_2026') {
-    throw new Error('Unsupported Utah agreement.');
+export function createWisconsinInitialOfferTerms(
+  input: CreateWisconsinInitialOfferTermsInput
+): WisconsinOfferTerms {
+  if (input.contractType !== 'navstreet_wisconsin_residential_sale_2026') {
+    throw new Error('Unsupported Wisconsin agreement.');
+  }
+  if (input.property.state !== 'WI' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+    throw new Error('A qualifying Wisconsin residential resale listing is required.');
   }
   return {
-    stateCode: 'UT', contractType: input.contractType,
-    property: { ...input.property, state: 'UT' },
+    stateCode: 'WI', contractType: input.contractType,
+    property: { ...input.property, state: 'WI' },
     legalDescription: input.property.legalDescription ?? '',
     purchase: {
       purchasePriceInCents: input.property.listPriceInCents,
@@ -34,8 +37,8 @@ export function createUtahInitialOfferTerms(
       saleOfBuyersProperty: null, additionalEarnestMoney: null,
     },
     propertyItems: {
-      included: '', excluded: '', waterRightsIncluded: null,
-      excludedWaterRights: '',
+      included: '', excluded: '', fixturesIncluded: null,
+      leasedItemsDescription: '',
     },
     settlement: {
       possession: 'unselected', possessionDelay: 0,
@@ -44,13 +47,13 @@ export function createUtahInitialOfferTerms(
     disclosures: {
       propertyConditionStatus: 'unselected', leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
       hoaDocumentsStatus: 'unselected',
-      sellerReportsCurrentMethContamination: null,
-      methamphetamineContaminationAcknowledged: null,
+      sellerReportsExistingLeases: null,
+      leaseStatementAcknowledged: null,
     },
     additionalTerms: '',
     delivery: {
       expiresAt: input.expiresAt,
-      timeZone: 'America/Denver',
+      timeZone: 'America/Chicago',
       electronicDeliveryAuthorized: null,
     },
   };

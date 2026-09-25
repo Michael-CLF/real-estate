@@ -1,8 +1,8 @@
 @if (terms(); as currentTerms) {
-  <section class="utah-offer-wizard">
+  <section class="wisconsin-offer-wizard">
     @if (contractDefinition(); as contract) {
-      <aside class="utah-offer-wizard__contract">
-        <span>Selected Utah contract</span>
+      <aside class="wisconsin-offer-wizard__contract">
+        <span>Selected Wisconsin contract</span>
         <strong>{{ contract.formName }}</strong>
         <small>
           NavStreet agreement · Version effective {{ contract.effectiveDate }}
@@ -11,9 +11,9 @@
     }
 
     <app-offer-wizard-shell
-      stateName="Utah"
-      title="Utah purchase offer"
-      description="Complete the questions for the selected Utah contract. Your draft will be saved through NavStreet's offer service."
+      stateName="Wisconsin"
+      title="Wisconsin purchase offer"
+      description="Complete the questions for the selected Wisconsin contract. Your draft will be saved through NavStreet's offer service."
       [sections]="sections()"
       [terms]="currentTerms"
       [buyers]="draftBuyers()"
@@ -21,7 +21,6 @@
       [sellers]="sellers()"
       [listingDisclosures]="listingDisclosures()"
       [validationIssues]="validationIssues()"
-      [requireCompleteSection]="true"
       [saving]="saving()"
       [submitting]="submitting()"
       submitLabel="Review and submit offer"
@@ -35,7 +34,7 @@
     />
   </section>
 } @else {
-  <section class="utah-offer-wizard__loading" aria-live="polite">
-    Preparing the Utah residential sale contract from the property listing…
+  <section class="wisconsin-offer-wizard__loading" aria-live="polite">
+    Preparing the Wisconsin residential sale contract from the property listing…
   </section>
 }

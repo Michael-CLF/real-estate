@@ -719,6 +719,13 @@ function validateDraftForPublication(
     );
   }
 
+  if (draft.address.state.trim().toUpperCase() === 'WI' &&
+      !draft.propertyDetails.legalDescription?.trim()) {
+    throw new Error(
+      `Listing draft ${listingUid} has no Wisconsin legal property description.`,
+    );
+  }
+
   if (draft.pricing?.listPrice === undefined) {
     throw new Error(`Listing draft ${listingUid} has no listing price.`);
   }

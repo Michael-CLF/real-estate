@@ -243,6 +243,27 @@
       </fieldset>
     }
 
+    @if (isWisconsinListing()) {
+      <fieldset class="seller-statements">
+        <legend>Wisconsin legal property description</legend>
+        <p class="seller-statements__description">
+          Copy the complete legal description from the deed or county record.
+          Buyers will see this seller-provided information in their offer.
+        </p>
+        <div class="field description-field">
+          <label for="legalDescription">Complete legal description</label>
+          <textarea id="legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"
+            [attr.aria-invalid]="form.controls.legalDescription.touched && form.controls.legalDescription.invalid ? 'true' : null"></textarea>
+          @if (form.controls.legalDescription.touched && (form.controls.legalDescription.hasError('required') || form.controls.legalDescription.hasError('pattern'))) {
+            <p class="field-error">Enter the legal description from the deed or county record.</p>
+          }
+          @if (form.controls.legalDescription.touched && form.controls.legalDescription.hasError('maxlength')) {
+            <p class="field-error">Legal description cannot exceed 5,000 characters.</p>
+          }
+        </div>
+      </fieldset>
+    }
+
     <div formGroupName="hoa">
       <div class="three-column">
         <div class="field">
