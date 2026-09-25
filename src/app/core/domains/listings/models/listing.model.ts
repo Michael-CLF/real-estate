@@ -511,21 +511,27 @@ export type ListingSellerOwnershipStatus =
 export type ListingFuelTankOwnership = 'owned' | 'leased';
 
 export interface ListingSellerStatements {
-  ownershipStatus: ListingSellerOwnershipStatus;
+  stateCode?: string;
+  schemaVersion?: number;
 
-  leadBasedPaintApplies: boolean;
-  leadBasedPaintDisclosureDocumentUid?: string;
+  ownershipStatus?:
+    ListingSellerOwnershipStatus;
 
-  ownersAssociationApplies: boolean;
+  leadBasedPaintApplies?: boolean;
+  leadBasedPaintDisclosureDocumentUid?:
+    string;
+
+  ownersAssociationApplies?: boolean;
   ownersAssociationName?: string;
   ownersAssociationDuesInCents?: number;
   ownersAssociationDuesFrequency?: string;
   ownersAssociationContact?: string;
 
-  fuelTankPresent: boolean;
-  fuelTankOwnership?: ListingFuelTankOwnership;
+  fuelTankPresent?: boolean;
+  fuelTankOwnership?:
+    ListingFuelTankOwnership;
 
-  leasesExist: boolean;
+  leasesExist?: boolean;
   leaseAddendumDocumentUid?: string;
 
   residentialLeasesExist?: boolean;

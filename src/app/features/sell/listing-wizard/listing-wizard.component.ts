@@ -50,6 +50,14 @@ import { ReviewStepComponent } from './components/review-step/review-step.compon
 
 import { ListingPhotoStorageService } from '../../../core/infrastructure/listings/listing-photo-storage.service';
 
+import {
+  getStateListingPackage,
+} from '../../../core/domains/listings/state-packages/state-listing.registry';
+
+import {
+  requiresStateListingField,
+} from '../../../core/domains/listings/state-packages/state-listing-package';
+
 interface WizardStep {
   number: number;
   label: string;
@@ -269,26 +277,26 @@ export class ListingWizardComponent implements OnInit {
 
         hoa: draft.hoa
           ? {
-              hasHoa: draft.hoa.hasHoa,
+            hasHoa: draft.hoa.hasHoa,
 
-              associationName: draft.hoa.associationName ?? '',
+            associationName: draft.hoa.associationName ?? '',
 
-              managementCompany: draft.hoa.managementCompany ?? '',
+            managementCompany: draft.hoa.managementCompany ?? '',
 
-              contactPhone: draft.hoa.contactPhone ?? '',
+            contactPhone: draft.hoa.contactPhone ?? '',
 
-              feeAmount: draft.hoa.feeAmount ?? null,
+            feeAmount: draft.hoa.feeAmount ?? null,
 
-              feeFrequency: draft.hoa.feeFrequency ?? '',
-            }
+            feeFrequency: draft.hoa.feeFrequency ?? '',
+          }
           : {
-              hasHoa: null,
-              associationName: '',
-              managementCompany: '',
-              contactPhone: '',
-              feeAmount: null,
-              feeFrequency: '',
-            },
+            hasHoa: null,
+            associationName: '',
+            managementCompany: '',
+            contactPhone: '',
+            feeAmount: null,
+            feeFrequency: '',
+          },
 
         sellerStatements: {
           ownershipStatus: draft.sellerStatements?.ownershipStatus ?? '',
@@ -341,10 +349,10 @@ export class ListingWizardComponent implements OnInit {
 
       const hasLegacyFeatures = legacyFeatures
         ? Object.entries(legacyFeatures).some(
-            ([key, value]) =>
-              value === true ||
-              (key === 'evChargingStatus' && value !== 'none'),
-          )
+          ([key, value]) =>
+            value === true ||
+            (key === 'evChargingStatus' && value !== 'none'),
+        )
         : false;
 
       this.propertyFeaturesData.set({
@@ -679,52 +687,108 @@ export class ListingWizardComponent implements OnInit {
           throw new Error('Please complete all required property details.');
         }
 
-        const statements = propertyDetails.sellerStatements;
+        const statements =
+          propertyDetails.sellerStatements;
 
-        if (!statements.ownershipStatus) {
+        const stateCode =
+          this.addressData()
+            ?.state
+            ?.trim()
+            .toUpperCase() ?? '';
+
+        const statePackage =
+          getStateListingPackage(stateCode);
+
+        if (
+          requiresStateListingField(
+            statePackage,
+            'ownershipStatus',
+          ) &&
+          !statements.ownershipStatus
+        ) {
           throw new Error(
             'Please select how long the seller has owned the property.',
           );
         }
 
-        if (statements.leadBasedPaintApplies === null) {
-          throw new Error('Please complete the lead-based-paint statement.');
+        if (
+          requiresStateListingField(
+            statePackage,
+            'leadBasedPaintApplies',
+          ) &&
+          statements.leadBasedPaintApplies === null
+        ) {
+          throw new Error(
+            'Please complete the lead-based-paint statement.',
+          );
         }
 
-        if (statements.ownersAssociationApplies === null) {
+        if (
+          requiresStateListingField(
+            statePackage,
+            'ownersAssociationApplies',
+          ) &&
+          statements.ownersAssociationApplies ===
+          null
+        ) {
           throw new Error(
             'Please specify whether an owners association applies.',
           );
         }
 
-        if (statements.fuelTankPresent === null) {
-          throw new Error('Please specify whether a fuel tank is present.');
+        if (
+          requiresStateListingField(
+            statePackage,
+            'fuelTankPresent',
+          ) &&
+          statements.fuelTankPresent === null
+        ) {
+          throw new Error(
+            'Please specify whether a fuel tank is present.',
+          );
         }
 
-        if (statements.fuelTankPresent && !statements.fuelTankOwnership) {
+        if (
+          statements.fuelTankPresent === true &&
+          !statements.fuelTankOwnership
+        ) {
           throw new Error(
             'Please specify whether the fuel tank is owned or leased.',
           );
         }
 
         const isTexasListing =
-          this.addressData()?.state?.trim().toUpperCase() === 'TX';
+          requiresStateListingField(
+            statePackage,
+            'texasLeaseCategories',
+          );
 
         if (
           isTexasListing &&
           (
-            statements.residentialLeasesExist === null ||
-            statements.fixtureLeasesExist === null ||
-            statements.naturalResourceLeasesExist === null
+            statements.residentialLeasesExist ===
+            null ||
+            statements.fixtureLeasesExist ===
+            null ||
+            statements.naturalResourceLeasesExist ===
+            null
           )
         ) {
           throw new Error(
-            'Please complete all three Texas lease statements.'
+            'Please complete all three Texas lease statements.',
           );
         }
 
-        if (!isTexasListing && statements.leasesExist === null) {
-          throw new Error('Please specify whether any leases exist.');
+        if (
+          requiresStateListingField(
+            statePackage,
+            'generalLeasesExist',
+          ) &&
+          statements.leasesExist === null
+        ) {
+          throw new Error(
+            'Please specify whether any leases exist.',
+          );
         }
 
         const fuelTankOwnership =
@@ -755,114 +819,189 @@ export class ListingWizardComponent implements OnInit {
           .filter((value) => value.length > 0)
           .join(' · ');
 
+
+
         const hoaDetails: ListingHoa = {
           hasHoa:
-            statements.ownersAssociationApplies,
+            statements.ownersAssociationApplies ===
+            true,
 
           includedItems: [],
 
           ...(associationName
             ? {
-                associationName,
-              }
+              associationName,
+            }
             : {}),
 
           ...(managementCompany
             ? {
-                managementCompany,
-              }
+              managementCompany,
+            }
             : {}),
 
           ...(contactPhone
             ? {
-                contactPhone,
-              }
+              contactPhone,
+            }
             : {}),
 
           ...(hoa.feeAmount !== null
             ? {
-                feeAmount: hoa.feeAmount,
-              }
+              feeAmount: hoa.feeAmount,
+            }
             : {}),
 
           ...(hoa.feeFrequency
             ? {
-                feeFrequency: hoa.feeFrequency,
-              }
+              feeFrequency:
+                hoa.feeFrequency,
+            }
             : {}),
         };
 
-        const sellerStatements: ListingSellerStatements = {
-          ownershipStatus: statements.ownershipStatus,
+        const sellerStatements:
+          ListingSellerStatements = {
+          stateCode,
+          schemaVersion: 1,
 
-          leadBasedPaintApplies: statements.leadBasedPaintApplies,
+          ...(requiresStateListingField(
+            statePackage,
+            'ownershipStatus',
+          )
+            ? {
+              ownershipStatus:
+                statements.ownershipStatus ||
+                undefined,
+            }
+            : {}),
 
-          ownersAssociationApplies:
-            statements.ownersAssociationApplies,
+          ...(requiresStateListingField(
+            statePackage,
+            'leadBasedPaintApplies',
+          )
+            ? {
+              leadBasedPaintApplies:
+                statements
+                  .leadBasedPaintApplies ===
+                true,
+            }
+            : {}),
+
+          ...(requiresStateListingField(
+            statePackage,
+            'ownersAssociationApplies',
+          )
+            ? {
+              ownersAssociationApplies:
+                statements
+                  .ownersAssociationApplies ===
+                true,
+            }
+            : {}),
 
           ...(associationName
             ? {
-                ownersAssociationName:
-                  associationName,
-              }
+              ownersAssociationName:
+                associationName,
+            }
             : {}),
 
           ...(hoa.feeAmount !== null
             ? {
-                ownersAssociationDuesInCents:
-                  Math.round(
-                    hoa.feeAmount * 100,
-                  ),
-              }
+              ownersAssociationDuesInCents:
+                Math.round(
+                  hoa.feeAmount * 100,
+                ),
+            }
             : {}),
 
           ...(hoa.feeFrequency
             ? {
-                ownersAssociationDuesFrequency:
-                  hoa.feeFrequency,
-              }
+              ownersAssociationDuesFrequency:
+                hoa.feeFrequency,
+            }
             : {}),
 
           ...(ownersAssociationContact
             ? {
-                ownersAssociationContact,
-              }
+              ownersAssociationContact,
+            }
             : {}),
 
-          fuelTankPresent: statements.fuelTankPresent,
-
-          ...(statements.fuelTankPresent
+          ...(requiresStateListingField(
+            statePackage,
+            'fuelTankPresent',
+          )
             ? {
-                fuelTankOwnership,
-              }
+              fuelTankPresent:
+                statements.fuelTankPresent ===
+                true,
+            }
             : {}),
 
-          leasesExist: isTexasListing
-            ? statements.residentialLeasesExist === true ||
-              statements.fixtureLeasesExist === true ||
-              statements.naturalResourceLeasesExist === true
-            : statements.leasesExist === true,
+          ...(statements.fuelTankPresent ===
+            true
+            ? {
+              fuelTankOwnership,
+            }
+            : {}),
+
+          ...(isTexasListing ||
+            requiresStateListingField(
+              statePackage,
+              'generalLeasesExist',
+            )
+            ? {
+              leasesExist:
+                isTexasListing
+                  ? statements
+                    .residentialLeasesExist ===
+                  true ||
+                  statements
+                    .fixtureLeasesExist ===
+                  true ||
+                  statements
+                    .naturalResourceLeasesExist ===
+                  true
+                  : statements.leasesExist ===
+                  true,
+            }
+            : {}),
 
           ...(isTexasListing
             ? {
-                residentialLeasesExist:
-                  statements.residentialLeasesExist === true,
-                fixtureLeasesExist:
-                  statements.fixtureLeasesExist === true,
-                naturalResourceLeasesExist:
-                  statements.naturalResourceLeasesExist === true,
-              }
+              residentialLeasesExist:
+                statements
+                  .residentialLeasesExist ===
+                true,
+
+              fixtureLeasesExist:
+                statements.fixtureLeasesExist ===
+                true,
+
+              naturalResourceLeasesExist:
+                statements
+                  .naturalResourceLeasesExist ===
+                true,
+            }
             : {}),
 
           ...(statements.additionalSellerIncluded
             ? {
               additionalSeller: {
                 legalName:
-                  statements.additionalSellerLegalName.trim(),
+                  statements.additionalSellerLegalName
+                    .trim(),
+
                 email:
-                  statements.additionalSellerEmail.trim().toLowerCase(),
+                  statements.additionalSellerEmail
+                    .trim()
+                    .toLowerCase(),
+
                 phone:
-                  statements.additionalSellerPhone.trim(),
+                  statements.additionalSellerPhone
+                    .trim(),
               },
             }
             : {}),

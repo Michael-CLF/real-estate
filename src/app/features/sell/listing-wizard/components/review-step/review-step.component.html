@@ -22,7 +22,7 @@
       </p>
 
       @if (address()?.county) {
-        <p class="review-muted">{{ address()!.county }} County</p>
+      <p class="review-muted">{{ address()!.county }} County</p>
       }
     </div>
   </div>
@@ -78,47 +78,57 @@
 
           <span class="review-detail__value">
             @if (
-              propertyDetails()?.lotSize !== null &&
-              propertyDetails()?.lotSize !== undefined
+            propertyDetails()?.lotSize !== null &&
+            propertyDetails()?.lotSize !== undefined
             ) {
-              {{ propertyDetails()!.lotSize | number: '1.0-2' }}
+            {{ propertyDetails()!.lotSize | number: '1.0-2' }}
 
-              @if (propertyDetails()!.lotSizeUnit === 'square_feet') {
-                sq. ft.
-              } @else {
-                acres
-              }
+            @if (propertyDetails()!.lotSizeUnit === 'square_feet') {
+            sq. ft.
             } @else {
-              —
+            acres
+            }
+            } @else {
+            —
             }
           </span>
         </div>
       </div>
 
       @if (propertyDetails()?.description) {
-        <div class="review-description">
-          <span class="review-detail__label">Property Description</span>
-          <p>{{ propertyDetails()!.description }}</p>
-        </div>
+      <div class="review-description">
+        <span class="review-detail__label">Property Description</span>
+        <p>{{ propertyDetails()!.description }}</p>
+      </div>
       }
 
       <div class="review-subsection">
         <h4>Seller Statements and Representations</h4>
 
         <div class="review-details-grid">
+          @if (requires('ownershipStatus')) {
           <div class="review-detail">
-            <span class="review-detail__label">Ownership</span>
+            <span class="review-detail__label">
+              Ownership
+            </span>
+
             <span class="review-detail__value">
               {{ formattedOwnershipStatus }}
             </span>
           </div>
+          }
 
+          @if (requires('leadBasedPaintApplies')) {
           <div class="review-detail">
-            <span class="review-detail__label">Lead-Based Paint</span>
+            <span class="review-detail__label">
+              Lead-Based Paint
+            </span>
+
             <span class="review-detail__value">
               {{ formattedLeadBasedPaintStatement }}
             </span>
           </div>
+          }
 
           <div class="review-detail">
             <span class="review-detail__label">Owners' Association</span>
@@ -127,41 +137,45 @@
             </span>
           </div>
 
+          @if (requires('fuelTankPresent')) {
           <div class="review-detail">
-            <span class="review-detail__label">Fuel Tank</span>
+            <span class="review-detail__label">
+              Fuel Tank
+            </span>
+
             <span class="review-detail__value">
               {{ formattedFuelTankStatement }}
             </span>
           </div>
-
+          }
           @if (isTexasListing) {
-            <div class="review-detail">
-              <span class="review-detail__label">Residential Leases</span>
-              <span class="review-detail__value">
-                {{ formatTexasLeaseStatement('residential') }}
-              </span>
-            </div>
+          <div class="review-detail">
+            <span class="review-detail__label">Residential Leases</span>
+            <span class="review-detail__value">
+              {{ formatTexasLeaseStatement('residential') }}
+            </span>
+          </div>
 
-            <div class="review-detail">
-              <span class="review-detail__label">Fixture Leases</span>
-              <span class="review-detail__value">
-                {{ formatTexasLeaseStatement('fixture') }}
-              </span>
-            </div>
+          <div class="review-detail">
+            <span class="review-detail__label">Fixture Leases</span>
+            <span class="review-detail__value">
+              {{ formatTexasLeaseStatement('fixture') }}
+            </span>
+          </div>
 
-            <div class="review-detail">
-              <span class="review-detail__label">Natural-Resource Leases</span>
-              <span class="review-detail__value">
-                {{ formatTexasLeaseStatement('naturalResource') }}
-              </span>
-            </div>
-          } @else {
-            <div class="review-detail">
-              <span class="review-detail__label">Existing Leases</span>
-              <span class="review-detail__value">
-                {{ formattedExistingLeasesStatement }}
-              </span>
-            </div>
+          <div class="review-detail">
+            <span class="review-detail__label">Natural-Resource Leases</span>
+            <span class="review-detail__value">
+              {{ formatTexasLeaseStatement('naturalResource') }}
+            </span>
+          </div>
+          } @else if (requires('generalLeasesExist')) {
+          <div class="review-detail">
+            <span class="review-detail__label">Existing Leases</span>
+            <span class="review-detail__value">
+              {{ formattedExistingLeasesStatement }}
+            </span>
+          </div>
           }
         </div>
       </div>
@@ -179,17 +193,17 @@
 
     <div class="review-section__content">
       @if (selectedFeatures.length > 0) {
-        <div class="review-features">
-          @for (feature of selectedFeatures; track feature) {
-            <span class="review-feature">
-              {{ feature }}
-            </span>
-          }
-        </div>
+      <div class="review-features">
+        @for (feature of selectedFeatures; track feature) {
+        <span class="review-feature">
+          {{ feature }}
+        </span>
+        }
+      </div>
       } @else {
-        <p class="review-muted">
-          No additional property details or amenities were selected.
-        </p>
+      <p class="review-muted">
+        No additional property details or amenities were selected.
+      </p>
       }
     </div>
   </div>
@@ -205,24 +219,21 @@
 
     <div class="review-section__content">
       @if (photos().length > 0) {
-        <div class="review-photos">
-          @for (photo of photos(); track photo.id) {
-            <div
-              class="review-photo"
-              [class.review-photo--primary]="photo.isPrimary"
-            >
-              <img [src]="photo.thumbnail.previewUrl" alt="Property photo" />
+      <div class="review-photos">
+        @for (photo of photos(); track photo.id) {
+        <div class="review-photo" [class.review-photo--primary]="photo.isPrimary">
+          <img [src]="photo.thumbnail.previewUrl" alt="Property photo" />
 
-              @if (photo.isPrimary) {
-                <span class="review-photo__badge"> Primary Photo </span>
-              }
-            </div>
+          @if (photo.isPrimary) {
+          <span class="review-photo__badge"> Primary Photo </span>
           }
         </div>
+        }
+      </div>
 
-        <p class="review-muted">{{ photos().length }} of 20 photos added</p>
+      <p class="review-muted">{{ photos().length }} of 20 photos added</p>
       } @else {
-        <p class="review-muted">No photos added.</p>
+      <p class="review-muted">No photos added.</p>
       }
     </div>
   </div>
@@ -281,16 +292,12 @@
           </p>
         </div>
 
-        <button
-          type="button"
-          class="featured-upgrade__button"
-          [class.featured-upgrade__button--selected]="featuredListing()"
-          (click)="toggleFeaturedListing()"
-        >
+        <button type="button" class="featured-upgrade__button"
+          [class.featured-upgrade__button--selected]="featuredListing()" (click)="toggleFeaturedListing()">
           @if (featuredListing()) {
-            ✓ Featured Listing Added
+          ✓ Featured Listing Added
           } @else {
-            Add Featured Listing
+          Add Featured Listing
           }
         </button>
       </div>
@@ -300,12 +307,8 @@
   <div class="review-section review-section--certification">
     <div class="review-section__content">
       <label class="certification">
-        <input
-          #certificationCheckbox
-          type="checkbox"
-          [checked]="certificationAccepted()"
-          (change)="onCertificationChange(certificationCheckbox.checked)"
-        />
+        <input #certificationCheckbox type="checkbox" [checked]="certificationAccepted()"
+          (change)="onCertificationChange(certificationCheckbox.checked)" />
 
         <span class="certification__checkmark"></span>
 

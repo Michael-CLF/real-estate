@@ -19,6 +19,15 @@ import { ListingPhoto } from '../photos-step/photos-step.component';
 
 import { PricingFormValue } from '../pricing-step/pricing-step.component';
 
+import {
+  getStateListingPackage,
+} from '../../../../../core/domains/listings/state-packages/state-listing.registry';
+
+import {
+  requiresStateListingField,
+  StateListingField,
+} from '../../../../../core/domains/listings/state-packages/state-listing-package';
+
 @Component({
   selector: 'app-review-step',
   standalone: true,
@@ -243,9 +252,9 @@ export class ReviewStepComponent {
       hoa.feeAmount === null
         ? ''
         : new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(hoa.feeAmount);
+          style: 'currency',
+          currency: 'USD',
+        }).format(hoa.feeAmount);
 
     const details = [
       hoa.associationName,
@@ -293,6 +302,18 @@ export class ReviewStepComponent {
 
   protected get isTexasListing(): boolean {
     return this.address()?.state.trim().toUpperCase() === 'TX';
+  }
+
+  protected requires(
+    field: StateListingField,
+  ): boolean {
+    const stateCode =
+      this.address()?.state ?? '';
+
+    return requiresStateListingField(
+      getStateListingPackage(stateCode),
+      field,
+    );
   }
 
   protected formatTexasLeaseStatement(

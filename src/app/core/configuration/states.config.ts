@@ -43,7 +43,7 @@ export const STATES: readonly StateConfiguration[] = [
 
   { abbreviation: 'ND', isActive: false, name: 'North Dakota', slug: 'north-dakota' },
   { abbreviation: 'OH', isActive: false, name: 'Ohio', slug: 'ohio' },
-  { abbreviation: 'OK', isActive: false, name: 'Oklahoma', slug: 'oklahoma' },
+  { abbreviation: 'OK', isActive: true, name: 'Oklahoma', slug: 'oklahoma' },
   { abbreviation: 'OR', isActive: false, name: 'Oregon', slug: 'oregon' },
   { abbreviation: 'PA', isActive: false, name: 'Pennsylvania', slug: 'pennsylvania' },
   { abbreviation: 'RI', isActive: false, name: 'Rhode Island', slug: 'rhode-island' },

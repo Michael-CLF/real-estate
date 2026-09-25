@@ -10,6 +10,10 @@ import {
   texasStateContractPackage,
 } from './texas/texas-state-contract.package';
 
+import {
+  oklahomaStateContractPackage,
+} from './oklahoma/oklahoma-state-contract.package';
+
 import type {
   StateAgreementTemplate,
   StateContractPackage,
@@ -55,6 +59,13 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
         .stateCode,
 
       texasStateContractPackage,
+    ],
+
+    [
+      oklahomaStateContractPackage
+        .stateCode,
+
+      oklahomaStateContractPackage,
     ],
   ]);
 

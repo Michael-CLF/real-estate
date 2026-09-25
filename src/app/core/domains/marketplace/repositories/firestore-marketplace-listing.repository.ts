@@ -26,58 +26,58 @@ import {
 
 const STATE_NAME_BY_ABBREVIATION:
     Readonly<Record<string, string>> = {
-        AL: 'Alabama',
-        AK: 'Alaska',
-        AZ: 'Arizona',
-        AR: 'Arkansas',
-        CA: 'California',
-        CO: 'Colorado',
-        CT: 'Connecticut',
-        DE: 'Delaware',
-        FL: 'Florida',
-        GA: 'Georgia',
-        HI: 'Hawaii',
-        ID: 'Idaho',
-        IL: 'Illinois',
-        IN: 'Indiana',
-        IA: 'Iowa',
-        KS: 'Kansas',
-        KY: 'Kentucky',
-        LA: 'Louisiana',
-        ME: 'Maine',
-        MD: 'Maryland',
-        MA: 'Massachusetts',
-        MI: 'Michigan',
-        MN: 'Minnesota',
-        MS: 'Mississippi',
-        MO: 'Missouri',
-        MT: 'Montana',
-        NE: 'Nebraska',
-        NV: 'Nevada',
-        NH: 'New Hampshire',
-        NJ: 'New Jersey',
-        NM: 'New Mexico',
-        NY: 'New York',
-        NC: 'North Carolina',
-        ND: 'North Dakota',
-        OH: 'Ohio',
-        OK: 'Oklahoma',
-        OR: 'Oregon',
-        PA: 'Pennsylvania',
-        RI: 'Rhode Island',
-        SC: 'South Carolina',
-        SD: 'South Dakota',
-        TN: 'Tennessee',
-        TX: 'Texas',
-        UT: 'Utah',
-        VT: 'Vermont',
-        VA: 'Virginia',
-        WA: 'Washington',
-        WV: 'West Virginia',
-        WI: 'Wisconsin',
-        WY: 'Wyoming',
-        DC: 'District of Columbia'
-    };
+    AL: 'Alabama',
+    AK: 'Alaska',
+    AZ: 'Arizona',
+    AR: 'Arkansas',
+    CA: 'California',
+    CO: 'Colorado',
+    CT: 'Connecticut',
+    DE: 'Delaware',
+    FL: 'Florida',
+    GA: 'Georgia',
+    HI: 'Hawaii',
+    ID: 'Idaho',
+    IL: 'Illinois',
+    IN: 'Indiana',
+    IA: 'Iowa',
+    KS: 'Kansas',
+    KY: 'Kentucky',
+    LA: 'Louisiana',
+    ME: 'Maine',
+    MD: 'Maryland',
+    MA: 'Massachusetts',
+    MI: 'Michigan',
+    MN: 'Minnesota',
+    MS: 'Mississippi',
+    MO: 'Missouri',
+    MT: 'Montana',
+    NE: 'Nebraska',
+    NV: 'Nevada',
+    NH: 'New Hampshire',
+    NJ: 'New Jersey',
+    NM: 'New Mexico',
+    NY: 'New York',
+    NC: 'North Carolina',
+    ND: 'North Dakota',
+    OH: 'Ohio',
+    OK: 'Oklahoma',
+    OR: 'Oregon',
+    PA: 'Pennsylvania',
+    RI: 'Rhode Island',
+    SC: 'South Carolina',
+    SD: 'South Dakota',
+    TN: 'Tennessee',
+    TX: 'Texas',
+    UT: 'Utah',
+    VT: 'Vermont',
+    VA: 'Virginia',
+    WA: 'Washington',
+    WV: 'West Virginia',
+    WI: 'Wisconsin',
+    WY: 'Wyoming',
+    DC: 'District of Columbia'
+};
 
 @Injectable()
 export class FirestoreMarketplaceListingRepository
@@ -417,6 +417,11 @@ export class FirestoreMarketplaceListingRepository
                 data['hoa']
             );
 
+        const parcelAndTaxesData =
+            this.readRecord(
+                data['parcelAndTaxes'],
+            );
+
         const enhancements =
             this.readEnhancements(
                 data['enhancements']
@@ -578,6 +583,23 @@ export class FirestoreMarketplaceListingRepository
             yearBuilt:
                 this.readNumber(
                     data['yearBuilt']
+                ),
+
+            annualPropertyTax:
+                this.readNumber(
+                    parcelAndTaxesData?.[
+                    'annualPropertyTax'
+                    ],
+                ) ??
+                this.readNumber(
+                    data['annualPropertyTax'],
+                ),
+
+            annualHomeownersInsurance:
+                this.readNumber(
+                    data[
+                    'annualHomeownersInsurance'
+                    ],
                 ),
 
             hoa: hoaData
@@ -1256,7 +1278,7 @@ export class FirestoreMarketplaceListingRepository
 
         if (
             STATE_NAME_BY_ABBREVIATION[
-                possibleAbbreviation
+            possibleAbbreviation
             ]
         ) {
             return possibleAbbreviation;
@@ -1279,7 +1301,7 @@ export class FirestoreMarketplaceListingRepository
         const normalizedState = state.trim();
         const stateName =
             STATE_NAME_BY_ABBREVIATION[
-                normalizedState.toUpperCase()
+            normalizedState.toUpperCase()
             ];
 
         if (stateName) {

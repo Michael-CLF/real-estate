@@ -12,6 +12,10 @@ import { SENDGRID_API_KEY } from '../authentication/otp/otp-config';
 
 import { sendListingPublishedEmailIfNeeded } from '../listings/listing-publication-email.service';
 
+import {
+  validateStateSellerStatements,
+} from '../listings/state-listing-packages/state-listing.registry';
+
 if (getApps().length === 0) {
   initializeApp();
 }
@@ -87,8 +91,10 @@ interface ListingDraftDocument {
   featuredListing?: boolean;
 
   sellerStatements?: {
-    ownershipStatus?: string;
+    stateCode?: string;
+    schemaVersion?: number;
 
+    ownershipStatus?: string;
     leadBasedPaintApplies?: boolean;
     leadBasedPaintDisclosureDocumentUid?: string;
 
@@ -469,28 +475,28 @@ async function publishPaidListing(
       listingDocument,
       'lot',
       draft.propertyDetails?.lotNumber ??
-        draft.parcelAndTaxes?.lotNumber,
+      draft.parcelAndTaxes?.lotNumber,
     );
 
     addOptionalField(
       listingDocument,
       'block',
       draft.propertyDetails?.blockNumber ??
-        draft.parcelAndTaxes?.blockNumber,
+      draft.parcelAndTaxes?.blockNumber,
     );
 
     addOptionalField(
       listingDocument,
       'subdivisionName',
       draft.propertyDetails?.subdivisionName ??
-        draft.parcelAndTaxes?.subdivisionName,
+      draft.parcelAndTaxes?.subdivisionName,
     );
 
     addOptionalField(
       listingDocument,
       'legalDescription',
       draft.propertyDetails?.legalDescription ??
-        draft.parcelAndTaxes?.legalDescription,
+      draft.parcelAndTaxes?.legalDescription,
     );
 
     addOptionalField(
@@ -721,67 +727,22 @@ function validateDraftForPublication(
 
   if (!sellerStatements) {
     throw new Error(
+      `Listing draft ${listingUid} has no seller statements.`,
+    );
+  }
+
+  if (!sellerStatements) {
+    throw new Error(
       `Listing draft ${listingUid} has incomplete seller statements.`,
     );
   }
 
-  if (
-    sellerStatements.ownershipStatus !== 'owned_at_least_one_year' &&
-    sellerStatements.ownershipStatus !== 'owned_less_than_one_year' &&
-    sellerStatements.ownershipStatus !== 'does_not_yet_own'
-  ) {
-    throw new Error(
-      `Listing draft ${listingUid} has no valid ownership statement.`,
-    );
-  }
-
-  if (typeof sellerStatements.leadBasedPaintApplies !== 'boolean') {
-    throw new Error(
-      `Listing draft ${listingUid} has no lead-based-paint statement.`,
-    );
-  }
-
-  if (typeof sellerStatements.ownersAssociationApplies !== 'boolean') {
-    throw new Error(
-      `Listing draft ${listingUid} has no owners-association statement.`,
-    );
-  }
-
-  if (typeof sellerStatements.fuelTankPresent !== 'boolean') {
-    throw new Error(`Listing draft ${listingUid} has no fuel-tank statement.`);
-  }
-
-  if (
-    sellerStatements.fuelTankPresent &&
-    sellerStatements.fuelTankOwnership !== 'owned' &&
-    sellerStatements.fuelTankOwnership !== 'leased'
-  ) {
-    throw new Error(
-      `Listing draft ${listingUid} has no valid fuel-tank ownership statement.`,
-    );
-  }
-
-  const isTexasListing =
-    draft.address.state.trim().toUpperCase() === 'TX';
-
-  if (
-    isTexasListing &&
-    (
-      typeof sellerStatements.residentialLeasesExist !== 'boolean' ||
-      typeof sellerStatements.fixtureLeasesExist !== 'boolean' ||
-      typeof sellerStatements.naturalResourceLeasesExist !== 'boolean'
-    )
-  ) {
-    throw new Error(
-      `Listing draft ${listingUid} has incomplete Texas lease statements.`,
-    );
-  }
-
-  if (!isTexasListing && typeof sellerStatements.leasesExist !== 'boolean') {
-    throw new Error(
-      `Listing draft ${listingUid} has no existing-leases statement.`,
-    );
-  }
+  validateStateSellerStatements(
+    listingUid,
+    draft.address.state,
+    sellerStatements as unknown as
+    Record<string, unknown>,
+  );
 
   const additionalSeller = sellerStatements.additionalSeller;
 
@@ -1092,8 +1053,8 @@ function getStripeResourceId(
   resource:
     | string
     | {
-        id: string;
-      }
+      id: string;
+    }
     | null
     | undefined,
 ): string {

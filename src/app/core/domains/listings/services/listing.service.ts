@@ -32,6 +32,14 @@ import {
   PublishedListingChanges,
 } from '../repositories/listing.repository';
 
+import {
+  getStateListingPackage,
+} from '../state-packages/state-listing.registry';
+
+import {
+  requiresStateListingField,
+} from '../state-packages/state-listing-package';
+
 export type SaveAddressStepInput = ListingDraftAddress;
 
 export type SavePropertyDetailsStepInput = ListingDraftPropertyDetails;
@@ -622,19 +630,19 @@ export class ListingService {
       value: unknown;
       message: string;
     }> = [
-      {
-        value: draft.address,
-        message: 'The listing address is incomplete.',
-      },
-      {
-        value: draft.propertyDetails,
-        message: 'The property details are incomplete.',
-      },
-      {
-        value: draft.enhancements ?? draft.features,
-        message: 'The property enhancements are incomplete.',
-      },
-    ];
+        {
+          value: draft.address,
+          message: 'The listing address is incomplete.',
+        },
+        {
+          value: draft.propertyDetails,
+          message: 'The property details are incomplete.',
+        },
+        {
+          value: draft.enhancements ?? draft.features,
+          message: 'The property enhancements are incomplete.',
+        },
+      ];
 
     const missingSection = requiredSections.find((section) => !section.value);
 
@@ -658,7 +666,9 @@ export class ListingService {
   }
 
   private validateSellerStatements(
-    sellerStatements: ListingSellerStatements | undefined,
+    sellerStatements:
+      | ListingSellerStatements
+      | undefined,
   ): ListingSellerStatements {
     if (!sellerStatements) {
       throw new Error(
@@ -666,48 +676,128 @@ export class ListingService {
       );
     }
 
-    if (
-      sellerStatements.ownershipStatus !== 'owned_at_least_one_year' &&
-      sellerStatements.ownershipStatus !== 'owned_less_than_one_year' &&
-      sellerStatements.ownershipStatus !== 'does_not_yet_own'
-    ) {
-      throw new Error('Select how long the seller has owned the property.');
-    }
-
-    if (typeof sellerStatements.leadBasedPaintApplies !== 'boolean') {
-      throw new Error('Complete the lead-based-paint statement.');
-    }
-
-    if (typeof sellerStatements.ownersAssociationApplies !== 'boolean') {
-      throw new Error('Specify whether an owners association applies.');
-    }
-
-    if (typeof sellerStatements.fuelTankPresent !== 'boolean') {
-      throw new Error('Specify whether a fuel tank is present.');
-    }
+    const statePackage =
+      getStateListingPackage(
+        sellerStatements.stateCode ?? 'NC',
+      );
 
     if (
-      sellerStatements.fuelTankPresent &&
-      sellerStatements.fuelTankOwnership !== 'owned' &&
-      sellerStatements.fuelTankOwnership !== 'leased'
+      requiresStateListingField(
+        statePackage,
+        'ownershipStatus',
+      ) &&
+      sellerStatements.ownershipStatus !==
+      'owned_at_least_one_year' &&
+      sellerStatements.ownershipStatus !==
+      'owned_less_than_one_year' &&
+      sellerStatements.ownershipStatus !==
+      'does_not_yet_own'
     ) {
-      throw new Error('Specify whether the fuel tank is owned or leased.');
+      throw new Error(
+        'Select how long the seller has owned the property.',
+      );
     }
 
-    if (typeof sellerStatements.leasesExist !== 'boolean') {
-      throw new Error('Specify whether any leases exist.');
+    if (
+      requiresStateListingField(
+        statePackage,
+        'leadBasedPaintApplies',
+      ) &&
+      typeof sellerStatements
+        .leadBasedPaintApplies !== 'boolean'
+    ) {
+      throw new Error(
+        'Complete the lead-based-paint statement.',
+      );
     }
 
-    const additionalSeller = sellerStatements.additionalSeller;
+    if (
+      requiresStateListingField(
+        statePackage,
+        'ownersAssociationApplies',
+      ) &&
+      typeof sellerStatements
+        .ownersAssociationApplies !== 'boolean'
+    ) {
+      throw new Error(
+        'Specify whether an owners association applies.',
+      );
+    }
+
+    if (
+      requiresStateListingField(
+        statePackage,
+        'fuelTankPresent',
+      ) &&
+      typeof sellerStatements
+        .fuelTankPresent !== 'boolean'
+    ) {
+      throw new Error(
+        'Specify whether a fuel tank is present.',
+      );
+    }
+
+    if (
+      sellerStatements.fuelTankPresent === true &&
+      sellerStatements.fuelTankOwnership !==
+      'owned' &&
+      sellerStatements.fuelTankOwnership !==
+      'leased'
+    ) {
+      throw new Error(
+        'Specify whether the fuel tank is owned or leased.',
+      );
+    }
+
+    if (
+      requiresStateListingField(
+        statePackage,
+        'generalLeasesExist',
+      ) &&
+      typeof sellerStatements.leasesExist !==
+      'boolean'
+    ) {
+      throw new Error(
+        'Specify whether any leases exist.',
+      );
+    }
+
+    if (
+      requiresStateListingField(
+        statePackage,
+        'texasLeaseCategories',
+      ) &&
+      (
+        typeof sellerStatements
+          .residentialLeasesExist !==
+        'boolean' ||
+        typeof sellerStatements
+          .fixtureLeasesExist !==
+        'boolean' ||
+        typeof sellerStatements
+          .naturalResourceLeasesExist !==
+        'boolean'
+      )
+    ) {
+      throw new Error(
+        'Complete all three Texas lease statements.',
+      );
+    }
+
+    const additionalSeller =
+      sellerStatements.additionalSeller;
+
     if (
       additionalSeller &&
       (
         !additionalSeller.legalName.trim() ||
-        !/^\S+@\S+\.\S+$/.test(additionalSeller.email.trim()) ||
+        !additionalSeller.email.trim() ||
         !additionalSeller.phone.trim()
       )
     ) {
-      throw new Error('Complete the co-seller name, email, and phone.');
+      throw new Error(
+        'Complete all required co-seller information.',
+      );
     }
 
     return sellerStatements;

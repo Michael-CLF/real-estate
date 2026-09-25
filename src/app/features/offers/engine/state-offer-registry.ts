@@ -9,8 +9,11 @@ export type OfferComponentLoader =
 
 export interface StateOfferRegistration {
   readonly stateCode: string;
+
   readonly offerCreationEnabled: boolean;
-  readonly loadComponent: OfferComponentLoader;
+
+  readonly loadComponent:
+    OfferComponentLoader;
 }
 
 
@@ -23,6 +26,7 @@ const STATE_OFFER_REGISTRATIONS:
   > = {
     NC: {
       stateCode: 'NC',
+
       offerCreationEnabled: true,
 
       loadComponent: () =>
@@ -34,13 +38,9 @@ const STATE_OFFER_REGISTRATIONS:
         ),
     },
 
-    /*
-     * Texas is wired into the application so its complete flow can
-     * be compiled and tested before launch. Keeping this flag false
-     * prevents the public offer-entry flow from loading it.
-     */
     TX: {
       stateCode: 'TX',
+
       offerCreationEnabled: true,
 
       loadComponent: () =>
@@ -49,6 +49,20 @@ const STATE_OFFER_REGISTRATIONS:
         ).then(
           component =>
             component.TexasOfferEntryComponent
+        ),
+    },
+
+    OK: {
+      stateCode: 'OK',
+
+      offerCreationEnabled: true,
+
+      loadComponent: () =>
+        import(
+          '../states/oklahoma/oklahoma-offer-entry/oklahoma-offer-entry.component'
+        ).then(
+          component =>
+            component.OklahomaOfferEntryComponent
         ),
     },
   };

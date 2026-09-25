@@ -1,11 +1,7 @@
 <main class="offer-page">
   <header class="offer-page__header">
     <div class="offer-page__header-content">
-      <button
-        class="offer-page__back"
-        type="button"
-        (click)="returnToDashboard()"
-      >
+      <button class="offer-page__back" type="button" (click)="returnToDashboard()">
         <span aria-hidden="true">←</span>
         Dashboard
       </button>
@@ -16,16 +12,16 @@
         </p>
 
         <h1>
-          Residential Purchase and Sale Agreement
+          {{ agreementTitle() }}
         </h1>
 
         @if (offer(); as offer) {
-          <p class="offer-page__property">
-            {{ offer.property.addressLine1 }},
-            {{ offer.property.city }},
-            {{ offer.property.state }}
-            {{ offer.property.zipCode }}
-          </p>
+        <p class="offer-page__property">
+          {{ offer.property.addressLine1 }},
+          {{ offer.property.city }},
+          {{ offer.property.state }}
+          {{ offer.property.zipCode }}
+        </p>
         }
       </div>
     </div>
@@ -33,550 +29,458 @@
 
   <div class="offer-page__content">
     @if (loading()) {
-      <section
-        class="state-card"
-        aria-live="polite"
-      >
-        <span class="spinner" aria-hidden="true"></span>
-        <p>Loading the offer and negotiation history…</p>
-      </section>
+    <section class="state-card" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading the offer and negotiation history…</p>
+    </section>
     } @else if (offer(); as offer) {
-      @if (currentVersion(); as version) {
-        <section class="offer-summary">
-          <div class="offer-summary__identity">
-            <div>
-              <span class="label">Offer number</span>
-              <strong>{{ getVersionLabel(version) }}</strong>
-              <span class="offer-summary__property">
-                {{ offer.property.addressLine1 }}
-                @if (offer.property.addressLine2) {
-                  , {{ offer.property.addressLine2 }}
-                }
-                ,
-                {{ offer.property.city }},
-                {{ offer.property.state }}
-                {{ offer.property.zipCode }}
-              </span>
-            </div>
-
-            <div>
-              <span class="label">Transaction status</span>
-              <strong>{{ offerStatusLabel() }}</strong>
-            </div>
-
-            <div>
-              <span class="label">Current version</span>
-              <strong>{{ currentVersionStatusLabel() }}</strong>
-            </div>
-          </div>
-
-          <div class="offer-summary__sender">
-            <span class="label">
-              {{ getVersionTypeLabel(version) }} from
-            </span>
-            <strong>{{ getVersionSenderName(version) }}</strong>
-            <span>
-              {{ version.initiatedBy === 'buyer' ? 'Buyer' : 'Seller' }}
-            </span>
-          </div>
-        </section>
-
-        @if (isClosedDueToContract()) {
-          <div
-            class="message message--closed-offer"
-            role="alert"
-          >
-            <strong>This offer was not accepted.</strong>
-            <span>
-              @if (access()?.isBuyer) {
-                The seller accepted another buyer’s offer, and the property is now under contract. Your offer remains available below as part of your permanent transaction history.
-              } @else {
-                Another offer for this property was accepted, so this offer closed automatically. It remains available below as part of the permanent transaction history.
-              }
-            </span>
-          </div>
-        }
-
-        @if (errorMessage()) {
-          <div
-            class="message message--error"
-            role="alert"
-          >
-            {{ errorMessage() }}
-          </div>
-        }
-
-        @if (successMessage()) {
-          <div
-            class="message message--success"
-            role="status"
-          >
-            {{ successMessage() }}
-          </div>
-        }
-
-        <div class="offer-page__grid">
-          <div class="offer-page__main-column">
-            <section class="card">
-              <div class="card__heading">
-                <div>
-                  <p class="section-kicker">Current terms</p>
-                  <h2>{{ getVersionTypeLabel(version) }} {{ getVersionLabel(version) }}</h2>
-                </div>
-
-                <span class="status-pill">
-                  {{ currentVersionStatusLabel() }}
-                </span>
-              </div>
-
-              <dl class="terms-grid">
-                <div>
-                  <dt>Purchase price</dt>
-                  <dd>
-                    {{ dollarsFromCents(getPurchasePriceInCents(version)) | currency:'USD':'symbol':'1.2-2' }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>Funding</dt>
-                  <dd>
-                    {{ getFundingLabel(version) }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>{{ getDepositLabel(version) }}</dt>
-                  <dd>
-                    {{ dollarsFromCents(getDepositInCents(version)) | currency:'USD':'symbol':'1.2-2' }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>Deposit delivery</dt>
-                  <dd>
-                    {{ getDepositDelivery(version) }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>Escrow agent</dt>
-                  <dd>
-                    {{ getEscrowAgent(version) }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>{{ getDeadlineLabel(version) }}</dt>
-                  <dd>{{ getDeadline(version) }}</dd>
-                </div>
-
-                <div>
-                  <dt>{{ getClosingDateLabel(version) }}</dt>
-                  <dd>{{ getClosingDate(version) | date:'MMMM d, y':'UTC' }}</dd>
-                </div>
-
-                <div>
-                  <dt>Possession</dt>
-                  <dd>
-                    {{ getPossessionLabel(version) }}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt>Offer expires</dt>
-                  <dd>{{ version.expiresAt | date:'MMM d, y, h:mm a' }}</dd>
-                </div>
-              </dl>
-
-              <div class="agreement-box">
-                <div>
-                  <h3>Agreement PDF</h3>
-
-                  @if (agreementDocument(); as document) {
-                    <p>
-                      Review the exact PDF associated with this immutable offer version before signing or responding.
-                    </p>
-                    <small>{{ document.fileName }}</small>
-                  } @else {
-                    <p>
-                      The agreement PDF must be generated before this version can be signed.
-                    </p>
-                  }
-                </div>
-
-                @if (agreementDocument()) {
-                  <button
-                    class="button button--secondary"
-                    type="button"
-                    [disabled]="openingDocument()"
-                    (click)="openAgreement()"
-                  >
-                    {{ openingDocument() ? 'Opening…' : 'Open Agreement PDF' }}
-                  </button>
-                } @else if (
-                  access()?.canSign ||
-                  version.status === 'accepted'
-                ) {
-                  <button
-                    class="button button--secondary"
-                    type="button"
-                    [disabled]="processing()"
-                    (click)="prepareAgreement()"
-                  >
-                    {{
-                      processing()
-                        ? 'Preparing…'
-                        : version.status === 'accepted'
-                          ? 'Prepare Final Agreement PDF'
-                          : 'Prepare Agreement PDF'
-                    }}
-                  </button>
-                }
-              </div>
-
-            </section>
-
-            <section class="card">
-              <div class="card__heading">
-                <div>
-                  <p class="section-kicker">Permanent record</p>
-                  <h2>Offer and counteroffer history</h2>
-                </div>
-              </div>
-
-              <div class="history-list">
-                @for (historyVersion of versions(); track historyVersion.Uid) {
-                  <article
-                    class="history-item"
-                    [class.history-item--current]="historyVersion.Uid === version.Uid"
-                  >
-                    <div class="history-item__marker" aria-hidden="true"></div>
-
-                    <div class="history-item__content">
-                      <div class="history-item__heading">
-                        <div>
-                          <h3>
-                            {{ getVersionTypeLabel(historyVersion) }}
-                            {{ getVersionLabel(historyVersion) }}
-                          </h3>
-                          <p>
-                            From:
-                            <strong>{{ getVersionSenderName(historyVersion) }}</strong>
-                            ·
-                            {{ historyVersion.initiatedBy === 'buyer' ? 'Buyer' : 'Seller' }}
-                          </p>
-                        </div>
-
-                        <span class="history-item__status">
-                          {{ getVersionStatusLabel(historyVersion) }}
-                        </span>
-                      </div>
-
-                      <div class="history-item__facts">
-                        <span>
-                          {{ dollarsFromCents(getPurchasePriceInCents(historyVersion)) | currency:'USD':'symbol':'1.2-2' }}
-                        </span>
-
-                        @if (historyVersion.submittedAt) {
-                          <span>
-                            Submitted {{ historyVersion.submittedAt | date:'MMM d, y, h:mm a' }}
-                          </span>
-                        }
-
-                        @if (historyVersion.acceptedAt) {
-                          <span>
-                            Accepted {{ historyVersion.acceptedAt | date:'MMM d, y, h:mm a' }}
-                          </span>
-                        }
-                      </div>
-                    </div>
-                  </article>
-                }
-              </div>
-            </section>
-          </div>
-
-          <aside class="offer-page__sidebar">
-            <section class="card action-card">
-              <p class="section-kicker">Available actions</p>
-              <h2>{{ actionHeading() }}</h2>
-
-              @if (actionNote()) {
-                <p class="action-card__note">
-                  {{ actionNote() }}
-                </p>
-              }
-
-              @if (access()?.canEditCurrentDraft) {
-                <button
-                  class="button button--primary"
-                  type="button"
-                  (click)="continueEditing()"
-                >
-                  Continue editing
-                </button>
-              }
-
-              @if (access()?.canSign) {
-                @if (agreementDocument()) {
-                  <button
-                    class="button button--primary"
-                    type="button"
-                    [disabled]="processing()"
-                    (click)="openSigningPanel()"
-                  >
-                    {{ signButtonLabel() }}
-                  </button>
-                } @else {
-                  <p class="action-card__note">
-                    Prepare and review the agreement PDF before signing.
-                  </p>
-                }
-              }
-
-              @if (access()?.canCounter) {
-                <button
-                  class="button button--secondary"
-                  type="button"
-                  [disabled]="processing()"
-                  (click)="createCounteroffer()"
-                >
-                  Create Counteroffer
-                </button>
-              }
-
-              @if (access()?.canDecline) {
-                <button
-                  class="button button--danger-outline"
-                  type="button"
-                  [disabled]="processing()"
-                  (click)="openDeclinePanel()"
-                >
-                  Decline Offer
-                </button>
-              }
-
-              @if (access()?.canWithdraw) {
-                <button
-                  class="button button--text-danger"
-                  type="button"
-                  [disabled]="processing()"
-                  (click)="withdrawOffer()"
-                >
-                  {{ offer.status === 'draft' ? 'Discard Draft' : 'Withdraw Offer' }}
-                </button>
-              }
-
-              @if (
-                !access()?.canEditCurrentDraft &&
-                !access()?.canSign &&
-                !access()?.canCounter &&
-                !access()?.canDecline &&
-                !access()?.canWithdraw &&
-                !actionNote()
-              ) {
-                <p class="action-card__note">
-                  No action is currently required from you. The complete offer history remains available here.
-                </p>
-              }
-            </section>
-
-            <section class="card participants-card">
-              <p class="section-kicker">Participants</p>
-              <h2>Buyer and seller</h2>
-
-              <div class="participant-group">
-                <span class="label">Buyer</span>
-                @for (buyer of getBuyers(version); track buyer.partyUid) {
-                  <div class="participant">
-                    <strong>{{ buyer.legalName }}</strong>
-                    <span [class.signed]="partyHasSigned(buyer)">
-                      {{ partyHasSigned(buyer) ? 'Signed' : 'Signature pending' }}
-                    </span>
-                  </div>
-                }
-              </div>
-
-              <div class="participant-group">
-                <span class="label">Seller</span>
-                @for (seller of getSellers(version); track seller.partyUid) {
-                  <div class="participant">
-                    <strong>{{ seller.legalName }}</strong>
-                    <span [class.signed]="partyHasSigned(seller)">
-                      {{ partyHasSigned(seller) ? 'Signed' : 'Signature pending' }}
-                    </span>
-                  </div>
-                }
-              </div>
-            </section>
-          </aside>
+    @if (currentVersion(); as version) {
+    <section class="offer-summary">
+      <div class="offer-summary__identity">
+        <div>
+          <span class="label">Offer number</span>
+          <strong>{{ getVersionLabel(version) }}</strong>
+          <span class="offer-summary__property">
+            {{ offer.property.addressLine1 }}
+            @if (offer.property.addressLine2) {
+            , {{ offer.property.addressLine2 }}
+            }
+            ,
+            {{ offer.property.city }},
+            {{ offer.property.state }}
+            {{ offer.property.zipCode }}
+          </span>
         </div>
 
-        @if (signingPanelOpen()) {
-          <div class="modal-backdrop" (click)="closeSigningPanel()">
-            <section
-              class="modal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="signing-title"
-              (click)="$event.stopPropagation()"
-            >
-              <div class="modal__heading">
-                <div>
-                  <p class="section-kicker">Electronic signature</p>
-                  <h2 id="signing-title">{{ signButtonLabel() }}</h2>
-                </div>
+        <div>
+          <span class="label">Transaction status</span>
+          <strong>{{ offerStatusLabel() }}</strong>
+        </div>
 
-                <button
-                  class="modal__close"
-                  type="button"
-                  aria-label="Close signing window"
-                  [disabled]="processing()"
-                  (click)="closeSigningPanel()"
-                >
-                  ×
-                </button>
-              </div>
+        <div>
+          <span class="label">Current version</span>
+          <strong>{{ currentVersionStatusLabel() }}</strong>
+        </div>
+      </div>
 
-              <p>
-                You are signing the exact agreement PDF for
-                <strong>{{ getVersionLabel(version) }}</strong>.
-                Your typed signature must match your verified legal name.
-              </p>
+      <div class="offer-summary__sender">
+        <span class="label">
+          {{ getVersionTypeLabel(version) }} from
+        </span>
+        <strong>{{ getVersionSenderName(version) }}</strong>
+        <span>
+          {{ version.initiatedBy === 'buyer' ? 'Buyer' : 'Seller' }}
+        </span>
+      </div>
+    </section>
 
-              <form [formGroup]="signingForm" (ngSubmit)="signAgreement()">
-                <label class="form-field">
-                  <span>Verified legal signature</span>
-                  <input
-                    type="text"
-                    formControlName="typedSignature"
-                    autocomplete="name"
-                    maxlength="200"
-                  />
-                </label>
-
-                <label class="checkbox-field">
-                  <input
-                    type="checkbox"
-                    formControlName="consentToElectronicRecords"
-                  />
-                  <span>I consent to receive this agreement and related records electronically.</span>
-                </label>
-
-                <label class="checkbox-field">
-                  <input
-                    type="checkbox"
-                    formControlName="consentToElectronicSignature"
-                  />
-                  <span>I consent to use my electronic signature for this agreement.</span>
-                </label>
-
-                <label class="checkbox-field">
-                  <input
-                    type="checkbox"
-                    formControlName="certificationAccepted"
-                  />
-                  <span>I certify that I reviewed the agreement and intend this typed name to be my legally binding signature.</span>
-                </label>
-
-                <div class="modal__actions">
-                  <button
-                    class="button button--secondary"
-                    type="button"
-                    [disabled]="processing()"
-                    (click)="closeSigningPanel()"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    class="button button--primary"
-                    type="submit"
-                    [disabled]="processing() || signingForm.invalid"
-                  >
-                    {{ processing() ? 'Recording Signature…' : signButtonLabel() }}
-                  </button>
-                </div>
-              </form>
-            </section>
-          </div>
+    @if (isClosedDueToContract()) {
+    <div class="message message--closed-offer" role="alert">
+      <strong>This offer was not accepted.</strong>
+      <span>
+        @if (access()?.isBuyer) {
+        The seller accepted another buyer’s offer, and the property is now under contract. Your offer remains available
+        below as part of your permanent transaction history.
+        } @else {
+        Another offer for this property was accepted, so this offer closed automatically. It remains available below as
+        part of the permanent transaction history.
         }
+      </span>
+    </div>
+    }
 
-        @if (declinePanelOpen()) {
-          <div class="modal-backdrop" (click)="closeDeclinePanel()">
-            <section
-              class="modal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="decline-title"
-              (click)="$event.stopPropagation()"
-            >
-              <div class="modal__heading">
-                <div>
-                  <p class="section-kicker">Final response</p>
-                  <h2 id="decline-title">Decline this offer</h2>
-                </div>
+    @if (errorMessage()) {
+    <div class="message message--error" role="alert">
+      {{ errorMessage() }}
+    </div>
+    }
 
-                <button
-                  class="modal__close"
-                  type="button"
-                  aria-label="Close decline window"
-                  [disabled]="processing()"
-                  (click)="closeDeclinePanel()"
-                >
-                  ×
-                </button>
-              </div>
+    @if (successMessage()) {
+    <div class="message message--success" role="status">
+      {{ successMessage() }}
+    </div>
+    }
 
-              <p>
-                Declining closes this negotiation. The offer and every counteroffer remain permanently recorded in the dashboard history.
-              </p>
+    <div class="offer-page__grid">
+      <div class="offer-page__main-column">
+        <section class="card">
+          <div class="card__heading">
+            <div>
+              <p class="section-kicker">Current terms</p>
+              <h2>{{ getVersionTypeLabel(version) }} {{ getVersionLabel(version) }}</h2>
+            </div>
 
-              <form [formGroup]="declineForm" (ngSubmit)="declineOffer()">
-                <label class="form-field">
-                  <span>Optional message</span>
-                  <textarea
-                    formControlName="note"
-                    rows="4"
-                    maxlength="1000"
-                  ></textarea>
-                </label>
-
-                <div class="modal__actions">
-                  <button
-                    class="button button--secondary"
-                    type="button"
-                    [disabled]="processing()"
-                    (click)="closeDeclinePanel()"
-                  >
-                    Keep Offer Open
-                  </button>
-
-                  <button
-                    class="button button--danger"
-                    type="submit"
-                    [disabled]="processing()"
-                  >
-                    {{ processing() ? 'Declining…' : 'Confirm Decline' }}
-                  </button>
-                </div>
-              </form>
-            </section>
+            <span class="status-pill">
+              {{ currentVersionStatusLabel() }}
+            </span>
           </div>
-        }
-      }
-    } @else {
-      <section class="state-card">
-        <h2>Offer unavailable</h2>
-        <p>{{ errorMessage() || 'The requested offer could not be loaded.' }}</p>
-        <button
-          class="button button--primary"
-          type="button"
-          (click)="returnToDashboard()"
-        >
-          Return to Dashboard
-        </button>
+
+          <dl class="terms-grid">
+            <div>
+              <dt>Purchase price</dt>
+              <dd>
+                {{
+                dollarsFromCents(
+                display(version).purchasePriceInCents
+                ) | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Funding</dt>
+              <dd>{{ display(version).fundingLabel }}</dd>
+            </div>
+
+            <div>
+              <dt>{{ display(version).depositLabel }}</dt>
+              <dd>
+                {{
+                dollarsFromCents(
+                display(version).depositInCents
+                ) | currency:'USD':'symbol':'1.2-2'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>{{ display(version).depositDelivery.label }}</dt>
+              <dd>{{ display(version).depositDelivery.value }}</dd>
+            </div>
+
+            <div>
+              <dt>Trust-account holder</dt>
+              <dd>{{ display(version).escrowAgent }}</dd>
+            </div>
+
+            <div>
+              <dt>{{ display(version).importantDeadline.label }}</dt>
+              <dd>{{ display(version).importantDeadline.value }}</dd>
+            </div>
+
+            <div>
+              <dt>{{ display(version).closingDate.label }}</dt>
+              <dd>
+                {{
+                display(version).closingDate.value
+                | date:'MMMM d, y':'UTC'
+                }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Possession</dt>
+              <dd>{{ display(version).possessionLabel }}</dd>
+            </div>
+
+            <div>
+              <dt>Offer expires</dt>
+              <dd>
+                {{ version.expiresAt | date:'MMM d, y, h:mm a' }}
+              </dd>
+            </div>
+          </dl>
+
+          <div class="agreement-box">
+            <div>
+              <h3>Agreement PDF</h3>
+
+              @if (agreementDocument(); as document) {
+              <p>
+                Review the exact PDF associated with this immutable offer version before signing or responding.
+              </p>
+              <small>{{ document.fileName }}</small>
+              } @else {
+              <p>
+                The agreement PDF must be generated before this version can be signed.
+              </p>
+              }
+            </div>
+
+            @if (agreementDocument()) {
+            <button class="button button--secondary" type="button" [disabled]="openingDocument()"
+              (click)="openAgreement()">
+              {{ openingDocument() ? 'Opening…' : 'Open Agreement PDF' }}
+            </button>
+            } @else if (
+            access()?.canSign ||
+            version.status === 'accepted'
+            ) {
+            <button class="button button--secondary" type="button" [disabled]="processing()"
+              (click)="prepareAgreement()">
+              {{
+              processing()
+              ? 'Preparing…'
+              : version.status === 'accepted'
+              ? 'Prepare Final Agreement PDF'
+              : 'Prepare Agreement PDF'
+              }}
+            </button>
+            }
+          </div>
+
+        </section>
+
+        <section class="card">
+          <div class="card__heading">
+            <div>
+              <p class="section-kicker">Permanent record</p>
+              <h2>Offer and counteroffer history</h2>
+            </div>
+          </div>
+
+          <div class="history-list">
+            @for (historyVersion of versions(); track historyVersion.Uid) {
+            <article class="history-item" [class.history-item--current]="historyVersion.Uid === version.Uid">
+              <div class="history-item__marker" aria-hidden="true"></div>
+
+              <div class="history-item__content">
+                <div class="history-item__heading">
+                  <div>
+                    <h3>
+                      {{ getVersionTypeLabel(historyVersion) }}
+                      {{ getVersionLabel(historyVersion) }}
+                    </h3>
+                    <p>
+                      From:
+                      <strong>{{ getVersionSenderName(historyVersion) }}</strong>
+                      ·
+                      {{ historyVersion.initiatedBy === 'buyer' ? 'Buyer' : 'Seller' }}
+                    </p>
+                  </div>
+
+                  <span class="history-item__status">
+                    {{ getVersionStatusLabel(historyVersion) }}
+                  </span>
+                </div>
+
+                <div class="history-item__facts">
+                  <span>
+                    {{ dollarsFromCents(display(historyVersion).purchasePriceInCents) | currency:'USD':'symbol':'1.2-2' }}
+                  </span>
+
+                  @if (historyVersion.submittedAt) {
+                  <span>
+                    Submitted {{ historyVersion.submittedAt | date:'MMM d, y, h:mm a' }}
+                  </span>
+                  }
+
+                  @if (historyVersion.acceptedAt) {
+                  <span>
+                    Accepted {{ historyVersion.acceptedAt | date:'MMM d, y, h:mm a' }}
+                  </span>
+                  }
+                </div>
+              </div>
+            </article>
+            }
+          </div>
+        </section>
+      </div>
+
+      <aside class="offer-page__sidebar">
+        <section class="card action-card">
+          <p class="section-kicker">Available actions</p>
+          <h2>{{ actionHeading() }}</h2>
+
+          @if (actionNote()) {
+          <p class="action-card__note">
+            {{ actionNote() }}
+          </p>
+          }
+
+          @if (access()?.canEditCurrentDraft) {
+          <button class="button button--primary" type="button" (click)="continueEditing()">
+            Continue editing
+          </button>
+          }
+
+          @if (access()?.canSign) {
+          @if (agreementDocument()) {
+          <button class="button button--primary" type="button" [disabled]="processing()" (click)="openSigningPanel()">
+            {{ signButtonLabel() }}
+          </button>
+          } @else {
+          <p class="action-card__note">
+            Prepare and review the agreement PDF before signing.
+          </p>
+          }
+          }
+
+          @if (access()?.canCounter) {
+          <button class="button button--secondary" type="button" [disabled]="processing()"
+            (click)="createCounteroffer()">
+            Create Counteroffer
+          </button>
+          }
+
+          @if (access()?.canDecline) {
+          <button class="button button--danger-outline" type="button" [disabled]="processing()"
+            (click)="openDeclinePanel()">
+            Decline Offer
+          </button>
+          }
+
+          @if (access()?.canWithdraw) {
+          <button class="button button--text-danger" type="button" [disabled]="processing()" (click)="withdrawOffer()">
+            {{ offer.status === 'draft' ? 'Discard Draft' : 'Withdraw Offer' }}
+          </button>
+          }
+
+          @if (
+          !access()?.canEditCurrentDraft &&
+          !access()?.canSign &&
+          !access()?.canCounter &&
+          !access()?.canDecline &&
+          !access()?.canWithdraw &&
+          !actionNote()
+          ) {
+          <p class="action-card__note">
+            No action is currently required from you. The complete offer history remains available here.
+          </p>
+          }
+        </section>
+
+        <section class="card participants-card">
+          <p class="section-kicker">Participants</p>
+          <h2>Buyer and seller</h2>
+
+          <div class="participant-group">
+            <span class="label">Buyer</span>
+            @for (buyer of getBuyers(version); track buyer.partyUid) {
+            <div class="participant">
+              <strong>{{ buyer.legalName }}</strong>
+              <span [class.signed]="partyHasSigned(buyer)">
+                {{ getPartySignatureLabel(buyer, version) }}
+              </span>
+            </div>
+            }
+          </div>
+
+          <div class="participant-group">
+            <span class="label">Seller</span>
+            @for (seller of getSellers(version); track seller.partyUid) {
+            <div class="participant">
+              <strong>{{ seller.legalName }}</strong>
+              <span [class.signed]="partyHasSigned(seller)">
+               {{ getPartySignatureLabel(seller, version) }}
+              </span>
+            </div>
+            }
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    @if (signingPanelOpen()) {
+    <div class="modal-backdrop" (click)="closeSigningPanel()">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="signing-title"
+        (click)="$event.stopPropagation()">
+        <div class="modal__heading">
+          <div>
+            <p class="section-kicker">Electronic signature</p>
+            <h2 id="signing-title">{{ signButtonLabel() }}</h2>
+          </div>
+
+          <button class="modal__close" type="button" aria-label="Close signing window" [disabled]="processing()"
+            (click)="closeSigningPanel()">
+            ×
+          </button>
+        </div>
+
+        <p>
+          You are signing the exact agreement PDF for
+          <strong>{{ getVersionLabel(version) }}</strong>.
+          Your typed signature must match your verified legal name.
+        </p>
+
+        <form [formGroup]="signingForm" (ngSubmit)="signAgreement()">
+          <label class="form-field">
+            <span>Verified legal signature</span>
+            <input type="text" formControlName="typedSignature" autocomplete="name" maxlength="200" />
+          </label>
+
+          <label class="checkbox-field">
+            <input type="checkbox" formControlName="consentToElectronicRecords" />
+            <span>I consent to receive this agreement and related records electronically.</span>
+          </label>
+
+          <label class="checkbox-field">
+            <input type="checkbox" formControlName="consentToElectronicSignature" />
+            <span>I consent to use my electronic signature for this agreement.</span>
+          </label>
+
+          <label class="checkbox-field">
+            <input type="checkbox" formControlName="certificationAccepted" />
+            <span>I certify that I reviewed the agreement and intend this typed name to be my legally binding
+              signature.</span>
+          </label>
+
+          <div class="modal__actions">
+            <button class="button button--secondary" type="button" [disabled]="processing()"
+              (click)="closeSigningPanel()">
+              Cancel
+            </button>
+
+            <button class="button button--primary" type="submit" [disabled]="processing() || signingForm.invalid">
+              {{ processing() ? 'Recording Signature…' : signButtonLabel() }}
+            </button>
+          </div>
+        </form>
       </section>
+    </div>
+    }
+
+    @if (declinePanelOpen()) {
+    <div class="modal-backdrop" (click)="closeDeclinePanel()">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="decline-title"
+        (click)="$event.stopPropagation()">
+        <div class="modal__heading">
+          <div>
+            <p class="section-kicker">Final response</p>
+            <h2 id="decline-title">Decline this offer</h2>
+          </div>
+
+          <button class="modal__close" type="button" aria-label="Close decline window" [disabled]="processing()"
+            (click)="closeDeclinePanel()">
+            ×
+          </button>
+        </div>
+
+        <p>
+          Declining closes this negotiation. The offer and every counteroffer remain permanently recorded in the
+          dashboard history.
+        </p>
+
+        <form [formGroup]="declineForm" (ngSubmit)="declineOffer()">
+          <label class="form-field">
+            <span>Optional message</span>
+            <textarea formControlName="note" rows="4" maxlength="1000"></textarea>
+          </label>
+
+          <div class="modal__actions">
+            <button class="button button--secondary" type="button" [disabled]="processing()"
+              (click)="closeDeclinePanel()">
+              Keep Offer Open
+            </button>
+
+            <button class="button button--danger" type="submit" [disabled]="processing()">
+              {{ processing() ? 'Declining…' : 'Confirm Decline' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+    }
+    }
+    } @else {
+    <section class="state-card">
+      <h2>Offer unavailable</h2>
+      <p>{{ errorMessage() || 'The requested offer could not be loaded.' }}</p>
+      <button class="button button--primary" type="button" (click)="returnToDashboard()">
+        Return to Dashboard
+      </button>
+    </section>
     }
   </div>
 </main>

@@ -6,6 +6,10 @@ import type {
   TexasOfferTerms,
 } from '../state-contracts/texas/models/texas-offer-terms.model';
 
+import type {
+  OklahomaOfferTerms,
+} from '../state-contracts/oklahoma/models/oklahoma-offer-terms.model';
+
 
 /*
  * Standard ISO date format used by offer fields that do
@@ -81,7 +85,8 @@ export interface OfferPropertySnapshot {
  */
 export type StateOfferTerms =
   | NorthCarolinaOfferTerms
-  | TexasOfferTerms;
+  | TexasOfferTerms
+  | OklahomaOfferTerms;
 
 
 /*
@@ -90,6 +95,7 @@ export type StateOfferTerms =
  */
 export type OfferTerms =
   NorthCarolinaOfferTerms;
+  
 
 
 /*

@@ -37,6 +37,15 @@ const MAX_SAVE_PAYLOAD_BYTES =
   750_000;
 
 
+const EDITABLE_OFFER_STATUSES =
+  new Set<OfferDocument['status']>([
+    'draft',
+    'submitted',
+    'viewed',
+    'countered',
+  ]);
+
+
 /*
  * Saves editable fields on the current draft version.
  *
@@ -230,16 +239,16 @@ function verifyDraftOwnership(
     );
   }
 
-  if (
-    offer.status !== 'draft' &&
-    offer.status !== 'countered'
-  ) {
-    throw new HttpsError(
-      'failed-precondition',
-      'This offer is not editable.'
-    );
-  }
-
+if (
+  !EDITABLE_OFFER_STATUSES.has(
+    offer.status
+  )
+) {
+  throw new HttpsError(
+    'failed-precondition',
+    'This offer is not editable.'
+  );
+}
   if (
     version.status !== 'draft' ||
     version.immutable

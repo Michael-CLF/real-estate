@@ -21,7 +21,6 @@ import type {
 } from '../../../../core/domains/offers/models/offer-validation.model';
 
 import type {
-  OfferChoiceQuestion,
   OfferQuestionCondition,
   OfferQuestionDefinition,
   OfferQuestionVisibilityRule,
@@ -55,6 +54,12 @@ export interface OfferCoBuyerChange {
 interface OfferReviewItem {
   readonly label: string;
   readonly value: string;
+}
+
+interface OfferReviewSection {
+  readonly id: string;
+  readonly title: string;
+  readonly items: readonly OfferReviewItem[];
 }
 
 
@@ -133,17 +138,12 @@ export class OfferWizardShellComponent {
   private readonly completedSectionIds =
     signal<ReadonlySet<string>>(new Set());
 
-  private readonly touchedFieldPaths =
-    signal<ReadonlySet<string>>(new Set());
-
   protected readonly reviewing = signal(false);
 
   protected readonly addingCoBuyer = signal(false);
   protected readonly coBuyerLegalName = signal('');
   protected readonly coBuyerEmail = signal('');
   protected readonly coBuyerPhone = signal('');
-  private readonly touchedCoBuyerFields =
-    signal<ReadonlySet<'legalName' | 'email' | 'phone'>>(new Set());
 
 
   protected readonly visibleSections = computed(
@@ -230,17 +230,32 @@ export class OfferWizardShellComponent {
     }
   );
 
-
-  protected readonly currentSectionValid = computed(
-    () => this.currentSectionErrorCount() === 0
+  protected readonly reviewSections = computed<
+    readonly OfferReviewSection[]
+  >(() =>
+    this.visibleSections().map(section => ({
+      id: section.id,
+      title: section.title,
+      items: questionsForSection(section)
+        .filter(
+          question =>
+            question.type !== 'information' &&
+            question.fieldPath !== undefined &&
+            this.isQuestionVisible(question)
+        )
+        .map(question => ({
+          label: question.label,
+          value: this.formatReviewValue(
+            question,
+            readPath(this.terms(), question.fieldPath as string)
+          ),
+        })),
+    }))
   );
 
 
-  protected readonly allSectionsValid = computed(
-    () =>
-      this.visibleSections().every(
-        section => this.sectionErrorCount(section) === 0
-      )
+  protected readonly currentSectionValid = computed(
+    () => this.currentSectionErrorCount() === 0
   );
 
 
@@ -306,67 +321,16 @@ export class OfferWizardShellComponent {
     if (
       !question.fieldPath ||
       !section ||
-      !this.isQuestionVisible(question) ||
-      (
-        !this.touchedFieldPaths().has(question.fieldPath) &&
-        !this.attemptedSectionIds().has(section.id)
-      )
+      !this.attemptedSectionIds().has(section.id)
     ) {
       return null;
     }
 
-    const issue = this.validationIssues().find(
+    return this.validationIssues().find(
       issue =>
         issue.severity === 'error' &&
-        (
-          issue.fieldPath === question.fieldPath ||
-          issue.fieldPath.startsWith(`${question.fieldPath}.`)
-        )
-    );
-
-    if (issue) {
-      return issue.message;
-    }
-
-    if (
-      question.validation?.required === true &&
-      isRequiredValueMissing(
-        readPath(this.terms(), question.fieldPath),
-        question
-      )
-    ) {
-      return question.validation.message ??
-        `${question.label} is required.`;
-    }
-
-    return null;
-  }
-
-
-  protected currentSectionHasVisibleErrors(): boolean {
-    const section = this.currentSection();
-
-    if (!section) {
-      return false;
-    }
-
-    if (
-      section.id === 'parties' &&
-      this.addingCoBuyer() &&
-      (
-        this.coBuyerValidationMessage('legalName') ||
-        this.coBuyerValidationMessage('email') ||
-        this.coBuyerValidationMessage('phone')
-      )
-    ) {
-      return true;
-    }
-
-    return questionsForSection(section).some(
-      question =>
-        this.isQuestionVisible(question) &&
-        this.validationMessageFor(question) !== null
-    );
+        issue.fieldPath === question.fieldPath
+    )?.message ?? null;
   }
 
 
@@ -419,44 +383,6 @@ export class OfferWizardShellComponent {
     }
 
     this.emitCoBuyer();
-  }
-
-
-  protected markCoBuyerFieldTouched(
-    field: 'legalName' | 'email' | 'phone'
-  ): void {
-    this.touchedCoBuyerFields.set(
-      new Set([...this.touchedCoBuyerFields(), field])
-    );
-  }
-
-
-  protected coBuyerValidationMessage(
-    field: 'legalName' | 'email' | 'phone'
-  ): string | null {
-    if (
-      !this.addingCoBuyer() ||
-      !this.touchedCoBuyerFields().has(field)
-    ) {
-      return null;
-    }
-
-    if (field === 'legalName') {
-      return this.coBuyerLegalName().trim()
-        ? null
-        : 'Co-buyer legal name is required.';
-    }
-
-    if (field === 'email') {
-      const email = this.coBuyerEmail().trim();
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-        ? null
-        : 'Enter a valid co-buyer email address.';
-    }
-
-    return this.coBuyerPhone().replace(/\D/g, '').length >= 10
-      ? null
-      : 'Enter a valid co-buyer phone number.';
   }
 
   private emitCoBuyer(): void {
@@ -544,29 +470,16 @@ export class OfferWizardShellComponent {
   }
 
 
-  protected onFieldTouched(
-    question: OfferQuestionDefinition
-  ): void {
-    if (!question.fieldPath) {
-      return;
-    }
-
-    this.touchedFieldPaths.set(
-      new Set([
-        ...this.touchedFieldPaths(),
-        question.fieldPath,
-      ])
-    );
-  }
-
-
   protected returnToCertification(): void {
     this.reviewing.set(false);
   }
 
+  protected editReviewSection(sectionId: string): void {
+    const index = this.visibleSections().findIndex(
+      section => section.id === sectionId
+    );
 
-  protected editReviewSection(index: number): void {
-    if (this.busy()) {
+    if (index < 0 || this.busy()) {
       return;
     }
 
@@ -576,74 +489,11 @@ export class OfferWizardShellComponent {
 
 
   protected confirmSubmit(): void {
-    if (this.busy() || !this.allSectionsValid()) {
+    if (this.busy() || !this.currentSectionValid()) {
       return;
     }
 
     this.submitRequested.emit();
-  }
-
-
-  protected reviewItemsForSection(
-    section: OfferSectionDefinition
-  ): readonly OfferReviewItem[] {
-    const items: OfferReviewItem[] = [];
-
-    if (section.id === 'property') {
-      items.push({
-        label: 'Property address',
-        value: this.reviewPropertyAddress(),
-      });
-    }
-
-    for (const question of questionsForSection(section)) {
-      if (
-        question.type === 'information' ||
-        !question.fieldPath ||
-        !this.isQuestionVisible(question)
-      ) {
-        continue;
-      }
-
-      items.push({
-        label: question.label,
-        value: this.formatReviewQuestionValue(question),
-      });
-    }
-
-    const documents = this.listingDocumentsForSection(section.id);
-    if (documents.length > 0) {
-      items.push({
-        label: 'Seller-provided documents',
-        value: documents
-          .map(document => document.originalFileName)
-          .join(', '),
-      });
-    }
-
-    return items;
-  }
-
-
-  protected reviewPartyItems(
-    parties: readonly OfferParty[]
-  ): string {
-    if (parties.length === 0) {
-      return 'Not provided';
-    }
-
-    return parties
-      .map(party => {
-        const contact = [
-          party.email,
-          this.formatPhone(party.phone),
-        ].filter(Boolean).join(' · ');
-
-        return contact
-          ? `${party.legalName} — ${contact}`
-          : party.legalName;
-      })
-      .join('; ');
   }
 
 
@@ -672,6 +522,14 @@ export class OfferWizardShellComponent {
     return value;
   }
 
+  protected partyNames(parties: readonly OfferParty[]): string {
+    const names = parties
+      .map(party => party.legalName.trim())
+      .filter(Boolean);
+
+    return names.length > 0 ? names.join(', ') : 'Not provided';
+  }
+
 
   protected reviewText(fieldPath: string): string {
     const value = readPath(this.terms(), fieldPath);
@@ -680,204 +538,75 @@ export class OfferWizardShellComponent {
       : 'Not provided';
   }
 
+  private formatReviewValue(
+    question: OfferQuestionDefinition,
+    value: unknown
+  ): string {
+    if (question.type === 'currency') {
+      return typeof value === 'number' && Number.isFinite(value)
+        ? new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+          }).format(value / 100)
+        : 'Not provided';
+    }
+
+    if (question.type === 'number') {
+      return typeof value === 'number' && Number.isFinite(value)
+        ? `${new Intl.NumberFormat('en-US').format(value)}${question.suffix ? ` ${question.suffix}` : ''}`
+        : 'Not provided';
+    }
+
+    if (question.type === 'yes_no' || question.type === 'acknowledgement') {
+      return value === true ? 'Yes' : value === false ? 'No' : 'Not provided';
+    }
+
+    if (question.type === 'single_choice' || question.type === 'multiple_choice') {
+      const selectedValues = selectedChoiceValues(question, value);
+      const labels = question.options
+        .filter(option => selectedValues.has(option.value))
+        .map(option => option.label);
+
+      return labels.length > 0 ? labels.join(', ') : 'None selected';
+    }
+
+    if (question.type === 'address') {
+      return formatReviewAddress(value);
+    }
+
+    if (question.type === 'document_upload') {
+      return isEmpty(value) ? 'Not provided' : 'Document uploaded';
+    }
+
+    if (question.type === 'date_time' && typeof value === 'string') {
+      const parsed = new Date(value);
+      return Number.isFinite(parsed.getTime())
+        ? new Intl.DateTimeFormat('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(parsed)
+        : 'Not provided';
+    }
+
+    if (Array.isArray(value)) {
+      return value.length > 0
+        ? value.map(item => String(item)).join(', ')
+        : 'None';
+    }
+
+    if (typeof value === 'string') {
+      return value.trim() || 'Not provided';
+    }
+
+    return value === null || value === undefined
+      ? 'Not provided'
+      : String(value);
+  }
+
 
   protected hasValue(fieldPath: string): boolean {
     const value = readPath(this.terms(), fieldPath);
     return value !== undefined && value !== null && value !== '';
-  }
-
-
-  private reviewPropertyAddress(): string {
-    const street = this.propertyValue('addressLine1');
-    const city = this.propertyValue('city');
-    const state = this.propertyValue('state');
-    const zipCode = this.propertyValue('zipCode');
-    const county = this.propertyValue('county');
-
-    return [
-      street,
-      [city, state, zipCode].filter(Boolean).join(' '),
-      county ? `${county} County` : '',
-    ].filter(Boolean).join(', ') || 'Not provided';
-  }
-
-
-  private formatReviewQuestionValue(
-    question: OfferQuestionDefinition
-  ): string {
-    if (!question.fieldPath) {
-      return 'Not provided';
-    }
-
-    const value = readPath(this.terms(), question.fieldPath);
-
-    switch (question.type) {
-      case 'currency':
-        return typeof value === 'number' && Number.isFinite(value)
-          ? new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(value / 100)
-          : 'Not provided';
-
-      case 'number':
-        return typeof value === 'number' && Number.isFinite(value)
-          ? `${value}${question.suffix ? ` ${question.suffix}` : ''}`
-          : 'Not provided';
-
-      case 'yes_no':
-      case 'acknowledgement':
-        return value === true
-          ? 'Yes'
-          : value === false
-            ? 'No'
-            : 'Not provided';
-
-      case 'single_choice': {
-        const selected = question.options.find(
-          option => option.value === value
-        );
-        return selected?.label ?? 'Not provided';
-      }
-
-      case 'multiple_choice': {
-        const selectedValues = this.reviewSelectedChoiceValues(
-          question,
-          value
-        );
-        const labels = selectedValues.map(
-          selectedValue =>
-            question.options.find(
-              option => option.value === selectedValue
-            )?.label ?? selectedValue
-        );
-        return labels.length > 0
-          ? labels.join(', ')
-          : 'None selected';
-      }
-
-      case 'date':
-        return this.formatReviewDate(value);
-
-      case 'date_time':
-        return this.formatReviewDateTime(value);
-
-      case 'address':
-        return this.formatReviewAddress(value);
-
-      case 'document_upload':
-        return typeof value === 'string' && value.trim()
-          ? 'Attached'
-          : 'Not attached';
-
-      case 'text':
-      case 'textarea':
-        return typeof value === 'string' && value.trim()
-          ? value.trim()
-          : 'Not provided';
-
-      default:
-        return 'Not provided';
-    }
-  }
-
-
-  private reviewSelectedChoiceValues(
-    question: OfferChoiceQuestion,
-    value: unknown
-  ): readonly string[] {
-    if (!Array.isArray(value)) {
-      return [];
-    }
-
-    if (!question.objectSelection) {
-      return value.filter(
-        item => typeof item === 'string'
-      ) as string[];
-    }
-
-    const selectedKey =
-      question.objectSelection.selectedKey ?? 'included';
-
-    return value.flatMap(item => {
-      if (
-        item === null ||
-        typeof item !== 'object' ||
-        Array.isArray(item)
-      ) {
-        return [];
-      }
-
-      const record = item as Record<string, unknown>;
-      const selectedValue = record[question.objectSelection!.valueKey];
-
-      return record[selectedKey] === true &&
-        typeof selectedValue === 'string'
-        ? [selectedValue]
-        : [];
-    });
-  }
-
-
-  private formatReviewDate(value: unknown): string {
-    if (typeof value !== 'string' || !value.trim()) {
-      return 'Not provided';
-    }
-
-    const parts = value.split('-').map(Number);
-    if (parts.length !== 3 || parts.some(part => !Number.isFinite(part))) {
-      return value;
-    }
-
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(new Date(parts[0], parts[1] - 1, parts[2]));
-  }
-
-
-  private formatReviewDateTime(value: unknown): string {
-    if (typeof value !== 'string' || !value.trim()) {
-      return 'Not provided';
-    }
-
-    const parsed = new Date(value);
-    if (!Number.isFinite(parsed.getTime())) {
-      return value;
-    }
-
-    return new Intl.DateTimeFormat('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(parsed);
-  }
-
-
-  private formatReviewAddress(value: unknown): string {
-    if (
-      value === null ||
-      typeof value !== 'object' ||
-      Array.isArray(value)
-    ) {
-      return 'Not provided';
-    }
-
-    const address = value as Record<string, unknown>;
-    const text = [
-      address['addressLine1'],
-      address['addressLine2'],
-      [
-        address['city'],
-        address['state'],
-        address['zipCode'],
-      ].filter(item => typeof item === 'string' && item.trim()).join(' '),
-      address['county'],
-    ].filter(item => typeof item === 'string' && item.trim());
-
-    return text.length > 0
-      ? text.join(', ')
-      : 'Not provided';
   }
 
 
@@ -1011,6 +740,59 @@ function questionsForSection(
   return section.questionGroups?.length
     ? section.questionGroups.flatMap(group => group.questions)
     : section.questions;
+}
+
+function selectedChoiceValues(
+  question: Extract<
+    OfferQuestionDefinition,
+    { readonly type: 'single_choice' | 'multiple_choice' }
+  >,
+  value: unknown
+): ReadonlySet<string> {
+  if (!Array.isArray(value)) {
+    return new Set(typeof value === 'string' ? [value] : []);
+  }
+
+  if (!question.objectSelection) {
+    return new Set(
+      value.filter((item): item is string => typeof item === 'string')
+    );
+  }
+
+  const valueKey = question.objectSelection.valueKey;
+  const selectedKey = question.objectSelection.selectedKey ?? 'included';
+
+  return new Set(
+    value.flatMap(item => {
+      if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+        return [];
+      }
+
+      const record = item as Record<string, unknown>;
+      return record[selectedKey] === true && typeof record[valueKey] === 'string'
+        ? [record[valueKey] as string]
+        : [];
+    })
+  );
+}
+
+function formatReviewAddress(value: unknown): string {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return 'Not provided';
+  }
+
+  const address = value as Record<string, unknown>;
+  const street = [address['addressLine1'], address['addressLine2']]
+    .filter(part => typeof part === 'string' && part.trim())
+    .join(' ');
+  const locality = [address['city'], address['state'], address['zipCode']]
+    .filter(part => typeof part === 'string' && part.trim())
+    .join(' ');
+  const county = typeof address['county'] === 'string' && address['county'].trim()
+    ? `${address['county']} County`
+    : '';
+
+  return [street, locality, county].filter(Boolean).join(', ') || 'Not provided';
 }
 
 

@@ -50,6 +50,10 @@ import {
   OfferService
 } from '../../../core/domains/offers/services/offer.service';
 
+import {
+  displayOfferTerms
+} from '../engine/display/state-offer-display.registry';
+
 
 @Component({
   selector: 'app-offer-details',
@@ -71,7 +75,7 @@ import {
     ChangeDetectionStrategy.OnPush
 })
 export class OfferDetailsComponent
-implements OnInit {
+  implements OnInit {
 
   private readonly route =
     inject(ActivatedRoute);
@@ -120,6 +124,14 @@ implements OnInit {
 
   readonly agreementDocument =
     signal<OfferDocument | null>(null);
+
+  readonly agreementTitle = computed(() => {
+    const version = this.currentVersion();
+
+    return version
+      ? this.display(version).agreementTitle
+      : 'Offer Agreement';
+  });
 
   readonly access =
     computed<OfferParticipantAccess | null>(
@@ -184,13 +196,13 @@ implements OnInit {
 
         return (
           version.initiatedBy ===
-            'buyer' &&
+          'buyer' &&
           access.isSeller
         ) || (
-          version.initiatedBy ===
+            version.initiatedBy ===
             'seller' &&
-          access.isBuyer
-        );
+            access.isBuyer
+          );
       }
     );
 
@@ -198,16 +210,16 @@ implements OnInit {
     computed(
       () =>
         this.offer()?.status ===
-          'closed_due_to_contract'
+        'closed_due_to_contract'
     );
 
   readonly isPropertySold =
     computed(
       () =>
         this.offer()?.status ===
-          'converted_to_contract' &&
+        'converted_to_contract' &&
         this.offer()?.contract?.status ===
-          'closed'
+        'closed'
     );
 
   readonly actionHeading =
@@ -221,14 +233,14 @@ implements OnInit {
 
         if (
           offer?.status ===
-            'closed_due_to_contract'
+          'closed_due_to_contract'
         ) {
           return 'No action available';
         }
 
         if (
           offer?.status ===
-            'converted_to_contract'
+          'converted_to_contract'
         ) {
           return this.isPropertySold()
             ? 'Property sold'
@@ -261,7 +273,7 @@ implements OnInit {
 
         if (
           offer?.status ===
-            'closed_due_to_contract'
+          'closed_due_to_contract'
         ) {
           return this.access()?.isBuyer
             ? 'The seller accepted another buyer\u2019s offer. This offer is closed, and no further action is available.'
@@ -270,7 +282,7 @@ implements OnInit {
 
         if (
           offer?.status ===
-            'converted_to_contract'
+          'converted_to_contract'
         ) {
           if (this.isPropertySold()) {
             return 'The seller confirmed that closing was completed. No further action is required.';
@@ -283,7 +295,7 @@ implements OnInit {
 
         if (
           this.actionHeading() !==
-            'Offer sent' ||
+          'Offer sent' ||
           !version
         ) {
           return '';
@@ -338,7 +350,7 @@ implements OnInit {
 
         if (
           offer?.status ===
-            'closed_due_to_contract'
+          'closed_due_to_contract'
         ) {
           return 'Closed — another offer accepted';
         }
@@ -349,7 +361,7 @@ implements OnInit {
 
         return offer
           ? OFFER_STATUS_LABELS[
-            offer.status
+          offer.status
           ]
           : '';
       }
@@ -373,14 +385,14 @@ implements OnInit {
         ) {
           if (
             version.status ===
-              'awaiting_signatures'
+            'awaiting_signatures'
           ) {
             return 'Awaiting your signature';
           }
 
           if (
             version.status ===
-              'partially_signed'
+            'partially_signed'
           ) {
             return 'Signing in progress';
           }
@@ -397,7 +409,7 @@ implements OnInit {
 
         return version
           ? OFFER_VERSION_STATUS_LABELS[
-            version.status
+          version.status
           ]
           : '';
       }
@@ -517,14 +529,14 @@ implements OnInit {
     ) {
       if (
         version.status ===
-          'awaiting_signatures'
+        'awaiting_signatures'
       ) {
         return 'Awaiting your signature';
       }
 
       if (
         version.status ===
-          'partially_signed'
+        'partially_signed'
       ) {
         return 'Signing in progress';
       }
@@ -545,34 +557,8 @@ implements OnInit {
   }
 
 
-  getDueDiligenceDeadline(
-    version: OfferVersion
-  ): string {
-    const deposits =
-      version.terms.deposits;
-
-    if (
-      deposits.dueDiligenceDeadlineType ===
-      'specific_date'
-    ) {
-      return deposits.dueDiligenceEndDate ||
-        'Not provided';
-    }
-
-    if (
-      deposits.dueDiligenceDeadlineType ===
-      'days_after_effective_date'
-    ) {
-      const days =
-        deposits
-          .dueDiligenceDaysAfterEffectiveDate;
-
-      return typeof days === 'number'
-        ? `${days} calendar days after the Effective Date`
-        : 'Not provided';
-    }
-
-    return 'Not selected';
+  display(version: OfferVersion) {
+    return displayOfferTerms(version);
   }
 
 
@@ -635,18 +621,18 @@ implements OnInit {
 
     const labels:
       Readonly<Record<string, string>> = {
-        third_party_financing:
-          'Third-party financing',
-        loan_assumption:
-          'Loan assumption',
-        seller_financing:
-          'Seller financing',
-      };
+      third_party_financing:
+        'Third-party financing',
+      loan_assumption:
+        'Loan assumption',
+      seller_financing:
+        'Seller financing',
+    };
 
     return addenda.length
       ? addenda
-          .map(value => labels[value] ?? value)
-          .join(', ')
+        .map(value => labels[value] ?? value)
+        .join(', ')
       : 'Financed';
   }
 
@@ -692,11 +678,10 @@ implements OnInit {
       return 'Not provided';
     }
 
-    return `Within ${days} ${
-      days === 1
-        ? 'calendar day'
-        : 'calendar days'
-    } after the Effective Date`;
+    return `Within ${days} ${days === 1
+      ? 'calendar day'
+      : 'calendar days'
+      } after the Effective Date`;
   }
 
 
@@ -727,21 +712,8 @@ implements OnInit {
   getDeadline(
     version: OfferVersion
   ): string {
-    if (!this.isTexasVersion(version)) {
-      return this.getDueDiligenceDeadline(
-        version
-      );
-    }
-
-    const days = readNestedNumber(
-      version.terms,
-      'earnestMoneyAndOption',
-      'optionPeriodDays'
-    );
-
-    return days === undefined
-      ? 'No termination option selected'
-      : `${days} ${days === 1 ? 'day' : 'days'} after the Effective Date`;
+    return this.display(version)
+      .importantDeadline.value;
   }
 
 
@@ -820,6 +792,42 @@ implements OnInit {
     party: OfferVersionPartySnapshot
   ): boolean {
     return party.signature?.status === 'signed';
+  }
+
+  getPartySignatureLabel(
+    party: OfferVersionPartySnapshot,
+    version: OfferVersion
+  ): string {
+    if (this.partyHasSigned(party)) {
+      return 'Signed';
+    }
+
+    const isInitiatingParty =
+      party.role === version.initiatedBy;
+
+    if (version.status === 'draft') {
+      return isInitiatingParty
+        ? 'Signature required before sending'
+        : 'Not yet sent';
+    }
+
+    if (
+      version.status === 'awaiting_signatures' ||
+      version.status === 'partially_signed'
+    ) {
+      return isInitiatingParty
+        ? 'Signature pending'
+        : 'Not yet sent';
+    }
+
+    if (
+      version.status === 'delivered' ||
+      version.status === 'signed'
+    ) {
+      return 'Signature pending';
+    }
+
+    return 'No signature required';
   }
 
 
@@ -1368,7 +1376,7 @@ implements OnInit {
           visibleVersion
         )
       );
-       } catch (error: unknown) {
+    } catch (error: unknown) {
       console.error(
         'Unable to load offer details:',
         error
@@ -1382,15 +1390,15 @@ implements OnInit {
     }
   }
 
-    private isPrivatePreparedVersion(
+  private isPrivatePreparedVersion(
     version: OfferVersion
   ): boolean {
     return (
       version.status === 'draft' ||
       version.status ===
-        'awaiting_signatures' ||
+      'awaiting_signatures' ||
       version.status ===
-        'partially_signed'
+      'partially_signed'
     );
   }
 
@@ -1406,7 +1414,7 @@ implements OnInit {
       (
         !!offer.lastDeliveredVersionUid &&
         version.Uid !==
-          offer.lastDeliveredVersionUid &&
+        offer.lastDeliveredVersionUid &&
         !version.deliveredAt
       )
     );
@@ -1426,11 +1434,11 @@ implements OnInit {
 
     return version.initiatedBy === 'buyer'
       ? offer.buyerUids.includes(
-          userUid
-        )
+        userUid
+      )
       : offer.sellerUids.includes(
-          userUid
-        );
+        userUid
+      );
   }
 
 
@@ -1493,8 +1501,8 @@ function readNestedText(
 
   return typeof result === 'string' &&
     result.trim().length > 0
-      ? result
-      : undefined;
+    ? result
+    : undefined;
 }
 
 
@@ -1509,8 +1517,8 @@ function readNestedNumber(
 
   return typeof result === 'number' &&
     Number.isFinite(result)
-      ? result
-      : undefined;
+    ? result
+    : undefined;
 }
 
 
@@ -1525,9 +1533,9 @@ function readNestedStringArray(
 
   return Array.isArray(result)
     ? result.filter(
-        (item): item is string =>
-          typeof item === 'string'
-      )
+      (item): item is string =>
+        typeof item === 'string'
+    )
     : [];
 }
 

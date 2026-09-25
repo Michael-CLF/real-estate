@@ -122,11 +122,11 @@ export const createCounteroffer =
 
             const offer =
               offerSnapshot.data() as
-                OfferDocument;
+              OfferDocument;
 
             const sourceVersion =
               sourceVersionSnapshot.data() as
-                OfferVersionDocument;
+              OfferVersionDocument;
 
             const stateContractPackage =
               requireStateContractPackage(
@@ -135,9 +135,9 @@ export const createCounteroffer =
 
             if (
               sourceVersion.stateCode !==
-                stateContractPackage.stateCode ||
+              stateContractPackage.stateCode ||
               sourceVersion.terms.stateCode !==
-                stateContractPackage.stateCode
+              stateContractPackage.stateCode
             ) {
               throw new HttpsError(
                 'data-loss',
@@ -259,6 +259,9 @@ export const createCounteroffer =
             transaction.update(
               offerReference,
               {
+                status:
+                  'draft',
+
                 currentVersionUid:
                   counterofferReference.id,
 
@@ -283,6 +286,36 @@ export const createCounteroffer =
 
                 totalVersions:
                   nextVersionNumber,
+
+                statusHistory:
+                  FieldValue.arrayUnion({
+                    fromStatus:
+                      offer.status,
+
+                    toStatus:
+                      'draft',
+
+                    action:
+                      'draft_created',
+
+                    actorUid:
+                      userUid,
+
+                    actorRole:
+                      initiatingParty,
+
+                    offerVersionUid:
+                      counterofferReference.id,
+
+                    offerVersionNumber:
+                      nextVersionNumber,
+
+                    note:
+                      `Counteroffer Version ${nextVersionNumber} draft created.`,
+
+                    occurredAt:
+                      now
+                  }),
 
                 lastActivityAt:
                   now,
@@ -356,11 +389,11 @@ function verifyCounterofferAccess(
   const authorized =
     receivingParty === 'buyer'
       ? offer.buyerUids.includes(
-          userUid
-        )
+        userUid
+      )
       : offer.sellerUids.includes(
-          userUid
-        );
+        userUid
+      );
 
   if (!authorized) {
     throw new HttpsError(
@@ -400,7 +433,7 @@ function resetPartySignatures(
         electronicTransactionsConsentAcceptedAt:
           undefined
       }) as
-        OfferVersionPartySnapshotDocument
+      OfferVersionPartySnapshotDocument
   );
 }
 

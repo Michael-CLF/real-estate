@@ -62,7 +62,10 @@ export interface MarketplaceListing {
   lotSizeAcres?: number;
 
   yearBuilt?: number;
+  annualPropertyTax?: number;
+  annualHomeownersInsurance?: number;
   hoa?: ListingHoa;
+  
   enhancements?: ListingEnhancements;
   schools?: ListingSchools;
 

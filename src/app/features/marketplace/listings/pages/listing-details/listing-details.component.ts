@@ -1057,22 +1057,27 @@ export class ListingDetailsComponent
   }
 
   protected estimateAnnualPropertyTax(
-    listing: MarketplaceListing
+    listing: MarketplaceListing,
   ): number {
     return this.mortgageCostEstimationService
       .estimateAnnualPropertyTax(
         listing.price,
-        listing.address.stateSlug
+        listing.address
+          .stateAbbreviation,
+        listing.annualPropertyTax,
       );
   }
 
   protected estimateAnnualHomeownersInsurance(
-    listing: MarketplaceListing
+    listing: MarketplaceListing,
   ): number {
     return this.mortgageCostEstimationService
       .estimateAnnualHomeownersInsurance(
         listing.price,
-        listing.address.stateSlug
+        listing.address
+          .stateAbbreviation,
+        listing
+          .annualHomeownersInsurance,
       );
   }
 
