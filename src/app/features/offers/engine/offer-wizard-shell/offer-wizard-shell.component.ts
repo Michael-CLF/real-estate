@@ -98,6 +98,7 @@ export class OfferWizardShellComponent {
   readonly terms = input.required<unknown>();
 
   readonly buyers = input<readonly OfferParty[]>([]);
+  readonly allowBuyerEdits = input(true);
   readonly sellers = input<readonly OfferParty[]>([]);
 
   readonly listingDisclosures =

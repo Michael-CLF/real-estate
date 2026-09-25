@@ -148,7 +148,10 @@ export class OfferIdentityVerificationService {
     const expectedPath =
       `/listings/${listingUid}/offer`;
 
+    const newPath = `/listings/${listingUid}/offers/new`;
     return (
+      returnPath === newPath ||
+      returnPath.startsWith(`${newPath}?`) ||
       returnPath === expectedPath ||
       returnPath.startsWith(
         `${expectedPath}?`

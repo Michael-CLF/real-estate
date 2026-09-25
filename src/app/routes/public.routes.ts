@@ -619,6 +619,18 @@ export const PUBLIC_ROUTES:
             )
         },
 
+        /* Utah and future state entry: creation and editing are separate actions. */
+        {
+          path: 'listings/:listingUid/offers/new',
+          canActivate: [authGuard, accountGuard, offerIdentityGuard],
+          loadComponent: () => import('../features/offers/engine/offer-entry/offer-entry.component').then(c => c.OfferEntryComponent)
+        },
+        {
+          path: 'offers/:offerUid/versions/:offerVersionUid/edit',
+          canActivate: [authGuard, accountGuard, offerAccessGuard],
+          loadComponent: () => import('../features/offers/engine/offer-entry/offer-entry.component').then(c => c.OfferEntryComponent)
+        },
+
         /*
          * Offer and counteroffer details
          *

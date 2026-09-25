@@ -51,7 +51,7 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'SD', isActive: false, name: 'South Dakota', slug: 'south-dakota' },
   { abbreviation: 'TN', isActive: false, name: 'Tennessee', slug: 'tennessee' },
   { abbreviation: 'TX', isActive: true, name: 'Texas', slug: 'texas' },
-  { abbreviation: 'UT', isActive: false, name: 'Utah', slug: 'utah' },
+  { abbreviation: 'UT', isActive: true, name: 'Utah', slug: 'utah' },
   { abbreviation: 'VT', isActive: false, name: 'Vermont', slug: 'vermont' },
   { abbreviation: 'VA', isActive: false, name: 'Virginia', slug: 'virginia' },
   { abbreviation: 'WA', isActive: false, name: 'Washington', slug: 'washington' },

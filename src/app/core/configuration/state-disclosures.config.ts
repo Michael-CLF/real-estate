@@ -40,6 +40,45 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
           'Mineral and Oil and Gas Rights Mandatory Disclosure Statement'
       }
     ],
+    UT: [
+      {
+        description: 'Upload a seller-completed property condition statement if agreed in the contract. This is a contractual choice, not a universal Utah statutory form.',
+        documentType: 'utah-seller-property-condition',
+        formCode: 'UT-SELLER-CONDITION',
+        required: false,
+        shortTitle: 'Property condition',
+        sortOrder: 1,
+        title: 'Utah seller property condition statement',
+      },
+      {
+        description: 'For most homes built before 1978, upload the signed lead disclosure and deliver available reports and the EPA pamphlet before the contract is signed.',
+        documentType: 'lead-based-paint',
+        formCode: 'FED-LEAD',
+        officialFormUrl: 'https://www.epa.gov/lead/lead-based-paint-disclosure-rule-section-1018-title-x',
+        required: false,
+        shortTitle: 'Lead paint',
+        sortOrder: 2,
+        title: 'Lead-based paint disclosure',
+      },
+      {
+        description: 'For property in an owners association, upload its recorded governing documents and provide the required homeowner education materials before closing.',
+        documentType: 'utah-hoa-governing-documents',
+        formCode: 'UT-HOA-DOCS',
+        required: false,
+        shortTitle: 'Association documents',
+        sortOrder: 3,
+        title: 'Utah association governing documents',
+      },
+      {
+        description: 'When you know the property is currently contaminated from methamphetamine use, storage, or manufacture, disclose that condition to the buyer.',
+        documentType: 'utah-methamphetamine-contamination',
+        formCode: 'UT-METH-DISCLOSURE',
+        required: false,
+        shortTitle: 'Contamination',
+        sortOrder: 4,
+        title: 'Current methamphetamine contamination disclosure',
+      },
+    ],
     TX: [
       {
         description:

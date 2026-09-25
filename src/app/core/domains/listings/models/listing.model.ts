@@ -538,6 +538,9 @@ export interface ListingSellerStatements {
   fixtureLeasesExist?: boolean;
   naturalResourceLeasesExist?: boolean;
 
+  /** Seller's actual knowledge of current contamination, not historical use. */
+  methamphetamineContaminationKnown?: boolean;
+
   additionalSeller?: {
     legalName: string;
     email: string;

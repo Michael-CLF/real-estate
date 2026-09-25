@@ -10,6 +10,8 @@ import {
   texasStateContractPackage,
 } from './texas/texas-state-contract.package';
 
+import { utahStateContractPackage } from './utah/utah-state-contract.package';
+
 import {
   oklahomaStateContractPackage,
 } from './oklahoma/oklahoma-state-contract.package';
@@ -67,6 +69,7 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
 
       oklahomaStateContractPackage,
     ],
+    [utahStateContractPackage.stateCode, utahStateContractPackage],
   ]);
 
 

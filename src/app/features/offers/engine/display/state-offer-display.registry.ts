@@ -14,6 +14,8 @@ import {
   texasOfferDisplayAdapter,
 } from '../../states/texas/display/texas-offer-display.adapter';
 
+import { utahOfferDisplayAdapter } from '../../states/utah/display/utah-offer-display.adapter';
+
 import {
   oklahomaOfferDisplayAdapter,
 } from '../../states/oklahoma/display/oklahoma-offer-display.adapter';
@@ -51,6 +53,9 @@ export function displayOfferTerms(
     case 'OK':
       return oklahomaOfferDisplayAdapter
         .display(version.terms);
+
+    case 'UT':
+      return utahOfferDisplayAdapter.display(version.terms);
 
     default:
       throw new Error(

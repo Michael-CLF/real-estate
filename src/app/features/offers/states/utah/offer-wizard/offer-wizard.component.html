@@ -1,1 +1,40 @@
-<p>offer-wizard works!</p>
+@if (terms(); as currentTerms) {
+  <section class="utah-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="utah-offer-wizard__contract">
+        <span>Selected Utah contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    <app-offer-wizard-shell
+      stateName="Utah"
+      title="Utah purchase offer"
+      description="Complete the questions for the selected Utah contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [allowBuyerEdits]="initiatedBy() === 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="utah-offer-wizard__loading" aria-live="polite">
+    Preparing the Utah residential sale contract from the property listing…
+  </section>
+}

@@ -15,6 +15,10 @@ import {
   texasListingPackage,
 } from './texas-listing.package';
 
+import {
+  utahListingPackage,
+} from './utah-listing.package';
+
 const PACKAGES =
   new Map<
     string,
@@ -31,6 +35,11 @@ const PACKAGES =
     [
       'TX',
       texasListingPackage,
+    ],
+
+    [
+      'UT',
+      utahListingPackage,
     ],
   ]);
 
@@ -49,9 +58,8 @@ export function getStateListingPackage(
 
   if (!statePackage) {
     throw new Error(
-      `Listing publication is not configured for ${
-        normalizedStateCode ||
-        'this state'
+      `Listing publication is not configured for ${normalizedStateCode ||
+      'this state'
       }.`,
     );
   }
@@ -86,8 +94,8 @@ export function validateStateSellerStatements(
     typeof statements['stateCode'] ===
       'string'
       ? statements['stateCode']
-          .trim()
-          .toUpperCase()
+        .trim()
+        .toUpperCase()
       : statePackage.stateCode;
 
   if (
@@ -111,7 +119,7 @@ export function validateStateSellerStatements(
     ].includes(
       String(
         statements[
-          'ownershipStatus'
+        'ownershipStatus'
         ] ?? '',
       ),
     )
@@ -146,7 +154,7 @@ export function validateStateSellerStatements(
         field,
       ) &&
       typeof statements[field] !==
-        'boolean'
+      'boolean'
     ) {
       throw new Error(
         `Listing draft ${listingUid} has no ${message} statement.`,
@@ -160,7 +168,7 @@ export function validateStateSellerStatements(
       'fuelTankPresent',
     ) &&
     statements[
-      'fuelTankPresent'
+    'fuelTankPresent'
     ] === true &&
     ![
       'owned',
@@ -168,7 +176,7 @@ export function validateStateSellerStatements(
     ].includes(
       String(
         statements[
-          'fuelTankOwnership'
+        'fuelTankOwnership'
         ] ?? '',
       ),
     )
@@ -184,7 +192,7 @@ export function validateStateSellerStatements(
       'generalLeasesExist',
     ) &&
     typeof statements[
-      'leasesExist'
+    'leasesExist'
     ] !== 'boolean'
   ) {
     throw new Error(
@@ -209,6 +217,17 @@ export function validateStateSellerStatements(
   ) {
     throw new Error(
       `Listing draft ${listingUid} has incomplete Texas lease statements.`,
+    );
+  }
+  if (
+    requiresField(
+      statePackage,
+      'utahMethamphetamineContamination',
+    ) &&
+    typeof statements['methamphetamineContaminationKnown'] !== 'boolean'
+  ) {
+    throw new Error(
+      `Listing draft ${listingUid} has no Utah methamphetamine-contamination statement.`,
     );
   }
 }

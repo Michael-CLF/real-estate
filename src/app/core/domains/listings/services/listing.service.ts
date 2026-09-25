@@ -788,6 +788,13 @@ export class ListingService {
       sellerStatements.additionalSeller;
 
     if (
+      requiresStateListingField(statePackage, 'utahMethamphetamineContamination') &&
+      typeof sellerStatements.methamphetamineContaminationKnown !== 'boolean'
+    ) {
+      throw new Error('Indicate whether you know of current methamphetamine contamination.');
+    }
+
+    if (
       additionalSeller &&
       (
         !additionalSeller.legalName.trim() ||

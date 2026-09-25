@@ -52,6 +52,11 @@ const STATE_OFFER_REGISTRATIONS:
         ),
     },
 
+    UT: {
+      stateCode: 'UT',
+      offerCreationEnabled: true,
+      loadComponent: () => import('../states/utah/utah-offer-entry/utah-offer-entry.component').then(component => component.UtahOfferEntryComponent),
+    },
     OK: {
       stateCode: 'OK',
 
@@ -89,4 +94,15 @@ export function getEnabledStateOfferRegistration(
   }
 
   return registration;
+}
+/** Routes are selected by state registration so shared pages do not inspect state terms. */
+export function newOfferPath(stateCode: string, listingUid: string): readonly string[] {
+  return stateCode.trim().toUpperCase() === 'UT'
+    ? ['/listings', listingUid, 'offers', 'new']
+    : ['/listings', listingUid, 'offer'];
+}
+export function editOfferPath(stateCode: string, listingUid: string, offerUid: string, versionUid: string): { path: readonly string[]; queryParams?: Record<string, string> } {
+  return stateCode.trim().toUpperCase() === 'UT'
+    ? { path: ['/offers', offerUid, 'versions', versionUid, 'edit'] }
+    : { path: ['/listings', listingUid, 'offer'], queryParams: { offerUid, offerVersionUid: versionUid } };
 }

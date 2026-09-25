@@ -52,18 +52,19 @@ export type PropertyDetailsFuelTankOwnership =
 
 export interface PropertyDetailsSellerStatementsFormValue {
   ownershipStatus:
-    | PropertyDetailsSellerOwnershipStatus
-    | '';
+  | PropertyDetailsSellerOwnershipStatus
+  | '';
   leadBasedPaintApplies: boolean | null;
   ownersAssociationApplies: boolean | null;
   fuelTankPresent: boolean | null;
   fuelTankOwnership:
-    | PropertyDetailsFuelTankOwnership
-    | '';
+  | PropertyDetailsFuelTankOwnership
+  | '';
   leasesExist: boolean | null;
   residentialLeasesExist: boolean | null;
   fixtureLeasesExist: boolean | null;
   naturalResourceLeasesExist: boolean | null;
+  methamphetamineContaminationKnown: boolean | null;
   additionalSellerIncluded: boolean;
   additionalSellerLegalName: string;
   additionalSellerEmail: string;
@@ -94,7 +95,7 @@ export interface PropertyDetailsFormValue {
   description: string;
   hoa?: PropertyDetailsHoaFormValue;
   sellerStatements:
-    PropertyDetailsSellerStatementsFormValue;
+  PropertyDetailsSellerStatementsFormValue;
 }
 
 @Component({
@@ -109,8 +110,7 @@ export interface PropertyDetailsFormValue {
     ChangeDetectionStrategy.OnPush,
 })
 export class PropertyDetailsStepComponent
-  implements OnInit
-{
+  implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   private readonly disclosureService =
@@ -161,6 +161,13 @@ export class PropertyDetailsStepComponent
         this.stateListingPackage(),
         'generalLeasesExist',
       ),
+  );
+
+  readonly requiresUtahMethamphetamineStatement = computed(() =>
+    requiresStateListingField(
+      this.stateListingPackage(),
+      'utahMethamphetamineContamination',
+    ),
   );
 
   readonly isTexasListing = computed(
@@ -242,23 +249,23 @@ export class PropertyDetailsStepComponent
     value: ListingHoaFeeFrequency;
     label: string;
   }[] = [
-    {
-      value: 'monthly',
-      label: 'Monthly',
-    },
-    {
-      value: 'quarterly',
-      label: 'Quarterly',
-    },
-    {
-      value: 'semi_annually',
-      label: 'Semi-Annually',
-    },
-    {
-      value: 'annually',
-      label: 'Annually',
-    },
-  ];
+      {
+        value: 'monthly',
+        label: 'Monthly',
+      },
+      {
+        value: 'quarterly',
+        label: 'Quarterly',
+      },
+      {
+        value: 'semi_annually',
+        label: 'Semi-Annually',
+      },
+      {
+        value: 'annually',
+        label: 'Annually',
+      },
+    ];
 
   readonly form = this.fb.nonNullable.group({
     propertyType: [
@@ -369,11 +376,15 @@ export class PropertyDetailsStepComponent
       this.fb.nonNullable.group({
         ownershipStatus: [
           '' as
-            | PropertyDetailsSellerOwnershipStatus
-            | '',
+          | PropertyDetailsSellerOwnershipStatus
+          | '',
         ],
 
         leadBasedPaintApplies: [
+          null as boolean | null,
+        ],
+
+        methamphetamineContaminationKnown: [
           null as boolean | null,
         ],
 
@@ -387,8 +398,8 @@ export class PropertyDetailsStepComponent
 
         fuelTankOwnership: [
           '' as
-            | PropertyDetailsFuelTankOwnership
-            | '',
+          | PropertyDetailsFuelTankOwnership
+          | '',
         ],
 
         leasesExist: [
@@ -530,7 +541,7 @@ export class PropertyDetailsStepComponent
           this.configureHoaValidators(
             ownersAssociationApplies,
             ownersAssociationApplies ===
-              false,
+            false,
           );
         }
 
@@ -585,7 +596,7 @@ export class PropertyDetailsStepComponent
   ): File | null {
     return (
       this.selectedLeaseFiles()[
-        documentType
+      documentType
       ] ?? null
     );
   }
@@ -992,6 +1003,11 @@ export class PropertyDetailsStepComponent
     this.setRequired(
       controls.leadBasedPaintApplies,
       this.requiresLeadBasedPaint(),
+    );
+
+    this.setRequired(
+      controls.methamphetamineContaminationKnown,
+      this.requiresUtahMethamphetamineStatement(),
     );
 
     this.setRequired(

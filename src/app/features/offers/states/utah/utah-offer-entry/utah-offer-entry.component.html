@@ -1,1 +1,84 @@
-<p>utah-offer-entry works!</p>
+@if (loading()) {
+  <main
+    class="utah-offer-entry"
+    aria-live="polite"
+  >
+    <section class="utah-offer-entry__status-card">
+      <div
+        class="utah-offer-entry__spinner"
+        aria-hidden="true"
+      ></div>
+
+      <h1>Opening your Utah offer</h1>
+
+      <p>
+        NavStreet is loading the property and checking for an existing draft.
+      </p>
+    </section>
+  </main>
+} @else if (errorMessage() && !property()) {
+  <main class="utah-offer-entry">
+    <section
+      class="utah-offer-entry__status-card utah-offer-entry__status-card--error"
+      role="alert"
+    >
+      <h1>Utah offer unavailable</h1>
+
+      <p>{{ errorMessage() }}</p>
+
+      <button
+        type="button"
+        (click)="returnToListing()"
+      >
+        Return to property details
+      </button>
+    </section>
+  </main>
+} @else if (property(); as propertySnapshot) {
+  <main class="utah-offer-entry">
+    @if (errorMessage()) {
+      <div
+        class="utah-offer-entry__error"
+        role="alert"
+      >
+        {{ errorMessage() }}
+      </div>
+    }
+
+    @if (creating()) {
+      <div
+        class="utah-offer-entry__notice"
+        aria-live="polite"
+      >
+        Creating your secure Utah offer draft…
+      </div>
+    }
+
+    @if (uploading()) {
+      <div
+        class="utah-offer-entry__notice"
+        aria-live="polite"
+      >
+        Uploading and registering your document…
+      </div>
+    }
+
+    <app-offer-wizard
+      [property]="propertySnapshot"
+      [buyers]="buyers()"
+      [initiatedBy]="currentVersion()?.initiatedBy ?? 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [expiresAt]="expiresAt()"
+      [timeZone]="timeZone()"
+      [initialTerms]="initialTerms()"
+      [saving]="saving() || creating() || uploading()"
+      [submitting]="submitting()"
+      (draftChanged)="onDraftChanged($event)"
+      (documentSelected)="onDocumentSelected($event)"
+      (submitRequested)="onSubmitRequested($event)"
+      (returnToListingRequested)="returnToListing()"
+      (listingDisclosureRequested)="openListingDisclosure($event)"
+    />
+  </main>
+}

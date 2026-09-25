@@ -247,11 +247,7 @@
             submit the completed offer directly to the seller.
           </p>
 
-          <a class="listing-details__offer-button" [routerLink]="[
-        '/listings',
-        listing.uid,
-        'offer'
-      ]">
+          <a class="listing-details__offer-button" [routerLink]="offerPath(listing)">
             <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
 
             Make an offer

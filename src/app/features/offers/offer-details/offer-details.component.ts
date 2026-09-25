@@ -1,3 +1,4 @@
+import { editOfferPath } from '../engine/state-offer-registry';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -1137,22 +1138,8 @@ export class OfferDetailsComponent
             version.Uid
           );
 
-      await this.router.navigate(
-        [
-          '/listings',
-          offer.listingUid,
-          'offer'
-        ],
-        {
-          queryParams: {
-            offerUid:
-              result.offerUid,
-
-            offerVersionUid:
-              result.offerVersionUid
-          }
-        }
-      );
+      const route = editOfferPath(offer.stateCode, offer.listingUid, result.offerUid, result.offerVersionUid);
+      await this.router.navigate([...route.path], { queryParams: route.queryParams });
     } catch (error) {
       this.errorMessage.set(
         this.getErrorMessage(error)
@@ -1178,22 +1165,8 @@ export class OfferDetailsComponent
       return;
     }
 
-    await this.router.navigate(
-      [
-        '/listings',
-        offer.listingUid,
-        'offer'
-      ],
-      {
-        queryParams: {
-          offerUid:
-            offer.Uid,
-
-          offerVersionUid:
-            version.Uid
-        }
-      }
-    );
+    const route = editOfferPath(offer.stateCode, offer.listingUid, offer.Uid, version.Uid);
+    await this.router.navigate([...route.path], { queryParams: route.queryParams });
   }
 
 

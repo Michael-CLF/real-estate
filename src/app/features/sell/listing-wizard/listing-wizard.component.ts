@@ -320,6 +320,8 @@ export class ListingWizardComponent implements OnInit {
             draft.sellerStatements?.fixtureLeasesExist ?? null,
           naturalResourceLeasesExist:
             draft.sellerStatements?.naturalResourceLeasesExist ?? null,
+          methamphetamineContaminationKnown:
+            draft.sellerStatements?.methamphetamineContaminationKnown ?? null,
 
           additionalSellerIncluded:
             !!draft.sellerStatements?.additionalSeller,
@@ -714,6 +716,18 @@ export class ListingWizardComponent implements OnInit {
         if (
           requiresStateListingField(
             statePackage,
+            'utahMethamphetamineContamination',
+          ) &&
+          typeof statements.methamphetamineContaminationKnown !== 'boolean'
+        ) {
+          throw new Error(
+            'Please answer the Utah current-contamination statement.',
+          );
+        }
+
+        if (
+          requiresStateListingField(
+            statePackage,
             'leadBasedPaintApplies',
           ) &&
           statements.leadBasedPaintApplies === null
@@ -864,6 +878,16 @@ export class ListingWizardComponent implements OnInit {
           ListingSellerStatements = {
           stateCode,
           schemaVersion: 1,
+
+          ...(requiresStateListingField(
+            statePackage,
+            'utahMethamphetamineContamination',
+          )
+            ? {
+              methamphetamineContaminationKnown:
+                statements.methamphetamineContaminationKnown === true,
+            }
+            : {}),
 
           ...(requiresStateListingField(
             statePackage,

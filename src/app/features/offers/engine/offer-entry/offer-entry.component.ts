@@ -28,6 +28,8 @@ import {
   FirestoreMarketplaceListingRepository,
 } from '../../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
 
+import { OfferService } from '../../../../core/domains/offers/services/offer.service';
+
 import {
   getEnabledStateOfferRegistration,
 } from '../state-offer-registry';
@@ -84,7 +86,9 @@ implements OnInit {
       null
     );
 
-  readonly listingUid =
+  private readonly offerService = inject(OfferService);
+
+  listingUid =
     this.route.snapshot.paramMap.get(
       'listingUid'
     ) ?? '';
@@ -92,6 +96,14 @@ implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
+      const offerUid = this.route.snapshot.paramMap.get('offerUid');
+      if (offerUid) {
+        const offer = await this.offerService.getOffer(offerUid);
+        if (!offer || offer.currentVersionUid !== this.route.snapshot.paramMap.get('offerVersionUid')) {
+          throw new Error('The current offer draft could not be found.');
+        }
+        this.listingUid = offer.listingUid;
+      }
       if (!this.listingUid) {
         throw new Error(
           'The property listing identifier is missing.'

@@ -150,7 +150,7 @@
       Primary party information is populated from NavStreet records and locked for this offer.
     </p>
 
-    @if (buyers().length === 1 || addingCoBuyer()) {
+    @if (allowBuyerEdits() && (buyers().length === 1 || addingCoBuyer())) {
     <label class="offer-wizard-shell__co-buyer-toggle">
       <input type="checkbox" [checked]="addingCoBuyer()" [disabled]="busy()"
         (change)="toggleCoBuyer(($any($event.target)).checked)" />

@@ -191,6 +191,8 @@ export interface StateContractPackage<
     input: GenerateStateAgreementInput<TTerms>
   ): Promise<GeneratedStateAgreement>;
 
+  requiredListingDisclosures?(input: ValidateStateSubmissionInput<TTerms>): readonly string[];
+
   validateSubmission(
     input: ValidateStateSubmissionInput<TTerms>
   ): void;

@@ -1,3 +1,4 @@
+import { newOfferPath } from '../../../../offers/engine/state-offer-registry';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -472,6 +473,10 @@ export class ListingDetailsComponent
     }
   }
 
+
+  offerPath(listing: MarketplaceListing): readonly string[] {
+    return newOfferPath(listing.address.stateAbbreviation || listing.address.state, listing.uid);
+  }
 
   async toggleSavedListing(
     listing: MarketplaceListing

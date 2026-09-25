@@ -284,6 +284,25 @@ form {
   color: #067647;
 }
 
+.utah-statement-card {
+  grid-column: 1 / -1;
+  padding: 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.utah-statement-card select {
+  max-width: 32rem;
+}
+
+.utah-statement-card__description {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   .three-column {
     grid-template-columns: 1fr;

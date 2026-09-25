@@ -13,12 +13,14 @@ import {
 import {
   texasListingPackage,
 } from './texas/texas-listing.package';
+import { utahListingPackage } from './utah/utah-listing.package';
 
 const PACKAGES =
   new Map<string, StateListingPackage>([
     ['NC', northCarolinaListingPackage],
     ['OK', oklahomaListingPackage],
     ['TX', texasListingPackage],
+    ['UT', utahListingPackage],
   ]);
 
 export function getStateListingPackage(

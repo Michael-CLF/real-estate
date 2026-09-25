@@ -4,7 +4,8 @@ export type StateListingField =
   | 'ownersAssociationApplies'
   | 'fuelTankPresent'
   | 'generalLeasesExist'
-  | 'texasLeaseCategories';
+  | 'texasLeaseCategories'
+  | 'utahMethamphetamineContamination';
 
 export interface StateListingPackage {
   readonly stateCode: string;

@@ -195,6 +195,7 @@
               {{ requirement.description }}
             </p>
 
+            @if (requirement.officialFormUrl) {
             <a
               class="official-form-link"
               [href]="requirement.officialFormUrl"
@@ -208,6 +209,7 @@
 
               Open the official blank form
             </a>
+            }
 
             @if (disclosure) {
               <section class="current-document">
