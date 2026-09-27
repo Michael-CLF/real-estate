@@ -119,13 +119,18 @@ export class OfferVerificationReturnComponent
       this.route.snapshot.queryParamMap
         .get('startError') === 'true'
     ) {
-      this.checking.set(false);
-      this.status.set(
-        'not_started'
-      );
-      this.errorMessage.set(
-        'Identity verification could not be started. Please try again.'
-      );
+      // Check the account before inviting an already verified buyer
+      // to start another Stripe verification session.
+      await this.checkStatus();
+
+      if (
+        this.status() !== 'verified' &&
+        !this.errorMessage()
+      ) {
+        this.errorMessage.set(
+          'Identity verification could not be started. Please try again.'
+        );
+      }
       return;
     }
 

@@ -10,6 +10,7 @@ export interface OfferSectionDefinition {
   readonly title: string;
   readonly shortTitle?: string;
   readonly description?: string;
+  readonly questionLayout?: 'cards';
 
   readonly questions:
     readonly OfferQuestionDefinition[];

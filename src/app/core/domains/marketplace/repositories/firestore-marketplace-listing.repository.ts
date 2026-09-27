@@ -585,6 +585,14 @@ export class FirestoreMarketplaceListingRepository
                     data['yearBuilt']
                 ),
 
+            sellerStatements:
+                data['sellerStatements'] && typeof data['sellerStatements'] === 'object'
+                    ? {
+                        ownersAssociationApplies: (data['sellerStatements'] as Record<string, unknown>)['ownersAssociationApplies'] as boolean | null | undefined,
+                        leadBasedPaintApplies: (data['sellerStatements'] as Record<string, unknown>)['leadBasedPaintApplies'] as boolean | null | undefined,
+                    }
+                    : undefined,
+
             annualPropertyTax:
                 this.readNumber(
                     parcelAndTaxesData?.[

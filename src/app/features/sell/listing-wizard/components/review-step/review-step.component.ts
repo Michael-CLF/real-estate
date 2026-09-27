@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   input,
   output,
@@ -18,6 +19,14 @@ import { PropertyFeaturesStepValue } from '../property-features-step/property-fe
 import { ListingPhoto } from '../photos-step/photos-step.component';
 
 import { PricingFormValue } from '../pricing-step/pricing-step.component';
+
+import {
+  getStateDisclosureRequirements,
+  isDisclosureRequiredForListing,
+  normalizeDisclosureStateCode,
+} from '../../../../../core/configuration/state-disclosures.config';
+
+import type { StateDisclosureRequirement } from '../../../../../core/domains/disclosures/models/state-disclosure-requirement.model';
 
 import {
   getStateListingPackage,
@@ -38,6 +47,23 @@ import {
 })
 export class ReviewStepComponent {
   readonly address = input<AddressFormValue | null>(null);
+
+  protected readonly stateDisclosureRequirements = computed(() =>
+    getStateDisclosureRequirements(this.address()?.state ?? '')
+  );
+
+  protected readonly floridaDisclosureNotice = computed(() =>
+    normalizeDisclosureStateCode(this.address()?.state ?? '') === 'FL'
+  );
+
+  protected isDisclosureRequired(requirement: StateDisclosureRequirement): boolean {
+    const statements = this.propertyDetails()?.sellerStatements;
+    return isDisclosureRequiredForListing(this.address()?.state ?? '', requirement, {
+      ownersAssociationApplies: statements?.ownersAssociationApplies,
+      leadBasedPaintApplies: statements?.leadBasedPaintApplies,
+      yearBuilt: this.propertyDetails()?.yearBuilt,
+    });
+  }
 
   readonly propertyDetails = input<PropertyDetailsFormValue | null>(null);
 
@@ -298,6 +324,11 @@ export class ReviewStepComponent {
     }
 
     return '—';
+  }
+
+  protected get formattedMethamphetamineStatement(): string {
+    const reported = this.propertyDetails()?.sellerStatements.methamphetamineContaminationKnown;
+    return reported === true ? 'Seller knows of current contamination.' : reported === false ? 'Seller does not know of current contamination.' : 'Not answered.';
   }
 
   protected get isTexasListing(): boolean {

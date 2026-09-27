@@ -203,7 +203,7 @@
               {{ openingDocument() ? 'Opening…' : 'Open Agreement PDF' }}
             </button>
             } @else if (
-            access()?.canSign ||
+            (access()?.canSign && !display(version).signingBlockReason) ||
             version.status === 'accepted'
             ) {
             <button class="button button--secondary" type="button" [disabled]="processing()"
@@ -295,7 +295,11 @@
           </button>
           }
 
-          @if (access()?.canSign) {
+          @if (display(version).signingBlockReason) {
+          <p class="action-card__note" role="alert">{{ display(version).signingBlockReason }}</p>
+          }
+
+          @if (access()?.canSign && !display(version).signingBlockReason) {
           @if (agreementDocument()) {
           <button class="button button--primary" type="button" [disabled]="processing()" (click)="openSigningPanel()">
             {{ signButtonLabel() }}
@@ -477,6 +481,7 @@
     <section class="state-card">
       <h2>Offer unavailable</h2>
       <p>{{ errorMessage() || 'The requested offer could not be loaded.' }}</p>
+      <button class="button button--primary" type="button" (click)="retryLoading()">Try again</button>
       <button class="button button--primary" type="button" (click)="returnToDashboard()">
         Return to Dashboard
       </button>

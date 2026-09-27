@@ -20,6 +20,7 @@ import {
 } from './utah-listing.package';
 
 import { wisconsinListingPackage } from './wisconsin-listing.package';
+import { floridaListingPackage } from './florida-listing.package';
 
 const PACKAGES =
   new Map<
@@ -47,6 +48,7 @@ const PACKAGES =
       'WI',
       wisconsinListingPackage,
     ],
+    ['FL', floridaListingPackage],
   ]);
 
 export function getStateListingPackage(

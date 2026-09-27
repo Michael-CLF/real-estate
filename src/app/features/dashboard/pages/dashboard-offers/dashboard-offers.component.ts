@@ -341,6 +341,8 @@ export class DashboardOffersComponent
       perspective,
 
       actionRequired:
+        offer.status !== 'converted_to_contract' &&
+        offer.status !== 'closed_due_to_contract' &&
         actionableVersion &&
         cameFromOtherParty
     };

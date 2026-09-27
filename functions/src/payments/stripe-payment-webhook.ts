@@ -719,10 +719,10 @@ function validateDraftForPublication(
     );
   }
 
-  if (draft.address.state.trim().toUpperCase() === 'WI' &&
+  if (['WI', 'FL'].includes(draft.address.state.trim().toUpperCase()) &&
       !draft.propertyDetails.legalDescription?.trim()) {
     throw new Error(
-      `Listing draft ${listingUid} has no Wisconsin legal property description.`,
+      `Listing draft ${listingUid} has no recorded legal property description.`,
     );
   }
 

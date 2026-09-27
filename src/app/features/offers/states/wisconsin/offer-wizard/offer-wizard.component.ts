@@ -49,6 +49,23 @@ import {
   WISCONSIN_OFFER_PACKAGE,
 } from '../wisconsin-offer-package';
 
+// A seller counteroffer may negotiate price and concessions, but cannot
+// rewrite the buyer's funding, deposit promises, or receipt statements.
+const BUYER_OWNED_FIELDS = new Set([
+  'purchase.earnestMoneyInCents',
+  'purchase.additionalEarnestMoneyInCents',
+  'purchase.earnestMoneyHolder',
+  'purchase.earnestMoneyDueDays',
+  'purchase.financingType',
+  'purchase.loanAmountInCents',
+  'disclosures.propertyConditionStatus',
+  'disclosures.leadPaintStatus',
+  'disclosures.leadInspectionSelection',
+  'disclosures.leadInspectionDays',
+  'disclosures.hoaDocumentsStatus',
+  'disclosures.leaseStatementAcknowledged',
+]);
+
 
 export interface WisconsinOfferDraftChange {
   readonly terms: WisconsinOfferTerms;
@@ -144,10 +161,17 @@ export class OfferWizardComponent {
   protected readonly sections = computed(
     () => {
       const terms = this.terms();
-
-      return terms
-        ? WISCONSIN_OFFER_PACKAGE.getSections(terms)
-        : [];
+      if (!terms) return [];
+      const sections = WISCONSIN_OFFER_PACKAGE.getSections(terms);
+      if (this.initiatedBy() !== 'seller') return sections;
+      return sections.map(section => ({
+        ...section,
+        questions: section.questions.map(question =>
+          question.fieldPath && BUYER_OWNED_FIELDS.has(question.fieldPath)
+            ? { ...question, readOnly: true }
+            : question
+        ),
+      }));
     }
   );
 
@@ -216,6 +240,10 @@ export class OfferWizardComponent {
     const currentTerms = this.terms();
 
     if (!currentTerms || this.busy()) {
+      return;
+    }
+
+    if (this.initiatedBy() === 'seller' && BUYER_OWNED_FIELDS.has(change.fieldPath)) {
       return;
     }
 

@@ -792,6 +792,23 @@ box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30p
 
   cursor: pointer;
 
+  &:disabled {
+    color: #536777;
+    background: #e5eaf0;
+    border-color: #b9c7d2;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &:disabled:hover {
+    color: #536777;
+    background: #e5eaf0;
+    border-color: #b9c7d2;
+    box-shadow: none;
+    transform: none;
+  }
+
   transition:
     background-color 160ms ease,
     border-color 160ms ease,

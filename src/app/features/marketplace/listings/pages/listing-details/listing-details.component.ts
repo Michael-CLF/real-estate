@@ -110,7 +110,8 @@ import {
 } from '../../../../../core/domains/disclosures/services/listing-disclosure.service';
 
 import {
-  getStateDisclosureRequirements
+  getStateDisclosureRequirements,
+  isDisclosureRequiredForListing
 } from '../../../../../core/configuration/state-disclosures.config';
 
 
@@ -267,6 +268,23 @@ export class ListingDetailsComponent
 
   readonly disclosureOpenError =
     signal('');
+
+  floridaOfferMissingTitles(listing: MarketplaceListing): string[] {
+    if (listing.address.stateAbbreviation !== 'FL') return [];
+    const uploaded = new Set(this.disclosures().map(doc => doc.documentType));
+    return getStateDisclosureRequirements('FL')
+      .filter(requirement => isDisclosureRequiredForListing('FL', requirement, {
+        ...listing.sellerStatements,
+        yearBuilt: listing.yearBuilt,
+      }) && !uploaded.has(requirement.documentType))
+      .map(requirement => requirement.shortTitle);
+  }
+
+  floridaOfferIsReady(listing: MarketplaceListing): boolean {
+    return listing.address.stateAbbreviation !== 'FL' ||
+      (this.isAuthenticated() && !this.disclosuresAreLoading() &&
+        !this.disclosureLoadError() && this.floridaOfferMissingTitles(listing).length === 0);
+  }
 
   readonly viewModel$:
     Observable<ListingDetailsViewModel> =

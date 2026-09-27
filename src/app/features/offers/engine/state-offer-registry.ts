@@ -62,6 +62,11 @@ const STATE_OFFER_REGISTRATIONS:
       offerCreationEnabled: true,
       loadComponent: () => import('../states/wisconsin/wisconsin-offer-entry/wisconsin-offer-entry.component').then(component => component.WisconsinOfferEntryComponent),
     },
+    FL: {
+      stateCode: 'FL',
+      offerCreationEnabled: true,
+      loadComponent: () => import('../states/florida/florida-offer-entry/florida-offer-entry.component').then(component => component.FloridaOfferEntryComponent),
+    },
     OK: {
       stateCode: 'OK',
 
@@ -102,12 +107,12 @@ export function getEnabledStateOfferRegistration(
 }
 /** Routes are selected by state registration so shared pages do not inspect state terms. */
 export function newOfferPath(stateCode: string, listingUid: string): readonly string[] {
-  return ['UT', 'WI'].includes(stateCode.trim().toUpperCase())
+  return ['UT', 'WI', 'FL'].includes(stateCode.trim().toUpperCase())
     ? ['/listings', listingUid, 'offers', 'new']
     : ['/listings', listingUid, 'offer'];
 }
 export function editOfferPath(stateCode: string, listingUid: string, offerUid: string, versionUid: string): { path: readonly string[]; queryParams?: Record<string, string> } {
-  return ['UT', 'WI'].includes(stateCode.trim().toUpperCase())
+  return ['UT', 'WI', 'FL'].includes(stateCode.trim().toUpperCase())
     ? { path: ['/offers', offerUid, 'versions', versionUid, 'edit'] }
     : { path: ['/listings', listingUid, 'offer'], queryParams: { offerUid, offerVersionUid: versionUid } };
 }

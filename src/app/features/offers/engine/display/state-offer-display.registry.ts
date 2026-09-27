@@ -14,12 +14,21 @@ import {
   texasOfferDisplayAdapter,
 } from '../../states/texas/display/texas-offer-display.adapter';
 
-import { utahOfferDisplayAdapter } from '../../states/utah/display/utah-offer-display.adapter';
-import { wisconsinOfferDisplayAdapter } from '../../states/wisconsin/display/wisconsin-offer-display.adapter';
-
 import {
   oklahomaOfferDisplayAdapter,
 } from '../../states/oklahoma/display/oklahoma-offer-display.adapter';
+
+import {
+  utahOfferDisplayAdapter,
+} from '../../states/utah/display/utah-offer-display.adapter';
+
+import {
+  wisconsinOfferDisplayAdapter,
+} from '../../states/wisconsin/display/wisconsin-offer-display.adapter';
+
+import {
+  floridaOfferDisplayAdapter,
+} from '../../states/florida/display/florida-offer-display.adapter';
 
 /**
  * The state stored on the offer version and the state stored
@@ -31,10 +40,7 @@ export function displayOfferTerms(
     readonly terms: StateOfferTerms;
   }
 ): OfferDisplayFields {
-  const state =
-    version.stateCode
-      .trim()
-      .toUpperCase();
+  const state = version.stateCode.trim().toUpperCase();
 
   if (state !== version.terms.stateCode) {
     throw new Error(
@@ -44,22 +50,22 @@ export function displayOfferTerms(
 
   switch (version.terms.stateCode) {
     case 'NC':
-      return northCarolinaOfferDisplayAdapter
-        .display(version.terms);
+      return northCarolinaOfferDisplayAdapter.display(version.terms);
 
     case 'TX':
-      return texasOfferDisplayAdapter
-        .display(version.terms);
+      return texasOfferDisplayAdapter.display(version.terms);
 
     case 'OK':
-      return oklahomaOfferDisplayAdapter
-        .display(version.terms);
+      return oklahomaOfferDisplayAdapter.display(version.terms);
 
     case 'UT':
       return utahOfferDisplayAdapter.display(version.terms);
 
     case 'WI':
       return wisconsinOfferDisplayAdapter.display(version.terms);
+
+    case 'FL':
+      return floridaOfferDisplayAdapter.display(version.terms);
 
     default:
       throw new Error(

@@ -7,7 +7,7 @@ const yn = (path: string, label: string, message: string) => ({ id: path, type: 
 export const WISCONSIN_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] = [
   { id: 'parties', title: 'Buyers and sellers', description: 'Review the parties copied from the listing and account.', questions: [] },
   { id: 'property', title: 'Property and included items', questions: [
-    { id: 'legal-description', type: 'textarea', label: 'Legal description', fieldPath: 'legalDescription', validation: required('Enter the recorded legal description.') },
+    { id: 'legal-description', type: 'textarea', label: 'Seller-provided legal description', fieldPath: 'legalDescription', readOnly: true, validation: required('The seller must provide the recorded legal description on the listing.'), helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.' },
     { id: 'included', type: 'textarea', label: 'Additional items included', fieldPath: 'propertyItems.included', placeholder: 'Appliances or other items included by agreement' },
     { id: 'excluded', type: 'textarea', label: 'Items excluded', fieldPath: 'propertyItems.excluded' },
     yn('propertyItems.fixturesIncluded', 'Are installed fixtures included?', 'Select whether installed fixtures are included.'),
@@ -30,9 +30,10 @@ export const WISCONSIN_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
     yn('conditions.appraisal', 'Conditioned on appraisal?', 'Select the appraisal condition.'),
     yn('conditions.financing', 'Conditioned on financing?', 'Select the financing condition.'),
     yn('conditions.saleOfBuyersProperty', 'Conditioned on the sale of another property?', 'Select the sale condition.'),
+    { id: 'sale-property-terms', type: 'textarea', label: 'Terms for sale of the buyer’s property', fieldPath: 'additionalTerms', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.saleOfBuyersProperty', operator: 'is_true' }] }, validation: required('Describe the property-sale condition before continuing.'), helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.' },
     yn('conditions.additionalEarnestMoney', 'Will an additional earnest money deposit be due?', 'Select an additional-deposit option.'),
   ] },
-  { id: 'deadlines', title: 'Contract deadlines', description: 'Unless the parties agree otherwise, stated dates end at 5:00 p.m. Central Time. The complete statutory condition report must already have been delivered.', questions: [
+  { id: 'deadlines', title: 'Contract deadlines', description: 'Unless the parties agree otherwise, stated dates end at 5:00 p.m. Central Time. The condition report has its own applicable statutory delivery period after acceptance.', questions: [
     { id: 'seller-date', type: 'date', label: 'Deadline for any additional seller documents', fieldPath: 'deadlines.sellerDisclosureDate', validation: required('Set the additional-document deadline.') },
     { id: 'inspection-date', type: 'date', label: 'Due diligence deadline', fieldPath: 'deadlines.dueDiligenceDate', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.dueDiligence', operator: 'is_true' }] }, validation: required('Set the due diligence deadline.') },
     { id: 'financing-date', type: 'date', label: 'Financing and appraisal deadline', fieldPath: 'deadlines.financingAppraisalDate', visibleWhen: { match: 'any', conditions: [{ fieldPath: 'conditions.financing', operator: 'is_true' }, { fieldPath: 'conditions.appraisal', operator: 'is_true' }] }, validation: required('Set the financing and appraisal deadline.') },
@@ -52,8 +53,9 @@ export const WISCONSIN_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
   ] },
   { id: 'disclosures', title: 'Seller disclosures', questions: [
     { id: 'seller-lease-statement', type: 'yes_no', label: 'Seller states that existing leases affect the property', fieldPath: 'disclosures.sellerReportsExistingLeases', readOnly: true, validation: required('The seller must answer the leases question on the listing.') },
-    { id: 'condition-status', type: 'single_choice', label: 'Wisconsin real estate condition report', fieldPath: 'disclosures.propertyConditionStatus', validation: required('Confirm receipt of the complete signed condition report.'), options: [
+    { id: 'condition-status', type: 'single_choice', label: 'Wisconsin real estate condition report', fieldPath: 'disclosures.propertyConditionStatus', validation: required('Select whether you have received the seller-signed report.'), options: [
       { value: 'received', label: 'I received and reviewed the seller-signed report' },
+      { value: 'pending', label: 'I have not received the seller-signed report yet' },
     ] },
     { id: 'lead-status', type: 'single_choice', label: 'Lead-based paint packet', fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the lead paint disclosure status.'), options: [
       { value: 'received', label: 'Signed packet, available reports and EPA pamphlet received' }, { value: 'built_1978_or_later', label: 'Built after 1977' }, { value: 'exempt', label: 'Other federal exemption applies' },
@@ -65,10 +67,11 @@ export const WISCONSIN_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
     { id: 'hoa-status', type: 'single_choice', label: 'Association documents (if applicable)', fieldPath: 'disclosures.hoaDocumentsStatus', validation: required('Select the association document status.'), options: [
       { value: 'received', label: 'Received' }, { value: 'pending', label: 'To be provided before closing' }, { value: 'not_applicable', label: 'No association' },
     ] },
-    { id: 'lease-acknowledgement', type: 'acknowledgement', label: 'I have reviewed the seller’s statement about existing leases and the separate condition report.', fieldPath: 'disclosures.leaseStatementAcknowledged', validation: required('Review and acknowledge the seller statement and condition report.') },
+    { id: 'lease-acknowledgement', type: 'acknowledgement', label: 'I have reviewed the seller’s statement about existing leases. My condition report selection above accurately states whether I have received it.', fieldPath: 'disclosures.leaseStatementAcknowledged', validation: required('Acknowledge the seller lease statement and your report selection.') },
   ] },
   { id: 'additional', title: 'Additional terms', questions: [
-    { id: 'additional-terms', type: 'textarea', label: 'Party-provided additional terms', fieldPath: 'additionalTerms', helpText: 'Ask a Wisconsin attorney to review any new legal language.' },
+    { id: 'additional-terms', type: 'textarea', label: 'Party-provided additional terms (optional)', fieldPath: 'additionalTerms', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.saleOfBuyersProperty', operator: 'is_false' }] }, helpText: 'Leave blank if there are no other terms. Ask a Wisconsin attorney to review any new legal language.' },
+    { id: 'sale-terms-location', type: 'information', label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.saleOfBuyersProperty', operator: 'is_true' }] } },
   ] },
   { id: 'delivery', title: 'Offer delivery and review', questions: [
     { id: 'expiration', type: 'date_time', label: 'Offer expires', fieldPath: 'delivery.expiresAt', validation: required('Set a future expiration date and time.') },

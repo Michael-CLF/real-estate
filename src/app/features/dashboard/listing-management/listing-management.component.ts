@@ -47,7 +47,9 @@ import {
 } from '../../../core/domains/showings/services/showing.service';
 
 import {
-  getStateDisclosureRequirements
+  getStateDisclosureRequirements,
+  isDisclosureRequiredForListing,
+  normalizeDisclosureStateCode
 } from '../../../core/configuration/state-disclosures.config';
 
 import {
@@ -119,6 +121,8 @@ export class ListingManagementComponent implements OnInit {
 
   protected readonly uploadedDisclosureCount =
     signal(0);
+
+  protected readonly missingDisclosureTitles = signal<readonly string[]>([]);
 
   protected readonly disclosureStatusError =
     signal('');
@@ -322,9 +326,7 @@ export class ListingManagementComponent implements OnInit {
 
     try {
       const stateAbbreviation =
-        this.normalizeState(
-          listingState
-        );
+        normalizeDisclosureStateCode(listingState);
 
       const requirements =
         getStateDisclosureRequirements(
@@ -334,7 +336,14 @@ export class ListingManagementComponent implements OnInit {
       const requiredRequirements =
         requirements.filter(
           requirement =>
-            requirement.required
+            isDisclosureRequiredForListing(
+              stateAbbreviation,
+              requirement,
+              {
+                ...this.listing()?.sellerStatements,
+                yearBuilt: this.listing()?.yearBuilt,
+              }
+            )
         );
 
       const summaries =
@@ -359,6 +368,10 @@ export class ListingManagementComponent implements OnInit {
             )
         ).length;
 
+      this.missingDisclosureTitles.set(requiredRequirements
+        .filter(requirement => !uploadedDocumentTypes.has(requirement.documentType))
+        .map(requirement => requirement.shortTitle));
+
       this.requiredDisclosureCount.set(
         requiredRequirements.length
       );
@@ -374,6 +387,7 @@ export class ListingManagementComponent implements OnInit {
 
       this.requiredDisclosureCount.set(0);
       this.uploadedDisclosureCount.set(0);
+      this.missingDisclosureTitles.set([]);
 
       this.disclosureStatusError.set(
         'Disclosure status could not be loaded.'
@@ -381,25 +395,6 @@ export class ListingManagementComponent implements OnInit {
     } finally {
       this.disclosureStatusIsLoading.set(false);
     }
-  }
-
-  private normalizeState(
-    state: string
-  ): string {
-    const normalizedState =
-      state.trim().toLowerCase();
-
-    if (
-      normalizedState === 'nc' ||
-      normalizedState ===
-      'north carolina'
-    ) {
-      return 'NC';
-    }
-
-    return state
-      .trim()
-      .toUpperCase();
   }
 
   private loadShowingActivity(

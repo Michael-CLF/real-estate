@@ -18,6 +18,7 @@ import type {
 } from './state-contracts/state-contract-package';
 
 import { getListingOfferAvailabilityMessage } from './listing-offer-availability';
+import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
 
 import type {
   CreateOfferDraftData,
@@ -181,6 +182,10 @@ export const createOfferDraft = onCall<
         'aborted',
         'The listing state changed while the offer was being created. Please try again.'
       );
+    }
+
+    if (currentStateCode === 'FL') {
+      await assertFloridaListingDisclosures(transaction, listingReference, currentListingData);
     }
 
     const existingOfferQuery = adminFirestore
@@ -998,4 +1003,3 @@ function isProfileIdentityVerified(profile: OfferUserProfile | null): boolean {
       Boolean(profile?.verifiedLastName?.trim()))
   );
 }
-

@@ -17,7 +17,7 @@ export const UTAH_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] =
     { id: 'price', type: 'currency', label: 'Purchase price', fieldPath: 'purchase.purchasePriceInCents', validation: { required: true, minimum: 1, message: 'Enter a purchase price above $0.' } },
     { id: 'deposit', type: 'currency', label: 'Earnest money deposit', fieldPath: 'purchase.earnestMoneyInCents', validation: { required: true, minimum: 1, message: 'Enter an earnest money deposit above $0.' } },
     { id: 'holder', type: 'text', label: 'Independent escrow or title holder', fieldPath: 'purchase.earnestMoneyHolder', validation: required('Identify the party that will hold earnest money.') },
-    { id: 'due-days', type: 'number', label: 'Calendar days after acceptance to deliver earnest money', fieldPath: 'purchase.earnestMoneyDueDays', validation: { required: true, minimum: 1, maximum: 30, message: 'Enter 1 to 30 days.' } },
+    { id: 'due-days', type: 'number', label: 'Days after acceptance to deliver earnest money', fieldPath: 'purchase.earnestMoneyDueDays', validation: { required: true, minimum: 1, maximum: 30, message: 'Enter 1 to 30 days.' } },
     { id: 'funding', type: 'single_choice', label: 'How will the purchase be funded?', fieldPath: 'purchase.financingType', validation: required('Select cash or a loan type.'), options: [
       { value: 'cash', label: 'Cash' }, { value: 'conventional', label: 'Conventional loan' }, { value: 'fha', label: 'FHA loan' }, { value: 'va', label: 'VA loan' }, { value: 'usda', label: 'USDA loan' },
     ] },

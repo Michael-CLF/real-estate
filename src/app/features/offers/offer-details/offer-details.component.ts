@@ -468,6 +468,24 @@ export class OfferDetailsComponent
     await this.loadOffer();
   }
 
+  retryLoading(): void {
+    void this.loadOffer();
+  }
+
+  private async readOfferData<T>(label: string, request: Promise<T>): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<T>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(
+        `Loading ${label} is taking too long. Check your connection and select Try again.`
+      )), 20000);
+    });
+    try {
+      return await Promise.race([request, timeout]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  }
+
 
   getVersionLabel(
     version: OfferVersion
@@ -1249,8 +1267,7 @@ export class OfferDetailsComponent
 
     try {
       const offer =
-        await this.offerService
-          .getOffer(this.offerUid);
+        await this.readOfferData('the offer', this.offerService.getOffer(this.offerUid));
 
       if (!offer) {
         throw new Error(
@@ -1262,15 +1279,15 @@ export class OfferDetailsComponent
         latestVersion,
         versions
       ] = await Promise.all([
-        this.offerService.getVersion(
+        this.readOfferData('the current version', this.offerService.getVersion(
           offer.Uid,
           offer.currentVersionUid
-        ),
+        )),
 
-        this.offerService
+        this.readOfferData('the negotiation history', this.offerService
           .getVersionHistory(
             offer.Uid
-          )
+          ))
       ]);
 
       if (!latestVersion) {
@@ -1304,19 +1321,19 @@ export class OfferDetailsComponent
               version.Uid ===
               offer.lastDeliveredVersionUid
           ) ??
-          await this.offerService.getVersion(
+          await this.readOfferData('the delivered version', this.offerService.getVersion(
             offer.Uid,
             offer.lastDeliveredVersionUid
-          ) ??
+          )) ??
           latestVersion;
       }
 
       const documents =
-        await this.offerDocumentService
+        await this.readOfferData('the agreement documents', this.offerDocumentService
           .getDocumentsForVersion(
             offer.Uid,
             visibleVersion.Uid
-          );
+          ));
 
       this.offer.set(offer);
       this.currentVersion.set(

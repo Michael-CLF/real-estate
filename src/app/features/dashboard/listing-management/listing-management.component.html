@@ -303,10 +303,17 @@
           </div>
 
           <p>
-            Complete and upload the required state-specific
-            property disclosure documents that buyers must
-            receive before submitting an offer.
+            Complete and upload the required state-specific property disclosures.
+            Buyers need to review them before signing an offer agreement.
           </p>
+
+          @if (currentListing.state === 'FL' && missingDisclosureTitles().length && !disclosureStatusIsLoading() && !disclosureStatusError()) {
+          <p class="management-card__status-error" role="status">
+            Buyers cannot make a Florida offer until you upload the required forms.
+            Missing: {{ missingDisclosureTitles().join(', ') }}.
+            Open Property Disclosures below to download and upload the completed forms.
+          </p>
+          }
 
           @if (
           !disclosureStatusIsLoading() &&

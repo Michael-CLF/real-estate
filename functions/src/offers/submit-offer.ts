@@ -3,6 +3,8 @@ import {
   onCall,
 } from 'firebase-functions/v2/https';
 
+import * as logger from 'firebase-functions/logger';
+
 import {
   FieldValue,
   Timestamp,
@@ -23,6 +25,7 @@ import {
 import {
   requireStateContractPackage,
 } from './state-contracts/state-contract-registry';
+import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
 
 import type {
   OfferDocument,
@@ -45,6 +48,7 @@ export const submitOffer =
   >(
     callableFunctionOptions,
     async request => {
+      const startedAt = Date.now();
       const userUid =
         request.auth?.uid;
 
@@ -112,6 +116,7 @@ export const submitOffer =
         initialOffer.listingUid,
         initialOffer.primaryBuyerUid
       );
+      const eligibilityCheckedAt = Date.now();
 
       await adminFirestore.runTransaction(
         async transaction => {
@@ -208,16 +213,22 @@ export const submitOffer =
           }
 
           stateContractPackage.validateSubmission({ offer, version });
+          if (offer.stateCode === 'FL') {
+            await assertFloridaListingDisclosures(transaction, listingReference, listingData);
+          }
           const requiredDisclosureTypes = stateContractPackage.requiredListingDisclosures?.({ offer, version }) ?? [];
           const listingDisclosureSnapshots: Array<{
             documentType: string;
             versionId: string;
             storagePath: string;
           }> = [];
-          for (const documentType of requiredDisclosureTypes) {
-            const disclosureSnapshot = await transaction.get(
+          const disclosureSnapshots = await Promise.all(requiredDisclosureTypes.map(
+            documentType => transaction.get(
               listingReference.collection('disclosures').doc(documentType)
-            );
+            )
+          ));
+          for (const [index, documentType] of requiredDisclosureTypes.entries()) {
+            const disclosureSnapshot = disclosureSnapshots[index];
             const currentDocument = disclosureSnapshot.data()?.['currentDocument'] as Record<string, unknown> | undefined;
             if (!currentDocument ||
               currentDocument['listingUid'] !== offer.listingUid ||
@@ -333,6 +344,13 @@ export const submitOffer =
           }
         }
       );
+
+      logger.info('Offer submission timing', {
+        eligibilityMs: eligibilityCheckedAt - startedAt,
+        transactionMs: Date.now() - eligibilityCheckedAt,
+        totalMs: Date.now() - startedAt,
+        stateCode: initialOffer.stateCode,
+      });
 
       return {
         success: true,

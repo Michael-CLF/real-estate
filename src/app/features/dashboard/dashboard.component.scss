@@ -366,6 +366,11 @@
     font-size: 0.85rem;
   }
 
+  strong.dashboard-overview__action-required,
+  &:hover strong.dashboard-overview__action-required {
+    color: #b42318;
+  }
+
   p {
     margin: 4px 0 0;
 

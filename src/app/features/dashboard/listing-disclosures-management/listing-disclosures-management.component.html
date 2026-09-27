@@ -79,6 +79,13 @@
         be available to authenticated buyers from the
         public listing page.
       </p>
+      @if (currentListing.state === 'FL') {
+      <p class="disclosure-header__description" role="note">
+        Florida: the Make an Offer action is unavailable until you upload the completed flood
+        disclosure and any applicable HOA and lead documents. Download the forms below, complete
+        them, and upload them here. Add a seller condition statement when applicable.
+      </p>
+      }
     </header>
 
     <aside
@@ -184,9 +191,13 @@
                 <span class="status-badge status-badge--complete">
                   Uploaded
                 </span>
-              } @else {
+              } @else if (isRequiredForCurrentListing(requirement)) {
                 <span class="status-badge status-badge--required">
                   Required
+                </span>
+              } @else {
+                <span class="status-badge status-badge--conditional">
+                  If applicable
                 </span>
               }
             </div>
@@ -195,10 +206,10 @@
               {{ requirement.description }}
             </p>
 
-            @if (requirement.officialFormUrl) {
+            @if (requirement.formDownloadUrl) {
             <a
               class="official-form-link"
-              [href]="requirement.officialFormUrl"
+              [href]="requirement.formDownloadUrl"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -207,8 +218,21 @@
                 aria-hidden="true"
               ></i>
 
-              Open the official blank form
+              Open or download the blank PDF
             </a>
+            }
+            @if (requirement.officialFormUrl && requirement.officialFormUrl !== requirement.formDownloadUrl) {
+              <a class="official-form-link" [href]="requirement.officialFormUrl" target="_blank" rel="noopener noreferrer">
+                Read the official source or instructions
+              </a>
+            }
+            @for (resource of requirement.additionalDownloads ?? []; track resource.url) {
+              <a class="official-form-link" [href]="resource.url" target="_blank" rel="noopener noreferrer">
+                {{ resource.label }}
+              </a>
+            }
+            @if (requirement.sourceInstructions) {
+              <p class="disclosure-card__description">{{ requirement.sourceInstructions }}</p>
             }
 
             @if (disclosure) {

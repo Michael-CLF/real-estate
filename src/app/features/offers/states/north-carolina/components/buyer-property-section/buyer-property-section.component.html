@@ -115,27 +115,37 @@
       </div>
     </div>
 
-    <aside class="identity-notice">
-      <span
-        class="identity-notice__icon"
-        aria-hidden="true"
-      >
-        ✓
-      </span>
-
-      <div>
-        <strong>
-          One-buyer offer
-        </strong>
-
-        <p>
-          This standard NavStreet offer supports one buyer.
-          A transaction involving additional buyers, an
-          entity, trust, estate or another signing capacity
-          should be handled through a qualified attorney.
-        </p>
+    @if (canAddCoBuyer() || coBuyerLocked()) {
+      <div class="co-buyer-card">
+        <label class="co-buyer-card__toggle" for="coBuyerEnabled">
+          <input
+            id="coBuyerEnabled"
+            type="checkbox"
+            formControlName="coBuyerEnabled"
+            [attr.disabled]="coBuyerLocked() ? '' : null"
+            (change)="onCoBuyerToggle()"
+          />
+          Add one co-buyer to this first offer
+        </label>
+        @if (sectionForm.get('coBuyerEnabled')?.value === true) {
+          <p class="field-help">The co-buyer must sign this offer separately. Their information is locked after the draft saves.</p>
+          <div class="form-grid form-grid--co-buyer">
+            <div class="form-field">
+              <label for="coBuyerLegalName">Co-buyer legal name *</label>
+              <input id="coBuyerLegalName" type="text" formControlName="coBuyerLegalName" />
+            </div>
+            <div class="form-field">
+              <label for="coBuyerEmail">Co-buyer email *</label>
+              <input id="coBuyerEmail" type="email" formControlName="coBuyerEmail" />
+            </div>
+            <div class="form-field">
+              <label for="coBuyerPhone">Co-buyer phone *</label>
+              <input id="coBuyerPhone" type="tel" inputmode="tel" placeholder="(919) 555-1212" formControlName="coBuyerPhone" (input)="formatCoBuyerPhone($event)" />
+            </div>
+          </div>
+        }
       </div>
-    </aside>
+    }
   </section>
 
   <section

@@ -20,7 +20,9 @@ import {
 } from '../../../core/authentication/services/auth.service';
 
 import {
-  getStateDisclosureRequirements
+  getStateDisclosureRequirements,
+  isDisclosureRequiredForListing,
+  normalizeDisclosureStateCode
 } from '../../../core/configuration/state-disclosures.config';
 
 import {
@@ -81,6 +83,14 @@ export class ListingDisclosuresManagementComponent
 
   protected readonly listing =
     signal<Listing | null>(null);
+
+  protected isRequiredForCurrentListing(requirement: StateDisclosureRequirement): boolean {
+    const listing = this.listing();
+    return listing !== null && isDisclosureRequiredForListing(listing.state, requirement, {
+      ...listing.sellerStatements,
+      yearBuilt: listing.yearBuilt,
+    });
+  }
 
   protected readonly requirements =
     signal<
@@ -181,9 +191,7 @@ export class ListingDisclosuresManagementComponent
 
       const requirements =
         getStateDisclosureRequirements(
-          this.normalizeState(
-            listing.state
-          )
+          listing.state
         );
 
       this.requirements.set(
@@ -345,9 +353,7 @@ export class ListingDisclosuresManagementComponent
           .uploadDisclosure(
             sellerUid,
             this.listingUid,
-            this.normalizeState(
-              listing.state
-            ),
+            normalizeDisclosureStateCode(listing.state),
             requirement.documentType,
             file
           );
@@ -455,22 +461,4 @@ export class ListingDisclosuresManagementComponent
     );
   }
 
-  private normalizeState(
-    state: string
-  ): string {
-    const normalizedState =
-      state.trim().toLowerCase();
-
-    if (
-      normalizedState === 'nc' ||
-      normalizedState ===
-        'north carolina'
-    ) {
-      return 'NC';
-    }
-
-    return state
-      .trim()
-      .toUpperCase();
-  }
 }

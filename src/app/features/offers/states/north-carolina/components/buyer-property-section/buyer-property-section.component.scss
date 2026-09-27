@@ -20,6 +20,38 @@
   gap: 2rem;
 }
 
+.co-buyer-card {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--section-border);
+  border-radius: 12px;
+  background: var(--section-surface);
+}
+
+.co-buyer-card__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--section-blue);
+  font-weight: 700;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.form-grid--co-buyer {
+  margin-top: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 750px) {
+  .form-grid--co-buyer {
+    grid-template-columns: 1fr;
+  }
+}
+
 .form-section {
   min-width: 0;
 }
@@ -334,7 +366,7 @@
 .property-card {
   display: grid;
   gap: 1.25rem;
-
+  margin-bottom: 20px;
   padding: 1.25rem;
 
   border: 1px solid #dce6ec;

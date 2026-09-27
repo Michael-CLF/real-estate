@@ -264,7 +264,7 @@
             </span>
 
             <div>
-              <strong id="action">
+              <strong [class.dashboard-overview__action-required]="item.actionRequired">
                 @if (item.actionRequired) {
                   Action required:
                 }

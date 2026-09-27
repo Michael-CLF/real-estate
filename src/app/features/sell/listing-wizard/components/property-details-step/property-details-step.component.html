@@ -245,7 +245,7 @@
 
     @if (isWisconsinListing()) {
       <fieldset class="seller-statements">
-        <legend>Wisconsin legal property description</legend>
+        <legend>Recorded legal property description</legend>
         <p class="seller-statements__description">
           Copy the complete legal description from the deed or county record.
           Buyers will see this seller-provided information in their offer.
@@ -498,6 +498,21 @@
               <p class="field-error">
                 Select whether the lead-based paint disclosure applies.
               </p>
+            }
+          </div>
+        }
+
+        @if (requiresOwnersAssociation()) {
+          <div class="field">
+            <label for="ownersAssociationApplies">Owners association</label>
+            <select id="ownersAssociationApplies" formControlName="ownersAssociationApplies">
+              <option [ngValue]="null">Select an answer</option>
+              <option [ngValue]="true">Membership in an owners association applies</option>
+              <option [ngValue]="false">No owners association applies</option>
+            </select>
+            @if (form.controls.sellerStatements.controls.ownersAssociationApplies.touched &&
+                 form.controls.sellerStatements.controls.ownersAssociationApplies.hasError('required')) {
+              <p class="field-error">Select whether the property belongs to an owners association.</p>
             }
           </div>
         }

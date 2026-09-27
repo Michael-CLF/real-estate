@@ -96,6 +96,18 @@
         </dd>
       </div>
 
+      @if (offerForm.get('buyerProperty.coBuyerEnabled')?.value === true) {
+      <div class="review-item">
+        <dt>Co-buyer</dt>
+        <dd>{{ value('buyerProperty.coBuyerLegalName') }}</dd>
+      </div>
+
+      <div class="review-item">
+        <dt>Co-buyer email</dt>
+        <dd>{{ value('buyerProperty.coBuyerEmail') }}</dd>
+      </div>
+      }
+
       <div class="review-item">
         <dt>Seller</dt>
         <dd>

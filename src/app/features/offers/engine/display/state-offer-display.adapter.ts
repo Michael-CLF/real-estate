@@ -23,6 +23,8 @@ export interface OfferDisplayFields {
   readonly importantDeadline: DisplayField;
   readonly closingDate: DisplayField;
   readonly possessionLabel: string;
+  /** Existing immutable versions that cannot proceed to signature. */
+  readonly signingBlockReason?: string;
 }
 
 export interface StateOfferDisplayAdapter<

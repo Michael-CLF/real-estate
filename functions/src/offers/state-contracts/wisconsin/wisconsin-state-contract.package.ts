@@ -18,7 +18,7 @@ export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferT
     const t = input.version.terms;
     return [
       ...(t.disclosures.leadPaintStatus === 'received' ? ['lead-based-paint'] : []),
-      'wisconsin-real-estate-condition-report',
+      ...(t.disclosures.propertyConditionStatus === 'received' ? ['wisconsin-real-estate-condition-report'] : []),
       ...(t.disclosures.hoaDocumentsStatus === 'received' ? ['wisconsin-association-documents'] : []),
     ];
   },

@@ -10,9 +10,9 @@ export function sanitizeWisconsinDraftTerms(input: SanitizeDraftTermsInput<Wisco
   const request = record(input.requestedTerms); const purchase = record(request['purchase']); const deadlines = record(request['deadlines']);
   const conditions = record(request['conditions']); const items = record(request['propertyItems']); const settlement = record(request['settlement']);
   const disclosures = record(request['disclosures']); const delivery = record(request['delivery']);
-  return {
+  const sanitized: WisconsinOfferTermsDocument = {
     ...input.currentTerms, // Preserve state, contract type, and immutable property snapshot.
-    legalDescription: text(request['legalDescription'], 4000),
+    legalDescription: input.currentTerms.legalDescription, // Seller-provided listing snapshot; buyers cannot replace it.
     purchase: { purchasePriceInCents: money(purchase['purchasePriceInCents']), earnestMoneyInCents: money(purchase['earnestMoneyInCents']), additionalEarnestMoneyInCents: money(purchase['additionalEarnestMoneyInCents']), earnestMoneyHolder: text(purchase['earnestMoneyHolder'], 300), earnestMoneyDueDays: integer(purchase['earnestMoneyDueDays']), financingType: choice(purchase['financingType'], ['unselected', 'cash', 'conventional', 'fha', 'va', 'usda'] as const, 'unselected'), loanAmountInCents: money(purchase['loanAmountInCents']), sellerConcessionsInCents: money(purchase['sellerConcessionsInCents']) },
     deadlines: { sellerDisclosureDate: text(deadlines['sellerDisclosureDate'], 10), dueDiligenceDate: text(deadlines['dueDiligenceDate'], 10), financingAppraisalDate: text(deadlines['financingAppraisalDate'], 10), settlementDate: text(deadlines['settlementDate'], 10) },
     conditions: { dueDiligence: bool(conditions['dueDiligence']), appraisal: bool(conditions['appraisal']), financing: bool(conditions['financing']), saleOfBuyersProperty: bool(conditions['saleOfBuyersProperty']), additionalEarnestMoney: bool(conditions['additionalEarnestMoney']) },
@@ -22,4 +22,24 @@ export function sanitizeWisconsinDraftTerms(input: SanitizeDraftTermsInput<Wisco
     additionalTerms: text(request['additionalTerms'], 5000),
     delivery: { expiresAt: text(delivery['expiresAt'], 40), timeZone: 'America/Chicago', electronicDeliveryAuthorized: bool(delivery['electronicDeliveryAuthorized']) },
   };
+
+  // Save-draft uses the trusted current version, never client-supplied terms,
+  // as the source of statements belonging to the buyer.
+  if (input.initiatedBy === 'seller') {
+    return {
+      ...sanitized,
+      purchase: {
+        ...sanitized.purchase,
+        earnestMoneyInCents: input.currentTerms.purchase.earnestMoneyInCents,
+        additionalEarnestMoneyInCents: input.currentTerms.purchase.additionalEarnestMoneyInCents,
+        earnestMoneyHolder: input.currentTerms.purchase.earnestMoneyHolder,
+        earnestMoneyDueDays: input.currentTerms.purchase.earnestMoneyDueDays,
+        financingType: input.currentTerms.purchase.financingType,
+        loanAmountInCents: input.currentTerms.purchase.loanAmountInCents,
+      },
+      disclosures: { ...input.currentTerms.disclosures },
+    };
+  }
+
+  return sanitized;
 }

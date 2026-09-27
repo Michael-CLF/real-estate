@@ -88,7 +88,8 @@ import {
 } from '../../../../../core/domains/offers/models/offer-terms.model';
 
 import {
-  OfferVersion
+  OfferVersion,
+  OfferVersionPartySnapshot
 } from '../../../../../core/domains/offers/models/offer-version.model';
 
 import {
@@ -177,6 +178,11 @@ implements OnInit {
 
   private existingTerms:
     OfferTerms | null = null;
+
+  private primaryBuyer: OfferVersionPartySnapshot | null = null;
+  private coBuyerUid = '';
+  readonly coBuyerLocked = signal(false);
+  readonly canAddCoBuyer = signal(false);
 
   private offerVersionNumber = 1;
 
@@ -328,6 +334,10 @@ implements OnInit {
     this.formBuilder.group({
       buyerProperty:
         this.formBuilder.group({
+          coBuyerEnabled: [false],
+          coBuyerLegalName: [{ value: '', disabled: true }, Validators.required],
+          coBuyerEmail: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+          coBuyerPhone: [{ value: '', disabled: true }, [Validators.required, Validators.pattern(/^\+?[0-9() .-]{7,20}$/)]],
           buyerFirstName: [
             {
               value: '',
@@ -974,6 +984,11 @@ implements OnInit {
       const buyer =
         offerVersion.buyers[0];
 
+      this.primaryBuyer = buyer ?? null;
+      this.coBuyerUid = offerVersion.buyers[1]?.partyUid ?? crypto.randomUUID();
+      this.coBuyerLocked.set(offerVersion.buyers.length > 1);
+      this.canAddCoBuyer.set(offerVersion.initiatedBy === 'buyer' && offerVersion.versionNumber === 1);
+
       const seller =
         offerVersion.sellers[0];
 
@@ -996,6 +1011,10 @@ implements OnInit {
       this.offerForm.patchValue(
         {
           buyerProperty: {
+            coBuyerEnabled: offerVersion.buyers.length > 1,
+            coBuyerLegalName: offerVersion.buyers[1]?.legalName ?? '',
+            coBuyerEmail: offerVersion.buyers[1]?.email ?? '',
+            coBuyerPhone: offerVersion.buyers[1]?.phone ?? '',
             buyerFirstName:
               buyer?.firstName ??
               profile.firstName,
@@ -1374,6 +1393,17 @@ implements OnInit {
         );
       }
 
+      // The signed party snapshot takes precedence over an old wizard cache.
+      if (this.coBuyerLocked()) {
+        this.offerForm.controls.buyerProperty.patchValue({
+          coBuyerEnabled: true,
+          coBuyerLegalName: offerVersion.buyers[1].legalName,
+          coBuyerEmail: offerVersion.buyers[1].email,
+          coBuyerPhone: offerVersion.buyers[1].phone,
+        }, { emitEvent: false });
+      }
+      this.updateCoBuyerControls();
+
       if (
         typeof savedSectionIndex ===
           'number' &&
@@ -1439,6 +1469,48 @@ implements OnInit {
           void this.queueDraftSave();
         }
       );
+  }
+
+  updateCoBuyerControls(): void {
+    const toggle = this.offerForm.controls.buyerProperty.controls.coBuyerEnabled;
+    if (this.coBuyerLocked()) toggle.disable({ emitEvent: false });
+    else toggle.enable({ emitEvent: false });
+    const enabled = toggle.value === true;
+    for (const field of ['coBuyerLegalName', 'coBuyerEmail', 'coBuyerPhone']) {
+      const control = this.offerForm.get(`buyerProperty.${field}`);
+      if (enabled && !this.coBuyerLocked()) control?.enable({ emitEvent: false });
+      else control?.disable({ emitEvent: false });
+    }
+  }
+
+  private draftBuyers(): OfferVersionPartySnapshot[] | null {
+    const primary = this.primaryBuyer;
+    if (!primary) return null;
+    const form = this.offerForm.getRawValue().buyerProperty;
+    if (!form.coBuyerEnabled || this.coBuyerLocked()) return null;
+    const group = this.offerForm.get('buyerProperty');
+    if (!group?.valid) return null;
+    const legalName = (form.coBuyerLegalName ?? '').trim();
+    const nameParts = legalName.split(/\s+/);
+    return [primary, {
+      partyUid: this.coBuyerUid,
+      role: 'buyer',
+      capacity: 'individual',
+      firstName: nameParts[0] ?? '',
+      lastName: nameParts.slice(1).join(' '),
+      legalName,
+      email: (form.coBuyerEmail ?? '').trim().toLowerCase(),
+      phone: (form.coBuyerPhone ?? '').trim(),
+      mailingAddress: { ...primary.mailingAddress },
+      sequence: 2,
+      primaryParty: false,
+      intendedUse: primary.intendedUse ?? 'primary_residence',
+      proposedDeedName: legalName,
+      requiredSigner: true,
+      identityVerification: { status: 'not_started', provider: 'stripe_identity', legalNameApplied: false },
+      signature: { status: 'not_started' },
+      electronicTransactionsConsentAccepted: false,
+    }];
   }
 
   private createWizardData():
@@ -1832,6 +1904,8 @@ implements OnInit {
     const terms =
       this.createTerms();
 
+    const buyers = this.draftBuyers();
+
     const serializedSnapshot =
       JSON.stringify({
         wizardData,
@@ -1855,12 +1929,18 @@ implements OnInit {
         {
           terms,
           wizardData,
+          ...(buyers ? { buyers } : {}),
           expiresAt:
             terms.delivery.expiresAt
         }
       );
 
       this.existingTerms = terms;
+
+      if (buyers) {
+        this.coBuyerLocked.set(true);
+        this.updateCoBuyerControls();
+      }
 
       this.lastSavedSnapshot =
         serializedSnapshot;

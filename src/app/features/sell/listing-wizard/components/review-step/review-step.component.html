@@ -137,6 +137,13 @@
             </span>
           </div>
 
+          @if (requires('utahMethamphetamineContamination')) {
+          <div class="review-detail">
+            <span class="review-detail__label">Known Current Methamphetamine Contamination</span>
+            <span class="review-detail__value">{{ formattedMethamphetamineStatement }}</span>
+          </div>
+          }
+
           @if (requires('fuelTankPresent')) {
           <div class="review-detail">
             <span class="review-detail__label">
@@ -306,6 +313,45 @@
 
   <div class="review-section review-section--certification">
     <div class="review-section__content">
+      @if (stateDisclosureRequirements().length) {
+      <div class="seller-disclosure-forms">
+        <h3>Seller disclosure forms</h3>
+        <p>Open and complete the forms for this state. After publishing, upload the signed documents in your listing's Disclosures section.</p>
+        @if (floridaDisclosureNotice()) {
+        <p class="seller-disclosure-forms__notice" role="note">
+          <strong>Florida sellers: prepare these documents before accepting offers.</strong>
+          Upload the flood disclosure, and provide a seller condition statement when applicable.
+          If you reported an HOA, also upload the HOA summary; if you reported that lead disclosures apply,
+          upload the lead packet. Buyers cannot start a NavStreet offer until the required documents are uploaded.
+          You can upload the documents from Manage listing → Property Disclosures after publication.
+        </p>
+        }
+        <ul>
+          @for (requirement of stateDisclosureRequirements(); track requirement.documentType) {
+          <li>
+            <strong>{{ requirement.title }}</strong>
+            <span> — {{ isDisclosureRequired(requirement) ? 'Required for this listing' : 'If applicable' }}</span>
+            @if (requirement.formDownloadUrl) {
+            <a [href]="requirement.formDownloadUrl" target="_blank" rel="noopener noreferrer">
+              Open or download blank PDF
+            </a>
+            }
+            @if (requirement.officialFormUrl && requirement.officialFormUrl !== requirement.formDownloadUrl) {
+            <a [href]="requirement.officialFormUrl" target="_blank" rel="noopener noreferrer">
+              Read official source
+            </a>
+            }
+            @for (resource of requirement.additionalDownloads ?? []; track resource.url) {
+            <a [href]="resource.url" target="_blank" rel="noopener noreferrer">{{ resource.label }}</a>
+            }
+            @if (requirement.sourceInstructions) {
+            <span> — {{ requirement.sourceInstructions }}</span>
+            }
+          </li>
+          }
+        </ul>
+      </div>
+      }
       <label class="certification">
         <input #certificationCheckbox type="checkbox" [checked]="certificationAccepted()"
           (change)="onCertificationChange(certificationCheckbox.checked)" />

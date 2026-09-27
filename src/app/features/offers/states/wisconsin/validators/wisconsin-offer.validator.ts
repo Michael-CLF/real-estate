@@ -19,7 +19,7 @@ export class WisconsinOfferValidator implements StateOfferValidator<WisconsinOff
         if (!party.phone?.trim()) error(`${side}.${index}.phone`, 'Enter a phone number.');
       });
     }
-    if (!terms.legalDescription.trim()) error('legalDescription', 'Enter the recorded legal description.');
+    if (!terms.legalDescription.trim()) error('legalDescription', 'The seller must provide the recorded legal description on the listing.');
     const p = terms.purchase;
     if (!money(p.purchasePriceInCents, true)) error('purchase.purchasePriceInCents', 'Enter a price above $0.');
     if (!money(p.earnestMoneyInCents, true)) error('purchase.earnestMoneyInCents', 'Enter earnest money above $0.');
@@ -37,11 +37,13 @@ export class WisconsinOfferValidator implements StateOfferValidator<WisconsinOff
     if (terms.conditions.dueDiligence && !date(d.dueDiligenceDate)) error('deadlines.dueDiligenceDate', 'Set the due diligence deadline.');
     if ((terms.conditions.financing || terms.conditions.appraisal) && !date(d.financingAppraisalDate)) error('deadlines.financingAppraisalDate', 'Set the financing and appraisal deadline.');
     if (date(d.settlementDate) && date(d.sellerDisclosureDate) && d.sellerDisclosureDate > d.settlementDate) error('deadlines.sellerDisclosureDate', 'Disclosure must be due no later than settlement.');
+    if (terms.conditions.dueDiligence && date(d.dueDiligenceDate) && date(d.settlementDate) && d.dueDiligenceDate > d.settlementDate) error('deadlines.dueDiligenceDate', 'Due diligence must end no later than settlement.');
+    if ((terms.conditions.financing || terms.conditions.appraisal) && date(d.financingAppraisalDate) && date(d.settlementDate) && d.financingAppraisalDate > d.settlementDate) error('deadlines.financingAppraisalDate', 'Financing and appraisal must end no later than settlement.');
     if (terms.settlement.possession === 'unselected') error('settlement.possession', 'Select possession timing.');
     if (terms.settlement.possession !== 'unselected' && terms.settlement.possession !== 'at_recording' && (!Number.isSafeInteger(terms.settlement.possessionDelay) || terms.settlement.possessionDelay < 1 || terms.settlement.possessionDelay > 365)) error('settlement.possessionDelay', 'Enter a delay from 1 through 365.');
     if (terms.settlement.specialAssessmentPayer === 'unselected') error('settlement.specialAssessmentPayer', 'Select who pays special assessments.');
     if (terms.settlement.hoaTransferFeePayer === 'unselected') error('settlement.hoaTransferFeePayer', 'Select who pays association transfer fees.');
-    if (terms.disclosures.propertyConditionStatus !== 'received') error('disclosures.propertyConditionStatus', 'Receive and review the complete seller-signed condition report before signing.');
+    if (!['received', 'pending'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.propertyConditionStatus', 'Select whether you received the seller-signed condition report.');
     if (terms.disclosures.leadPaintStatus === 'unselected' || (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus !== 'received' && terms.disclosures.leadPaintStatus !== 'exempt')) error('disclosures.leadPaintStatus', 'For a pre-1978 home, receive the signed lead packet or confirm a federal exemption before signing.');
     if (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The listing year indicates this home was built before 1978.');
     if (terms.property.yearBuilt == null && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The year built is unknown; obtain the lead packet or document an exemption.');
@@ -50,7 +52,7 @@ export class WisconsinOfferValidator implements StateOfferValidator<WisconsinOff
     if (terms.disclosures.hoaDocumentsStatus === 'unselected') error('disclosures.hoaDocumentsStatus', 'Select the association documents status.');
     if (terms.disclosures.sellerReportsExistingLeases === null) error('disclosures.sellerReportsExistingLeases', 'The seller must answer the leases question on the listing.');
     if (terms.conditions.saleOfBuyersProperty && !terms.additionalTerms.trim()) error('additionalTerms', 'Describe the sale of the buyer’s property in additional terms.');
-    if (terms.disclosures.leaseStatementAcknowledged !== true) error('disclosures.leaseStatementAcknowledged', 'Review and acknowledge the lease statement and condition report.');
+    if (terms.disclosures.leaseStatementAcknowledged !== true) error('disclosures.leaseStatementAcknowledged', 'Acknowledge the lease statement and your report selection.');
     if (terms.delivery.electronicDeliveryAuthorized !== true) error('delivery.electronicDeliveryAuthorized', 'Electronic delivery consent is required.');
     const expiration = new Date(terms.delivery.expiresAt);
     if (!Number.isFinite(expiration.getTime()) || (context.mode !== 'draft' && expiration.getTime() <= (context.currentDateTime ?? new Date()).getTime())) error('delivery.expiresAt', 'Set a future expiration date and time.');

@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject
+  inject,
+  input,
+  output
 } from '@angular/core';
 
 import {
@@ -10,6 +12,8 @@ import {
   FormGroupDirective,
   ReactiveFormsModule
 } from '@angular/forms';
+
+import { formatOfferPhone } from '../../../../engine/format-offer-phone';
 
 
 @Component({
@@ -43,6 +47,10 @@ import {
 })
 export class BuyerPropertySectionComponent {
 
+  readonly coBuyerLocked = input(false);
+  readonly canAddCoBuyer = input(false);
+  readonly coBuyerToggle = output<void>();
+
   private readonly parentFormDirective =
     inject(FormGroupDirective);
 
@@ -61,5 +69,16 @@ export class BuyerPropertySectionComponent {
     }
 
     return section;
+  }
+
+  onCoBuyerToggle(): void {
+    this.coBuyerToggle.emit();
+  }
+
+  formatCoBuyerPhone(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = formatOfferPhone(input.value, true);
+    input.value = formatted;
+    this.sectionForm.get('coBuyerPhone')?.setValue(formatted);
   }
 }

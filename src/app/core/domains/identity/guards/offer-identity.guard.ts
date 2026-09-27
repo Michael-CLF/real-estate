@@ -7,6 +7,11 @@ import {
   Router,
 } from '@angular/router';
 
+import { firstValueFrom, filter, take } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+
+import { AuthState } from '../../../authentication/state/auth.state';
+
 import {
   OfferIdentityVerificationService,
 } from '../services/offer-identity-verification.service';
@@ -20,6 +25,8 @@ export const offerIdentityGuard:
   ) => {
     const router =
       inject(Router);
+
+    const authState = inject(AuthState);
 
     const identityService =
       inject(
@@ -35,6 +42,22 @@ export const offerIdentityGuard:
       return router.createUrlTree([
         '/homes',
       ]);
+    }
+
+    // Angular may start sibling route guards at the same time. Wait for
+    // Firebase to restore the signed-in user before checking identity or
+    // invoking the session-start callable.
+    await firstValueFrom(
+      toObservable(authState.loading).pipe(
+        filter(loading => !loading),
+        take(1)
+      )
+    );
+
+    if (!authState.isAuthenticated()) {
+      return router.createUrlTree(['/sign-in'], {
+        queryParams: { returnUrl: state.url },
+      });
     }
 
     const returnRoute = [

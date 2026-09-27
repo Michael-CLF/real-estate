@@ -80,10 +80,10 @@ export function validateNorthCarolinaSubmission(
 function validateParties(
     version: OfferVersionDocument
 ): void {
-    if (version.buyers.length !== 1) {
+    if (version.buyers.length < 1 || version.buyers.length > 2) {
         throw new HttpsError(
             'failed-precondition',
-            'The NavStreet offer form currently supports exactly one buyer.'
+            'A North Carolina offer supports one buyer and one optional co-buyer.'
         );
     }
 
@@ -139,20 +139,14 @@ function validateParties(
             ? version.buyers
             : version.sellers;
 
-    for (
-        const party of initiatingParties
-    ) {
-        if (
-            party.requiredSigner &&
-            party.identityVerification
-                .status !== 'verified'
-        ) {
-            throw new HttpsError(
-                'failed-precondition',
-                party.legalName +
-                ' must complete identity verification before submitting this offer.'
-            );
-        }
+    const initiator = initiatingParties.find(
+        party => party.userUid === version.initiatedByUid
+    );
+    if (!initiator || initiator.identityVerification.status !== 'verified') {
+        throw new HttpsError(
+            'failed-precondition',
+            'The initiating signer must complete identity verification before submitting this offer.'
+        );
     }
 }
 

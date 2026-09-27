@@ -35,6 +35,8 @@ import {
   OfferQuestionRendererComponent,
 } from '../question-renderer/question-renderer.component';
 
+import { formatOfferPhone } from '../format-offer-phone';
+
 import type {
   OfferDocumentSelection,
 } from '../question-renderer/question-renderer.component';
@@ -97,6 +99,10 @@ export class OfferWizardShellComponent {
 
   readonly terms = input.required<unknown>();
 
+  // Compatibility with state templates that already bind this input.
+  // Every state now validates required fields before advancing.
+  readonly requireCompleteSection = input(true);
+
   readonly buyers = input<readonly OfferParty[]>([]);
   readonly allowBuyerEdits = input(true);
   readonly sellers = input<readonly OfferParty[]>([]);
@@ -104,11 +110,10 @@ export class OfferWizardShellComponent {
   readonly listingDisclosures =
     input<readonly ListingDisclosureDocument[]>([]);
 
+  readonly disclosureNotice = input<string | null>(null);
+
   readonly validationIssues =
     input<readonly OfferValidationIssue[]>([]);
-
-  /** Opt in per state so existing state wizards retain their current navigation. */
-  readonly requireCompleteSection = input(false);
 
   readonly currentSectionIndex = model(0);
 
@@ -265,31 +270,36 @@ export class OfferWizardShellComponent {
 
 
   protected readonly currentSectionValid = computed(
-    () => this.currentSectionErrorCount() === 0
+    () => this.currentSectionErrorCount() === 0 &&
+      (this.currentSection()?.id !== 'disclosures' || !this.disclosureNotice())
+  );
+
+  protected readonly allSectionsValid = computed(
+    () => this.visibleSections().every(section => this.sectionErrorCount(section) === 0) &&
+      !this.disclosureNotice()
   );
 
 
-  protected readonly currentSectionHasMissingSellerInformation = computed(
-    () => {
-      const section = this.currentSection();
+ protected readonly currentSectionMissingLockedFields = computed(() => {
+  const section = this.currentSection();
 
-      if (!section) {
-        return false;
-      }
+  if (!section) {
+    return [];
+  }
 
-      return questionsForSection(section).some(
-        question =>
-          question.readOnly === true &&
-          question.validation?.required === true &&
-          this.isQuestionVisible(question) &&
-          question.fieldPath !== undefined &&
-          isRequiredValueMissing(
-            readPath(this.terms(), question.fieldPath),
-            question
-          )
-      );
-    }
-  );
+  return questionsForSection(section)
+    .filter(question =>
+      question.readOnly === true &&
+      question.validation?.required === true &&
+      this.isQuestionVisible(question) &&
+      question.fieldPath !== undefined &&
+      isRequiredValueMissing(
+        readPath(this.terms(), question.fieldPath),
+        question
+      )
+    )
+    .map(question => question.label);
+});
 
 
   protected readonly busy = computed(
@@ -326,27 +336,54 @@ export class OfferWizardShellComponent {
   protected validationMessageFor(
     question: OfferQuestionDefinition
   ): string | null {
-    const section = this.currentSection();
-
-    if (
-      !question.fieldPath ||
-      !section ||
-      (!this.attemptedSectionIds().has(section.id) &&
-        !(this.requireCompleteSection() && this.touchedFieldPaths().has(question.fieldPath)))
-    ) {
+    if (!question.fieldPath) {
       return null;
     }
+    const section = this.currentSection();
+    if (!section ||
+      (!this.attemptedSectionIds().has(section.id) &&
+        !this.touchedFieldPaths().has(question.fieldPath))) {
+      return null;
+    }
+    return this.questionValidationMessage(question);
+  }
 
+  private questionValidationMessage(question: OfferQuestionDefinition): string | null {
+    if (!question.fieldPath) return null;
     const issue = this.validationIssues().find(
       issue =>
         issue.severity === 'error' &&
-        issue.fieldPath === question.fieldPath
+        (issue.fieldPath === question.fieldPath ||
+          issue.fieldPath.startsWith(`${question.fieldPath}.`) ||
+          question.fieldPath.startsWith(`${issue.fieldPath}.`))
     );
-
     if (issue) return issue.message;
-    if (question.validation?.required &&
-      isRequiredValueMissing(this.questionValue(question), question)) {
-      return question.validation.message ?? 'Complete this field.';
+    const rule = question.validation;
+    if (!rule) return null;
+    const value = this.questionValue(question);
+    const missing = isRequiredValueMissing(value, question);
+    if (rule.required && missing) return rule.message ?? 'Complete this field.';
+    if (missing) return null;
+    if (question.type === 'single_choice' &&
+      !question.options.some(option => option.value === value))
+      return rule.message ?? 'Select a valid option.';
+    if (typeof value === 'number' || question.type === 'number' || question.type === 'currency') {
+      const amount = Number(value);
+      if (!Number.isFinite(amount) ||
+          (rule.minimum !== undefined && amount < rule.minimum) ||
+          (rule.maximum !== undefined && amount > rule.maximum))
+        return rule.message ?? 'Enter a number in the permitted range.';
+    }
+    if (typeof value === 'string') {
+      if (rule.minimumLength !== undefined && value.trim().length < rule.minimumLength)
+        return rule.message ?? `Enter at least ${rule.minimumLength} characters.`;
+      if (rule.maximumLength !== undefined && value.length > rule.maximumLength)
+        return rule.message ?? `Enter no more than ${rule.maximumLength} characters.`;
+      if (rule.pattern && !new RegExp(rule.pattern).test(value))
+        return rule.message ?? 'Enter a valid value.';
+      if ((question.type === 'date' || question.type === 'date_time') &&
+          !Number.isFinite(Date.parse(value)))
+        return rule.message ?? 'Enter a valid date.';
     }
     return null;
   }
@@ -398,8 +435,7 @@ export class OfferWizardShellComponent {
   }
 
   protected coBuyerError(field: 'legalName' | 'email' | 'phone'): string | null {
-    if (!this.requireCompleteSection() || !this.addingCoBuyer() ||
-        !this.touchedCoBuyerFields().has(field)) return null;
+    if (!this.addingCoBuyer()) return null;
     const value = field === 'legalName' ? this.coBuyerLegalName() :
       field === 'email' ? this.coBuyerEmail() : this.coBuyerPhone();
     if (!value.trim()) return `Enter the co-buyer’s ${field === 'legalName' ? 'legal name' : field}.`;
@@ -412,7 +448,12 @@ export class OfferWizardShellComponent {
     field: 'legalName' | 'email' | 'phone',
     event: Event
   ): void {
-    const value = (event.target as HTMLInputElement).value;
+    const input = event.target as HTMLInputElement;
+    const value = field === 'phone'
+      ? formatOfferPhone(input.value, true)
+      : input.value;
+
+    if (field === 'phone') input.value = value;
 
     if (field === 'legalName') {
       this.coBuyerLegalName.set(value);
@@ -467,7 +508,7 @@ export class OfferWizardShellComponent {
       new Set([...this.attemptedSectionIds(), section.id])
     );
 
-    if (this.currentSectionErrorCount() > 0) {
+    if (!this.currentSectionValid()) {
       return;
     }
 
@@ -529,7 +570,16 @@ export class OfferWizardShellComponent {
 
 
   protected confirmSubmit(): void {
-    if (this.busy() || !this.currentSectionValid()) {
+    if (this.busy()) {
+      return;
+    }
+    if (!this.allSectionsValid()) {
+      this.attemptedSectionIds.set(new Set(this.visibleSections().map(section => section.id)));
+      this.reviewing.set(false);
+      const firstInvalid = this.visibleSections().findIndex(section =>
+        this.sectionErrorCount(section) > 0 ||
+        (section.id === 'disclosures' && !!this.disclosureNotice()));
+      if (firstInvalid >= 0) this.setSectionIndex(firstInvalid);
       return;
     }
 
@@ -549,17 +599,11 @@ export class OfferWizardShellComponent {
 
 
   protected formatPhone(value: string): string {
-    const digits = value.replace(/\D/g, '');
+    return formatOfferPhone(value);
+  }
 
-    if (digits.length === 10) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    }
-
-    if (digits.length === 11 && digits.startsWith('1')) {
-      return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
-    }
-
-    return value;
+  protected sectionLabel(value: string): string {
+    return value.replace(/^\s*\d+\s*[.:-]?\s*/, '').trim();
   }
 
   protected partyNames(parties: readonly OfferParty[]): string {
@@ -696,13 +740,15 @@ export class OfferWizardShellComponent {
     section: OfferSectionDefinition
   ): number {
     if (section.id === 'parties') {
-      return this.validationIssues().filter(
+      const partyIssues = this.validationIssues().filter(
         issue => issue.severity === 'error' &&
           (issue.fieldPath === 'buyers' ||
             issue.fieldPath.startsWith('buyers.') ||
             issue.fieldPath === 'sellers' ||
             issue.fieldPath.startsWith('sellers.'))
       ).length;
+      return partyIssues + (this.addingCoBuyer() &&
+        (this.coBuyerError('legalName') || this.coBuyerError('email') || this.coBuyerError('phone')) ? 1 : 0);
     }
 
     const visibleQuestions = questionsForSection(section).filter(
@@ -725,26 +771,16 @@ export class OfferWizardShellComponent {
             Array.from(fieldPaths).some(
               fieldPath =>
                 issue.fieldPath === fieldPath ||
-                issue.fieldPath.startsWith(
-                  `${fieldPath}.`
-                )
+                issue.fieldPath.startsWith(`${fieldPath}.`) ||
+                fieldPath.startsWith(`${issue.fieldPath}.`)
             )
         )
         .map(issue => issue.fieldPath)
     );
 
-    for (const question of visibleQuestions) {
-      if (
-        question.validation?.required === true &&
-        question.fieldPath &&
-        isRequiredValueMissing(
-          readPath(this.terms(), question.fieldPath),
-          question
-        )
-      ) {
+    for (const question of visibleQuestions)
+      if (question.fieldPath && this.questionValidationMessage(question))
         errorKeys.add(question.fieldPath);
-      }
-    }
 
     return errorKeys.size;
   }

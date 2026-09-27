@@ -29,15 +29,16 @@
         of {{ visibleSections().length }}
       </span>
 
-      <strong>{{ progressPercent() }}%</strong>
+      <strong>{{ sectionLabel(currentSection()?.shortTitle ?? currentSection()?.title ?? '') }}</strong>
     </div>
 
     <div class="offer-wizard-shell__progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
       [attr.aria-valuenow]="progressPercent()">
       <span [style.width.%]="progressPercent()"></span>
     </div>
+  </section>
 
-    <ol class="offer-wizard-shell__section-list">
+    <ol class="offer-wizard-shell__section-list" aria-label="Offer sections">
       @for (
       section of visibleSections();
       track section.id;
@@ -54,11 +55,15 @@
           {{ index + 1 }}
           }
         </span>
-        {{ section.shortTitle ?? section.title }}
+        <span class="offer-wizard-shell__section-copy">
+          <strong>{{ sectionLabel(section.shortTitle ?? section.title) }}</strong>
+          @if (section.shortTitle && sectionLabel(section.title) !== sectionLabel(section.shortTitle)) {
+          <small>{{ sectionLabel(section.title) }}</small>
+          }
+        </span>
       </li>
       }
     </ol>
-  </section>
 
   @if (reviewing()) {
   <section class="offer-wizard-shell__section offer-wizard-shell__review">
@@ -99,7 +104,11 @@
     </p>
   </section>
   } @else if (currentSection(); as section) {
-  <section class="offer-wizard-shell__section">
+  <section class="offer-wizard-shell__section" [attr.data-section-id]="section.id"
+    [class.offer-wizard-shell__section--question-cards]="section.questionLayout === 'cards'"
+    [class.offer-wizard-shell__section--disclosures]="section.id === 'disclosures'"
+    [class.offer-wizard-shell__section--parties]="section.id === 'parties'"
+    [class.offer-wizard-shell__section--property]="section.id === 'property'">
     <header>
       <p class="offer-wizard-shell__section-number">
         Section {{ normalizedSectionIndex() + 1 }}
@@ -112,79 +121,136 @@
       }
     </header>
 
-    @if (currentSectionHasMissingSellerInformation()) {
+ @if (currentSectionMissingLockedFields(); as missingFields) {
+  @if (missingFields.length) {
     <aside class="offer-wizard-shell__listing-blocker" role="alert">
-      <strong>Required seller information is missing from this offer.</strong>
+      <strong>Required answers are missing from locked fields in this offer.</strong>
       <span>
-        The seller must complete the missing answers in the {{ stateName() }} listing.
-        After the listing is saved, discard this draft and start a new offer
-        so the corrected listing answers are copied into the contract.
+        Missing: {{ missingFields.join(', ') }}.
+        These answers cannot be changed by the current party.
+        Review the last submitted offer to determine why they are missing
+        from this draft. Listing Enhancements cannot fill in buyer answers.
       </span>
+    </aside>
+  }
+}
+
+    @if (section.id === 'disclosures' && disclosureNotice(); as notice) {
+    <aside class="offer-wizard-shell__disclosure-notice" role="status">
+      <strong>Seller document needed</strong>
+      <p>{{ notice }}</p>
     </aside>
     }
 
     @if (section.id === 'parties') {
-    <div class="offer-wizard-shell__party-grid">
-      <section>
-        <h3>Buyer</h3>
-        @for (buyer of buyers(); track buyer.Uid) {
-        <article class="offer-wizard-shell__party-card">
-          <strong>{{ buyer.legalName }}</strong>
-          <span>{{ buyer.email }}</span>
-          <span>{{ formatPhone(buyer.phone) }}</span>
-        </article>
+    <div class="offer-wizard-shell__party-sections">
+      <section class="offer-wizard-shell__party-section" aria-labelledby="offer-buyers-heading">
+        <div class="offer-wizard-shell__party-heading">
+          <div>
+            <p class="offer-wizard-shell__party-eyebrow">Buyer</p>
+            <h3 id="offer-buyers-heading">Buyer information</h3>
+            <p>NavStreet uses the buyer information connected to this offer. These details are locked.</p>
+          </div>
+          <span class="offer-wizard-shell__locked-badge">Account information</span>
+        </div>
+        @for (buyer of buyers(); track buyer.Uid; let buyerIndex = $index) {
+        <div class="offer-wizard-shell__detail-card">
+          @if (buyers().length > 1) {
+          <h4>{{ buyerIndex === 0 ? 'Primary buyer' : 'Co-buyer' }}</h4>
+          }
+          <div class="offer-wizard-shell__detail-fields offer-wizard-shell__detail-fields--names">
+            <div><span>Legal first name</span><strong>{{ buyer.firstName || 'Not provided' }}</strong></div>
+            <div><span>Middle name</span><strong>{{ buyer.middleName || 'Not provided' }}</strong></div>
+            <div><span>Legal last name</span><strong>{{ buyer.lastName || 'Not provided' }}</strong></div>
+            <div><span>Suffix</span><strong>{{ buyer.suffix || 'Not provided' }}</strong></div>
+          </div>
+          <div class="offer-wizard-shell__detail-fields offer-wizard-shell__detail-fields--contact">
+            <div><span>Email address</span><strong>{{ buyer.email || 'Not provided' }}</strong></div>
+            <div><span>Phone number</span><strong>{{ formatPhone(buyer.phone) || 'Not provided' }}</strong></div>
+          </div>
+        </div>
+        }
+
+        @if (allowBuyerEdits() && (buyers().length === 1 || addingCoBuyer())) {
+        <div class="offer-wizard-shell__co-buyer-card">
+          <label class="offer-wizard-shell__co-buyer-toggle">
+            <input type="checkbox" [checked]="addingCoBuyer()" [disabled]="busy()"
+              (change)="toggleCoBuyer(($any($event.target)).checked)" />
+            Add one co-buyer to this first offer
+          </label>
+
+          @if (addingCoBuyer()) {
+          <p>The co-buyer must sign separately. Their information is locked after the draft saves.</p>
+          <div class="offer-wizard-shell__co-buyer-form">
+            <label>
+              <span>Co-buyer legal name</span>
+              <input type="text" [value]="coBuyerLegalName()" [attr.aria-invalid]="coBuyerError('legalName') ? 'true' : null" (input)="updateCoBuyerField('legalName', $event)" (blur)="touchCoBuyerField('legalName')" />
+              @if (coBuyerError('legalName'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
+            </label>
+            <label>
+              <span>Co-buyer email</span>
+              <input type="email" [value]="coBuyerEmail()" [attr.aria-invalid]="coBuyerError('email') ? 'true' : null" (input)="updateCoBuyerField('email', $event)" (blur)="touchCoBuyerField('email')" />
+              @if (coBuyerError('email'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
+            </label>
+            <label>
+              <span>Co-buyer phone</span>
+              <input type="tel" [value]="coBuyerPhone()" [attr.aria-invalid]="coBuyerError('phone') ? 'true' : null" (input)="updateCoBuyerField('phone', $event)" (blur)="touchCoBuyerField('phone')" />
+              @if (coBuyerError('phone'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
+            </label>
+          </div>
+          }
+        </div>
         }
       </section>
-      <section>
-        <h3>Seller</h3>
+
+      <section class="offer-wizard-shell__party-section" aria-labelledby="offer-sellers-heading">
+        <div class="offer-wizard-shell__party-heading">
+          <div>
+            <p class="offer-wizard-shell__party-eyebrow">Seller</p>
+            <h3 id="offer-sellers-heading">Seller information</h3>
+            <p>NavStreet uses the seller connected to the published property listing.</p>
+          </div>
+          <span class="offer-wizard-shell__locked-badge">Listing owner</span>
+        </div>
         @for (seller of sellers(); track seller.Uid) {
-        <article class="offer-wizard-shell__party-card">
-          <strong>{{ seller.legalName }}</strong>
-          <span>{{ seller.email }}</span>
-          <span>{{ formatPhone(seller.phone) }}</span>
-        </article>
+        <div class="offer-wizard-shell__detail-card">
+          <div class="offer-wizard-shell__detail-fields offer-wizard-shell__detail-fields--contact">
+            <div><span>Seller legal name</span><strong>{{ seller.legalName || 'Not provided' }}</strong></div>
+            <div><span>Seller email</span><strong>{{ seller.email || 'Not provided' }}</strong></div>
+          </div>
+        </div>
         }
       </section>
     </div>
-    <p class="offer-wizard-shell__locked-note">
-      Primary party information is populated from NavStreet records and locked for this offer.
-    </p>
-
-    @if (allowBuyerEdits() && (buyers().length === 1 || addingCoBuyer())) {
-    <label class="offer-wizard-shell__co-buyer-toggle">
-      <input type="checkbox" [checked]="addingCoBuyer()" [disabled]="busy()"
-        (change)="toggleCoBuyer(($any($event.target)).checked)" />
-      Add one co-buyer to this first offer
-    </label>
-
-    @if (addingCoBuyer()) {
-    <div class="offer-wizard-shell__co-buyer-form">
-      <label>
-        <span>Co-buyer legal name</span>
-        <input type="text" [value]="coBuyerLegalName()" [attr.aria-invalid]="coBuyerError('legalName') ? 'true' : null" (input)="updateCoBuyerField('legalName', $event)" (blur)="touchCoBuyerField('legalName')" />
-        @if (coBuyerError('legalName'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
-      </label>
-      <label>
-        <span>Co-buyer email</span>
-        <input type="email" [value]="coBuyerEmail()" [attr.aria-invalid]="coBuyerError('email') ? 'true' : null" (input)="updateCoBuyerField('email', $event)" (blur)="touchCoBuyerField('email')" />
-        @if (coBuyerError('email'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
-      </label>
-      <label>
-        <span>Co-buyer phone</span>
-        <input type="tel" [value]="coBuyerPhone()" [attr.aria-invalid]="coBuyerError('phone') ? 'true' : null" (input)="updateCoBuyerField('phone', $event)" (blur)="touchCoBuyerField('phone')" />
-        @if (coBuyerError('phone'); as error) { <span class="offer-wizard-shell__field-error">{{ error }}</span> }
-      </label>
-    </div>
-    }
-    }
     }
 
     @if (section.id === 'property') {
-    <div class="offer-wizard-shell__property-summary">
-      <strong>Property Address</strong>
-      <span>{{ propertyValue('addressLine1') }}</span>
-      <span>{{ propertyValue('city') }}, {{ propertyValue('state') }} {{ propertyValue('zipCode') }}</span>
-      <span>{{ propertyValue('county') }} County</span>
+    <div class="offer-wizard-shell__party-section offer-wizard-shell__property-section">
+      <div class="offer-wizard-shell__party-heading">
+        <div>
+          <p class="offer-wizard-shell__party-eyebrow">Property</p>
+          <h3>Property being purchased</h3>
+          <p>These details are copied from the published listing and cannot be changed in the offer.</p>
+        </div>
+        <span class="offer-wizard-shell__locked-badge">Listing information</span>
+      </div>
+      <div class="offer-wizard-shell__detail-card">
+        <div class="offer-wizard-shell__detail-fields">
+          <div><span>Street address</span><strong>{{ propertyValue('addressLine1') || 'Not provided' }}</strong></div>
+        </div>
+        <div class="offer-wizard-shell__detail-fields offer-wizard-shell__detail-fields--address">
+          <div><span>City</span><strong>{{ propertyValue('city') || 'Not provided' }}</strong></div>
+          <div><span>County</span><strong>{{ propertyValue('county') || 'Not provided' }}</strong></div>
+          <div><span>State</span><strong>{{ propertyValue('state') || 'Not provided' }}</strong></div>
+          <div><span>ZIP code</span><strong>{{ propertyValue('zipCode') || 'Not provided' }}</strong></div>
+        </div>
+        <div class="offer-wizard-shell__detail-fields offer-wizard-shell__detail-fields--address">
+          <div><span>Parcel ID</span><strong>{{ propertyValue('parcelIdentificationNumber') || 'Not provided' }}</strong></div>
+          <div><span>Deed book</span><strong>{{ propertyValue('deedBook') || 'Not provided' }}</strong></div>
+          <div><span>Deed page</span><strong>{{ propertyValue('deedPage') || 'Not provided' }}</strong></div>
+          <div><span>Other reference</span><strong>{{ propertyValue('otherPropertyReference') || 'Not provided' }}</strong></div>
+        </div>
+      </div>
     </div>
 
     @if (hasValue('propertyAssociation.associationName')) {
@@ -283,7 +349,9 @@
       }
     </div>
 
-    <button type="button" class="offer-wizard-shell__primary" [disabled]="busy() || (requireCompleteSection() && !reviewing() && !currentSectionValid())"
+    <button type="button" class="offer-wizard-shell__primary" [disabled]="busy()"
+      [attr.aria-disabled]="busy() || (reviewing() ? !allSectionsValid() : !currentSectionValid())"
+      [class.offer-wizard-shell__primary--invalid]="!busy() && (reviewing() ? !allSectionsValid() : !currentSectionValid())"
       (click)="reviewing() ? confirmSubmit() : continueOrSubmit()">
       @if (submitting()) {
       Submitting…

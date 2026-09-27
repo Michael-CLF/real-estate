@@ -238,25 +238,52 @@
 
             <div>
               <p>Interested in this property?</p>
-              <h2>Submit an offer</h2>
+              <h2>{{ listing.status === 'under_contract' ? 'Under contract' : 'Submit an offer' }}</h2>
             </div>
           </div>
 
+          @if (listing.status === 'active') {
           <p class="listing-details__offer-description">
             Create a private offer, review all proposed terms and
             submit the completed offer directly to the seller.
           </p>
+          }
 
+          @if (listing.status === 'active') {
+          @if (floridaOfferIsReady(listing)) {
           <a class="listing-details__offer-button" [routerLink]="offerPath(listing)">
             <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
 
             Make an offer
           </a>
+          } @else {
+          <button class="listing-details__offer-button" type="button" disabled aria-describedby="florida-offer-requirements">
+            Make an offer
+          </button>
+          <p id="florida-offer-requirements" class="listing-details__offer-note" role="status">
+            @if (authenticationIsLoading() || (isAuthenticated() && disclosuresAreLoading())) {
+              Checking required Florida disclosures…
+            } @else if (!isAuthenticated()) {
+              Sign in to check Florida disclosures and make an offer.
+            } @else if (disclosureLoadError()) {
+              Offer availability could not be checked. Refresh this page.
+            } @else {
+              Waiting for the seller to upload: {{ floridaOfferMissingTitles(listing).join(', ') }}.
+            }
+          </p>
+          }
+          } @else {
+          <p class="listing-details__offer-note" role="status">
+            {{ listing.status === 'under_contract' ? 'Under contract — new offers are closed.' : 'This property is not accepting offers.' }}
+          </p>
+          }
 
+          @if (listing.status === 'active') {
           <p class="listing-details__offer-note">
             You must sign in or create a NavStreet account before
             submitting an offer.
           </p>
+          }
         </section>
 
         <div class="listing-details__contact-card">

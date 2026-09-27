@@ -62,6 +62,10 @@ export interface MarketplaceListing {
   lotSizeAcres?: number;
 
   yearBuilt?: number;
+  sellerStatements?: {
+    ownersAssociationApplies?: boolean | null;
+    leadBasedPaintApplies?: boolean | null;
+  };
   annualPropertyTax?: number;
   annualHomeownersInsurance?: number;
   hoa?: ListingHoa;

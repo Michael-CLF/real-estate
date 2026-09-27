@@ -159,6 +159,13 @@ export class OfferQuestionRendererComponent {
       : '';
   }
 
+  protected selectedChoiceLabel(): string {
+  const value = this.textValue();
+
+  return this.choiceOptions()
+    .find(option => option.value === value)
+    ?.label ?? 'No answer provided';
+}
 
   protected numericValue(): number | null {
     const value = this.value();

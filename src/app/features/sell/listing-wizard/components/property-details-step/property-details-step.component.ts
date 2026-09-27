@@ -155,6 +155,10 @@ export class PropertyDetailsStepComponent
       ),
   );
 
+  readonly requiresOwnersAssociation = computed(
+    () => requiresStateListingField(this.stateListingPackage(), 'ownersAssociationApplies'),
+  );
+
   readonly requiresGeneralLeases = computed(
     () =>
       requiresStateListingField(
@@ -178,7 +182,7 @@ export class PropertyDetailsStepComponent
   );
 
   readonly isWisconsinListing = computed(
-    () => this.stateCode().trim().toUpperCase() === 'WI',
+    () => ['WI', 'FL'].includes(this.stateCode().trim().toUpperCase()),
   );
 
   readonly currentYear =

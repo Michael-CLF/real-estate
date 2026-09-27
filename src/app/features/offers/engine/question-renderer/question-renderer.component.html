@@ -41,16 +41,20 @@
     }
 
     @case ('textarea') {
-      <textarea
-        [id]="controlId()"
-        rows="5"
-        [value]="textValue()"
-        [disabled]="controlDisabled()"
-        [attr.required]="question().validation?.required ? '' : null"
-        [attr.aria-invalid]="validationMessage() ? 'true' : null"
-        (input)="onTextInput($event)"
-        (blur)="markTouched()"
-      ></textarea>
+      @if (question().readOnly) {
+        <div [id]="controlId()" class="offer-question__locked-answer">{{ textValue() || 'Not provided by the seller' }}</div>
+      } @else {
+        <textarea
+          [id]="controlId()"
+          rows="5"
+          [value]="textValue()"
+          [disabled]="controlDisabled()"
+          [attr.required]="question().validation?.required ? '' : null"
+          [attr.aria-invalid]="validationMessage() ? 'true' : null"
+          (input)="onTextInput($event)"
+          (blur)="markTouched()"
+        ></textarea>
+      }
     }
 
     @case ('currency') {
@@ -168,25 +172,31 @@
       </label>
     }
 
-    @case ('single_choice') {
-      <select
-        [id]="controlId()"
-        [value]="textValue()"
-        [disabled]="controlDisabled()"
-        [attr.required]="question().validation?.required ? '' : null"
-        [attr.aria-invalid]="validationMessage() ? 'true' : null"
-        (change)="onSingleChoiceInput($event)"
-        (blur)="markTouched()"
-      >
-        <option value="">Select an option</option>
+   @case ('single_choice') {
+  @if (question().readOnly) {
+    <div [id]="controlId()" class="offer-question__locked-answer">
+      {{ selectedChoiceLabel() }}
+    </div>
+  } @else {
+    <select
+      [id]="controlId()"
+      [value]="textValue()"
+      [disabled]="controlDisabled()"
+      [attr.required]="question().validation?.required ? '' : null"
+      [attr.aria-invalid]="validationMessage() ? 'true' : null"
+      (change)="onSingleChoiceInput($event)"
+      (blur)="markTouched()"
+    >
+      <option value="">Select an option</option>
 
-        @for (option of choiceOptions(); track option.value) {
-          <option [value]="option.value">
-            {{ option.label }}
-          </option>
-        }
-      </select>
-    }
+      @for (option of choiceOptions(); track option.value) {
+        <option [value]="option.value">
+          {{ option.label }}
+        </option>
+      }
+    </select>
+  }
+}
 
     @case ('multiple_choice') {
       <div class="offer-question__choices">

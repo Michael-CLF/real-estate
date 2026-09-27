@@ -19,7 +19,7 @@ export function validateWisconsinSubmission(input: ValidateStateSubmissionInput<
   const initiatingSide = version.initiatedBy === 'buyer' ? version.buyers : version.sellers;
   const initiator = initiatingSide.find(party => party.userUid === version.initiatedByUid);
   requireValue(initiator?.identityVerification.status === 'verified', 'The initiating signer must verify identity.');
-  requireValue(t.legalDescription.trim(), 'Enter the legal description.');
+  requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && money(p.earnestMoneyInCents, true) && p.earnestMoneyHolder.trim(), 'Purchase price, earnest money and escrow holder are required.');
   requireValue(Number.isSafeInteger(p.earnestMoneyDueDays) && p.earnestMoneyDueDays >= 1 && p.earnestMoneyDueDays <= 30, 'Earnest money is due within 1 to 30 days.');
   requireValue(p.financingType !== 'unselected' && ['cash','conventional','fha','va','usda'].includes(p.financingType), 'Choose cash or financing.');
@@ -32,9 +32,11 @@ export function validateWisconsinSubmission(input: ValidateStateSubmissionInput<
   requireValue(date(d.sellerDisclosureDate) && date(d.settlementDate) && d.sellerDisclosureDate <= d.settlementDate, 'Disclosure and settlement deadlines must be valid and ordered.');
   requireValue(!t.conditions.dueDiligence || date(d.dueDiligenceDate), 'Set a due diligence deadline.');
   requireValue(!(t.conditions.appraisal || t.conditions.financing) || date(d.financingAppraisalDate), 'Set a financing and appraisal deadline.');
+  requireValue(!t.conditions.dueDiligence || d.dueDiligenceDate <= d.settlementDate, 'Due diligence must end no later than settlement.');
+  requireValue(!(t.conditions.appraisal || t.conditions.financing) || d.financingAppraisalDate <= d.settlementDate, 'Financing and appraisal must end no later than settlement.');
   requireValue(t.settlement.possession !== 'unselected' && t.settlement.specialAssessmentPayer !== 'unselected' && t.settlement.hoaTransferFeePayer !== 'unselected', 'Complete possession and costs.');
   requireValue(t.settlement.possession === 'at_recording' || (Number.isSafeInteger(t.settlement.possessionDelay) && t.settlement.possessionDelay >= 1 && t.settlement.possessionDelay <= 365), 'Enter the possession delay.');
-  requireValue(t.disclosures.propertyConditionStatus === 'received' && t.disclosures.hoaDocumentsStatus !== 'unselected', 'The complete Wisconsin condition report must be received and association status selected.');
+  requireValue(['received', 'pending'].includes(t.disclosures.propertyConditionStatus) && t.disclosures.hoaDocumentsStatus !== 'unselected', 'Select whether the condition report was received and select association status.');
   requireValue(t.disclosures.leadPaintStatus !== 'unselected', 'Select lead paint status.');
   requireValue(t.property.yearBuilt == null || t.property.yearBuilt >= 1978 || ['received','exempt'].includes(t.disclosures.leadPaintStatus), 'The pre-1978 lead packet or exemption is required before signing.');
   requireValue(t.property.yearBuilt != null || t.disclosures.leadPaintStatus !== 'built_1978_or_later', 'The listing has no construction year; a post-1977 claim needs support.');
@@ -42,7 +44,7 @@ export function validateWisconsinSubmission(input: ValidateStateSubmissionInput<
   requireValue(!t.conditions.saleOfBuyersProperty || t.additionalTerms.trim(), 'Describe the sale of buyer’s property in additional terms.');
   requireValue(t.disclosures.leadPaintStatus !== 'received' || t.disclosures.leadInspectionSelection !== 'unselected', 'Choose the federal lead inspection opportunity.');
   requireValue(t.disclosures.leadInspectionSelection !== 'other_period' || (Number.isSafeInteger(t.disclosures.leadInspectionDays) && t.disclosures.leadInspectionDays >= 1 && t.disclosures.leadInspectionDays <= 60), 'Enter 1 to 60 agreed lead inspection days.');
-  requireValue(t.disclosures.leaseStatementAcknowledged === true, 'Review the lease statement and condition report.');
+  requireValue(t.disclosures.leaseStatementAcknowledged === true, 'Acknowledge the lease statement and your report selection.');
   requireValue(t.delivery.timeZone === 'America/Chicago' && t.delivery.electronicDeliveryAuthorized === true, 'Electronic delivery consent and Central time are required.');
   const expiration = new Date(t.delivery.expiresAt);
   requireValue(Number.isFinite(expiration.getTime()) && expiration.getTime() > Date.now() && version.expiresAt === t.delivery.expiresAt, 'Enter a future offer expiration matching the version.');
