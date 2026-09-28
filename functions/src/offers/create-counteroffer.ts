@@ -19,6 +19,7 @@ import {
 import {
   requireStateContractPackage
 } from './state-contracts/state-contract-registry';
+import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
 
 import type {
   CreateCounterofferData,
@@ -151,6 +152,15 @@ export const createCounteroffer =
               userUid,
               sourceVersionUid
             );
+
+            if (offer.stateCode === 'LA') {
+              const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
+              const listingSnapshot = await transaction.get(listingReference);
+              if (!listingSnapshot.exists || !listingSnapshot.data()) {
+                throw new HttpsError('not-found', 'The Louisiana listing could not be found.');
+              }
+              await assertLouisianaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+            }
 
             const initiatingParty =
               getCounteringParty(

@@ -9,6 +9,7 @@ import type {
 import type { UtahOfferTerms } from '../state-contracts/utah/models/utah-offer-terms.model';
 import type { WisconsinOfferTerms } from '../state-contracts/wisconsin/models/wisconsin-offer-terms.model';
 import type { FloridaOfferTerms } from '../state-contracts/florida/models/florida-offer-terms.model';
+import type { LouisianaOfferTerms } from '../state-contracts/louisiana/models/louisiana-offer-terms.model';
 
 import type {
   OklahomaOfferTerms,
@@ -93,7 +94,8 @@ export type StateOfferTerms =
   | OklahomaOfferTerms
   | UtahOfferTerms
   | WisconsinOfferTerms
-  | FloridaOfferTerms;
+  | FloridaOfferTerms
+  | LouisianaOfferTerms;
 
 
 /*

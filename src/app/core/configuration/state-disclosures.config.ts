@@ -41,6 +41,31 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
         required: false, shortTitle: 'Lead paint', sortOrder: 4, title: 'Lead-based paint disclosure',
       },
     ],
+    LA: [
+      {
+        description: 'Download the LREC 2026 Property Disclosure Document, complete the applicable pages (including its exemption section when legally applicable), sign it, and upload it here. NavStreet will not accept an offer until the buyer can access this upload.',
+        documentType: 'louisiana-property-disclosure',
+        formCode: 'LREC PROPERTY DISCLOSURE 01/2026',
+        formDownloadUrl: '/forms/lrec-louisiana-property-disclosure-2026.pdf',
+        officialFormUrl: 'https://lrec.gov/form-categories/mandatory',
+        required: true,
+        shortTitle: 'Louisiana property disclosure',
+        sortOrder: 1,
+        title: 'Louisiana Property Disclosure Document (seller signed)',
+      },
+      {
+        description: 'For most pre-1978 homes, provide the signed federal lead seller disclosure, available records and EPA pamphlet before the buyer signs.',
+        documentType: 'lead-based-paint',
+        formCode: 'FED-LEAD',
+        formDownloadUrl: 'https://www.epa.gov/sites/default/files/documents/selr_eng.pdf',
+        officialFormUrl: 'https://www.epa.gov/sites/default/files/documents/selr_eng.pdf',
+        additionalDownloads: [{ label: 'Download the 2026 EPA lead safety pamphlet', url: 'https://www.epa.gov/system/files/documents/2026-02/protectyourfamily_pamphlet_2026_3.pdf' }],
+        required: false,
+        shortTitle: 'Lead-based paint',
+        sortOrder: 2,
+        title: 'Lead-based paint packet',
+      },
+    ],
     NC: [
       {
         description:
@@ -257,8 +282,19 @@ export function isDisclosureRequiredForListing(
   requirement: StateDisclosureRequirement,
   listing: { ownersAssociationApplies?: boolean | null; leadBasedPaintApplies?: boolean | null; yearBuilt?: number | null }
 ): boolean {
-  if (requirement.required) return true;
-  if (normalizeDisclosureStateCode(state) !== 'FL') return false;
+ if (requirement.required) return true;
+
+const stateCode = normalizeDisclosureStateCode(state);
+
+if (stateCode === 'LA') {
+  return requirement.documentType === 'lead-based-paint' &&
+    (
+      listing.leadBasedPaintApplies === true ||
+      listing.yearBuilt == null ||
+      listing.yearBuilt < 1978
+    );
+}
+if (stateCode !== 'FL') return false;
   return (requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||
     (requirement.documentType === 'lead-based-paint' &&
       (listing.leadBasedPaintApplies === true ||

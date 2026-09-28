@@ -26,6 +26,7 @@ import {
   requireStateContractPackage,
 } from './state-contracts/state-contract-registry';
 import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
+import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
 
 import type {
   OfferDocument,
@@ -215,6 +216,9 @@ export const submitOffer =
           stateContractPackage.validateSubmission({ offer, version });
           if (offer.stateCode === 'FL') {
             await assertFloridaListingDisclosures(transaction, listingReference, listingData);
+          }
+          if (offer.stateCode === 'LA') {
+            await assertLouisianaListingDisclosures(transaction, listingReference, listingData);
           }
           const requiredDisclosureTypes = stateContractPackage.requiredListingDisclosures?.({ offer, version }) ?? [];
           const listingDisclosureSnapshots: Array<{

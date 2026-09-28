@@ -43,6 +43,7 @@ interface ListingDraftDocument {
     halfBathrooms?: number;
     squareFeet?: number;
     lotSize?: number;
+    lotSizeUnit?: 'acres' | 'square_feet';
     lotNumber?: string;
     blockNumber?: string;
     subdivisionName?: string;
@@ -447,6 +448,14 @@ async function publishPaidListing(
 
     addOptionalField(listingDocument, 'schools', draft.schools);
 
+    if (draft.propertyDetails?.lotSize != null) {
+      addOptionalField(
+        listingDocument,
+        'lotSizeUnit',
+        draft.propertyDetails.lotSizeUnit,
+      );
+    }
+
     addOptionalField(
       listingDocument,
       'parcelAndTaxes',
@@ -720,7 +729,7 @@ function validateDraftForPublication(
   }
 
   if (['WI', 'FL'].includes(draft.address.state.trim().toUpperCase()) &&
-      !draft.propertyDetails.legalDescription?.trim()) {
+    !draft.propertyDetails.legalDescription?.trim()) {
     throw new Error(
       `Listing draft ${listingUid} has no recorded legal property description.`,
     );

@@ -1,0 +1,41 @@
+
+@if (terms(); as currentTerms) {
+  <section class="louisiana-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="louisiana-offer-wizard__contract">
+        <span>Selected Louisiana contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    <app-offer-wizard-shell
+      stateName="Louisiana"
+      title="Louisiana purchase offer"
+      description="Complete the questions for the selected Louisiana contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [allowBuyerEdits]="initiatedBy() === 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="louisiana-offer-wizard__loading" aria-live="polite">
+    Loading your Louisiana offer…
+  </section>
+}

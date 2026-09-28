@@ -16,7 +16,9 @@ export type DisclosureDocumentType =
   | 'wisconsin-association-documents'
   | 'florida-flood-disclosure'
   | 'florida-seller-property-disclosure'
-  | 'florida-hoa-disclosure-summary';
+  | 'florida-hoa-disclosure-summary'
+  | 'louisiana-property-disclosure'
+  | 'louisiana-vacant-residential-property-disclosure';
 
 export interface StateDisclosureRequirement {
   readonly description: string;

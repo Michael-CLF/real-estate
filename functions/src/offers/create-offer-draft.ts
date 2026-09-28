@@ -19,6 +19,7 @@ import type {
 
 import { getListingOfferAvailabilityMessage } from './listing-offer-availability';
 import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
+import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
 
 import type {
   CreateOfferDraftData,
@@ -186,6 +187,9 @@ export const createOfferDraft = onCall<
 
     if (currentStateCode === 'FL') {
       await assertFloridaListingDisclosures(transaction, listingReference, currentListingData);
+    }
+    if (currentStateCode === 'LA') {
+      await assertLouisianaListingDisclosures(transaction, listingReference, currentListingData);
     }
 
     const existingOfferQuery = adminFirestore

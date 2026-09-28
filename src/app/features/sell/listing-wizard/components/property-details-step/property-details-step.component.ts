@@ -181,8 +181,8 @@ export class PropertyDetailsStepComponent
         .toUpperCase() === 'TX',
   );
 
-  readonly isWisconsinListing = computed(
-    () => ['WI', 'FL'].includes(this.stateCode().trim().toUpperCase()),
+  readonly requiresListingLegalDescription = computed(
+    () => ['WI', 'FL', 'LA'].includes(this.stateCode().trim().toUpperCase()),
   );
 
   readonly currentYear =
@@ -944,7 +944,7 @@ export class PropertyDetailsStepComponent
   private configureLegalDescriptionValidators(): void {
     const control = this.form.controls.legalDescription;
     control.setValidators([
-      ...(this.isWisconsinListing() ? [Validators.required, Validators.pattern(/\S/)] : []),
+      ...(this.requiresListingLegalDescription() ? [Validators.required, Validators.pattern(/\S/)] : []),
       Validators.maxLength(5000),
     ]);
     control.updateValueAndValidity({ emitEvent: false });

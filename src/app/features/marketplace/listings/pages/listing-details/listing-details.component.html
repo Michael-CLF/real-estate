@@ -250,25 +250,25 @@
           }
 
           @if (listing.status === 'active') {
-          @if (floridaOfferIsReady(listing)) {
+          @if (offerDisclosuresAreReady(listing)) {
           <a class="listing-details__offer-button" [routerLink]="offerPath(listing)">
             <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
 
             Make an offer
           </a>
           } @else {
-          <button class="listing-details__offer-button" type="button" disabled aria-describedby="florida-offer-requirements">
+          <button class="listing-details__offer-button" type="button" disabled aria-describedby="offer-disclosure-requirements">
             Make an offer
           </button>
-          <p id="florida-offer-requirements" class="listing-details__offer-note" role="status">
+          <p id="offer-disclosure-requirements" class="listing-details__offer-note" role="status">
             @if (authenticationIsLoading() || (isAuthenticated() && disclosuresAreLoading())) {
-              Checking required Florida disclosures…
+              Checking required seller disclosures…
             } @else if (!isAuthenticated()) {
-              Sign in to check Florida disclosures and make an offer.
+              Sign in to check seller disclosures and make an offer.
             } @else if (disclosureLoadError()) {
               Offer availability could not be checked. Refresh this page.
             } @else {
-              Waiting for the seller to upload: {{ floridaOfferMissingTitles(listing).join(', ') }}.
+              Waiting for the seller to upload: {{ requiredOfferDisclosureTitles(listing).join(', ') }}.
             }
           </p>
           }
