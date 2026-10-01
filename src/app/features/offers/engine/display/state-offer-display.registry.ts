@@ -30,6 +30,7 @@ import {
   floridaOfferDisplayAdapter,
 } from '../../states/florida/display/florida-offer-display.adapter';
 import { louisianaOfferDisplayAdapter } from '../../states/louisiana/display/louisiana-offer-display.adapter';
+import { coloradoOfferDisplayAdapter } from '../../states/colorado/display/colorado-offer-display.adapter';
 
 /**
  * The state stored on the offer version and the state stored
@@ -69,6 +70,8 @@ export function displayOfferTerms(
       return floridaOfferDisplayAdapter.display(version.terms);
     case 'LA':
       return louisianaOfferDisplayAdapter.display(version.terms);
+    case 'CO':
+      return coloradoOfferDisplayAdapter.display(version.terms);
 
     default:
       throw new Error(

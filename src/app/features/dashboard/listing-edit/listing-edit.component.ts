@@ -1,3 +1,4 @@
+import { ColoradoPropertyFactsEditorComponent } from './colorado-property-facts-editor.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -97,7 +98,8 @@ interface UpdatePublishedListingResponse {
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    ListingPhotoEditorComponent
+    ListingPhotoEditorComponent,
+    ColoradoPropertyFactsEditorComponent
   ],
   templateUrl:
     './listing-edit.component.html',

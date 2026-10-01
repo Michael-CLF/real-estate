@@ -2,6 +2,9 @@ export type DisclosureDocumentType =
   | 'lead-based-paint'
   | 'residential-property-owners-association'
   | 'mineral-oil-gas-rights'
+  | 'colorado-property-disclosure'
+  | 'colorado-association-documents'
+  | 'colorado-radon-brochure'
   | 'texas-seller-disclosure-notice'
   | 'texas-residential-leases'
   | 'texas-fixture-leases'
@@ -23,10 +26,11 @@ export type DisclosureDocumentType =
 export interface StateDisclosureRequirement {
   readonly description: string;
   readonly documentType:
-    DisclosureDocumentType;
+  DisclosureDocumentType;
   readonly formCode: string;
   /** A blank PDF that the seller can save, complete, and upload. */
   readonly formDownloadUrl?: string;
+  readonly formDownloadLabel?: string;
   readonly additionalDownloads?: readonly { readonly label: string; readonly url: string }[];
   /** Official source for the form or the governing instructions. */
   readonly officialFormUrl?: string;

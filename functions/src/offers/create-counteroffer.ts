@@ -20,6 +20,7 @@ import {
   requireStateContractPackage
 } from './state-contracts/state-contract-registry';
 import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
+import { assertColoradoListingDisclosures } from './colorado-listing-disclosure-gate';
 
 import type {
   CreateCounterofferData,
@@ -160,6 +161,13 @@ export const createCounteroffer =
                 throw new HttpsError('not-found', 'The Louisiana listing could not be found.');
               }
               await assertLouisianaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+            }
+
+if (offer.stateCode === 'CO') {
+              const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
+              const listingSnapshot = await transaction.get(listingReference);
+              if (!listingSnapshot.exists || !listingSnapshot.data()) throw new HttpsError('not-found', 'The Colorado listing could not be found.');
+              await assertColoradoListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
             }
 
             const initiatingParty =

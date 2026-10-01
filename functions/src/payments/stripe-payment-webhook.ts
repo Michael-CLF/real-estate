@@ -50,6 +50,8 @@ interface ListingDraftDocument {
     legalDescription?: string;
     yearBuilt?: number;
     description?: string;
+    coloradoPropertyFacts?: Record<string, unknown>;
+    coloradoAssumableLoan?: Record<string, unknown>;
 
     hoa?: {
       hasHoa?: boolean;
@@ -447,6 +449,8 @@ async function publishPaidListing(
     }
 
     addOptionalField(listingDocument, 'schools', draft.schools);
+    addOptionalField(listingDocument, 'coloradoPropertyFacts', draft.propertyDetails?.coloradoPropertyFacts);
+    addOptionalField(listingDocument, 'coloradoAssumableLoan', draft.propertyDetails?.coloradoAssumableLoan);
 
     if (draft.propertyDetails?.lotSize != null) {
       addOptionalField(

@@ -50,3 +50,4 @@ export {
 export {
   getAdministrationListingDetails
 } from './get-administration-listing-details';
+export { updateColoradoPropertyFacts } from './update-colorado-property-facts';

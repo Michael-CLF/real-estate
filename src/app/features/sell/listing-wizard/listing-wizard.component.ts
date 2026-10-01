@@ -272,6 +272,12 @@ export class ListingWizardComponent implements OnInit {
         blockNumber: draft.propertyDetails.blockNumber ?? '',
         subdivisionName: draft.propertyDetails.subdivisionName ?? '',
         legalDescription: draft.propertyDetails.legalDescription ?? '',
+        coloradoPropertyFacts: draft.propertyDetails.coloradoPropertyFacts,
+        coloradoAssumableLoan: draft.propertyDetails.coloradoAssumableLoan ? {
+          ...draft.propertyDetails.coloradoAssumableLoan,
+          estimatedBalanceDollars: draft.propertyDetails.coloradoAssumableLoan.estimatedBalanceInCents / 100,
+          principalInterestPaymentDollars: draft.propertyDetails.coloradoAssumableLoan.principalInterestPaymentInCents / 100,
+        } : null,
 
         description: draft.propertyDetails.description ?? '',
 
@@ -701,7 +707,7 @@ export class ListingWizardComponent implements OnInit {
         const statePackage =
           getStateListingPackage(stateCode);
 
-        if (['WI', 'FL'].includes(stateCode) && !propertyDetails.legalDescription.trim()) {
+        if (['WI', 'FL', 'LA', 'CO'].includes(stateCode) && !propertyDetails.legalDescription.trim()) {
           throw new Error('Enter the property legal description from the deed or county record.');
         }
 
@@ -1066,6 +1072,19 @@ export class ListingWizardComponent implements OnInit {
               propertyDetails.legalDescription.trim() || undefined,
 
             description: propertyDetails.description,
+            coloradoPropertyFacts: this.addressData()?.state === 'CO' ? propertyDetails.coloradoPropertyFacts : undefined,
+            coloradoAssumableLoan: this.addressData()?.state === 'CO' && propertyDetails.coloradoAssumableLoan?.available ? {
+              available: true,
+              ratePercent: propertyDetails.coloradoAssumableLoan.ratePercent,
+              balanceAsOf: propertyDetails.coloradoAssumableLoan.balanceAsOf,
+              estimatedBalanceInCents: Math.round(propertyDetails.coloradoAssumableLoan.estimatedBalanceDollars * 100),
+              principalInterestPaymentInCents: Math.round(propertyDetails.coloradoAssumableLoan.principalInterestPaymentDollars * 100),
+              paymentPeriod: propertyDetails.coloradoAssumableLoan.paymentPeriod.trim(),
+              escrowRealEstateTaxes: propertyDetails.coloradoAssumableLoan.escrowRealEstateTaxes,
+              escrowPropertyInsurance: propertyDetails.coloradoAssumableLoan.escrowPropertyInsurance,
+              escrowMortgageInsurance: propertyDetails.coloradoAssumableLoan.escrowMortgageInsurance,
+              escrowOther: propertyDetails.coloradoAssumableLoan.escrowOther.trim(),
+            } : undefined,
           },
           hoaDetails,
           this.completedSteps(),

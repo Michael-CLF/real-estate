@@ -1,3 +1,4 @@
+import { COLORADO_FACT_DEFAULTS, type ColoradoPropertyFacts } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,6 +26,7 @@ import {
   LotSizeUnit,
   PropertyType,
 } from '../../../../../core/domains/listings/models/listing.model';
+import type { ColoradoSellerLoan } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-offer-terms.model';
 import { getStateListingPackage } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
 import { requiresStateListingField } from '../../../../../core/domains/listings/state-packages/state-listing-package';
 import { auth } from '../../../../../core/infrastructure/firebase/firebase';
@@ -80,7 +82,15 @@ export interface PropertyDetailsHoaFormValue {
   feeFrequency: ListingHoaFeeFrequency | '';
 }
 
+export interface ColoradoSellerLoanFormValue extends Omit<ColoradoSellerLoan,
+  'estimatedBalanceInCents' | 'principalInterestPaymentInCents'> {
+  estimatedBalanceDollars: number;
+  principalInterestPaymentDollars: number;
+}
+
 export interface PropertyDetailsFormValue {
+  coloradoPropertyFacts?: ColoradoPropertyFacts;
+  coloradoAssumableLoan?: ColoradoSellerLoanFormValue | null;
   propertyType: PropertyType | '';
   bedrooms: number | null;
   bathrooms: number | null;
@@ -182,8 +192,10 @@ export class PropertyDetailsStepComponent
   );
 
   readonly requiresListingLegalDescription = computed(
-    () => ['WI', 'FL', 'LA'].includes(this.stateCode().trim().toUpperCase()),
+    () => ['WI', 'FL', 'LA', 'CO'].includes(this.stateCode().trim().toUpperCase()),
   );
+
+  readonly isColoradoListing = computed(() => this.stateCode().trim().toUpperCase() === 'CO');
 
   readonly currentYear =
     new Date().getFullYear();
@@ -275,7 +287,185 @@ export class PropertyDetailsStepComponent
       },
     ];
 
+  readonly coloradoOptionalFacts = [
+    {
+      key: 'leasedItems',
+      question: 'Is any equipment included in the sale leased?',
+      detail: 'Leased equipment and lease references',
+      guidance:
+        'Examples include rented propane tanks, security systems or equipment. Identify the equipment and lease document.',
+    },
+    {
+      key: 'encumberedItems',
+      question:
+        'Is any included equipment subject to debt or a PACE obligation?',
+      detail: 'Equipment debt or PACE obligation',
+      guidance:
+        'Identify the equipment, outstanding obligation and relevant agreement.',
+    },
+    {
+      key: 'solarPowerPlan',
+      question: 'Is there a solar lease or power purchase agreement?',
+      detail: 'Solar agreement and document reference',
+      guidance:
+        'Identify the provider, agreement and relevant document. Seller-owned solar equipment belongs in the included-items description.',
+    },
+    {
+      key: 'deededWaterRights',
+      question:
+        'Are separately deeded water rights included with this property?',
+      detail: 'Deeded water rights and their legal description',
+      guidance:
+        'Describe the separately deeded water rights and copy their legal description from your records. This is separate from the property legal description. Municipal water service alone does not establish separately deeded water rights.',
+    },
+    {
+      key: 'otherWaterRights',
+      question: 'Are other transferable water rights included?',
+      detail: 'Other transferable water rights',
+      guidance:
+        'Identify the rights and supporting documents. Do not assume water utility service is a transferable water right.',
+    },
+    {
+      key: 'wellPermit',
+      question: 'Does the property use a well?',
+      detail: 'Well and permit information',
+      guidance:
+        'Enter the permit number and identify any available permit copy. If a well exists but the permit number is unknown, state that in the details.',
+    },
+    {
+      key: 'waterStock',
+      question: 'Are water company shares included in the sale?',
+      detail: 'Water company and shares',
+      guidance:
+        'Identify the water company, shares and supporting ownership records.',
+    },
+    {
+      key: 'mineralRights',
+      question:
+        'Do your records identify mineral interests or reservations affecting the property?',
+      detail: 'Known mineral interests and reservations',
+      guidance:
+        'Describe what your deed or other records identify. NO means no known interests or reservations are reported; it does not establish ownership or guarantee clear title.',
+    },
+    {
+      key: 'offRecordMatters',
+      question:
+        'Are there known off-record title matters or existing surveys to identify?',
+      detail: 'Known off-record matters and surveys',
+      guidance:
+        'Identify known unrecorded claims, use agreements or existing survey documents. This answer is not a title guarantee.',
+    },
+    {
+      key: 'thirdPartyRights',
+      question:
+        'Does another party have an approval right, purchase option or right of first refusal?',
+      detail: 'Third-party approval or purchase rights',
+      guidance:
+        'Identify the party, right and relevant agreement or document.',
+    },
+    {
+      key: 'leases',
+      question: 'Are there existing occupancy agreements or leases?',
+      detail: 'Occupancy agreements and lease references',
+      guidance:
+        'Identify current rental, occupancy or lease agreements and their documents. Keep this answer consistent with Existing Leases below.',
+    },
+  ] as const;
+
+  private readonly coloradoFactChoices: Partial<
+    Record<
+      typeof this.coloradoOptionalFacts[number]['key'],
+      'yes' | 'no' | 'unknown' | 'unselected'
+    >
+  > = {};
+
+  coloradoFactChoice(
+    key: typeof this.coloradoOptionalFacts[number]['key'],
+  ): 'yes' | 'no' | 'unknown' | 'unselected' {
+    const value =
+      this.form.controls.coloradoPropertyFacts.controls[key].value.trim();
+
+    if (!value) {
+      return this.coloradoFactChoices[key] ?? 'unselected';
+    }
+
+    if (/^(none|n\/?a|not applicable)$/i.test(value)) {
+      return 'no';
+    }
+
+    if (/^unknown$/i.test(value)) {
+      return 'unknown';
+    }
+
+    return 'yes';
+  }
+
+  setColoradoFactChoice(
+    key: typeof this.coloradoOptionalFacts[number]['key'],
+    event: Event,
+  ): void {
+    const choice = (event.target as HTMLSelectElement).value;
+
+    if (!['unselected', 'yes', 'no', 'unknown'].includes(choice)) {
+      return;
+    }
+
+    this.coloradoFactChoices[key] =
+      choice as 'yes' | 'no' | 'unknown' | 'unselected';
+
+    const control =
+      this.form.controls.coloradoPropertyFacts.controls[key];
+
+    const previous = control.value.trim();
+
+    control.setValue(
+      choice === 'no'
+        ? 'NONE'
+        : choice === 'unknown'
+          ? 'UNKNOWN'
+          : choice === 'yes' &&
+            previous &&
+            !/^(none|n\/?a|not applicable|unknown)$/i.test(previous)
+            ? previous
+            : '',
+      { emitEvent: false },
+    );
+
+    control.markAsUntouched();
+
+    this.configureColoradoFactValidators();
+    this.form.updateValueAndValidity({ emitEvent: false });
+    this.emitFormState();
+  }
+
   readonly form = this.fb.nonNullable.group({
+    coloradoPropertyFacts: this.fb.nonNullable.group({
+      includedItems: [''],
+      excludedItems: [''],
+      leasedItems: [''],
+      encumberedItems: [''],
+      solarPowerPlan: [''],
+      parkingStorage: [''],
+      waterSource: [''],
+      deededWaterRights: [''],
+      otherWaterRights: [''],
+      wellPermit: [''],
+      waterStock: [''],
+      mineralRights: [''],
+      offRecordMatters: [''],
+      thirdPartyRights: [''],
+      leases: [''],
+      metroDistrictWebsite: [''],
+      metroDistrictDisclosure: [''],
+      metroDistrict: ['unselected' as ColoradoPropertyFacts['metroDistrict']],
+    }),
+    coloradoAssumableLoan: this.fb.nonNullable.group({
+      available: [false], ratePercent: [0],
+      estimatedBalanceDollars: [0], balanceAsOf: [''],
+      principalInterestPaymentDollars: [0], paymentPeriod: ['month'],
+      escrowRealEstateTaxes: [false], escrowPropertyInsurance: [false],
+      escrowMortgageInsurance: [false], escrowOther: [''],
+    }),
     propertyType: [
       '' as PropertyType | '',
       Validators.required,
@@ -445,6 +635,8 @@ export class PropertyDetailsStepComponent
         this.form.patchValue(
           {
             ...initialValue,
+            coloradoPropertyFacts: { ...COLORADO_FACT_DEFAULTS, ...initialValue.coloradoPropertyFacts },
+            coloradoAssumableLoan: initialValue.coloradoAssumableLoan ?? undefined,
 
             hoa:
               initialValue.hoa ?? {
@@ -489,6 +681,8 @@ export class PropertyDetailsStepComponent
           .hasHoa.value,
         false,
       );
+      this.configureColoradoFactValidators();
+      this.configureColoradoLoanValidators();
 
       this.configureStateStatementValidators();
 
@@ -582,6 +776,11 @@ export class PropertyDetailsStepComponent
     );
 
     this.form.valueChanges.subscribe(() => {
+      this.configureColoradoFactValidators();
+      this.emitFormState();
+    });
+    this.form.controls.coloradoAssumableLoan.controls.available.valueChanges.subscribe(() => {
+      this.configureColoradoLoanValidators();
       this.emitFormState();
     });
   }
@@ -590,6 +789,105 @@ export class PropertyDetailsStepComponent
     if (this.isTexasListing()) {
       void this.loadLeaseDocuments();
     }
+  }
+
+  private configureColoradoFactValidators(): void {
+    const group = this.form.controls.coloradoPropertyFacts;
+    const c = group.controls;
+    const active = this.isColoradoListing();
+
+    const requiredText = (control: AbstractControl) =>
+      typeof control.value === 'string' && control.value.trim()
+        ? null
+        : { required: true };
+
+    // Errors belong to individual controls, not the whole section.
+    group.clearValidators();
+
+    for (const control of Object.values(c)) {
+      control.setValidators(Validators.maxLength(4000));
+    }
+
+    c.waterSource.setValidators(
+      active
+        ? [requiredText, Validators.maxLength(4000)]
+        : [],
+    );
+
+    c.metroDistrict.setValidators(
+      active
+        ? [
+          (control: AbstractControl) =>
+            ['covered', 'not_applicable'].includes(control.value)
+              ? null
+              : control.value === 'unknown'
+                ? { districtUnknown: true }
+                : { required: true },
+        ]
+        : [],
+    );
+
+    const covered =
+      active && c.metroDistrict.value === 'covered';
+
+    c.metroDistrictWebsite.setValidators(
+      covered
+        ? [
+          requiredText,
+          (control: AbstractControl) => {
+            if (!control.value?.trim()) {
+              return null;
+            }
+
+            try {
+              const url = new URL(control.value.trim());
+
+              return url.protocol === 'https:' &&
+                url.hostname.includes('.')
+                ? null
+                : { districtUrl: true };
+            } catch {
+              return { districtUrl: true };
+            }
+          },
+          Validators.maxLength(4000),
+        ]
+        : [],
+    );
+
+    c.metroDistrictDisclosure.setValidators(
+      covered
+        ? [requiredText, Validators.maxLength(4000)]
+        : [],
+    );
+
+    for (const field of this.coloradoOptionalFacts) {
+      c[field.key].setValidators(
+        active && this.coloradoFactChoice(field.key) === 'yes'
+          ? [requiredText, Validators.maxLength(4000)]
+          : [Validators.maxLength(4000)],
+      );
+    }
+
+    for (const control of Object.values(c)) {
+      control.updateValueAndValidity({ emitEvent: false });
+    }
+
+    group.updateValueAndValidity({ emitEvent: false });
+  }
+
+
+  private configureColoradoLoanValidators(): void {
+    const controls = this.form.controls.coloradoAssumableLoan.controls;
+    const active = this.isColoradoListing() && controls.available.value;
+    const required = active ? [Validators.required] : [];
+    controls.balanceAsOf.setValidators(required);
+    controls.paymentPeriod.setValidators(required);
+    controls.ratePercent.setValidators(active ? [Validators.min(0.01), Validators.max(30)] : []);
+    controls.estimatedBalanceDollars.setValidators(active ? [Validators.min(1)] : []);
+    controls.principalInterestPaymentDollars.setValidators(active ? [Validators.min(1)] : []);
+    controls.escrowOther.setValidators(active ? [Validators.maxLength(180)] : []);
+    for (const control of Object.values(controls)) control.updateValueAndValidity({ emitEvent: false });
   }
 
   protected leaseDocumentFor(

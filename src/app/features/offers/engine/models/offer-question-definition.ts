@@ -98,6 +98,7 @@ export interface OfferTextQuestion
 
   readonly placeholder?: string;
   readonly autocomplete?: string;
+  readonly inputType?: 'text' | 'time';
 }
 
 
@@ -113,19 +114,21 @@ export interface OfferNumericQuestion
   readonly suffix?: string;
 }
 
-
 export interface OfferDateQuestion
   extends OfferQuestionBase {
-  readonly type:
-    | 'date'
-    | 'date_time';
-
+  readonly type: 'date' | 'date_time';
   readonly fieldPath: string;
 
   readonly minimumDate?: string;
   readonly maximumDate?: string;
-}
 
+  // When provided, one picker edits an existing date field
+  // and its separate time field.
+  readonly timeFieldPath?: string;
+
+  // Used when displaying and saving an actual timestamp.
+  readonly timeZone?: string;
+}
 
 export interface OfferBooleanQuestion
   extends OfferQuestionBase {

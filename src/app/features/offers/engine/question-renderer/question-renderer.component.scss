@@ -204,6 +204,18 @@ textarea {
   margin: 0;
   font-size: 0.9rem;
 }
+.offer-question__time {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  select {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 5rem;
+  }
+}
 
 @media (max-width: 640px) {
   .offer-question[data-question-id='selected-addenda']

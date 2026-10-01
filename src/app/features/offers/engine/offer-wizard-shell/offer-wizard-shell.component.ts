@@ -314,15 +314,37 @@ export class OfferWizardShellComponent {
         this.visibleSections().length - 1
   );
 
-
   protected questionValue(
-    question: OfferQuestionDefinition
+    question: OfferQuestionDefinition,
   ): unknown {
-    return question.fieldPath
-      ? readPath(this.terms(), question.fieldPath)
-      : null;
-  }
+    if (!question.fieldPath) {
+      return null;
+    }
 
+    const value = readPath(
+      this.terms(),
+      question.fieldPath,
+    );
+
+    if (
+      question.type === 'date_time' &&
+      question.timeFieldPath
+    ) {
+      const time = readPath(
+        this.terms(),
+        question.timeFieldPath,
+      );
+
+      return typeof value === 'string' &&
+        value &&
+        typeof time === 'string' &&
+        time
+        ? `${value}T${time}`
+        : '';
+    }
+
+    return value;
+  }
 
   protected isQuestionVisible(
     question: OfferQuestionDefinition
@@ -350,12 +372,22 @@ export class OfferWizardShellComponent {
 
   private questionValidationMessage(question: OfferQuestionDefinition): string | null {
     if (!question.fieldPath) return null;
-    const issue = this.validationIssues().find(
+       const issue = this.validationIssues().find(
       issue =>
         issue.severity === 'error' &&
-        (issue.fieldPath === question.fieldPath ||
-          issue.fieldPath.startsWith(`${question.fieldPath}.`) ||
-          question.fieldPath.startsWith(`${issue.fieldPath}.`))
+        (
+          issue.fieldPath === question.fieldPath ||
+          (
+            question.type === 'date_time' &&
+            issue.fieldPath === question.timeFieldPath
+          ) ||
+          issue.fieldPath.startsWith(
+            `${question.fieldPath}.`,
+          ) ||
+          question.fieldPath.startsWith(
+            `${issue.fieldPath}.`,
+          )
+        ),
     );
     if (issue) return issue.message;
     const rule = question.validation;
@@ -526,10 +558,9 @@ export class OfferWizardShellComponent {
     );
   }
 
-
   protected onValueChange(
     question: OfferQuestionDefinition,
-    value: unknown
+    value: unknown,
   ): void {
     if (!question.fieldPath) {
       return;
@@ -538,10 +569,37 @@ export class OfferWizardShellComponent {
     this.reviewing.set(false);
 
     const section = this.currentSection();
+
     if (section) {
-      const completed = new Set(this.completedSectionIds());
+      const completed = new Set(
+        this.completedSectionIds(),
+      );
+
       completed.delete(section.id);
       this.completedSectionIds.set(completed);
+    }
+
+    if (
+      question.type === 'date_time' &&
+      question.timeFieldPath
+    ) {
+      const combined =
+        typeof value === 'string' ? value : '';
+
+      const valid =
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(combined);
+
+      this.fieldValueChange.emit({
+        fieldPath: question.fieldPath,
+        value: valid ? combined.slice(0, 10) : '',
+      });
+
+      this.fieldValueChange.emit({
+        fieldPath: question.timeFieldPath,
+        value: valid ? combined.slice(11, 16) : '',
+      });
+
+      return;
     }
 
     this.fieldValueChange.emit({
@@ -549,7 +607,6 @@ export class OfferWizardShellComponent {
       value,
     });
   }
-
 
   protected returnToCertification(): void {
     this.reviewing.set(false);

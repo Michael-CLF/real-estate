@@ -189,11 +189,21 @@ export class ListingDisclosuresManagementComponent
 
       this.listing.set(listing);
 
-      const requirements =
-        getStateDisclosureRequirements(
-          listing.state
-        );
+      const stateCode =
+        normalizeDisclosureStateCode(listing.state);
 
+      const requirements =
+        getStateDisclosureRequirements(stateCode);
+
+      console.info('Disclosure requirements diagnostic', {
+        listingUid: this.listingUid,
+        storedState: listing.state,
+        normalizedState: stateCode,
+        requirementCount: requirements.length,
+        documentTypes: requirements.map(
+          requirement => requirement.documentType
+        ),
+      });
       this.requirements.set(
         [...requirements].sort(
           (
@@ -226,7 +236,7 @@ export class ListingDisclosuresManagementComponent
   ): ListingDisclosureDocument | null {
     return (
       this.disclosures()[
-        documentType
+      documentType
       ] ?? null
     );
   }
@@ -237,7 +247,7 @@ export class ListingDisclosuresManagementComponent
   ): File | null {
     return (
       this.selectedFiles()[
-        documentType
+      documentType
       ] ?? null
     );
   }

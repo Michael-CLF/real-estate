@@ -74,14 +74,13 @@
         </div>
 
         <div class="review-detail">
-          <span class="review-detail__label"> Lot Size </span>
-
+          <span class="review-detail__label">Lot Size</span>
           <span class="review-detail__value">
             @if (
             propertyDetails()?.lotSize !== null &&
             propertyDetails()?.lotSize !== undefined
             ) {
-            {{ propertyDetails()!.lotSize | number: '1.0-2' }}
+            {{ propertyDetails()!.lotSize | number:'1.0-2' }}
 
             @if (propertyDetails()!.lotSizeUnit === 'square_feet') {
             sq. ft.
@@ -111,7 +110,6 @@
             <span class="review-detail__label">
               Ownership
             </span>
-
             <span class="review-detail__value">
               {{ formattedOwnershipStatus }}
             </span>
@@ -123,7 +121,6 @@
             <span class="review-detail__label">
               Lead-Based Paint
             </span>
-
             <span class="review-detail__value">
               {{ formattedLeadBasedPaintStatement }}
             </span>
@@ -139,8 +136,12 @@
 
           @if (requires('utahMethamphetamineContamination')) {
           <div class="review-detail">
-            <span class="review-detail__label">Known Current Methamphetamine Contamination</span>
-            <span class="review-detail__value">{{ formattedMethamphetamineStatement }}</span>
+            <span class="review-detail__label">
+              Known Current Methamphetamine Contamination
+            </span>
+            <span class="review-detail__value">
+              {{ formattedMethamphetamineStatement }}
+            </span>
           </div>
           }
 
@@ -149,12 +150,12 @@
             <span class="review-detail__label">
               Fuel Tank
             </span>
-
             <span class="review-detail__value">
               {{ formattedFuelTankStatement }}
             </span>
           </div>
           }
+
           @if (isTexasListing) {
           <div class="review-detail">
             <span class="review-detail__label">Residential Leases</span>
@@ -232,7 +233,7 @@
           <img [src]="photo.thumbnail.previewUrl" alt="Property photo" />
 
           @if (photo.isPrimary) {
-          <span class="review-photo__badge"> Primary Photo </span>
+          <span class="review-photo__badge">Primary Photo</span>
           }
         </div>
         }
@@ -257,16 +258,14 @@
     <div class="review-section__content">
       <div class="review-pricing">
         <div>
-          <span class="review-detail__label"> Listing Price </span>
-
+          <span class="review-detail__label">Listing Price</span>
           <div class="review-pricing__price">
             {{ formattedPrice }}
           </div>
         </div>
 
         <div>
-          <span class="review-detail__label"> Price per Square Foot </span>
-
+          <span class="review-detail__label">Price per Square Foot</span>
           <div class="review-pricing__secondary">
             {{ pricePerSquareFoot }}
           </div>
@@ -286,9 +285,8 @@
       <div class="featured-upgrade">
         <div class="featured-upgrade__content">
           <div class="featured-upgrade__heading">
-            <span class="featured-upgrade__badge"> ★ Featured </span>
-
-            <span class="featured-upgrade__price"> + $10 </span>
+            <span class="featured-upgrade__badge">★ Featured</span>
+            <span class="featured-upgrade__price">+ $10</span>
           </div>
 
           <h4>Give your property additional exposure</h4>
@@ -316,42 +314,78 @@
       @if (stateDisclosureRequirements().length) {
       <div class="seller-disclosure-forms">
         <h3>Seller disclosure forms</h3>
-        <p>Open and complete the forms for this state. After publishing, upload the signed documents in your listing's Disclosures section.</p>
+
+        <p>
+          Open and complete the forms for this state. After publishing,
+          upload the documents in your listing's Disclosures section.
+        </p>
+
         @if (floridaDisclosureNotice()) {
         <p class="seller-disclosure-forms__notice" role="note">
-          <strong>Florida sellers: prepare these documents before accepting offers.</strong>
-          Upload the flood disclosure, and provide a seller condition statement when applicable.
-          If you reported an HOA, also upload the HOA summary; if you reported that lead disclosures apply,
-          upload the lead packet. Buyers cannot start a NavStreet offer until the required documents are uploaded.
-          You can upload the documents from Manage listing → Property Disclosures after publication.
+          <strong>
+            Florida sellers: prepare these documents before accepting offers.
+          </strong>
+          Upload the flood disclosure, and provide a seller condition
+          statement when applicable. If you reported an HOA, also upload
+          the HOA summary; if you reported that lead disclosures apply,
+          upload the lead packet. Buyers cannot start a NavStreet offer
+          until the required documents are uploaded. You can upload the
+          documents from Manage listing → Property Disclosures after
+          publication.
         </p>
         }
+
         <ul>
-          @for (requirement of stateDisclosureRequirements(); track requirement.documentType) {
+          @for (
+          requirement of stateDisclosureRequirements();
+          track requirement.documentType
+          ) {
+          @if (
+          requirement.documentType !== 'colorado-association-documents' ||
+          propertyDetails()?.sellerStatements?.ownersAssociationApplies === true
+          ) {
           <li>
             <strong>{{ requirement.title }}</strong>
-            <span> — {{ isDisclosureRequired(requirement) ? 'Required for this listing' : 'If applicable' }}</span>
+            <span>
+              — {{ isDisclosureRequired(requirement)
+              ? 'Required for this listing'
+              : 'If applicable' }}
+            </span>
+
             @if (requirement.formDownloadUrl) {
             <a [href]="requirement.formDownloadUrl" target="_blank" rel="noopener noreferrer">
-              Open or download blank PDF
+              {{ requirement.formDownloadLabel ?? 'Open or download blank PDF' }}
             </a>
             }
-            @if (requirement.officialFormUrl && requirement.officialFormUrl !== requirement.formDownloadUrl) {
+
+            @if (
+            requirement.officialFormUrl &&
+            requirement.officialFormUrl !== requirement.formDownloadUrl
+            ) {
             <a [href]="requirement.officialFormUrl" target="_blank" rel="noopener noreferrer">
               Read official source
             </a>
             }
-            @for (resource of requirement.additionalDownloads ?? []; track resource.url) {
-            <a [href]="resource.url" target="_blank" rel="noopener noreferrer">{{ resource.label }}</a>
+
+            @for (
+            resource of requirement.additionalDownloads ?? [];
+            track resource.url
+            ) {
+            <a [href]="resource.url" target="_blank" rel="noopener noreferrer">
+              {{ resource.label }}
+            </a>
             }
+
             @if (requirement.sourceInstructions) {
-            <span> — {{ requirement.sourceInstructions }}</span>
+            <span>— {{ requirement.sourceInstructions }}</span>
             }
           </li>
+          }
           }
         </ul>
       </div>
       }
+
       <label class="certification">
         <input #certificationCheckbox type="checkbox" [checked]="certificationAccepted()"
           (change)="onCertificationChange(certificationCheckbox.checked)" />

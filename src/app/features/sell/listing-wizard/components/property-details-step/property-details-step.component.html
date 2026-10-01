@@ -14,69 +14,55 @@
           <option value="">Select property type</option>
 
           @for (propertyType of propertyTypes; track propertyType.value) {
-            <option [value]="propertyType.value">
-              {{ propertyType.label }}
-            </option>
+          <option [value]="propertyType.value">
+            {{ propertyType.label }}
+          </option>
           }
         </select>
 
         @if (
-          form.controls.propertyType.touched &&
-          form.controls.propertyType.hasError('required')
+        form.controls.propertyType.touched &&
+        form.controls.propertyType.hasError('required')
         ) {
-          <p class="field-error">Property type is required.</p>
+        <p class="field-error">Property type is required.</p>
         }
       </div>
 
       <div class="field">
         <label for="bedrooms">Bedrooms</label>
 
-        <input
-          id="bedrooms"
-          type="number"
-          formControlName="bedrooms"
-          min="0"
-          max="99"
-          step="1"
-        />
+        <input id="bedrooms" type="number" formControlName="bedrooms" min="0" max="99" step="1" />
 
         @if (form.controls.bedrooms.touched) {
-          @if (form.controls.bedrooms.hasError('required')) {
-            <p class="field-error">Bedrooms are required.</p>
-          }
+        @if (form.controls.bedrooms.hasError('required')) {
+        <p class="field-error">Bedrooms are required.</p>
+        }
 
-          @if (
-            form.controls.bedrooms.hasError('min') ||
-            form.controls.bedrooms.hasError('max')
-          ) {
-            <p class="field-error">Enter a valid number of bedrooms.</p>
-          }
+        @if (
+        form.controls.bedrooms.hasError('min') ||
+        form.controls.bedrooms.hasError('max')
+        ) {
+        <p class="field-error">Enter a valid number of bedrooms.</p>
+        }
         }
       </div>
 
       <div class="field">
         <label for="bathrooms">Bathrooms</label>
 
-        <input
-          id="bathrooms"
-          type="number"
-          formControlName="bathrooms"
-          min="0"
-          max="99"
-          step="0.5"
-        />
+        <input id="bathrooms" type="number" formControlName="bathrooms" min="0" max="99" step="0.5" />
 
         @if (form.controls.bathrooms.touched) {
-          @if (form.controls.bathrooms.hasError('required')) {
-            <p class="field-error">Bathrooms are required.</p>
-          }
+        @if (form.controls.bathrooms.hasError('required')) {
+        <p class="field-error">Bathrooms are required.</p>
+        }
 
-          @if (
-            form.controls.bathrooms.hasError('min') ||
-            form.controls.bathrooms.hasError('max')
-          ) {
-            <p class="field-error">Enter a valid number of bathrooms.</p>
-          }
+        @if (
+        form.controls.bathrooms.hasError('min') ||
+        form.controls.bathrooms.hasError('max')
+        ) {
+        <p class="field-error">Enter a valid number of bathrooms.</p>
+        }
         }
       </div>
     </div>
@@ -85,52 +71,38 @@
       <div class="field">
         <label for="squareFeet">Square Feet</label>
 
-        <input
-          id="squareFeet"
-          type="number"
-          formControlName="squareFeet"
-          min="1"
-          max="1000000"
-          step="1"
-        />
+        <input id="squareFeet" type="number" formControlName="squareFeet" min="1" max="1000000" step="1" />
 
         @if (form.controls.squareFeet.touched) {
-          @if (form.controls.squareFeet.hasError('required')) {
-            <p class="field-error">Square footage is required.</p>
-          }
+        @if (form.controls.squareFeet.hasError('required')) {
+        <p class="field-error">Square footage is required.</p>
+        }
 
-          @if (
-            form.controls.squareFeet.hasError('min') ||
-            form.controls.squareFeet.hasError('max')
-          ) {
-            <p class="field-error">Enter valid square footage.</p>
-          }
+        @if (
+        form.controls.squareFeet.hasError('min') ||
+        form.controls.squareFeet.hasError('max')
+        ) {
+        <p class="field-error">Enter valid square footage.</p>
+        }
         }
       </div>
 
       <div class="field">
         <label for="yearBuilt">Year Built</label>
 
-        <input
-          id="yearBuilt"
-          type="number"
-          formControlName="yearBuilt"
-          min="1600"
-          [max]="currentYear + 1"
-          step="1"
-        />
+        <input id="yearBuilt" type="number" formControlName="yearBuilt" min="1600" [max]="currentYear + 1" step="1" />
 
         @if (form.controls.yearBuilt.touched) {
-          @if (form.controls.yearBuilt.hasError('required')) {
-            <p class="field-error">Year built is required.</p>
-          }
+        @if (form.controls.yearBuilt.hasError('required')) {
+        <p class="field-error">Year built is required.</p>
+        }
 
-          @if (
-            form.controls.yearBuilt.hasError('min') ||
-            form.controls.yearBuilt.hasError('max')
-          ) {
-            <p class="field-error">Enter a valid year.</p>
-          }
+        @if (
+        form.controls.yearBuilt.hasError('min') ||
+        form.controls.yearBuilt.hasError('max')
+        ) {
+        <p class="field-error">Enter a valid year.</p>
+        }
         }
       </div>
 
@@ -141,127 +113,376 @@
         </label>
 
         <div class="lot-size-input">
-          <input
-            id="lotSize"
-            type="number"
-            formControlName="lotSize"
-            min="0"
-            [step]="form.controls.lotSizeUnit.value === 'acres' ? 0.01 : 1"
-          />
+          <input id="lotSize" type="number" formControlName="lotSize" min="0"
+            [step]="form.controls.lotSizeUnit.value === 'acres' ? 0.01 : 1" />
 
-          <select
-            id="lotSizeUnit"
-            formControlName="lotSizeUnit"
-            aria-label="Lot size unit"
-          >
+          <select id="lotSizeUnit" formControlName="lotSizeUnit" aria-label="Lot size unit">
             <option value="square_feet">Square feet</option>
             <option value="acres">Acres</option>
           </select>
         </div>
 
         @if (
-          form.controls.lotSize.touched &&
-          form.controls.lotSize.hasError('min')
+        form.controls.lotSize.touched &&
+        form.controls.lotSize.hasError('min')
         ) {
-          <p class="field-error">Lot size cannot be negative.</p>
+        <p class="field-error">Lot size cannot be negative.</p>
         }
 
         @if (
-          form.controls.lotSizeUnit.touched &&
-          form.controls.lotSizeUnit.hasError('required')
+        form.controls.lotSizeUnit.touched &&
+        form.controls.lotSizeUnit.hasError('required')
         ) {
-          <p class="field-error">Select a lot-size unit.</p>
+        <p class="field-error">Select a lot-size unit.</p>
         }
       </div>
     </div>
 
     @if (stateCode().trim().toUpperCase() === 'TX') {
-      <fieldset class="seller-statements">
-        <legend>Texas legal property description</legend>
+    <fieldset class="seller-statements">
+      <legend>Texas legal property description</legend>
 
-        <p class="seller-statements__description">
-          Enter these details from the deed, survey, or county property
-          record. They will be carried into a buyer’s Texas offer so the
-          buyer does not have to research them.
-        </p>
+      <p class="seller-statements__description">
+        Enter these details from the deed, survey, or county property
+        record. They will be carried into a buyer’s Texas offer so the
+        buyer does not have to research them.
+      </p>
 
-        <div class="three-column">
-          <div class="field">
-            <label for="lotNumber">
-              Lot <span class="optional">(optional)</span>
-            </label>
+      <div class="three-column">
+        <div class="field">
+          <label for="lotNumber">
+            Lot <span class="optional">(optional)</span>
+          </label>
 
-            <input
-              id="lotNumber"
-              type="text"
-              formControlName="lotNumber"
-              maxlength="200"
-            />
-          </div>
-
-          <div class="field">
-            <label for="blockNumber">
-              Block <span class="optional">(optional)</span>
-            </label>
-
-            <input
-              id="blockNumber"
-              type="text"
-              formControlName="blockNumber"
-              maxlength="200"
-            />
-          </div>
-
-          <div class="field">
-            <label for="subdivisionName">
-              Addition or subdivision
-              <span class="optional">(optional)</span>
-            </label>
-
-            <input
-              id="subdivisionName"
-              type="text"
-              formControlName="subdivisionName"
-              maxlength="500"
-            />
-          </div>
+          <input id="lotNumber" type="text" formControlName="lotNumber" maxlength="200" />
         </div>
 
-        <div class="field description-field">
-          <label for="legalDescription">
-            Complete legal description
+        <div class="field">
+          <label for="blockNumber">
+            Block <span class="optional">(optional)</span>
+          </label>
+
+          <input id="blockNumber" type="text" formControlName="blockNumber" maxlength="200" />
+        </div>
+
+        <div class="field">
+          <label for="subdivisionName">
+            Addition or subdivision
             <span class="optional">(optional)</span>
           </label>
 
-          <textarea
-            id="legalDescription"
-            formControlName="legalDescription"
-            rows="4"
-            maxlength="5000"
-          ></textarea>
+          <input id="subdivisionName" type="text" formControlName="subdivisionName" maxlength="500" />
         </div>
-      </fieldset>
+      </div>
+
+      <div class="field description-field">
+        <label for="legalDescription">
+          Complete legal description
+          <span class="optional">(optional)</span>
+        </label>
+
+        <textarea id="legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"></textarea>
+      </div>
+    </fieldset>
     }
 
     @if (requiresListingLegalDescription()) {
-      <fieldset class="seller-statements">
-        <legend>Recorded legal property description</legend>
-        <p class="seller-statements__description">
-          Copy the complete legal description from the deed or county record.
-          Buyers will see this seller-provided information in their offer.
+    <fieldset class="seller-statements">
+      <legend>Recorded legal property description</legend>
+      <p class="seller-statements__description">
+        Copy the complete property legal description from the deed or
+        recorded property documents. This is separate from any
+        water-rights description. Do not enter NONE or N/A.
+        Buyers cannot change this seller-provided description in their offer.
+      </p>
+      <div class="field description-field">
+        <label for="legalDescription">Complete legal description</label>
+        <textarea id="legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"
+          [attr.aria-invalid]="form.controls.legalDescription.touched && form.controls.legalDescription.invalid ? 'true' : null"></textarea>
+        @if (form.controls.legalDescription.touched && (form.controls.legalDescription.hasError('required') ||
+        form.controls.legalDescription.hasError('pattern'))) {
+        <p class="field-error">Enter the legal description from the deed or county record.</p>
+        }
+        @if (form.controls.legalDescription.touched && form.controls.legalDescription.hasError('maxlength')) {
+        <p class="field-error">Legal description cannot exceed 5,000 characters.</p>
+        }
+      </div>
+    </fieldset>
+    }
+
+    @if (isColoradoListing()) {
+    <fieldset class="seller-statements colorado-property-facts" formGroupName="coloradoPropertyFacts">
+      <legend>Colorado property facts</legend>
+
+      <p>
+        Provide information from your records. Buyers will see these as
+        protected seller statements. For optional facts, select YES to
+        describe them, NO to report NONE, or UNKNOWN if you cannot confirm.
+        Unanswered optional fields mean information was not supplied.
+      </p>
+
+      @for (
+      field of [
+      {
+      key: 'includedItems',
+      label: 'Additional included items',
+      help: 'List additional seller-owned items, such as garage remotes and equipment. Enter NONE if there are no
+      additional items.'
+      },
+      {
+      key: 'excludedItems',
+      label: 'Items excluded from the sale',
+      help: 'Identify items that will not be included. Enter NONE if none are excluded, or UNKNOWN if you cannot
+      confirm.'
+      },
+      {
+      key: 'parkingStorage',
+      label: 'Parking and storage ownership or use rights',
+      help: 'Describe any garage, parking or storage rights. Enter NONE if none, or UNKNOWN if you cannot confirm.'
+      }
+      ];
+      track field.key
+      ) {
+      <div class="colorado-fact-card field">
+        <label [for]="'co-' + field.key">
+          {{ field.label }}
+        </label>
+
+        <p class="field-help" [id]="'co-help-' + field.key">
+          {{ field.help }}
         </p>
-        <div class="field description-field">
-          <label for="legalDescription">Complete legal description</label>
-          <textarea id="legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"
-            [attr.aria-invalid]="form.controls.legalDescription.touched && form.controls.legalDescription.invalid ? 'true' : null"></textarea>
-          @if (form.controls.legalDescription.touched && (form.controls.legalDescription.hasError('required') || form.controls.legalDescription.hasError('pattern'))) {
-            <p class="field-error">Enter the legal description from the deed or county record.</p>
-          }
-          @if (form.controls.legalDescription.touched && form.controls.legalDescription.hasError('maxlength')) {
-            <p class="field-error">Legal description cannot exceed 5,000 characters.</p>
-          }
+
+        <textarea [id]="'co-' + field.key" [formControlName]="field.key" rows="2" maxlength="4000"
+          [attr.aria-describedby]="'co-help-' + field.key"></textarea>
+      </div>
+      }
+
+      <div class="colorado-fact-card field">
+        <label for="co-waterSource">
+          What is the property's potable water source? (required)
+        </label>
+
+        <p class="field-help">
+          For example: municipal water, a water district or a private well.
+          Identify the provider if known.
+        </p>
+
+        <textarea id="co-waterSource" formControlName="waterSource" rows="2" maxlength="4000" [attr.aria-invalid]="
+              form.controls.coloradoPropertyFacts.controls.waterSource.touched &&
+              form.controls.coloradoPropertyFacts.controls.waterSource.invalid
+                ? 'true'
+                : null
+            " aria-describedby="co-waterSource-error"></textarea>
+
+        @if (
+        form.controls.coloradoPropertyFacts.controls.waterSource.touched &&
+        form.controls.coloradoPropertyFacts.controls.waterSource.invalid
+        ) {
+        <p id="co-waterSource-error" class="field-error">
+          Enter the property's potable water source.
+        </p>
+        }
+      </div>
+
+      @for (field of coloradoOptionalFacts; track field.key) {
+      <div class="colorado-fact-card field">
+        <label [for]="'co-choice-' + field.key">
+          {{ field.question }}
+        </label>
+
+        <p class="field-help" [id]="'co-help-' + field.key">
+          {{ field.guidance }}
+        </p>
+
+        <select [id]="'co-choice-' + field.key" [value]="coloradoFactChoice(field.key)"
+          (change)="setColoradoFactChoice(field.key, $event)" [attr.aria-describedby]="'co-help-' + field.key">
+          <option value="unselected">
+            SELECT AN OPTION (OPTIONAL)
+          </option>
+          <option value="yes">YES — PROVIDE DETAILS</option>
+          <option value="no">NO — NONE</option>
+          <option value="unknown">UNKNOWN — NOT CONFIRMED</option>
+        </select>
+
+        @if (coloradoFactChoice(field.key) === 'yes') {
+        <label class="detail-label" [for]="'co-detail-' + field.key">
+          {{ field.detail }}
+        </label>
+
+        <textarea [id]="'co-detail-' + field.key" [formControlName]="field.key" rows="2" maxlength="4000"
+          [attr.aria-invalid]="
+                  form.controls.coloradoPropertyFacts.controls[field.key].touched &&
+                  form.controls.coloradoPropertyFacts.controls[field.key].invalid
+                    ? 'true'
+                    : null
+                " [attr.aria-describedby]="'co-error-' + field.key"></textarea>
+
+        @if (
+        form.controls.coloradoPropertyFacts.controls[field.key].touched &&
+        form.controls.coloradoPropertyFacts.controls[field.key].invalid
+        ) {
+        <p class="field-error" [id]="'co-error-' + field.key">
+          Provide details for {{ field.detail.toLowerCase() }}.
+        </p>
+        }
+        } @else if (coloradoFactChoice(field.key) === 'no') {
+        <p class="field-help">
+          Your listing will record: NONE.
+        </p>
+        } @else if (coloradoFactChoice(field.key) === 'unknown') {
+        <p class="field-help">
+          Your listing will record: UNKNOWN.
+          This does not mean none exist.
+        </p>
+        }
+      </div>
+      }
+
+      <div class="colorado-fact-card field">
+        <label for="co-metroDistrict">
+          Is this property in a metropolitan district organized on or
+          after January 1, 2000? (required)
+        </label>
+
+        <p class="field-help">
+          A metropolitan district is a local government district that may
+          levy taxes or fees for infrastructure and services. It is separate
+          from an HOA. Check your property tax records or ask the county
+          assessor or district office to confirm membership and the
+          district's formation date.
+        </p>
+
+        <select id="co-metroDistrict" formControlName="metroDistrict" [attr.aria-invalid]="
+              form.controls.coloradoPropertyFacts.controls.metroDistrict.touched &&
+              form.controls.coloradoPropertyFacts.controls.metroDistrict.invalid
+                ? 'true'
+                : null
+            " aria-describedby="co-district-error">
+          <option value="unselected">SELECT AN OPTION</option>
+          <option value="covered">
+            YES — COVERED METROPOLITAN DISTRICT
+          </option>
+          <option value="not_applicable">
+            NO — NOT A COVERED METROPOLITAN DISTRICT
+          </option>
+          <option value="unknown">
+            UNKNOWN — NEED TO CONFIRM
+          </option>
+        </select>
+
+        @if (
+        form.controls.coloradoPropertyFacts.controls.metroDistrict.touched &&
+        form.controls.coloradoPropertyFacts.controls.metroDistrict.invalid
+        ) {
+        <p id="co-district-error" class="field-error">
+          {{
+          form.controls.coloradoPropertyFacts.controls.metroDistrict
+          .hasError('districtUnknown')
+          ? 'Confirm district applicability with the county assessor or district office before continuing. UNKNOWN is
+          not recorded as NO.'
+          : 'Select whether the property is in a covered metropolitan district.'
+          }}
+        </p>
+        }
+      </div>
+
+      @if (
+      form.controls.coloradoPropertyFacts.controls.metroDistrict.value ===
+      'covered'
+      ) {
+      <div class="colorado-fact-card field">
+        <label for="co-districtWebsite">
+          Official district website (required)
+        </label>
+
+        <p class="field-help">
+          Enter the district's complete HTTPS website address.
+        </p>
+
+        <input id="co-districtWebsite" formControlName="metroDistrictWebsite" type="url" maxlength="4000"
+          [attr.aria-invalid]="
+                form.controls.coloradoPropertyFacts.controls.metroDistrictWebsite.touched &&
+                form.controls.coloradoPropertyFacts.controls.metroDistrictWebsite.invalid
+                  ? 'true'
+                  : null
+              " aria-describedby="co-districtWebsite-error" />
+
+        @if (
+        form.controls.coloradoPropertyFacts.controls.metroDistrictWebsite.touched &&
+        form.controls.coloradoPropertyFacts.controls.metroDistrictWebsite.invalid
+        ) {
+        <p id="co-districtWebsite-error" class="field-error">
+          Enter the official district website beginning with https://.
+        </p>
+        }
+      </div>
+
+      <div class="colorado-fact-card field">
+        <label for="co-districtDisclosure">
+          District disclosure and records reference (required)
+        </label>
+
+        <p class="field-help">
+          Identify the completed district disclosure and accessible records,
+          including the service plan, debt, levies, fees, tax estimate and
+          tax statement or certificate.
+        </p>
+
+        <textarea id="co-districtDisclosure" formControlName="metroDistrictDisclosure" rows="4" maxlength="4000"
+          [attr.aria-invalid]="
+                form.controls.coloradoPropertyFacts.controls.metroDistrictDisclosure.touched &&
+                form.controls.coloradoPropertyFacts.controls.metroDistrictDisclosure.invalid
+                  ? 'true'
+                  : null
+              " aria-describedby="co-districtDisclosure-error"></textarea>
+
+        @if (
+        form.controls.coloradoPropertyFacts.controls.metroDistrictDisclosure.touched &&
+        form.controls.coloradoPropertyFacts.controls.metroDistrictDisclosure.invalid
+        ) {
+        <p id="co-districtDisclosure-error" class="field-error">
+          Identify the completed district disclosure and where its
+          supporting records can be accessed.
+        </p>
+        }
+      </div>
+      }
+    </fieldset>
+    <fieldset class="seller-statements colorado-loan" formGroupName="coloradoAssumableLoan">
+      <legend>Existing loan assumption (optional)</legend>
+      <p class="seller-statements__description">If your lender indicates the loan may be assumed, enter its current
+        terms. Written lender consent is still required before the buyer can assume it. These facts appear read-only in
+        the offer.</p>
+      <label class="colorado-loan__option">
+        <input type="checkbox" formControlName="available">
+        <span>My existing loan may be available for a buyer to assume</span>
+      </label>
+      @if (form.controls.coloradoAssumableLoan.controls.available.value) {
+      <div class="colorado-loan__details">
+        <p>Use your current loan statement for the balance, payment and rate. The buyer will choose the limits on
+          transfer fees and any changed loan terms in the offer.</p>
+        <div class="three-column">
+          <label class="field">Approximate loan balance ($) <input formControlName="estimatedBalanceDollars"
+              type="number" min="0" step="0.01"></label>
+          <label class="field">Balance as of <input formControlName="balanceAsOf" type="date"></label>
+          <label class="field">Current annual interest rate (%) <input formControlName="ratePercent" type="number"
+              min="0" max="30" step="0.001"></label>
+          <label class="field">Current principal and interest payment ($) <input
+              formControlName="principalInterestPaymentDollars" type="number" min="0" step="0.01"></label>
+          <label class="field">Payment period <input formControlName="paymentPeriod" type="text" maxlength="30"
+              placeholder="month"></label>
         </div>
-      </fieldset>
+        <p class="colorado-loan__escrow-title">The current payment also includes escrow for:</p>
+        <div class="colorado-loan__escrow">
+          <label><input type="checkbox" formControlName="escrowRealEstateTaxes"> Real estate taxes</label>
+          <label><input type="checkbox" formControlName="escrowPropertyInsurance"> Property insurance premiums</label>
+          <label><input type="checkbox" formControlName="escrowMortgageInsurance"> Mortgage insurance premiums</label>
+        </div>
+        <label class="field colorado-loan__other">Other escrow item (optional) <input formControlName="escrowOther"
+            type="text" maxlength="180"></label>
+      </div>
+      }
+    </fieldset>
     }
 
     <div formGroupName="hoa">
@@ -280,112 +501,90 @@
         </div>
 
         @if (form.controls.hoa.controls.hasHoa.value === true) {
-          <div class="field">
-            <label for="hoaAssociationName">
-              Association Name
-              <span class="optional">(optional)</span>
-            </label>
+        <div class="field">
+          <label for="hoaAssociationName">
+            Association Name
+            <span class="optional">(optional)</span>
+          </label>
 
-            <input
-              id="hoaAssociationName"
-              type="text"
-              formControlName="associationName"
-              maxlength="200"
-            />
+          <input id="hoaAssociationName" type="text" formControlName="associationName" maxlength="200" />
 
-            @if (
-              form.controls.hoa.controls.associationName.touched &&
-              form.controls.hoa.controls.associationName.hasError('maxlength')
-            ) {
-              <p class="field-error">
-                Association name cannot exceed 200 characters.
-              </p>
+          @if (
+          form.controls.hoa.controls.associationName.touched &&
+          form.controls.hoa.controls.associationName.hasError('maxlength')
+          ) {
+          <p class="field-error">
+            Association name cannot exceed 200 characters.
+          </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="hoaManagementCompany">
+            Association Contact
+            <span class="optional">(optional)</span>
+          </label>
+
+          <input id="hoaManagementCompany" type="text" formControlName="managementCompany" maxlength="200"
+            placeholder="Management company or self-managed contact" />
+
+          @if (
+          form.controls.hoa.controls.managementCompany.touched &&
+          form.controls.hoa.controls.managementCompany.hasError('maxlength')
+          ) {
+          <p class="field-error">
+            Association contact cannot exceed 200 characters.
+          </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="hoaFeeAmount">
+            HOA Fee
+            <span class="optional">(optional)</span>
+          </label>
+
+          <input id="hoaFeeAmount" type="number" formControlName="feeAmount" min="0" max="1000000" step="0.01" />
+
+          @if (
+          form.controls.hoa.controls.feeAmount.touched &&
+          (
+          form.controls.hoa.controls.feeAmount.hasError('min') ||
+          form.controls.hoa.controls.feeAmount.hasError('max')
+          )
+          ) {
+          <p class="field-error">Enter a valid HOA fee.</p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="hoaFeeFrequency">
+            Fee Frequency
+            <span class="optional">(optional)</span>
+          </label>
+
+          <select id="hoaFeeFrequency" formControlName="feeFrequency">
+            <option value="">Select frequency</option>
+
+            @for (frequency of hoaFeeFrequencies; track frequency.value) {
+            <option [value]="frequency.value">
+              {{ frequency.label }}
+            </option>
             }
-          </div>
-
-          <div class="field">
-            <label for="hoaManagementCompany">
-              Association Contact
-              <span class="optional">(optional)</span>
-            </label>
-
-            <input
-              id="hoaManagementCompany"
-              type="text"
-              formControlName="managementCompany"
-              maxlength="200"
-              placeholder="Management company or self-managed contact"
-            />
-
-            @if (
-              form.controls.hoa.controls.managementCompany.touched &&
-              form.controls.hoa.controls.managementCompany.hasError('maxlength')
-            ) {
-              <p class="field-error">
-                Association contact cannot exceed 200 characters.
-              </p>
-            }
-          </div>
-
-          <div class="field">
-            <label for="hoaFeeAmount">
-              HOA Fee
-              <span class="optional">(optional)</span>
-            </label>
-
-            <input
-              id="hoaFeeAmount"
-              type="number"
-              formControlName="feeAmount"
-              min="0"
-              max="1000000"
-              step="0.01"
-            />
-
-            @if (
-              form.controls.hoa.controls.feeAmount.touched &&
-              (
-                form.controls.hoa.controls.feeAmount.hasError('min') ||
-                form.controls.hoa.controls.feeAmount.hasError('max')
-              )
-            ) {
-              <p class="field-error">Enter a valid HOA fee.</p>
-            }
-          </div>
-
-          <div class="field">
-            <label for="hoaFeeFrequency">
-              Fee Frequency
-              <span class="optional">(optional)</span>
-            </label>
-
-            <select id="hoaFeeFrequency" formControlName="feeFrequency">
-              <option value="">Select frequency</option>
-
-              @for (frequency of hoaFeeFrequencies; track frequency.value) {
-                <option [value]="frequency.value">
-                  {{ frequency.label }}
-                </option>
-              }
-            </select>
-          </div>
+          </select>
+        </div>
         }
       </div>
 
       @if (form.controls.hoa.controls.hasHoa.value === true) {
-        <div class="field hoa-contact-phone">
-          <label for="hoaContactPhone">
-            Association Phone
-            <span class="optional">(optional)</span>
-          </label>
+      <div class="field hoa-contact-phone">
+        <label for="hoaContactPhone">
+          Association Phone
+          <span class="optional">(optional)</span>
+        </label>
 
-          <input
-            id="hoaContactPhone"
-            type="tel"
-            formControlName="contactPhone"
-            maxlength="30"
-          />
-        </div>
+        <input id="hoaContactPhone" type="tel" formControlName="contactPhone" maxlength="30" />
+      </div>
       }
     </div>
 
@@ -399,444 +598,367 @@
 
       <div class="two-column">
         @if (requiresOwnershipStatus()) {
-          <div class="field">
-            <label for="ownershipStatus">Property Ownership</label>
+        <div class="field">
+          <label for="ownershipStatus">Property Ownership</label>
 
-            <select id="ownershipStatus" formControlName="ownershipStatus">
-              <option value="">Select an option</option>
-              <option value="owned_at_least_one_year">
-                Owned for at least one year
-              </option>
-              <option value="owned_less_than_one_year">
-                Owned for less than one year
-              </option>
-              <option value="does_not_yet_own">
-                Seller does not yet own the property
-              </option>
-            </select>
+          <select id="ownershipStatus" formControlName="ownershipStatus">
+            <option value="">Select an option</option>
+            <option value="owned_at_least_one_year">
+              Owned for at least one year
+            </option>
+            <option value="owned_less_than_one_year">
+              Owned for less than one year
+            </option>
+            <option value="does_not_yet_own">
+              Seller does not yet own the property
+            </option>
+          </select>
 
-            @if (
-              form.controls.sellerStatements.controls.ownershipStatus.touched &&
-              form.controls.sellerStatements.controls.ownershipStatus.hasError('required')
-            ) {
-              <p class="field-error">
-                Select how long the seller has owned the property.
-              </p>
-            }
-          </div>
+          @if (
+          form.controls.sellerStatements.controls.ownershipStatus.touched &&
+          form.controls.sellerStatements.controls.ownershipStatus.hasError('required')
+          ) {
+          <p class="field-error">
+            Select how long the seller has owned the property.
+          </p>
+          }
+        </div>
         }
 
         @if (requiresUtahMethamphetamineStatement()) {
-          <div class="field utah-statement-card">
-            <label for="methamphetamineContaminationKnown">
-              Methamphetamine Contamination
-            </label>
+        <div class="field utah-statement-card">
+          <label for="methamphetamineContaminationKnown">
+            Methamphetamine Contamination
+          </label>
 
-            <p class="utah-statement-card__description">
-              Do you have actual knowledge that this property is currently
-              contaminated by methamphetamines?
-            </p>
+          <p class="utah-statement-card__description">
+            Do you have actual knowledge that this property is currently
+            contaminated by methamphetamines?
+          </p>
 
-            <select
-              id="methamphetamineContaminationKnown"
-              formControlName="methamphetamineContaminationKnown"
-              [attr.aria-invalid]="
+          <select id="methamphetamineContaminationKnown" formControlName="methamphetamineContaminationKnown"
+            [attr.aria-invalid]="
                 form.controls.sellerStatements.controls.methamphetamineContaminationKnown.touched &&
                 form.controls.sellerStatements.controls.methamphetamineContaminationKnown.hasError('required')
                   ? 'true'
                   : null
-              "
-            >
-              <option [ngValue]="null">Select an answer</option>
-              <option [ngValue]="true">
-                Yes, current contamination is known
-              </option>
-              <option [ngValue]="false">
-                No current contamination known
-              </option>
-            </select>
+              ">
+            <option [ngValue]="null">Select an answer</option>
+            <option [ngValue]="true">
+              Yes, current contamination is known
+            </option>
+            <option [ngValue]="false">
+              No current contamination known
+            </option>
+          </select>
 
-            @if (
-              form.controls.sellerStatements.controls.methamphetamineContaminationKnown.touched &&
-              form.controls.sellerStatements.controls.methamphetamineContaminationKnown.hasError('required')
-            ) {
-              <p class="field-error">
-                Select an answer about current methamphetamine contamination.
-              </p>
-            }
-          </div>
+          @if (
+          form.controls.sellerStatements.controls.methamphetamineContaminationKnown.touched &&
+          form.controls.sellerStatements.controls.methamphetamineContaminationKnown.hasError('required')
+          ) {
+          <p class="field-error">
+            Select an answer about current methamphetamine contamination.
+          </p>
+          }
+        </div>
         }
 
         @if (requiresLeadBasedPaint()) {
-          <div
-            class="field"
-            [class.utah-statement-card]="requiresUtahMethamphetamineStatement()"
-          >
-            <label for="leadBasedPaintApplies">
-              Lead-Based Paint Disclosure
-            </label>
+        <div class="field" [class.utah-statement-card]="requiresUtahMethamphetamineStatement()">
+          <label for="leadBasedPaintApplies">
+            Lead-Based Paint Disclosure
+          </label>
 
-            <select
-              id="leadBasedPaintApplies"
-              formControlName="leadBasedPaintApplies"
-              [attr.aria-invalid]="
+          <select id="leadBasedPaintApplies" formControlName="leadBasedPaintApplies" [attr.aria-invalid]="
                 form.controls.sellerStatements.controls.leadBasedPaintApplies.touched &&
                 form.controls.sellerStatements.controls.leadBasedPaintApplies.hasError('required')
                   ? 'true'
                   : null
-              "
-            >
-              <option [ngValue]="null">Select an option</option>
-              <option [ngValue]="true">Applies to this property</option>
-              <option [ngValue]="false">Does not apply</option>
-            </select>
+              ">
+            <option [ngValue]="null">Select an option</option>
+            <option [ngValue]="true">Applies to this property</option>
+            <option [ngValue]="false">Does not apply</option>
+          </select>
 
-            @if (
-              form.controls.sellerStatements.controls.leadBasedPaintApplies.touched &&
-              form.controls.sellerStatements.controls.leadBasedPaintApplies.hasError('required')
-            ) {
-              <p class="field-error">
-                Select whether the lead-based paint disclosure applies.
-              </p>
-            }
-          </div>
+          @if (
+          form.controls.sellerStatements.controls.leadBasedPaintApplies.touched &&
+          form.controls.sellerStatements.controls.leadBasedPaintApplies.hasError('required')
+          ) {
+          <p class="field-error">
+            Select whether the lead-based paint disclosure applies.
+          </p>
+          }
+        </div>
         }
 
         @if (requiresOwnersAssociation()) {
-          <div class="field">
-            <label for="ownersAssociationApplies">Owners association</label>
-            <select id="ownersAssociationApplies" formControlName="ownersAssociationApplies">
-              <option [ngValue]="null">Select an answer</option>
-              <option [ngValue]="true">Membership in an owners association applies</option>
-              <option [ngValue]="false">No owners association applies</option>
-            </select>
-            @if (form.controls.sellerStatements.controls.ownersAssociationApplies.touched &&
-                 form.controls.sellerStatements.controls.ownersAssociationApplies.hasError('required')) {
-              <p class="field-error">Select whether the property belongs to an owners association.</p>
-            }
-          </div>
+        <div class="field">
+          <label for="ownersAssociationApplies">Owners association</label>
+          <select id="ownersAssociationApplies" formControlName="ownersAssociationApplies">
+            <option [ngValue]="null">Select an answer</option>
+            <option [ngValue]="true">Membership in an owners association applies</option>
+            <option [ngValue]="false">No owners association applies</option>
+          </select>
+          @if (form.controls.sellerStatements.controls.ownersAssociationApplies.touched &&
+          form.controls.sellerStatements.controls.ownersAssociationApplies.hasError('required')) {
+          <p class="field-error">Select whether the property belongs to an owners association.</p>
+          }
+        </div>
         }
 
         @if (requiresFuelTank()) {
-          <div class="field">
-            <label for="fuelTankPresent">Fuel Tank</label>
+        <div class="field">
+          <label for="fuelTankPresent">Fuel Tank</label>
 
-            <select id="fuelTankPresent" formControlName="fuelTankPresent">
+          <select id="fuelTankPresent" formControlName="fuelTankPresent">
+            <option [ngValue]="null">Select an option</option>
+            <option [ngValue]="true">Present</option>
+            <option [ngValue]="false">Not present</option>
+          </select>
+
+          @if (
+          form.controls.sellerStatements.controls.fuelTankPresent.touched &&
+          form.controls.sellerStatements.controls.fuelTankPresent.hasError('required')
+          ) {
+          <p class="field-error">
+            Specify whether a fuel tank is present.
+          </p>
+          }
+        </div>
+
+        @if (
+        form.controls.sellerStatements.controls.fuelTankPresent.value === true
+        ) {
+        <div class="field">
+          <label for="fuelTankOwnership">Fuel Tank Ownership</label>
+
+          <select id="fuelTankOwnership" formControlName="fuelTankOwnership">
+            <option value="">Select an option</option>
+            <option value="owned">Owned</option>
+            <option value="leased">Leased</option>
+          </select>
+
+          @if (
+          form.controls.sellerStatements.controls.fuelTankOwnership.touched &&
+          form.controls.sellerStatements.controls.fuelTankOwnership.hasError('required')
+          ) {
+          <p class="field-error">
+            Specify whether the fuel tank is owned or leased.
+          </p>
+          }
+        </div>
+        }
+        }
+
+        @if (isTexasListing()) {
+        <section class="texas-lease-card">
+          <div class="field">
+            <label for="residentialLeasesExist">
+              Residential Leases
+            </label>
+
+            <select id="residentialLeasesExist" formControlName="residentialLeasesExist">
               <option [ngValue]="null">Select an option</option>
-              <option [ngValue]="true">Present</option>
-              <option [ngValue]="false">Not present</option>
+              <option [ngValue]="true">
+                One or more residential leases exist
+              </option>
+              <option [ngValue]="false">No residential leases</option>
             </select>
 
             @if (
-              form.controls.sellerStatements.controls.fuelTankPresent.touched &&
-              form.controls.sellerStatements.controls.fuelTankPresent.hasError('required')
+            form.controls.sellerStatements.controls.residentialLeasesExist.touched &&
+            form.controls.sellerStatements.controls.residentialLeasesExist.hasError('required')
             ) {
-              <p class="field-error">
-                Specify whether a fuel tank is present.
-              </p>
+            <p class="field-error">
+              Specify whether residential leases exist.
+            </p>
             }
           </div>
 
           @if (
-            form.controls.sellerStatements.controls.fuelTankPresent.value === true
+          form.controls.sellerStatements.controls.residentialLeasesExist.value === true
           ) {
-            <div class="field">
-              <label for="fuelTankOwnership">Fuel Tank Ownership</label>
+          <div class="texas-lease-document">
+            <p>
+              Upload the residential leases or the residential-leases
+              addendum supplied with the listing.
+            </p>
 
-              <select
-                id="fuelTankOwnership"
-                formControlName="fuelTankOwnership"
-              >
-                <option value="">Select an option</option>
-                <option value="owned">Owned</option>
-                <option value="leased">Leased</option>
-              </select>
+            @if (leaseDocumentFor('texas-residential-leases'); as document) {
+            <button type="button" class="document-link" (click)="openLeaseDocument(document)">
+              Review {{ document.originalFileName }}
+            </button>
+            }
 
-              @if (
-                form.controls.sellerStatements.controls.fuelTankOwnership.touched &&
-                form.controls.sellerStatements.controls.fuelTankOwnership.hasError('required')
-              ) {
-                <p class="field-error">
-                  Specify whether the fuel tank is owned or leased.
-                </p>
-              }
-            </div>
-          }
-        }
+            <input type="file" accept="application/pdf,.pdf" [disabled]="uploadingLeaseType() !== null"
+              (change)="onLeaseFileSelected($event, 'texas-residential-leases')" />
 
-        @if (isTexasListing()) {
-          <section class="texas-lease-card">
-            <div class="field">
-              <label for="residentialLeasesExist">
-                Residential Leases
-              </label>
-
-              <select
-                id="residentialLeasesExist"
-                formControlName="residentialLeasesExist"
-              >
-                <option [ngValue]="null">Select an option</option>
-                <option [ngValue]="true">
-                  One or more residential leases exist
-                </option>
-                <option [ngValue]="false">No residential leases</option>
-              </select>
-
-              @if (
-                form.controls.sellerStatements.controls.residentialLeasesExist.touched &&
-                form.controls.sellerStatements.controls.residentialLeasesExist.hasError('required')
-              ) {
-                <p class="field-error">
-                  Specify whether residential leases exist.
-                </p>
-              }
-            </div>
-
-            @if (
-              form.controls.sellerStatements.controls.residentialLeasesExist.value === true
-            ) {
-              <div class="texas-lease-document">
-                <p>
-                  Upload the residential leases or the residential-leases
-                  addendum supplied with the listing.
-                </p>
-
-                @if (leaseDocumentFor('texas-residential-leases'); as document) {
-                  <button
-                    type="button"
-                    class="document-link"
-                    (click)="openLeaseDocument(document)"
-                  >
-                    Review {{ document.originalFileName }}
-                  </button>
-                }
-
-                <input
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  [disabled]="uploadingLeaseType() !== null"
-                  (change)="onLeaseFileSelected($event, 'texas-residential-leases')"
-                />
-
-                <button
-                  type="button"
-                  class="document-upload"
-                  [disabled]="
+            <button type="button" class="document-upload" [disabled]="
                     !selectedLeaseFileFor('texas-residential-leases') ||
                     uploadingLeaseType() !== null
-                  "
-                  (click)="uploadLeaseDocument('texas-residential-leases')"
-                >
-                  {{
-                    uploadingLeaseType() === 'texas-residential-leases'
-                      ? 'Uploading…'
-                      : 'Upload residential lease PDF'
-                  }}
-                </button>
-              </div>
-            }
-          </section>
+                  " (click)="uploadLeaseDocument('texas-residential-leases')">
+              {{
+              uploadingLeaseType() === 'texas-residential-leases'
+              ? 'Uploading…'
+              : 'Upload residential lease PDF'
+              }}
+            </button>
+          </div>
+          }
+        </section>
 
-          <section class="texas-lease-card">
-            <div class="field">
-              <label for="fixtureLeasesExist">Fixture Leases</label>
+        <section class="texas-lease-card">
+          <div class="field">
+            <label for="fixtureLeasesExist">Fixture Leases</label>
 
-              <select
-                id="fixtureLeasesExist"
-                formControlName="fixtureLeasesExist"
-              >
-                <option [ngValue]="null">Select an option</option>
-                <option [ngValue]="true">
-                  One or more fixture leases exist
-                </option>
-                <option [ngValue]="false">No fixture leases</option>
-              </select>
-
-              @if (
-                form.controls.sellerStatements.controls.fixtureLeasesExist.touched &&
-                form.controls.sellerStatements.controls.fixtureLeasesExist.hasError('required')
-              ) {
-                <p class="field-error">
-                  Specify whether fixture leases exist.
-                </p>
-              }
-            </div>
+            <select id="fixtureLeasesExist" formControlName="fixtureLeasesExist">
+              <option [ngValue]="null">Select an option</option>
+              <option [ngValue]="true">
+                One or more fixture leases exist
+              </option>
+              <option [ngValue]="false">No fixture leases</option>
+            </select>
 
             @if (
-              form.controls.sellerStatements.controls.fixtureLeasesExist.value === true
+            form.controls.sellerStatements.controls.fixtureLeasesExist.touched &&
+            form.controls.sellerStatements.controls.fixtureLeasesExist.hasError('required')
             ) {
-              <div class="texas-lease-document">
-                <p>
-                  Upload the fixture leases or the fixture-leases addendum
-                  supplied with the listing.
-                </p>
+            <p class="field-error">
+              Specify whether fixture leases exist.
+            </p>
+            }
+          </div>
 
-                @if (leaseDocumentFor('texas-fixture-leases'); as document) {
-                  <button
-                    type="button"
-                    class="document-link"
-                    (click)="openLeaseDocument(document)"
-                  >
-                    Review {{ document.originalFileName }}
-                  </button>
-                }
+          @if (
+          form.controls.sellerStatements.controls.fixtureLeasesExist.value === true
+          ) {
+          <div class="texas-lease-document">
+            <p>
+              Upload the fixture leases or the fixture-leases addendum
+              supplied with the listing.
+            </p>
 
-                <input
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  [disabled]="uploadingLeaseType() !== null"
-                  (change)="onLeaseFileSelected($event, 'texas-fixture-leases')"
-                />
+            @if (leaseDocumentFor('texas-fixture-leases'); as document) {
+            <button type="button" class="document-link" (click)="openLeaseDocument(document)">
+              Review {{ document.originalFileName }}
+            </button>
+            }
 
-                <button
-                  type="button"
-                  class="document-upload"
-                  [disabled]="
+            <input type="file" accept="application/pdf,.pdf" [disabled]="uploadingLeaseType() !== null"
+              (change)="onLeaseFileSelected($event, 'texas-fixture-leases')" />
+
+            <button type="button" class="document-upload" [disabled]="
                     !selectedLeaseFileFor('texas-fixture-leases') ||
                     uploadingLeaseType() !== null
-                  "
-                  (click)="uploadLeaseDocument('texas-fixture-leases')"
-                >
-                  {{
-                    uploadingLeaseType() === 'texas-fixture-leases'
-                      ? 'Uploading…'
-                      : 'Upload fixture lease PDF'
-                  }}
-                </button>
-              </div>
-            }
-          </section>
+                  " (click)="uploadLeaseDocument('texas-fixture-leases')">
+              {{
+              uploadingLeaseType() === 'texas-fixture-leases'
+              ? 'Uploading…'
+              : 'Upload fixture lease PDF'
+              }}
+            </button>
+          </div>
+          }
+        </section>
 
-          <section class="texas-lease-card">
-            <div class="field">
-              <label for="naturalResourceLeasesExist">
-                Natural-Resource Leases
-              </label>
+        <section class="texas-lease-card">
+          <div class="field">
+            <label for="naturalResourceLeasesExist">
+              Natural-Resource Leases
+            </label>
 
-              <select
-                id="naturalResourceLeasesExist"
-                formControlName="naturalResourceLeasesExist"
-              >
-                <option [ngValue]="null">Select an option</option>
-                <option [ngValue]="true">
-                  One or more natural-resource leases exist
-                </option>
-                <option [ngValue]="false">
-                  No natural-resource leases
-                </option>
-              </select>
-
-              @if (
-                form.controls.sellerStatements.controls.naturalResourceLeasesExist.touched &&
-                form.controls.sellerStatements.controls.naturalResourceLeasesExist.hasError('required')
-              ) {
-                <p class="field-error">
-                  Specify whether natural-resource leases exist.
-                </p>
-              }
-            </div>
+            <select id="naturalResourceLeasesExist" formControlName="naturalResourceLeasesExist">
+              <option [ngValue]="null">Select an option</option>
+              <option [ngValue]="true">
+                One or more natural-resource leases exist
+              </option>
+              <option [ngValue]="false">
+                No natural-resource leases
+              </option>
+            </select>
 
             @if (
-              form.controls.sellerStatements.controls.naturalResourceLeasesExist.value === true
+            form.controls.sellerStatements.controls.naturalResourceLeasesExist.touched &&
+            form.controls.sellerStatements.controls.naturalResourceLeasesExist.hasError('required')
             ) {
-              <div class="texas-lease-document">
-                <p>
-                  Upload all natural-resource leases currently available
-                  from the seller.
-                </p>
+            <p class="field-error">
+              Specify whether natural-resource leases exist.
+            </p>
+            }
+          </div>
 
-                @if (leaseDocumentFor('texas-natural-resource-leases'); as document) {
-                  <button
-                    type="button"
-                    class="document-link"
-                    (click)="openLeaseDocument(document)"
-                  >
-                    Review {{ document.originalFileName }}
-                  </button>
-                }
+          @if (
+          form.controls.sellerStatements.controls.naturalResourceLeasesExist.value === true
+          ) {
+          <div class="texas-lease-document">
+            <p>
+              Upload all natural-resource leases currently available
+              from the seller.
+            </p>
 
-                <input
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  [disabled]="uploadingLeaseType() !== null"
-                  (change)="onLeaseFileSelected($event, 'texas-natural-resource-leases')"
-                />
+            @if (leaseDocumentFor('texas-natural-resource-leases'); as document) {
+            <button type="button" class="document-link" (click)="openLeaseDocument(document)">
+              Review {{ document.originalFileName }}
+            </button>
+            }
 
-                <button
-                  type="button"
-                  class="document-upload"
-                  [disabled]="
+            <input type="file" accept="application/pdf,.pdf" [disabled]="uploadingLeaseType() !== null"
+              (change)="onLeaseFileSelected($event, 'texas-natural-resource-leases')" />
+
+            <button type="button" class="document-upload" [disabled]="
                     !selectedLeaseFileFor('texas-natural-resource-leases') ||
                     uploadingLeaseType() !== null
-                  "
-                  (click)="uploadLeaseDocument('texas-natural-resource-leases')"
-                >
-                  {{
-                    uploadingLeaseType() === 'texas-natural-resource-leases'
-                      ? 'Uploading…'
-                      : 'Upload natural-resource lease PDF'
-                  }}
-                </button>
-              </div>
-            }
-          </section>
-
-          @if (leaseDocumentError()) {
-            <p
-              class="lease-document-status lease-document-status--error"
-              role="alert"
-            >
-              {{ leaseDocumentError() }}
-            </p>
+                  " (click)="uploadLeaseDocument('texas-natural-resource-leases')">
+              {{
+              uploadingLeaseType() === 'texas-natural-resource-leases'
+              ? 'Uploading…'
+              : 'Upload natural-resource lease PDF'
+              }}
+            </button>
+          </div>
           }
+        </section>
 
-          @if (leaseDocumentMessage()) {
-            <p
-              class="lease-document-status lease-document-status--success"
-              role="status"
-            >
-              {{ leaseDocumentMessage() }}
-            </p>
-          }
+        @if (leaseDocumentError()) {
+        <p class="lease-document-status lease-document-status--error" role="alert">
+          {{ leaseDocumentError() }}
+        </p>
+        }
+
+        @if (leaseDocumentMessage()) {
+        <p class="lease-document-status lease-document-status--success" role="status">
+          {{ leaseDocumentMessage() }}
+        </p>
+        }
         } @else if (requiresGeneralLeases()) {
-          <div
-            class="field"
-            [class.utah-statement-card]="requiresUtahMethamphetamineStatement()"
-          >
-            <label for="leasesExist">Existing Leases</label>
+        <div class="field" [class.utah-statement-card]="requiresUtahMethamphetamineStatement()">
+          <label for="leasesExist">Existing Leases</label>
 
-            <select
-              id="leasesExist"
-              formControlName="leasesExist"
-              [attr.aria-invalid]="
+          <select id="leasesExist" formControlName="leasesExist" [attr.aria-invalid]="
                 form.controls.sellerStatements.controls.leasesExist.touched &&
                 form.controls.sellerStatements.controls.leasesExist.hasError('required')
                   ? 'true'
                   : null
-              "
-            >
-              <option [ngValue]="null">Select an option</option>
-              <option [ngValue]="true">One or more leases exist</option>
-              <option [ngValue]="false">No leases exist</option>
-            </select>
+              ">
+            <option [ngValue]="null">Select an option</option>
+            <option [ngValue]="true">One or more leases exist</option>
+            <option [ngValue]="false">No leases exist</option>
+          </select>
 
-            @if (
-              form.controls.sellerStatements.controls.leasesExist.touched &&
-              form.controls.sellerStatements.controls.leasesExist.hasError('required')
-            ) {
-              <p class="field-error">
-                Specify whether any leases exist.
-              </p>
-            }
-          </div>
+          @if (
+          form.controls.sellerStatements.controls.leasesExist.touched &&
+          form.controls.sellerStatements.controls.leasesExist.hasError('required')
+          ) {
+          <p class="field-error">
+            Specify whether any leases exist.
+          </p>
+          }
+        </div>
         }
       </div>
     </fieldset>
 
-    <fieldset
-      class="additional-seller"
-      formGroupName="sellerStatements"
-    >
+    <fieldset class="additional-seller" formGroupName="sellerStatements">
       <legend>Additional Seller</legend>
 
       <p class="additional-seller__description">
@@ -845,126 +967,104 @@
       </p>
 
       <label class="additional-seller__option">
-        <input
-          type="checkbox"
-          formControlName="additionalSellerIncluded"
-        />
+        <input type="checkbox" formControlName="additionalSellerIncluded" />
 
         <span>Include a co-seller on this listing</span>
       </label>
 
       @if (
-        form.controls.sellerStatements.controls.additionalSellerIncluded.value
+      form.controls.sellerStatements.controls.additionalSellerIncluded.value
       ) {
-        <div class="three-column">
-          <div class="field">
-            <label for="additionalSellerLegalName">
-              Co-seller legal name
-            </label>
+      <div class="three-column">
+        <div class="field">
+          <label for="additionalSellerLegalName">
+            Co-seller legal name
+          </label>
 
-            <input
-              id="additionalSellerLegalName"
-              type="text"
-              formControlName="additionalSellerLegalName"
-              maxlength="300"
-            />
+          <input id="additionalSellerLegalName" type="text" formControlName="additionalSellerLegalName"
+            maxlength="300" />
 
-            @if (
-              form.controls.sellerStatements.controls.additionalSellerLegalName.touched
-            ) {
-              @if (
-                form.controls.sellerStatements.controls.additionalSellerLegalName.hasError('required')
-              ) {
-                <p class="field-error">
-                  Enter the co-seller’s legal name.
-                </p>
-              }
-            }
-          </div>
-
-          <div class="field">
-            <label for="additionalSellerEmail">Co-seller email</label>
-
-            <input
-              id="additionalSellerEmail"
-              type="email"
-              formControlName="additionalSellerEmail"
-              maxlength="320"
-            />
-
-            @if (
-              form.controls.sellerStatements.controls.additionalSellerEmail.touched
-            ) {
-              @if (
-                form.controls.sellerStatements.controls.additionalSellerEmail.hasError('required')
-              ) {
-                <p class="field-error">
-                  Enter the co-seller’s email address.
-                </p>
-              } @else if (
-                form.controls.sellerStatements.controls.additionalSellerEmail.hasError('email')
-              ) {
-                <p class="field-error">
-                  Enter a valid co-seller email address.
-                </p>
-              }
-            }
-          </div>
-
-          <div class="field">
-            <label for="additionalSellerPhone">Co-seller phone</label>
-
-            <input
-              id="additionalSellerPhone"
-              type="tel"
-              formControlName="additionalSellerPhone"
-              maxlength="50"
-            />
-
-            @if (
-              form.controls.sellerStatements.controls.additionalSellerPhone.touched &&
-              form.controls.sellerStatements.controls.additionalSellerPhone.hasError('required')
-            ) {
-              <p class="field-error">
-                Enter the co-seller’s phone number.
-              </p>
-            }
-          </div>
+          @if (
+          form.controls.sellerStatements.controls.additionalSellerLegalName.touched
+          ) {
+          @if (
+          form.controls.sellerStatements.controls.additionalSellerLegalName.hasError('required')
+          ) {
+          <p class="field-error">
+            Enter the co-seller’s legal name.
+          </p>
+          }
+          }
         </div>
+
+        <div class="field">
+          <label for="additionalSellerEmail">Co-seller email</label>
+
+          <input id="additionalSellerEmail" type="email" formControlName="additionalSellerEmail" maxlength="320" />
+
+          @if (
+          form.controls.sellerStatements.controls.additionalSellerEmail.touched
+          ) {
+          @if (
+          form.controls.sellerStatements.controls.additionalSellerEmail.hasError('required')
+          ) {
+          <p class="field-error">
+            Enter the co-seller’s email address.
+          </p>
+          } @else if (
+          form.controls.sellerStatements.controls.additionalSellerEmail.hasError('email')
+          ) {
+          <p class="field-error">
+            Enter a valid co-seller email address.
+          </p>
+          }
+          }
+        </div>
+
+        <div class="field">
+          <label for="additionalSellerPhone">Co-seller phone</label>
+
+          <input id="additionalSellerPhone" type="tel" formControlName="additionalSellerPhone" maxlength="50" />
+
+          @if (
+          form.controls.sellerStatements.controls.additionalSellerPhone.touched &&
+          form.controls.sellerStatements.controls.additionalSellerPhone.hasError('required')
+          ) {
+          <p class="field-error">
+            Enter the co-seller’s phone number.
+          </p>
+          }
+        </div>
+      </div>
       }
     </fieldset>
 
     <div class="field description-field">
       <label for="description">Property Description</label>
 
-      <textarea
-        id="description"
-        formControlName="description"
-        rows="7"
-        maxlength="5000"
-        placeholder="Describe the property, including its layout, updates, features, location, and anything else buyers should know."
-      ></textarea>
+      <textarea id="description" formControlName="description" rows="7" maxlength="5000"
+        placeholder="Describe the property, including its layout, updates, features, location, and anything else buyers should know."></textarea>
 
       <div class="description-footer">
         <div>
           @if (form.controls.description.touched) {
-            @if (form.controls.description.hasError('required')) {
-              <p class="field-error">
-                Property description is required.
-              </p>
-            }
+          @if (form.controls.description.hasError('required')) {
+          <p class="field-error">
+            Property description is required.
+          </p>
+          }
 
-            @if (form.controls.description.hasError('minlength')) {
-              <p class="field-error">
-                Property description must be at least 20 characters.
-              </p>
-            }
+          @if (form.controls.description.hasError('minlength')) {
+          <p class="field-error">
+            Property description must be at least 20 characters.
+          </p>
+          }
 
-            @if (form.controls.description.hasError('maxlength')) {
-              <p class="field-error">
-                Property description cannot exceed 5,000 characters.
-              </p>
-            }
+          @if (form.controls.description.hasError('maxlength')) {
+          <p class="field-error">
+            Property description cannot exceed 5,000 characters.
+          </p>
+          }
           }
         </div>
 

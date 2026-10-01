@@ -452,3 +452,8 @@
   </div>
   }
 </section>
+@if (listing(); as currentListing) {
+  @if (currentListing.state === 'CO' && currentListing.status === 'active') {
+    <app-colorado-property-facts-editor [listingUid]="currentListing.Uid" [facts]="currentListing.coloradoPropertyFacts" />
+  }
+}

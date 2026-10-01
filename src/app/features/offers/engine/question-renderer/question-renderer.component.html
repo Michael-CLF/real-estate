@@ -1,331 +1,240 @@
-<section
-  class="offer-question"
-  [attr.data-question-id]="question().id"
-  [class.offer-question--invalid]="validationMessage()"
-  [attr.aria-labelledby]="controlId() + '-label'"
->
+<section class="offer-question" [attr.data-question-id]="question().id"
+  [class.offer-question--invalid]="validationMessage()" [attr.aria-labelledby]="controlId() + '-label'">
   @if (question().type !== 'information') {
-    <div class="offer-question__heading">
-      <label
-        [id]="controlId() + '-label'"
-        [for]="controlId()"
-      >
-        {{ question().label }}
+  <div class="offer-question__heading">
+    <label [id]="controlId() + '-label'" [for]="controlId()">
+      {{ question().label }}
 
-        @if (question().validation?.required) {
-          <span
-            class="offer-question__required"
-            aria-hidden="true"
-          >*</span>
-        }
-      </label>
-
-      @if (question().description) {
-        <p>{{ question().description }}</p>
+      @if (question().validation?.required) {
+      <span class="offer-question__required" aria-hidden="true">*</span>
       }
-    </div>
+    </label>
+
+    @if (question().description) {
+    <p>{{ question().description }}</p>
+    }
+  </div>
   }
 
   @switch (question().type) {
-    @case ('text') {
-      <input
-        [id]="controlId()"
-        type="text"
-        [value]="textValue()"
-        [disabled]="controlDisabled()"
-        [attr.required]="question().validation?.required ? '' : null"
-        [attr.aria-invalid]="validationMessage() ? 'true' : null"
-        (input)="onTextInput($event)"
-        (blur)="markTouched()"
-      />
-    }
+  @case ('text') {
+  @if (textInputType() === 'time') {
+  <div class="offer-question__time" role="group" [attr.aria-labelledby]="controlId() + '-label'">
+    <select [id]="controlId()" aria-label="Hour" [value]="timeParts().hour" [disabled]="controlDisabled()"
+      [required]="question().validation?.required === true" [attr.aria-invalid]="validationMessage() ? 'true' : null"
+      (change)="onTimePartChange('hour', $event)" (blur)="markTouched()">
+      <option value="">Hour</option>
 
-    @case ('textarea') {
-      @if (question().readOnly) {
-        <div [id]="controlId()" class="offer-question__locked-answer">{{ textValue() || 'Not provided by the seller' }}</div>
-      } @else {
-        <textarea
-          [id]="controlId()"
-          rows="5"
-          [value]="textValue()"
-          [disabled]="controlDisabled()"
-          [attr.required]="question().validation?.required ? '' : null"
-          [attr.aria-invalid]="validationMessage() ? 'true' : null"
-          (input)="onTextInput($event)"
-          (blur)="markTouched()"
-        ></textarea>
-      }
-    }
-
-    @case ('currency') {
-      <div class="offer-question__currency">
-        <span aria-hidden="true">$</span>
-        <input
-          [id]="controlId()"
-          type="text"
-          inputmode="decimal"
-          [value]="currencyInputValue()"
-          [disabled]="controlDisabled()"
-          [attr.readonly]="question().readOnly ? '' : null"
-          [attr.required]="question().validation?.required ? '' : null"
-          [attr.aria-invalid]="validationMessage() ? 'true' : null"
-          (input)="onCurrencyInput($event)"
-          (focus)="onCurrencyFocus($event)"
-          (blur)="onCurrencyBlur($event)"
-        />
-      </div>
-    }
-
-    @case ('number') {
-      <input
-        [id]="controlId()"
-        type="number"
-        inputmode="decimal"
-        [value]="numericValue() ?? ''"
-        [disabled]="controlDisabled()"
-        [attr.min]="question().validation?.minimum ?? null"
-        [attr.max]="question().validation?.maximum ?? null"
-        [attr.required]="question().validation?.required ? '' : null"
-        [attr.aria-invalid]="validationMessage() ? 'true' : null"
-        (input)="onNumberInput($event)"
-        (blur)="markTouched()"
-      />
-    }
-
-    @case ('date') {
-      <input
-        [id]="controlId()"
-        type="date"
-        [value]="textValue()"
-        [disabled]="controlDisabled()"
-        [attr.required]="question().validation?.required ? '' : null"
-        [attr.aria-invalid]="validationMessage() ? 'true' : null"
-        (input)="onTextInput($event)"
-        (blur)="markTouched()"
-      />
-    }
-
-    @case ('date_time') {
-      <input
-        [id]="controlId()"
-        type="datetime-local"
-        [value]="dateTimeValue()"
-        [disabled]="controlDisabled()"
-        [attr.required]="question().validation?.required ? '' : null"
-        [attr.aria-invalid]="validationMessage() ? 'true' : null"
-        (input)="onDateTimeInput($event)"
-        (blur)="markTouched()"
-      />
-    }
-
-    @case ('yes_no') {
-      @if (question().readOnly) {
-        <div class="offer-question__locked-answer">
-          @if (booleanValue() === true) {
-            Yes
-          } @else if (booleanValue() === false) {
-            No
-          } @else {
-            Not provided by the seller
-          }
-        </div>
-      } @else {
-        <div class="offer-question__choices offer-question__choices--inline">
-          <label>
-            <input
-              [name]="controlId()"
-              type="radio"
-              [checked]="booleanValue() === true"
-              [disabled]="controlDisabled()"
-              (change)="onBooleanInput(true)"
-              (blur)="markTouched()"
-            />
-            <span>Yes</span>
-          </label>
-
-          <label>
-            <input
-              [name]="controlId()"
-              type="radio"
-              [checked]="booleanValue() === false"
-              [disabled]="controlDisabled()"
-              (change)="onBooleanInput(false)"
-              (blur)="markTouched()"
-            />
-            <span>No</span>
-          </label>
-        </div>
-      }
-    }
-
-    @case ('acknowledgement') {
-      <label class="offer-question__acknowledgement">
-        <input
-          [id]="controlId()"
-          type="checkbox"
-          [checked]="booleanValue() === true"
-          [disabled]="controlDisabled()"
-          (change)="onAcknowledgementInput($event)"
-          (blur)="markTouched()"
-        />
-        <span>{{ question().label }}</span>
-      </label>
-    }
-
-   @case ('single_choice') {
-  @if (question().readOnly) {
-    <div [id]="controlId()" class="offer-question__locked-answer">
-      {{ selectedChoiceLabel() }}
-    </div>
-  } @else {
-    <select
-      [id]="controlId()"
-      [value]="textValue()"
-      [disabled]="controlDisabled()"
-      [attr.required]="question().validation?.required ? '' : null"
-      [attr.aria-invalid]="validationMessage() ? 'true' : null"
-      (change)="onSingleChoiceInput($event)"
-      (blur)="markTouched()"
-    >
-      <option value="">Select an option</option>
-
-      @for (option of choiceOptions(); track option.value) {
-        <option [value]="option.value">
-          {{ option.label }}
-        </option>
+      @for (hour of timeHours; track hour) {
+      <option [value]="hour">{{ hour }}</option>
       }
     </select>
+
+    <span aria-hidden="true">:</span>
+
+    <select [id]="controlId() + '-minute'" aria-label="Minute" [value]="timeParts().minute"
+      [disabled]="controlDisabled()" [required]="question().validation?.required === true"
+      [attr.aria-invalid]="validationMessage() ? 'true' : null" (change)="onTimePartChange('minute', $event)"
+      (blur)="markTouched()">
+      <option value="">Minute</option>
+
+      @for (minute of timeMinutes; track minute) {
+      <option [value]="minute">{{ minute }}</option>
+      }
+    </select>
+
+    <select [id]="controlId() + '-period'" aria-label="AM or PM" [value]="timeParts().period"
+      [disabled]="controlDisabled()" [required]="question().validation?.required === true"
+      [attr.aria-invalid]="validationMessage() ? 'true' : null" (change)="onTimePartChange('period', $event)"
+      (blur)="markTouched()">
+      <option value="">AM/PM</option>
+      <option value="AM">AM</option>
+      <option value="PM">PM</option>
+    </select>
+  </div>
+  } @else {
+  <input [id]="controlId()" type="text" [value]="textValue()" [disabled]="controlDisabled()"
+    [attr.required]="question().validation?.required ? '' : null"
+    [attr.aria-invalid]="validationMessage() ? 'true' : null" (input)="onTextInput($event)" (blur)="markTouched()" />
   }
-}
+  }
 
-    @case ('multiple_choice') {
-      <div class="offer-question__choices">
-        @for (option of choiceOptions(); track option.value) {
-          <label>
-            <input
-              type="checkbox"
-              [checked]="isMultipleChoiceSelected(option.value)"
-              [disabled]="isChoiceDisabled(option.value)"
-              (change)="onMultipleChoiceInput(option.value, $event)"
-              (blur)="markTouched()"
-            />
+  @case ('textarea') {
+  @if (question().readOnly) {
+  <div [id]="controlId()" class="offer-question__locked-answer">{{ textValue() || 'Not provided by the seller' }}</div>
+  } @else {
+  <textarea [id]="controlId()" rows="5" [value]="textValue()" [disabled]="controlDisabled()"
+    [attr.required]="question().validation?.required ? '' : null"
+    [attr.aria-invalid]="validationMessage() ? 'true' : null" (input)="onTextInput($event)"
+    (blur)="markTouched()"></textarea>
+  }
+  }
 
-            <span>
-              <strong>{{ option.label }}</strong>
+  @case ('currency') {
+  <div class="offer-question__currency">
+    <span aria-hidden="true">$</span>
+    <input [id]="controlId()" type="text" inputmode="decimal" [value]="currencyInputValue()"
+      [disabled]="controlDisabled()" [attr.readonly]="question().readOnly ? '' : null"
+      [attr.required]="question().validation?.required ? '' : null"
+      [attr.aria-invalid]="validationMessage() ? 'true' : null" (input)="onCurrencyInput($event)"
+      (focus)="onCurrencyFocus($event)" (blur)="onCurrencyBlur($event)" />
+  </div>
+  }
 
-              @if (option.description) {
-                <small>{{ option.description }}</small>
-              }
-            </span>
-          </label>
+  @case ('number') {
+  <input [id]="controlId()" type="number" inputmode="decimal" [value]="numericValue() ?? ''"
+    [disabled]="controlDisabled()" [attr.min]="question().validation?.minimum ?? null"
+    [attr.max]="question().validation?.maximum ?? null" [attr.required]="question().validation?.required ? '' : null"
+    [attr.aria-invalid]="validationMessage() ? 'true' : null" (input)="onNumberInput($event)" (blur)="markTouched()" />
+  }
+
+  @case ('date') {
+  <input [id]="controlId()" type="date" [value]="textValue()" [disabled]="controlDisabled()"
+    [attr.required]="question().validation?.required ? '' : null"
+    [attr.aria-invalid]="validationMessage() ? 'true' : null" (input)="onTextInput($event)" (blur)="markTouched()" />
+  }
+
+  @case ('date_time') {
+  <input [id]="controlId()" type="datetime-local" [value]="dateTimeValue()" [disabled]="controlDisabled()"
+    [attr.required]="question().validation?.required ? '' : null"
+    [attr.aria-invalid]="validationMessage() ? 'true' : null" (input)="onDateTimeInput($event)"
+    (blur)="markTouched()" />
+  }
+
+  @case ('yes_no') {
+  @if (question().readOnly) {
+  <div class="offer-question__locked-answer">
+    @if (booleanValue() === true) {
+    YES
+    } @else if (booleanValue() === false) {
+    NO
+    } @else {
+    Not provided by the seller
+    }
+  </div>
+  } @else {
+  <div class="offer-question__choices offer-question__choices--inline">
+    <label>
+      <input [name]="controlId()" type="radio" [checked]="booleanValue() === true" [disabled]="controlDisabled()"
+        (change)="onBooleanInput(true)" (blur)="markTouched()" />
+      <span>YES</span>
+    </label>
+
+    <label>
+      <input [name]="controlId()" type="radio" [checked]="booleanValue() === false" [disabled]="controlDisabled()"
+        (change)="onBooleanInput(false)" (blur)="markTouched()" />
+      <span>NO</span>
+    </label>
+  </div>
+  }
+  }
+
+  @case ('acknowledgement') {
+  <label class="offer-question__acknowledgement">
+    <input [id]="controlId()" type="checkbox" [checked]="booleanValue() === true" [disabled]="controlDisabled()"
+      (change)="onAcknowledgementInput($event)" (blur)="markTouched()" />
+    <span>{{ question().label }}</span>
+  </label>
+  }
+
+  @case ('single_choice') {
+  @if (question().readOnly) {
+  <div [id]="controlId()" class="offer-question__locked-answer">
+    {{ selectedChoiceLabel() }}
+  </div>
+  } @else {
+  <select [id]="controlId()" [value]="textValue()" [disabled]="controlDisabled()"
+    [attr.required]="question().validation?.required ? '' : null"
+    [attr.aria-invalid]="validationMessage() ? 'true' : null" (change)="onSingleChoiceInput($event)"
+    (blur)="markTouched()">
+    <option value="">SELECT AN OPTION</option>
+
+    @for (option of choiceOptions(); track option.value) {
+    <option [value]="option.value">
+      {{ option.label }}
+    </option>
+    }
+  </select>
+  }
+  }
+
+  @case ('multiple_choice') {
+  <div class="offer-question__choices">
+    @for (option of choiceOptions(); track option.value) {
+    <label>
+      <input type="checkbox" [checked]="isMultipleChoiceSelected(option.value)"
+        [disabled]="isChoiceDisabled(option.value)" (change)="onMultipleChoiceInput(option.value, $event)"
+        (blur)="markTouched()" />
+
+      <span>
+        <strong>{{ option.label }}</strong>
+
+        @if (option.description) {
+        <small>{{ option.description }}</small>
         }
-      </div>
+      </span>
+    </label>
     }
+  </div>
+  }
 
-    @case ('address') {
-      <div class="offer-question__address">
-        <input
-          [id]="controlId()"
-          type="text"
-          autocomplete="address-line1"
-          placeholder="Street address"
-          [value]="addressField('addressLine1')"
-          [disabled]="controlDisabled()"
-          (input)="onAddressInput('addressLine1', $event)"
-          (blur)="markTouched()"
-        />
+  @case ('address') {
+  <div class="offer-question__address">
+    <input [id]="controlId()" type="text" autocomplete="address-line1" placeholder="Street address"
+      [value]="addressField('addressLine1')" [disabled]="controlDisabled()"
+      (input)="onAddressInput('addressLine1', $event)" (blur)="markTouched()" />
 
-        <input
-          type="text"
-          autocomplete="address-line2"
-          placeholder="Address line 2"
-          [value]="addressField('addressLine2')"
-          [disabled]="controlDisabled()"
-          (input)="onAddressInput('addressLine2', $event)"
-          (blur)="markTouched()"
-        />
+    <input type="text" autocomplete="address-line2" placeholder="Address line 2" [value]="addressField('addressLine2')"
+      [disabled]="controlDisabled()" (input)="onAddressInput('addressLine2', $event)" (blur)="markTouched()" />
 
-        <div class="offer-question__address-row">
-          <input
-            type="text"
-            autocomplete="address-level2"
-            placeholder="City"
-            [value]="addressField('city')"
-            [disabled]="controlDisabled()"
-            (input)="onAddressInput('city', $event)"
-            (blur)="markTouched()"
-          />
+    <div class="offer-question__address-row">
+      <input type="text" autocomplete="address-level2" placeholder="City" [value]="addressField('city')"
+        [disabled]="controlDisabled()" (input)="onAddressInput('city', $event)" (blur)="markTouched()" />
 
-          <input
-            type="text"
-            autocomplete="address-level1"
-            placeholder="State"
-            [value]="addressField('state')"
-            [disabled]="controlDisabled()"
-            (input)="onAddressInput('state', $event)"
-            (blur)="markTouched()"
-          />
+      <input type="text" autocomplete="address-level1" placeholder="State" [value]="addressField('state')"
+        [disabled]="controlDisabled()" (input)="onAddressInput('state', $event)" (blur)="markTouched()" />
 
-          <input
-            type="text"
-            autocomplete="postal-code"
-            placeholder="ZIP code"
-            [value]="addressField('zipCode')"
-            [disabled]="controlDisabled()"
-            (input)="onAddressInput('zipCode', $event)"
-            (blur)="markTouched()"
-          />
-        </div>
-      </div>
+      <input type="text" autocomplete="postal-code" placeholder="ZIP code" [value]="addressField('zipCode')"
+        [disabled]="controlDisabled()" (input)="onAddressInput('zipCode', $event)" (blur)="markTouched()" />
+    </div>
+  </div>
+  }
+
+  @case ('document_upload') {
+  <div class="offer-question__document">
+    <input [id]="controlId()" type="file" [accept]="acceptedFileTypes()" [disabled]="controlDisabled()"
+      (change)="onDocumentInput($event)" (blur)="markTouched()" />
+
+    <small>{{ maximumFileSizeLabel() }}</small>
+
+    @if (hasAttachedDocument()) {
+    <span class="offer-question__attached">
+      Document attached
+    </span>
     }
+  </div>
+  }
 
-    @case ('document_upload') {
-      <div class="offer-question__document">
-        <input
-          [id]="controlId()"
-          type="file"
-          [accept]="acceptedFileTypes()"
-          [disabled]="controlDisabled()"
-          (change)="onDocumentInput($event)"
-          (blur)="markTouched()"
-        />
+  @case ('information') {
+  <aside class="offer-question__information" [attr.data-tone]="informationTone()">
+    <strong>{{ question().label }}</strong>
 
-        <small>{{ maximumFileSizeLabel() }}</small>
-
-        @if (hasAttachedDocument()) {
-          <span class="offer-question__attached">
-            Document attached
-          </span>
-        }
-      </div>
+    @if (question().description) {
+    <p>{{ question().description }}</p>
     }
-
-    @case ('information') {
-      <aside
-        class="offer-question__information"
-        [attr.data-tone]="informationTone()"
-      >
-        <strong>{{ question().label }}</strong>
-
-        @if (question().description) {
-          <p>{{ question().description }}</p>
-        }
-      </aside>
-    }
+  </aside>
+  }
   }
 
   @if (question().helpText) {
-    <p class="offer-question__help">
-      {{ question().helpText }}
-    </p>
+  <p class="offer-question__help">
+    {{ question().helpText }}
+  </p>
   }
 
   @if (validationMessage()) {
-    <p
-      class="offer-question__error"
-      role="alert"
-    >
-      {{ validationMessage() }}
-    </p>
+  <p class="offer-question__error" role="alert">
+    {{ validationMessage() }}
+  </p>
   }
 </section>

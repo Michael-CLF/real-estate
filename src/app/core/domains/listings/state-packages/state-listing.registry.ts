@@ -10,6 +10,8 @@ import {
   oklahomaListingPackage,
 } from './oklahoma/oklahoma-listing.package';
 
+import { coloradoListingPackage } from './colorado/colorado-listing.package';
+
 import {
   texasListingPackage,
 } from './texas/texas-listing.package';
@@ -20,6 +22,7 @@ import { louisianaListingPackage } from './louisiana/louisiana-listing.package';
 
 const PACKAGES =
   new Map<string, StateListingPackage>([
+    ['CO', coloradoListingPackage],
     ['NC', northCarolinaListingPackage],
     ['OK', oklahomaListingPackage],
     ['TX', texasListingPackage],
@@ -40,8 +43,7 @@ export function getStateListingPackage(
 
   if (!statePackage) {
     throw new Error(
-      `Listing creation is not configured for ${
-        normalizedStateCode || 'this state'
+      `Listing creation is not configured for ${normalizedStateCode || 'this state'
       }.`,
     );
   }

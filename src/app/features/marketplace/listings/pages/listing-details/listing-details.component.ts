@@ -270,7 +270,7 @@ export class ListingDetailsComponent
     signal('');
 
   requiredOfferDisclosureTitles(listing: MarketplaceListing): string[] {
-    if (!['FL', 'LA'].includes(listing.address.stateAbbreviation)) return [];
+    if (!['FL', 'LA', 'CO'].includes(listing.address.stateAbbreviation)) return [];
     const uploaded = new Set(this.disclosures().map(doc => doc.documentType));
     return getStateDisclosureRequirements(listing.address.stateAbbreviation)
       .filter(requirement => isDisclosureRequiredForListing(listing.address.stateAbbreviation, requirement, {
@@ -281,7 +281,7 @@ export class ListingDetailsComponent
   }
 
   offerDisclosuresAreReady(listing: MarketplaceListing): boolean {
-    return !['FL', 'LA'].includes(listing.address.stateAbbreviation) ||
+    return !['FL', 'LA', 'CO'].includes(listing.address.stateAbbreviation) ||
       (this.isAuthenticated() && !this.disclosuresAreLoading() &&
         !this.disclosureLoadError() && this.requiredOfferDisclosureTitles(listing).length === 0);
   }

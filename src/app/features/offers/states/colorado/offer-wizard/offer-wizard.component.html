@@ -1,0 +1,44 @@
+
+@if (terms(); as currentTerms) {
+  <section class="colorado-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="colorado-offer-wizard__contract">
+        <span>Selected Colorado contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    <p class="colorado-offer-wizard__brochure">Review the seller-uploaded disclosure records below before confirming receipt. Your answers record actual receipt; upload alone does not confirm that you reviewed a document.</p>
+
+    <app-offer-wizard-shell
+      stateName="Colorado"
+      title="Colorado purchase offer"
+      description="Complete the questions for the selected Colorado contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [requireCompleteSection]="true"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [allowBuyerEdits]="initiatedBy() === 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="colorado-offer-wizard__loading" aria-live="polite">
+    Loading your Colorado offer…
+  </section>
+}

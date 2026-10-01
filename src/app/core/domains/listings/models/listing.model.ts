@@ -1,3 +1,5 @@
+import type { ColoradoPropertyFacts } from '../../offers/state-contracts/colorado/models/colorado-contract-elections';
+import type { ColoradoSellerLoan } from '../../offers/state-contracts/colorado/models/colorado-offer-terms.model';
 export interface Listing {
   Uid: string;
   sellerUid: string;
@@ -23,6 +25,8 @@ export interface Listing {
   blockNumber?: string;
   subdivisionName?: string;
   legalDescription?: string;
+  coloradoPropertyFacts?: ColoradoPropertyFacts;
+  coloradoAssumableLoan?: ColoradoSellerLoan;
   yearBuilt?: number;
   description?: string;
   stories?: number;
@@ -628,6 +632,8 @@ export interface ListingDraftAddress {
 
 export interface ListingDraftPropertyDetails {
   propertyType: PropertyType;
+  coloradoPropertyFacts?: ColoradoPropertyFacts;
+  coloradoAssumableLoan?: ColoradoSellerLoan;
 
   bedrooms: number;
   fullBathrooms: number;

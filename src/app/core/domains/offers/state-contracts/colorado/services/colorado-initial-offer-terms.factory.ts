@@ -1,0 +1,17 @@
+import { COLORADO_FACT_DEFAULTS, COLORADO_ELECTION_DEFAULTS } from '../models/colorado-contract-elections';
+import type { CreateStateOfferTermsInput } from '../../../../../../features/offers/engine/models/state-offer-package';
+import type { ColoradoContractType, ColoradoOfferTerms } from '../models/colorado-offer-terms.model';
+
+const keys = ['alternativeEarnestMoney','recordTitle','recordTitleObjection','offRecordTitle','offRecordTitleObjection','titleResolution','thirdPartyApproval','associationDocuments','associationTermination','sellerPropertyDisclosure','leadDisclosure','newLoanApplication','newLoanTerms','newLoanAvailability','existingLoan','existingLoanTermination','loanTransferApproval','appraisal','appraisalObjection','appraisalResolution','survey','surveyObjection','surveyResolution','waterRightsExamination','mineralRightsExamination','inspectionTermination','inspectionObjection','inspectionResolution','insuranceTermination','dueDiligenceDelivery','dueDiligenceObjection','dueDiligenceResolution','conditionalSale','leadTermination','closing','possession'] as const;
+export const COLORADO_DEADLINE_KEYS = keys;
+export function createColoradoInitialOfferTerms(input: CreateStateOfferTermsInput<ColoradoContractType>): ColoradoOfferTerms {
+  if (input.contractType !== 'navstreet_colorado_residential_2026' || input.property.state !== 'CO' || !['single_family','townhome','condo'].includes(input.property.propertyType)) throw new Error('Choose a qualifying Colorado home and agreement.');
+  const deadlines = Object.fromEntries(keys.map(key => [key, ''])) as unknown as ColoradoOfferTerms['deadlines'];
+  return { stateCode:'CO', contractType:input.contractType, property:input.property, legalDescription:input.property.legalDescription ?? '', sellerLoan:null, propertyFacts:{...COLORADO_FACT_DEFAULTS}, elections:{...COLORADO_ELECTION_DEFAULTS},
+    propertyItems:{included:'',excluded:'',leasedItems:'',waterRights:'',wellPermit:'',mineralRights:''},
+    purchase:{purchasePriceInCents:input.property.listPriceInCents, earnestMoneyInCents:0, earnestMoneyHolder:'',earnestMoneyForm:'',financingType:'unselected',newLoanType:'unselected',newLoanAmountInCents:0,cashAtClosingInCents:0,availableCashConfirmed:null,sellerConcessionsInCents:0,assumption:{maxTransferFeeInCents:0,maxCashIncreaseInCents:0,maxRatePercent:0,maxPaymentInCents:0,maxPaymentPeriod:'month',sellerReleaseRequired:null,releaseEvidenceTiming:'unselected',releaseCostPayer:'unselected',maxReleaseCostInCents:0}},
+    conditions:{saleOfBuyerProperty:null,saleOfBuyerPropertyAddress:'',appraisal:null,inspection:null,newSurvey:'unselected',surveyPayer:'unselected',ownerTitlePolicyPayer:'unselected',deedType:'unselected',closingFeePayer:'unselected',specialAssessmentPayer:'unselected',possessionDelayChargeInCents:0},
+    deadlines:{...deadlines,timeOfDay:'23:59',extendHoliday:false,possessionTime:''},
+    disclosures:{sellerReportsHoa:null,sellerPropertyStatus:'unselected',leadPaintStatus:'unselected',leadInspectionChoice:'unselected',leadInspectionDays:10,associationStatus:'unselected',waterSourceAcknowledged:null,radonBrochureAcknowledged:null,radonInformationAcknowledged:null},
+    additionalTerms:'',delivery:{expiresAt:input.expiresAt,timeZone:'America/Denver',electronicDeliveryAuthorized:null} };
+}

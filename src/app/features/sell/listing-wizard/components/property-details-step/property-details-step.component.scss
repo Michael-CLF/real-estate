@@ -62,6 +62,50 @@ form {
   line-height: 1.5;
 }
 
+.colorado-loan__option,
+.colorado-loan__escrow label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  color: #154360;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.colorado-loan__option input,
+.colorado-loan__escrow input {
+  flex: 0 0 auto;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: #154360;
+}
+
+.colorado-loan__details {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid #b9d7e6;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.colorado-loan__details > p {
+  margin: 0 0 1rem;
+  color: #475569;
+}
+
+.colorado-loan__escrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.colorado-loan__other {
+  max-width: 35rem;
+  margin-top: 1rem;
+}
+
 .additional-seller__description {
   margin: 0 0 1rem;
   color: #475569;
@@ -131,9 +175,8 @@ form {
 }
 
 .field input:focus,
-.field select:focus,
-.field textarea[aria-invalid='true'] {
-  border: 2px solid #b42318;
+.field select:focus {
+  border-color: #154360;
 }
 
 .field textarea:focus {
@@ -315,6 +358,49 @@ form {
   font-size: 1rem;
 }
 
+/* Show invalid borders only after interaction. */
+:host input.ng-invalid.ng-touched,
+:host select.ng-invalid.ng-touched,
+:host textarea.ng-invalid.ng-touched,
+:host input[aria-invalid='true'],
+:host select[aria-invalid='true'],
+:host textarea[aria-invalid='true'] {
+  border: 2px solid #b42318;
+  outline-color: rgba(180, 35, 24, 0.15);
+}
+
+.colorado-property-facts .colorado-fact-card {
+  display: block;
+  padding: 16px;
+  margin: 14px 0;
+  background: #fff;
+  border: 1px solid #d5e2eb;
+  border-radius: 8px;
+}
+
+.colorado-property-facts .field-help {
+  margin: 6px 0 10px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.colorado-property-facts .detail-label {
+  margin-top: 14px;
+}
+
+.colorado-property-facts textarea {
+  min-height: 88px;
+  margin-bottom: 0;
+}
+
+:host .field-error {
+  margin: 6px 0 0;
+  color: #b42318;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
 @media (max-width: 768px) {
   .three-column {
     grid-template-columns: 1fr;
@@ -357,5 +443,30 @@ form {
         width: 100%;
       }
     }
+  }
+}
+
+.colorado-property-facts {
+  display: grid;
+  gap: 1rem;
+
+  label {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #d7e3ea;
+    border-radius: 8px;
+    background: #fff;
+    color: #17202a;
+    font-size: 1rem;
+  }
+
+  textarea, input, select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #b8cbd7;
+    border-radius: 6px;
+    font: inherit;
   }
 }
