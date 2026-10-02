@@ -58,6 +58,9 @@ import {
   requiresStateListingField,
 } from '../../../core/domains/listings/state-packages/state-listing-package';
 
+import { DocumentChecklistComponent, ListingChecklistLocation } from './components/document-checklist/document-checklist.component';
+import { LISTING_CHECKLIST_STATES } from '../../../core/configuration/listing-document-checklist.config';
+
 interface WizardStep {
   number: number;
   label: string;
@@ -67,6 +70,7 @@ interface WizardStep {
   selector: 'app-listing-wizard',
   standalone: true,
   imports: [
+    DocumentChecklistComponent,
     AddressStepComponent,
     PropertyDetailsStepComponent,
     PropertyFeaturesStepComponent,
@@ -93,6 +97,11 @@ export class ListingWizardComponent implements OnInit {
   private readonly listingPhotoStorageService = inject(
     ListingPhotoStorageService,
   );
+
+  protected readonly showDocumentChecklist = signal(false);
+
+  protected readonly checklistState = signal('');
+  protected readonly checklistLocation = signal<ListingChecklistLocation | null>(null);
 
   protected readonly listingUid = signal<string | null>(null);
 
@@ -191,7 +200,7 @@ export class ListingWizardComponent implements OnInit {
         return;
       }
 
-      await this.createNewDraft(user.uid);
+      this.showDocumentChecklist.set(true);
     } catch (error) {
       console.error('Failed to initialize listing draft.', error);
 
@@ -205,13 +214,51 @@ export class ListingWizardComponent implements OnInit {
     }
   }
 
+  protected openDocumentChecklist(): void {
+    const address = this.addressData();
+    if (address) this.checklistLocation.set({ zipCode: address.zipCode, city: address.city, state: address.state, county: address.county });
+    this.checklistState.set(address?.state ?? this.checklistState());
+    this.showDocumentChecklist.set(true);
+    this.scrollToTop();
+  }
+
+  protected async continueFromChecklist(location: ListingChecklistLocation): Promise<void> {
+    const stateCode = location.state;
+    if (this.isSaving() || !LISTING_CHECKLIST_STATES.some(state => state.abbreviation === stateCode)) return;
+    this.checklistState.set(stateCode);
+    this.checklistLocation.set(location);
+    if (this.listingUid()) {
+      this.showDocumentChecklist.set(false);
+      this.scrollToTop();
+      return;
+    }
+    const user = auth.currentUser;
+    if (!user) {
+      this.initializationError.set('Your authentication session could not be found. Please sign in again.');
+      return;
+    }
+    this.initializationError.set('');
+    this.isSaving.set(true);
+    try {
+      await this.createNewDraft(user.uid);
+      this.showDocumentChecklist.set(false);
+    } catch (error) {
+      this.initializationError.set(error instanceof Error ? error.message : 'We could not open your listing draft. Please try again.');
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
   private async createNewDraft(sellerUid: string): Promise<void> {
     const listingUid = await this.listingService.createInitialDraft(sellerUid);
 
     this.listingUid.set(listingUid);
+    const location = this.checklistLocation();
+    this.addressData.set({ addressLine1: '', addressLine2: '', city: location?.city ?? '', state: this.checklistState(), zipCode: location?.zipCode ?? '', county: location?.county ?? '' });
 
     await this.router.navigate(['/sell/listings', listingUid, 'edit'], {
       replaceUrl: true,
+      queryParams: { checklistState: this.checklistState(), checklistZip: location?.zipCode, checklistCity: location?.city, checklistCounty: location?.county },
     });
   }
 
@@ -231,6 +278,16 @@ export class ListingWizardComponent implements OnInit {
     this.listingUid.set(listingUid);
 
     this.completedSteps.set([...draft.progress.completedSteps]);
+
+    if (!draft.address) {
+      const selectedState = this.route.snapshot.queryParamMap.get('checklistState') ?? '';
+      if (LISTING_CHECKLIST_STATES.some(state => state.abbreviation === selectedState)) {
+        this.checklistState.set(selectedState);
+        const location = { state: selectedState, zipCode: this.route.snapshot.queryParamMap.get('checklistZip') ?? '', city: this.route.snapshot.queryParamMap.get('checklistCity') ?? '', county: this.route.snapshot.queryParamMap.get('checklistCounty') ?? '' };
+        this.checklistLocation.set(location);
+        this.addressData.set({ addressLine1: '', addressLine2: '', ...location });
+      }
+    }
 
     if (draft.address) {
       this.addressData.set({

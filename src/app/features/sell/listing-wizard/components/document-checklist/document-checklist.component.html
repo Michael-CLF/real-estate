@@ -1,0 +1,199 @@
+<section class="checklist" aria-labelledby="checklist-title">
+  @if (stage() === 'location') {
+  <p class="eyebrow">New listing</p>
+
+  <h1 id="checklist-title">
+    Where is the property you’re selling?
+  </h1>
+
+  <p>
+    Enter the property’s ZIP code. We’ll show the seller
+    document checklist for its state.
+  </p>
+
+  <form (submit)="findLocation($event)">
+    <label for="property-zip" class="property-zip">
+      Property ZIP code
+    </label>
+
+    <div class="zip-row">
+      <input id="property-zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5"
+        [value]="zipCode()" [disabled]="busy() || lookingUp()" [attr.aria-invalid]="zipError() ? 'true' : null"
+        aria-describedby="zip-help" (input)="changeZip($event)" />
+
+      <button type="submit" [disabled]="busy() || lookingUp() || !validZip()">
+        {{
+        lookingUp()
+        ? 'Finding location…'
+        : 'Find location'
+        }}
+      </button>
+    </div>
+
+    <p id="zip-help">
+      Enter a five-digit ZIP code for the home being listed,
+      even if you live elsewhere.
+    </p>
+  </form>
+
+  @if (zipError()) {
+  <p class="error" role="alert">
+    {{ zipError() }}
+  </p>
+  }
+
+  @if (locationFound()) {
+  <div class="location-confirmation">
+    <h2>Confirm the property location</h2>
+
+    <p class="confirm">
+      Check the city and state below. You can correct
+      the lookup before continuing.
+    </p>
+
+    <label for="property-city">City</label>
+
+    <input id="property-city" type="text" autocomplete="address-level2" [value]="city()" [disabled]="busy()"
+      (input)="changeCity($event)" />
+
+    <label for="property-state">State</label>
+
+    <select id="property-state" [disabled]="busy()" (change)="changeState($event)">
+      <option value="" [selected]="!selectedState()">
+        Select the property’s state
+      </option>
+
+      @for (state of allStates; track state.abbreviation) {
+      <option [value]="state.abbreviation" [selected]="selectedState() === state.abbreviation">
+        {{ state.name }}
+      </option>
+      }
+    </select>
+
+    @if (selectedState() && !supportedState()) {
+    <p class="error" role="status">
+      Listing creation is not available in this state yet.
+      Please choose another property location.
+    </p>
+    }
+
+    <button type="button" [disabled]="!canConfirm() || busy()" (click)="confirmLocation()">
+      Confirm location and view checklist
+    </button>
+  </div>
+  }
+  } @else {
+  <p class="eyebrow">Before you start</p>
+
+  <h1 id="checklist-title">
+    Your {{ stateName() }} seller document checklist
+  </h1>
+
+  <h4 class="location">
+    {{ city() }}, {{ selectedState() }} {{ zipCode() }}
+  </h4>
+
+  @if (allowLocationChange()) {
+  <button type="button" class="secondary" [disabled]="busy()" (click)="stage.set('location')">
+    Correct checklist location
+  </button>
+  } @else {
+  <p>
+    To change the property location, edit the Address step.
+  </p>
+  }
+
+  <p>
+    You can create your listing now. Gather and upload
+    applicable required disclosures so buyers can move forward
+    when they are ready.
+  </p>
+
+  <ul class="documents">
+    @for (item of items(); track item.id) {
+    <li>
+      <div class="item-heading">
+        <h2>{{ item.title }}</h2>
+
+        <span class="badge">
+          {{ item.category }}
+        </span>
+      </div>
+
+      @if (applicability(item.id)) {
+      <p class="confirm">
+        {{ applicability(item.id) }}
+      </p>
+      }
+
+      <p class="confirm">{{ item.instructions }}</p>
+
+      <dl>
+        <dt>Applies to</dt>
+        <dd>{{ item.applicability }}</dd>
+
+        <dt>Needed by</dt>
+        <dd>{{ item.timing }}</dd>
+
+        <dt>Provided by</dt>
+        <dd>{{ item.suppliedBy }}</dd>
+      </dl>
+
+      <div class="links">
+        @for (link of item.links; track $index) {
+        <a [href]="link.url" target="_blank" rel="noopener noreferrer">
+          {{ link.label }}
+        </a>
+        }
+      </div>
+    </li>
+    }
+  </ul>
+
+  <p>
+    Property answers, exemptions and your purchase agreement
+    determine the final requirements. Additional local or
+    property-specific documents may apply.
+  </p>
+
+  <aside class="offer-warning" aria-labelledby="offer-warning-title">
+    <h2 id="offer-warning-title">
+      Missing disclosures can delay offers or signing
+    </h2>
+
+    <ul>
+      @for (message of restrictions(); track $index) {
+      <li>{{ message }}</li>
+      }
+    </ul>
+
+    <p class="confirm">
+      <strong>You can continue creating your listing now.</strong>
+      After completing your listing, open
+      <strong>
+        Dashboard → Your listing → Property Disclosures
+      </strong>.
+      Download the applicable forms, complete and sign them,
+      select a PDF for each applicable document, and choose
+      <strong>Upload disclosure</strong>.
+    </p>
+
+    <p class="confirm">
+      Uploading a file does not replace required delivery
+      to the buyer, buyer acknowledgment or signatures.
+      Revisit this checklist after entering Property Details
+      to see guidance based on your answers.
+    </p>
+  </aside>
+
+  <div class="actions">
+    <button type="button" [disabled]="busy()" (click)="continueListing()">
+      {{
+      busy()
+      ? 'Opening your listing…'
+      : 'Continue with listing'
+      }}
+    </button>
+  </div>
+  }
+</section>

@@ -292,7 +292,7 @@
               </span>
               } @else if (allDisclosuresUploaded()) {
               <span class="available-badge">
-                Complete
+                Uploads ready
               </span>
               } @else {
               <span class="pending-count-badge">
@@ -303,17 +303,9 @@
           </div>
 
           <p>
-            Complete and upload the required state-specific property disclosures.
-            Buyers need to review them before signing an offer agreement.
+            Complete and upload the applicable state-specific disclosures by their listed deadlines.
+            Buyer delivery, acknowledgment and signatures are separate from uploading.
           </p>
-
-          @if (currentListing.state === 'FL' && missingDisclosureTitles().length && !disclosureStatusIsLoading() && !disclosureStatusError()) {
-          <p class="management-card__status-error" role="status">
-            Buyers cannot make a Florida offer until you upload the required forms.
-            Missing: {{ missingDisclosureTitles().join(', ') }}.
-            Open Property Disclosures below to download and upload the completed forms.
-          </p>
-          }
 
           @if (
           !disclosureStatusIsLoading() &&
@@ -324,7 +316,7 @@
               {{ uploadedDisclosureCount() }}
               of
               {{ requiredDisclosureCount() }}
-              required documents uploaded
+              listed documents uploaded
             </span>
 
             <div class="management-card__progress-track" role="progressbar" [attr.aria-valuemin]="0"
@@ -350,11 +342,23 @@
           }
         </div>
 
+        @if (!disclosureStatusIsLoading() && !disclosureStatusError()) {
+          <aside class="disclosure-offer-warning" aria-label="Disclosure deadlines and offer restrictions">
+            <strong>Keep your listing ready for buyers</strong>
+            @if (missingOfferDocumentTitles().length) {
+              <p>Buyers cannot start or submit an offer until these required uploads are available:</p>
+              <ul>@for (title of missingOfferDocumentTitles(); track title) { <li>{{ title }}</li> }</ul>
+            }
+            @for (message of offerDisclosureMessages(); track $index) { <p>{{ message }}</p> }
+            <p>Open Property Disclosures to download the applicable forms, complete and sign them, and upload the PDFs.</p>
+          </aside>
+        }
+
         <button type="button" class="primary-button" (click)="openDisclosures()">
           @if (allDisclosuresUploaded()) {
           Review disclosures
           } @else {
-          Manage disclosures
+          Upload disclosures
           }
 
           <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>

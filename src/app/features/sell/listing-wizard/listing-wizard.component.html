@@ -13,6 +13,19 @@
         We’re opening your secure draft.
       </p>
     </div>
+    } @else if (showDocumentChecklist()) {
+      <app-document-checklist [initialLocation]="checklistLocation()" [allowLocationChange]="!listingUid()"
+        [facts]="{ yearBuilt: propertyDetailsData()?.yearBuilt, propertyType: propertyDetailsData()?.propertyType,
+          leadBasedPaintApplies: propertyDetailsData()?.sellerStatements?.leadBasedPaintApplies,
+          ownersAssociationApplies: propertyDetailsData()?.sellerStatements?.ownersAssociationApplies,
+          methamphetamineContaminationKnown: propertyDetailsData()?.sellerStatements?.methamphetamineContaminationKnown }" [busy]="isSaving()"
+        (proceed)="continueFromChecklist($event)" />
+      @if (initializationError()) {
+        <p class="wizard-save-error" role="alert">{{ initializationError() }}</p>
+      }
+    } @else if (initializationError()) {
+      <p class="wizard-save-error" role="alert">{{ initializationError() }}</p>
+      <a routerLink="/dashboard">Return to Dashboard</a>
     } @else if (listingContentComplete()) {
     <div class="verification-preparation" aria-live="polite">
 
@@ -106,6 +119,9 @@
         {{ steps.length }}
       </div>
     </header>
+
+    <button type="button" class="button button--secondary" [disabled]="isSaving() || isSavingPhotos()"
+      (click)="openDocumentChecklist()">Review document checklist</button>
 
     <nav class="wizard-progress" aria-label="Listing progress">
       @for (

@@ -1,3 +1,4 @@
+import { getOfferBlockingDocumentTypes, checklistDocumentTitle, getChecklistRestrictionMessages } from '../../../core/configuration/listing-document-checklist.config';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -318,6 +319,23 @@ export class ListingManagementComponent implements OnInit {
     ]);
   }
 
+  private readonly verifiedDisclosureTypes = signal<readonly string[]>([]);
+
+  protected readonly missingOfferDocumentTitles = computed(() => {
+    const listing = this.listing();
+    if (!listing || this.disclosureStatusIsLoading() || this.disclosureStatusError()) return [];
+    return getOfferBlockingDocumentTypes(listing.state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+      .filter(type => !this.verifiedDisclosureTypes().includes(type))
+      .map(type => checklistDocumentTitle(listing.state, type));
+  });
+
+  protected readonly offerDisclosureMessages = computed(() => {
+    const listing = this.listing();
+    if (!listing) return [];
+    return getChecklistRestrictionMessages(listing.state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+      .filter(message => !message.startsWith('NavStreet currently prevents'));
+  });
+
   private async loadDisclosureStatus(
     listingState: string
   ): Promise<void> {
@@ -351,6 +369,11 @@ export class ListingManagementComponent implements OnInit {
           .getListingDisclosures(
             this.listingUid
           );
+
+      this.verifiedDisclosureTypes.set(summaries.filter(summary => {
+        const document = summary.currentDocument;
+        return document.listingUid === this.listingUid && document.stateAbbreviation === stateAbbreviation && !!document.storagePath && !!document.versionId;
+      }).map(summary => summary.documentType));
 
       const uploadedDocumentTypes =
         new Set(
