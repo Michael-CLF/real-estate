@@ -1,47 +1,24 @@
 <main class="professional-registration">
-    @if (!isSupportedState()) {
-    <section class="registration-unavailable">
-        <div class="registration-shell">
-            <span class="registration-unavailable__icon">
-                <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
-            </span>
-
-            <h1>
-                Professional registration is not yet
-                available in {{ stateName() }}.
-            </h1>
-
-            <p>
-                NavStreet is currently accepting
-                professional-directory listings in North
-                Carolina.
-            </p>
-
-            <a class="registration-button registration-button--primary" routerLink="/">
-                Return home
-            </a>
-        </div>
-    </section>
-    } @else {
     <section class="registration-hero" aria-labelledby="registration-title">
         <div class="registration-shell">
             <p class="registration-eyebrow">
-                NavStreet Find a Pro
+                NavStreet Directory
             </p>
 
             <h1 id="registration-title">
-                Add your business to the
-                {{ stateName() }} directory.
+                Add your business to the NavStreet Directory.
             </h1>
 
             <p>
+                Choose your service state in the form below.
                 Create a useful free directory listing or
-                select a full-profile subscription. You will
-                verify your email before registration is
-                completed.
+                select a full-profile subscription.
+                You will verify your email before
+                registration is completed.
             </p>
         </div>
     </section>
+
 
     <section class="registration-content">
         <div class="registration-shell">
@@ -72,6 +49,45 @@
                     </header>
 
                     <div class="registration-card__body">
+                        <div class="registration-field">
+                            <label for="professional-service-state">
+                                Service state
+                            </label>
+
+                            <select id="professional-service-state" formControlName="stateSlug"
+                                (change)="onStateChange()" [attr.aria-invalid]="
+            registrationForm.controls.stateSlug.touched &&
+            registrationForm.controls.stateSlug.invalid
+                ? 'true'
+                : null
+        ">
+                                <option value="">
+                                    Select a state
+                                </option>
+
+                                @for (state of states; track state.slug) {
+                                <option [value]="state.slug">
+                                    {{ state.name }}
+                                </option>
+                                }
+                            </select>
+
+                            <p class="registration-help">
+                                Choose the state where you provide services.
+                                Select your cities, counties or statewide
+                                coverage below.
+                            </p>
+
+                            @if (
+                            registrationForm.controls.stateSlug.touched &&
+                            registrationForm.controls.stateSlug.invalid
+                            ) {
+                            <p class="registration-error">
+                                Select the state where you provide services.
+                            </p>
+                            }
+                        </div>
+
                         <div class="registration-field">
                             <label for="professional-business-name">
                                 Business or professional name
@@ -290,7 +306,7 @@
                                     <strong>Statewide</strong>
 
                                     <small>
-                                        Serve all of North Carolina
+                                        Serve all of {{ stateName() }}
                                     </small>
                                 </span>
                             </label>
@@ -720,5 +736,4 @@
             </p>
         </div>
     </aside>
-    }
 </main>

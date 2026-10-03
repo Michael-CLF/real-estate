@@ -353,22 +353,96 @@ export const PUBLIC_ROUTES:
         },
 
         /*
-         * Professional registration
-         *
-         * Must remain public.
-         */
+ * Professional registration.
+ * Reuses the existing registration component.
+ */
         {
-          path:
-            'professionals/register/:stateSlug',
+          path: 'professionals/register',
+          pathMatch: 'full',
 
           loadComponent: () =>
             import(
               '../features/professionals/pages/professional-registration/professional-registration.component'
-            ).then(
-              component =>
-                component
-                  .ProfessionalRegistrationComponent
+            ).then(component =>
+              component.ProfessionalRegistrationComponent
             )
+        },
+
+        /*
+         * Preserve existing state-specific registration links.
+         */
+        {
+          path: 'professionals/register/:stateSlug',
+
+          loadComponent: () =>
+            import(
+              '../features/professionals/pages/professional-registration/professional-registration.component'
+            ).then(component =>
+              component.ProfessionalRegistrationComponent
+            )
+        },
+
+        /*
+         * Legacy directory shortcut.
+         */
+        {
+          path: 'professionals',
+          redirectTo: 'find-a-pro',
+          pathMatch: 'full'
+        },
+
+        /*
+         * National directory.
+         * A signed-in, active account is required.
+         */
+        {
+          path: 'find-a-pro',
+
+          canActivate: [
+            authGuard,
+            accountGuard
+          ],
+
+          canActivateChild: [
+            authGuard,
+            accountGuard
+          ],
+
+          children: [
+            {
+              path: '',
+              pathMatch: 'full',
+
+              loadComponent: () =>
+                import(
+                  '../features/professionals/professionals.component'
+                ).then(component =>
+                  component.ProfessionalsComponent
+                )
+            },
+
+            {
+              path: ':stateSlug/:professionalSlug',
+
+              loadComponent: () =>
+                import(
+                  '../features/professionals/pages/professional-profile/professional-profile.component'
+                ).then(component =>
+                  component.ProfessionalProfileComponent
+                )
+            },
+
+            {
+              path: ':stateSlug',
+
+              loadComponent: () =>
+                import(
+                  '../features/professionals/professionals.component'
+                ).then(component =>
+                  component.ProfessionalsComponent
+                )
+            }
+          ]
         },
 
         /*

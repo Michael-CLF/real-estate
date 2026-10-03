@@ -27,6 +27,14 @@ import {
   EducationContentService
 } from '../../services/education-content.service';
 
+import {
+  effect
+} from '@angular/core';
+
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 @Component({
   selector:
     'app-education-center',
@@ -66,6 +74,19 @@ export class EducationCenterComponent {
       }
     );
 
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    effect(() => {
+      this.pageSeo.set(
+        `${this.pageTitle()} | NavStreet`,
+        this.pageDescription(),
+        this.categoryNotFound()
+      );
+    });
+  }
+
   protected readonly searchTerm =
     signal('');
 
@@ -100,9 +121,9 @@ export class EducationCenterComponent {
     computed(
       () =>
         this.activeCategorySlug() !==
-          null &&
+        null &&
         this.activeCategory() ===
-          null
+        null
     );
 
   protected readonly visibleArticles =
@@ -116,11 +137,11 @@ export class EducationCenterComponent {
       const categoryArticles =
         categorySlug
           ? this.educationContentService
-              .getArticlesByCategory(
-                categorySlug
-              )
+            .getArticlesByCategory(
+              categorySlug
+            )
           : this.educationContentService
-              .getArticles();
+            .getArticles();
 
       if (!searchTerm.trim()) {
         return categoryArticles;
@@ -148,24 +169,19 @@ export class EducationCenterComponent {
       .getFeaturedArticles()
       .slice(0, 3);
 
-  protected readonly pageTitle =
-    computed(
-      () =>
-        this.activeCategory()?.title ??
-        'Education Center'
-    );
+  protected readonly pageTitle = computed(() =>
+    this.activeCategory()?.title ??
+    'Home Buying and For-Sale-by-Owner Education'
+  );
 
-  protected readonly pageDescription =
-    computed(
-      () =>
-        this.activeCategory()
-          ?.description ??
-        (
-          'Clear guidance for buying, selling, ' +
-          'financing, marketing, and managing ' +
-          'a property through NavStreet.'
-        )
-    );
+  protected readonly pageDescription = computed(() =>
+    this.activeCategory()?.description ??
+    (
+      'Practical guidance for buying a home and selling for sale by owner, ' +
+      'financing, marketing, and managing ' +
+      'a property through NavStreet.'
+    )
+  );
 
   protected updateSearchTerm(
     event: Event

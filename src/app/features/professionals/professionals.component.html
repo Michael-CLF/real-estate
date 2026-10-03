@@ -1,8 +1,5 @@
 <main class="professionals-page">
-  <section
-    class="professionals-hero"
-    aria-labelledby="professionals-title"
-  >
+  <section class="professionals-hero" aria-labelledby="professionals-title">
     <div class="professionals-shell">
       <div class="professionals-hero__layout">
         <div class="professionals-hero__content">
@@ -16,36 +13,27 @@
           </h1>
 
           <p class="professionals-hero__description">
-            Search {{ stateName() }} professionals by
-            business name, service, specialty, city or
-            county. Hire the services you need while
-            remaining in control of your transaction.
+            Search professionals nationwide by business name,
+            service, specialty, city or county.
+            Hire the services you need while remaining
+            in control of your transaction.
           </p>
 
           <div class="professionals-hero__highlights">
             <span>
-              <i
-                class="fa-solid fa-location-dot"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
 
               {{ stateName() }}
             </span>
 
             <span>
-              <i
-                class="fa-solid fa-layer-group"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
 
               Eight service categories
             </span>
 
             <span>
-              <i
-                class="fa-solid fa-address-card"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-address-card" aria-hidden="true"></i>
 
               Direct business contact
             </span>
@@ -54,45 +42,29 @@
 
         <aside class="professionals-hero__aside">
           <span class="professionals-hero__aside-icon">
-            <i
-              class="fa-solid fa-handshake"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-handshake" aria-hidden="true"></i>
           </span>
 
           <h2>
-            Are you a North Carolina professional?
+            Are you a real estate professional?
           </h2>
-
           <p>
             Add a free business listing or create a
             complete subscriber profile for greater
             marketplace exposure.
           </p>
 
-          <a
-            class="professionals-button professionals-button--light"
-            [routerLink]="[
-              '/professionals/register',
-              stateSlug()
-            ]"
-          >
-            Add your business
+          <a class="professionals-button professionals-button--light" [routerLink]="registrationLink()"
+            Add your business>
 
-            <i
-              class="fa-solid fa-arrow-right"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </a>
         </aside>
       </div>
     </div>
   </section>
 
-  <section
-    class="professionals-search-section"
-    aria-labelledby="professional-search-title"
-  >
+  <section class="professionals-search-section" aria-labelledby="professional-search-title">
     <div class="professionals-shell">
       <div class="professionals-search-panel">
         <div class="professionals-search-panel__heading">
@@ -112,127 +84,116 @@
           </p>
         </div>
 
-        <label
-          class="professionals-search"
-          for="professional-search"
-        >
-          <span class="sr-only">
-            Search {{ stateName() }} professionals
-          </span>
+        <form class="professionals-filters" (submit)="search($event)">
+          <label for="directory-state">
+            State
 
-          <i
-            class="fa-solid fa-magnifying-glass"
-            aria-hidden="true"
-          ></i>
+            <select id="directory-state" (change)="updateState($event)">
+              <option value="" [selected]="!draftState()">
+                All states
+              </option>
 
-          <input
-            id="professional-search"
-            type="search"
-            autocomplete="off"
-            [value]="searchTerm()"
-            [placeholder]="
-              'Search ' +
-              stateAbbreviation() +
-              ' professionals, services or locations'
-            "
-            (input)="updateSearchTerm($event)"
-          />
+              @for (state of states; track state.slug) {
+              <option [value]="state.slug" [selected]="draftState() === state.slug">
+                {{ state.name }}
+              </option>
+              }
+            </select>
+          </label>
 
-          @if (searchTerm()) {
-            <button
-              type="button"
-              aria-label="Clear professional search"
-              (click)="searchTerm.set('')"
-            >
-              <i
-                class="fa-solid fa-xmark"
-                aria-hidden="true"
-              ></i>
-            </button>
-          }
-        </label>
+          <label for="directory-city">
+            City (optional)
 
-        <div
-          class="professionals-categories"
-          aria-label="Filter by professional category"
-        >
+            <input id="directory-city" type="search" list="directory-cities" [value]="draftCity()"
+              [disabled]="!draftState()" placeholder="Any city in this state" (input)="updateCity($event)" />
+
+            <datalist id="directory-cities">
+              @for (city of citySuggestions(); track city) {
+              <option [value]="city"></option>
+              }
+            </datalist>
+          </label>
+
+          <label for="professional-search">
+            Business name or service
+
+            <input id="professional-search" type="search" [value]="searchTerm()"
+              placeholder="Name, service or specialty" (input)="updateSearchTerm($event)" />
+          </label>
+
+          <button type="submit" class="professionals-button professionals-button--primary">
+            Search
+          </button>
+
+          <button type="button" class="professionals-clear" (click)="clearFilters()">
+            Clear filters
+          </button>
+        </form>
+
+        <p>
+          Choose a state to search a city, or leave the
+          city blank to search the whole state.
+          Results include providers who say they serve
+          the area, wherever their office is located.
+        </p>
+
+        @if (locationWarning()) {
+        <p role="status">
+          {{ locationWarning() }}
+        </p>
+        }
+
+        <div class="professionals-categories" aria-label="Filter by professional category">
           @for (
-            category of categories;
-            track category.value
+          category of categories;
+          track category.value
           ) {
-            <button
-              type="button"
-              class="professionals-category"
-              [class.professionals-category--active]="
+          <button type="button" class="professionals-category" [class.professionals-category--active]="
                 selectedCategory() ===
                 category.value
-              "
-              [attr.aria-pressed]="
+              " [attr.aria-pressed]="
                 selectedCategory() ===
                 category.value
-              "
-              (click)="
+              " (click)="
                 selectCategory(category.value)
-              "
-            >
-              <span
-                class="professionals-category__icon"
-              >
-                <i
-                  [class]="category.icon"
-                  aria-hidden="true"
-                ></i>
-              </span>
+              ">
+            <span class="professionals-category__icon">
+              <i [class]="category.icon" aria-hidden="true"></i>
+            </span>
 
-              <span
-                class="professionals-category__content"
-              >
-                <strong>
-                  {{ category.label }}
-                </strong>
+            <span class="professionals-category__content">
+              <strong>
+                {{ category.label }}
+              </strong>
 
-                <small>
-                  {{ category.description }}
-                </small>
-              </span>
+              <small>
+                {{ category.description }}
+              </small>
+            </span>
 
-              <span
-                class="professionals-category__count"
-              >
-                {{
-                  getCategoryCount(
-                    category.value
-                  )
-                }}
-              </span>
-            </button>
+            <span class="professionals-category__count">
+              {{
+              getCategoryCount(
+              category.value
+              )
+              }}
+            </span>
+          </button>
           }
         </div>
       </div>
     </div>
   </section>
 
-  <section
-  class="professionals-results"
-  aria-labelledby="professional-results-title"
->
-  <div class="professionals-shell">
-    @if (isLoading()) {
-      <section
-        class="professionals-directory-status"
-        role="status"
-        aria-live="polite"
-      >
-        <span
-          class="
+  <section class="professionals-results" aria-labelledby="professional-results-title">
+    <div class="professionals-shell">
+      @if (isLoading()) {
+      <section class="professionals-directory-status" role="status" aria-live="polite">
+        <span class="
             professionals-directory-status__icon
             professionals-directory-status__icon--loading
-          "
-        >
-          <i
-            class="fa-solid fa-spinner"
-            aria-hidden="true"
-          ></i>
+          ">
+          <i class="fa-solid fa-spinner" aria-hidden="true"></i>
         </span>
 
         <h2 id="professional-results-title">
@@ -244,25 +205,16 @@
           professional directory.
         </p>
       </section>
-    } @else if (hasLoadError()) {
-      <section
-        class="
+      } @else if (hasLoadError()) {
+      <section class="
           professionals-directory-status
           professionals-directory-status--error
-        "
-        role="alert"
-        aria-live="assertive"
-      >
-        <span
-          class="
+        " role="alert" aria-live="assertive">
+        <span class="
             professionals-directory-status__icon
             professionals-directory-status__icon--error
-          "
-        >
-          <i
-            class="fa-solid fa-triangle-exclamation"
-            aria-hidden="true"
-          ></i>
+          ">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
         </span>
 
         <h2 id="professional-results-title">
@@ -275,7 +227,7 @@
           again.
         </p>
       </section>
-    } @else {
+      } @else {
       <header class="professionals-results__header">
         <div>
           <p class="professionals-eyebrow">
@@ -284,126 +236,89 @@
 
           <h2 id="professional-results-title">
             @if (
-              filteredProfessionals().length === 1
+            filteredProfessionals().length === 1
             ) {
-              1 professional found
+            1 professional found
             } @else {
-              {{ filteredProfessionals().length }}
-              professionals found
+            {{ filteredProfessionals().length }}
+            professionals found
             }
           </h2>
         </div>
 
         @if (hasActiveFilters()) {
-          <button
-            type="button"
-            class="professionals-clear"
-            (click)="clearFilters()"
-          >
-            <i
-              class="fa-solid fa-rotate-left"
-              aria-hidden="true"
-            ></i>
+        <button type="button" class="professionals-clear" (click)="clearFilters()">
+          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
 
-            Clear filters
-          </button>
+          Clear filters
+        </button>
         }
       </header>
 
       @if (filteredProfessionals().length) {
-        <div
-          class="professionals-grid"
-          aria-label="Professional directory results"
-        >
-          @for (
-            professional of
-              filteredProfessionals();
-            track professional.uid
-          ) {
-            <app-professional-directory-card
-              [professional]="professional"
-            />
-          }
-        </div>
+      <div class="professionals-grid" aria-label="Professional directory results">
+        @for (
+        professional of
+        filteredProfessionals();
+        track professional.uid
+        ) {
+        <app-professional-directory-card [professional]="professional" />
+        }
+      </div>
       } @else {
-        <section
-          class="professionals-empty"
-          aria-live="polite"
-        >
-          <span class="professionals-empty__icon">
-            <i
-              class="fa-solid fa-magnifying-glass"
-              aria-hidden="true"
-            ></i>
-          </span>
+      <section class="professionals-empty" aria-live="polite">
+        <span class="professionals-empty__icon">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        </span>
 
-          @if (hasActiveFilters()) {
-            <h2>
-              No matching professionals found
-            </h2>
+        @if (hasActiveFilters()) {
+        <h2>
+          No matching professionals found
+        </h2>
 
-            <p>
-              Try a different business name,
-              specialty, city, county or category.
-            </p>
+        <p>
+          Try a different business name,
+          specialty, city, county or category.
+        </p>
 
-            <button
-              type="button"
-              class="
+        <button type="button" class="
                 professionals-button
                 professionals-button--primary
-              "
-              (click)="clearFilters()"
-            >
-              Clear search and filters
-            </button>
-          } @else {
-            <h2>
-              No professionals are listed yet
-            </h2>
+              " (click)="clearFilters()">
+          Clear search and filters
+        </button>
+        } @else {
+        <h2>
+          No professionals are listed yet
+        </h2>
 
-            <p>
-              The {{ stateName() }} professional
-              directory does not currently contain any
-              active business listings.
-            </p>
+        <p>
+          The {{ stateName() }} professional
+          directory does not currently contain any
+          active business listings.
+        </p>
 
-            <a
-              class="
+        <a class="
                 professionals-button
                 professionals-button--primary
-              "
-              [routerLink]="[
-                '/professionals/register',
-                stateSlug()
-              ]"
-            >
-              Add your business
+              " [routerLink]="registrationLink()"
+          Add your business>
 
-              <i
-                class="fa-solid fa-arrow-right"
-                aria-hidden="true"
-              ></i>
-            </a>
-          }
-        </section>
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
+        }
+      </section>
       }
-    }
-  </div>
-</section>
+      }
+    </div>
+  </section>
 
-  <section
-    class="professionals-information"
-    aria-labelledby="professional-information-title"
-  >
+  <section class="professionals-information" aria-labelledby="professional-information-title">
     <div class="professionals-shell">
       <div class="professionals-information__grid">
         <article class="professionals-information__card">
           <span>
-            <i
-              class="fa-solid fa-lightbulb"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
           </span>
 
           <div>
@@ -422,10 +337,7 @@
 
         <article class="professionals-information__card">
           <span>
-            <i
-              class="fa-solid fa-chart-column"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
           </span>
 
           <div>
@@ -446,16 +358,11 @@
     </div>
   </section>
 
-  <section
-    class="professionals-business-cta"
-    aria-labelledby="professional-cta-title"
-  >
-    <div
-      class="
+  <section class="professionals-business-cta" aria-labelledby="professional-cta-title">
+    <div class="
         professionals-shell
         professionals-business-cta__layout
-      "
-    >
+      ">
       <div>
         <p class="professionals-eyebrow">
           Grow your local visibility
@@ -472,36 +379,26 @@
         </p>
       </div>
 
-      <a
-        class="
+      <a class="
           professionals-button
           professionals-button--light
-        "
-        [routerLink]="[
-          '/professionals/register',
-          stateSlug()
-        ]"
-      >
+        " [routerLink]="registrationLink()">
         Register your business
 
-        <i
-          class="fa-solid fa-arrow-right"
-          aria-hidden="true"
-        ></i>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
       </a>
     </div>
   </section>
 
   <aside class="professionals-disclaimer">
     <div class="professionals-shell">
-      <i
-        class="fa-solid fa-circle-info"
-        aria-hidden="true"
-      ></i>
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
 
       <div>
         <strong>
-          Professional directory disclaimer
+          The NavStreet Directory is provided
+          solely as an informational and advertising
+          resource.
         </strong>
 
         <p>

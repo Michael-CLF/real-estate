@@ -49,6 +49,7 @@ export class FirebaseProfessionalRepository
         this.collectionName
       );
 
+
     const sanitizedProfessional =
       this.removeUndefinedValues(
         professional
@@ -74,6 +75,38 @@ export class FirebaseProfessionalRepository
       );
 
     return documentReference.id;
+  }
+
+  async getActiveDirectoryProfessionals(
+    stateSlug = ''
+  ): Promise<ProfessionalUser[]> {
+    const constraints = [
+      where('status', '==', 'active')
+    ];
+
+    if (stateSlug) {
+      constraints.push(
+        where(
+          'stateSlug',
+          '==',
+          stateSlug.trim().toLowerCase()
+        )
+      );
+    }
+
+    const snapshot = await getDocs(
+      query(
+        collection(
+          firestore,
+          this.collectionName
+        ),
+        ...constraints
+      )
+    );
+
+    return snapshot.docs.map(document =>
+      this.mapProfessionalSnapshot(document)
+    );
   }
 
   async getProfessionalByOwnerUid(

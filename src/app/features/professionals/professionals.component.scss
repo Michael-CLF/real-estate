@@ -41,17 +41,13 @@
   padding: 66px 0;
   color: #ffffff;
   background:
-    radial-gradient(
-      circle at 92% 12%,
+    radial-gradient(circle at 92% 12%,
       rgba(0, 190, 179, 0.18),
-      transparent 33%
-    ),
-    linear-gradient(
-      135deg,
+      transparent 33%),
+    linear-gradient(135deg,
       #0b2c43 0%,
       #154360 62%,
-      #1b5874 100%
-    );
+      #1b5874 100%);
 
   &::after {
     position: absolute;
@@ -242,7 +238,7 @@
     letter-spacing: -0.025em;
   }
 
-  > p {
+  >p {
     margin: 0;
     color: var(--muted);
     font-family: 'Barlow', sans-serif;
@@ -271,7 +267,7 @@
       0 0 0 4px rgba(0, 155, 148, 0.11);
   }
 
-  > i {
+  >i {
     color: var(--teal-dark);
     font-size: 1rem;
   }
@@ -530,7 +526,7 @@
   gap: 16px;
   background: #ffffff;
 
-  > span {
+  >span {
     display: grid;
     width: 44px;
     height: 44px;
@@ -601,7 +597,7 @@
     gap: 14px;
   }
 
-  > .professionals-shell > i {
+  >.professionals-shell>i {
     flex: 0 0 auto;
     margin-top: 3px;
     color: var(--teal-dark);
@@ -621,7 +617,7 @@
     font-size: 0.78rem;
     line-height: 1.55;
 
-    & + p {
+    &+p {
       margin-top: 8px;
     }
   }
@@ -637,6 +633,40 @@
   margin: -1px;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+}
+
+.professionals-filters {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) auto auto;
+  gap: 1rem;
+  align-items: end;
+
+  label {
+    display: grid;
+    gap: 0.5rem;
+    font-weight: 600;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0.75rem;
+    border: 1px solid #ccd5df;
+    border-radius: 0.5rem;
+    font: inherit;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (min-width: 620px) {
@@ -678,8 +708,7 @@
 
   .professionals-hero__layout {
     grid-template-columns:
-      minmax(0, 1.55fr)
-      minmax(285px, 0.65fr);
+      minmax(0, 1.55fr) minmax(285px, 0.65fr);
     gap: 64px;
   }
 
@@ -748,11 +777,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .professionals-button,
   .professionals-category {
     transition: none;
   }
 }
+
 .professionals-directory-status {
   display: grid;
   min-height: 320px;

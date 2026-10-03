@@ -4,8 +4,6 @@ Allow: /
 Disallow: /administration/
 Disallow: /dashboard/
 Disallow: /sell/
-Disallow: /education/
-Disallow: /find-a-pro/
 Disallow: /register
 Disallow: /sign-in
 Disallow: /offers/

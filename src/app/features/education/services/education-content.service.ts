@@ -101,10 +101,10 @@ export class EducationContentService {
           'selling-a-home',
 
         title:
-          'How the NavStreet Selling Process Works',
+          'How to Sell Your Home For Sale by Owner with NavStreet',
 
         summary:
-          'Follow the complete seller process from preparing the property and creating the listing through publication, marketing, buyer activity, offers, and closing.',
+          'Follow the for-sale-by-owner process from preparing the property and creating the listing through publication, marketing, buyer activity, offers, and closing.',
 
         eyebrow:
           'Complete seller procedure',
@@ -1227,7 +1227,7 @@ export class EducationContentService {
               }
             ]
           }
-          
+
         ],
 
         navStreetLinks: [
@@ -1337,10 +1337,10 @@ export class EducationContentService {
           'preparing-and-marketing',
 
         title:
-          'Creating an Effective Property Listing',
+          'How to Create an Effective For-Sale-by-Owner Listing',
 
         summary:
-          'Build an accurate and persuasive listing with verified property facts, useful descriptions, strong photographs, transparent pricing, and a complete final review.',
+          'Build an accurate and persuasive for-sale-by-owner listing with verified property facts, useful descriptions, strong photographs, transparent pricing, and a complete final review.',
 
         eyebrow:
           'Listing creation guide',
@@ -1671,7 +1671,7 @@ export class EducationContentService {
           'selling-a-home',
 
         title:
-          'Pricing Your Property and Using Comparable Sales',
+          'How to Price Your For-Sale-by-Owner Home Using Comparable Sales',
 
         summary:
           'Evaluate comparable sales, active competition, market conditions, property differences, and appraisal risk before selecting a listing price.',
@@ -2684,7 +2684,7 @@ export class EducationContentService {
           'Using the NavStreet Marketing Toolkit',
 
         summary:
-          'Use the permanent property link, social captions, sharing controls, downloadable QR code, and marketing checklist to promote a published listing.',
+          'Promote your for-sale-by-owner listing using the permanent property link, social captions, sharing controls, downloadable QR code and marketing checklist.',
 
         eyebrow:
           'NavStreet tool guide',

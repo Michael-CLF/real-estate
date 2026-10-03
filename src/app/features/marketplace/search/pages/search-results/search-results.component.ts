@@ -14,7 +14,8 @@ import {
   Observable,
   of,
   shareReplay,
-  switchMap
+  switchMap,
+  tap
 } from 'rxjs';
 
 import {
@@ -37,6 +38,9 @@ import {
 import {
   PropertyType
 } from '../../../../../core/domains/property/models/property-type.type';
+import {
+  PageSeoService
+} from '../../../../../core/seo/page-seo.service';
 
 interface SearchResultsViewModel {
   result: ListingSearchResult;
@@ -66,6 +70,8 @@ interface SearchResultsViewModel {
 export class SearchResultsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly pageSeo =
+    inject(PageSeoService);
   private readonly listingRepository = inject(
     MarketplaceListingRepository
   );
@@ -74,27 +80,27 @@ export class SearchResultsComponent {
     label: string;
     value: ListingSortOption;
   }> = [
-    {
-      label: 'Newest listings',
-      value: 'newest'
-    },
-    {
-      label: 'Price: Low to high',
-      value: 'price_low_to_high'
-    },
-    {
-      label: 'Price: High to low',
-      value: 'price_high_to_low'
-    },
-    {
-      label: 'Most bedrooms',
-      value: 'bedrooms_high_to_low'
-    },
-    {
-      label: 'Largest square footage',
-      value: 'square_feet_high_to_low'
-    }
-  ];
+      {
+        label: 'Newest listings',
+        value: 'newest'
+      },
+      {
+        label: 'Price: Low to high',
+        value: 'price_low_to_high'
+      },
+      {
+        label: 'Price: High to low',
+        value: 'price_high_to_low'
+      },
+      {
+        label: 'Most bedrooms',
+        value: 'bedrooms_high_to_low'
+      },
+      {
+        label: 'Largest square footage',
+        value: 'square_feet_high_to_low'
+      }
+    ];
 
   readonly viewModel$: Observable<SearchResultsViewModel> =
     this.route.queryParamMap.pipe(
@@ -170,6 +176,13 @@ export class SearchResultsComponent {
         )
       ),
 
+      tap(viewModel => {
+        this.pageSeo.set(
+          `${viewModel.heading} | NavStreet`,
+          'Browse for-sale-by-owner homes, photos and property details on NavStreet.'
+        );
+      }),
+
       shareReplay({
         bufferSize: 1,
         refCount: true
@@ -235,25 +248,20 @@ export class SearchResultsComponent {
   private createPageHeading(
     filters: ListingSearchFilters
   ): string {
-    if (filters.stateSlug) {
-      return `Listings for the State of ${
-        this.stateNameFromSlug(filters.stateSlug)
-      }`;
-    }
+    const location = [
+      filters.city ||
+      filters.postalCode ||
+      filters.searchTerm,
+      filters.stateSlug
+        ? this.stateNameFromSlug(filters.stateSlug)
+        : ''
+    ]
+      .filter(Boolean)
+      .join(', ');
 
-    if (filters.searchTerm) {
-      return `Listings in ${filters.searchTerm}`;
-    }
-
-    if (filters.city) {
-      return `Listings in ${filters.city}`;
-    }
-
-    if (filters.postalCode) {
-      return `Listings in ${filters.postalCode}`;
-    }
-
-    return 'All Listings';
+    return location
+      ? `For Sale by Owner Homes in ${location}`
+      : 'For Sale by Owner Homes';
   }
 
   private stateNameFromSlug(stateSlug: string): string {

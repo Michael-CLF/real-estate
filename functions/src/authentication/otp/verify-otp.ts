@@ -140,6 +140,7 @@ export const verifyOtp = onCall<
         email,
       );
 
+
     const customToken =
       await adminAuth.createCustomToken(
         firebaseUser.uid,

@@ -7,6 +7,13 @@ import {
 import {
   RouterLink
 } from '@angular/router';
+import {
+  inject as injectSeo
+} from '@angular/core';
+
+import {
+  PageSeoService
+} from '../../core/seo/page-seo.service';
 
 type FaqCategory =
   | 'Getting started'
@@ -37,13 +44,31 @@ interface FaqItem {
 export class FaqComponent {
   protected readonly searchTerm = signal('');
 
+  private readonly pageSeo =
+    injectSeo(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'For Sale by Owner FAQs | NavStreet',
+      'Answers about selling for sale by owner, listing fees, buyers, disclosures, offers and closing.'
+    );
+  }
+
   protected readonly faqItems:
     ReadonlyArray<FaqItem> = [
+      {
+        id: 'fsbo-definition',
+        category: 'Getting started',
+        question:
+          'What does for sale by owner (FSBO) mean?',
+        answer:
+          'For sale by owner means the homeowner markets the property and manages the sale directly. On NavStreet, sellers create their listings and communicate with buyers. You can still hire qualified professionals for legal advice, inspections, financing and closing.'
+      },
       {
         id: 'sell-without-agent',
         category: 'Getting started',
         question:
-          'Can I really sell my home without a traditional listing agent?',
+          'Can I sell my home for sale by owner without a listing agent?',
         answer:
           'Yes. Homeowners are generally allowed to sell their own property. NavStreet is designed to make that process less intimidating by guiding you through creating a professional listing, presenting your property, communicating with interested buyers and preparing for the major steps between listing and closing. You remain in control and can still hire an attorney, title company, inspector, appraiser or other professional whenever you need specialized assistance.'
       },
@@ -75,7 +100,7 @@ export class FaqComponent {
         id: 'navstreet-fee',
         category: 'Costs and commissions',
         question:
-          'How much does it cost to list a home on NavStreet?',
+          'How much does a for-sale-by-owner listing cost on NavStreet?',
         answer:
           'The standard NavStreet listing fee is $49. A seller may also choose an optional Featured Listing upgrade for an additional $10. The Featured upgrade gives the property more prominent placement within the NavStreet marketplace. Other transaction expenses, such as legal, title, inspection, repair, recording or closing costs, are separate and are not included in the NavStreet listing fee.'
       },
@@ -107,7 +132,7 @@ export class FaqComponent {
         id: 'buyer-agent',
         category: 'Costs and commissions',
         question:
-          'What happens if the buyer has a real estate agent?',
+          'Can a buyer with an agent purchase my for-sale-by-owner home?',
         answer:
           'You can still consider an offer from a represented buyer. Any request for you to pay buyer-broker compensation should be clearly presented and evaluated as part of the offer. Compensation is negotiable; you may accept it, reject it or negotiate different terms. Make sure all compensation obligations are documented in writing and reviewed before you sign.'
       },
@@ -123,7 +148,7 @@ export class FaqComponent {
         id: 'listing-content',
         category: 'Creating your listing',
         question:
-          'What information do I need to create a listing?',
+          'What do I need to create a for-sale-by-owner listing?',
         answer:
           'You should be prepared to provide the property address, property type, bedroom and bathroom counts, square footage, year built, lot information, asking price, ownership details, a clear description and accurate photographs. Depending on the property and your state, you may also need association information, required disclosure forms and information about known material defects.'
       },
@@ -139,7 +164,7 @@ export class FaqComponent {
         id: 'disclosures',
         category: 'Creating your listing',
         question:
-          'Am I responsible for property disclosures?',
+          'What disclosures do I need when selling my home for sale by owner?',
         answer:
           'Yes. Selling without a traditional agent does not eliminate federal, state or local disclosure obligations. Required forms and deadlines vary by location and property type. Known defects and other material facts may need to be disclosed even when they are not obvious. Consult a qualified real estate attorney or the appropriate state agency if you are unsure what must be disclosed.'
       },

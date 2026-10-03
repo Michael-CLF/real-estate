@@ -1,8 +1,5 @@
 <main class="faq-page">
-  <section
-    class="faq-hero"
-    aria-labelledby="faq-title"
-  >
+  <section class="faq-hero" aria-labelledby="faq-title">
     <div class="faq-shell faq-hero__layout">
       <div class="faq-hero__content">
         <p class="faq-eyebrow">
@@ -10,23 +7,19 @@
         </p>
 
         <h1 id="faq-title">
-          Selling your home yourself does not mean
-          doing it alone.
+          For Sale by Owner:
+          Questions About Selling with NavStreet
         </h1>
 
         <p class="faq-hero__description">
-          NavStreet gives homeowners a guided,
-          understandable way to present a property,
-          connect with buyers and move toward closing
-          without automatically surrendering a percentage
-          of their equity to a traditional listing agent.
+          Selling your home for sale by owner (FSBO)?
+          Find answers about listing costs, property marketing,
+          buyer inquiries, offers, disclosures and closing.
+          Selling your home yourself does not mean doing it alone.
         </p>
 
         <div class="faq-hero__actions">
-          <a
-            class="faq-button faq-button--primary"
-            routerLink="/sell"
-          >
+          <a class="faq-button faq-button--primary" routerLink="/sell">
             Start your listing
 
             <span aria-hidden="true">
@@ -34,24 +27,15 @@
             </span>
           </a>
 
-          <a
-            class="faq-button faq-button--secondary"
-            routerLink="/contact"
-          >
+          <a class="faq-button faq-button--secondary" routerLink="/contact">
             Contact NavStreet
           </a>
         </div>
       </div>
 
-      <aside
-        class="faq-hero__summary"
-        aria-label="Why sellers choose NavStreet"
-      >
+      <aside class="faq-hero__summary" aria-label="Why sellers choose NavStreet">
         <div class="faq-hero__summary-icon">
-          <i
-            class="fa-solid fa-house-circle-check"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-house-circle-check" aria-hidden="true"></i>
         </div>
 
         <p class="faq-hero__summary-eyebrow">
@@ -65,37 +49,25 @@
 
         <ul>
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
 
             Guided listing process
           </li>
 
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
 
             Flat $49 NavStreet listing fee
           </li>
 
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
 
             Direct buyer inquiries
           </li>
 
           <li>
-            <i
-              class="fa-solid fa-check"
-              aria-hidden="true"
-            ></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
 
             You decide which professionals to hire
           </li>
@@ -104,10 +76,7 @@
     </div>
   </section>
 
-  <section
-    class="faq-process"
-    aria-labelledby="faq-process-title"
-  >
+  <section class="faq-process" aria-labelledby="faq-process-title">
     <div class="faq-shell">
       <header class="faq-section-heading">
         <p class="faq-eyebrow">
@@ -207,10 +176,7 @@
     </div>
   </section>
 
-  <section
-    class="faq-directory"
-    aria-labelledby="faq-directory-title"
-  >
+  <section class="faq-directory" aria-labelledby="faq-directory-title">
     <div class="faq-shell faq-directory__layout">
       <aside class="faq-directory__sidebar">
         <div class="faq-directory__sidebar-inner">
@@ -228,63 +194,39 @@
             closing.
           </p>
 
-          <label
-            class="faq-search"
-            for="faq-search-input"
-          >
+          <label class="faq-search" for="faq-search-input">
             <span class="faq-search__label">
               Search questions
             </span>
 
             <span class="faq-search__control">
-              <i
-                class="fa-solid fa-magnifying-glass"
-                aria-hidden="true"
-              ></i>
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
 
-              <input
-                id="faq-search-input"
-                type="search"
-                placeholder="Search the FAQ"
-                autocomplete="off"
-                [value]="searchTerm()"
-                (input)="updateSearchTerm($event)"
-              />
+              <input id="faq-search-input" type="search" placeholder="Search the FAQ" autocomplete="off"
+                [value]="searchTerm()" (input)="updateSearchTerm($event)" />
 
               @if (searchTerm()) {
-                <button
-                  type="button"
-                  aria-label="Clear FAQ search"
-                  (click)="clearSearch()"
-                >
-                  <i
-                    class="fa-solid fa-xmark"
-                    aria-hidden="true"
-                  ></i>
-                </button>
+              <button type="button" aria-label="Clear FAQ search" (click)="clearSearch()">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              </button>
               }
             </span>
           </label>
 
-          <nav
-            class="faq-category-links"
-            aria-label="FAQ categories"
-          >
+          <nav class="faq-category-links" aria-label="FAQ categories">
             @for (
-              category of categories;
-              track category
+            category of categories;
+            track category
             ) {
-              <a
-                [attr.href]="
+            <a [attr.href]="
                   '#faq-' +
                   category
                     .toLowerCase()
                     .replaceAll(' ', '-')
                     .replaceAll('&', 'and')
-                "
-              >
-                {{ category }}
-              </a>
+                ">
+              {{ category }}
+            </a>
             }
           </nav>
         </div>
@@ -292,154 +234,109 @@
 
       <div class="faq-directory__content">
         @if (filteredFaqItems().length) {
-          @for (
-            category of categories;
-            track category
-          ) {
-            @if (
-              getFaqItemsByCategory(category).length
-            ) {
-              <section
-                class="faq-group"
-                [attr.id]="
+        @for (
+        category of categories;
+        track category
+        ) {
+        @if (
+        getFaqItemsByCategory(category).length
+        ) {
+        <section class="faq-group" [attr.id]="
                   'faq-' +
                   category
                     .toLowerCase()
                     .replaceAll(' ', '-')
                     .replaceAll('&', 'and')
-                "
-              >
-                <header class="faq-group__header">
-                  <span class="faq-group__icon">
-                    @switch (category) {
-                      @case ('Getting started') {
-                        <i
-                          class="fa-solid fa-route"
-                          aria-hidden="true"
-                        ></i>
-                      }
+                ">
+          <header class="faq-group__header">
+            <span class="faq-group__icon">
+              @switch (category) {
+              @case ('Getting started') {
+              <i class="fa-solid fa-route" aria-hidden="true"></i>
+              }
 
-                      @case ('Costs and commissions') {
-                        <i
-                          class="fa-solid fa-dollar-sign"
-                          aria-hidden="true"
-                        ></i>
-                      }
+              @case ('Costs and commissions') {
+              <i class="fa-solid fa-dollar-sign" aria-hidden="true"></i>
+              }
 
-                      @case ('Creating your listing') {
-                        <i
-                          class="fa-solid fa-house"
-                          aria-hidden="true"
-                        ></i>
-                      }
+              @case ('Creating your listing') {
+              <i class="fa-solid fa-house" aria-hidden="true"></i>
+              }
 
-                      @case ('Buyers and offers') {
-                        <i
-                          class="fa-solid fa-handshake"
-                          aria-hidden="true"
-                        ></i>
-                      }
+              @case ('Buyers and offers') {
+              <i class="fa-solid fa-handshake" aria-hidden="true"></i>
+              }
 
-                      @case ('Contracts and closing') {
-                        <i
-                          class="fa-solid fa-file-signature"
-                          aria-hidden="true"
-                        ></i>
-                      }
+              @case ('Contracts and closing') {
+              <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
+              }
 
-                      @case ('Safety and support') {
-                        <i
-                          class="fa-solid fa-shield-halved"
-                          aria-hidden="true"
-                        ></i>
-                      }
-                    }
-                  </span>
-
-                  <h2>
-                    {{ category }}
-                  </h2>
-                </header>
-
-                <div class="faq-list">
-                  @for (
-                    faq of
-                      getFaqItemsByCategory(category);
-                    track faq.id
-                  ) {
-                    <details
-                      class="faq-item"
-                      [attr.id]="faq.id"
-                    >
-                      <summary>
-                        <span>
-                          {{ faq.question }}
-                        </span>
-
-                        <span
-                          class="faq-item__toggle"
-                          aria-hidden="true"
-                        >
-                          <i
-                            class="fa-solid fa-plus"
-                          ></i>
-                        </span>
-                      </summary>
-
-                      <div class="faq-item__answer">
-                        <p>
-                          {{ faq.answer }}
-                        </p>
-                      </div>
-                    </details>
-                  }
-                </div>
-              </section>
-            }
-          }
-        } @else {
-          <section
-            class="faq-empty-state"
-            aria-live="polite"
-          >
-            <span class="faq-empty-state__icon">
-              <i
-                class="fa-solid fa-magnifying-glass"
-                aria-hidden="true"
-              ></i>
+              @case ('Safety and support') {
+              <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              }
+              }
             </span>
 
-            <h2>No matching questions found</h2>
+            <h2>
+              {{ category }}
+            </h2>
+          </header>
 
-            <p>
-              Try a broader search or contact NavStreet
-              if you need help with something specific.
-            </p>
+          <div class="faq-list">
+            @for (
+            faq of
+            getFaqItemsByCategory(category);
+            track faq.id
+            ) {
+            <details class="faq-item" [attr.id]="faq.id">
+              <summary>
+                <span>
+                  {{ faq.question }}
+                </span>
 
-            <button
-              type="button"
-              class="faq-button faq-button--primary"
-              (click)="clearSearch()"
-            >
-              Clear search
-            </button>
-          </section>
+                <span class="faq-item__toggle" aria-hidden="true">
+                  <i class="fa-solid fa-plus"></i>
+                </span>
+              </summary>
+
+              <div class="faq-item__answer">
+                <p>
+                  {{ faq.answer }}
+                </p>
+              </div>
+            </details>
+            }
+          </div>
+        </section>
+        }
+        }
+        } @else {
+        <section class="faq-empty-state" aria-live="polite">
+          <span class="faq-empty-state__icon">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          </span>
+
+          <h2>No matching questions found</h2>
+
+          <p>
+            Try a broader search or contact NavStreet
+            if you need help with something specific.
+          </p>
+
+          <button type="button" class="faq-button faq-button--primary" (click)="clearSearch()">
+            Clear search
+          </button>
+        </section>
         }
       </div>
     </div>
   </section>
 
-  <section
-    class="faq-open-listing"
-    aria-labelledby="open-listing-title"
-  >
+  <section class="faq-open-listing" aria-labelledby="open-listing-title">
     <div class="faq-shell">
       <div class="faq-open-listing__card">
         <div class="faq-open-listing__icon">
-          <i
-            class="fa-solid fa-scale-balanced"
-            aria-hidden="true"
-          ></i>
+          <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
         </div>
 
         <div class="faq-open-listing__content">
@@ -473,10 +370,7 @@
     </div>
   </section>
 
-  <section
-    class="faq-cta"
-    aria-labelledby="faq-cta-title"
-  >
+  <section class="faq-cta" aria-labelledby="faq-cta-title">
     <div class="faq-shell faq-cta__layout">
       <div>
         <p class="faq-eyebrow">
@@ -494,10 +388,7 @@
       </div>
 
       <div class="faq-cta__actions">
-        <a
-          class="faq-button faq-button--light"
-          routerLink="/sell"
-        >
+        <a class="faq-button faq-button--light" routerLink="/sell">
           List your property
 
           <span aria-hidden="true">
@@ -505,10 +396,7 @@
           </span>
         </a>
 
-        <a
-          class="faq-button faq-button--outline-light"
-          routerLink="/buy"
-        >
+        <a class="faq-button faq-button--outline-light" routerLink="/buy">
           Browse homes
         </a>
       </div>
@@ -517,10 +405,7 @@
 
   <aside class="faq-disclaimer">
     <div class="faq-shell">
-      <i
-        class="fa-solid fa-circle-info"
-        aria-hidden="true"
-      ></i>
+      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
 
       <div>
         <strong>

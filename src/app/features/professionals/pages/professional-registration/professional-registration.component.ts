@@ -36,7 +36,6 @@ import {
 import {
   filter,
   firstValueFrom,
-  map,
   take
 } from 'rxjs';
 
@@ -76,6 +75,10 @@ import {
 import {
   FirebaseProfessionalRepository
 } from '../../../../core/infrastructure/firebase/firebase-professional.repository';
+
+import {
+  STATES
+} from '../../../../core/configuration/states.config';
 
 interface PendingProfessionalRegistration {
   firstName: string;
@@ -334,6 +337,8 @@ const CATEGORY_SPECIALTIES:
 export class ProfessionalRegistrationComponent
   implements OnInit, OnDestroy {
 
+  protected readonly states = STATES;
+
   private readonly route =
     inject(ActivatedRoute);
 
@@ -396,45 +401,6 @@ export class ProfessionalRegistrationComponent
       PendingProfessionalRegistration | null
     >(null);
 
-  protected readonly stateSlug =
-    toSignal(
-      this.route.paramMap.pipe(
-        map(
-          parameters =>
-            parameters.get('stateSlug') ??
-            'north-carolina'
-        )
-      ),
-      {
-        initialValue: 'north-carolina'
-      }
-    );
-
-  protected readonly stateName =
-    computed(() => {
-      switch (this.stateSlug()) {
-        case 'north-carolina':
-          return 'North Carolina';
-
-        default:
-          return this.stateSlug()
-            .split('-')
-            .map(
-              word =>
-                word.charAt(0).toUpperCase() +
-                word.slice(1)
-            )
-            .join(' ');
-      }
-    });
-
-  protected readonly isSupportedState =
-    computed(
-      () =>
-        this.stateSlug() ===
-        'north-carolina'
-    );
-
   protected readonly categoryOptions:
     ReadonlyArray<ProfessionalCategoryOption> =
     Object.entries(
@@ -481,6 +447,15 @@ export class ProfessionalRegistrationComponent
 
   protected readonly registrationForm =
     this.formBuilder.nonNullable.group({
+      stateSlug: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(
+            `^(?:${STATES.map(state => state.slug).join('|')})$`
+          )
+        ]
+      ],
       firstName: [
         '',
         [
@@ -598,6 +573,29 @@ export class ProfessionalRegistrationComponent
         ]
       ]
     });
+
+  protected readonly stateSlug = toSignal(
+    this.registrationForm.controls.stateSlug.valueChanges,
+    {
+      initialValue:
+        this.registrationForm.controls.stateSlug.value
+    }
+  );
+
+  protected readonly selectedState = computed(() =>
+    STATES.find(state =>
+      state.slug === this.stateSlug()
+    )
+  );
+
+  protected readonly stateName = computed(() =>
+    this.selectedState()?.name ??
+    'your selected state'
+  );
+
+  protected onStateChange(): void {
+    this.registrationForm.controls.serviceAreas.reset('');
+  }
 
   protected readonly otpForm =
     this.formBuilder.nonNullable.group({
@@ -860,7 +858,8 @@ export class ProfessionalRegistrationComponent
         stateName:
           this.stateName(),
 
-        stateAbbreviation: 'NC',
+        stateAbbreviation:
+          this.selectedState()!.abbreviation,
 
         stateSlug:
           this.stateSlug(),

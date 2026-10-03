@@ -36,6 +36,8 @@
 
         <h1>{{ listing.title }}</h1>
 
+        <p class="listing-details__owner-heading">{{ listingOwnerHeading(listing) }}</p>
+
         <p class="listing-details__address">
           {{ listing.address.addressLine1 }},
           {{ listing.address.city }},
@@ -77,6 +79,10 @@
 
           <p class="listing-details__description">
             {{ listing.description }}
+          </p>
+
+          <p class="listing-details__owner-description">
+            {{ listingOwnerHeading(listing) }}. Review this home’s details and photos on NavStreet.
           </p>
         </section>
 

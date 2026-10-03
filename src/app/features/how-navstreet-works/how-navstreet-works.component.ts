@@ -38,6 +38,14 @@ import {
   ProductTourAction
 } from './models/how-navstreet-works.models';
 
+import {
+  inject as injectSeo
+} from '@angular/core';
+
+import {
+  PageSeoService
+} from '../../core/seo/page-seo.service';
+
 interface ProductTourQuestion {
   answer: string;
   question: string;
@@ -71,6 +79,16 @@ export class HowNavStreetWorksComponent
 
   private readonly analytics =
     inject(AnalyticsDataLayerService);
+
+  private readonly pageSeo =
+    injectSeo(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'How For Sale by Owner Works on NavStreet',
+      'Explore the NavStreet process for creating a listing, communicating with buyers and managing your sale.'
+    );
+  }
 
   protected readonly audiencePaths =
     AUDIENCE_PATHS;

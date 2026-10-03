@@ -39,6 +39,14 @@ import {
   ListingCardComponent
 } from '../marketplace/search/components/listing-card/listing-card.component';
 
+import {
+  inject as injectSeo
+} from '@angular/core';
+
+import {
+  PageSeoService
+} from '../../core/seo/page-seo.service';
+
 interface AudiencePath {
   readonly icon: string;
   readonly eyebrow: string;
@@ -92,6 +100,16 @@ interface MortgageTool {
 export class HomeComponent {
   private readonly listingRepository =
     inject(MarketplaceListingRepository);
+
+  private readonly pageSeo =
+    injectSeo(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'For Sale by Owner Homes & Selling Tools | NavStreet',
+      'List your home for sale by owner, connect with buyers and explore guided selling tools on NavStreet.'
+    );
+  }
 
   protected readonly featuredListings$:
     Observable<MarketplaceListingSummary[]> =

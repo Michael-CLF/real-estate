@@ -1,3 +1,5 @@
+import { STATES } from '../../../../../core/configuration/states.config';
+import { PageSeoService } from '../../../../../core/seo/page-seo.service';
 import { newOfferPath } from '../../../../offers/engine/state-offer-registry';
 import {
   ChangeDetectionStrategy,
@@ -36,7 +38,8 @@ import {
   of,
   shareReplay,
   switchMap,
-  take
+  take,
+  tap
 } from 'rxjs';
 
 import {
@@ -198,6 +201,34 @@ const ENHANCEMENT_SECTIONS: ReadonlyArray<
 })
 export class ListingDetailsComponent
   implements OnInit {
+  private readonly pageSeo = inject(PageSeoService);
+
+  listingLocation(listing: MarketplaceListing): string {
+    const address = listing.address;
+    const state = STATES.find(item => item.slug === address.stateSlug ||
+      item.abbreviation === address.stateAbbreviation?.trim().toUpperCase() ||
+      item.name.toLowerCase() === address.state?.trim().toLowerCase());
+    return [address.city?.trim(), state?.name || address.state?.trim() || address.stateAbbreviation?.trim()]
+      .filter(Boolean).join(', ');
+  }
+
+  listingOwnerHeading(listing: MarketplaceListing): string {
+    const location = this.listingLocation(listing);
+    const prefix = listing.status === 'sold' ? 'Sold by owner' : 'For sale by owner';
+    return location ? `${prefix} in ${location}` : prefix;
+  }
+
+  private updateListingSeo(listing: MarketplaceListing | null): void {
+    if (!listing) {
+      this.pageSeo.set('Listing unavailable | NavStreet', 'This property listing is unavailable.', true);
+      return;
+    }
+    const address = listing.address.addressLine1?.trim() || listing.title;
+    const heading = this.listingOwnerHeading(listing);
+    this.pageSeo.set(`${address} — ${heading} | NavStreet`,
+      `${heading}. View property details, photos and the seller’s description on NavStreet.`);
+  }
+
 
   private readonly route =
     inject(ActivatedRoute);
@@ -349,6 +380,7 @@ export class ListingDetailsComponent
             )
       ),
 
+      tap(viewModel => this.updateListingSeo(viewModel.listing)),
       shareReplay({
         bufferSize: 1,
         refCount: true

@@ -26,6 +26,14 @@ import {
   EducationContentService
 } from '../../services/education-content.service';
 
+import {
+  effect
+} from '@angular/core';
+
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 @Component({
   selector:
     'app-education-article',
@@ -64,6 +72,24 @@ export class EducationArticleComponent {
           this.route.snapshot.paramMap
       }
     );
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    effect(() => {
+      const article = this.article();
+
+      this.pageSeo.set(
+        article
+          ? `${article.title} | NavStreet`
+          : 'Article unavailable | NavStreet',
+        article?.summary ??
+        'This article is unavailable.',
+        !article
+      );
+    });
+  }
 
   protected readonly categories =
     this.educationContentService
@@ -105,7 +131,7 @@ export class EducationArticleComponent {
       if (
         !article ||
         article.categorySlug !==
-          this.categorySlug()
+        this.categorySlug()
       ) {
         return null;
       }
