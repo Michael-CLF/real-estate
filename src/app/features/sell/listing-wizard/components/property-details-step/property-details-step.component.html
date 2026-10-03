@@ -1,3 +1,4 @@
+/*property-details-step.component.html*/
 <section class="wizard-step">
   <h2>Property Details</h2>
 
@@ -186,28 +187,45 @@
     </fieldset>
     }
 
-    @if (requiresListingLegalDescription()) {
-    <fieldset class="seller-statements">
-      <legend>Recorded legal property description</legend>
-      <p class="seller-statements__description">
-        Copy the complete property legal description from the deed or
-        recorded property documents. This is separate from any
-        water-rights description. Do not enter NONE or N/A.
-        Buyers cannot change this seller-provided description in their offer.
-      </p>
-      <div class="field description-field">
-        <label for="legalDescription">Complete legal description</label>
-        <textarea id="legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"
-          [attr.aria-invalid]="form.controls.legalDescription.touched && form.controls.legalDescription.invalid ? 'true' : null"></textarea>
-        @if (form.controls.legalDescription.touched && (form.controls.legalDescription.hasError('required') ||
-        form.controls.legalDescription.hasError('pattern'))) {
-        <p class="field-error">Enter the legal description from the deed or county record.</p>
-        }
-        @if (form.controls.legalDescription.touched && form.controls.legalDescription.hasError('maxlength')) {
-        <p class="field-error">Legal description cannot exceed 5,000 characters.</p>
-        }
-      </div>
-    </fieldset>
+        @if (showsListingLegalDescription()) {
+      <fieldset class="seller-statements">
+        <legend>Recorded legal property description (optional)</legend>
+
+        <p class="seller-statements__description">
+          If available, copy the legal description from the deed or
+          recorded property documents. You can publish your listing
+          without it.
+        </p>
+
+        <div class="field description-field">
+          <label for="legalDescription">
+            Complete legal description
+            <span class="optional">(optional)</span>
+          </label>
+
+          <textarea
+            id="legalDescription"
+            formControlName="legalDescription"
+            rows="4"
+            maxlength="5000"
+            [attr.aria-invalid]="
+              form.controls.legalDescription.touched &&
+              form.controls.legalDescription.invalid
+                ? 'true'
+                : null
+            "
+          ></textarea>
+
+          @if (
+            form.controls.legalDescription.touched &&
+            form.controls.legalDescription.hasError('maxlength')
+          ) {
+            <p class="field-error">
+              Legal description cannot exceed 5,000 characters.
+            </p>
+          }
+        </div>
+      </fieldset>
     }
 
     @if (isColoradoListing()) {

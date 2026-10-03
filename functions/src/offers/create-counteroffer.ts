@@ -1,3 +1,4 @@
+import { assertCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
   HttpsError,
   onCall
@@ -161,6 +162,13 @@ export const createCounteroffer =
                 throw new HttpsError('not-found', 'The Louisiana listing could not be found.');
               }
               await assertLouisianaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+            }
+
+            if (offer.stateCode === 'CA') {
+              const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
+              const listingSnapshot = await transaction.get(listingReference);
+              if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The California listing could not be found.');
+              await assertCaliforniaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
             }
 
 if (offer.stateCode === 'CO') {

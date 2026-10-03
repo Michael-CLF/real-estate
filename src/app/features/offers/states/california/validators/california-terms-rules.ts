@@ -1,0 +1,77 @@
+import type { CaliforniaOfferTerms } from '../../../../../core/domains/offers/state-contracts/california/models/california-offer-terms.model';
+export interface CaliforniaIssue { fieldPath: string; message: string; severity: 'error' | 'warning'; }
+const money = (n: number, positive = false) => Number.isSafeInteger(n) && (positive ? n > 0 : n >= 0);
+const days = (n: number, min: number, max: number) => Number.isSafeInteger(n) && n >= min && n <= max;
+export function validCaliforniaDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const date = new Date(s + 'T12:00:00Z');
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0,10) === s;
+}
+export function californiaTermsIssues(t: CaliforniaOfferTerms, now: Date, submitting: boolean): CaliforniaIssue[] {
+  const issues: CaliforniaIssue[] = [];
+  const error = (fieldPath: string, message: string) => issues.push({fieldPath,message,severity:'error'});
+  const p=t.purchase, d=t.deadlines, a=t.disclosures;
+  if (t.stateCode !== 'CA' || t.property.state !== 'CA' || t.contractType !== 'navstreet_california_residential_sale_2026') error('form','Select the California residential resale agreement.');
+  if (!['single_family','townhome','pud','condo'].includes(t.property.propertyType)) error('property.propertyType','This agreement supports houses, townhomes, PUDs and condos.');
+  if (!money(p.purchasePriceInCents,true)) error('purchase.purchasePriceInCents','Enter a purchase price above $0.');
+  if (typeof p.hasEarnestMoney !== 'boolean') error('purchase.hasEarnestMoney','Choose whether to offer an escrow deposit.');
+  if (p.hasEarnestMoney) {
+    if (!money(p.earnestMoneyInCents,true)) error('purchase.earnestMoneyInCents','Enter a positive deposit.');
+    if (!days(p.earnestMoneyDueDays,1,30)) error('purchase.earnestMoneyDueDays','Choose 1 to 30 calendar days.');
+    if (typeof t.conditions.additionalEarnestMoney !== 'boolean') error('conditions.additionalEarnestMoney','Choose whether another deposit is due.');
+    if (t.conditions.additionalEarnestMoney && (!money(p.additionalEarnestMoneyInCents,true) || !days(p.additionalEarnestMoneyDueDays,1,60))) error('purchase.additionalEarnestMoneyInCents','Enter a positive additional deposit and 1 to 60 days.');
+    if (p.earnestMoneyInCents + p.additionalEarnestMoneyInCents > p.purchasePriceInCents) error('purchase.earnestMoneyInCents','Total deposits cannot exceed the purchase price.');
+  } else if (p.hasEarnestMoney === false && (p.earnestMoneyInCents !== 0 || p.additionalEarnestMoneyInCents !== 0 || t.conditions.additionalEarnestMoney !== false)) error('purchase.hasEarnestMoney','No deposit is due when none is offered.');
+  if (!['cash','conventional','fha','va','usda'].includes(p.financingType)) error('purchase.financingType','Choose cash or a loan type.');
+  if (p.financingType === 'cash') {
+    if (p.loanAmountInCents !== 0 || t.conditions.financing !== false) error('purchase.financingType','Cash has no loan or financing contingency.');
+  } else if (p.financingType !== 'unselected') {
+    if (!money(p.loanAmountInCents,true) || p.loanAmountInCents > p.purchasePriceInCents) error('purchase.loanAmountInCents','Enter a positive loan amount no greater than the price.');
+    if (!days(p.loanTermYears,1,40)) error('purchase.loanTermYears','Enter a term of 1 to 40 years.');
+    if (typeof t.conditions.financing !== 'boolean') error('conditions.financing','Choose the financing contingency.');
+    if (t.conditions.financing && (!days(p.loanApplicationDays,1,30) || !days(p.loanApprovalDays,1,90))) error('purchase.loanApprovalDays','Complete the loan application and approval periods.');
+  }
+  if (typeof t.conditions.appraisal !== 'boolean') error('conditions.appraisal','Choose whether an appraisal contingency applies.');
+  if (t.conditions.appraisal && !days(d.appraisalPeriodDays,1,90)) error('deadlines.appraisalPeriodDays','Choose 1 to 90 days for appraisal review.');
+  if (!money(p.sellerConcessionsInCents) || p.sellerConcessionsInCents > p.purchasePriceInCents) error('purchase.sellerConcessionsInCents','Enter valid seller concessions.');
+  if (t.conditions.dueDiligence !== true || !days(d.inspectionPeriodDays,1,60)) error('deadlines.inspectionPeriodDays','Choose an inspection contingency review period of 1 to 60 days.');
+  if (t.propertyItems.fixturesIncluded !== true) error('propertyItems.fixturesIncluded','Installed fixtures are included except named exclusions.');
+  if (typeof t.conditions.saleOfBuyersProperty !== 'boolean') error('conditions.saleOfBuyersProperty','Choose whether another property must sell.');
+  if (t.conditions.saleOfBuyersProperty && !t.additionalTerms.trim()) error('additionalTerms','Describe the other property, deadline and cancellation terms.');
+  if (!validCaliforniaDate(d.settlementDate)) error('deadlines.settlementDate','Enter a valid close-of-escrow date.');
+  else if (submitting) {
+    const today = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+    if (d.settlementDate < today) error('deadlines.settlementDate','Closing cannot be in the past.');
+  }
+  if (d.sellerDisclosureDate && (!validCaliforniaDate(d.sellerDisclosureDate) || d.sellerDisclosureDate > d.settlementDate)) error('deadlines.sellerDisclosureDate','Choose a valid document deadline no later than closing.');
+  if (t.settlement.possession !== 'at_recording') error('settlement.possession','This agreement requires vacant possession on recording; other occupancy needs a separate written agreement.');
+  for (const key of ['specialAssessmentPayer','hoaTransferFeePayer'] as const) {
+    if ((key !== 'hoaTransferFeePayer' || a.sellerReportsHoa) && !['buyer','seller','split'].includes(t.settlement[key])) error('settlement.'+key,'Choose the agreed allocation.');
+  }
+  if (!['buyer','seller'].includes(t.settlement.titlePolicyPayer)) error('settlement.titlePolicyPayer','Choose who pays the owner title policy.');
+  if (!days(t.settlement.titleEvidenceDaysBeforeClosing,1,45)) error('settlement.titleEvidenceDaysBeforeClosing','Choose 1 to 45 days.');
+  const status=(path:string,value:string,allowed:string[])=> {if(!allowed.includes(value)) error(path,'Select the actual document receipt or applicability status.');};
+  const required = new Set(t.requiredDisclosureTypes ?? []);
+  for (const [field, type] of [
+    ['propertyConditionStatus','california-transfer-disclosure'],
+    ['naturalHazardStatus','california-natural-hazard-disclosure'],
+    ['fireHardeningStatus','california-fire-hardening'],
+    ['defensibleSpaceStatus','california-defensible-space'],
+    ['renovationStatus','california-recent-renovations'],
+    ['waterTankStatus','california-assisted-water-tank'],
+    ['hoaDocumentsStatus','california-association-documents'],
+    ['leadPaintStatus','lead-based-paint'],
+  ] as const) {
+    status('disclosures.' + field, a[field], required.has(type)
+      ? ['received'] : ['exempt','not_applicable', ...(field === 'defensibleSpaceStatus' ? ['buyer_agreement'] : []), ...(field === 'leadPaintStatus' && t.property.yearBuilt != null && t.property.yearBuilt >= 1978 ? ['built_1978_or_later'] : [])]);
+  }
+  if (a.leadPaintStatus === 'exempt' && !a.leadExemptionBasis.trim()) error('disclosures.leadExemptionBasis','State the actual federal exemption and supporting facts.');
+  if (submitting && a.leadPaintStatus === 'pending') error('disclosures.leadPaintStatus','Receive the applicable lead disclosure, available reports and EPA pamphlet before submitting this offer for signature.');
+  if (a.leadPaintStatus === 'received' && !['ten_days','waived','other_period'].includes(a.leadInspectionSelection)) error('disclosures.leadInspectionSelection','Choose the lead inspection opportunity.');
+  if (a.leadPaintStatus === 'received' && a.leadInspectionSelection === 'other_period' && !days(a.leadInspectionDays,1,60)) error('disclosures.leadInspectionDays','Enter 1 to 60 agreed lead inspection days.');
+  if (typeof a.sellerReportsExistingLeases !== 'boolean' || a.leaseStatementAcknowledged !== true) error('disclosures.leaseStatementAcknowledged','Review and acknowledge the seller lease statement.');
+  if (a.californiaNoticesAcknowledged !== true) error('disclosures.californiaNoticesAcknowledged','Read the California statutory notices.');
+  if (t.delivery.timeZone !== 'America/Los_Angeles' || t.delivery.electronicDeliveryAuthorized !== true) error('delivery.electronicDeliveryAuthorized','Agree to electronic delivery and signatures in Pacific time.');
+  if (!/(?:Z|[+-]\d{2}:\d{2})$/.test(t.delivery.expiresAt) || !Number.isFinite(Date.parse(t.delivery.expiresAt)) || (submitting && Date.parse(t.delivery.expiresAt) <= now.getTime())) error('delivery.expiresAt','Choose a future expiration with a time-zone offset.');
+  return issues;
+}

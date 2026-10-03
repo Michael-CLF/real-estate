@@ -1,3 +1,4 @@
+import type { CaliforniaListingFacts } from '../../listings/state-packages/california/california-listing-facts.model';
 import { Injectable } from '@angular/core';
 import {
     collection,
@@ -588,6 +589,7 @@ export class FirestoreMarketplaceListingRepository
             sellerStatements:
                 data['sellerStatements'] && typeof data['sellerStatements'] === 'object'
                     ? {
+                        california: (data['sellerStatements'] as Record<string, unknown>)['california'] as CaliforniaListingFacts | undefined,
                         ownersAssociationApplies: (data['sellerStatements'] as Record<string, unknown>)['ownersAssociationApplies'] as boolean | null | undefined,
                         leadBasedPaintApplies: (data['sellerStatements'] as Record<string, unknown>)['leadBasedPaintApplies'] as boolean | null | undefined,
                     }

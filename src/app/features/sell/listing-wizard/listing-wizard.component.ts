@@ -1,3 +1,6 @@
+/*listing-wizard.component.ts*/
+
+import { CALIFORNIA_LISTING_FACT_DEFAULTS } from '../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -362,6 +365,7 @@ export class ListingWizardComponent implements OnInit {
           },
 
         sellerStatements: {
+          california: draft.sellerStatements?.california ?? { ...CALIFORNIA_LISTING_FACT_DEFAULTS },
           ownershipStatus: draft.sellerStatements?.ownershipStatus ?? '',
 
           leadBasedPaintApplies:
@@ -764,10 +768,6 @@ export class ListingWizardComponent implements OnInit {
         const statePackage =
           getStateListingPackage(stateCode);
 
-        if (['WI', 'FL', 'LA', 'CO'].includes(stateCode) && !propertyDetails.legalDescription.trim()) {
-          throw new Error('Enter the property legal description from the deed or county record.');
-        }
-
         if (
           requiresStateListingField(
             statePackage,
@@ -945,6 +945,7 @@ export class ListingWizardComponent implements OnInit {
           ListingSellerStatements = {
           stateCode,
           schemaVersion: 1,
+          ...(stateCode === 'CA' ? { california: statements.california } : {}),
 
           ...(requiresStateListingField(
             statePackage,

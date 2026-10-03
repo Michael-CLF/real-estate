@@ -1,3 +1,4 @@
+import { californiaStateContractPackage } from './california/california-state-contract.package';
 import {
   HttpsError,
 } from 'firebase-functions/v2/https';
@@ -78,6 +79,7 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
     [floridaStateContractPackage.stateCode, floridaStateContractPackage],
     [louisianaStateContractPackage.stateCode, louisianaStateContractPackage],
     [coloradoStateContractPackage.stateCode, coloradoStateContractPackage],
+    [californiaStateContractPackage.stateCode, californiaStateContractPackage],
   ]);
 
 

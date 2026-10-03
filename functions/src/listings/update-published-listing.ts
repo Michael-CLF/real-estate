@@ -1,3 +1,4 @@
+import { CALIFORNIA_DISCLOSURE_TYPES, validCaliforniaDisclosureDecision, type CaliforniaDisclosureDecision, type CaliforniaDisclosureType } from './state-listing-packages/california-listing-facts';
 import * as logger from 'firebase-functions/logger';
 
 import {
@@ -32,6 +33,7 @@ interface EditableHoa {
 }
 
 interface PublishedListingChanges {
+  californiaDisclosure?: { documentType: CaliforniaDisclosureType; decision: CaliforniaDisclosureDecision };
   listPrice?: number;
   description?: string;
   hoa?: EditableHoa;
@@ -50,6 +52,7 @@ interface UpdatePublishedListingResponse {
 
 const EDITABLE_FIELDS =
   new Set([
+    'californiaDisclosure',
     'listPrice',
     'description',
     'hoa'
@@ -164,6 +167,13 @@ export const updatePublishedListing =
                 string[] = [];
 
               let priceChanged = false;
+
+              if (validatedInput.changes.californiaDisclosure) {
+                if (listingData['state'] !== 'CA') throw new HttpsError('failed-precondition', 'California disclosure applicability is only available for California listings.');
+                const { documentType, decision } = validatedInput.changes.californiaDisclosure;
+                updates[`sellerStatements.california.disclosureApplicability.${documentType}`] = decision;
+                updatedFields.push('californiaDisclosure');
+              }
 
               /*
                * LIST PRICE
@@ -463,6 +473,15 @@ function validateUpdateInput(
       );
   }
 
+  const californiaValue = changesValue['californiaDisclosure'];
+  if (californiaValue !== undefined) {
+    if (!isRecord(californiaValue) || !CALIFORNIA_DISCLOSURE_TYPES.includes(californiaValue['documentType'] as CaliforniaDisclosureType) ||
+      !validCaliforniaDisclosureDecision(californiaValue['decision'])) {
+      throw new HttpsError('invalid-argument', 'Choose applicability and explain any exemption or non-applicability (maximum 5,000 characters).');
+    }
+    const decision = californiaValue['decision'];
+    changes.californiaDisclosure = { documentType: californiaValue['documentType'] as CaliforniaDisclosureType, decision: { status: decision.status, basis: decision.basis.trim() } };
+  }
   return {
     listingUid,
     changes

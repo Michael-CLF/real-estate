@@ -1,3 +1,6 @@
+/*stripe-payment-webhook.ts*/
+
+import { validateDraftForPublication } from '../listings/validate-listing-publication';
 import Stripe from 'stripe';
 
 import { getApps, initializeApp } from 'firebase-admin/app';
@@ -13,7 +16,6 @@ import { SENDGRID_API_KEY } from '../authentication/otp/otp-config';
 import { sendListingPublishedEmailIfNeeded } from '../listings/listing-publication-email.service';
 
 import {
-  validateStateSellerStatements,
 } from '../listings/state-listing-packages/state-listing.registry';
 
 if (getApps().length === 0) {
@@ -690,95 +692,6 @@ async function markPaymentFailed(
   });
 }
 
-function validateDraftForPublication(
-  draft: ListingDraftDocument,
-  listingUid: string,
-): void {
-  if (draft.progress?.contentStatus !== 'complete') {
-    throw new Error(`Listing draft ${listingUid} is not complete.`);
-  }
-
-  if (draft.publication?.identityStatus !== 'verified') {
-    throw new Error(
-      `Listing draft ${listingUid} has not completed identity verification.`,
-    );
-  }
-
-  if (draft.certification?.accepted !== true) {
-    throw new Error(
-      `Listing draft ${listingUid} has not accepted seller certification.`,
-    );
-  }
-
-  if (
-    !draft.address?.addressLine1 ||
-    !draft.address.city ||
-    !draft.address.state ||
-    !draft.address.zipCode ||
-    !draft.address.county
-  ) {
-    throw new Error(`Listing draft ${listingUid} has an incomplete address.`);
-  }
-
-  if (
-    !draft.propertyDetails?.propertyType ||
-    draft.propertyDetails.bedrooms === undefined ||
-    draft.propertyDetails.fullBathrooms === undefined ||
-    draft.propertyDetails.halfBathrooms === undefined ||
-    draft.propertyDetails.squareFeet === undefined
-  ) {
-    throw new Error(
-      `Listing draft ${listingUid} has incomplete property details.`,
-    );
-  }
-
-  if (['WI', 'FL'].includes(draft.address.state.trim().toUpperCase()) &&
-    !draft.propertyDetails.legalDescription?.trim()) {
-    throw new Error(
-      `Listing draft ${listingUid} has no recorded legal property description.`,
-    );
-  }
-
-  if (draft.pricing?.listPrice === undefined) {
-    throw new Error(`Listing draft ${listingUid} has no listing price.`);
-  }
-
-  const sellerStatements = draft.sellerStatements;
-
-  if (!sellerStatements) {
-    throw new Error(
-      `Listing draft ${listingUid} has no seller statements.`,
-    );
-  }
-
-  if (!sellerStatements) {
-    throw new Error(
-      `Listing draft ${listingUid} has incomplete seller statements.`,
-    );
-  }
-
-  validateStateSellerStatements(
-    listingUid,
-    draft.address.state,
-    sellerStatements as unknown as
-    Record<string, unknown>,
-  );
-
-  const additionalSeller = sellerStatements.additionalSeller;
-
-  if (
-    additionalSeller &&
-    (
-      !additionalSeller.legalName?.trim() ||
-      !additionalSeller.email?.trim() ||
-      !additionalSeller.phone?.trim()
-    )
-  ) {
-    throw new Error(
-      `Listing draft ${listingUid} has incomplete co-seller information.`,
-    );
-  }
-}
 
 function addOptionalField(
   target: Record<string, unknown>,

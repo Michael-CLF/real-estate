@@ -1,6 +1,9 @@
 import type {
   NorthCarolinaOfferTerms,
 } from '../state-contracts/north-carolina/models/north-carolina-offer-terms.model';
+import type {
+  CaliforniaOfferTerms
+} from '../state-contracts/california/models/california-offer-terms.model';
 
 import type {
   TexasOfferTerms,
@@ -89,15 +92,15 @@ export interface OfferPropertySnapshot {
  * so adding Texas cannot broaden their field types.
  */
 export type StateOfferTerms =
-  | ColoradoOfferTerms
   | NorthCarolinaOfferTerms
   | TexasOfferTerms
   | OklahomaOfferTerms
   | UtahOfferTerms
   | WisconsinOfferTerms
   | FloridaOfferTerms
-  | LouisianaOfferTerms;
-
+  | LouisianaOfferTerms
+  | ColoradoOfferTerms
+  | CaliforniaOfferTerms;
 
 /*
  * Compatibility name used throughout the existing offer

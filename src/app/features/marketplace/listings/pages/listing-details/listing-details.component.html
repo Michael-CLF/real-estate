@@ -274,7 +274,7 @@
             } @else if (disclosureLoadError()) {
               Offer availability could not be checked. Refresh this page.
             } @else {
-              Waiting for the seller to upload: {{ requiredOfferDisclosureTitles(listing).join(', ') }}.
+              Waiting for the seller to complete Property Disclosures: {{ requiredOfferDisclosureTitles(listing).join(', ') }}.
             }
           </p>
           }
@@ -514,6 +514,17 @@
           </span>
         </div>
       </div>
+      }
+      @if (isAuthenticated() && !disclosuresAreLoading() && !disclosureLoadError()) {
+        @for (explanation of californiaDisclosureExplanations(listing); track explanation.type) {
+          <article class="listing-details__disclosure-card">
+            <div class="listing-details__disclosure-card-content">
+              <h3>{{ explanation.title }}</h3>
+              <p>{{ explanation.status }}</p>
+              <p>{{ explanation.basis }}</p>
+            </div>
+          </article>
+        }
       }
     </section>
     } @else {

@@ -1,3 +1,5 @@
+import { FormsModule } from '@angular/forms';
+import { CALIFORNIA_LISTING_FACT_DEFAULTS, validCaliforniaDisclosureDecision, type CaliforniaDisclosureDecision, type CaliforniaDisclosureType } from '../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -53,6 +55,7 @@ import {
   standalone: true,
 
   imports: [
+    FormsModule,
     DatePipe,
     RouterLink
   ],
@@ -81,11 +84,41 @@ export class ListingDisclosuresManagementComponent
   private readonly disclosureService =
     inject(ListingDisclosureService);
 
+  protected readonly applicabilityEdits = signal<Partial<Record<string, CaliforniaDisclosureDecision>>>({});
+  protected readonly savingApplicability = signal(false);
+  protected applicabilityFor(type: string): CaliforniaDisclosureDecision {
+    return this.applicabilityEdits()[type] ?? this.listing()?.sellerStatements?.california?.disclosureApplicability?.[type as CaliforniaDisclosureType] ?? { status: 'required', basis: '' };
+  }
+  protected changeApplicability(type: string, status: CaliforniaDisclosureDecision['status'], basis: string): void {
+    this.applicabilityEdits.update(value => ({ ...value, [type]: { status, basis } }));
+  }
+  protected async saveApplicability(type: DisclosureDocumentType): Promise<void> {
+    const decision = this.applicabilityFor(type);
+    this.actionError.set('');
+    this.successMessage.set('');
+    if (!validCaliforniaDisclosureDecision(decision)) {
+      this.actionError.set('Explain the exemption or why this document does not apply (maximum 5,000 characters).');
+      return;
+    }
+    if (this.savingApplicability()) return;
+    this.savingApplicability.set(true);
+    try {
+      const saved = await this.disclosureService.saveCaliforniaApplicability(this.listingUid, type, decision);
+      this.listing.update(listing => listing ? { ...listing, sellerStatements: { ...listing.sellerStatements!, california: { ...CALIFORNIA_LISTING_FACT_DEFAULTS, ...listing.sellerStatements?.california, disclosureApplicability: { ...listing.sellerStatements?.california?.disclosureApplicability, [type]: saved } } } } : listing);
+      this.successMessage.set('Disclosure applicability saved.');
+    } catch (error) {
+      this.actionError.set(error instanceof Error ? error.message : 'Could not save applicability.');
+    } finally { this.savingApplicability.set(false); }
+  }
+
   protected readonly listing =
     signal<Listing | null>(null);
 
   protected isRequiredForCurrentListing(requirement: StateDisclosureRequirement): boolean {
     const listing = this.listing();
+    if (listing?.state === 'CA') {
+      return listing.sellerStatements?.california?.disclosureApplicability?.[requirement.documentType as CaliforniaDisclosureType]?.status === 'required';
+    }
     return listing !== null && isDisclosureRequiredForListing(listing.state, requirement, {
       ...listing.sellerStatements,
       yearBuilt: listing.yearBuilt,

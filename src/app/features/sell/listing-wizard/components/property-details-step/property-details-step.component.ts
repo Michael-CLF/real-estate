@@ -1,3 +1,6 @@
+/*property-details-step.component.ts*/
+
+import { CALIFORNIA_LISTING_FACT_DEFAULTS, type CaliforniaListingFacts } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import { COLORADO_FACT_DEFAULTS, type ColoradoPropertyFacts } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
 import {
   ChangeDetectionStrategy,
@@ -53,6 +56,7 @@ export type PropertyDetailsFuelTankOwnership =
   | 'leased';
 
 export interface PropertyDetailsSellerStatementsFormValue {
+  california?: CaliforniaListingFacts;
   ownershipStatus:
   | PropertyDetailsSellerOwnershipStatus
   | '';
@@ -157,6 +161,13 @@ export class PropertyDetailsStepComponent
       ),
   );
 
+    readonly showsListingLegalDescription = computed(
+    () =>
+      ['WI', 'FL', 'LA', 'CA'].includes(
+        this.stateCode().trim().toUpperCase(),
+      ),
+  );
+
   readonly requiresFuelTank = computed(
     () =>
       requiresStateListingField(
@@ -189,10 +200,6 @@ export class PropertyDetailsStepComponent
       this.stateCode()
         .trim()
         .toUpperCase() === 'TX',
-  );
-
-  readonly requiresListingLegalDescription = computed(
-    () => ['WI', 'FL', 'LA', 'CO'].includes(this.stateCode().trim().toUpperCase()),
   );
 
   readonly isColoradoListing = computed(() => this.stateCode().trim().toUpperCase() === 'CO');
@@ -572,6 +579,12 @@ export class PropertyDetailsStepComponent
 
     sellerStatements:
       this.fb.nonNullable.group({
+        california: this.fb.nonNullable.group({
+          transferDisclosure: ['unselected'], transferExemptionBasis: [''],
+          naturalHazardDisclosure: ['unselected'], naturalHazardExemptionBasis: [''],
+          fireHazardZone: ['unselected'], resaleWithin18Months: ['unselected'],
+          assistedWaterTank: ['unselected'], gasApplianceRestrictions: [''],
+        }),
         ownershipStatus: [
           '' as
           | PropertyDetailsSellerOwnershipStatus
@@ -675,6 +688,11 @@ export class PropertyDetailsStepComponent
           },
         );
       }
+
+      this.form.controls.sellerStatements.controls.california.patchValue(
+        { ...CALIFORNIA_LISTING_FACT_DEFAULTS, ...initialValue?.sellerStatements?.california },
+        { emitEvent: false },
+      );
 
       this.configureHoaValidators(
         this.form.controls.hoa.controls
@@ -1241,11 +1259,14 @@ export class PropertyDetailsStepComponent
 
   private configureLegalDescriptionValidators(): void {
     const control = this.form.controls.legalDescription;
+
     control.setValidators([
-      ...(this.requiresListingLegalDescription() ? [Validators.required, Validators.pattern(/\S/)] : []),
       Validators.maxLength(5000),
     ]);
-    control.updateValueAndValidity({ emitEvent: false });
+
+    control.updateValueAndValidity({
+      emitEvent: false,
+    });
   }
 
   private configureLeaseValidators(

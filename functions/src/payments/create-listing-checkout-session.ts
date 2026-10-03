@@ -1,3 +1,5 @@
+/*create-listing-checkout-session.ts*/
+import { validateDraftForPublication, type PublicationValidationDraft } from '../listings/validate-listing-publication';
 import Stripe from 'stripe';
 
 import {
@@ -56,7 +58,7 @@ interface CreateListingCheckoutSessionResult {
   totalAmount: number;
 }
 
-interface ListingDraftDocument {
+interface ListingDraftDocument extends PublicationValidationDraft {
   sellerUid?: string;
 
   featuredListing?: boolean;
@@ -243,6 +245,15 @@ export const createListingCheckoutSession =
         );
       }
 
+      try {
+        validateDraftForPublication(draft, listingUid);
+      } catch (error) {
+        throw new HttpsError(
+          'failed-precondition',
+          error instanceof Error ? error.message : 'Complete the listing before payment.',
+        );
+      }
+
       const stripe =
         new Stripe(
           stripeSecretKey.value()
@@ -320,6 +331,18 @@ export const createListingCheckoutSession =
           validation
             .totalAmountCents;
       }
+
+      const applicationUrl =
+        process.env[
+          'NAVSTREET_APP_URL'
+        ]
+          ?.trim()
+          .replace(
+            /\/$/,
+            ''
+          ) ||
+        DEVELOPMENT_SITE_URL;
+
 
       const existingCheckoutSessionId =
         draft.publication
@@ -415,10 +438,13 @@ export const createListingCheckoutSession =
               .payment_status ===
             'no_payment_required'
           ) {
-            throw new HttpsError(
-              'already-exists',
-              'Checkout has already been completed for this listing.'
-            );
+            return {
+              checkoutSessionId: existingSession.id,
+              checkoutUrl:
+                `${applicationUrl}/sell/listings/${encodeURIComponent(listingUid)}` +
+                `/payment-return?session_id=${encodeURIComponent(existingSession.id)}`,
+              totalAmount: existingSession.amount_total ?? totalAmountCents,
+            };
           }
         } catch (error) {
           if (
@@ -473,16 +499,6 @@ export const createListingCheckoutSession =
           ]
           : undefined;
 
-      const applicationUrl =
-        process.env[
-          'NAVSTREET_APP_URL'
-        ]
-          ?.trim()
-          .replace(
-            /\/$/,
-            ''
-          ) ||
-        DEVELOPMENT_SITE_URL;
 
       try {
         const checkoutSession =

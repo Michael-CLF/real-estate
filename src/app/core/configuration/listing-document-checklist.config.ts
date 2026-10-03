@@ -1,3 +1,4 @@
+import { californiaDisclosureOutstanding, type CaliforniaListingFacts } from '../domains/listings/state-packages/california/california-listing-facts.model';
 import { getStateDisclosureRequirements, normalizeDisclosureStateCode } from './state-disclosures.config';
 import { STATES } from './states.config';
 import type { DisclosureDocumentType } from '../domains/disclosures/models/state-disclosure-requirement.model';
@@ -21,6 +22,34 @@ export const LISTING_CHECKLIST_STATES = STATES.filter(state =>
 
 // Presentation guidance only. Do not use these labels as upload or publication gates.
 const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
+  ...Object.fromEntries(
+    getStateDisclosureRequirements('CA')
+      .filter(requirement =>
+        requirement.documentType !== 'lead-based-paint'
+      )
+      .map(requirement => [
+        requirement.documentType,
+        {
+          category:
+            requirement.documentType ===
+              'california-earthquake-environmental-guides'
+              ? 'Information booklet' as const
+              : 'Required when applicable' as const,
+
+          applicability:
+            'California residential resale; applicability depends on the property and any valid exemption.',
+
+          timing:
+            'Provide promptly at the applicable legal or agreed stage. Uploading a document does not establish buyer receipt.',
+
+          instructions:
+            requirement.description,
+
+          suppliedBy:
+            'Seller, with applicable association, local or property records',
+        },
+      ])
+  ),
   'residential-property-owners-association': {
     category: 'Required when applicable', applicability: 'Covered North Carolina residential transfers; statutory exemptions and permitted waivers may apply.',
     timing: 'Provide to the buyer no later than the buyer makes an offer.', suppliedBy: 'Seller',
@@ -174,6 +203,7 @@ export function getListingDocumentChecklist(state: string): readonly ListingChec
 }
 
 export interface ListingChecklistFacts {
+  readonly california?: CaliforniaListingFacts;
   readonly yearBuilt?: number | null;
   readonly propertyType?: string | null;
   readonly leadBasedPaintApplies?: boolean | null;
@@ -186,6 +216,7 @@ export function getOfferBlockingDocumentTypes(state: string, facts: ListingCheck
   const code = normalizeDisclosureStateCode(state);
   const lead = facts.leadBasedPaintApplies === true;
   const old = typeof facts.yearBuilt === 'number' && facts.yearBuilt < 1978;
+  if (code === 'CA') return californiaDisclosureOutstanding(facts.california?.disclosureApplicability, new Set()) as DisclosureDocumentType[];
   if (code === 'FL') return [
     'florida-flood-disclosure',
     ...(facts.ownersAssociationApplies === true ? ['florida-hoa-disclosure-summary' as const] : []),
@@ -226,6 +257,7 @@ export function checklistApplicability(id: string, facts: ListingChecklistFacts)
 
 export function getChecklistRestrictionMessages(state: string, facts: ListingChecklistFacts): readonly string[] {
   const code = normalizeDisclosureStateCode(state);
+  if (code === 'CA') return ['You may create and publish your listing while gathering disclosures. Buyers can start an offer after applicable required documents are uploaded. Save any exemption or non-applicability explanation on the existing Property Disclosures page.'];
   const blocking = getOfferBlockingDocumentTypes(code, facts);
   const messages: string[] = [];
   if (blocking.length) messages.push('NavStreet currently prevents buyers from starting or submitting an offer while these uploads are missing: ' +

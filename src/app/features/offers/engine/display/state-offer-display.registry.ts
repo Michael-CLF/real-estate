@@ -1,3 +1,4 @@
+import { californiaOfferDisplayAdapter } from '../../states/california/display/california-offer-display.adapter';
 import type {
   StateOfferTerms,
 } from '../../../../core/domains/offers/models/offer-terms.model';
@@ -70,6 +71,8 @@ export function displayOfferTerms(
       return floridaOfferDisplayAdapter.display(version.terms);
     case 'LA':
       return louisianaOfferDisplayAdapter.display(version.terms);
+    case 'CA':
+      return californiaOfferDisplayAdapter.display(version.terms);
     case 'CO':
       return coloradoOfferDisplayAdapter.display(version.terms);
 

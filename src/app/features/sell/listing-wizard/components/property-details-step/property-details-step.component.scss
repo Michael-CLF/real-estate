@@ -1,3 +1,5 @@
+/*property-details-step.component.scss*/
+
 .wizard-step {
   width: 100%;
 }
@@ -470,3 +472,8 @@ form {
     font: inherit;
   }
 }
+.california-disclosures { display: grid; gap: 1rem; margin-bottom: 1.5rem; padding: 1.25rem; border: 1px solid #cbd5e1; border-radius: .75rem; }
+.california-error { color: #8b0000; }
+.california-disclosures select[aria-invalid='true'] { border-color: #8b0000; }
+
+

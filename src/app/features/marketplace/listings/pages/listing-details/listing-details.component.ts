@@ -1,3 +1,4 @@
+import { californiaDisclosureOutstanding, validCaliforniaDisclosureDecision, type CaliforniaDisclosureType } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import { STATES } from '../../../../../core/configuration/states.config';
 import { PageSeoService } from '../../../../../core/seo/page-seo.service';
 import { newOfferPath } from '../../../../offers/engine/state-offer-registry';
@@ -300,21 +301,56 @@ export class ListingDetailsComponent
   readonly disclosureOpenError =
     signal('');
 
-  requiredOfferDisclosureTitles(listing: MarketplaceListing): string[] {
-    if (!['FL', 'LA', 'CO'].includes(listing.address.stateAbbreviation)) return [];
-    const uploaded = new Set(this.disclosures().map(doc => doc.documentType));
-    return getStateDisclosureRequirements(listing.address.stateAbbreviation)
-      .filter(requirement => isDisclosureRequiredForListing(listing.address.stateAbbreviation, requirement, {
-        ...listing.sellerStatements,
-        yearBuilt: listing.yearBuilt,
-      }) && !uploaded.has(requirement.documentType))
-      .map(requirement => requirement.shortTitle);
+requiredOfferDisclosureTitles(
+  listing: MarketplaceListing
+): string[] {
+  const state = listing.address.stateAbbreviation;
+
+  if (!['FL', 'LA', 'CO'].includes(state)) {
+    return [];
   }
 
-  offerDisclosuresAreReady(listing: MarketplaceListing): boolean {
-    return !['FL', 'LA', 'CO'].includes(listing.address.stateAbbreviation) ||
-      (this.isAuthenticated() && !this.disclosuresAreLoading() &&
-        !this.disclosureLoadError() && this.requiredOfferDisclosureTitles(listing).length === 0);
+  const uploaded = new Set(
+    this.disclosures().map(document => document.documentType)
+  );
+
+  return getStateDisclosureRequirements(state)
+    .filter(requirement =>
+      isDisclosureRequiredForListing(
+        state,
+        requirement,
+        {
+          ...listing.sellerStatements,
+          yearBuilt: listing.yearBuilt
+        }
+      ) && !uploaded.has(requirement.documentType)
+    )
+    .map(requirement => requirement.shortTitle);
+}
+
+offerDisclosuresAreReady(
+  listing: MarketplaceListing
+): boolean {
+  const state = listing.address.stateAbbreviation;
+
+  if (!['FL', 'LA', 'CO'].includes(state)) {
+    return true;
+  }
+
+  return this.isAuthenticated()
+    && !this.disclosuresAreLoading()
+    && !this.disclosureLoadError()
+    && this.requiredOfferDisclosureTitles(listing).length === 0;
+}
+
+  californiaDisclosureExplanations(listing: MarketplaceListing): { type: string; title: string; status: string; basis: string }[] {
+    if (listing.address.stateAbbreviation !== 'CA') return [];
+    return getStateDisclosureRequirements('CA').flatMap(requirement => {
+      const decision = listing.sellerStatements?.california?.disclosureApplicability?.[requirement.documentType as CaliforniaDisclosureType];
+      return validCaliforniaDisclosureDecision(decision) && decision.status !== 'required'
+        ? [{ type: requirement.documentType, title: requirement.shortTitle, status: decision.status === 'exempt' ? 'Seller reports an exemption' : 'Seller reports this does not apply', basis: decision.basis }]
+        : [];
+    });
   }
 
   readonly viewModel$:

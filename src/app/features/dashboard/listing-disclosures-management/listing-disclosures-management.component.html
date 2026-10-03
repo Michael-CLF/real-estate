@@ -59,6 +59,9 @@
       public listing page.
     </p>
 
+    @if (currentListing.state === 'CA') {
+      <p class="disclosure-header__description">Your listing can be advertised while documents are being prepared. Buyers can make an offer after you upload the applicable required documents. For an exempt or inapplicable item, save an explanation here.</p>
+    }
     @if (currentListing.state === 'FL') {
     <p class="disclosure-header__description" role="note">
       Florida: the Make an Offer action is unavailable until you upload
@@ -122,6 +125,24 @@
     @let selectedFile = selectedFileFor(requirement.documentType);
 
     <article class="disclosure-card" [class.disclosure-card--complete]="disclosure">
+      @if (currentListing.state === 'CA') {
+        @let decision = applicabilityFor(requirement.documentType);
+        <div class="disclosure-applicability">
+          <label [for]="'applicability-' + requirement.documentType">Applicability for this property</label>
+          <select [id]="'applicability-' + requirement.documentType" [ngModel]="decision.status"
+            (ngModelChange)="changeApplicability(requirement.documentType, $event, decision.basis)">
+            <option value="required">Applicable — upload required documents</option>
+            <option value="exempt">Exempt — explain the exemption</option>
+            <option value="not_applicable">Not applicable — explain why</option>
+          </select>
+          @if (decision.status !== 'required') {
+            <label [for]="'basis-' + requirement.documentType">Explanation and supporting facts</label>
+            <textarea [id]="'basis-' + requirement.documentType" maxlength="5000" rows="3" [ngModel]="decision.basis"
+              (ngModelChange)="changeApplicability(requirement.documentType, decision.status, $event)"></textarea>
+          }
+          <button type="button" [disabled]="savingApplicability()" (click)="saveApplicability(requirement.documentType)">Save applicability</button>
+        </div>
+      }
       <div class="disclosure-card__heading">
         <div class="disclosure-card__icon" aria-hidden="true">
           <i class="fa-solid fa-file-shield"></i>

@@ -1,3 +1,4 @@
+import { assertCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -197,6 +198,10 @@ if (currentStateCode === 'CO') {
       await assertColoradoListingDisclosures(transaction, listingReference, currentListingData);
     }
 
+    const californiaReadiness = currentStateCode === 'CA'
+      ? await assertCaliforniaListingDisclosures(transaction, listingReference, currentListingData)
+      : undefined;
+
     const existingOfferQuery = adminFirestore
       .collection('offers')
       .where('buyerUids', 'array-contains', buyerUid)
@@ -353,8 +358,7 @@ if (currentStateCode === 'CO') {
           seller:
             sellerParty,
 
-          listingData:
-            currentListingData,
+          listingData: { ...currentListingData, californiaReadiness },
         });
 
     const offerData = removeUndefinedValues({

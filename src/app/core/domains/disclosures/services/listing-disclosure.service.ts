@@ -1,3 +1,6 @@
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../../infrastructure/firebase/firebase';
+import type { CaliforniaDisclosureDecision } from '../../listings/state-packages/california/california-listing-facts.model';
 import {
   Injectable
 } from '@angular/core';
@@ -40,6 +43,11 @@ const MAXIMUM_DISCLOSURE_SIZE_BYTES =
   providedIn: 'root'
 })
 export class ListingDisclosureService {
+  async saveCaliforniaApplicability(listingUid: string, documentType: DisclosureDocumentType, decision: CaliforniaDisclosureDecision): Promise<CaliforniaDisclosureDecision> {
+    await httpsCallable(functions, 'updatePublishedListing')({ listingUid, changes: { californiaDisclosure: { documentType, decision } } });
+    return decision;
+  }
+
 
   async getListingDisclosures(
     listingUid: string

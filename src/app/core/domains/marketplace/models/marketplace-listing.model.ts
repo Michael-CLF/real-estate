@@ -1,3 +1,4 @@
+import type { CaliforniaListingFacts } from '../../listings/state-packages/california/california-listing-facts.model';
 import { ListingPhoto } from '../../listings/models/listing-photo.model';
 import { ListingStatus } from '../../listings/models/listing-status.type';
 import { PropertyType } from '../../property/models/property-type.type';
@@ -63,6 +64,7 @@ export interface MarketplaceListing {
 
   yearBuilt?: number;
   sellerStatements?: {
+    california?: CaliforniaListingFacts;
     ownersAssociationApplies?: boolean | null;
     leadBasedPaintApplies?: boolean | null;
   };

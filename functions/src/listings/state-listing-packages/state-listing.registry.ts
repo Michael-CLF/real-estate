@@ -24,11 +24,14 @@ import { floridaListingPackage } from './florida-listing.package';
 import { louisianaListingPackage } from './louisiana-listing.package';
 import { coloradoListingPackage } from './colorado-listing.package';
 
+import { californiaListingPackage } from './california-listing.package';
+
 const PACKAGES =
   new Map<
     string,
     StateListingPackage
   >([
+    ['CA', californiaListingPackage],
     [
       'NC',
       northCarolinaListingPackage,

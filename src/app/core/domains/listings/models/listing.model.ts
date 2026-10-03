@@ -1,3 +1,5 @@
+/*listing.model.ts*/
+import type { CaliforniaListingFacts } from '../state-packages/california/california-listing-facts.model';
 import type { ColoradoPropertyFacts } from '../../offers/state-contracts/colorado/models/colorado-contract-elections';
 import type { ColoradoSellerLoan } from '../../offers/state-contracts/colorado/models/colorado-offer-terms.model';
 export interface Listing {
@@ -515,6 +517,7 @@ export type ListingSellerOwnershipStatus =
 export type ListingFuelTankOwnership = 'owned' | 'leased';
 
 export interface ListingSellerStatements {
+  california?: CaliforniaListingFacts;
   stateCode?: string;
   schemaVersion?: number;
 

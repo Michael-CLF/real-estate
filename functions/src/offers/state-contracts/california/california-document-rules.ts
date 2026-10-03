@@ -1,0 +1,1 @@
+export const CALIFORNIA_DOCUMENT_RULES = {templateUid:'NAVSTREET-CA-RESIDENTIAL-2026',version:'2026-10-03.1'} as const;

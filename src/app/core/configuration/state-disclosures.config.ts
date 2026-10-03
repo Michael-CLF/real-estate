@@ -10,6 +10,153 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  CA: [
+    {
+      documentType: 'california-transfer-disclosure',
+      title: 'Transfer Disclosure Statement (TDS)',
+      shortTitle: 'Transfer Disclosure Statement (TDS)',
+      formCode: 'CC 1102.6',
+      sourceInstructions:
+        'The official statute contains the TDS. Save or print its complete form, complete the seller sections, sign it and upload the PDF. Preserve all applicable statutory text and required signatures.',
+      description:
+        'Complete the statutory TDS for a covered transfer, or identify a valid exemption. Disclose known material facts even if exempt.',
+      required: false,
+      sortOrder: 1,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.6.',
+    },
+    {
+      documentType: 'california-natural-hazard-disclosure',
+      title: 'Natural Hazard Disclosure (NHD)',
+      shortTitle: 'Natural Hazard Disclosure (NHD)',
+      formCode: 'CC 1103.2',
+      sourceInstructions:
+        'Obtain current property-specific hazard information from an appropriate source or NHD provider. Complete and sign the statutory statement and upload the statement with the supporting report.',
+      description:
+        'Obtain property-specific current hazard information and a completed signed NHD statement where required. A purchased report is one method; NavStreet does not infer hazards from ZIP code.',
+      required: false,
+      sortOrder: 2,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1103.2.',
+    },
+    {
+      documentType: 'california-fire-hardening',
+      title: 'Fire-hardening disclosure and retrofit information',
+      shortTitle: 'Fire-hardening disclosure and retrofit information',
+      formCode: 'CC 1102.6f',
+      description:
+        'For covered pre-2010 homes in high or very high fire zones, provide the statutory notice, known vulnerable features, applicable low-cost retrofit information and any required inspection information.',
+      required: false,
+      sortOrder: 3,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.6f.',
+    },
+    {
+      documentType: 'california-defensible-space',
+      title: 'Defensible-space documentation or buyer agreement',
+      shortTitle: 'Defensible-space documentation or buyer agreement',
+      formCode: 'CC 1102.19',
+      description:
+        'Provide applicable current compliance documentation. If absent, use the statutory written buyer agreement route; follow the local ordinance or applicable one-year documentation rule.',
+      required: false,
+      sortOrder: 4,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.19.',
+    },
+    {
+      documentType: 'california-recent-renovations',
+      title: 'Recent-resale renovations, contractors and permits',
+      shortTitle: 'Recent-resale renovations, contractors and permits',
+      formCode: 'CC 1102.6h',
+      description:
+        'For an applicable single-family sale accepted within 18 months after acquisition, disclose covered contractor work, required contractor contacts and permits or permitted third-party contact information. Confirm applicability at acceptance.',
+      required: false,
+      sortOrder: 5,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.6h.',
+    },
+    {
+      documentType: 'california-assisted-water-tank',
+      title: 'Assisted domestic water storage tank statement',
+      shortTitle: 'Assisted domestic water storage tank statement',
+      formCode: 'CC 1102.156',
+      description:
+        'Disclose a known existing domestic water tank provided through Water Code 13194 assistance using the statutory information.',
+      required: false,
+      sortOrder: 6,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.156.',
+    },
+    {
+      documentType: 'california-association-documents',
+      title: 'HOA or condominium resale document package',
+      shortTitle: 'HOA or condominium resale document package',
+      formCode: 'CC 4525',
+      description:
+        'Request current governing and financial records, assessments, applicable inspection information, rental restrictions and other required resale documents from the association.',
+      required: false,
+      sortOrder: 7,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=4525.',
+    },
+    {
+      documentType: 'california-local-disclosures',
+      title: 'Property-specific and local disclosures',
+      shortTitle: 'Property-specific and local disclosures',
+      formCode: 'LOCAL / CC 1102',
+      description:
+        'Confirm city and county point-of-sale rules, special tax districts and Mello-Roos notices, private transfer fees, known contamination, industrial or nuisance conditions, death disclosures when required, and existing leases or solar agreements.',
+      required: false,
+      sortOrder: 8,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.',
+    },
+    {
+      documentType: 'california-safety-compliance',
+      title: 'Safety, plumbing and point-of-sale compliance records',
+      shortTitle: 'Safety, plumbing and point-of-sale compliance records',
+      formCode: 'CA SAFETY',
+      description:
+        'Confirm applicable smoke and carbon monoxide requirements, water heater bracing, water-conserving plumbing disclosures and local inspection or retrofit rules before closing. A universal new inspection is not required simply to create a listing.',
+      required: false,
+      sortOrder: 9,
+      officialFormUrl:
+        'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=1102.155.',
+    },
+    {
+      documentType: 'lead-based-paint',
+      title: 'Federal lead disclosure and EPA pamphlet',
+      shortTitle: 'Lead packet',
+      formCode: 'FED-LEAD',
+      description:
+        'For most pre-1978 housing, provide the signed seller disclosure, available records and EPA pamphlet before the buyer signs, plus the inspection opportunity unless changed or waived in writing. A new test is not required.',
+      required: false,
+      sortOrder: 10,
+      additionalDownloads: [
+        {
+          label: 'EPA lead safety pamphlet for the buyer',
+          url:
+            'https://www.epa.gov/system/files/documents/2026-02/protectyourfamily_pamphlet_2026_3.pdf',
+        },
+      ],
+      formDownloadUrl:
+        'https://www.epa.gov/sites/default/files/documents/selr_eng.pdf',
+      officialFormUrl:
+        'https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards',
+    },
+    {
+      documentType: 'california-earthquake-environmental-guides',
+      title: 'Applicable earthquake and environmental hazard guides',
+      shortTitle: 'Consumer guides',
+      formCode: 'CA GUIDES',
+      description:
+        'Provide the applicable Homeowner’s Guide to Earthquake Safety, including the residential earthquake risk disclosure for covered pre-1960 construction. The environmental hazard booklet supplies general information and does not replace disclosure of known property-specific conditions.',
+      required: false,
+      sortOrder: 11,
+      officialFormUrl:
+        'https://www.dre.ca.gov/Publications/Disclosures.html',
+    },
+  ],
   CO: [
     {
       documentType: 'colorado-property-disclosure',
@@ -353,8 +500,8 @@ export function isDisclosureRequiredForListing(
   if (stateCode === 'CO') {
     if (requirement.documentType === 'lead-based-paint') return listing.leadBasedPaintApplies === true || listing.yearBuilt == null || listing.yearBuilt < 1978;
     if (requirement.documentType === 'colorado-association-documents') {
-  return false;
-}
+      return false;
+    }
     return false;
   }
 

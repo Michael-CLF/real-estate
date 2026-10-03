@@ -13,6 +13,10 @@ import {
 import { coloradoListingPackage } from './colorado/colorado-listing.package';
 
 import {
+  californiaListingPackage
+} from './california/california-listing.package';
+
+import {
   texasListingPackage,
 } from './texas/texas-listing.package';
 import { utahListingPackage } from './utah/utah-listing.package';
@@ -22,6 +26,7 @@ import { louisianaListingPackage } from './louisiana/louisiana-listing.package';
 
 const PACKAGES =
   new Map<string, StateListingPackage>([
+    ['CA', californiaListingPackage],
     ['CO', coloradoListingPackage],
     ['NC', northCarolinaListingPackage],
     ['OK', oklahomaListingPackage],
