@@ -6,7 +6,6 @@ export function validateCaliforniaSubmission({offer,version}: ValidateStateSubmi
   const fail=(ok:unknown,message:string)=> {if(!ok) throw new HttpsError('failed-precondition',message);};
   fail(offer.stateCode==='CA' && version.stateCode==='CA' && offer.currentVersionUid===version.Uid && version.offerUid===offer.Uid && version.status==='draft' && !version.immutable,'Only the current mutable California draft can be submitted.');
   fail(version.terms.property.listingUid===offer.listingUid,'The property snapshot does not match the offer.');
-  fail(Array.isArray(version.terms.requiredDisclosureTypes), 'Start a new California offer after the seller completes Property Disclosures.');
   const issues=californiaTermsIssues(version.terms,new Date(),true);
   fail(!issues.length,issues.map(i=>i.message).join(' '));
   fail(version.expiresAt===version.terms.delivery.expiresAt,'Offer expiration must match its version.');

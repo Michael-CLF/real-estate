@@ -294,6 +294,14 @@
           </button>
           }
 
+          @if (canReviseUnsignedCaliforniaOffer()) {
+          <button class="button button--secondary" type="button" [disabled]="processing()"
+            (click)="returnUnsignedOfferToEditing()">
+            Return to editing
+          </button>
+          <p class="action-card__note">Your unsigned version stays in history. An editable revision will open with your existing terms.</p>
+          }
+
           @if (display(version).signingBlockReason) {
           <p class="action-card__note" role="alert">{{ display(version).signingBlockReason }}</p>
           }

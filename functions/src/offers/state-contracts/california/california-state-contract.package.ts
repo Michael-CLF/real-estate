@@ -11,14 +11,23 @@ export const californiaStateContractPackage: StateContractPackage<CaliforniaOffe
   stateCode:'CA',offerCreationEnabled:true,contractTypes:['navstreet_california_residential_sale_2026'],contractTypeRequired:true,
   defaultTimeZone:'America/Los_Angeles',agreementTemplate:{stateCode:'CA',templateUid:CALIFORNIA_DOCUMENT_RULES.templateUid,templateName:'NavStreet California Residential Purchase and Sale Agreement',templateVersion:CALIFORNIA_DOCUMENT_RULES.version},
   createInitialOfferTerms:createCaliforniaInitialOfferTerms,sanitizeDraftTerms:sanitizeCaliforniaDraftTerms,validateSubmission:validateCaliforniaSubmission,
-  validateBeforeSigning:({version})=> {if(version.terms.disclosures.leadPaintStatus==='pending') throw new HttpsError('failed-precondition','Applicable federal lead disclosures must be received before signing.');},
-  requiredListingDisclosures:({version})=> [...(version.terms.requiredDisclosureTypes ?? [])],
+  validateBeforeSigning:({version})=> {if(version.terms.disclosures.leadPaintStatus==='pending' && (version.terms.property.yearBuilt == null || version.terms.property.yearBuilt < 1978)) throw new HttpsError('failed-precondition','Applicable federal lead disclosures must be received before signing.');},
+  requiredListingDisclosures:({version})=> ([
+    ['propertyConditionStatus','california-transfer-disclosure'],
+    ['naturalHazardStatus','california-natural-hazard-disclosure'],
+    ['fireHardeningStatus','california-fire-hardening'],
+    ['defensibleSpaceStatus','california-defensible-space'],
+    ['renovationStatus','california-recent-renovations'],
+    ['waterTankStatus','california-assisted-water-tank'],
+    ['hoaDocumentsStatus','california-association-documents'],
+    ['leadPaintStatus','lead-based-paint'],
+  ] as const).filter(([field])=>version.terms.disclosures[field]==='received').map(([,type])=>type),
   createContractMilestones:createCaliforniaContractMilestones,generateAgreement:generateCaliforniaOfferPdf,
 };
 
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 import { CALIFORNIA_DISCLOSURE_TYPES, validCaliforniaDisclosureDecision, type CaliforniaDisclosureApplicability } from '../../../listings/state-listing-packages/california-listing-facts';
-export async function assertCaliforniaListingDisclosures(
+export async function readCaliforniaListingDisclosures(
   transaction: Transaction, listingReference: DocumentReference, listing: Record<string, unknown>,
 ): Promise<{ requiredDisclosureTypes: string[]; documentVersions: Record<string, string>; applicability: CaliforniaDisclosureApplicability }> {
   const applicability = ((listing['sellerStatements'] as { california?: { disclosureApplicability?: CaliforniaDisclosureApplicability } } | undefined)?.california?.disclosureApplicability ?? {}) as CaliforniaDisclosureApplicability;
@@ -35,8 +44,7 @@ export async function assertCaliforniaListingDisclosures(
       /^[A-Za-z0-9_-]{1,180}$/.test(file['versionId']) &&
       file['storagePath'] === `listing-disclosures/${listing['sellerUid']}/${listingReference.id}/${type}/${file['versionId']}.pdf`;
     if (validCaliforniaDisclosureDecision(decision) && decision.status !== 'required') continue;
-    if (!validFile) throw new HttpsError('failed-precondition',
-      `The seller must upload ${type.replace(/-/g, ' ')} or record an applicable exemption/non-applicability explanation in Property Disclosures before an offer can be made.`);
+    if (!validFile) continue;
     requiredDisclosureTypes.push(type);
     documentVersions[type] = file!['versionId'] as string;
   }

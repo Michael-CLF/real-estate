@@ -1,5 +1,4 @@
 import type { CaliforniaOfferTermsDocument } from './state-contracts/california/california-offer-terms.document';
-import { assertCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
   HttpsError,
   onCall,
@@ -227,9 +226,6 @@ if (offer.stateCode === 'CO') {
             await assertColoradoListingDisclosures(transaction, listingReference, listingData);
           }
 
-          if (offer.stateCode === 'CA') {
-            await assertCaliforniaListingDisclosures(transaction, listingReference, listingData);
-          }
           const requiredDisclosureTypes = stateContractPackage.requiredListingDisclosures?.({ offer, version }) ?? [];
           const listingDisclosureSnapshots: Array<{
             documentType: string;

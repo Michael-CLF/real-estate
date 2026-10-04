@@ -10,6 +10,6 @@ export const californiaOfferDisplayAdapter: StateOfferDisplayAdapter<CaliforniaO
     escrowAgent:t.purchase.earnestMoneyHolder || t.settlement.closingAgentName || 'To be jointly selected',
     importantDeadline:{label:'Inspection contingency review',value:t.deadlines.inspectionPeriodDays+' calendar days after acceptance; written removal required'},
     closingDate:{label:'Close of escrow',value:t.deadlines.settlementDate},possessionLabel:'Vacant on recording',
-    signingBlockReason:t.disclosures.leadPaintStatus==='pending'?'Receive applicable federal lead materials before signing.':undefined,
+    signingBlockReason:t.disclosures.leadPaintStatus==='pending' && (t.property.yearBuilt == null || t.property.yearBuilt < 1978)?'Receive applicable federal lead materials before signing.':undefined,
   };},
 };

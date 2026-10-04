@@ -50,6 +50,7 @@ export interface SubmitOfferVersionRequest {
 export interface CreateCounterofferRequest {
   offerUid: string;
   sourceVersionUid: string;
+  reviseUnsigned?: boolean;
 }
 
 

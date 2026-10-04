@@ -51,22 +51,17 @@ export function californiaTermsIssues(t: CaliforniaOfferTerms, now: Date, submit
   if (!['buyer','seller'].includes(t.settlement.titlePolicyPayer)) error('settlement.titlePolicyPayer','Choose who pays the owner title policy.');
   if (!days(t.settlement.titleEvidenceDaysBeforeClosing,1,45)) error('settlement.titleEvidenceDaysBeforeClosing','Choose 1 to 45 days.');
   const status=(path:string,value:string,allowed:string[])=> {if(!allowed.includes(value)) error(path,'Select the actual document receipt or applicability status.');};
-  const required = new Set(t.requiredDisclosureTypes ?? []);
-  for (const [field, type] of [
-    ['propertyConditionStatus','california-transfer-disclosure'],
-    ['naturalHazardStatus','california-natural-hazard-disclosure'],
-    ['fireHardeningStatus','california-fire-hardening'],
-    ['defensibleSpaceStatus','california-defensible-space'],
-    ['renovationStatus','california-recent-renovations'],
-    ['waterTankStatus','california-assisted-water-tank'],
-    ['hoaDocumentsStatus','california-association-documents'],
-    ['leadPaintStatus','lead-based-paint'],
+  for (const field of [
+    'propertyConditionStatus', 'naturalHazardStatus', 'fireHardeningStatus',
+    'defensibleSpaceStatus', 'renovationStatus', 'waterTankStatus', 'hoaDocumentsStatus',
   ] as const) {
-    status('disclosures.' + field, a[field], required.has(type)
-      ? ['received'] : ['exempt','not_applicable', ...(field === 'defensibleSpaceStatus' ? ['buyer_agreement'] : []), ...(field === 'leadPaintStatus' && t.property.yearBuilt != null && t.property.yearBuilt >= 1978 ? ['built_1978_or_later'] : [])]);
+    status('disclosures.' + field, a[field], ['received','pending','exempt','not_applicable',
+      ...(field === 'defensibleSpaceStatus' ? ['buyer_agreement'] : [])]);
   }
+  status('disclosures.leadPaintStatus', a.leadPaintStatus, ['received','pending','exempt',
+    ...(t.property.yearBuilt != null && t.property.yearBuilt >= 1978 ? ['built_1978_or_later'] : [])]);
   if (a.leadPaintStatus === 'exempt' && !a.leadExemptionBasis.trim()) error('disclosures.leadExemptionBasis','State the actual federal exemption and supporting facts.');
-  if (submitting && a.leadPaintStatus === 'pending') error('disclosures.leadPaintStatus','Receive the applicable lead disclosure, available reports and EPA pamphlet before submitting this offer for signature.');
+  if (submitting && a.leadPaintStatus === 'pending' && (t.property.yearBuilt == null || t.property.yearBuilt < 1978)) error('disclosures.leadPaintStatus','Your offer remains editable. Receive the applicable lead materials and update this status before preparing it for signature.');
   if (a.leadPaintStatus === 'received' && !['ten_days','waived','other_period'].includes(a.leadInspectionSelection)) error('disclosures.leadInspectionSelection','Choose the lead inspection opportunity.');
   if (a.leadPaintStatus === 'received' && a.leadInspectionSelection === 'other_period' && !days(a.leadInspectionDays,1,60)) error('disclosures.leadInspectionDays','Enter 1 to 60 agreed lead inspection days.');
   if (typeof a.sellerReportsExistingLeases !== 'boolean' || a.leaseStatementAcknowledged !== true) error('disclosures.leaseStatementAcknowledged','Review and acknowledge the seller lease statement.');

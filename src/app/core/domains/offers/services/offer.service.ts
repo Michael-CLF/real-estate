@@ -311,7 +311,8 @@ export class OfferService {
 
   async createCounteroffer(
     offerUid: string,
-    sourceVersionUid: string
+    sourceVersionUid: string,
+    reviseUnsigned = false
   ): Promise<CreateCounterofferResult> {
     this.requireText(
       offerUid,
@@ -326,7 +327,8 @@ export class OfferService {
     return this.offerRepository
       .createCounteroffer({
         offerUid,
-        sourceVersionUid
+        sourceVersionUid,
+        ...(reviseUnsigned ? { reviseUnsigned: true } : {})
       });
   }
 

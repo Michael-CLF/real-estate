@@ -1,4 +1,3 @@
-import { assertCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
   HttpsError,
   onCall
@@ -20,6 +19,8 @@ import {
 import {
   requireStateContractPackage
 } from './state-contracts/state-contract-registry';
+import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
+import type { CaliforniaOfferTermsDocument } from './state-contracts/california/california-offer-terms.document';
 import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
 import { assertColoradoListingDisclosures } from './colorado-listing-disclosure-gate';
 
@@ -148,12 +149,19 @@ export const createCounteroffer =
               );
             }
 
-            verifyCounterofferAccess(
-              offer,
-              sourceVersion,
-              userUid,
-              sourceVersionUid
-            );
+            const reviseUnsigned = request.data.reviseUnsigned === true;
+            if (reviseUnsigned) {
+              verifyUnsignedRevisionAccess(offer, sourceVersion, userUid, sourceVersionUid);
+            } else {
+              verifyCounterofferAccess(offer, sourceVersion, userUid, sourceVersionUid);
+            }
+            let revisionDocuments: Awaited<ReturnType<typeof readCaliforniaListingDisclosures>> | undefined;
+            if (reviseUnsigned) {
+              const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
+              const listingSnapshot = await transaction.get(listingReference);
+              if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The California listing could not be found.');
+              revisionDocuments = await readCaliforniaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+            }
 
             if (offer.stateCode === 'LA') {
               const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
@@ -164,12 +172,6 @@ export const createCounteroffer =
               await assertLouisianaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
             }
 
-            if (offer.stateCode === 'CA') {
-              const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
-              const listingSnapshot = await transaction.get(listingReference);
-              if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The California listing could not be found.');
-              await assertCaliforniaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
-            }
 
 if (offer.stateCode === 'CO') {
               const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
@@ -178,10 +180,9 @@ if (offer.stateCode === 'CO') {
               await assertColoradoListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
             }
 
-            const initiatingParty =
-              getCounteringParty(
-                sourceVersion.initiatedBy
-              );
+            const initiatingParty = reviseUnsigned
+              ? sourceVersion.initiatedBy
+              : getCounteringParty(sourceVersion.initiatedBy);
 
             const nextVersionNumber =
               offer.totalVersions + 1;
@@ -224,10 +225,14 @@ if (offer.stateCode === 'CO') {
                 stateCode:
                   stateContractPackage.stateCode,
 
-                terms:
-                  createCounterofferTerms(
-                    sourceVersion.terms
-                  ),
+                terms: revisionDocuments ? {
+                  ...createCounterofferTerms(sourceVersion.terms),
+                  documentVersions: {
+                    ...(sourceVersion.terms as unknown as CaliforniaOfferTermsDocument).documentVersions,
+                    ...revisionDocuments.documentVersions
+                  },
+                  requiredDisclosureTypes: revisionDocuments.requiredDisclosureTypes
+                } : createCounterofferTerms(sourceVersion.terms),
 
                 buyers,
                 sellers,
@@ -253,7 +258,7 @@ if (offer.stateCode === 'CO') {
                       initiatingParty,
 
                     note:
-                      `Counteroffer Version ${nextVersionNumber} created from Version ${sourceVersion.versionNumber}.`,
+                      `${reviseUnsigned ? "Unsigned revision" : "Counteroffer"} Version ${nextVersionNumber} created from Version ${sourceVersion.versionNumber}.`,
 
                     occurredAt:
                       now
@@ -277,6 +282,17 @@ if (offer.stateCode === 'CO') {
                   now
               });
 
+            if (reviseUnsigned) {
+              transaction.update(sourceVersionReference, {
+                status: 'superseded', updatedAt: now,
+                statusHistory: FieldValue.arrayUnion({
+                  fromStatus: sourceVersion.status, toStatus: 'superseded',
+                  action: 'superseded', actorUid: userUid, actorRole: initiatingParty,
+                  note: 'Replaced by an editable unsigned revision; original terms and documents retained.',
+                  occurredAt: now
+                })
+              });
+            }
             transaction.create(
               counterofferReference,
               counterofferData
@@ -301,9 +317,9 @@ if (offer.stateCode === 'CO') {
                  * The receiving party continues to see the
                  * last version that was actually delivered.
                  */
-                lastDeliveredVersionUid:
-                  offer.lastDeliveredVersionUid ??
-                  sourceVersionUid,
+                ...(reviseUnsigned ? {} : {
+                  lastDeliveredVersionUid: offer.lastDeliveredVersionUid ?? sourceVersionUid
+                }),
 
                 versionUids:
                   FieldValue.arrayUnion(
@@ -337,7 +353,7 @@ if (offer.stateCode === 'CO') {
                       nextVersionNumber,
 
                     note:
-                      `Counteroffer Version ${nextVersionNumber} draft created.`,
+                      `${reviseUnsigned ? "Unsigned revision" : "Counteroffer"} Version ${nextVersionNumber} draft created.`,
 
                     occurredAt:
                       now
@@ -367,6 +383,21 @@ if (offer.stateCode === 'CO') {
     }
   );
 
+
+function verifyUnsignedRevisionAccess(
+  offer: OfferDocument, version: OfferVersionDocument, userUid: string, versionUid: string
+): void {
+  if (offer.stateCode !== 'CA' || offer.currentVersionUid !== versionUid ||
+      offer.status !== 'submitted' || version.status !== 'awaiting_signatures' ||
+      !version.immutable || offer.lastDeliveredVersionUid === versionUid ||
+      [...version.buyers, ...version.sellers].some(p => p.signature?.status === 'signed')) {
+    throw new HttpsError('failed-precondition', 'Only the current unsigned, undelivered California offer can return to editing.');
+  }
+  const initiators = version.initiatedBy === 'buyer' ? offer.buyerUids : offer.sellerUids;
+  if (!initiators.includes(userUid)) {
+    throw new HttpsError('permission-denied', 'Only the initiating party can revise this unsigned offer.');
+  }
+}
 
 function verifyCounterofferAccess(
   offer: OfferDocument,

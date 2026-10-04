@@ -1,4 +1,4 @@
-import { assertCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
+import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -199,7 +199,7 @@ if (currentStateCode === 'CO') {
     }
 
     const californiaReadiness = currentStateCode === 'CA'
-      ? await assertCaliforniaListingDisclosures(transaction, listingReference, currentListingData)
+      ? await readCaliforniaListingDisclosures(transaction, listingReference, currentListingData)
       : undefined;
 
     const existingOfferQuery = adminFirestore

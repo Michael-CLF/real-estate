@@ -103,6 +103,7 @@ export interface SubmitOfferResponse {
 export interface CreateCounterofferData {
   offerUid: string;
   sourceVersionUid: string;
+  reviseUnsigned?: boolean;
 }
 
 

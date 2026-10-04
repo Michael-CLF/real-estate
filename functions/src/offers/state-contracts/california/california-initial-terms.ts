@@ -9,14 +9,14 @@ export function createCaliforniaInitialOfferTerms(input: CreateInitialOfferTerms
   }
   const statements = input.listingData['sellerStatements'] as Record<string, unknown> | undefined;
   const readiness = input.listingData['californiaReadiness'] as { requiredDisclosureTypes: string[]; documentVersions: Record<string,string>; applicability: Record<string, { status: string; basis: string }> } | undefined;
-  if (!readiness) throw new Error('California disclosure readiness must be checked before offer creation.');
+  const documents = readiness ?? { requiredDisclosureTypes: [], documentVersions: {}, applicability: {} };
   const legacy = statements?.['california'] as Partial<CaliforniaListingFacts> | undefined;
   const sellerFacts: CaliforniaListingFacts = {
     ...CALIFORNIA_LISTING_FACT_DEFAULTS, ...legacy,
-    transferDisclosure: readiness.requiredDisclosureTypes.includes('california-transfer-disclosure') ? 'required' : 'exempt',
-    transferExemptionBasis: readiness.applicability['california-transfer-disclosure']?.basis ?? '',
-    naturalHazardDisclosure: readiness.requiredDisclosureTypes.includes('california-natural-hazard-disclosure') ? 'required' : 'exempt',
-    naturalHazardExemptionBasis: readiness.applicability['california-natural-hazard-disclosure']?.basis ?? '',
+    transferDisclosure: documents.applicability['california-transfer-disclosure']?.status === 'exempt' ? 'exempt' : 'required',
+    transferExemptionBasis: documents.applicability['california-transfer-disclosure']?.basis ?? '',
+    naturalHazardDisclosure: documents.applicability['california-natural-hazard-disclosure']?.status === 'exempt' ? 'exempt' : 'required',
+    naturalHazardExemptionBasis: documents.applicability['california-natural-hazard-disclosure']?.basis ?? '',
   };
   return {
     stateCode: 'CA', contractType: 'navstreet_california_residential_sale_2026',
@@ -26,10 +26,10 @@ export function createCaliforniaInitialOfferTerms(input: CreateInitialOfferTerms
     conditions: { dueDiligence: true, appraisal: null, financing: null, saleOfBuyersProperty: false, additionalEarnestMoney: null },
     propertyItems: { included: '', excluded: '', fixturesIncluded: true, leasedItemsDescription: '' },
     settlement: { possession: 'at_recording', possessionDelay: 0, specialAssessmentPayer: 'unselected', hoaTransferFeePayer: 'unselected', titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15 },
-    requiredDisclosureTypes: [...readiness.requiredDisclosureTypes],
-    documentVersions: { ...readiness.documentVersions },
+    requiredDisclosureTypes: [...documents.requiredDisclosureTypes],
+    documentVersions: { ...documents.documentVersions },
     sellerFacts: { ...sellerFacts },
-    disclosures: { propertyConditionStatus: 'unselected', naturalHazardStatus: 'unselected', fireHardeningStatus: 'unselected', defensibleSpaceStatus: 'unselected', renovationStatus: 'unselected', waterTankStatus: 'unselected', californiaNoticesAcknowledged: null, sellerReportsHoa: sellerHoa(input.listingData), leadPaintStatus: 'unselected', leadExemptionBasis: readiness.applicability['lead-based-paint']?.basis ?? '', leadInspectionSelection: 'unselected', leadInspectionDays: 10, hoaDocumentsStatus: 'unselected', sellerReportsExistingLeases: sellerLeases(input.listingData), leaseStatementAcknowledged: null },
+    disclosures: { propertyConditionStatus: 'unselected', naturalHazardStatus: 'unselected', fireHardeningStatus: 'unselected', defensibleSpaceStatus: 'unselected', renovationStatus: 'unselected', waterTankStatus: 'unselected', californiaNoticesAcknowledged: null, sellerReportsHoa: sellerHoa(input.listingData), leadPaintStatus: 'unselected', leadExemptionBasis: documents.applicability['lead-based-paint']?.basis ?? '', leadInspectionSelection: 'unselected', leadInspectionDays: 10, hoaDocumentsStatus: 'unselected', sellerReportsExistingLeases: sellerLeases(input.listingData), leaseStatementAcknowledged: null },
     additionalTerms: '', delivery: { expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), timeZone: 'America/Los_Angeles', electronicDeliveryAuthorized: null },
   };
 }

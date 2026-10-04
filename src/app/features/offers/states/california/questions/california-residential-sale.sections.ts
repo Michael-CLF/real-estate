@@ -7,7 +7,7 @@ const q = (fieldPath:string,label:string,type:'text'|'textarea'|'currency'|'numb
 const choice = (fieldPath:string,label:string,options:readonly {value:string;label:string}[]):OfferQuestionDefinition => ({id:fieldPath,type:'single_choice',fieldPath,label,options,validation:required});
 const number = (path:string,label:string,min:number,max:number,when?:OfferQuestionVisibilityRule):OfferQuestionDefinition => ({...q(path,label,'number'),validation:{...required,minimum:min,maximum:max},...(when?{visibleWhen:when}:{})});
 const money = (path:string,label:string,positive=true,when?:OfferQuestionVisibilityRule):OfferQuestionDefinition => ({...q(path,label,'currency',positive),validation:{...required,required:positive,minimum:positive?1:0},...(when?{visibleWhen:when}:{})});
-const receipt = [{value:'received',label:'I received and reviewed the uploaded document'},{value:'not_applicable',label:'Not applicable based on the seller’s property facts'},{value:'exempt',label:'Seller reports a statutory exemption — review the stated basis'}];
+const receipt = [{value:'pending',label:'Not yet received — seller will provide the applicable documents'},{value:'received',label:'I received and reviewed the uploaded document'},{value:'not_applicable',label:'Not applicable based on the seller’s property facts'},{value:'exempt',label:'Seller reports a statutory exemption — review the stated basis'}];
 const allocation=[{value:'seller',label:'Seller'},{value:'buyer',label:'Buyer'},{value:'split',label:'Split equally'}];
 export const CALIFORNIA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefinition[]=[
  {id:'parties',title:'Buyers and sellers',questions:[]},
@@ -58,7 +58,7 @@ export const CALIFORNIA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefinitio
   {id:'possession',type:'information',label:'Vacant possession is due when the deed records. Existing tenants or seller occupancy continuing after closing require separately signed occupancy terms and compliance with tenant law.'},
  ]},
  {id:'disclosures',title:'Seller documents and actual buyer receipt',questions:[
-  {...choice('disclosures.propertyConditionStatus','Transfer Disclosure Statement (TDS)',receipt),helpText:'Review the uploaded disclosure before acknowledging receipt. Applicable required documents must be uploaded before an offer can be made.'},
+  {...choice('disclosures.propertyConditionStatus','Transfer Disclosure Statement (TDS)',receipt),helpText:'Review the uploaded disclosure before acknowledging receipt. Select pending if the seller has not provided this document yet.'},
   {...q('sellerFacts.transferExemptionBasis','Seller’s stated TDS exemption','textarea',false),readOnly:true,visibleWhen:visible('sellerFacts.transferDisclosure','exempt')},
   choice('disclosures.naturalHazardStatus','Natural Hazard Disclosure statement and applicable report',receipt),
   {...q('sellerFacts.naturalHazardExemptionBasis','Seller’s stated NHD exemption','textarea',false),readOnly:true,visibleWhen:visible('sellerFacts.naturalHazardDisclosure','exempt')},
@@ -69,7 +69,7 @@ export const CALIFORNIA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefinitio
   choice('disclosures.waterTankStatus','Applicable assisted domestic water tank disclosure',receipt),
   {...q('disclosures.sellerReportsHoa','Seller reports association membership','yes_no'),readOnly:true},
   choice('disclosures.hoaDocumentsStatus','Applicable HOA or condominium resale documents',receipt),
-  choice('disclosures.leadPaintStatus','Federal lead disclosure, available reports and EPA pamphlet',[{value:'received',label:'I received and reviewed the uploaded lead packet'},{value:'built_1978_or_later',label:'The listing confirms construction in 1978 or later'},{value:'exempt',label:'A federal exemption applies'}]),
+  choice('disclosures.leadPaintStatus','Federal lead disclosure, available reports and EPA pamphlet',[{value:'pending',label:'Not yet received — required before signing if applicable'},{value:'received',label:'I received and reviewed the uploaded lead packet'},{value:'built_1978_or_later',label:'The listing confirms construction in 1978 or later'},{value:'exempt',label:'A federal exemption applies'}]),
   {...q('disclosures.leadExemptionBasis','Seller’s federal exemption and supporting facts','textarea'),readOnly:true,visibleWhen:visible('disclosures.leadPaintStatus','exempt')},
   {...choice('disclosures.leadInspectionSelection','Buyer’s lead inspection opportunity',[{value:'ten_days',label:'10 days after acceptance'},{value:'waived',label:'Buyer waives the inspection opportunity'},{value:'other_period',label:'Another period agreed in writing'}]),visibleWhen:visible('disclosures.leadPaintStatus','received')},
   number('disclosures.leadInspectionDays','Agreed lead inspection days',1,60,visible('disclosures.leadInspectionSelection','other_period')),
@@ -79,7 +79,7 @@ export const CALIFORNIA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefinitio
   {id:'megans-notice',type:'information',label:'Megan’s Law notice — Civil Code 2079.10a',description:notices.megansLaw},
   {id:'supplemental-tax-notice',type:'information',label:'Notice of your supplemental property tax bill',description:notices.supplementalTax},
   {id:'electrical-notice',type:'information',label:'Electrical-system inspection advice — Civil Code 1102.6i',description:notices.electrical},
-  q('disclosures.californiaNoticesAcknowledged','I read the California statutory notices and the seller’s uploaded disclosures.','acknowledgement'),
+  q('disclosures.californiaNoticesAcknowledged','I read the California statutory notices and understand the disclosure statuses selected above.','acknowledgement'),
  ]},
  {id:'additional',title:'Additional terms',questions:[
   {...q('additionalTerms','Other agreed terms','textarea',false),visibleWhen:visible('conditions.saleOfBuyersProperty',false)},

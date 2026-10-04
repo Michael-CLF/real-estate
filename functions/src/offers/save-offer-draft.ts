@@ -1,3 +1,4 @@
+import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
   HttpsError,
   onCall,
@@ -133,7 +134,7 @@ export const saveOfferDraft =
             offerSnapshot.data() as
             OfferDocument;
 
-          const version =
+          let version =
             versionSnapshot.data() as
             OfferVersionDocument;
 
@@ -143,6 +144,21 @@ export const saveOfferDraft =
             userUid,
             offerVersionUid
           );
+
+          if (offer.stateCode === 'CA' && requestedChanges['terms']) {
+            const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
+            const listingSnapshot = await transaction.get(listingReference);
+            if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The California listing could not be found.');
+            const documents = await readCaliforniaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+            const savedVersions = (version.terms as unknown as { documentVersions?: Record<string, string> }).documentVersions;
+            version = {
+              ...version,
+              terms: {
+                ...version.terms,
+                documentVersions: { ...documents.documentVersions, ...savedVersions }
+              } as OfferVersionDocument['terms']
+            };
+          }
 
           const sanitizedChanges =
             sanitizeDraftChanges(

@@ -504,6 +504,10 @@ export class OfferDetailsComponent
   getVersionTypeLabel(
     version: OfferVersion
   ): string {
+    if (version.statusHistory.some(entry => entry.note?.startsWith('Unsigned revision '))) {
+      return 'Revision';
+    }
+
     return version.versionNumber === 1
       ? 'Offer'
       : 'Counteroffer';
@@ -1133,6 +1137,33 @@ export class OfferDetailsComponent
     }
   }
 
+
+  canReviseUnsignedCaliforniaOffer(): boolean {
+    const offer = this.offer();
+    const version = this.currentVersion();
+    if (!offer || !version || offer.stateCode !== 'CA' || offer.status !== 'submitted' ||
+        version.status !== 'awaiting_signatures' || !version.immutable ||
+        offer.lastDeliveredVersionUid === version.Uid ||
+        [...version.buyers, ...version.sellers].some(p => p.signature.status === 'signed')) return false;
+    return version.initiatedBy === 'buyer' ? !!this.access()?.isBuyer : !!this.access()?.isSeller;
+  }
+
+  async returnUnsignedOfferToEditing(): Promise<void> {
+    const offer = this.offer();
+    const version = this.currentVersion();
+    if (!offer || !version || !this.canReviseUnsignedCaliforniaOffer() || this.processing()) return;
+    this.processing.set(true);
+    this.clearMessages();
+    try {
+      const result = await this.offerService.createCounteroffer(offer.Uid, version.Uid, true);
+      const route = editOfferPath(offer.stateCode, offer.listingUid, result.offerUid, result.offerVersionUid);
+      await this.router.navigate([...route.path], { queryParams: route.queryParams });
+    } catch (error) {
+      this.errorMessage.set(this.getErrorMessage(error));
+    } finally {
+      this.processing.set(false);
+    }
+  }
 
   async createCounteroffer(): Promise<void> {
     const offer =
