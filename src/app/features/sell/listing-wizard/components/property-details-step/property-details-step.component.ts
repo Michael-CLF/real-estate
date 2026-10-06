@@ -1,5 +1,4 @@
 /*property-details-step.component.ts*/
-
 import { CALIFORNIA_LISTING_FACT_DEFAULTS, type CaliforniaListingFacts } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import { COLORADO_FACT_DEFAULTS, type ColoradoPropertyFacts } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
 import {
@@ -13,14 +12,12 @@ import {
   output,
   signal,
 } from '@angular/core';
-
 import {
   AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-
 import type { ListingDisclosureDocument } from '../../../../../core/domains/disclosures/models/listing-disclosure-document.model';
 import type { DisclosureDocumentType } from '../../../../../core/domains/disclosures/models/state-disclosure-requirement.model';
 import { ListingDisclosureService } from '../../../../../core/domains/disclosures/services/listing-disclosure.service';
@@ -33,29 +30,28 @@ import type { ColoradoSellerLoan } from '../../../../../core/domains/offers/stat
 import { getStateListingPackage } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
 import { requiresStateListingField } from '../../../../../core/domains/listings/state-packages/state-listing-package';
 import { auth } from '../../../../../core/infrastructure/firebase/firebase';
-
 type TexasLeaseDocumentType = Extract<
   DisclosureDocumentType,
   | 'texas-residential-leases'
   | 'texas-fixture-leases'
   | 'texas-natural-resource-leases'
 >;
-
 interface PropertyTypeOption {
   value: PropertyType;
   label: string;
 }
-
 export type PropertyDetailsSellerOwnershipStatus =
   | 'owned_at_least_one_year'
   | 'owned_less_than_one_year'
   | 'does_not_yet_own';
-
 export type PropertyDetailsFuelTankOwnership =
   | 'owned'
   | 'leased';
-
 export interface PropertyDetailsSellerStatementsFormValue {
+  southCarolina?: {
+    beachfrontApplies: boolean | null;
+    futureVacationBookingsExist: boolean | null;
+  };
   california?: CaliforniaListingFacts;
   ownershipStatus:
   | PropertyDetailsSellerOwnershipStatus
@@ -76,7 +72,6 @@ export interface PropertyDetailsSellerStatementsFormValue {
   additionalSellerEmail: string;
   additionalSellerPhone: string;
 }
-
 export interface PropertyDetailsHoaFormValue {
   hasHoa: boolean | null;
   associationName: string;
@@ -85,13 +80,11 @@ export interface PropertyDetailsHoaFormValue {
   feeAmount: number | null;
   feeFrequency: ListingHoaFeeFrequency | '';
 }
-
 export interface ColoradoSellerLoanFormValue extends Omit<ColoradoSellerLoan,
   'estimatedBalanceInCents' | 'principalInterestPaymentInCents'> {
   estimatedBalanceDollars: number;
   principalInterestPaymentDollars: number;
 }
-
 export interface PropertyDetailsFormValue {
   coloradoPropertyFacts?: ColoradoPropertyFacts;
   coloradoAssumableLoan?: ColoradoSellerLoanFormValue | null;
@@ -111,7 +104,6 @@ export interface PropertyDetailsFormValue {
   sellerStatements:
   PropertyDetailsSellerStatementsFormValue;
 }
-
 @Component({
   selector: 'app-property-details-step',
   standalone: true,
@@ -126,25 +118,19 @@ export interface PropertyDetailsFormValue {
 export class PropertyDetailsStepComponent
   implements OnInit {
   private readonly fb = inject(FormBuilder);
-
   private readonly disclosureService =
     inject(ListingDisclosureService);
-
   readonly initialValue =
     input<PropertyDetailsFormValue | null>(null);
-
   readonly listingUid =
     input<string | null>(null);
-
   readonly stateCode = input('');
-
   readonly stateListingPackage = computed(
     () =>
       getStateListingPackage(
         this.stateCode(),
       ),
   );
-
   readonly requiresOwnershipStatus = computed(
     () =>
       requiresStateListingField(
@@ -152,7 +138,6 @@ export class PropertyDetailsStepComponent
         'ownershipStatus',
       ),
   );
-
   readonly requiresLeadBasedPaint = computed(
     () =>
       requiresStateListingField(
@@ -160,14 +145,12 @@ export class PropertyDetailsStepComponent
         'leadBasedPaintApplies',
       ),
   );
-
     readonly showsListingLegalDescription = computed(
     () =>
-      ['WI', 'FL', 'LA', 'CA'].includes(
+      ['WI', 'FL', 'LA', 'CA', 'SC'].includes(
         this.stateCode().trim().toUpperCase(),
       ),
   );
-
   readonly requiresFuelTank = computed(
     () =>
       requiresStateListingField(
@@ -175,11 +158,9 @@ export class PropertyDetailsStepComponent
         'fuelTankPresent',
       ),
   );
-
   readonly requiresOwnersAssociation = computed(
     () => requiresStateListingField(this.stateListingPackage(), 'ownersAssociationApplies'),
   );
-
   readonly requiresGeneralLeases = computed(
     () =>
       requiresStateListingField(
@@ -187,31 +168,24 @@ export class PropertyDetailsStepComponent
         'generalLeasesExist',
       ),
   );
-
   readonly requiresUtahMethamphetamineStatement = computed(() =>
     requiresStateListingField(
       this.stateListingPackage(),
       'utahMethamphetamineContamination',
     ),
   );
-
   readonly isTexasListing = computed(
     () =>
       this.stateCode()
         .trim()
         .toUpperCase() === 'TX',
   );
-
   readonly isColoradoListing = computed(() => this.stateCode().trim().toUpperCase() === 'CO');
-
   readonly currentYear =
     new Date().getFullYear();
-
   readonly validityChange = output<boolean>();
-
   readonly valueChange =
     output<PropertyDetailsFormValue>();
-
   protected readonly leaseDocuments = signal<
     Partial<
       Record<
@@ -220,7 +194,6 @@ export class PropertyDetailsStepComponent
       >
     >
   >({});
-
   protected readonly selectedLeaseFiles = signal<
     Partial<
       Record<
@@ -229,18 +202,14 @@ export class PropertyDetailsStepComponent
       >
     >
   >({});
-
   protected readonly uploadingLeaseType =
     signal<TexasLeaseDocumentType | null>(
       null,
     );
-
   protected readonly leaseDocumentError =
     signal('');
-
   protected readonly leaseDocumentMessage =
     signal('');
-
   readonly propertyTypes: PropertyTypeOption[] = [
     {
       value: 'condo',
@@ -271,7 +240,6 @@ export class PropertyDetailsStepComponent
       label: 'Townhome',
     },
   ];
-
   readonly hoaFeeFrequencies: {
     value: ListingHoaFeeFrequency;
     label: string;
@@ -293,7 +261,6 @@ export class PropertyDetailsStepComponent
         label: 'Annually',
       },
     ];
-
   readonly coloradoOptionalFacts = [
     {
       key: 'leasedItems',
@@ -378,53 +345,41 @@ export class PropertyDetailsStepComponent
         'Identify current rental, occupancy or lease agreements and their documents. Keep this answer consistent with Existing Leases below.',
     },
   ] as const;
-
   private readonly coloradoFactChoices: Partial<
     Record<
       typeof this.coloradoOptionalFacts[number]['key'],
       'yes' | 'no' | 'unknown' | 'unselected'
     >
   > = {};
-
   coloradoFactChoice(
     key: typeof this.coloradoOptionalFacts[number]['key'],
   ): 'yes' | 'no' | 'unknown' | 'unselected' {
     const value =
       this.form.controls.coloradoPropertyFacts.controls[key].value.trim();
-
     if (!value) {
       return this.coloradoFactChoices[key] ?? 'unselected';
     }
-
     if (/^(none|n\/?a|not applicable)$/i.test(value)) {
       return 'no';
     }
-
     if (/^unknown$/i.test(value)) {
       return 'unknown';
     }
-
     return 'yes';
   }
-
   setColoradoFactChoice(
     key: typeof this.coloradoOptionalFacts[number]['key'],
     event: Event,
   ): void {
     const choice = (event.target as HTMLSelectElement).value;
-
     if (!['unselected', 'yes', 'no', 'unknown'].includes(choice)) {
       return;
     }
-
     this.coloradoFactChoices[key] =
       choice as 'yes' | 'no' | 'unknown' | 'unselected';
-
     const control =
       this.form.controls.coloradoPropertyFacts.controls[key];
-
     const previous = control.value.trim();
-
     control.setValue(
       choice === 'no'
         ? 'NONE'
@@ -437,14 +392,11 @@ export class PropertyDetailsStepComponent
             : '',
       { emitEvent: false },
     );
-
     control.markAsUntouched();
-
     this.configureColoradoFactValidators();
     this.form.updateValueAndValidity({ emitEvent: false });
     this.emitFormState();
   }
-
   readonly form = this.fb.nonNullable.group({
     coloradoPropertyFacts: this.fb.nonNullable.group({
       includedItems: [''],
@@ -477,7 +429,6 @@ export class PropertyDetailsStepComponent
       '' as PropertyType | '',
       Validators.required,
     ],
-
     bedrooms: [
       null as number | null,
       [
@@ -486,7 +437,6 @@ export class PropertyDetailsStepComponent
         Validators.max(99),
       ],
     ],
-
     bathrooms: [
       null as number | null,
       [
@@ -495,7 +445,6 @@ export class PropertyDetailsStepComponent
         Validators.max(99),
       ],
     ],
-
     squareFeet: [
       null as number | null,
       [
@@ -504,7 +453,6 @@ export class PropertyDetailsStepComponent
         Validators.max(1000000),
       ],
     ],
-
     yearBuilt: [
       null as number | null,
       [
@@ -515,37 +463,30 @@ export class PropertyDetailsStepComponent
         ),
       ],
     ],
-
     lotSize: [
       null as number | null,
       Validators.min(0),
     ],
-
     lotSizeUnit: [
       'square_feet' as LotSizeUnit,
       Validators.required,
     ],
-
     lotNumber: [
       '',
       Validators.maxLength(200),
     ],
-
     blockNumber: [
       '',
       Validators.maxLength(200),
     ],
-
     subdivisionName: [
       '',
       Validators.maxLength(500),
     ],
-
     legalDescription: [
       '',
       Validators.maxLength(5000),
     ],
-
     description: [
       '',
       [
@@ -554,12 +495,10 @@ export class PropertyDetailsStepComponent
         Validators.maxLength(5000),
       ],
     ],
-
     hoa: this.fb.nonNullable.group({
       hasHoa: [
         null as boolean | null,
       ],
-
       feeAmount: [
         null as number | null,
         [
@@ -567,18 +506,19 @@ export class PropertyDetailsStepComponent
           Validators.max(1000000),
         ],
       ],
-
       feeFrequency: [
         '' as ListingHoaFeeFrequency | '',
       ],
-
       associationName: [''],
       managementCompany: [''],
       contactPhone: [''],
     }),
-
     sellerStatements:
       this.fb.nonNullable.group({
+        southCarolina: this.fb.nonNullable.group({
+          beachfrontApplies: [null as boolean | null],
+          futureVacationBookingsExist: [null as boolean | null],
+        }),
         california: this.fb.nonNullable.group({
           transferDisclosure: ['unselected'], transferExemptionBasis: [''],
           naturalHazardDisclosure: ['unselected'], naturalHazardExemptionBasis: [''],
@@ -590,67 +530,53 @@ export class PropertyDetailsStepComponent
           | PropertyDetailsSellerOwnershipStatus
           | '',
         ],
-
         leadBasedPaintApplies: [
           null as boolean | null,
         ],
-
         methamphetamineContaminationKnown: [
           null as boolean | null,
         ],
-
         ownersAssociationApplies: [
           null as boolean | null,
         ],
-
         fuelTankPresent: [
           null as boolean | null,
         ],
-
         fuelTankOwnership: [
           '' as
           | PropertyDetailsFuelTankOwnership
           | '',
         ],
-
         leasesExist: [
           null as boolean | null,
         ],
-
         residentialLeasesExist: [
           null as boolean | null,
         ],
-
         fixtureLeasesExist: [
           null as boolean | null,
         ],
-
         naturalResourceLeasesExist: [
           null as boolean | null,
         ],
-
         additionalSellerIncluded: [
           false,
         ],
-
         additionalSellerLegalName: [''],
         additionalSellerEmail: [''],
         additionalSellerPhone: [''],
       }),
   });
-
   constructor() {
     effect(() => {
       const initialValue =
         this.initialValue();
-
       if (initialValue) {
         this.form.patchValue(
           {
             ...initialValue,
             coloradoPropertyFacts: { ...COLORADO_FACT_DEFAULTS, ...initialValue.coloradoPropertyFacts },
             coloradoAssumableLoan: initialValue.coloradoAssumableLoan ?? undefined,
-
             hoa:
               initialValue.hoa ?? {
                 hasHoa: null,
@@ -660,7 +586,6 @@ export class PropertyDetailsStepComponent
                 feeAmount: null,
                 feeFrequency: '',
               },
-
             sellerStatements:
               initialValue.sellerStatements ?? {
                 ownershipStatus: '',
@@ -688,12 +613,15 @@ export class PropertyDetailsStepComponent
           },
         );
       }
-
+      this.form.controls.sellerStatements.controls.southCarolina.patchValue({
+        beachfrontApplies: initialValue?.sellerStatements?.southCarolina?.beachfrontApplies ?? null,
+        futureVacationBookingsExist: initialValue?.sellerStatements?.southCarolina?.futureVacationBookingsExist ?? null,
+      }, { emitEvent: false });
+      this.configureSouthCarolinaValidators();
       this.form.controls.sellerStatements.controls.california.patchValue(
         { ...CALIFORNIA_LISTING_FACT_DEFAULTS, ...initialValue?.sellerStatements?.california },
         { emitEvent: false },
       );
-
       this.configureHoaValidators(
         this.form.controls.hoa.controls
           .hasHoa.value,
@@ -701,40 +629,32 @@ export class PropertyDetailsStepComponent
       );
       this.configureColoradoFactValidators();
       this.configureColoradoLoanValidators();
-
       this.configureStateStatementValidators();
-
       this.configureLegalDescriptionValidators();
-
       this.configureFuelTankValidators(
         this.form.controls.sellerStatements
           .controls.fuelTankPresent.value,
         false,
       );
-
       this.configureLeaseValidators(
         this.isTexasListing(),
       );
-
       this.configureAdditionalSellerValidators(
         this.form.controls.sellerStatements
           .controls.additionalSellerIncluded
           .value,
         false,
       );
-
       this.validityChange.emit(
         this.form.valid,
       );
     });
-
     this.form.controls.hoa.controls.hasHoa.valueChanges.subscribe(
       hasHoa => {
         this.configureHoaValidators(
           hasHoa,
           true,
         );
-
         if (hasHoa !== null) {
           this.form.controls.sellerStatements.controls.ownersAssociationApplies.setValue(
             hasHoa,
@@ -743,11 +663,9 @@ export class PropertyDetailsStepComponent
             },
           );
         }
-
         this.emitFormState();
       },
     );
-
     this.form.controls.sellerStatements.controls.ownersAssociationApplies.valueChanges.subscribe(
       ownersAssociationApplies => {
         if (
@@ -759,40 +677,33 @@ export class PropertyDetailsStepComponent
               emitEvent: false,
             },
           );
-
           this.configureHoaValidators(
             ownersAssociationApplies,
             ownersAssociationApplies ===
             false,
           );
         }
-
         this.emitFormState();
       },
     );
-
     this.form.controls.sellerStatements.controls.fuelTankPresent.valueChanges.subscribe(
       fuelTankPresent => {
         this.configureFuelTankValidators(
           fuelTankPresent,
           true,
         );
-
         this.emitFormState();
       },
     );
-
     this.form.controls.sellerStatements.controls.additionalSellerIncluded.valueChanges.subscribe(
       included => {
         this.configureAdditionalSellerValidators(
           included,
           true,
         );
-
         this.emitFormState();
       },
     );
-
     this.form.valueChanges.subscribe(() => {
       this.configureColoradoFactValidators();
       this.emitFormState();
@@ -802,36 +713,29 @@ export class PropertyDetailsStepComponent
       this.emitFormState();
     });
   }
-
   ngOnInit(): void {
     if (this.isTexasListing()) {
       void this.loadLeaseDocuments();
     }
   }
-
   private configureColoradoFactValidators(): void {
     const group = this.form.controls.coloradoPropertyFacts;
     const c = group.controls;
     const active = this.isColoradoListing();
-
     const requiredText = (control: AbstractControl) =>
       typeof control.value === 'string' && control.value.trim()
         ? null
         : { required: true };
-
     // Errors belong to individual controls, not the whole section.
     group.clearValidators();
-
     for (const control of Object.values(c)) {
       control.setValidators(Validators.maxLength(4000));
     }
-
     c.waterSource.setValidators(
       active
         ? [requiredText, Validators.maxLength(4000)]
         : [],
     );
-
     c.metroDistrict.setValidators(
       active
         ? [
@@ -844,10 +748,8 @@ export class PropertyDetailsStepComponent
         ]
         : [],
     );
-
     const covered =
       active && c.metroDistrict.value === 'covered';
-
     c.metroDistrictWebsite.setValidators(
       covered
         ? [
@@ -856,10 +758,8 @@ export class PropertyDetailsStepComponent
             if (!control.value?.trim()) {
               return null;
             }
-
             try {
               const url = new URL(control.value.trim());
-
               return url.protocol === 'https:' &&
                 url.hostname.includes('.')
                 ? null
@@ -872,13 +772,11 @@ export class PropertyDetailsStepComponent
         ]
         : [],
     );
-
     c.metroDistrictDisclosure.setValidators(
       covered
         ? [requiredText, Validators.maxLength(4000)]
         : [],
     );
-
     for (const field of this.coloradoOptionalFacts) {
       c[field.key].setValidators(
         active && this.coloradoFactChoice(field.key) === 'yes'
@@ -886,15 +784,11 @@ export class PropertyDetailsStepComponent
           : [Validators.maxLength(4000)],
       );
     }
-
     for (const control of Object.values(c)) {
       control.updateValueAndValidity({ emitEvent: false });
     }
-
     group.updateValueAndValidity({ emitEvent: false });
   }
-
-
   private configureColoradoLoanValidators(): void {
     const controls = this.form.controls.coloradoAssumableLoan.controls;
     const active = this.isColoradoListing() && controls.available.value;
@@ -907,7 +801,6 @@ export class PropertyDetailsStepComponent
     controls.escrowOther.setValidators(active ? [Validators.maxLength(180)] : []);
     for (const control of Object.values(controls)) control.updateValueAndValidity({ emitEvent: false });
   }
-
   protected leaseDocumentFor(
     documentType: TexasLeaseDocumentType,
   ): ListingDisclosureDocument | null {
@@ -916,7 +809,6 @@ export class PropertyDetailsStepComponent
       null
     );
   }
-
   protected selectedLeaseFileFor(
     documentType: TexasLeaseDocumentType,
   ): File | null {
@@ -926,61 +818,47 @@ export class PropertyDetailsStepComponent
       ] ?? null
     );
   }
-
   protected onLeaseFileSelected(
     event: Event,
     documentType: TexasLeaseDocumentType,
   ): void {
     const inputElement =
       event.target as HTMLInputElement;
-
     const file =
       inputElement.files?.[0];
-
     this.leaseDocumentError.set('');
     this.leaseDocumentMessage.set('');
-
     if (!file) {
       this.removeSelectedLeaseFile(
         documentType,
       );
-
       return;
     }
-
     if (
       file.type !== 'application/pdf'
     ) {
       inputElement.value = '';
-
       this.removeSelectedLeaseFile(
         documentType,
       );
-
       this.leaseDocumentError.set(
         'Lease documents must be PDF files.',
       );
-
       return;
     }
-
     if (
       file.size >
       15 * 1024 * 1024
     ) {
       inputElement.value = '';
-
       this.removeSelectedLeaseFile(
         documentType,
       );
-
       this.leaseDocumentError.set(
         'A lease PDF cannot exceed 15 MB.',
       );
-
       return;
     }
-
     this.selectedLeaseFiles.update(
       current => ({
         ...current,
@@ -988,21 +866,17 @@ export class PropertyDetailsStepComponent
       }),
     );
   }
-
   protected async uploadLeaseDocument(
     documentType: TexasLeaseDocumentType,
   ): Promise<void> {
     const listingUid =
       this.listingUid();
-
     const sellerUid =
       auth.currentUser?.uid;
-
     const file =
       this.selectedLeaseFileFor(
         documentType,
       );
-
     if (
       !listingUid ||
       !sellerUid ||
@@ -1011,14 +885,11 @@ export class PropertyDetailsStepComponent
     ) {
       return;
     }
-
     this.leaseDocumentError.set('');
     this.leaseDocumentMessage.set('');
-
     this.uploadingLeaseType.set(
       documentType,
     );
-
     try {
       const uploadedDocument =
         await this.disclosureService.uploadDisclosure(
@@ -1028,7 +899,6 @@ export class PropertyDetailsStepComponent
           documentType,
           file,
         );
-
       this.leaseDocuments.update(
         current => ({
           ...current,
@@ -1036,11 +906,9 @@ export class PropertyDetailsStepComponent
             uploadedDocument,
         }),
       );
-
       this.removeSelectedLeaseFile(
         documentType,
       );
-
       this.leaseDocumentMessage.set(
         'Lease document uploaded successfully.',
       );
@@ -1056,12 +924,10 @@ export class PropertyDetailsStepComponent
       );
     }
   }
-
   protected async openLeaseDocument(
     document: ListingDisclosureDocument,
   ): Promise<void> {
     this.leaseDocumentError.set('');
-
     try {
       await this.disclosureService.openDisclosure(
         document,
@@ -1074,40 +940,33 @@ export class PropertyDetailsStepComponent
       );
     }
   }
-
   private async loadLeaseDocuments():
     Promise<void> {
     const listingUid =
       this.listingUid();
-
     if (!listingUid) {
       return;
     }
-
     try {
       const summaries =
         await this.disclosureService.getListingDisclosures(
           listingUid,
         );
-
       const leaseTypes =
         new Set<TexasLeaseDocumentType>([
           'texas-residential-leases',
           'texas-fixture-leases',
           'texas-natural-resource-leases',
         ]);
-
       const documents: Partial<
         Record<
           TexasLeaseDocumentType,
           ListingDisclosureDocument
         >
       > = {};
-
       for (const summary of summaries) {
         const documentType =
           summary.documentType as TexasLeaseDocumentType;
-
         if (
           leaseTypes.has(documentType)
         ) {
@@ -1115,7 +974,6 @@ export class PropertyDetailsStepComponent
             summary.currentDocument;
         }
       }
-
       this.leaseDocuments.set(
         documents,
       );
@@ -1127,7 +985,6 @@ export class PropertyDetailsStepComponent
       );
     }
   }
-
   private removeSelectedLeaseFile(
     documentType: TexasLeaseDocumentType,
   ): void {
@@ -1136,33 +993,26 @@ export class PropertyDetailsStepComponent
         const next = {
           ...current,
         };
-
         delete next[documentType];
-
         return next;
       },
     );
   }
-
   private configureHoaValidators(
     hasHoa: boolean | null,
     clearValues: boolean,
   ): void {
     const controls =
       this.form.controls.hoa.controls;
-
     if (hasHoa === true) {
       controls.feeAmount.setValidators([
         Validators.min(0),
         Validators.max(1000000),
       ]);
-
       controls.feeFrequency.clearValidators();
-
       controls.associationName.setValidators([
         Validators.maxLength(200),
       ]);
-
       controls.managementCompany.setValidators([
         Validators.maxLength(200),
       ]);
@@ -1171,7 +1021,6 @@ export class PropertyDetailsStepComponent
       controls.feeFrequency.clearValidators();
       controls.associationName.clearValidators();
       controls.managementCompany.clearValidators();
-
       if (clearValues) {
         controls.feeAmount.setValue(
           null,
@@ -1179,28 +1028,24 @@ export class PropertyDetailsStepComponent
             emitEvent: false,
           },
         );
-
         controls.feeFrequency.setValue(
           '',
           {
             emitEvent: false,
           },
         );
-
         controls.associationName.setValue(
           '',
           {
             emitEvent: false,
           },
         );
-
         controls.managementCompany.setValue(
           '',
           {
             emitEvent: false,
           },
         );
-
         controls.contactPhone.setValue(
           '',
           {
@@ -1209,24 +1054,19 @@ export class PropertyDetailsStepComponent
         );
       }
     }
-
     controls.feeAmount.updateValueAndValidity({
       emitEvent: false,
     });
-
     controls.feeFrequency.updateValueAndValidity({
       emitEvent: false,
     });
-
     controls.associationName.updateValueAndValidity({
       emitEvent: false,
     });
-
     controls.managementCompany.updateValueAndValidity({
       emitEvent: false,
     });
   }
-
   private configureFuelTankValidators(
     fuelTankPresent: boolean | null,
     clearValue: boolean,
@@ -1234,14 +1074,12 @@ export class PropertyDetailsStepComponent
     const fuelTankOwnership =
       this.form.controls.sellerStatements
         .controls.fuelTankOwnership;
-
     if (fuelTankPresent === true) {
       fuelTankOwnership.setValidators([
         Validators.required,
       ]);
     } else {
       fuelTankOwnership.clearValidators();
-
       if (clearValue) {
         fuelTankOwnership.setValue(
           '',
@@ -1251,40 +1089,32 @@ export class PropertyDetailsStepComponent
         );
       }
     }
-
     fuelTankOwnership.updateValueAndValidity({
       emitEvent: false,
     });
   }
-
   private configureLegalDescriptionValidators(): void {
     const control = this.form.controls.legalDescription;
-
     control.setValidators([
       Validators.maxLength(5000),
     ]);
-
     control.updateValueAndValidity({
       emitEvent: false,
     });
   }
-
   private configureLeaseValidators(
     isTexasListing: boolean,
   ): void {
     const controls =
       this.form.controls.sellerStatements
         .controls;
-
     const texasLeaseControls = [
       controls.residentialLeasesExist,
       controls.fixtureLeasesExist,
       controls.naturalResourceLeasesExist,
     ];
-
     if (isTexasListing) {
       controls.leasesExist.clearValidators();
-
       texasLeaseControls.forEach(
         control => {
           control.setValidators([
@@ -1298,7 +1128,6 @@ export class PropertyDetailsStepComponent
       controls.leasesExist.setValidators([
         Validators.required,
       ]);
-
       texasLeaseControls.forEach(
         control => {
           control.clearValidators();
@@ -1306,18 +1135,15 @@ export class PropertyDetailsStepComponent
       );
     } else {
       controls.leasesExist.clearValidators();
-
       texasLeaseControls.forEach(
         control => {
           control.clearValidators();
         },
       );
     }
-
     controls.leasesExist.updateValueAndValidity({
       emitEvent: false,
     });
-
     texasLeaseControls.forEach(
       control => {
         control.updateValueAndValidity({
@@ -1326,28 +1152,23 @@ export class PropertyDetailsStepComponent
       },
     );
   }
-
   private configureStateStatementValidators():
     void {
     const controls =
       this.form.controls.sellerStatements
         .controls;
-
     this.setRequired(
       controls.ownershipStatus,
       this.requiresOwnershipStatus(),
     );
-
     this.setRequired(
       controls.leadBasedPaintApplies,
       this.requiresLeadBasedPaint(),
     );
-
     this.setRequired(
       controls.methamphetamineContaminationKnown,
       this.requiresUtahMethamphetamineStatement(),
     );
-
     this.setRequired(
       controls.ownersAssociationApplies,
       requiresStateListingField(
@@ -1355,13 +1176,11 @@ export class PropertyDetailsStepComponent
         'ownersAssociationApplies',
       ),
     );
-
     this.setRequired(
       controls.fuelTankPresent,
       this.requiresFuelTank(),
     );
   }
-
   private setRequired(
     control: AbstractControl,
     required: boolean,
@@ -1373,12 +1192,10 @@ export class PropertyDetailsStepComponent
     } else {
       control.clearValidators();
     }
-
     control.updateValueAndValidity({
       emitEvent: false,
     });
   }
-
   private configureAdditionalSellerValidators(
     included: boolean,
     clearValues: boolean,
@@ -1386,13 +1203,11 @@ export class PropertyDetailsStepComponent
     const controls =
       this.form.controls.sellerStatements
         .controls;
-
     const fields = [
       controls.additionalSellerLegalName,
       controls.additionalSellerEmail,
       controls.additionalSellerPhone,
     ];
-
     if (included) {
       controls.additionalSellerLegalName.setValidators(
         [
@@ -1400,7 +1215,6 @@ export class PropertyDetailsStepComponent
           Validators.maxLength(300),
         ],
       );
-
       controls.additionalSellerEmail.setValidators(
         [
           Validators.required,
@@ -1408,7 +1222,6 @@ export class PropertyDetailsStepComponent
           Validators.maxLength(320),
         ],
       );
-
       controls.additionalSellerPhone.setValidators(
         [
           Validators.required,
@@ -1419,7 +1232,6 @@ export class PropertyDetailsStepComponent
       fields.forEach(control => {
         control.clearValidators();
       });
-
       if (clearValues) {
         fields.forEach(control => {
           control.setValue('', {
@@ -1428,21 +1240,34 @@ export class PropertyDetailsStepComponent
         });
       }
     }
-
     fields.forEach(control => {
       control.updateValueAndValidity({
         emitEvent: false,
       });
     });
   }
-
   private emitFormState(): void {
     this.valueChange.emit(
       this.form.getRawValue() as PropertyDetailsFormValue,
     );
-
     this.validityChange.emit(
       this.form.valid,
     );
   }
+  protected isSouthCarolinaListing(): boolean {
+    const state = this.stateCode().trim().toUpperCase();
+    return state === 'SC' || state === 'SOUTH CAROLINA';
+  }
+  private configureSouthCarolinaValidators(): void {
+    const controls = this.form.controls.sellerStatements.controls.southCarolina.controls;
+    for (const control of [controls.beachfrontApplies, controls.futureVacationBookingsExist]) {
+      if (this.isSouthCarolinaListing()) {
+        control.setValidators([Validators.required]);
+      } else {
+        control.clearValidators();
+      }
+      control.updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
 }

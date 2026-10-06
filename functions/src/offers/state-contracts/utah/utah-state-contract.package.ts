@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import type { UtahOfferTermsDocument } from './utah-offer-terms.document';
 import { UTAH_DOCUMENT_RULES } from './utah-document-rules';
@@ -23,5 +24,12 @@ export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocume
     ];
   },
   createContractMilestones: input => createUtahContractMilestones(input),
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.earnestMoneyInCents) },
+    { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
+    { label: 'Inspection / due diligence', value: summaryText(t.deadlines.dueDiligenceDate) },
+  ],
   generateAgreement: input => generateUtahOfferPdf(input),
 };

@@ -1,55 +1,45 @@
 import { CALIFORNIA_DISCLOSURE_TYPES, validCaliforniaDisclosureDecision, type CaliforniaDisclosureDecision, type CaliforniaDisclosureType } from './state-listing-packages/california-listing-facts';
 import * as logger from 'firebase-functions/logger';
-
 import {
   HttpsError,
   onCall
 } from 'firebase-functions/v2/https';
-
 import {
   FieldValue,
   Timestamp
 } from 'firebase-admin/firestore';
-
 import {
   adminFirestore
 } from '../shared/firebase-admin';
-
 import {
   callableFunctionOptions
 } from '../shared/function-options';
-
 type EditableHoaFeeFrequency =
   | 'monthly'
   | 'quarterly'
   | 'semi_annually'
   | 'annually';
-
 interface EditableHoa {
   hasHoa: boolean;
   feeAmount: number | null;
   feeFrequency:
     EditableHoaFeeFrequency | null;
 }
-
 interface PublishedListingChanges {
   californiaDisclosure?: { documentType: CaliforniaDisclosureType; decision: CaliforniaDisclosureDecision };
   listPrice?: number;
   description?: string;
   hoa?: EditableHoa;
 }
-
 interface UpdatePublishedListingData {
   listingUid: string;
   changes: PublishedListingChanges;
 }
-
 interface UpdatePublishedListingResponse {
   listingUid: string;
   updatedFields: string[];
   priceChanged: boolean;
 }
-
 const EDITABLE_FIELDS =
   new Set([
     'californiaDisclosure',
@@ -57,7 +47,6 @@ const EDITABLE_FIELDS =
     'description',
     'hoa'
   ]);
-
 const HOA_FEE_FREQUENCIES =
   new Set<EditableHoaFeeFrequency>([
     'monthly',
@@ -65,7 +54,6 @@ const HOA_FEE_FREQUENCIES =
     'semi_annually',
     'annually'
   ]);
-
 /**
  * Securely updates the limited fields a seller may
  * change after a listing has been published.
@@ -82,28 +70,23 @@ export const updatePublishedListing =
     {
       ...callableFunctionOptions
     },
-
     async request => {
       const authenticatedUserUid =
         request.auth?.uid;
-
       if (!authenticatedUserUid) {
         throw new HttpsError(
           'unauthenticated',
           'Sign in before editing a listing.'
         );
       }
-
       const validatedInput =
         validateUpdateInput(
           request.data
         );
-
       const listingReference =
         adminFirestore
           .collection('listings')
           .doc(validatedInput.listingUid);
-
       try {
         const transactionResult =
           await adminFirestore.runTransaction(
@@ -112,24 +95,20 @@ export const updatePublishedListing =
                 await transaction.get(
                   listingReference
                 );
-
               if (!listingSnapshot.exists) {
                 throw new HttpsError(
                   'not-found',
                   'The selected listing could not be found.'
                 );
               }
-
               const listingData =
                 listingSnapshot.data();
-
               if (!listingData) {
                 throw new HttpsError(
                   'data-loss',
                   'The selected listing contains no data.'
                 );
               }
-
               if (
                 listingData['sellerUid'] !==
                 authenticatedUserUid
@@ -139,13 +118,11 @@ export const updatePublishedListing =
                   'Only the listing owner may edit this listing.'
                 );
               }
-
               const listingStatus =
                 readRequiredString(
                   listingData['status'],
                   'Listing status'
                 );
-
               if (
                 listingStatus === 'sold' ||
                 listingStatus === 'withdrawn' ||
@@ -156,25 +133,19 @@ export const updatePublishedListing =
                   'This listing cannot be edited in its current status.'
                 );
               }
-
               const timestamp =
                 Timestamp.now();
-
               const updates:
                 Record<string, unknown> = {};
-
               const updatedFields:
                 string[] = [];
-
               let priceChanged = false;
-
               if (validatedInput.changes.californiaDisclosure) {
                 if (listingData['state'] !== 'CA') throw new HttpsError('failed-precondition', 'California disclosure applicability is only available for California listings.');
                 const { documentType, decision } = validatedInput.changes.californiaDisclosure;
                 updates[`sellerStatements.california.disclosureApplicability.${documentType}`] = decision;
                 updatedFields.push('californiaDisclosure');
               }
-
               /*
                * LIST PRICE
                */
@@ -187,61 +158,47 @@ export const updatePublishedListing =
                     listingData['listPrice'],
                     'Current listing price'
                   );
-
                 const newPrice =
                   validatedInput.changes
                     .listPrice;
-
                 if (
                   newPrice !== previousPrice
                 ) {
                   priceChanged = true;
-
                   updates['listPrice'] =
                     newPrice;
-
                   updates['priceChangedAt'] =
                     timestamp;
-
                   updatedFields.push(
                     'listPrice'
                   );
-
                   const priceHistoryReference =
                     listingReference
                       .collection('priceHistory')
                       .doc();
-
                   transaction.set(
                     priceHistoryReference,
                     {
                       priceHistoryUid:
                         priceHistoryReference.id,
-
                       listingUid:
                         validatedInput.listingUid,
-
                       sellerUid:
                         authenticatedUserUid,
-
                       previousPrice,
                       newPrice,
-
                       changeType:
                         newPrice < previousPrice
                           ? 'price_reduction'
                           : 'price_increase',
-
                       changedByUid:
                         authenticatedUserUid,
-
                       changedAt:
                         timestamp
                     }
                   );
                 }
               }
-
               /*
                * DESCRIPTION
                */
@@ -257,24 +214,20 @@ export const updatePublishedListing =
                       'description'
                     ]
                     : '';
-
                 const newDescription =
                   validatedInput.changes
                     .description;
-
                 if (
                   newDescription !==
                   existingDescription
                 ) {
                   updates['description'] =
                     newDescription;
-
                   updatedFields.push(
                     'description'
                   );
                 }
               }
-
               /*
                * HOA
                *
@@ -293,7 +246,6 @@ export const updatePublishedListing =
                   updatedFields
                 );
               }
-
               if (
                 updatedFields.length === 0
               ) {
@@ -302,49 +254,39 @@ export const updatePublishedListing =
                   priceChanged
                 };
               }
-
               updates['updatedAt'] =
                 timestamp;
-
               transaction.update(
                 listingReference,
                 updates
               );
-
               return {
                 updatedFields,
                 priceChanged
               };
             }
           );
-
         logger.info(
           'Published listing updated.',
           {
             listingUid:
               validatedInput.listingUid,
-
             sellerUid:
               authenticatedUserUid,
-
             updatedFields:
               transactionResult
                 .updatedFields,
-
             priceChanged:
               transactionResult
                 .priceChanged
           }
         );
-
         return {
           listingUid:
             validatedInput.listingUid,
-
           updatedFields:
             transactionResult
               .updatedFields,
-
           priceChanged:
             transactionResult
               .priceChanged
@@ -353,20 +295,16 @@ export const updatePublishedListing =
         if (error instanceof HttpsError) {
           throw error;
         }
-
         logger.error(
           'Unable to update published listing.',
           {
             listingUid:
               validatedInput.listingUid,
-
             sellerUid:
               authenticatedUserUid,
-
             error
           }
         );
-
         throw new HttpsError(
           'internal',
           'We could not update this listing. Please try again.'
@@ -374,7 +312,6 @@ export const updatePublishedListing =
       }
     }
   );
-
 function validateUpdateInput(
   value: unknown
 ): UpdatePublishedListingData {
@@ -384,48 +321,39 @@ function validateUpdateInput(
       'Listing update information is required.'
     );
   }
-
   const listingUid =
     readRequiredString(
       value['listingUid'],
       'Listing UID'
     );
-
   const changesValue =
     value['changes'];
-
   if (!isRecord(changesValue)) {
     throw new HttpsError(
       'invalid-argument',
       'Listing changes are required.'
     );
   }
-
   const changeKeys =
     Object.keys(changesValue);
-
   if (changeKeys.length === 0) {
     throw new HttpsError(
       'invalid-argument',
       'At least one listing change is required.'
     );
   }
-
   const unsupportedField =
     changeKeys.find(
       key => !EDITABLE_FIELDS.has(key)
     );
-
   if (unsupportedField) {
     throw new HttpsError(
       'invalid-argument',
       `${unsupportedField} cannot be edited after publication.`
     );
   }
-
   const changes:
     PublishedListingChanges = {};
-
   if (
     changesValue['listPrice'] !==
     undefined
@@ -438,7 +366,6 @@ function validateUpdateInput(
         1_000_000_000
       );
   }
-
   if (
     changesValue['description'] !==
     undefined
@@ -448,7 +375,6 @@ function validateUpdateInput(
         changesValue['description'],
         'Property description'
       );
-
     if (
       description.length < 20 ||
       description.length > 5_000
@@ -458,11 +384,9 @@ function validateUpdateInput(
         'The property description must contain between 20 and 5,000 characters.'
       );
     }
-
     changes.description =
       description;
   }
-
   if (
     changesValue['hoa'] !==
     undefined
@@ -472,7 +396,6 @@ function validateUpdateInput(
         changesValue['hoa']
       );
   }
-
   const californiaValue = changesValue['californiaDisclosure'];
   if (californiaValue !== undefined) {
     if (!isRecord(californiaValue) || !CALIFORNIA_DISCLOSURE_TYPES.includes(californiaValue['documentType'] as CaliforniaDisclosureType) ||
@@ -487,7 +410,6 @@ function validateUpdateInput(
     changes
   };
 }
-
 function validateHoa(
   value: unknown
 ): EditableHoa {
@@ -497,17 +419,14 @@ function validateHoa(
       'HOA information is invalid.'
     );
   }
-
   const hasHoa =
     value['hasHoa'];
-
   if (typeof hasHoa !== 'boolean') {
     throw new HttpsError(
       'invalid-argument',
       'Select whether the property has an HOA.'
     );
   }
-
   if (!hasHoa) {
     return {
       hasHoa: false,
@@ -515,7 +434,6 @@ function validateHoa(
       feeFrequency: null
     };
   }
-
   const feeAmount =
     readNumberWithinRange(
       value['feeAmount'],
@@ -523,13 +441,11 @@ function validateHoa(
       0,
       1_000_000
     );
-
   const feeFrequency =
     readRequiredString(
       value['feeFrequency'],
       'HOA fee frequency'
     ) as EditableHoaFeeFrequency;
-
   if (
     !HOA_FEE_FREQUENCIES.has(
       feeFrequency
@@ -540,14 +456,12 @@ function validateHoa(
       'Select a valid HOA fee frequency.'
     );
   }
-
   return {
     hasHoa: true,
     feeAmount,
     feeFrequency
   };
 }
-
 function applyHoaChanges(
   hoa: EditableHoa,
   existingHoaValue: unknown,
@@ -558,36 +472,29 @@ function applyHoaChanges(
     isRecord(existingHoaValue)
       ? existingHoaValue
       : {};
-
   const existingHasHoa =
     existingHoa['hasHoa'] === true;
-
   const existingFeeAmount =
     typeof existingHoa[
       'feeAmount'
     ] === 'number'
       ? existingHoa['feeAmount']
       : null;
-
   const existingFeeFrequency =
     typeof existingHoa[
       'feeFrequency'
     ] === 'string'
       ? existingHoa['feeFrequency']
       : null;
-
   let hoaChanged = false;
-
   if (
     hoa.hasHoa !==
     existingHasHoa
   ) {
     updates['hoa.hasHoa'] =
       hoa.hasHoa;
-
     hoaChanged = true;
   }
-
   /*
    * Existing ListingHoa records require this array.
    * Only add it when an older listing does not
@@ -600,10 +507,8 @@ function applyHoaChanges(
   ) {
     updates['hoa.includedItems'] =
       [];
-
     hoaChanged = true;
   }
-
   if (hoa.hasHoa) {
     if (
       hoa.feeAmount !==
@@ -611,17 +516,14 @@ function applyHoaChanges(
     ) {
       updates['hoa.feeAmount'] =
         hoa.feeAmount;
-
       hoaChanged = true;
     }
-
     if (
       hoa.feeFrequency !==
       existingFeeFrequency
     ) {
       updates['hoa.feeFrequency'] =
         hoa.feeFrequency;
-
       hoaChanged = true;
     }
   } else {
@@ -632,10 +534,8 @@ function applyHoaChanges(
     ) {
       updates['hoa.feeAmount'] =
         FieldValue.delete();
-
       hoaChanged = true;
     }
-
     if (
       existingHoa[
         'feeFrequency'
@@ -643,18 +543,15 @@ function applyHoaChanges(
     ) {
       updates['hoa.feeFrequency'] =
         FieldValue.delete();
-
       hoaChanged = true;
     }
   }
-
   if (hoaChanged) {
     updatedFields.push(
       'hoa'
     );
   }
 }
-
 function readRequiredString(
   value: unknown,
   fieldName: string
@@ -668,10 +565,8 @@ function readRequiredString(
       `${fieldName} is required.`
     );
   }
-
   return value.trim();
 }
-
 function readRequiredNumber(
   value: unknown,
   fieldName: string
@@ -685,10 +580,8 @@ function readRequiredNumber(
       `${fieldName} is invalid.`
     );
   }
-
   return value;
 }
-
 function readNumberWithinRange(
   value: unknown,
   fieldName: string,
@@ -706,10 +599,8 @@ function readNumberWithinRange(
       `${fieldName} must be between ${minimum} and ${maximum}.`
     );
   }
-
   return value;
 }
-
 function isRecord(
   value: unknown
 ): value is Record<string, unknown> {

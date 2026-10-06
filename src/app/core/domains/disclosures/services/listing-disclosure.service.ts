@@ -4,7 +4,6 @@ import type { CaliforniaDisclosureDecision } from '../../listings/state-packages
 import {
   Injectable
 } from '@angular/core';
-
 import {
   collection,
   deleteDoc,
@@ -14,48 +13,56 @@ import {
   setDoc,
   Timestamp
 } from 'firebase/firestore';
-
 import {
   deleteObject,
   getBlob,
   ref,
   uploadBytes
 } from 'firebase/storage';
-
 import {
   firestore,
   storage
 } from '../../../infrastructure/firebase/firebase';
-
 import {
   ListingDisclosureDocument,
   ListingDisclosureSummary
 } from '../models/listing-disclosure-document.model';
-
 import {
   DisclosureDocumentType
 } from '../models/state-disclosure-requirement.model';
-
 const MAXIMUM_DISCLOSURE_SIZE_BYTES =
   15 * 1024 * 1024;
-
+export interface SouthCarolinaDisclosureAnswers {
+  beachfrontApplies: boolean | null;
+  futureVacationBookingsExist: boolean | null;
+}
 @Injectable({
   providedIn: 'root'
 })
 export class ListingDisclosureService {
+  async getSouthCarolinaDisclosureAnswers(listingUid: string): Promise<SouthCarolinaDisclosureAnswers> {
+    const snapshot = await getDoc(doc(firestore, 'listings', listingUid));
+    if (!snapshot.exists()) throw new Error('The listing could not be found.');
+    const statements = this.readRecord(snapshot.data()['sellerStatements']);
+    const facts = this.readRecord(statements?.['southCarolina']);
+    const beachfront = facts?.['beachfrontApplies'];
+    const vacation = facts?.['futureVacationBookingsExist'];
+    return {
+      beachfrontApplies: typeof beachfront === 'boolean' ? beachfront : null,
+      futureVacationBookingsExist: typeof vacation === 'boolean' ? vacation : null,
+    };
+  }
+
   async saveCaliforniaApplicability(listingUid: string, documentType: DisclosureDocumentType, decision: CaliforniaDisclosureDecision): Promise<CaliforniaDisclosureDecision> {
     await httpsCallable(functions, 'updatePublishedListing')({ listingUid, changes: { californiaDisclosure: { documentType, decision } } });
     return decision;
   }
-
-
   async getListingDisclosures(
     listingUid: string
   ): Promise<ListingDisclosureSummary[]> {
     if (!listingUid.trim()) {
       return [];
     }
-
     const disclosuresReference =
       collection(
         firestore,
@@ -63,10 +70,8 @@ export class ListingDisclosureService {
         listingUid,
         'disclosures'
       );
-
     const snapshot =
       await getDocs(disclosuresReference);
-
     return snapshot.docs
       .map(documentSnapshot =>
         this.mapDisclosureSummary(
@@ -94,7 +99,6 @@ export class ListingDisclosureService {
             )
       );
   }
-
   async getCurrentDisclosure(
     listingUid: string,
     documentType: DisclosureDocumentType
@@ -107,22 +111,17 @@ export class ListingDisclosureService {
         'disclosures',
         documentType
       );
-
     const snapshot =
       await getDoc(summaryReference);
-
     if (!snapshot.exists()) {
       return null;
     }
-
     const summary =
       this.mapDisclosureSummary(
         snapshot.data()
       );
-
     return summary?.currentDocument ?? null;
   }
-
   async getDisclosureVersion(
     listingUid: string,
     documentType: DisclosureDocumentType,
@@ -134,7 +133,6 @@ export class ListingDisclosureService {
     ) {
       return null;
     }
-
     const versionReference =
       doc(
         firestore,
@@ -145,19 +143,15 @@ export class ListingDisclosureService {
         'versions',
         versionId
       );
-
     const snapshot =
       await getDoc(versionReference);
-
     if (!snapshot.exists()) {
       return null;
     }
-
     return this.mapDisclosureDocument(
       snapshot.data()
     );
   }
-
   async uploadDisclosure(
     sellerUid: string,
     listingUid: string,
@@ -171,21 +165,16 @@ export class ListingDisclosureService {
       stateAbbreviation,
       file
     );
-
     await this.validatePdfFile(file);
-
     const currentDocument =
       await this.getCurrentDisclosure(
         listingUid,
         documentType
       );
-
     const version =
       (currentDocument?.version ?? 0) + 1;
-
     const versionId =
       this.createVersionId();
-
     const storagePath =
       this.buildDisclosureStoragePath(
         sellerUid,
@@ -193,47 +182,36 @@ export class ListingDisclosureService {
         documentType,
         versionId
       );
-
     const storageReference =
       ref(
         storage,
         storagePath
       );
-
     const uploadedAt =
       new Date();
-
     const disclosureDocument:
       ListingDisclosureDocument = {
       id: versionId,
       listingUid,
       sellerUid,
       documentType,
-
       stateAbbreviation:
         stateAbbreviation
           .trim()
           .toUpperCase(),
-
       originalFileName:
         file.name,
-
       storagePath,
-
       contentType:
         'application/pdf',
-
       sizeBytes:
         file.size,
-
       version,
       versionId,
-
       uploadedAt,
       uploadedByUid:
         sellerUid
     };
-
     const versionReference =
       doc(
         firestore,
@@ -244,7 +222,6 @@ export class ListingDisclosureService {
         'versions',
         versionId
       );
-
     const summaryReference =
       doc(
         firestore,
@@ -253,7 +230,6 @@ export class ListingDisclosureService {
         'disclosures',
         documentType
       );
-
     try {
       await uploadBytes(
         storageReference,
@@ -261,7 +237,6 @@ export class ListingDisclosureService {
         {
           contentType:
             'application/pdf',
-
           customMetadata: {
             sellerUid,
             listingUid,
@@ -277,32 +252,26 @@ export class ListingDisclosureService {
           }
         }
       );
-
       const firestoreDocument =
         this.toFirestoreDocument(
           disclosureDocument
         );
-
       await setDoc(
         versionReference,
         firestoreDocument
       );
-
       await setDoc(
         summaryReference,
         {
           documentType,
-
           currentDocument:
             firestoreDocument,
-
           updatedAt:
             Timestamp.fromDate(
               uploadedAt
             )
         }
       );
-
       return disclosureDocument;
     } catch (error) {
       await Promise.allSettled([
@@ -313,11 +282,9 @@ export class ListingDisclosureService {
           versionReference
         )
       ]);
-
       throw error;
     }
   }
-
   async downloadDisclosure(
     disclosure:
       ListingDisclosureDocument
@@ -327,7 +294,6 @@ export class ListingDisclosureService {
         'The disclosure document does not have a valid storage location.'
       );
     }
-
     return getBlob(
       ref(
         storage,
@@ -335,7 +301,6 @@ export class ListingDisclosureService {
       )
     );
   }
-
   async openDisclosure(
     disclosure:
       ListingDisclosureDocument
@@ -351,27 +316,21 @@ export class ListingDisclosureService {
         '',
         '_blank'
       );
-
     if (!openedWindow) {
       throw new Error(
         'Your browser prevented the disclosure document from opening.'
       );
     }
-
     openedWindow.opener = null;
-
     try {
       const pdfBlob =
         await this.downloadDisclosure(
           disclosure
         );
-
       const objectUrl =
         URL.createObjectURL(pdfBlob);
-
       openedWindow.location.href =
         objectUrl;
-
       window.setTimeout(
         () => {
           URL.revokeObjectURL(
@@ -385,7 +344,6 @@ export class ListingDisclosureService {
       throw error;
     }
   }
-
   private validateUploadArguments(
     sellerUid: string,
     listingUid: string,
@@ -397,25 +355,21 @@ export class ListingDisclosureService {
         'An authenticated seller is required to upload disclosures.'
       );
     }
-
     if (!listingUid.trim()) {
       throw new Error(
         'A listing is required before uploading disclosures.'
       );
     }
-
     if (!stateAbbreviation.trim()) {
       throw new Error(
         'The listing state is required before uploading disclosures.'
       );
     }
-
     if (!file) {
       throw new Error(
         'Select a completed disclosure PDF.'
       );
     }
-
     if (
       file.type !==
       'application/pdf'
@@ -424,7 +378,6 @@ export class ListingDisclosureService {
         'Disclosure documents must be uploaded as PDF files.'
       );
     }
-
     if (
       file.size >
       MAXIMUM_DISCLOSURE_SIZE_BYTES
@@ -434,7 +387,6 @@ export class ListingDisclosureService {
       );
     }
   }
-
   private async validatePdfFile(
     file: File
   ): Promise<void> {
@@ -442,18 +394,15 @@ export class ListingDisclosureService {
       await file
         .slice(0, 5)
         .arrayBuffer();
-
     const header =
       new TextDecoder()
         .decode(headerBuffer);
-
     if (header !== '%PDF-') {
       throw new Error(
         'The selected file does not appear to be a valid PDF document.'
       );
     }
   }
-
   private toFirestoreDocument(
     disclosure:
       ListingDisclosureDocument
@@ -461,47 +410,34 @@ export class ListingDisclosureService {
     return {
       id:
         disclosure.id,
-
       listingUid:
         disclosure.listingUid,
-
       sellerUid:
         disclosure.sellerUid,
-
       documentType:
         disclosure.documentType,
-
       stateAbbreviation:
         disclosure.stateAbbreviation,
-
       originalFileName:
         disclosure.originalFileName,
-
       storagePath:
         disclosure.storagePath,
-
       contentType:
         disclosure.contentType,
-
       sizeBytes:
         disclosure.sizeBytes,
-
       version:
         disclosure.version,
-
       versionId:
         disclosure.versionId,
-
       uploadedAt:
         Timestamp.fromDate(
           disclosure.uploadedAt
         ),
-
       uploadedByUid:
         disclosure.uploadedByUid
     };
   }
-
   private mapDisclosureSummary(
     value:
       Record<string, unknown>
@@ -510,26 +446,20 @@ export class ListingDisclosureService {
       this.readRecord(
         value['currentDocument']
       );
-
     if (!currentDocumentValue) {
       return null;
     }
-
     const currentDocument =
       this.mapDisclosureDocument(
         currentDocumentValue
       );
-
     if (!currentDocument) {
       return null;
     }
-
     return {
       documentType:
         currentDocument.documentType,
-
       currentDocument,
-
       updatedAt:
         this.toDate(
           value['updatedAt']
@@ -537,7 +467,6 @@ export class ListingDisclosureService {
         currentDocument.uploadedAt
     };
   }
-
   private mapDisclosureDocument(
     value:
       Record<string, unknown>
@@ -546,47 +475,38 @@ export class ListingDisclosureService {
       this.readString(
         value['id']
       );
-
     const listingUid =
       this.readString(
         value['listingUid']
       );
-
     const sellerUid =
       this.readString(
         value['sellerUid']
       );
-
     const documentType =
       this.readString(
         value['documentType']
       ) as DisclosureDocumentType;
-
     const stateAbbreviation =
       this.readString(
         value['stateAbbreviation']
       );
-
     const originalFileName =
       this.readString(
         value['originalFileName']
       );
-
     const storagePath =
       this.readString(
         value['storagePath']
       );
-
     const uploadedAt =
       this.toDate(
         value['uploadedAt']
       );
-
     const version =
       this.readNumber(
         value['version']
       );
-
     if (
       !id ||
       !listingUid ||
@@ -600,7 +520,6 @@ export class ListingDisclosureService {
     ) {
       return null;
     }
-
     return {
       id,
       listingUid,
@@ -609,31 +528,24 @@ export class ListingDisclosureService {
       stateAbbreviation,
       originalFileName,
       storagePath,
-
       contentType:
         'application/pdf',
-
       sizeBytes:
         this.readNumber(
           value['sizeBytes']
         ) ?? 0,
-
       version,
-
       versionId:
         this.readString(
           value['versionId']
         ) || id,
-
       uploadedAt,
-
       uploadedByUid:
         this.readString(
           value['uploadedByUid']
         ) || sellerUid
     };
   }
-
   private buildDisclosureStoragePath(
     sellerUid: string,
     listingUid: string,
@@ -649,14 +561,12 @@ export class ListingDisclosureService {
       `${versionId}.pdf`
     ].join('/');
   }
-
   private createVersionId(): string {
     return [
       Date.now(),
       crypto.randomUUID()
     ].join('-');
   }
-
   private readRecord(
     value: unknown
   ): Record<string, unknown> | null {
@@ -667,11 +577,9 @@ export class ListingDisclosureService {
     ) {
       return null;
     }
-
     return value as
       Record<string, unknown>;
   }
-
   private readString(
     value: unknown
   ): string {
@@ -679,7 +587,6 @@ export class ListingDisclosureService {
       ? value.trim()
       : '';
   }
-
   private readNumber(
     value: unknown
   ): number | undefined {
@@ -690,7 +597,6 @@ export class ListingDisclosureService {
       ? value
       : undefined;
   }
-
   private toDate(
     value: unknown
   ): Date | undefined {
@@ -699,7 +605,6 @@ export class ListingDisclosureService {
     ) {
       return value;
     }
-
     if (
       value &&
       typeof value === 'object' &&
@@ -716,7 +621,6 @@ export class ListingDisclosureService {
         }
       ).toDate();
     }
-
     return undefined;
   }
 }

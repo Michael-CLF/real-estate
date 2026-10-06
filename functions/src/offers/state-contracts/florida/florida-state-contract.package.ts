@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import type { FloridaOfferTermsDocument } from './florida-offer-terms.document';
 import { FLORIDA_DOCUMENT_RULES } from './florida-document-rules';
@@ -34,5 +35,12 @@ export const floridaStateContractPackage: StateContractPackage<FloridaOfferTerms
     ];
   },
   createContractMilestones: input => createFloridaContractMilestones(input),
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.hasEarnestMoney === false ? 0 : t.purchase.earnestMoneyInCents) },
+    { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
+    { label: 'Inspection / due diligence', value: `${t.deadlines.inspectionPeriodDays} calendar days after Effective Date; see agreement counting rules` },
+  ],
   generateAgreement: input => generateFloridaOfferPdf(input),
 };

@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import type { WisconsinOfferTermsDocument } from './wisconsin-offer-terms.document';
 import { WISCONSIN_DOCUMENT_RULES } from './wisconsin-document-rules';
@@ -23,5 +24,12 @@ export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferT
     ];
   },
   createContractMilestones: input => createWisconsinContractMilestones(input),
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.earnestMoneyInCents) },
+    { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
+    { label: 'Inspection / due diligence', value: summaryText(t.deadlines.dueDiligenceDate) },
+  ],
   generateAgreement: input => generateWisconsinOfferPdf(input),
 };

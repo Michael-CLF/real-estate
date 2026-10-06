@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { StateContractPackage } from '../state-contract-package';
 import type { CaliforniaOfferTermsDocument } from './california-offer-terms.document';
@@ -22,7 +23,14 @@ export const californiaStateContractPackage: StateContractPackage<CaliforniaOffe
     ['hoaDocumentsStatus','california-association-documents'],
     ['leadPaintStatus','lead-based-paint'],
   ] as const).filter(([field])=>version.terms.disclosures[field]==='received').map(([,type])=>type),
-  createContractMilestones:createCaliforniaContractMilestones,generateAgreement:generateCaliforniaOfferPdf,
+  createContractMilestones:createCaliforniaContractMilestones,  getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.hasEarnestMoney === false ? 0 : t.purchase.earnestMoneyInCents) },
+    { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
+    { label: 'Inspection / due diligence', value: `${t.deadlines.inspectionPeriodDays} calendar days after acceptance; see agreement counting rules` },
+  ],
+  generateAgreement:generateCaliforniaOfferPdf,
 };
 
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';

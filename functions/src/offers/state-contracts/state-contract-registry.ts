@@ -1,3 +1,4 @@
+import { southCarolinaStateContractPackage } from './south-carolina/south-carolina-state-contract.package';
 import { californiaStateContractPackage } from './california/california-state-contract.package';
 import {
   HttpsError,
@@ -80,6 +81,7 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
     [louisianaStateContractPackage.stateCode, louisianaStateContractPackage],
     [coloradoStateContractPackage.stateCode, coloradoStateContractPackage],
     [californiaStateContractPackage.stateCode, californiaStateContractPackage],
+    [southCarolinaStateContractPackage.stateCode, southCarolinaStateContractPackage],
   ]);
 
 

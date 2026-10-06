@@ -1,3 +1,4 @@
+import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
 import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
@@ -198,6 +199,7 @@ if (currentStateCode === 'CO') {
       await assertColoradoListingDisclosures(transaction, listingReference, currentListingData);
     }
 
+    const southCarolinaDocuments = currentStateCode === 'SC' ? await readSouthCarolinaListingDisclosures(transaction, listingReference, currentListingData) : undefined;
     const californiaReadiness = currentStateCode === 'CA'
       ? await readCaliforniaListingDisclosures(transaction, listingReference, currentListingData)
       : undefined;
@@ -358,7 +360,7 @@ if (currentStateCode === 'CO') {
           seller:
             sellerParty,
 
-          listingData: { ...currentListingData, californiaReadiness },
+          listingData: { ...currentListingData, californiaReadiness, ...(southCarolinaDocuments ? {southCarolinaDocuments} : {}) },
         });
 
     const offerData = removeUndefinedValues({

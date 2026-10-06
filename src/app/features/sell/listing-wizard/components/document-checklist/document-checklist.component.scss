@@ -187,15 +187,15 @@ button {
   padding: 0.9rem 1.25rem;
   border: 0;
   border-radius: 0.5rem;
-  background: #154360;
+  background: #008080;
   color: white;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
 
   &.secondary {
-    background: #edf4f8;
-    color: #154360;
+    background: #008080;
+    color: #ffffff;
   }
 
   &:disabled {

@@ -1,5 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import PDFDocument from 'pdfkit';
+import { PDFDocument as MergePdfDocument } from 'pdf-lib';
+import type { AgreementSummaryRow, GenerateStateAgreementInput, GeneratedStateAgreement, StateContractTerms } from './state-contract-package';
 import SVGtoPDF from 'svg-to-pdfkit';
 
 /** Shared NavStreet page chrome for state-authored agreements. Official state forms keep their own pages. */
@@ -76,4 +79,97 @@ export function drawNavStreetNotice(pdf: PDFKit.PDFDocument, title: string, body
     .text(body, margin + 12, y + 24,
       { width: contentWidth - 24, lineGap: 2, characterSpacing: 0 });
   pdf.y = y + height + 8;
+}
+
+
+export function summaryMoney(cents: number): string {
+  return Number.isFinite(cents) ? new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD',
+  }).format(cents / 100) : 'Not specified';
+}
+
+export function summaryText(value: string | number | undefined): string {
+  return value === undefined || value === '' || value === 'unselected'
+    ? 'Not specified' : String(value).replace(/_/g, ' ');
+}
+
+/** Down payment is price less financing, before crediting earnest money; not cash to close. */
+export function summaryFunding(price: number, loan: number | undefined, cash: boolean): AgreementSummaryRow[] {
+  return [
+    { label: 'Purchase price', value: summaryMoney(price) },
+    { label: 'Down payment (before deposit credit)', value: cash ? 'Not applicable — cash purchase' :
+      loan === undefined ? 'Not specified in base agreement; see financing attachments' : summaryMoney(price - loan) },
+    { label: 'Loan amount', value: cash ? 'None — cash purchase' :
+      loan === undefined ? 'Not specified in base agreement; see financing attachments' : summaryMoney(loan) },
+  ];
+}
+
+/** Adds the same branded summary to submitted and accepted PDFs before hashing/storage. */
+export async function prependNavStreetContractSummary(
+  input: GenerateStateAgreementInput<StateContractTerms>,
+  rows: readonly AgreementSummaryRow[],
+  agreement: GeneratedStateAgreement,
+): Promise<GeneratedStateAgreement> {
+  const pdf = new PDFDocument({ size: 'LETTER', margin: NAVSTREET_PDF.margin, bufferPages: true });
+  const chunks: Buffer[] = [];
+  const completed = new Promise<Buffer>((resolve, reject) => {
+    pdf.on('data', chunk => chunks.push(Buffer.from(chunk)));
+    pdf.on('end', () => resolve(Buffer.concat(chunks)));
+    pdf.on('error', reject);
+  });
+  registerNavStreetPdfFonts(pdf);
+  const property = input.version.terms.property;
+  pdf.y = NAVSTREET_PDF.contentTop;
+  pdf.font('NavStreet-Bold').fontSize(20).fillColor(NAVSTREET_PDF.blue)
+    .text('Contract at a glance', NAVSTREET_PDF.margin, pdf.y);
+  pdf.moveDown(0.4);
+  pdf.font('NavStreet-Regular').fontSize(10).fillColor(NAVSTREET_PDF.ink)
+    .text([property.addressLine1, property.city, property.state, property.zipCode].filter(Boolean).join(', '),
+      { width: NAVSTREET_PDF.contentWidth });
+  pdf.moveDown(0.5);
+  const parties = [
+    { label: 'Buyer(s)', value: input.version.buyers.map(party => party.legalName).join('; ') },
+    { label: 'Seller(s)', value: input.version.sellers.map(party => party.legalName).join('; ') },
+  ];
+  const addPageIfNeeded = (height: number): void => {
+    if (pdf.y + height > NAVSTREET_PDF.contentBottom) {
+      pdf.addPage(); pdf.y = NAVSTREET_PDF.contentTop;
+    }
+  };
+  for (const row of [...parties, ...rows]) {
+    pdf.font('NavStreet-Regular').fontSize(10);
+    const valueHeight = pdf.heightOfString(row.value || 'Not specified', { width: 300, lineGap: 2 });
+    pdf.font('NavStreet-Bold').fontSize(9);
+    const height = Math.max(32, valueHeight + 14, pdf.heightOfString(row.label, { width: 196 }) + 14);
+    addPageIfNeeded(height);
+    const y = pdf.y;
+    pdf.rect(NAVSTREET_PDF.margin, y, NAVSTREET_PDF.contentWidth, height).fill(NAVSTREET_PDF.pale);
+    pdf.font('NavStreet-Bold').fontSize(9).fillColor(NAVSTREET_PDF.blue)
+      .text(row.label, NAVSTREET_PDF.margin + 10, y + 8, { width: 196 });
+    pdf.font('NavStreet-Regular').fontSize(10).fillColor(NAVSTREET_PDF.ink)
+      .text(row.value || 'Not specified', NAVSTREET_PDF.margin + 216, y + 8, { width: 300, lineGap: 2 });
+    pdf.y = y + height + 4;
+  }
+  const notice = 'This page highlights selected terms for convenience. It does not replace or modify the complete agreement. Read all provisions and incorporated attachments. If this summary differs from the agreement’s operative provisions, those provisions control. Down payment excludes closing costs and is shown before deposit credits. Relative deadlines follow the agreement’s counting rules and any agreed extensions.';
+  pdf.font('NavStreet-Regular').fontSize(9);
+  addPageIfNeeded(pdf.heightOfString(notice, { width: NAVSTREET_PDF.contentWidth - 24, lineGap: 2 }) + 48);
+  drawNavStreetNotice(pdf, 'Summary only — read the complete agreement', notice);
+  const range = pdf.bufferedPageRange();
+  for (let index = range.start; index < range.start + range.count; index++) {
+    pdf.switchToPage(index);
+    pdf.page.margins.bottom = 0;
+    drawNavStreetPdfChrome(pdf, { stateName: property.state, referenceNumber: input.offer.referenceNumber,
+      versionNumber: input.version.versionNumber, pageNumber: index + 1, pageCount: range.count });
+    pdf.font('NavStreet-Regular').fontSize(7).fillColor(NAVSTREET_PDF.teal)
+      .text('Summary pages • Agreement pages follow with their original numbering', NAVSTREET_PDF.margin, 748,
+        { width: NAVSTREET_PDF.contentWidth, lineBreak: false });
+  }
+  pdf.end();
+  const cover = await MergePdfDocument.load(await completed);
+  // Load the original rather than copying its pages, which would drop interactive form fields.
+  const merged = await MergePdfDocument.load(agreement.buffer, { updateMetadata: false });
+  const coverPages = await merged.copyPages(cover, cover.getPageIndices());
+  coverPages.forEach((page, index) => merged.insertPage(index, page));
+  return { ...agreement, buffer: Buffer.from(await merged.save({ updateFieldAppearances: false })),
+    pageCount: merged.getPageCount() };
 }

@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import {
   createNorthCarolinaContractMilestones,
 } from './north-carolina-contract-milestones';
@@ -75,7 +76,16 @@ export const northCarolinaStateContractPackage:
           }
         ),
 
-    generateAgreement:
+      getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, undefined, t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.deposits.depositInCents) },
+    { label: 'Closing / settlement date', value: summaryText(t.settlement.settlementDate) },
+    { label: 'Due diligence deadline', value: t.deposits.dueDiligenceDeadlineType === 'specific_date'
+      ? `${summaryText(t.deposits.dueDiligenceEndDate)} at 5:00 p.m. Eastern`
+      : `${summaryText(t.deposits.dueDiligenceDaysAfterEffectiveDate)} days after Effective Date, at 5:00 p.m. Eastern` },
+  ],
+  generateAgreement:
       input =>
         generateOfferPdf(
           input

@@ -1,3 +1,4 @@
+import { summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import {
   createTexasContractMilestones,
 } from './texas-contract-milestones';
@@ -85,6 +86,17 @@ export const texasStateContractPackage:
     );
   },
 
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    { label: 'Purchase price', value: summaryMoney(t.salesPrice.salesPriceInCents) },
+    { label: 'Down payment / cash portion (before deposit credit)', value: summaryMoney(t.salesPrice.cashPortionInCents) },
+    { label: 'Financing amount', value: summaryMoney(t.salesPrice.financingInCents) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.earnestMoneyAndOption.earnestMoneyInCents) },
+    { label: 'Closing date', value: summaryText(t.closingAndPossession.closingDate) },
+    { label: 'Option termination period', value: t.earnestMoneyAndOption.optionPeriodDays
+      ? `${t.earnestMoneyAndOption.optionPeriodDays} days after Effective Date; see contract for 5:00 p.m. deadline rule`
+      : 'No option period specified' },
+    { label: 'Option fee (separate from deposit)', value: summaryMoney(t.earnestMoneyAndOption.optionFeeInCents) },
+  ],
   generateAgreement: input =>
     generateTexasOfferPdf(input),
 

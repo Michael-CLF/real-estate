@@ -1,5 +1,3 @@
-/*listing-wizard.component.ts*/
-
 import { CALIFORNIA_LISTING_FACT_DEFAULTS } from '../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import {
   ChangeDetectionStrategy,
@@ -8,15 +6,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
-
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-
 import { auth } from '../../../core/infrastructure/firebase/firebase';
-
 import { ListingService } from '../../../core/domains/listings/services/listing.service';
-
 import { IdentityVerificationService } from '../../identity/services/identity-verification.service';
-
 import {
   ListingDraftStep,
   ListingEnhancements,
@@ -24,12 +17,10 @@ import {
   ListingHoa,
   ListingSellerStatements,
 } from '../../../core/domains/listings/models/listing.model';
-
 import {
   AddressFormValue,
   AddressStepComponent,
 } from './components/address-step/address-step.component';
-
 import {
   PropertyDetailsFormValue,
   PropertyDetailsStepComponent,
@@ -38,37 +29,28 @@ import {
   PropertyFeaturesStepComponent,
   PropertyFeaturesStepValue,
 } from './components/property-features-step/property-features-step.component';
-
 import {
   ListingPhoto,
   PhotosStepComponent,
 } from './components/photos-step/photos-step.component';
-
 import {
   PricingFormValue,
   PricingStepComponent,
 } from './components/pricing-step/pricing-step.component';
-
 import { ReviewStepComponent } from './components/review-step/review-step.component';
-
 import { ListingPhotoStorageService } from '../../../core/infrastructure/listings/listing-photo-storage.service';
-
 import {
   getStateListingPackage,
 } from '../../../core/domains/listings/state-packages/state-listing.registry';
-
 import {
   requiresStateListingField,
 } from '../../../core/domains/listings/state-packages/state-listing-package';
-
 import { DocumentChecklistComponent, ListingChecklistLocation } from './components/document-checklist/document-checklist.component';
 import { LISTING_CHECKLIST_STATES } from '../../../core/configuration/listing-document-checklist.config';
-
 interface WizardStep {
   number: number;
   label: string;
 }
-
 @Component({
   selector: 'app-listing-wizard',
   standalone: true,
@@ -88,60 +70,36 @@ interface WizardStep {
 })
 export class ListingWizardComponent implements OnInit {
   private readonly listingService = inject(ListingService);
-
   private readonly identityVerificationService = inject(
     IdentityVerificationService,
   );
-
   private readonly route = inject(ActivatedRoute);
-
   private readonly router = inject(Router);
-
   private readonly listingPhotoStorageService = inject(
     ListingPhotoStorageService,
   );
-
   protected readonly showDocumentChecklist = signal(false);
-
   protected readonly checklistState = signal('');
   protected readonly checklistLocation = signal<ListingChecklistLocation | null>(null);
-
   protected readonly listingUid = signal<string | null>(null);
-
   protected readonly isInitializing = signal(true);
-
   protected readonly initializationError = signal('');
-
   protected readonly currentStep = signal(1);
-
   protected readonly completedSteps = signal<ListingDraftStep[]>([]);
-
   protected readonly addressData = signal<AddressFormValue | null>(null);
-
   protected readonly propertyDetailsData =
     signal<PropertyDetailsFormValue | null>(null);
-
   protected readonly propertyFeaturesData =
     signal<PropertyFeaturesStepValue | null>(null);
-
   protected readonly photosData = signal<ListingPhoto[]>([]);
-
   protected readonly pricingData = signal<PricingFormValue | null>(null);
-
   protected readonly featuredListing = signal(false);
-
   protected readonly certificationAccepted = signal(false);
-
   protected readonly isSaving = signal(false);
-
   protected readonly isSavingPhotos = signal(false);
-
   protected readonly saveError = signal('');
-
   protected readonly photoSaveError = signal('');
-
   protected readonly listingContentComplete = signal(false);
-
   protected readonly stepValidity = signal<Record<number, boolean>>({
     1: false,
     2: false,
@@ -150,7 +108,6 @@ export class ListingWizardComponent implements OnInit {
     5: false,
     6: false,
   });
-
   protected readonly steps: WizardStep[] = [
     {
       number: 1,
@@ -177,36 +134,27 @@ export class ListingWizardComponent implements OnInit {
       label: 'Review',
     },
   ];
-
   async ngOnInit(): Promise<void> {
     await this.initializeDraft();
   }
-
   private async initializeDraft(): Promise<void> {
     const user = auth.currentUser;
-
     if (!user) {
       this.initializationError.set(
         'Your authentication session could not be found. Please sign in again.',
       );
-
       this.isInitializing.set(false);
       return;
     }
-
     const routeListingUid = this.route.snapshot.paramMap.get('listingUid');
-
     try {
       if (routeListingUid) {
         await this.loadExistingDraft(routeListingUid, user.uid);
-
         return;
       }
-
       this.showDocumentChecklist.set(true);
     } catch (error) {
       console.error('Failed to initialize listing draft.', error);
-
       this.initializationError.set(
         error instanceof Error
           ? error.message
@@ -216,7 +164,6 @@ export class ListingWizardComponent implements OnInit {
       this.isInitializing.set(false);
     }
   }
-
   protected openDocumentChecklist(): void {
     const address = this.addressData();
     if (address) this.checklistLocation.set({ zipCode: address.zipCode, city: address.city, state: address.state, county: address.county });
@@ -224,7 +171,6 @@ export class ListingWizardComponent implements OnInit {
     this.showDocumentChecklist.set(true);
     this.scrollToTop();
   }
-
   protected async continueFromChecklist(location: ListingChecklistLocation): Promise<void> {
     const stateCode = location.state;
     if (this.isSaving() || !LISTING_CHECKLIST_STATES.some(state => state.abbreviation === stateCode)) return;
@@ -251,20 +197,16 @@ export class ListingWizardComponent implements OnInit {
       this.isSaving.set(false);
     }
   }
-
   private async createNewDraft(sellerUid: string): Promise<void> {
     const listingUid = await this.listingService.createInitialDraft(sellerUid);
-
     this.listingUid.set(listingUid);
     const location = this.checklistLocation();
     this.addressData.set({ addressLine1: '', addressLine2: '', city: location?.city ?? '', state: this.checklistState(), zipCode: location?.zipCode ?? '', county: location?.county ?? '' });
-
     await this.router.navigate(['/sell/listings', listingUid, 'edit'], {
       replaceUrl: true,
       queryParams: { checklistState: this.checklistState(), checklistZip: location?.zipCode, checklistCity: location?.city, checklistCounty: location?.county },
     });
   }
-
   private async loadExistingDraft(
     listingUid: string,
     sellerUid: string,
@@ -273,15 +215,11 @@ export class ListingWizardComponent implements OnInit {
       listingUid,
       sellerUid,
     );
-
     if (!draft) {
       throw new Error('This listing draft could not be found.');
     }
-
     this.listingUid.set(listingUid);
-
     this.completedSteps.set([...draft.progress.completedSteps]);
-
     if (!draft.address) {
       const selectedState = this.route.snapshot.queryParamMap.get('checklistState') ?? '';
       if (LISTING_CHECKLIST_STATES.some(state => state.abbreviation === selectedState)) {
@@ -291,43 +229,28 @@ export class ListingWizardComponent implements OnInit {
         this.addressData.set({ addressLine1: '', addressLine2: '', ...location });
       }
     }
-
     if (draft.address) {
       this.addressData.set({
         addressLine1: draft.address.addressLine1,
-
         addressLine2: draft.address.addressLine2 ?? '',
-
         city: draft.address.city,
-
         state: draft.address.state,
-
         zipCode: draft.address.zipCode,
-
         county: draft.address.county,
       });
-
       this.setStepValidity(1, true);
     }
-
     if (draft.propertyDetails) {
       this.propertyDetailsData.set({
         propertyType: draft.propertyDetails.propertyType,
-
         bedrooms: draft.propertyDetails.bedrooms,
-
         bathrooms:
           draft.propertyDetails.fullBathrooms +
           draft.propertyDetails.halfBathrooms * 0.5,
-
         squareFeet: draft.propertyDetails.squareFeet,
-
         yearBuilt: draft.propertyDetails.yearBuilt,
-
         lotSize: draft.propertyDetails.lotSize ?? null,
-
         lotSizeUnit: draft.propertyDetails.lotSizeUnit ?? 'acres',
-
         lotNumber: draft.propertyDetails.lotNumber ?? '',
         blockNumber: draft.propertyDetails.blockNumber ?? '',
         subdivisionName: draft.propertyDetails.subdivisionName ?? '',
@@ -338,21 +261,14 @@ export class ListingWizardComponent implements OnInit {
           estimatedBalanceDollars: draft.propertyDetails.coloradoAssumableLoan.estimatedBalanceInCents / 100,
           principalInterestPaymentDollars: draft.propertyDetails.coloradoAssumableLoan.principalInterestPaymentInCents / 100,
         } : null,
-
         description: draft.propertyDetails.description ?? '',
-
         hoa: draft.hoa
           ? {
             hasHoa: draft.hoa.hasHoa,
-
             associationName: draft.hoa.associationName ?? '',
-
             managementCompany: draft.hoa.managementCompany ?? '',
-
             contactPhone: draft.hoa.contactPhone ?? '',
-
             feeAmount: draft.hoa.feeAmount ?? null,
-
             feeFrequency: draft.hoa.feeFrequency ?? '',
           }
           : {
@@ -363,23 +279,21 @@ export class ListingWizardComponent implements OnInit {
             feeAmount: null,
             feeFrequency: '',
           },
-
         sellerStatements: {
+          southCarolina: {
+            beachfrontApplies: draft.sellerStatements?.southCarolina?.beachfrontApplies ?? null,
+            futureVacationBookingsExist: draft.sellerStatements?.southCarolina?.futureVacationBookingsExist ?? null,
+          },
           california: draft.sellerStatements?.california ?? { ...CALIFORNIA_LISTING_FACT_DEFAULTS },
           ownershipStatus: draft.sellerStatements?.ownershipStatus ?? '',
-
           leadBasedPaintApplies:
             draft.sellerStatements?.leadBasedPaintApplies ?? null,
-
           ownersAssociationApplies:
             draft.sellerStatements?.ownersAssociationApplies ??
             draft.hoa?.hasHoa ??
             null,
-
           fuelTankPresent: draft.sellerStatements?.fuelTankPresent ?? null,
-
           fuelTankOwnership: draft.sellerStatements?.fuelTankOwnership ?? '',
-
           leasesExist: draft.sellerStatements?.leasesExist ?? null,
           residentialLeasesExist:
             draft.sellerStatements?.residentialLeasesExist ?? null,
@@ -389,7 +303,6 @@ export class ListingWizardComponent implements OnInit {
             draft.sellerStatements?.naturalResourceLeasesExist ?? null,
           methamphetamineContaminationKnown:
             draft.sellerStatements?.methamphetamineContaminationKnown ?? null,
-
           additionalSellerIncluded:
             !!draft.sellerStatements?.additionalSeller,
           additionalSellerLegalName:
@@ -400,22 +313,17 @@ export class ListingWizardComponent implements OnInit {
             draft.sellerStatements?.additionalSeller?.phone ?? '',
         },
       });
-
       this.setStepValidity(2, true);
     }
-
     if (draft.enhancements || draft.features) {
       const enhancements: ListingEnhancements = {
         ...(draft.enhancements ?? {}),
       };
-
       const hasEnhancements = Object.values(enhancements).some(
         (selectedValues) =>
           Array.isArray(selectedValues) && selectedValues.length > 0,
       );
-
       const legacyFeatures = draft.features as ListingFeatures | undefined;
-
       const hasLegacyFeatures = legacyFeatures
         ? Object.entries(legacyFeatures).some(
           ([key, value]) =>
@@ -423,16 +331,12 @@ export class ListingWizardComponent implements OnInit {
             (key === 'evChargingStatus' && value !== 'none'),
         )
         : false;
-
       this.propertyFeaturesData.set({
         mode: hasEnhancements || hasLegacyFeatures ? 'add' : 'skip',
-
         enhancements,
       });
-
       this.setStepValidity(3, true);
     }
-
     const restoredPhotos: ListingPhoto[] = [...(draft.photos ?? [])]
       .sort(
         (firstPhoto, secondPhoto) =>
@@ -440,193 +344,133 @@ export class ListingWizardComponent implements OnInit {
       )
       .map((photo) => ({
         id: photo.id,
-
         originalFileName: photo.originalFileName,
-
         fullImage: {
           blob: null,
-
           previewUrl: photo.fullImageUrl,
-
           width: photo.width,
-
           height: photo.height,
-
           size: photo.sizeBytes,
-
           mimeType: 'image/webp',
         },
-
         thumbnail: {
           blob: null,
-
           previewUrl: photo.thumbnailUrl,
-
           width: photo.thumbnailWidth,
-
           height: photo.thumbnailHeight,
-
           size: photo.thumbnailSizeBytes,
-
           mimeType: 'image/webp',
         },
-
         isPrimary: photo.isPrimary,
-
         storageReference: photo,
       }));
-
     this.photosData.set(restoredPhotos);
-
     if (restoredPhotos.length > 0) {
       this.setStepValidity(4, true);
     }
-
     if (draft.pricing) {
       this.pricingData.set({
         listPrice: draft.pricing.listPrice,
       });
-
       this.setStepValidity(5, true);
     }
-
     this.featuredListing.set(draft.featuredListing);
-
     this.currentStep.set(
       this.stepNumberFromDraftStep(draft.progress.currentStep),
     );
   }
-
   private stepNumberFromDraftStep(draftStep: ListingDraftStep): number {
     switch (draftStep) {
       case 'property_details':
         return 2;
-
       case 'property_features':
         return 3;
-
       case 'photos':
         return 4;
-
       case 'pricing':
         return 5;
-
       case 'review':
         return 6;
-
       case 'address':
       default:
         return 1;
     }
   }
-
   protected onStepValidityChange(step: number, isValid: boolean): void {
     this.setStepValidity(step, isValid);
   }
-
   private setStepValidity(step: number, isValid: boolean): void {
     this.stepValidity.update((validity) => ({
       ...validity,
       [step]: isValid,
     }));
   }
-
   protected onAddressChange(value: AddressFormValue): void {
     this.addressData.set(value);
-
     this.invalidateCertification();
   }
-
   protected onPropertyDetailsChange(value: PropertyDetailsFormValue): void {
     this.propertyDetailsData.set(value);
-
     this.invalidateCertification();
   }
-
   protected onPropertyFeaturesChange(value: PropertyFeaturesStepValue): void {
     this.propertyFeaturesData.set(value);
-
     this.invalidateCertification();
   }
-
   protected async onPhotosChange(photos: ListingPhoto[]): Promise<void> {
     this.photosData.set(photos);
-
     this.invalidateCertification();
-
     const listingUid = this.listingUid();
-
     const user = auth.currentUser;
-
     if (!listingUid || !user || this.isSavingPhotos()) {
       return;
     }
-
     if (photos.length === 0) {
       this.photoSaveError.set('At least one listing photo is required.');
-
       return;
     }
-
     this.photoSaveError.set('');
     this.isSavingPhotos.set(true);
-
     try {
       const references = await this.listingPhotoStorageService.uploadPhotos(
         user.uid,
         listingUid,
         photos,
       );
-
       await this.listingService.updateDraftPhotos(
         listingUid,
         user.uid,
         references,
         this.completedSteps(),
       );
-
       this.addCompletedStep('photos');
-
       const persistedPhotos = photos.map((photo) => {
         const storageReference = references.find(
           (reference) => reference.id === photo.id,
         );
-
         if (!storageReference) {
           return photo;
         }
-
         this.revokeTemporaryPhotoUrls(photo);
-
         return {
           ...photo,
-
           fullImage: {
             ...photo.fullImage,
-
             blob: null,
-
             previewUrl: storageReference.fullImageUrl,
           },
-
           thumbnail: {
             ...photo.thumbnail,
-
             blob: null,
-
             previewUrl: storageReference.thumbnailUrl,
           },
-
           isPrimary: storageReference.isPrimary,
-
           storageReference,
         };
       });
-
       this.photosData.set(persistedPhotos);
     } catch (error) {
       console.error('Failed to save listing photos.', error);
-
       this.photoSaveError.set(
         error instanceof Error
           ? error.message
@@ -636,39 +480,28 @@ export class ListingWizardComponent implements OnInit {
       this.isSavingPhotos.set(false);
     }
   }
-
   protected onPricingChange(value: PricingFormValue): void {
     this.pricingData.set(value);
-
     this.invalidateCertification();
   }
-
   protected onFeaturedListingChange(selected: boolean): void {
     this.featuredListing.set(selected);
-
     this.invalidateCertification();
   }
-
   protected onCertificationChange(accepted: boolean): void {
     this.certificationAccepted.set(accepted);
-
     this.setStepValidity(6, accepted);
   }
-
   protected isCurrentStepValid(): boolean {
     return this.stepValidity()[this.currentStep()] ?? false;
   }
-
   protected previousStep(): void {
     if (this.currentStep() <= 1 || this.isSaving() || this.isSavingPhotos()) {
       return;
     }
-
     this.currentStep.update((step) => step - 1);
-
     this.scrollToTop();
   }
-
   protected async nextStep(): Promise<void> {
     if (
       !this.isCurrentStepValid() ||
@@ -677,21 +510,16 @@ export class ListingWizardComponent implements OnInit {
     ) {
       return;
     }
-
     this.saveError.set('');
     this.isSaving.set(true);
-
     try {
       await this.saveCurrentStep();
-
       if (this.currentStep() < this.steps.length) {
         this.currentStep.update((step) => step + 1);
-
         this.scrollToTop();
       }
     } catch (error) {
       console.error('Failed to save listing step.', error);
-
       this.saveError.set(
         error instanceof Error
           ? error.message
@@ -701,7 +529,6 @@ export class ListingWizardComponent implements OnInit {
       this.isSaving.set(false);
     }
   }
-
   protected goToStep(step: number): void {
     if (
       step < this.currentStep() &&
@@ -709,42 +536,31 @@ export class ListingWizardComponent implements OnInit {
       !this.isSavingPhotos()
     ) {
       this.currentStep.set(step);
-
       this.scrollToTop();
     }
   }
-
   private async saveCurrentStep(): Promise<void> {
     const listingUid = this.listingUid();
-
     const user = auth.currentUser;
-
     if (!listingUid || !user) {
       throw new Error('Your authenticated listing session could not be found.');
     }
-
     switch (this.currentStep()) {
       case 1: {
         const address = this.addressData();
-
         if (!address) {
           throw new Error('Please complete the property address.');
         }
-
         await this.listingService.saveAddressStep(
           listingUid,
           user.uid,
           address,
         );
-
         this.addCompletedStep('address');
-
         return;
       }
-
       case 2: {
         const propertyDetails = this.propertyDetailsData();
-
         if (
           !propertyDetails ||
           !propertyDetails.propertyType ||
@@ -755,19 +571,21 @@ export class ListingWizardComponent implements OnInit {
         ) {
           throw new Error('Please complete all required property details.');
         }
-
         const statements =
           propertyDetails.sellerStatements;
-
         const stateCode =
           this.addressData()
             ?.state
             ?.trim()
             .toUpperCase() ?? '';
-
         const statePackage =
           getStateListingPackage(stateCode);
-
+        if (stateCode === 'SC' && (
+          typeof statements.southCarolina?.beachfrontApplies !== 'boolean' ||
+          typeof statements.southCarolina?.futureVacationBookingsExist !== 'boolean'
+        )) {
+          throw new Error('Answer both South Carolina disclosure applicability questions.');
+        }
         if (
           requiresStateListingField(
             statePackage,
@@ -779,7 +597,6 @@ export class ListingWizardComponent implements OnInit {
             'Please select how long the seller has owned the property.',
           );
         }
-
         if (
           requiresStateListingField(
             statePackage,
@@ -791,7 +608,6 @@ export class ListingWizardComponent implements OnInit {
             'Please answer the Utah current-contamination statement.',
           );
         }
-
         if (
           requiresStateListingField(
             statePackage,
@@ -803,7 +619,6 @@ export class ListingWizardComponent implements OnInit {
             'Please complete the lead-based-paint statement.',
           );
         }
-
         if (
           requiresStateListingField(
             statePackage,
@@ -816,7 +631,6 @@ export class ListingWizardComponent implements OnInit {
             'Please specify whether an owners association applies.',
           );
         }
-
         if (
           requiresStateListingField(
             statePackage,
@@ -828,7 +642,6 @@ export class ListingWizardComponent implements OnInit {
             'Please specify whether a fuel tank is present.',
           );
         }
-
         if (
           statements.fuelTankPresent === true &&
           !statements.fuelTankOwnership
@@ -837,13 +650,11 @@ export class ListingWizardComponent implements OnInit {
             'Please specify whether the fuel tank is owned or leased.',
           );
         }
-
         const isTexasListing =
           requiresStateListingField(
             statePackage,
             'texasLeaseCategories',
           );
-
         if (
           isTexasListing &&
           (
@@ -859,7 +670,6 @@ export class ListingWizardComponent implements OnInit {
             'Please complete all three Texas lease statements.',
           );
         }
-
         if (
           requiresStateListingField(
             statePackage,
@@ -871,10 +681,8 @@ export class ListingWizardComponent implements OnInit {
             'Please specify whether any leases exist.',
           );
         }
-
         const fuelTankOwnership =
           statements.fuelTankOwnership || undefined;
-
         const hoa = propertyDetails.hoa ?? {
           hasHoa: null,
           associationName: '',
@@ -883,56 +691,43 @@ export class ListingWizardComponent implements OnInit {
           feeAmount: null,
           feeFrequency: '',
         };
-
         const associationName =
           hoa.associationName.trim();
-
         const managementCompany =
           hoa.managementCompany.trim();
-
         const contactPhone =
           hoa.contactPhone.trim();
-
         const ownersAssociationContact = [
           managementCompany,
           contactPhone,
         ]
           .filter((value) => value.length > 0)
           .join(' · ');
-
-
-
         const hoaDetails: ListingHoa = {
           hasHoa:
             statements.ownersAssociationApplies ===
             true,
-
           includedItems: [],
-
           ...(associationName
             ? {
               associationName,
             }
             : {}),
-
           ...(managementCompany
             ? {
               managementCompany,
             }
             : {}),
-
           ...(contactPhone
             ? {
               contactPhone,
             }
             : {}),
-
           ...(hoa.feeAmount !== null
             ? {
               feeAmount: hoa.feeAmount,
             }
             : {}),
-
           ...(hoa.feeFrequency
             ? {
               feeFrequency:
@@ -940,13 +735,17 @@ export class ListingWizardComponent implements OnInit {
             }
             : {}),
         };
-
         const sellerStatements:
           ListingSellerStatements = {
           stateCode,
           schemaVersion: 1,
+          ...(stateCode === 'SC' ? {
+            southCarolina: {
+              beachfrontApplies: statements.southCarolina!.beachfrontApplies!,
+              futureVacationBookingsExist: statements.southCarolina!.futureVacationBookingsExist!,
+            },
+          } : {}),
           ...(stateCode === 'CA' ? { california: statements.california } : {}),
-
           ...(requiresStateListingField(
             statePackage,
             'utahMethamphetamineContamination',
@@ -956,7 +755,6 @@ export class ListingWizardComponent implements OnInit {
                 statements.methamphetamineContaminationKnown === true,
             }
             : {}),
-
           ...(requiresStateListingField(
             statePackage,
             'ownershipStatus',
@@ -967,7 +765,6 @@ export class ListingWizardComponent implements OnInit {
                 undefined,
             }
             : {}),
-
           ...(requiresStateListingField(
             statePackage,
             'leadBasedPaintApplies',
@@ -979,7 +776,6 @@ export class ListingWizardComponent implements OnInit {
                 true,
             }
             : {}),
-
           ...(requiresStateListingField(
             statePackage,
             'ownersAssociationApplies',
@@ -991,14 +787,12 @@ export class ListingWizardComponent implements OnInit {
                 true,
             }
             : {}),
-
           ...(associationName
             ? {
               ownersAssociationName:
                 associationName,
             }
             : {}),
-
           ...(hoa.feeAmount !== null
             ? {
               ownersAssociationDuesInCents:
@@ -1007,20 +801,17 @@ export class ListingWizardComponent implements OnInit {
                 ),
             }
             : {}),
-
           ...(hoa.feeFrequency
             ? {
               ownersAssociationDuesFrequency:
                 hoa.feeFrequency,
             }
             : {}),
-
           ...(ownersAssociationContact
             ? {
               ownersAssociationContact,
             }
             : {}),
-
           ...(requiresStateListingField(
             statePackage,
             'fuelTankPresent',
@@ -1031,14 +822,12 @@ export class ListingWizardComponent implements OnInit {
                 true,
             }
             : {}),
-
           ...(statements.fuelTankPresent ===
             true
             ? {
               fuelTankOwnership,
             }
             : {}),
-
           ...(isTexasListing ||
             requiresStateListingField(
               statePackage,
@@ -1060,37 +849,31 @@ export class ListingWizardComponent implements OnInit {
                   true,
             }
             : {}),
-
           ...(isTexasListing
             ? {
               residentialLeasesExist:
                 statements
                   .residentialLeasesExist ===
                 true,
-
               fixtureLeasesExist:
                 statements.fixtureLeasesExist ===
                 true,
-
               naturalResourceLeasesExist:
                 statements
                   .naturalResourceLeasesExist ===
                 true,
             }
             : {}),
-
           ...(statements.additionalSellerIncluded
             ? {
               additionalSeller: {
                 legalName:
                   statements.additionalSellerLegalName
                     .trim(),
-
                 email:
                   statements.additionalSellerEmail
                     .trim()
                     .toLowerCase(),
-
                 phone:
                   statements.additionalSellerPhone
                     .trim(),
@@ -1098,37 +881,27 @@ export class ListingWizardComponent implements OnInit {
             }
             : {}),
         };
-
         await this.listingService.savePropertyDetailsStep(
           listingUid,
           user.uid,
           {
             propertyType: propertyDetails.propertyType,
-
             bedrooms: propertyDetails.bedrooms,
-
             fullBathrooms: Math.floor(propertyDetails.bathrooms),
-
             halfBathrooms: propertyDetails.bathrooms % 1 === 0 ? 0 : 1,
-
             squareFeet: propertyDetails.squareFeet,
-
             yearBuilt: propertyDetails.yearBuilt,
-
             lotSize: propertyDetails.lotSize ?? undefined,
-
             lotSizeUnit:
               propertyDetails.lotSize !== null
                 ? propertyDetails.lotSizeUnit
                 : undefined,
-
             lotNumber: propertyDetails.lotNumber.trim() || undefined,
             blockNumber: propertyDetails.blockNumber.trim() || undefined,
             subdivisionName:
               propertyDetails.subdivisionName.trim() || undefined,
             legalDescription:
               propertyDetails.legalDescription.trim() || undefined,
-
             description: propertyDetails.description,
             coloradoPropertyFacts: this.addressData()?.state === 'CO' ? propertyDetails.coloradoPropertyFacts : undefined,
             coloradoAssumableLoan: this.addressData()?.state === 'CO' && propertyDetails.coloradoAssumableLoan?.available ? {
@@ -1148,69 +921,52 @@ export class ListingWizardComponent implements OnInit {
           this.completedSteps(),
           sellerStatements,
         );
-
         this.addCompletedStep('property_details');
-
         return;
       }
-
       case 3: {
         const propertyFeatures = this.propertyFeaturesData();
-
         if (!propertyFeatures || propertyFeatures.mode === 'unselected') {
           throw new Error(
             'Please complete the property details and amenities step.',
           );
         }
-
         await this.listingService.saveEnhancementsStep(
           listingUid,
           user.uid,
           propertyFeatures.enhancements,
           this.completedSteps(),
         );
-
         this.addCompletedStep('property_features');
-
         return;
       }
-
       case 4: {
         const photos = this.photosData();
-
         if (photos.length === 0) {
           throw new Error('At least one listing photo is required.');
         }
-
         const references = photos
           .map((photo) => photo.storageReference)
           .filter((reference) => reference !== undefined);
-
         if (references.length !== photos.length) {
           throw new Error(
             'Your photos are still being saved. Please wait a moment and try again.',
           );
         }
-
         await this.listingService.updateDraftPhotos(
           listingUid,
           user.uid,
           references,
           this.completedSteps(),
         );
-
         this.addCompletedStep('photos');
-
         return;
       }
-
       case 5: {
         const pricing = this.pricingData();
-
         if (!pricing || pricing.listPrice === null || pricing.listPrice <= 0) {
           throw new Error('Please enter a valid listing price.');
         }
-
         await this.listingService.savePricingStep(
           listingUid,
           user.uid,
@@ -1220,17 +976,13 @@ export class ListingWizardComponent implements OnInit {
           this.featuredListing(),
           this.completedSteps(),
         );
-
         this.addCompletedStep('pricing');
-
         return;
       }
-
       default:
         return;
     }
   }
-
   protected async completeListing(): Promise<void> {
     if (
       this.isSaving() ||
@@ -1239,37 +991,27 @@ export class ListingWizardComponent implements OnInit {
     ) {
       return;
     }
-
     if (!this.certificationAccepted()) {
       this.saveError.set(
         'You must accept the seller certification before continuing.',
       );
-
       return;
     }
-
     const listingUid = this.listingUid();
-
     const user = auth.currentUser;
-
     if (!listingUid || !user) {
       this.saveError.set(
         'Your authenticated listing session could not be found.',
       );
-
       return;
     }
-
     this.saveError.set('');
     this.isSaving.set(true);
-
     try {
       const pricing = this.pricingData();
-
       if (!pricing || pricing.listPrice === null || pricing.listPrice <= 0) {
         throw new Error('The listing pricing information could not be found.');
       }
-
       /*
        * Persist the final Featured Listing selection made
        * on the Review step before identity and payment.
@@ -1283,34 +1025,25 @@ export class ListingWizardComponent implements OnInit {
         this.featuredListing(),
         this.completedSteps(),
       );
-
       await this.listingService.completeListingContent(
         listingUid,
         user.uid,
         true,
       );
-
       this.addCompletedStep('review');
-
       this.listingContentComplete.set(true);
-
       const verification =
         await this.identityVerificationService.startVerification(listingUid);
-
       if (verification.alreadyVerified) {
         await this.router.navigate(['/sell/listings', listingUid, 'payment'], {
           replaceUrl: true,
         });
-
         return;
       }
-
       if (verification.verificationUrl) {
         window.location.assign(verification.verificationUrl);
-
         return;
       }
-
       if (verification.status === 'processing') {
         await this.router.navigate(
           ['/sell/listings', listingUid, 'verification-return'],
@@ -1318,10 +1051,8 @@ export class ListingWizardComponent implements OnInit {
             replaceUrl: true,
           },
         );
-
         return;
       }
-
       throw new Error(
         'Stripe did not provide a verification link. Please try again.',
       );
@@ -1330,7 +1061,6 @@ export class ListingWizardComponent implements OnInit {
         'Failed to complete the listing or start identity verification.',
         error,
       );
-
       this.saveError.set(
         error instanceof Error
           ? error.message
@@ -1340,7 +1070,6 @@ export class ListingWizardComponent implements OnInit {
       this.isSaving.set(false);
     }
   }
-
   private addCompletedStep(completedStep: ListingDraftStep): void {
     const workflowOrder: ListingDraftStep[] = [
       'address',
@@ -1350,22 +1079,16 @@ export class ListingWizardComponent implements OnInit {
       'pricing',
       'review',
     ];
-
     this.completedSteps.update((completedSteps) => {
       const uniqueSteps = new Set([...completedSteps, completedStep]);
-
       return workflowOrder.filter((step) => uniqueSteps.has(step));
     });
   }
-
   private invalidateCertification(): void {
     this.certificationAccepted.set(false);
-
     this.setStepValidity(6, false);
-
     this.listingContentComplete.set(false);
   }
-
   private revokeTemporaryPhotoUrls(photo: ListingPhoto): void {
     if (
       photo.fullImage.blob &&
@@ -1373,7 +1096,6 @@ export class ListingWizardComponent implements OnInit {
     ) {
       URL.revokeObjectURL(photo.fullImage.previewUrl);
     }
-
     if (
       photo.thumbnail.blob &&
       photo.thumbnail.previewUrl.startsWith('blob:')
@@ -1381,7 +1103,6 @@ export class ListingWizardComponent implements OnInit {
       URL.revokeObjectURL(photo.thumbnail.previewUrl);
     }
   }
-
   private scrollToTop(): void {
     window.scrollTo({
       top: 0,

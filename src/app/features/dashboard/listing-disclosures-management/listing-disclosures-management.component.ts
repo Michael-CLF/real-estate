@@ -1,3 +1,4 @@
+import { getOfferBlockingDocumentTypes, checklistDocumentTitle, getChecklistRestrictionMessages } from '../../../core/configuration/listing-document-checklist.config';
 import { FormsModule } from '@angular/forms';
 import { CALIFORNIA_LISTING_FACT_DEFAULTS, validCaliforniaDisclosureDecision, type CaliforniaDisclosureDecision, type CaliforniaDisclosureType } from '../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import {
@@ -5,85 +6,84 @@ import {
   Component,
   OnInit,
   inject,
-  signal
+  signal,
+  computed
 } from '@angular/core';
-
 import {
   DatePipe
 } from '@angular/common';
-
 import {
   ActivatedRoute,
   RouterLink
 } from '@angular/router';
-
 import {
   AuthService
 } from '../../../core/authentication/services/auth.service';
-
 import {
   getStateDisclosureRequirements,
   isDisclosureRequiredForListing,
   normalizeDisclosureStateCode
 } from '../../../core/configuration/state-disclosures.config';
-
 import {
   ListingDisclosureDocument
 } from '../../../core/domains/disclosures/models/listing-disclosure-document.model';
-
 import {
   DisclosureDocumentType,
   StateDisclosureRequirement
 } from '../../../core/domains/disclosures/models/state-disclosure-requirement.model';
-
 import {
   ListingDisclosureService
 } from '../../../core/domains/disclosures/services/listing-disclosure.service';
-
 import {
   Listing
 } from '../../../core/domains/listings/models/listing.model';
-
 import {
   ListingService
 } from '../../../core/domains/listings/services/listing.service';
-
 @Component({
   selector:
     'app-listing-disclosures-management',
-
   standalone: true,
-
   imports: [
     FormsModule,
     DatePipe,
     RouterLink
   ],
-
   templateUrl:
     './listing-disclosures-management.component.html',
-
   styleUrl:
     './listing-disclosures-management.component.scss',
-
   changeDetection:
     ChangeDetectionStrategy.OnPush
 })
 export class ListingDisclosuresManagementComponent
   implements OnInit {
+  protected readonly southCarolinaSavedAnswers = signal<{
+    beachfrontApplies: boolean | null;
+    futureVacationBookingsExist: boolean | null;
+  }>({ beachfrontApplies: null, futureVacationBookingsExist: null });
+  protected isSouthCarolinaListing(): boolean {
+    return normalizeDisclosureStateCode(this.listing()?.state ?? '') === 'SC';
+  }
+  protected shouldShowDisclosure(requirement: StateDisclosureRequirement): boolean {
+    const listing = this.listing();
+    if (!listing) return false;
+    if (requirement.documentType === 'colorado-association-documents') return listing.sellerStatements?.ownersAssociationApplies === true;
+    if (!this.isSouthCarolinaListing()) return true;
+    if (requirement.documentType === 'south-carolina-association-documents') return listing.sellerStatements?.ownersAssociationApplies !== false;
+    if (requirement.documentType === 'south-carolina-coastal-disclosure') return this.southCarolinaSavedAnswers().beachfrontApplies === true;
+    if (requirement.documentType === 'south-carolina-vacation-rentals') return this.southCarolinaSavedAnswers().futureVacationBookingsExist === true;
+    return true;
+  }
 
   private readonly route =
     inject(ActivatedRoute);
-
   private readonly authService =
     inject(AuthService);
-
   private readonly listingService =
     inject(ListingService);
-
   private readonly disclosureService =
     inject(ListingDisclosureService);
-
   protected readonly applicabilityEdits = signal<Partial<Record<string, CaliforniaDisclosureDecision>>>({});
   protected readonly savingApplicability = signal(false);
   protected applicabilityFor(type: string): CaliforniaDisclosureDecision {
@@ -110,10 +110,8 @@ export class ListingDisclosuresManagementComponent
       this.actionError.set(error instanceof Error ? error.message : 'Could not save applicability.');
     } finally { this.savingApplicability.set(false); }
   }
-
   protected readonly listing =
     signal<Listing | null>(null);
-
   protected isRequiredForCurrentListing(requirement: StateDisclosureRequirement): boolean {
     const listing = this.listing();
     if (listing?.state === 'CA') {
@@ -124,12 +122,10 @@ export class ListingDisclosuresManagementComponent
       yearBuilt: listing.yearBuilt,
     });
   }
-
   protected readonly requirements =
     signal<
       readonly StateDisclosureRequirement[]
     >([]);
-
   protected readonly disclosures =
     signal<
       Partial<
@@ -139,7 +135,6 @@ export class ListingDisclosuresManagementComponent
         >
       >
     >({});
-
   protected readonly selectedFiles =
     signal<
       Partial<
@@ -149,66 +144,69 @@ export class ListingDisclosuresManagementComponent
         >
       >
     >({});
-
   protected readonly uploadingType =
     signal<DisclosureDocumentType | null>(
       null
     );
-
   protected readonly isLoading =
     signal(true);
-
   protected readonly loadError =
     signal('');
-
   protected readonly actionError =
     signal('');
-
   protected readonly successMessage =
     signal('');
-
+  protected readonly disclosureStatusIsLoading = this.isLoading;
+  protected readonly disclosureStatusError = this.loadError;
+  protected readonly missingOfferDocumentTitles = computed(() => {
+    const listing = this.listing();
+    if (!listing || this.isLoading() || this.loadError()) return [];
+    const state = normalizeDisclosureStateCode(listing.state);
+    return getOfferBlockingDocumentTypes(state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+      .filter(type => {
+        const document = this.disclosures()[type];
+        return !(document?.listingUid === this.listingUid && document.stateAbbreviation === state && document.storagePath && document.versionId);
+      }).map(type => checklistDocumentTitle(state, type));
+  });
+  protected readonly offerDisclosureMessages = computed(() => {
+    const listing = this.listing();
+    if (!listing || this.isLoading() || this.loadError()) return [];
+    return getChecklistRestrictionMessages(listing.state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+      .filter(message => !message.startsWith('NavStreet currently prevents'));
+  });
   protected readonly listingUid =
     this.route.snapshot.paramMap.get(
       'listingUid'
     ) ?? '';
-
   async ngOnInit(): Promise<void> {
     if (!this.listingUid) {
       this.loadError.set(
         'The selected listing could not be identified.'
       );
-
       this.isLoading.set(false);
       return;
     }
-
     const currentUserUid =
       this.authService.currentUserUid;
-
     if (!currentUserUid) {
       this.loadError.set(
         'You must be signed in to manage property disclosures.'
       );
-
       this.isLoading.set(false);
       return;
     }
-
     try {
       const listing =
         await this.listingService
           .getPublishedListing(
             this.listingUid
           );
-
       if (!listing) {
         this.loadError.set(
           'The selected listing could not be found.'
         );
-
         return;
       }
-
       if (
         listing.sellerUid !==
         currentUserUid
@@ -216,18 +214,13 @@ export class ListingDisclosuresManagementComponent
         this.loadError.set(
           'You do not have permission to manage disclosures for this listing.'
         );
-
         return;
       }
-
       this.listing.set(listing);
-
       const stateCode =
         normalizeDisclosureStateCode(listing.state);
-
       const requirements =
         getStateDisclosureRequirements(stateCode);
-
       console.info('Disclosure requirements diagnostic', {
         listingUid: this.listingUid,
         storedState: listing.state,
@@ -247,14 +240,18 @@ export class ListingDisclosuresManagementComponent
             secondRequirement.sortOrder
         )
       );
-
       await this.loadDisclosures();
+      if (this.isSouthCarolinaListing()) {
+        this.southCarolinaSavedAnswers.set(
+          await this.disclosureService.getSouthCarolinaDisclosureAnswers(this.listingUid)
+        );
+      }
+
     } catch (error: unknown) {
       console.error(
         'Unable to load property disclosures:',
         error
       );
-
       this.loadError.set(
         'We could not load the property disclosures. Please return to the listing and try again.'
       );
@@ -262,7 +259,6 @@ export class ListingDisclosuresManagementComponent
       this.isLoading.set(false);
     }
   }
-
   protected disclosureFor(
     documentType:
       DisclosureDocumentType
@@ -273,7 +269,6 @@ export class ListingDisclosuresManagementComponent
       ] ?? null
     );
   }
-
   protected selectedFileFor(
     documentType:
       DisclosureDocumentType
@@ -284,7 +279,6 @@ export class ListingDisclosuresManagementComponent
       ] ?? null
     );
   }
-
   protected isUploading(
     documentType:
       DisclosureDocumentType
@@ -294,7 +288,6 @@ export class ListingDisclosuresManagementComponent
       documentType
     );
   }
-
   protected onFileSelected(
     event: Event,
     documentType:
@@ -302,55 +295,42 @@ export class ListingDisclosuresManagementComponent
   ): void {
     this.actionError.set('');
     this.successMessage.set('');
-
     const input =
       event.target as HTMLInputElement;
-
     const file =
       input.files?.[0];
-
     if (!file) {
       this.removeSelectedFile(
         documentType
       );
-
       return;
     }
-
     if (
       file.type !==
       'application/pdf'
     ) {
       input.value = '';
-
       this.removeSelectedFile(
         documentType
       );
-
       this.actionError.set(
         'Disclosure documents must be uploaded as PDF files.'
       );
-
       return;
     }
-
     if (
       file.size >
       15 * 1024 * 1024
     ) {
       input.value = '';
-
       this.removeSelectedFile(
         documentType
       );
-
       this.actionError.set(
         'The disclosure PDF cannot exceed 15 MB.'
       );
-
       return;
     }
-
     this.selectedFiles.update(
       currentFiles => ({
         ...currentFiles,
@@ -358,22 +338,18 @@ export class ListingDisclosuresManagementComponent
       })
     );
   }
-
   protected async uploadDisclosure(
     requirement:
       StateDisclosureRequirement
   ): Promise<void> {
     const listing =
       this.listing();
-
     const sellerUid =
       this.authService.currentUserUid;
-
     const file =
       this.selectedFileFor(
         requirement.documentType
       );
-
     if (
       !listing ||
       !sellerUid ||
@@ -382,14 +358,11 @@ export class ListingDisclosuresManagementComponent
     ) {
       return;
     }
-
     this.actionError.set('');
     this.successMessage.set('');
-
     this.uploadingType.set(
       requirement.documentType
     );
-
     try {
       const uploadedDocument =
         await this.disclosureService
@@ -400,20 +373,16 @@ export class ListingDisclosuresManagementComponent
             requirement.documentType,
             file
           );
-
       this.disclosures.update(
         currentDisclosures => ({
           ...currentDisclosures,
-
           [requirement.documentType]:
             uploadedDocument
         })
       );
-
       this.removeSelectedFile(
         requirement.documentType
       );
-
       this.successMessage.set(
         `${requirement.shortTitle} uploaded successfully.`
       );
@@ -422,7 +391,6 @@ export class ListingDisclosuresManagementComponent
         'Unable to upload disclosure:',
         error
       );
-
       this.actionError.set(
         error instanceof Error
           ? error.message
@@ -432,14 +400,12 @@ export class ListingDisclosuresManagementComponent
       this.uploadingType.set(null);
     }
   }
-
   protected async openDisclosure(
     disclosure:
       ListingDisclosureDocument
   ): Promise<void> {
     this.actionError.set('');
     this.successMessage.set('');
-
     try {
       await this.disclosureService
         .openDisclosure(disclosure);
@@ -448,7 +414,6 @@ export class ListingDisclosuresManagementComponent
         'Unable to open disclosure:',
         error
       );
-
       this.actionError.set(
         error instanceof Error
           ? error.message
@@ -456,7 +421,6 @@ export class ListingDisclosuresManagementComponent
       );
     }
   }
-
   private async loadDisclosures():
     Promise<void> {
     const summaries =
@@ -464,7 +428,6 @@ export class ListingDisclosuresManagementComponent
         .getListingDisclosures(
           this.listingUid
         );
-
     const disclosureMap:
       Partial<
         Record<
@@ -472,19 +435,16 @@ export class ListingDisclosuresManagementComponent
           ListingDisclosureDocument
         >
       > = {};
-
     for (const summary of summaries) {
       disclosureMap[
         summary.documentType
       ] =
         summary.currentDocument;
     }
-
     this.disclosures.set(
       disclosureMap
     );
   }
-
   private removeSelectedFile(
     documentType:
       DisclosureDocumentType
@@ -494,14 +454,11 @@ export class ListingDisclosuresManagementComponent
         const nextFiles = {
           ...currentFiles
         };
-
         delete nextFiles[
           documentType
         ];
-
         return nextFiles;
       }
     );
   }
-
 }

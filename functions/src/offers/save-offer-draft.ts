@@ -1,3 +1,4 @@
+import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
 import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
   HttpsError,
@@ -145,11 +146,11 @@ export const saveOfferDraft =
             offerVersionUid
           );
 
-          if (offer.stateCode === 'CA' && requestedChanges['terms']) {
+          if (['CA','SC'].includes(offer.stateCode) && requestedChanges['terms']) {
             const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
             const listingSnapshot = await transaction.get(listingReference);
-            if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The California listing could not be found.');
-            const documents = await readCaliforniaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+            if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The listing could not be found.');
+            const documents = await (offer.stateCode === 'SC' ? readSouthCarolinaListingDisclosures : readCaliforniaListingDisclosures)(transaction, listingReference, listingSnapshot.data()!);
             const savedVersions = (version.terms as unknown as { documentVersions?: Record<string, string> }).documentVersions;
             version = {
               ...version,

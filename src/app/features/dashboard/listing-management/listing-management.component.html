@@ -342,18 +342,6 @@
           }
         </div>
 
-        @if (!disclosureStatusIsLoading() && !disclosureStatusError()) {
-          <aside class="disclosure-offer-warning" aria-label="Disclosure deadlines and offer restrictions">
-            <strong>Keep your listing ready for buyers</strong>
-            @if (missingOfferDocumentTitles().length) {
-              <p>Buyers cannot start or submit an offer until these required uploads are available:</p>
-              <ul>@for (title of missingOfferDocumentTitles(); track title) { <li>{{ title }}</li> }</ul>
-            }
-            @for (message of offerDisclosureMessages(); track $index) { <p>{{ message }}</p> }
-            <p>Open Property Disclosures to download the applicable forms, complete and sign them, and upload the PDFs.</p>
-          </aside>
-        }
-
         <button type="button" class="primary-button" (click)="openDisclosures()">
           @if (allDisclosuresUploaded()) {
           Review disclosures

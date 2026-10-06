@@ -22,6 +22,12 @@ export const LISTING_CHECKLIST_STATES = STATES.filter(state =>
 
 // Presentation guidance only. Do not use these labels as upload or publication gates.
 const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
+  ...Object.fromEntries(getStateDisclosureRequirements('SC').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{
+    category:'Required when applicable' as const, applicability:'South Carolina residential sale; property-specific conditions and lawful exemptions determine applicability.',
+    timing:r.documentType==='south-carolina-property-condition'?'Before signing or by the delivery date expressly agreed in the contract.':r.documentType==='south-carolina-vacation-rentals'?'Disclose all future rental periods before ratification.':r.documentType==='south-carolina-coastal-disclosure'?'Include required beachfront information in the purchase contract.':'Provide at the applicable agreed stage.',
+    instructions:r.description,suppliedBy:'Seller, with association, survey or property records as applicable',
+  }])),
+
   ...Object.fromEntries(
     getStateDisclosureRequirements('CA')
       .filter(requirement =>

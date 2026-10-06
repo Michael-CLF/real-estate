@@ -1,4 +1,3 @@
-import type { CaliforniaOfferTermsDocument } from './state-contracts/california/california-offer-terms.document';
 import {
   HttpsError,
   onCall,
@@ -232,21 +231,21 @@ if (offer.stateCode === 'CO') {
             versionId: string;
             storagePath: string;
           }> = [];
-          const californiaVersionIds = offer.stateCode === 'CA'
-            ? (version.terms as unknown as CaliforniaOfferTermsDocument).documentVersions : undefined;
-          if (californiaVersionIds && requiredDisclosureTypes.some(type => !californiaVersionIds[type])) {
+          const reviewedDisclosureVersionIds = ['CA','SC'].includes(offer.stateCode)
+            ? (version.terms as unknown as {documentVersions: Readonly<Record<string,string>>}).documentVersions : undefined;
+          if (reviewedDisclosureVersionIds && requiredDisclosureTypes.some(type => !reviewedDisclosureVersionIds[type])) {
             throw new HttpsError('failed-precondition', 'The offer is missing the uploaded disclosure versions shared when it was created.');
           }
           const disclosureSnapshots = await Promise.all(requiredDisclosureTypes.map(
             documentType => transaction.get(
-              californiaVersionIds
-                ? listingReference.collection('disclosures').doc(documentType).collection('versions').doc(californiaVersionIds[documentType])
+              reviewedDisclosureVersionIds
+                ? listingReference.collection('disclosures').doc(documentType).collection('versions').doc(reviewedDisclosureVersionIds[documentType])
                 : listingReference.collection('disclosures').doc(documentType)
             )
           ));
           for (const [index, documentType] of requiredDisclosureTypes.entries()) {
             const disclosureSnapshot = disclosureSnapshots[index];
-            const currentDocument = (californiaVersionIds ? disclosureSnapshot.data() : disclosureSnapshot.data()?.['currentDocument']) as Record<string, unknown> | undefined;
+            const currentDocument = (reviewedDisclosureVersionIds ? disclosureSnapshot.data() : disclosureSnapshot.data()?.['currentDocument']) as Record<string, unknown> | undefined;
             if (!currentDocument ||
               currentDocument['listingUid'] !== offer.listingUid ||
               currentDocument['stateAbbreviation'] !== offer.stateCode ||
@@ -257,7 +256,7 @@ if (offer.stateCode === 'CO') {
             if (typeof currentDocument['versionId'] !== 'string' || !currentDocument['versionId']) {
               throw new HttpsError('failed-precondition', `The ${documentType.replace(/-/g, ' ')} disclosure has no immutable version.`);
             }
-            if (californiaVersionIds && (currentDocument['documentType'] !== documentType || currentDocument['versionId'] !== californiaVersionIds[documentType])) {
+            if (reviewedDisclosureVersionIds && (currentDocument['documentType'] !== documentType || currentDocument['versionId'] !== reviewedDisclosureVersionIds[documentType])) {
               throw new HttpsError('failed-precondition', 'The disclosure version does not match its stored record.');
             }
             listingDisclosureSnapshots.push({

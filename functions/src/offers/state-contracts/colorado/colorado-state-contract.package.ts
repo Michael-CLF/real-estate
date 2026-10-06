@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { StateContractPackage } from '../state-contract-package';
 import type { ColoradoOfferTermsDocument } from './colorado-offer-terms.document';
@@ -34,5 +35,14 @@ export const coloradoStateContractPackage: StateContractPackage<ColoradoOfferTer
     ...(version.terms.disclosures.leadPaintStatus === 'received' ? ['lead-based-paint'] : []),
   ],
   createContractMilestones: createColoradoContractMilestones,
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents,
+      t.purchase.financingType === 'assumption' ? undefined : t.purchase.newLoanAmountInCents,
+      t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType === 'new_loan' ? t.purchase.newLoanType : t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.earnestMoneyInCents) },
+    { label: 'Closing date', value: summaryText(t.deadlines.closing) },
+    { label: 'Inspection objection / termination', value: `Objection: ${summaryText(t.deadlines.inspectionObjection)}; termination: ${summaryText(t.deadlines.inspectionTermination)}; ${summaryText(t.deadlines.timeOfDay)} Mountain time; see holiday rules` },
+  ],
   generateAgreement: generateColoradoOfferPdf,
 };

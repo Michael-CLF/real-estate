@@ -1138,10 +1138,10 @@ export class OfferDetailsComponent
   }
 
 
-  canReviseUnsignedCaliforniaOffer(): boolean {
+  canReviseUnsignedOffer(): boolean {
     const offer = this.offer();
     const version = this.currentVersion();
-    if (!offer || !version || offer.stateCode !== 'CA' || offer.status !== 'submitted' ||
+    if (!offer || !version || !['CA','SC'].includes(offer.stateCode) || offer.status !== 'submitted' ||
         version.status !== 'awaiting_signatures' || !version.immutable ||
         offer.lastDeliveredVersionUid === version.Uid ||
         [...version.buyers, ...version.sellers].some(p => p.signature.status === 'signed')) return false;
@@ -1151,7 +1151,7 @@ export class OfferDetailsComponent
   async returnUnsignedOfferToEditing(): Promise<void> {
     const offer = this.offer();
     const version = this.currentVersion();
-    if (!offer || !version || !this.canReviseUnsignedCaliforniaOffer() || this.processing()) return;
+    if (!offer || !version || !this.canReviseUnsignedOffer() || this.processing()) return;
     this.processing.set(true);
     this.clearMessages();
     try {

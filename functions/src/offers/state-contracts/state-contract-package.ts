@@ -160,6 +160,11 @@ export interface StateContractMilestones {
 }
 
 
+export interface AgreementSummaryRow {
+  readonly label: string;
+  readonly value: string;
+}
+
 export interface StateContractPackage<
   TTerms extends StateContractTerms =
     OfferTermsDocument,
@@ -186,6 +191,9 @@ export interface StateContractPackage<
   createInitialOfferTerms(
     input: CreateInitialOfferTermsInput
   ): TTerms;
+
+  /** Required for every state; maps this exact immutable version to its summary. */
+  getAgreementSummary(input: GenerateStateAgreementInput<TTerms>): readonly AgreementSummaryRow[];
 
   generateAgreement(
     input: GenerateStateAgreementInput<TTerms>

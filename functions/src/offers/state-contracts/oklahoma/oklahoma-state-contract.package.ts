@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import { createOklahomaContractMilestones } from './oklahoma-contract-milestones';
 import { sanitizeOklahomaDraftTerms } from './oklahoma-draft-terms-sanitizer';
@@ -22,6 +23,13 @@ export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTer
     templateVersion: OREC_RESIDENTIAL_SALE_TEMPLATE.templateVersion,
   },
   createInitialOfferTerms: input => createOklahomaInitialOfferTerms(input),
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, undefined, false),
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.earnestMoneyInCents) },
+    { label: 'Closing date', value: summaryText(t.closing.closingDate) },
+    { label: 'Inspection period', value: `${t.timePeriods.inspectionDays} days from Time Reference Date (${summaryText(t.timePeriods.referenceDate)}); see contract counting rules` },
+    { label: 'Possession', value: summaryText(t.closing.possessionTerms) },
+  ],
   generateAgreement: input => generateOklahomaOfferPdf(input),
   validateSubmission: input => validateOklahomaSubmission(input),
   sanitizeDraftTerms: input => sanitizeOklahomaDraftTerms(input),

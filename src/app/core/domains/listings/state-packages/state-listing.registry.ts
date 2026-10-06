@@ -1,3 +1,4 @@
+import { southCarolinaListingPackage } from './south-carolina/south-carolina-listing.package';
 import type {
   StateListingPackage,
 } from './state-listing-package';
@@ -27,6 +28,7 @@ import { louisianaListingPackage } from './louisiana/louisiana-listing.package';
 const PACKAGES =
   new Map<string, StateListingPackage>([
     ['CA', californiaListingPackage],
+    ['SC', southCarolinaListingPackage],
     ['CO', coloradoListingPackage],
     ['NC', northCarolinaListingPackage],
     ['OK', oklahomaListingPackage],

@@ -1,4 +1,9 @@
 export type DisclosureDocumentType =
+  | 'south-carolina-property-condition'
+  | 'south-carolina-association-documents'
+  | 'south-carolina-coastal-disclosure'
+  | 'south-carolina-vacation-rentals'
+
   | 'california-transfer-disclosure'
   | 'california-natural-hazard-disclosure'
   | 'california-fire-hardening'

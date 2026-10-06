@@ -1,3 +1,4 @@
+import type { SouthCarolinaOfferTerms } from '../state-contracts/south-carolina/models/south-carolina-offer-terms.model';
 import type {
   NorthCarolinaOfferTerms,
 } from '../state-contracts/north-carolina/models/north-carolina-offer-terms.model';
@@ -100,7 +101,8 @@ export type StateOfferTerms =
   | FloridaOfferTerms
   | LouisianaOfferTerms
   | ColoradoOfferTerms
-  | CaliforniaOfferTerms;
+  | CaliforniaOfferTerms
+  | SouthCarolinaOfferTerms;
 
 /*
  * Compatibility name used throughout the existing offer

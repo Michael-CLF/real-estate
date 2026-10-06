@@ -1,3 +1,4 @@
+import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { StateContractPackage } from '../state-contract-package';
 import type { LouisianaOfferTermsDocument } from './louisiana-offer-terms.document';
@@ -36,5 +37,12 @@ export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferT
     ...(version.terms.disclosures.leadPaintStatus === 'received' ? ['lead-based-paint'] : []),
   ],
   createContractMilestones: createLouisianaContractMilestones,
+    getAgreementSummary: ({ version: { terms: t } }) => [
+    ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
+    { label: 'Funding', value: summaryText(t.purchase.financingType) },
+    { label: 'Earnest money deposit', value: summaryMoney(t.purchase.hasEarnestMoney === false ? 0 : t.purchase.earnestMoneyInCents) },
+    { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
+    { label: 'Inspection / due diligence', value: `${t.deadlines.inspectionPeriodDays} calendar days after the period begins on the day after acceptance; may end earlier upon a signed remedy request or extend for unavailable access/utilities — see contract` },
+  ],
   generateAgreement: generateLouisianaOfferPdf,
 };

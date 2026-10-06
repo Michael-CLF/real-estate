@@ -10,6 +10,20 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  SC: [
+    { documentType:'south-carolina-property-condition',title:'South Carolina Residential Property Condition Disclosure Statement',shortTitle:'Property condition',formCode:'SC REC — updated June 2025',required:false,sortOrder:1,
+      description:'For covered residential transfers, seller completes and signs the official statement. Deliver before signing or by the different deadline expressly agreed in the purchase contract. Statutory exemptions and a mutual written waiver are separate options; upload is not required to advertise the property.',
+      officialFormUrl:'https://llr.sc.gov/re/resources.aspx',formDownloadUrl:'https://llr.sc.gov/re/recpdf/Property-Condition-Disclosure-Statement-06.2025.pdf',additionalDownloads:[{label:'Statutory disclosure exemptions',url:'https://llr.sc.gov/re/recpdf/Doc370.pdf'}]},
+    { documentType:'lead-based-paint',title:'Federal Lead-Based Paint Disclosure and Buyer Materials',shortTitle:'Lead paint',formCode:'FED-LEAD',required:false,sortOrder:2,
+      description:'For most pre-1978 housing, deliver the lead disclosure, available reports and EPA pamphlet before the buyer signs. The buyer may waive the inspection opportunity, which does not waive the disclosure requirement.',
+      formDownloadUrl:'https://www.epa.gov/sites/default/files/documents/selr_eng.pdf',officialFormUrl:'https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards',additionalDownloads:[{label:'EPA lead safety pamphlet',url:'https://www.epa.gov/system/files/documents/2026-02/protectyourfamily_pamphlet_2026_3.pdf'}]},
+    { documentType:'south-carolina-association-documents',title:'Association or Condominium Documents',shortTitle:'Association documents',formCode:'SC-ASSOCIATION',required:false,sortOrder:3,
+      description:'When applicable, provide recorded covenants, restrictions, association fees, assessments and property-specific condominium records. HOA information is included in the official condition disclosure.',sourceInstructions:'Request property-specific records from the association, manager or county register of deeds.'},
+    { documentType:'south-carolina-coastal-disclosure',title:'Applicable Beachfront Disclosure and Survey',shortTitle:'Beachfront disclosure',formCode:'SC 48-39-330',required:false,sortOrder:4,
+      description:'Only for property in whole or part seaward of a beachfront setback or jurisdictional line. The purchase contract must contain the required baseline, setback, NAD-1983 seaward structure-corner coordinates and latest local erosion rate.',officialFormUrl:'https://www.scstatehouse.gov/code/t48c039.php',sourceInstructions:'Obtain the seller’s survey and current departmental coastal records. Upload supporting documents and include the required information in the contract.'},
+    { documentType:'south-carolina-vacation-rentals',title:'Existing Vacation Rental Bookings and Management Agreements',shortTitle:'Vacation rentals',formCode:'SC 27-50-250',required:false,sortOrder:5,
+      description:'If vacation rentals apply, disclose all future rental periods in writing before ratification. Certain bookings and management agreements continue after transfer; observe statutory notices to the rental manager.',officialFormUrl:'https://www.scstatehouse.gov/code/t27c050.php',sourceInstructions:'Provide all future booking periods and copies of existing rental and management agreements. Ordinary residential leases should also be disclosed.'},
+  ],
   CA: [
     {
       documentType: 'california-transfer-disclosure',

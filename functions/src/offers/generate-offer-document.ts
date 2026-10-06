@@ -39,6 +39,8 @@ import type {
 } from './state-contracts/state-contract-package';
 
 
+import { prependNavStreetContractSummary } from './state-contracts/navstreet-pdf-layout';
+
 type GeneratedAgreementType =
     | 'offer_agreement'
     | 'counteroffer_agreement'
@@ -283,9 +285,7 @@ export const generateOfferDocument =
                         .stateCode
                 );
 
-            const generatedPdf =
-                await stateContractPackage
-                    .generateAgreement({
+            const agreementInput = {
                     offer,
 
                     version:
@@ -299,8 +299,13 @@ export const generateOfferDocument =
                     generatedAt,
 
                     documentStatus:
-                        'approved',
-                    });
+                        'approved' as const,
+                    };
+            const generatedPdf = await prependNavStreetContractSummary(
+                agreementInput,
+                stateContractPackage.getAgreementSummary(agreementInput),
+                await stateContractPackage.generateAgreement(agreementInput),
+            );
 
             const hashValue =
                 createHash('sha256')

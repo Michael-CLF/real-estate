@@ -1,0 +1,45 @@
+
+@if (terms(); as currentTerms) {
+  <section class="south-carolina-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="south-carolina-offer-wizard__contract">
+        <span>Selected South Carolina contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    @if (pendingDisclosureNotice(); as notice) {
+      <p class="south-carolina-offer-wizard__pending-disclosures" role="status">{{ notice }}</p>
+    }
+
+    <app-offer-wizard-shell
+      stateName="South Carolina"
+      title="South Carolina purchase offer"
+      description="Complete the questions for the selected South Carolina contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [allowBuyerEdits]="initiatedBy() === 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="south-carolina-offer-wizard__loading" aria-live="polite">
+    Preparing the South Carolina residential sale contract from the property listing…
+  </section>
+}

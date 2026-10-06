@@ -1,0 +1,6 @@
+export const SOUTH_CAROLINA_STATUTORY_NOTICES = {
+  condition: 'For covered one-to-four-unit residential transfers, seller provides the official Residential Property Condition Disclosure Statement before the contract is signed, or at the different time expressly agreed in this contract. Statutory exemptions and a mutual written waiver are separate choices. No representation on the form is not an exemption.',
+  coastal: 'For property in whole or part seaward of the beachfront setback or jurisdictional line, the contract must include the applicable baseline, setback, NAD-1983 seaward structure-corner coordinates and the current departmental local erosion rate. Obtain the seller’s survey and coastal records; do not guess.',
+  rentals: 'Seller must disclose in writing all future vacation rental periods before ratification. South Carolina vacation rental law can require buyer to honor bookings beginning within 90 days after recording, together with the applicable management agreement. Seller must provide the statutory notices to the rental manager.',
+  closing: 'A licensed South Carolina attorney must supervise the legally required closing work. Buyer and seller select their own professional assistance. NavStreet does not prepare deeds, examine title, hold earnest money or conduct the closing.',
+} as const;
