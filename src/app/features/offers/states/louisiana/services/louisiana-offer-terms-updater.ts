@@ -1,3 +1,4 @@
+import { updatePath } from '../../../engine/offer-term-path';
 import type { LouisianaOfferTerms } from '../../../../../core/domains/offers/state-contracts/louisiana/models/louisiana-offer-terms.model';
 
 const FORBIDDEN = new Set(['__proto__', 'constructor', 'prototype']);
@@ -22,8 +23,3 @@ export function updateLouisianaOfferTerms(terms: LouisianaOfferTerms, fieldPath:
   return updated;
 }
 
-function updatePath(source: unknown, [head, ...tail]: readonly string[], value: unknown): Record<string, unknown> {
-  const record = source && typeof source === 'object' && !Array.isArray(source) ? source as Record<string, unknown> : {};
-  if (!head) return record;
-  return { ...record, [head]: tail.length ? updatePath(record[head], tail, value) : value };
-}

@@ -31,6 +31,17 @@ const checks = [
   'verify-listing-statement-validation.cjs',
   'verify-state-pdf-generation.cjs',
   'verify-completed-contracts.cjs',
+  'verify-signed-contract-pdfs.cjs',
+  'verify-fixed-form-continuations.cjs',
+  'verify-fixed-form-signatures.cjs',
+  'verify-remaining-fixed-form-text.cjs',
+  'verify-ok-single-field-text.cjs',
+  'verify-texas-contact-text.cjs',
+  'verify-pdf-capacity.cjs',
+  'verify-party-pdf-layout.cjs',
+  'verify-contract-summaries.cjs',
+  'verify-architecture-boundaries.cjs',
+  'verify-shared-term-updates.cjs',
 ];
 
 function run(args, label) {

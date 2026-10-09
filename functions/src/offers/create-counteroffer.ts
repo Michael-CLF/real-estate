@@ -1,6 +1,5 @@
 import { resetPartySignatures, createCounterofferTerms } from './counteroffer-draft-data';
 import { removeUndefinedValues } from './draft-value-cleanup';
-import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
 import {
   HttpsError,
   onCall
@@ -22,9 +21,6 @@ import {
 import {
   requireStateContractPackage
 } from './state-contracts/state-contract-registry';
-import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
-import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
-import { assertColoradoListingDisclosures } from './colorado-listing-disclosure-gate';
 
 import type {
   CreateCounterofferData,
@@ -160,24 +156,15 @@ export const createCounteroffer =
               const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
               const listingSnapshot = await transaction.get(listingReference);
               if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The listing could not be found.');
-              revisionDocuments = await (offer.stateCode === 'SC' ? readSouthCarolinaListingDisclosures : readCaliforniaListingDisclosures)(transaction, listingReference, listingSnapshot.data()!);
+              revisionDocuments = await stateContractPackage.listingDisclosurePolicy!.readVersions!(transaction, listingReference, listingSnapshot.data()!);
             }
 
-            if (offer.stateCode === 'LA') {
+            const listingPolicy = stateContractPackage.listingDisclosurePolicy;
+            if (listingPolicy?.assertCounterofferReady) {
               const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
               const listingSnapshot = await transaction.get(listingReference);
-              if (!listingSnapshot.exists || !listingSnapshot.data()) {
-                throw new HttpsError('not-found', 'The Louisiana listing could not be found.');
-              }
-              await assertLouisianaListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
-            }
-
-
-if (offer.stateCode === 'CO') {
-              const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
-              const listingSnapshot = await transaction.get(listingReference);
-              if (!listingSnapshot.exists || !listingSnapshot.data()) throw new HttpsError('not-found', 'The Colorado listing could not be found.');
-              await assertColoradoListingDisclosures(transaction, listingReference, listingSnapshot.data()!);
+              if (!listingSnapshot.exists || !listingSnapshot.data()) throw new HttpsError('not-found', listingPolicy.counterofferMissingListingMessage ?? 'The listing could not be found.');
+              await listingPolicy.assertCounterofferReady(transaction, listingReference, listingSnapshot.data()!);
             }
 
             const initiatingParty = reviseUnsigned
@@ -387,7 +374,7 @@ if (offer.stateCode === 'CO') {
 function verifyUnsignedRevisionAccess(
   offer: OfferDocument, version: OfferVersionDocument, userUid: string, versionUid: string
 ): void {
-  if (!['CA','SC'].includes(offer.stateCode) || offer.currentVersionUid !== versionUid ||
+  if (requireStateContractPackage(offer.stateCode).listingDisclosurePolicy?.supportsUnsignedRevision !== true || offer.currentVersionUid !== versionUid ||
       offer.status !== 'submitted' || version.status !== 'awaiting_signatures' ||
       !version.immutable || offer.lastDeliveredVersionUid === versionUid ||
       [...version.buyers, ...version.sellers].some(p => p.signature?.status === 'signed')) {

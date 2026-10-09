@@ -1,7 +1,7 @@
-// Explicit cash-purchase examples for compatibility tests, not recommended contract elections.
+// Explicit cash/financed purchase examples for compatibility tests, not recommended contract elections.
 const path=require('node:path');
 const CODES=['NC','TX','OK','UT','WI','FL','LA','CO','CA','SC'];
-function createCompletedContractFixture(project,code,now=new Date()) {
+function createCompletedContractFixture(project,code,now=new Date(),funding='cash') {
  const registry=require(path.join(project,'functions/lib/offers/state-contracts/state-contract-registry.js'));
  const pkg=registry.requireStateContractPackage(code);
  const day=n=>new Date(now.getTime()+n*86400000).toISOString().slice(0,10);
@@ -88,6 +88,27 @@ function createCompletedContractFixture(project,code,now=new Date()) {
    inspectionObjection:day(12),inspectionResolution:day(14),timeOfDay:'17:00',possessionTime:'17:00',extendHoliday:false});
   Object.assign(terms.disclosures,{sellerPropertyStatus:'received',waterSourceAcknowledged:true,radonBrochureAcknowledged:true,
    radonInformationAcknowledged:true,sellerReportsHoa:false,associationStatus:'not_applicable',leadPaintStatus:'not_applicable'});
+ }
+ if (!['cash','financed'].includes(funding)) throw new Error('Unknown fixture funding scenario.');
+ if (funding === 'financed') {
+  if (code === 'NC') terms.purchase.financingType = 'loan'; // NC does not store a loan amount.
+  else if (code === 'TX') {
+   Object.assign(terms.salesPrice,{cashPortionInCents:7000000,financingInCents:28000000,financingAddenda:['third_party_financing']});
+   terms.addenda.find(addendum => addendum.formId === 'third-party-financing').included = true;
+  } else if (code === 'OK') terms.contractDocuments = ['conventional_loan']; // Amount is in the separate supplement.
+  else if (code === 'CO') {
+   Object.assign(terms.purchase,{financingType:'new_loan',newLoanType:'conventional',newLoanAmountInCents:28000000,cashAtClosingInCents:6900000});
+   Object.assign(terms.deadlines,{newLoanApplication:day(3),newLoanTerms:day(10),newLoanAvailability:day(20)});
+  } else {
+   Object.assign(terms.purchase,{financingType:code === 'LA' ? 'financed' : 'conventional',loanAmountInCents:28000000,
+    loanTermYears:30,loanApplicationDays:3,loanApprovalDays:20});
+   Object.assign(terms.conditions,{financing:true,appraisal:true});
+   terms.deadlines.financingAppraisalDate=day(20);
+   if(code === 'LA') {
+    Object.assign(terms.purchase,{maxInterestRatePercent:6.5,financingSource:'conventional'});
+    Object.assign(terms.deadlines,{appraisalCopyDays:3,appraisalResponseDays:5});
+   }
+  }
  }
  const offer={Uid:'sample',stateCode:code,listingUid:'sample',currentVersionUid:'sample-version',status:'draft',referenceNumber:'SAMPLE-'+code};
  const version={Uid:'sample-version',offerUid:'sample',stateCode:code,versionNumber:1,status:'draft',immutable:false,

@@ -1,8 +1,6 @@
 import { removeUndefinedValues } from './draft-value-cleanup';
 import { readTexasListingLeaseFacts } from './state-contracts/texas/texas-initial-terms';
 import * as logger from 'firebase-functions/logger';
-import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
-import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 import { Timestamp } from 'firebase-admin/firestore';
@@ -23,9 +21,6 @@ import type {
 } from './state-contracts/state-contract-package';
 
 import { getListingOfferAvailabilityMessage } from './listing-offer-availability';
-import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
-import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
-import { assertColoradoListingDisclosures } from './colorado-listing-disclosure-gate';
 
 import type {
   CreateOfferDraftData,
@@ -193,21 +188,8 @@ export const createOfferDraft = onCall<
       );
     }
 
-    if (currentStateCode === 'FL') {
-      await assertFloridaListingDisclosures(transaction, listingReference, currentListingData);
-    }
-    if (currentStateCode === 'LA') {
-      await assertLouisianaListingDisclosures(transaction, listingReference, currentListingData);
-    }
-
-if (currentStateCode === 'CO') {
-      await assertColoradoListingDisclosures(transaction, listingReference, currentListingData);
-    }
-
-    const southCarolinaDocuments = currentStateCode === 'SC' ? await readSouthCarolinaListingDisclosures(transaction, listingReference, currentListingData) : undefined;
-    const californiaReadiness = currentStateCode === 'CA'
-      ? await readCaliforniaListingDisclosures(transaction, listingReference, currentListingData)
-      : undefined;
+    await stateContractPackage.listingDisclosurePolicy?.assertReady?.(transaction, listingReference, currentListingData);
+    const listingExtensions = await stateContractPackage.listingDisclosurePolicy?.initialListingData?.(transaction, listingReference, currentListingData) ?? {};
 
     const existingOfferQuery = adminFirestore
       .collection('offers')
@@ -419,7 +401,7 @@ if (currentStateCode === 'CO') {
           seller:
             sellerParty,
 
-          listingData: { ...currentListingData, californiaReadiness, ...(southCarolinaDocuments ? {southCarolinaDocuments} : {}) },
+          listingData: { ...currentListingData, ...listingExtensions },
         });
 
     // Expiration is a buyer-selected term, not a creation-time default.

@@ -10,6 +10,9 @@ import type { OfferVersionPartySnapshotDocument } from '../../offer-types';
 import type { OklahomaOfferTermsDocument } from './oklahoma-offer-terms.document';
 import { OREC_RESIDENTIAL_SALE_TEMPLATE } from './contracts/residential-sale/orec-residential-sale-template';
 
+import { populateFixedFormTextSections, appendFixedFormTextSections, populateSingleLineFixedFormTextSections, type FixedFormTextSection } from '../fixed-form-text-continuation';
+import { appendFixedFormSignatureRecord } from '../fixed-form-signature-record';
+
 type OklahomaAgreementInput = GenerateStateAgreementInput<OklahomaOfferTermsDocument>;
 
 export async function generateOklahomaOfferPdf(input: OklahomaAgreementInput): Promise<GeneratedStateAgreement> {
@@ -23,6 +26,13 @@ export async function generateOklahomaOfferPdf(input: OklahomaAgreementInput): P
   const form = pdf.getForm();
   populateOfficialForm(form, terms, input.version.buyers, input.version.sellers);
   const appearanceFont = await pdf.embedFont(StandardFonts.Helvetica);
+  const continuations = populateFixedFormTextSections(form, oklahomaFixedFormTextSections(terms), appearanceFont);
+  continuations.push(...populateSingleLineFixedFormTextSections(form, [
+    ...oklahomaFixedFormIdentitySections(form),
+    { title: 'Oklahoma - Legal Description', field: 'Text Field 74', value: terms.legalDescription },
+    { title: 'Oklahoma - Possession Terms', field: 'Text Field 90', value: terms.closing.possessionTerms },
+    { title: 'Oklahoma - Additional Investigations', field: 'Text Field 99', value: terms.timePeriods.additionalInvestigations },
+  ], appearanceFont));
   form.updateFieldAppearances(appearanceFont);
 
   const coverBytes = await generateNavStreetCover(input, terms);
@@ -37,6 +47,12 @@ export async function generateOklahomaOfferPdf(input: OklahomaAgreementInput): P
   pdf.setCreator('NavStreet');
   pdf.setCreationDate(input.generatedAt);
   pdf.setModificationDate(input.generatedAt);
+
+  await appendFixedFormTextSections(
+    pdf, continuations, input.offer.referenceNumber + ' / version ' + input.version.versionNumber
+  );
+
+  await appendFixedFormSignatureRecord(pdf, input, 'Oklahoma', 'America/Chicago');
 
   const bytes = await pdf.save({ useObjectStreams: false, addDefaultPage: false, updateFieldAppearances: false });
   return {
@@ -76,21 +92,15 @@ function populateOfficialForm(
   setText(form, 'Text Field 72', formatPartyNames(sellers));
   setText(form, 'Text Field 73', formatPartyNames(buyers));
   setText(form, 'Text Field 75', terms.property.county);
-  setText(form, 'Text Field 74', terms.legalDescription);
   setText(form, 'Text Field 69', [terms.property.addressLine1, terms.property.addressLine2].filter(Boolean).join(', '));
   setText(form, 'Text Field 70', terms.property.city);
   setText(form, 'Text Field 71', terms.property.zipCode);
   setText(form, 'Text Field 76', moneyWithoutSymbol(terms.purchase.purchasePriceInCents));
   setText(form, 'Text Field 77', moneyWithoutSymbol(terms.purchase.earnestMoneyInCents));
-  setSplitText(form, ['Text Field 78', 'Text Field 79'], terms.purchase.trustAccountHolder, 42);
   setText(form, 'Text Field 80', formatContractDate(terms.closing.closingDate));
 
-  setText(form, 'Text Field 90', terms.closing.possessionTerms);
-  setSplitText(form, ['Text Field 87', 'Text Field 88'], terms.accessories.additionalInclusions, 110);
-  setSplitText(form, ['Text Field 173', 'Text Field 89'], terms.accessories.exclusions, 85);
   setText(form, 'Text Field 91', formatContractDate(terms.timePeriods.referenceDate));
   setText(form, 'Text Field 92', String(terms.timePeriods.inspectionDays));
-  setText(form, 'Text Field 99', terms.timePeriods.additionalInvestigations);
   setText(form, 'Text Field 100', String(terms.timePeriods.trrNegotiationDays));
 
   check(form, 'Check Box 82', terms.title.evidenceSelection === 'title_insurance_commitment');
@@ -107,13 +117,14 @@ function populateOfficialForm(
   check(form, 'Check Box 91', terms.serviceAgreement.selection === 'buyer_selected');
   setText(form, 'Text Field 108', terms.serviceAgreement.selection === 'buyer_selected' ? moneyWithoutSymbol(terms.serviceAgreement.approximateCostInCents) : '');
   setText(form, 'Text Field 109', terms.serviceAgreement.selection === 'buyer_selected' ? moneyWithoutSymbol(terms.serviceAgreement.sellerContributionInCents) : '');
-  setSplitText(form, ['Text Field 116', 'Text Field 117', 'Text Field 118', 'Text Field 119'], terms.additionalProvisions.included ? terms.additionalProvisions.partyProvidedText : '', 105);
 
   const expiration = formatExpiration(terms.delivery.expiresAt, terms.delivery.timeZone);
   setText(form, 'Text Field 130', expiration.date);
   setText(form, 'Text Field 131', expiration.time);
   check(form, 'Check Box 92', expiration.meridiem === 'AM');
   check(form, 'Check Box 93', expiration.meridiem === 'PM');
+
+setPartyNames(form, ['Text Field 141', 'Text Field 145', 'Text Field 149'], buyers);
 
 setPartyNames(
   form,
@@ -238,18 +249,6 @@ function setPartyDates(
 function formatPartyNames(parties: readonly OfferVersionPartySnapshotDocument[]): string {
   return parties.map(party => party.legalName).join('; ');
 }
-function setSplitText(form: PDFForm, fields: readonly string[], value: string, maximumPerField: number): void {
-  const remainingWords = value.trim().split(/\s+/).filter(Boolean);
-  fields.forEach(field => {
-    let line = '';
-    while (remainingWords.length) {
-      const candidate = line ? `${line} ${remainingWords[0]}` : remainingWords[0];
-      if (candidate.length > maximumPerField && line) break;
-      line = candidate; remainingWords.shift();
-    }
-    setText(form, field, line);
-  });
-}
 function formatMoney(cents: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 }
@@ -306,3 +305,27 @@ function resolveBrandAssetPath(): string {
   return path;
 }
 function sanitizeFilePart(value: string): string { return value.replace(/[^A-Za-z0-9_-]/g, '-'); }
+
+function oklahomaFixedFormTextSections(terms: OklahomaOfferTermsDocument): FixedFormTextSection[] {
+  return [
+    { title: 'Oklahoma - Trust Account Holder', fields: ['Text Field 78', 'Text Field 79'], value: terms.purchase.trustAccountHolder, maximumPerField: 42 },
+    { title: 'Oklahoma - Additional Inclusions', fields: ['Text Field 87', 'Text Field 88'], value: terms.accessories.additionalInclusions, maximumPerField: 110 },
+    { title: 'Oklahoma - Exclusions', fields: ['Text Field 173', 'Text Field 89'], value: terms.accessories.exclusions, maximumPerField: 85 },
+    { title: 'Oklahoma - Additional Provisions', fields: ['Text Field 116', 'Text Field 117', 'Text Field 118', 'Text Field 119'], value: terms.additionalProvisions.included ? terms.additionalProvisions.partyProvidedText : undefined, maximumPerField: 105 },
+  ];
+}
+
+function oklahomaFixedFormIdentitySections(form: PDFForm) {
+  const sections = [
+    { title: 'Oklahoma - Seller Names', field: 'Text Field 72' },
+    { title: 'Oklahoma - Buyer Names', field: 'Text Field 73' },
+    { title: 'Oklahoma - County', field: 'Text Field 75' },
+    { title: 'Oklahoma - Property Address', field: 'Text Field 69' },
+    { title: 'Oklahoma - City', field: 'Text Field 70' },
+    { title: 'Oklahoma - Postal Code', field: 'Text Field 71' },
+    ...OREC_RESIDENTIAL_SALE_TEMPLATE.propertyIdentifierFields.map(field => ({ title: 'Oklahoma - Property Identifier', field })),
+    ...['33', '34', '141', '145', '149'].map((id, index) => ({ title: 'Oklahoma - Buyer Printed Name ' + (index < 2 ? index + 1 : index - 1), field: 'Text Field ' + id })),
+    ...['39', '40', '142', '146', '150'].map((id, index) => ({ title: 'Oklahoma - Seller Printed Name ' + (index < 2 ? index + 1 : index - 1), field: 'Text Field ' + id })),
+  ];
+  return sections.map(section => ({ ...section, value: form.getTextField(section.field).getText() }));
+}

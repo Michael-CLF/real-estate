@@ -6,9 +6,6 @@ import { adminFirestore } from '../shared/firebase-admin';
 import { callableFunctionOptions } from '../shared/function-options';
 import { verifyOfferSubmissionEligibility } from './verify-offer-eligibility';
 import { requireStateContractPackage } from './state-contracts/state-contract-registry';
-import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
-import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
-import { assertColoradoListingDisclosures } from './colorado-listing-disclosure-gate';
 
 import type {
   OfferDocument,
@@ -148,29 +145,7 @@ export const submitOffer = onCall<
 
     stateContractPackage.validateSubmission({ offer, version });
 
-    if (offer.stateCode === 'FL') {
-      await assertFloridaListingDisclosures(
-        transaction,
-        listingReference,
-        listingData,
-      );
-    }
-
-    if (offer.stateCode === 'LA') {
-      await assertLouisianaListingDisclosures(
-        transaction,
-        listingReference,
-        listingData,
-      );
-    }
-
-    if (offer.stateCode === 'CO') {
-      await assertColoradoListingDisclosures(
-        transaction,
-        listingReference,
-        listingData,
-      );
-    }
+    await stateContractPackage.listingDisclosurePolicy?.assertReady?.(transaction, listingReference, listingData);
 
     const requiredDisclosureTypes =
       stateContractPackage.requiredListingDisclosures?.({
@@ -184,14 +159,7 @@ export const submitOffer = onCall<
       storagePath: string;
     }> = [];
 
-    const reviewedDisclosureVersionIds =
-      ['CA', 'SC'].includes(offer.stateCode)
-        ? (
-            version.terms as unknown as {
-              documentVersions: Readonly<Record<string, string>>;
-            }
-          ).documentVersions
-        : undefined;
+    const reviewedDisclosureVersionIds = stateContractPackage.listingDisclosurePolicy?.reviewedVersions?.({ offer, version });
 
     if (
       reviewedDisclosureVersionIds &&

@@ -9,6 +9,12 @@ import { validateSouthCarolinaSubmission } from './south-carolina-submission-val
 import { createSouthCarolinaContractMilestones } from './south-carolina-contract-milestones';
 import { SOUTH_CAROLINA_DOCUMENT_RULES } from './south-carolina-document-rules';
 export const southCarolinaStateContractPackage: StateContractPackage<SouthCarolinaOfferTermsDocument> = {
+  listingDisclosurePolicy: {
+    readVersions: readSouthCarolinaListingDisclosures,
+    initialListingData: async (transaction, reference, listing) => ({ southCarolinaDocuments: await readSouthCarolinaListingDisclosures(transaction, reference, listing) }),
+    reviewedVersions: ({ version }) => version.terms.documentVersions,
+    supportsUnsignedRevision: true,
+  },
   stateCode:'SC', offerCreationEnabled:true, contractTypes:['navstreet_south_carolina_residential_sale_2026'],contractTypeRequired:true,
   defaultTimeZone:'America/New_York', agreementTemplate:{stateCode:'SC',templateUid:SOUTH_CAROLINA_DOCUMENT_RULES.templateUid,templateName:'NavStreet South Carolina Residential Purchase and Sale Agreement',templateVersion:SOUTH_CAROLINA_DOCUMENT_RULES.version},
   createInitialOfferTerms:createSouthCarolinaInitialOfferTerms,sanitizeDraftTerms:sanitizeSouthCarolinaDraftTerms,validateSubmission:validateSouthCarolinaSubmission,

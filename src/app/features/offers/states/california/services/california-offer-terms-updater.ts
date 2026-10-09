@@ -1,3 +1,4 @@
+import { updatePath } from '../../../engine/offer-term-path';
 
 import type { CaliforniaOfferTerms } from '../../../../../core/domains/offers/state-contracts/california/models/california-offer-terms.model';
 
@@ -25,8 +26,3 @@ export function updateCaliforniaOfferTerms(terms: CaliforniaOfferTerms, fieldPat
   return updated;
 }
 
-function updatePath(source: unknown, [head, ...tail]: readonly string[], value: unknown): Record<string, unknown> {
-  const record = source && typeof source === 'object' && !Array.isArray(source) ? source as Record<string, unknown> : {};
-  if (!head) return record;
-  return { ...record, [head]: tail.length ? updatePath(record[head], tail, value) : value };
-}

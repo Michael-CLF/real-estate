@@ -40,6 +40,10 @@ import {
 } from './contracts/one-to-four-family-resale/trec-20-19-template';
 
 
+import { populateFixedFormTextSections, appendFixedFormTextSections, populateSingleLineFixedFormTextSections, type FixedFormTextSection } from '../fixed-form-text-continuation';
+import { appendFixedFormSignatureRecord } from '../fixed-form-signature-record';
+
+
 type TexasAgreementInput =
   GenerateStateAgreementInput<
     TexasOneToFourFamilyResaleOfferTermsDocument
@@ -81,10 +85,15 @@ export async function generateTexasOfferPdf(
     input.version.sellers
   );
 
+
   const appearanceFont =
     await pdfDocument.embedFont(
       StandardFonts.Helvetica
     );
+
+  const continuations = populateFixedFormTextSections(form, texasFixedFormTextSections(terms), appearanceFont);
+
+  continuations.push(...populateSingleLineFixedFormTextSections(form, texasFixedFormContactSections(form), appearanceFont));
 
   form.updateFieldAppearances(
     appearanceFont
@@ -105,6 +114,12 @@ export async function generateTexasOfferPdf(
   pdfDocument.setModificationDate(
     input.generatedAt
   );
+
+  await appendFixedFormTextSections(
+    pdfDocument, continuations, input.offer.referenceNumber + ' / version ' + input.version.versionNumber
+  );
+
+  await appendFixedFormSignatureRecord(pdfDocument, input, 'Texas', 'America/Chicago');
 
   const generatedBytes =
     await pdfDocument.save({
@@ -259,12 +274,6 @@ function populateContract(
   setText(form, fields.county, terms.property.county);
   setText(form, fields.propertyAddress, propertyAddress);
 
-  const exclusionLines = splitText(
-    terms.propertyTerms.exclusions,
-    75
-  );
-  setText(form, fields.exclusionsLine1, exclusionLines[0]);
-  setText(form, fields.exclusionsLine2, exclusionLines[1]);
 
   setText(form, fields.cashPortion, money(terms.salesPrice.cashPortionInCents));
   setText(form, fields.financingAmount, money(terms.salesPrice.financingInCents));
@@ -316,13 +325,7 @@ function populateContract(
     integer(terms.leases.naturalResourceLeaseTerminationDays)
   );
 
-  const escrowAddress = splitText(
-    terms.earnestMoneyAndOption.escrowAgentAddress,
-    62
-  );
   setText(form, fields.escrowAgentName, terms.earnestMoneyAndOption.escrowAgentName);
-  setText(form, fields.escrowAgentAddressLine1, escrowAddress[0]);
-  setText(form, fields.escrowAgentAddressLine2, escrowAddress[1]);
   setText(form, fields.earnestMoney, money(terms.earnestMoneyAndOption.earnestMoneyInCents));
   setText(form, fields.optionFee, money(terms.earnestMoneyAndOption.optionFeeInCents));
   setText(form, fields.additionalEarnestMoney, money(terms.earnestMoneyAndOption.additionalEarnestMoneyInCents));
@@ -398,12 +401,6 @@ function populateDisclosuresAndCondition(
   setChecked(form, fields.propertyAcceptedAsIs, condition.acceptance === 'as_is');
   setChecked(form, fields.propertyAcceptedWithRepairs, condition.acceptance === 'as_is_with_specific_repairs');
 
-  const repairLines = splitText(
-    condition.partyProvidedRepairsAndTreatments,
-    93
-  );
-  setText(form, fields.repairsLine1, repairLines[0]);
-  setText(form, fields.repairsLine2, repairLines[1]);
   setText(form, fields.serviceContractReimbursement, money(condition.residentialServiceContractReimbursementInCents));
 
   const waterDisclosure = terms.disclosures.waterRights;
@@ -415,12 +412,6 @@ function populateDisclosuresAndCondition(
     waterDisclosure.status === 'exempt');
   setText(form, fields.waterDisclosureDeliveryDays, integer(waterDisclosure.deliveryDays));
 
-  const waterSupplierLines = splitText(
-    terms.disclosures.exemptWaterSupplierName,
-    90
-  );
-  setText(form, fields.exemptWaterSupplierLine1, waterSupplierLines[0]);
-  setText(form, fields.exemptWaterSupplierLine2, waterSupplierLines[1]);
 }
 
 
@@ -438,23 +429,7 @@ function populateClosingAndPossession(
   setChecked(form, fields.possessionAtClosing, terms.closingAndPossession.possession === 'upon_closing_and_funding');
   setChecked(form, fields.possessionByLease, terms.closingAndPossession.possession === 'temporary_residential_lease');
 
-  const specialProvisionLines = splitText(
-    terms.specialProvisions.included
-      ? terms.specialProvisions.partyProvidedText
-      : undefined,
-    105
-  );
-  setText(form, fields.specialProvisionsLine1, specialProvisionLines[0]);
-  setText(form, fields.specialProvisionsLine2, specialProvisionLines[1]);
-  setText(form, fields.specialProvisionsLine3, specialProvisionLines[2]);
 
-  const brokerDisclosureLines = splitText(
-    terms.brokerOrSalesAgentDisclosure,
-    105
-  );
-  setText(form, fields.brokerDisclosureLine1, brokerDisclosureLines[0]);
-  setText(form, fields.brokerDisclosureLine2, brokerDisclosureLines[1]);
-  setText(form, fields.brokerDisclosureLine3, brokerDisclosureLines[2]);
   setText(form, fields.sellerContributionToBuyerExpenses, money(terms.expenses.sellerContributionToBuyerExpensesInCents));
 
   populateBrokerContribution(
@@ -751,44 +726,6 @@ function integer(
 }
 
 
-function splitText(
-  value: string | undefined,
-  maximumCharactersPerLine: number
-): string[] {
-  const text = value?.trim();
-
-  if (!text) {
-    return [];
-  }
-
-  const words = text.split(/\s+/u);
-  const lines: string[] = [];
-  let current = '';
-
-  for (const word of words) {
-    const candidate = current
-      ? `${current} ${word}`
-      : word;
-
-    if (
-      current &&
-      candidate.length > maximumCharactersPerLine
-    ) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = candidate;
-    }
-  }
-
-  if (current) {
-    lines.push(current);
-  }
-
-  return lines;
-}
-
-
 function parseIsoDate(
   value: string
 ): {
@@ -841,4 +778,48 @@ function createAgreementFileName(
     .replace(/^-+|-+$/gu, '') || 'offer';
 
   return `${safeReference}-v${versionNumber}-trec-20-19.pdf`;
+}
+
+function texasFixedFormTextSections(terms: TexasOneToFourFamilyResaleOfferTermsDocument): FixedFormTextSection[] {
+  const f = TREC_20_19_TEMPLATE.fields;
+  return [
+    { title: 'Texas - Property Exclusions', fields: [f.exclusionsLine1, f.exclusionsLine2], value: terms.propertyTerms.exclusions, maximumPerField: 75 },
+    { title: 'Texas - Escrow Agent Address', fields: [f.escrowAgentAddressLine1, f.escrowAgentAddressLine2], value: terms.earnestMoneyAndOption.escrowAgentAddress, maximumPerField: 62 },
+    { title: 'Texas - Repairs and Treatments', fields: [f.repairsLine1, f.repairsLine2], value: terms.propertyCondition.partyProvidedRepairsAndTreatments, maximumPerField: 93 },
+    { title: 'Texas - Exempt Water Supplier', fields: [f.exemptWaterSupplierLine1, f.exemptWaterSupplierLine2], value: terms.disclosures.exemptWaterSupplierName, maximumPerField: 90 },
+    { title: 'Texas - Paragraph 11 Special Provisions', fields: [f.specialProvisionsLine1, f.specialProvisionsLine2, f.specialProvisionsLine3], value: terms.specialProvisions.included ? terms.specialProvisions.partyProvidedText : undefined, maximumPerField: 105 },
+    { title: 'Texas - Broker or Sales Agent Disclosure', fields: [f.brokerDisclosureLine1, f.brokerDisclosureLine2, f.brokerDisclosureLine3], value: terms.brokerOrSalesAgentDisclosure, maximumPerField: 105 },
+  ];
+}
+
+function texasFixedFormContactSections(form: PDFForm) {
+  const f = TREC_20_19_TEMPLATE.fields;
+  const contacts = [
+    { title: 'Buyer Notice', address1: f.buyerNoticeAddressLine1, address2: f.buyerNoticeAddressLine2, email: f.buyerNoticeEmail },
+    { title: 'Seller Notice', address1: f.sellerNoticeAddressLine1, address2: f.sellerNoticeAddressLine2, email: f.sellerNoticeEmail },
+    { title: 'Buyer Agent Notice', address1: f.buyerAgentAddressLine1, address2: f.buyerAgentAddressLine2, email: f.buyerAgentEmail },
+    { title: 'Seller Agent Notice', address1: f.sellerAgentAddressLine1, address2: f.sellerAgentAddressLine2, email: f.sellerAgentEmail },
+  ];
+  const sections: { title: string; field: string }[] = contacts.flatMap(contact => [
+    { title: 'Texas - ' + contact.title + ' Address Line 1', field: contact.address1 },
+    { title: 'Texas - ' + contact.title + ' Address Line 2', field: contact.address2 },
+    { title: 'Texas - ' + contact.title + ' Email', field: contact.email },
+  ]);
+  sections.push(
+    ...([['Seller Names', f.sellerNames], ['Buyer Names', f.buyerNames],
+      ['Lot', f.lot], ['Block', f.block], ['Addition', f.addition], ['City', f.city], ['County', f.county],
+      ['Property Address', f.propertyAddress], ['Escrow Agent Name', f.escrowAgentName],
+      ['Title Company Name', f.titleCompanyName], ['Prohibited Use', f.prohibitedUse],
+      ['Buyer Notice Phone', f.buyerNoticePhone], ['Seller Notice Phone', f.sellerNoticePhone],
+      ['Buyer Agent Phone', f.buyerAgentPhone], ['Seller Agent Phone', f.sellerAgentPhone],
+      ['Buyer Attorney Phone', f.buyerAttorneyPhoneNumber], ['Buyer Attorney Fax', f.buyerAttorneyFaxNumber],
+      ['Seller Attorney Phone', f.sellerAttorneyPhoneNumber], ['Seller Attorney Fax', f.sellerAttorneyFaxNumber]]
+      .map(([title, field]) => ({ title: 'Texas - ' + title, field }))),
+    ...f.headerAddresses.map(field => ({ title: 'Texas - Property Address', field })),
+    { title: 'Texas - Buyer Attorney Name', field: f.buyerAttorneyName },
+    { title: 'Texas - Buyer Attorney Email', field: f.buyerAttorneyEmail },
+    { title: 'Texas - Seller Attorney Name', field: f.sellerAttorneyName },
+    { title: 'Texas - Seller Attorney Email', field: f.sellerAttorneyEmail }
+  );
+  return sections.map(section => ({ ...section, value: form.getTextField(section.field).getText() }));
 }

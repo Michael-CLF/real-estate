@@ -1,7 +1,5 @@
 import { removeUndefinedValues } from './draft-value-cleanup';
 import * as logger from 'firebase-functions/logger';
-import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
-import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
   HttpsError,
   onCall,
@@ -150,11 +148,12 @@ export const saveOfferDraft =
             offerVersionUid
           );
 
-          if (['CA','SC'].includes(offer.stateCode) && requestedChanges['terms']) {
+          const listingPolicy = requireStateContractPackage(offer.stateCode).listingDisclosurePolicy;
+          if (listingPolicy?.readVersions && requestedChanges['terms']) {
             const listingReference = adminFirestore.collection('listings').doc(offer.listingUid);
             const listingSnapshot = await transaction.get(listingReference);
             if (!listingSnapshot.exists) throw new HttpsError('not-found', 'The listing could not be found.');
-            const documents = await (offer.stateCode === 'SC' ? readSouthCarolinaListingDisclosures : readCaliforniaListingDisclosures)(transaction, listingReference, listingSnapshot.data()!);
+            const documents = await listingPolicy.readVersions(transaction, listingReference, listingSnapshot.data()!);
             const savedVersions = (version.terms as unknown as { documentVersions?: Record<string, string> }).documentVersions;
             version = {
               ...version,

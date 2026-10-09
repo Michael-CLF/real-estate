@@ -1,3 +1,4 @@
+import { assertLouisianaListingDisclosures } from '../../louisiana-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -10,6 +11,7 @@ import { validateLouisianaSubmission } from './louisiana-submission-validator';
 import { createLouisianaContractMilestones } from './louisiana-contract-milestones';
 
 export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferTermsDocument> = {
+  listingDisclosurePolicy: { assertReady: assertLouisianaListingDisclosures, assertCounterofferReady: assertLouisianaListingDisclosures, counterofferMissingListingMessage: 'The Louisiana listing could not be found.' },
   stateCode: 'LA', offerCreationEnabled: true,
   contractTypes: ['lrec_louisiana_residential_agreement_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',

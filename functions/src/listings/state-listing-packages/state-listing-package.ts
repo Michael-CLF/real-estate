@@ -10,6 +10,8 @@ export type StateListingField =
 export interface StateListingPackage {
   readonly stateCode: string;
 
+  validateAdditionalSellerStatements?(listingUid: string, statements: Record<string, unknown>): void;
+
   readonly requiredSellerStatementFields:
     readonly StateListingField[];
 }

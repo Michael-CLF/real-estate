@@ -1,3 +1,4 @@
+import { formatTimestamp } from '../property-time-format';
 import PDFDocument from 'pdfkit';
 import type { GenerateStateAgreementInput, GeneratedStateAgreement } from '../state-contract-package';
 import type { WisconsinOfferTermsDocument } from './wisconsin-offer-terms.document';
@@ -118,7 +119,4 @@ export async function generateWisconsinOfferPdf(input: GenerateStateAgreementInp
   }
   pdf.end();
   return { buffer: await done, fileName: `NavStreet-WI-${input.offer.referenceNumber}-v${input.version.versionNumber}.pdf`, pageCount };
-}
-function formatTimestamp(date: Date | undefined, timeZone: string): string {
-  return date ? new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(date) : '';
 }

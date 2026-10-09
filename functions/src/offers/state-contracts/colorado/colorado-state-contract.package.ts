@@ -1,3 +1,4 @@
+import { assertColoradoListingDisclosures } from '../../colorado-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -10,6 +11,7 @@ import { validateColoradoSubmission } from './colorado-submission-validator';
 import { createColoradoContractMilestones } from './colorado-contract-milestones';
 
 export const coloradoStateContractPackage: StateContractPackage<ColoradoOfferTermsDocument> = {
+  listingDisclosurePolicy: { assertReady: assertColoradoListingDisclosures, assertCounterofferReady: assertColoradoListingDisclosures, counterofferMissingListingMessage: 'The Colorado listing could not be found.' },
   stateCode: 'CO', offerCreationEnabled: true,
   contractTypes: ['navstreet_colorado_residential_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Denver',

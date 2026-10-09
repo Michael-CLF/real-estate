@@ -114,16 +114,23 @@ export async function generateLouisianaOfferPdf(input: PdfInput): Promise<Genera
 
   function detail(label: string, value: string): void {
     const wrapped = lines(value || 'None stated', regular, 9.2, WIDTH - 24);
-    const height = 20 + wrapped.length * 13;
-    need(height + 8);
-    page.drawRectangle({ x: LEFT, y: y - height, width: WIDTH, height, color: PALE });
-    page.drawText(label.toUpperCase(), { x: LEFT + 12, y: y - 14, font: bold, size: 7.8, color: BLUE });
-    let lineY = y - 29;
-    for (const line of wrapped) {
-      if (line) page.drawText(line, { x: LEFT + 12, y: lineY, font: regular, size: 9.2, color: INK });
-      lineY -= 13;
+    let labels = lines(label.toUpperCase(), bold, 7.8, WIDTH - 24);
+    if (labels.length > 40) { paragraph(label.toUpperCase(), 7.8, BLUE); labels = ['DETAILS']; }
+    const labelExtra = Math.max(0, labels.length - 1) * 11;
+    const perPage = Math.max(1, Math.floor((620 - 28 - labelExtra) / 13));
+    for (let offset = 0; offset < wrapped.length; offset += perPage) {
+      const chunk = wrapped.slice(offset, offset + perPage);
+      const height = 20 + labelExtra + chunk.length * 13;
+      need(height + 8);
+      page.drawRectangle({ x: LEFT, y: y - height, width: WIDTH, height, color: PALE });
+      labels.forEach((line, index) => { if (line) page.drawText(line, { x: LEFT + 12, y: y - 14 - index * 11, font: bold, size: 7.8, color: BLUE }); });
+      let lineY = y - 29 - labelExtra;
+      for (const line of chunk) {
+        if (line) page.drawText(line, { x: LEFT + 12, y: lineY, font: regular, size: 9.2, color: INK });
+        lineY -= 13;
+      }
+      y -= height + 9;
     }
-    y -= height + 9;
   }
 
   function signedAt(person: (typeof version.buyers)[number]): string {

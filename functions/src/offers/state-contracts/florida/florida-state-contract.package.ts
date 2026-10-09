@@ -1,3 +1,4 @@
+import { assertFloridaListingDisclosures } from '../../florida-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
@@ -9,6 +10,7 @@ import { validateFloridaSubmission } from './florida-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createFloridaContractMilestones } from './florida-contract-milestones';
 export const floridaStateContractPackage: StateContractPackage<FloridaOfferTermsDocument> = {
+  listingDisclosurePolicy: { assertReady: assertFloridaListingDisclosures },
   stateCode: 'FL', offerCreationEnabled: true,
   contractTypes: ['navstreet_florida_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/New_York',

@@ -1,3 +1,4 @@
+import type { Transaction, DocumentReference } from 'firebase-admin/firestore';
 import type {
   OfferDocument,
   OfferPropertySnapshotDocument,
@@ -171,6 +172,8 @@ export interface StateContractPackage<
 > {
   stateCode: string;
 
+  listingDisclosurePolicy?: StateListingOfferPolicy<TTerms>;
+
   offerCreationEnabled: boolean;
 
   /*
@@ -215,4 +218,13 @@ export interface StateContractPackage<
   createContractMilestones(
     input: CreateStateContractMilestonesInput<TTerms>
   ): StateContractMilestones;
+}
+export interface StateListingOfferPolicy<TTerms extends StateContractTerms = StateContractTerms> {
+  assertReady?(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void>;
+  assertCounterofferReady?(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void>;
+  readonly counterofferMissingListingMessage?: string;
+  readVersions?(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<{ documentVersions: Record<string, string>; requiredDisclosureTypes?: string[] }>;
+  initialListingData?(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<Record<string, unknown>>;
+  reviewedVersions?(input: ValidateStateSubmissionInput<TTerms>): Readonly<Record<string, string>> | undefined;
+  readonly supportsUnsignedRevision?: boolean;
 }

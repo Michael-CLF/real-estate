@@ -9,6 +9,12 @@ import { validateCaliforniaSubmission } from './california-submission-validator'
 import { createCaliforniaContractMilestones } from './california-contract-milestones';
 import { CALIFORNIA_DOCUMENT_RULES } from './california-document-rules';
 export const californiaStateContractPackage: StateContractPackage<CaliforniaOfferTermsDocument> = {
+  listingDisclosurePolicy: {
+    readVersions: readCaliforniaListingDisclosures,
+    initialListingData: async (transaction, reference, listing) => ({ californiaReadiness: await readCaliforniaListingDisclosures(transaction, reference, listing) }),
+    reviewedVersions: ({ version }) => version.terms.documentVersions,
+    supportsUnsignedRevision: true,
+  },
   stateCode:'CA',offerCreationEnabled:true,contractTypes:['navstreet_california_residential_sale_2026'],contractTypeRequired:true,
   defaultTimeZone:'America/Los_Angeles',agreementTemplate:{stateCode:'CA',templateUid:CALIFORNIA_DOCUMENT_RULES.templateUid,templateName:'NavStreet California Residential Purchase and Sale Agreement',templateVersion:CALIFORNIA_DOCUMENT_RULES.version},
   createInitialOfferTerms:createCaliforniaInitialOfferTerms,sanitizeDraftTerms:sanitizeCaliforniaDraftTerms,validateSubmission:validateCaliforniaSubmission,

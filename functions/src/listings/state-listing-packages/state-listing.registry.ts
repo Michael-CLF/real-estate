@@ -54,17 +54,7 @@ export function validateStateSellerStatements(
     throw new Error(`Listing draft ${listingUid} has no valid ownership statement.`);
   }
 
-  if (statePackage.stateCode === 'SC') {
-    const facts = statements['southCarolina'];
-    if (!facts || typeof facts !== 'object' || Array.isArray(facts)) {
-      throw new Error('Answer the South Carolina disclosure applicability questions.');
-    }
-    const answers = facts as Record<string, unknown>;
-    if (typeof answers['beachfrontApplies'] !== 'boolean' ||
-        typeof answers['futureVacationBookingsExist'] !== 'boolean') {
-      throw new Error('Answer both South Carolina disclosure applicability questions.');
-    }
-  }
+  statePackage.validateAdditionalSellerStatements?.(listingUid, statements);
 
   for (const [field, message] of [
     ['leadBasedPaintApplies', 'lead-based-paint'],

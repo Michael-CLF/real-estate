@@ -1,3 +1,4 @@
+import { selectOfferListingDocuments } from '../listing-document-policy.registry';
 import {
   afterNextRender,
   ElementRef,
@@ -792,29 +793,7 @@ export class OfferWizardShellComponent {
   protected listingDocumentsForSection(
     sectionId: string
   ): readonly ListingDisclosureDocument[] {
-    if (sectionId === 'leases') {
-      const leaseDocumentRules: Readonly<Record<string, string>> = {
-        'texas-residential-leases': 'leases.residentialLeasesExist',
-        'texas-fixture-leases': 'leases.fixtureLeasesExist',
-        'texas-natural-resource-leases': 'leases.naturalResourceLeasesExist',
-      };
-
-      return this.listingDisclosures().filter(document => {
-        const fieldPath = leaseDocumentRules[document.documentType];
-        return fieldPath
-          ? readPath(this.terms(), fieldPath) === true
-          : false;
-      });
-    }
-
-    if (sectionId === 'disclosures') {
-      return this.listingDisclosures().filter(
-        document => !document.documentType.startsWith('texas-') ||
-          !document.documentType.endsWith('-leases')
-      );
-    }
-
-    return [];
+    return selectOfferListingDocuments(sectionId, this.terms(), this.listingDisclosures());
   }
 
 

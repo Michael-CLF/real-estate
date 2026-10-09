@@ -1,3 +1,4 @@
+import { paginatePdfText } from './pdf-text-pagination';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { inflateSync } from 'node:zlib';
@@ -144,17 +145,22 @@ export async function prependNavStreetContractSummary(
   };
   for (const row of [...parties, ...rows]) {
     pdf.font('NavStreet-Regular').fontSize(10);
-    const valueHeight = pdf.heightOfString(row.value || 'Not specified', { width: 300, lineGap: 2 });
+    const fragments = summaryValueFragments(pdf, row.value || 'Not specified');
+    for (const [fragmentIndex, value] of fragments.entries()) {
+    const label = row.label + (fragmentIndex ? ' (continued)' : '');
+    pdf.font('NavStreet-Regular').fontSize(10);
+    const valueHeight = pdf.heightOfString(value, { width: 300, lineGap: 2 });
     pdf.font('NavStreet-Bold').fontSize(9);
-    const height = Math.max(32, valueHeight + 14, pdf.heightOfString(row.label, { width: 196 }) + 14);
+    const height = Math.max(32, valueHeight + 14, pdf.heightOfString(label, { width: 196 }) + 14);
     addPageIfNeeded(height);
     const y = pdf.y;
     pdf.rect(NAVSTREET_PDF.margin, y, NAVSTREET_PDF.contentWidth, height).fill(NAVSTREET_PDF.pale);
     pdf.font('NavStreet-Bold').fontSize(9).fillColor(NAVSTREET_PDF.blue)
-      .text(row.label, NAVSTREET_PDF.margin + 10, y + 8, { width: 196 });
+      .text(label, NAVSTREET_PDF.margin + 10, y + 8, { width: 196 });
     pdf.font('NavStreet-Regular').fontSize(10).fillColor(NAVSTREET_PDF.ink)
-      .text(row.value || 'Not specified', NAVSTREET_PDF.margin + 216, y + 8, { width: 300, lineGap: 2 });
+      .text(value, NAVSTREET_PDF.margin + 216, y + 8, { width: 300, lineGap: 2 });
     pdf.y = y + height + 4;
+    }
   }
   const notice = 'This page highlights selected terms for convenience. It does not replace or modify the complete agreement. Read all provisions and incorporated attachments. If this summary differs from the agreement’s operative provisions, those provisions control. Down payment excludes closing costs and is shown before deposit credits. Relative deadlines follow the agreement’s counting rules and any agreed extensions.';
   pdf.font('NavStreet-Regular').fontSize(9);
@@ -229,4 +235,11 @@ function preparePdfFont(source: Buffer): Buffer {
     font.writeUInt32BE((0xB1B0AFBA - checksum) >>> 0, headOffset + 8);
   }
   return font;
+}
+/** A large party group or summary value must stay inside each summary page. */
+function summaryValueFragments(pdf: PDFKit.PDFDocument, value: string): string[] {
+  pdf.font('NavStreet-Regular').fontSize(10);
+  const pageCapacity = NAVSTREET_PDF.contentBottom - NAVSTREET_PDF.contentTop - 20;
+  const availableCapacity = Math.max(80, NAVSTREET_PDF.contentBottom - pdf.y - 20);
+  return paginatePdfText(pdf, value, 300, Math.min(pageCapacity, availableCapacity), 2);
 }

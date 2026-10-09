@@ -1,3 +1,4 @@
+import { paginatePdfText } from '../pdf-text-pagination';
 import PDFDocument from 'pdfkit';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -59,7 +60,7 @@ export interface GeneratedOfferPdf {
   pageCount: number;
 }
 
-/** Generates the seven-page NavStreet North Carolina purchase agreement. */
+/** Generates the NavStreet North Carolina agreement with complete text and dynamic pagination. */
 export async function generateOfferPdf(
   input: GenerateOfferPdfInput
 ): Promise<GeneratedOfferPdf> {
@@ -68,7 +69,7 @@ export async function generateOfferPdf(
     margins: {
       top: CONTENT_TOP,
       right: PAGE_MARGIN,
-      bottom: 34,
+      bottom: 87,
       left: PAGE_MARGIN,
     },
     bufferPages: true,
@@ -109,6 +110,12 @@ export async function generateOfferPdf(
   addAgreementPage(document, input, 7);
   renderPageSeven(document, input);
 
+  const pageCount = document.bufferedPageRange().count;
+  for (let index = 0; index < pageCount; index++) {
+    document.switchToPage(index);
+    document.page.margins.bottom = 0;
+    renderPageChrome(document, input, index + 1, pageCount);
+  }
   document.end();
   const buffer = await completed;
   return {
@@ -118,7 +125,7 @@ export async function generateOfferPdf(
       input.version.versionNumber,
       input.documentTitle
     ),
-    pageCount: 7,
+    pageCount,
   };
 }
 
@@ -126,7 +133,6 @@ function renderPageOne(
   document: PDFKit.PDFDocument,
   input: GenerateOfferPdfInput
 ): void {
-  renderPageChrome(document, input, 1);
   document.y = CONTENT_TOP;
 
   if (input.documentStatus === 'prototype') {
@@ -439,14 +445,14 @@ function addAgreementPage(
   pageNumber: number
 ): void {
   document.addPage();
-  renderPageChrome(document, input, pageNumber);
   document.y = CONTENT_TOP;
 }
 
 function renderPageChrome(
   document: PDFKit.PDFDocument,
   input: GenerateOfferPdfInput,
-  pageNumber: number
+  pageNumber: number,
+  pageCount: number
 ): void {
   const headerX = 36;
   const headerY = 24;
@@ -488,7 +494,7 @@ function renderPageChrome(
       FOOTER_Y,
       { width: CONTENT_WIDTH / 2, lineBreak: false }
     )
-    .text(`Page ${pageNumber} of 7`, PAGE_WIDTH - PAGE_MARGIN - 90, FOOTER_Y, {
+    .text(`Page ${pageNumber} of ${pageCount}`, PAGE_WIDTH - PAGE_MARGIN - 90, FOOTER_Y, {
       width: 90,
       align: 'right',
       lineBreak: false,
@@ -522,6 +528,7 @@ function addNoticeBox(
   document.font('NavStreet-Regular').fontSize(bodySize);
   const bodyHeight = document.heightOfString(body, { width: bodyWidth, lineGap: 1.1 });
   const height = bodyHeight + (compact ? 29 : 34);
+  ensureNcRoom(document, height + 2);
   const top = document.y;
   document
     .roundedRect(PAGE_MARGIN, top, CONTENT_WIDTH, height, 2)
@@ -558,6 +565,12 @@ function addTableRow(
     document.heightOfString(value, { width: valueWidth - 14, lineGap: 1 }) + 11,
     document.heightOfString(label, { width: labelWidth - 14, lineGap: 1 }) + 11
   );
+  if (height > 600) {
+    const parts = paginatePdfText(document, value, valueWidth - 14, 589, 1);
+    parts.forEach((part, index) => addTableRow(document, label + (index ? ' (continued)' : ''), part));
+    return;
+  }
+  ensureNcRoom(document, height);
   const top = document.y;
   document.rect(PAGE_MARGIN, top, CONTENT_WIDTH, height).fill(LIGHT_BACKGROUND);
   document
@@ -700,8 +713,15 @@ function addSignaturePanel(
   role: 'BUYER' | 'SELLER',
   party: OfferVersionPartySnapshotDocument
 ): void {
+  document.font('NavStreet-Bold').fontSize(7.5);
+  const nameExtra = Math.max(0, document.heightOfString(party.legalName, { width: CONTENT_WIDTH - 70 }) - 10);
+  document.font('NavStreet-Italic').fontSize(9.5);
+  const signatureExtra = party.signature.status === 'signed' ? Math.max(0, document.heightOfString('/s/ ' + party.legalName, { width: 338 }) - 12) : 0;
+  document.font('NavStreet-Regular').fontSize(5.8);
+  const emailExtra = Math.max(0, document.heightOfString('Email: ' + party.email, { width: 300 }) - 8);
+  const height = 82 + nameExtra + signatureExtra + emailExtra;
+  ensureNcRoom(document, height + 12);
   const top = document.y + 12;
-  const height = 82;
   document
     .roundedRect(PAGE_MARGIN, top, CONTENT_WIDTH, height, 2)
     .fillAndStroke(LIGHT_BACKGROUND, NAVSTREET_TEAL);
@@ -720,9 +740,8 @@ function addSignaturePanel(
     .fontSize(7.5)
     .text(party.legalName, PAGE_MARGIN + 60, top + 8, {
       width: CONTENT_WIDTH - 70,
-      lineBreak: false,
     });
-  const signatureY = top + 41;
+  const signatureY = top + 41 + nameExtra + signatureExtra;
   document
     .strokeColor(MUTED_COLOR)
     .lineWidth(0.7)
@@ -737,9 +756,8 @@ function addSignaturePanel(
       .fillColor(NAVSTREET_BLUE)
       .font('NavStreet-Italic')
       .fontSize(9.5)
-      .text(`/s/ ${party.legalName}`, PAGE_MARGIN + 12, signatureY - 14, {
+      .text(`/s/ ${party.legalName}`, PAGE_MARGIN + 12, signatureY - 14 - signatureExtra, {
         width: 338,
-        lineBreak: false,
       });
   }
   document
@@ -760,7 +778,6 @@ function addSignaturePanel(
     .fontSize(6.4)
     .text(`Email: ${party.email}`, PAGE_MARGIN + 10, signatureY + 22, {
       width: 300,
-      lineBreak: false,
     });
   if (party.signature.signedAt) {
     document
@@ -984,4 +1001,8 @@ function createFileName(
   const safeReference = referenceNumber.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
   const safeTitle = documentTitle.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
   return `${safeReference}-version-${versionNumber}-${safeTitle}.pdf`;
+}
+
+function ensureNcRoom(document: PDFKit.PDFDocument, height: number): void {
+  if (document.y + height > 705) { document.addPage(); document.y = CONTENT_TOP; }
 }

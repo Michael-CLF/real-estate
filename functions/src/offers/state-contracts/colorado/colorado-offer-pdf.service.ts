@@ -43,7 +43,9 @@ export async function generateColoradoOfferPdf(input: GenerateStateAgreementInpu
   }
   function row(name: string, value: string): void {
     pdf.font('NavStreet-Regular').fontSize(9);
-    const height = Math.max(26, pdf.heightOfString(value, { width: 315 }) + 12);
+    const valueHeight = pdf.heightOfString(value, { width: 315 });
+    pdf.font('NavStreet-Bold').fontSize(9);
+    const height = Math.max(26, valueHeight + 12, pdf.heightOfString(name, { width: 180 }) + 12);
     if (pdf.y + height > NAVSTREET_PDF.contentBottom) pdf.addPage();
     const y = pdf.y;
     pdf.rect(NAVSTREET_PDF.margin, y, NAVSTREET_PDF.contentWidth, height - 2).fill(NAVSTREET_PDF.pale);
