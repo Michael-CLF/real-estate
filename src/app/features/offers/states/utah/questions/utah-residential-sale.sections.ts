@@ -29,7 +29,15 @@ export const UTAH_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] =
     yn('conditions.dueDiligence', 'Conditioned on due diligence?', 'Select the due diligence condition.'),
     yn('conditions.appraisal', 'Conditioned on appraisal?', 'Select the appraisal condition.'),
     yn('conditions.financing', 'Conditioned on financing?', 'Select the financing condition.'),
-    yn('conditions.saleOfBuyersProperty', 'Conditioned on the sale of another property?', 'Select the sale condition.'),
+    {
+      ...yn('conditions.saleOfBuyersProperty', 'Does this purchase depend on selling another property you own?', 'Select whether this purchase depends on selling another property you own.'),
+      helpText: 'This refers to a property you already own, not the seller’s property you are offering to buy. Select No if this purchase does not depend on that sale.',
+    },
+    {
+      id: 'buyer-property-sale-note', type: 'information', label: 'Your other property must sell',
+      description: 'Because you selected Yes, describe this sale condition in Additional terms and arrange the applicable subject-to-sale addendum. If this purchase does not depend on selling another property you own, select No.',
+      visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.saleOfBuyersProperty', operator: 'is_true' }] },
+    },
     yn('conditions.additionalEarnestMoney', 'Will an additional earnest money deposit be due?', 'Select an additional-deposit option.'),
   ] },
   { id: 'deadlines', title: 'Contract deadlines', description: 'Unless the parties agree otherwise, times are 5:00 p.m. Mountain Time on each date.', questions: [
@@ -68,7 +76,7 @@ export const UTAH_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] =
     { id: 'meth-acknowledgement', type: 'acknowledgement', label: 'I have reviewed the seller’s statement about known current methamphetamine contamination.', fieldPath: 'disclosures.methamphetamineContaminationAcknowledged', validation: required('Review and acknowledge the seller statement.') },
   ] },
   { id: 'additional', title: 'Additional terms', questions: [
-    { id: 'additional-terms', type: 'textarea', label: 'Party-provided additional terms', fieldPath: 'additionalTerms', helpText: 'Ask a Utah attorney to review any new legal language.' },
+    { id: 'additional-terms', type: 'textarea', label: 'Party-provided additional terms', fieldPath: 'additionalTerms', helpText: 'Optional unless this purchase depends on selling another property you own. If it does, describe that condition and arrange the applicable addendum. Ask a Utah attorney to review any new legal language.' },
   ] },
   { id: 'delivery', title: 'Offer delivery and review', questions: [
     { id: 'expiration', type: 'date_time', label: 'Offer expires', fieldPath: 'delivery.expiresAt', validation: required('Set a future expiration date and time.') },

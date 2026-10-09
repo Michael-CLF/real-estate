@@ -24,7 +24,7 @@ export class ListingBadgeService {
           type: 'sold',
           label: 'Sold',
           icon: 'fa-solid fa-house-circle-check',
-          tone: 'green',
+          tone: 'red',
           priority: 130
         }
       ];

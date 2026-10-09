@@ -1,31 +1,6 @@
+import { record, text, money, integer, bool, choice } from '../draft-term-values';
 import type { SanitizeDraftTermsInput } from '../state-contract-package';
 import type { FloridaOfferTermsDocument } from './florida-offer-terms.document';
-
-const record = (v: unknown): Record<string, unknown> =>
-  v && typeof v === 'object' && !Array.isArray(v)
-    ? v as Record<string, unknown>
-    : {};
-
-const text = (v: unknown, max = 5000) =>
-  typeof v === 'string' ? v.trim().slice(0, max) : '';
-
-const money = (v: unknown) =>
-  Number.isSafeInteger(v) && Number(v) >= 0 ? Number(v) : 0;
-
-const integer = (v: unknown) =>
-  Number.isSafeInteger(v) ? Number(v) : 0;
-
-const bool = (v: unknown): boolean | null =>
-  typeof v === 'boolean' ? v : null;
-
-const choice = <T extends string>(
-  v: unknown,
-  allowed: readonly T[],
-  fallback: T
-): T =>
-  typeof v === 'string' && allowed.includes(v as T)
-    ? v as T
-    : fallback;
 
 export function sanitizeFloridaDraftTerms(
   input: SanitizeDraftTermsInput<FloridaOfferTermsDocument>

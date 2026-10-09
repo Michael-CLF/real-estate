@@ -60,26 +60,8 @@ export function createTexasInitialOfferTerms(
       input.property.county
     );
 
-  const residentialLeasesExist =
-    readNestedListingBoolean(
-      input.listingData,
-      'sellerStatements',
-      'residentialLeasesExist'
-    );
-
-  const fixtureLeasesExist =
-    readNestedListingBoolean(
-      input.listingData,
-      'sellerStatements',
-      'fixtureLeasesExist'
-    );
-
-  const naturalResourceLeasesExist =
-    readNestedListingBoolean(
-      input.listingData,
-      'sellerStatements',
-      'naturalResourceLeasesExist'
-    );
+  const { residentialLeasesExist, fixtureLeasesExist, naturalResourceLeasesExist } =
+    readTexasListingLeaseFacts(input.listingData);
 
   return {
     stateCode: 'TX',
@@ -625,4 +607,20 @@ function optionalStoredText(
   return normalized.length > 0
     ? normalized
     : undefined;
+}
+
+/** Preserve explicit category answers; older confirmed no-leases statements cover all categories. */
+export function readTexasListingLeaseFacts(listingData: Record<string, unknown>): {
+  residentialLeasesExist: boolean | null;
+  fixtureLeasesExist: boolean | null;
+  naturalResourceLeasesExist: boolean | null;
+} {
+  const noLeases = readNestedListingBoolean(listingData, 'sellerStatements', 'leasesExist') === false;
+  const read = (field: string): boolean | null =>
+    readNestedListingBoolean(listingData, 'sellerStatements', field) ?? (noLeases ? false : null);
+  return {
+    residentialLeasesExist: read('residentialLeasesExist'),
+    fixtureLeasesExist: read('fixtureLeasesExist'),
+    naturalResourceLeasesExist: read('naturalResourceLeasesExist'),
+  };
 }

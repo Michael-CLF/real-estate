@@ -1,3 +1,5 @@
+import { removeUndefinedValues } from './draft-value-cleanup';
+import * as logger from 'firebase-functions/logger';
 import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
 import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import {
@@ -61,6 +63,7 @@ export const saveOfferDraft =
   >(
     callableFunctionOptions,
     async request => {
+      const operationStartedAt = Date.now();
       const userUid =
         request.auth?.uid;
 
@@ -102,6 +105,7 @@ export const saveOfferDraft =
           .collection('versions')
           .doc(offerVersionUid);
 
+      const transactionStartedAt = Date.now();
       await adminFirestore.runTransaction(
         async transaction => {
           const [
@@ -232,10 +236,8 @@ export const saveOfferDraft =
           );
         }
       );
-
-      return {
-        success: true,
-      };
+      logger.info('saveOfferDraft timing', {totalMs: Date.now() - operationStartedAt, transactionMs: Date.now() - transactionStartedAt});
+      return { success: true };
     }
   );
 
@@ -889,40 +891,4 @@ function requireIdentifier(
 }
 
 
-function removeUndefinedValues<T>(
-  value: T
-): T {
-  if (Array.isArray(value)) {
-    return value.map(
-      item =>
-        removeUndefinedValues(item)
-    ) as T;
-  }
 
-  if (
-    value !== null &&
-    typeof value === 'object' &&
-    !(value instanceof Timestamp) &&
-    !(value instanceof FieldValue)
-  ) {
-    return Object.fromEntries(
-      Object.entries(
-        value as Record<string, unknown>
-      )
-        .filter(
-          ([, nestedValue]) =>
-            nestedValue !== undefined
-        )
-        .map(
-          ([key, nestedValue]) => [
-            key,
-            removeUndefinedValues(
-              nestedValue
-            ),
-          ]
-        )
-    ) as T;
-  }
-
-  return value;
-}

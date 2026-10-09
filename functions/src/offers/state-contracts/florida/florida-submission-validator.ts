@@ -1,25 +1,14 @@
-import { HttpsError } from 'firebase-functions/v2/https';
+import { validateSubmissionParties } from '../submission-parties';
+import { requireValue, money, days, date } from '../submission-values';
 import type { ValidateStateSubmissionInput } from '../state-contract-package';
 import type { FloridaOfferTermsDocument } from './florida-offer-terms.document';
-const requireValue = (condition: unknown, message: string): void => { if (!condition) throw new HttpsError('failed-precondition', message); };
-const money = (n: number, positive = false) => Number.isSafeInteger(n) && (positive ? n > 0 : n >= 0);
-const days = (n: number, min: number, max: number) => Number.isSafeInteger(n) && n >= min && n <= max;
-const date = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(`${s}T12:00:00Z`));
 export function validateFloridaSubmission(input: ValidateStateSubmissionInput<FloridaOfferTermsDocument>): void {
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'FL' && version.stateCode === 'FL' && t.stateCode === 'FL', 'The offer must belong to Florida.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
   requireValue(t.contractType === 'navstreet_florida_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'FL', 'The contract or property snapshot is invalid.');
   requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Florida agreement.');
-  requireValue(version.buyers.length > 0 && version.sellers.length > 0, 'Both parties must be identified.');
-  for (const party of [...version.buyers, ...version.sellers]) {
-    requireValue(party.legalName?.trim(), 'Every party needs a legal name.');
-    requireValue(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(party.email?.trim() ?? ''), 'Every party needs a contact email.');
-    requireValue(party.phone?.trim(), 'Every party needs a phone number.');
-  }
-  const initiatingSide = version.initiatedBy === 'buyer' ? version.buyers : version.sellers;
-  const initiator = initiatingSide.find(party => party.userUid === version.initiatedByUid);
-  requireValue(initiator?.identityVerification.status === 'verified', 'The initiating signer must verify identity.');
+  validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');
   if (p.hasEarnestMoney) {

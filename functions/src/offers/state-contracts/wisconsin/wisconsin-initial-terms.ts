@@ -1,3 +1,5 @@
+import { sellerLeases } from '../initial-listing-facts';
+
 import type { CreateInitialOfferTermsInput } from '../state-contract-package';
 import type { WisconsinOfferTermsDocument } from './wisconsin-offer-terms.document';
 export function createWisconsinInitialOfferTerms(input: CreateInitialOfferTermsInput): WisconsinOfferTermsDocument {
@@ -16,11 +18,4 @@ export function createWisconsinInitialOfferTerms(input: CreateInitialOfferTermsI
     disclosures: { propertyConditionStatus: 'unselected', leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10, hoaDocumentsStatus: 'unselected', sellerReportsExistingLeases: sellerLeases(input.listingData), leaseStatementAcknowledged: null },
     additionalTerms: '', delivery: { expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), timeZone: 'America/Chicago', electronicDeliveryAuthorized: null },
   };
-}
-
-function sellerLeases(data: Record<string, unknown>): boolean | null {
-  const statements = data['sellerStatements'];
-  if (!statements || typeof statements !== 'object' || Array.isArray(statements)) return null;
-  const value = (statements as Record<string, unknown>)['leasesExist'];
-  return typeof value === 'boolean' ? value : null;
 }

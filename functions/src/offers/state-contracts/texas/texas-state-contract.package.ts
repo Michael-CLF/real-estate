@@ -12,10 +12,6 @@ import {
 } from './texas-initial-terms';
 
 import {
-  generateTexasOfferPdf,
-} from './texas-offer-pdf.service';
-
-import {
   validateTexasSubmission,
 } from './texas-submission-validator';
 
@@ -97,8 +93,10 @@ export const texasStateContractPackage:
       : 'No option period specified' },
     { label: 'Option fee (separate from deposit)', value: summaryMoney(t.earnestMoneyAndOption.optionFeeInCents) },
   ],
-  generateAgreement: input =>
-    generateTexasOfferPdf(input),
+  generateAgreement: async input => {
+    const { generateTexasOfferPdf } = require('./texas-offer-pdf.service') as typeof import('./texas-offer-pdf.service');
+    return generateTexasOfferPdf(input);
+  },
 
   validateSubmission: input =>
     validateTexasSubmission(input),

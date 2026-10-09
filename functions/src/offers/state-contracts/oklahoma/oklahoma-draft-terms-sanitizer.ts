@@ -1,3 +1,4 @@
+import { record, money, integer, bool as nullableBoolean, choice } from '../draft-term-values';
 import type { SanitizeDraftTermsInput } from '../state-contract-package';
 import type { OklahomaOfferTermsDocument } from './oklahoma-offer-terms.document';
 
@@ -77,23 +78,10 @@ export function sanitizeOklahomaDraftTerms(
   };
 }
 
-function record(value: unknown): Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
-}
 function text(value: unknown, maximum: number): string {
   return typeof value === 'string' ? value.trim().slice(0, maximum) : '';
 }
-function money(value: unknown): number {
-  return Number.isSafeInteger(value) && Number(value) >= 0 ? Number(value) : 0;
-}
-function integer(value: unknown): number {
-  return Number.isSafeInteger(value) ? Number(value) : 0;
-}
 function boolean(value: unknown): boolean { return value === true; }
-function nullableBoolean(value: unknown): boolean | null { return typeof value === 'boolean' ? value : null; }
 function arrayOfStrings(value: unknown): string[] {
   return Array.isArray(value) ? [...new Set(value.filter(item => typeof item === 'string').map(item => item.trim()))] : [];
-}
-function choice<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
-  return typeof value === 'string' && allowed.includes(value as T) ? value as T : fallback;
 }

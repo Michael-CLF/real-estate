@@ -1,4 +1,7 @@
-import { CALIFORNIA_LISTING_FACT_DEFAULTS } from '../../../core/domains/listings/state-packages/california/california-listing-facts.model';
+import { buildListingStatementPayload } from '../../../core/domains/listings/state-packages/listing-statement-mapping';
+import { validateListingStatementAnswers } from '../../../core/domains/listings/state-packages/listing-statement-validation';
+import { validateStateListingQuestionAnswers } from '../../../core/domains/listings/state-packages/listing-question-validation';
+import { getStateListingFormRestorer, getStateListingFormSerializer, restoreStateListingSellerStatements } from '../../../core/domains/listings/state-packages/state-listing.registry';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,8 +17,6 @@ import {
   ListingDraftStep,
   ListingEnhancements,
   ListingFeatures,
-  ListingHoa,
-  ListingSellerStatements,
 } from '../../../core/domains/listings/models/listing.model';
 import {
   AddressFormValue,
@@ -43,7 +44,6 @@ import {
   getStateListingPackage,
 } from '../../../core/domains/listings/state-packages/state-listing.registry';
 import {
-  requiresStateListingField,
 } from '../../../core/domains/listings/state-packages/state-listing-package';
 import { DocumentChecklistComponent, ListingChecklistLocation } from './components/document-checklist/document-checklist.component';
 import { LISTING_CHECKLIST_STATES } from '../../../core/configuration/listing-document-checklist.config';
@@ -256,11 +256,7 @@ export class ListingWizardComponent implements OnInit {
         subdivisionName: draft.propertyDetails.subdivisionName ?? '',
         legalDescription: draft.propertyDetails.legalDescription ?? '',
         coloradoPropertyFacts: draft.propertyDetails.coloradoPropertyFacts,
-        coloradoAssumableLoan: draft.propertyDetails.coloradoAssumableLoan ? {
-          ...draft.propertyDetails.coloradoAssumableLoan,
-          estimatedBalanceDollars: draft.propertyDetails.coloradoAssumableLoan.estimatedBalanceInCents / 100,
-          principalInterestPaymentDollars: draft.propertyDetails.coloradoAssumableLoan.principalInterestPaymentInCents / 100,
-        } : null,
+        coloradoAssumableLoan: getStateListingFormRestorer('coloradoAssumableLoan')(draft.propertyDetails.coloradoAssumableLoan),
         description: draft.propertyDetails.description ?? '',
         hoa: draft.hoa
           ? {
@@ -280,11 +276,7 @@ export class ListingWizardComponent implements OnInit {
             feeFrequency: '',
           },
         sellerStatements: {
-          southCarolina: {
-            beachfrontApplies: draft.sellerStatements?.southCarolina?.beachfrontApplies ?? null,
-            futureVacationBookingsExist: draft.sellerStatements?.southCarolina?.futureVacationBookingsExist ?? null,
-          },
-          california: draft.sellerStatements?.california ?? { ...CALIFORNIA_LISTING_FACT_DEFAULTS },
+          ...restoreStateListingSellerStatements(draft.sellerStatements),
           ownershipStatus: draft.sellerStatements?.ownershipStatus ?? '',
           leadBasedPaintApplies:
             draft.sellerStatements?.leadBasedPaintApplies ?? null,
@@ -580,307 +572,11 @@ export class ListingWizardComponent implements OnInit {
             .toUpperCase() ?? '';
         const statePackage =
           getStateListingPackage(stateCode);
-        if (stateCode === 'SC' && (
-          typeof statements.southCarolina?.beachfrontApplies !== 'boolean' ||
-          typeof statements.southCarolina?.futureVacationBookingsExist !== 'boolean'
-        )) {
-          throw new Error('Answer both South Carolina disclosure applicability questions.');
-        }
-        if (
-          requiresStateListingField(
-            statePackage,
-            'ownershipStatus',
-          ) &&
-          !statements.ownershipStatus
-        ) {
-          throw new Error(
-            'Please select how long the seller has owned the property.',
-          );
-        }
-        if (
-          requiresStateListingField(
-            statePackage,
-            'utahMethamphetamineContamination',
-          ) &&
-          typeof statements.methamphetamineContaminationKnown !== 'boolean'
-        ) {
-          throw new Error(
-            'Please answer the Utah current-contamination statement.',
-          );
-        }
-        if (
-          requiresStateListingField(
-            statePackage,
-            'leadBasedPaintApplies',
-          ) &&
-          statements.leadBasedPaintApplies === null
-        ) {
-          throw new Error(
-            'Please complete the lead-based-paint statement.',
-          );
-        }
-        if (
-          requiresStateListingField(
-            statePackage,
-            'ownersAssociationApplies',
-          ) &&
-          statements.ownersAssociationApplies ===
-          null
-        ) {
-          throw new Error(
-            'Please specify whether an owners association applies.',
-          );
-        }
-        if (
-          requiresStateListingField(
-            statePackage,
-            'fuelTankPresent',
-          ) &&
-          statements.fuelTankPresent === null
-        ) {
-          throw new Error(
-            'Please specify whether a fuel tank is present.',
-          );
-        }
-        if (
-          statements.fuelTankPresent === true &&
-          !statements.fuelTankOwnership
-        ) {
-          throw new Error(
-            'Please specify whether the fuel tank is owned or leased.',
-          );
-        }
-        const isTexasListing =
-          requiresStateListingField(
-            statePackage,
-            'texasLeaseCategories',
-          );
-        if (
-          isTexasListing &&
-          (
-            statements.residentialLeasesExist ===
-            null ||
-            statements.fixtureLeasesExist ===
-            null ||
-            statements.naturalResourceLeasesExist ===
-            null
-          )
-        ) {
-          throw new Error(
-            'Please complete all three Texas lease statements.',
-          );
-        }
-        if (
-          requiresStateListingField(
-            statePackage,
-            'generalLeasesExist',
-          ) &&
-          statements.leasesExist === null
-        ) {
-          throw new Error(
-            'Please specify whether any leases exist.',
-          );
-        }
-        const fuelTankOwnership =
-          statements.fuelTankOwnership || undefined;
-        const hoa = propertyDetails.hoa ?? {
-          hasHoa: null,
-          associationName: '',
-          managementCompany: '',
-          contactPhone: '',
-          feeAmount: null,
-          feeFrequency: '',
-        };
-        const associationName =
-          hoa.associationName.trim();
-        const managementCompany =
-          hoa.managementCompany.trim();
-        const contactPhone =
-          hoa.contactPhone.trim();
-        const ownersAssociationContact = [
-          managementCompany,
-          contactPhone,
-        ]
-          .filter((value) => value.length > 0)
-          .join(' · ');
-        const hoaDetails: ListingHoa = {
-          hasHoa:
-            statements.ownersAssociationApplies ===
-            true,
-          includedItems: [],
-          ...(associationName
-            ? {
-              associationName,
-            }
-            : {}),
-          ...(managementCompany
-            ? {
-              managementCompany,
-            }
-            : {}),
-          ...(contactPhone
-            ? {
-              contactPhone,
-            }
-            : {}),
-          ...(hoa.feeAmount !== null
-            ? {
-              feeAmount: hoa.feeAmount,
-            }
-            : {}),
-          ...(hoa.feeFrequency
-            ? {
-              feeFrequency:
-                hoa.feeFrequency,
-            }
-            : {}),
-        };
-        const sellerStatements:
-          ListingSellerStatements = {
-          stateCode,
-          schemaVersion: 1,
-          ...(stateCode === 'SC' ? {
-            southCarolina: {
-              beachfrontApplies: statements.southCarolina!.beachfrontApplies!,
-              futureVacationBookingsExist: statements.southCarolina!.futureVacationBookingsExist!,
-            },
-          } : {}),
-          ...(stateCode === 'CA' ? { california: statements.california } : {}),
-          ...(requiresStateListingField(
-            statePackage,
-            'utahMethamphetamineContamination',
-          )
-            ? {
-              methamphetamineContaminationKnown:
-                statements.methamphetamineContaminationKnown === true,
-            }
-            : {}),
-          ...(requiresStateListingField(
-            statePackage,
-            'ownershipStatus',
-          )
-            ? {
-              ownershipStatus:
-                statements.ownershipStatus ||
-                undefined,
-            }
-            : {}),
-          ...(requiresStateListingField(
-            statePackage,
-            'leadBasedPaintApplies',
-          )
-            ? {
-              leadBasedPaintApplies:
-                statements
-                  .leadBasedPaintApplies ===
-                true,
-            }
-            : {}),
-          ...(requiresStateListingField(
-            statePackage,
-            'ownersAssociationApplies',
-          )
-            ? {
-              ownersAssociationApplies:
-                statements
-                  .ownersAssociationApplies ===
-                true,
-            }
-            : {}),
-          ...(associationName
-            ? {
-              ownersAssociationName:
-                associationName,
-            }
-            : {}),
-          ...(hoa.feeAmount !== null
-            ? {
-              ownersAssociationDuesInCents:
-                Math.round(
-                  hoa.feeAmount * 100,
-                ),
-            }
-            : {}),
-          ...(hoa.feeFrequency
-            ? {
-              ownersAssociationDuesFrequency:
-                hoa.feeFrequency,
-            }
-            : {}),
-          ...(ownersAssociationContact
-            ? {
-              ownersAssociationContact,
-            }
-            : {}),
-          ...(requiresStateListingField(
-            statePackage,
-            'fuelTankPresent',
-          )
-            ? {
-              fuelTankPresent:
-                statements.fuelTankPresent ===
-                true,
-            }
-            : {}),
-          ...(statements.fuelTankPresent ===
-            true
-            ? {
-              fuelTankOwnership,
-            }
-            : {}),
-          ...(isTexasListing ||
-            requiresStateListingField(
-              statePackage,
-              'generalLeasesExist',
-            )
-            ? {
-              leasesExist:
-                isTexasListing
-                  ? statements
-                    .residentialLeasesExist ===
-                  true ||
-                  statements
-                    .fixtureLeasesExist ===
-                  true ||
-                  statements
-                    .naturalResourceLeasesExist ===
-                  true
-                  : statements.leasesExist ===
-                  true,
-            }
-            : {}),
-          ...(isTexasListing
-            ? {
-              residentialLeasesExist:
-                statements
-                  .residentialLeasesExist ===
-                true,
-              fixtureLeasesExist:
-                statements.fixtureLeasesExist ===
-                true,
-              naturalResourceLeasesExist:
-                statements
-                  .naturalResourceLeasesExist ===
-                true,
-            }
-            : {}),
-          ...(statements.additionalSellerIncluded
-            ? {
-              additionalSeller: {
-                legalName:
-                  statements.additionalSellerLegalName
-                    .trim(),
-                email:
-                  statements.additionalSellerEmail
-                    .trim()
-                    .toLowerCase(),
-                phone:
-                  statements.additionalSellerPhone
-                    .trim(),
-              },
-            }
-            : {}),
-        };
+        validateStateListingQuestionAnswers(statePackage, propertyDetails);
+        validateListingStatementAnswers(statements, statePackage);
+        const { hoaDetails, sellerStatements } = buildListingStatementPayload(
+          stateCode, statePackage, statements, propertyDetails.hoa,
+        );
         await this.listingService.savePropertyDetailsStep(
           listingUid,
           user.uid,
@@ -904,18 +600,7 @@ export class ListingWizardComponent implements OnInit {
               propertyDetails.legalDescription.trim() || undefined,
             description: propertyDetails.description,
             coloradoPropertyFacts: this.addressData()?.state === 'CO' ? propertyDetails.coloradoPropertyFacts : undefined,
-            coloradoAssumableLoan: this.addressData()?.state === 'CO' && propertyDetails.coloradoAssumableLoan?.available ? {
-              available: true,
-              ratePercent: propertyDetails.coloradoAssumableLoan.ratePercent,
-              balanceAsOf: propertyDetails.coloradoAssumableLoan.balanceAsOf,
-              estimatedBalanceInCents: Math.round(propertyDetails.coloradoAssumableLoan.estimatedBalanceDollars * 100),
-              principalInterestPaymentInCents: Math.round(propertyDetails.coloradoAssumableLoan.principalInterestPaymentDollars * 100),
-              paymentPeriod: propertyDetails.coloradoAssumableLoan.paymentPeriod.trim(),
-              escrowRealEstateTaxes: propertyDetails.coloradoAssumableLoan.escrowRealEstateTaxes,
-              escrowPropertyInsurance: propertyDetails.coloradoAssumableLoan.escrowPropertyInsurance,
-              escrowMortgageInsurance: propertyDetails.coloradoAssumableLoan.escrowMortgageInsurance,
-              escrowOther: propertyDetails.coloradoAssumableLoan.escrowOther.trim(),
-            } : undefined,
+            coloradoAssumableLoan: getStateListingFormSerializer('coloradoAssumableLoan')(this.addressData()?.state, propertyDetails.coloradoAssumableLoan),
           },
           hoaDetails,
           this.completedSteps(),

@@ -1,4 +1,4 @@
-/*property-details-step.component.html*/
+<!--property-details-step.component.html -->
 <section class="wizard-step">
   <h2>Property Details</h2>
   <p class="step-description">
@@ -154,9 +154,13 @@
       <fieldset class="seller-statements">
         <legend>Recorded legal property description (optional)</legend>
         <p class="seller-statements__description">
-          If available, copy the legal description from the deed or
-          recorded property documents. You can publish your listing
-          without it.
+          @if (isColoradoListing()) {
+            Copy the complete legal description from the deed or recorded property documents.
+            You can publish the listing without it, but buyers need this information to complete a Colorado offer.
+          } @else {
+            If available, copy the legal description from the deed or
+            recorded property documents. You can publish your listing without it.
+          }
         </p>
         <div class="field description-field">
           <label for="legalDescription">
@@ -847,37 +851,26 @@
         }
       </div>
     </fieldset>
-    @if (isSouthCarolinaListing()) {
-      <fieldset class="seller-statements" formGroupName="sellerStatements">
-        <legend>South Carolina disclosure applicability</legend>
-        <div formGroupName="southCarolina">
-          <div class="form-field">
-            <label for="sc-beachfront">Is any part of this property seaward of the beachfront setback line or jurisdictional line?</label>
-            <select id="sc-beachfront" formControlName="beachfrontApplies"
-              [attr.aria-invalid]="form.controls.sellerStatements.controls.southCarolina.controls.beachfrontApplies.touched && form.controls.sellerStatements.controls.southCarolina.controls.beachfrontApplies.invalid">
-              <option [ngValue]="null">Select an answer</option>
-              <option [ngValue]="true">Yes</option>
-              <option [ngValue]="false">No</option>
-            </select>
-            <p>Being near the coast does not automatically make this disclosure applicable. Check the property's survey and current coastal boundary records if unsure.</p>
-            @if (form.controls.sellerStatements.controls.southCarolina.controls.beachfrontApplies.touched && form.controls.sellerStatements.controls.southCarolina.controls.beachfrontApplies.hasError('required')) {
-              <p class="field-error">Select whether the beachfront disclosure applies.</p>
-            }
-          </div>
-          <div class="form-field">
-            <label for="sc-vacation">Is this property subject to any future vacation rental bookings?</label>
-            <select id="sc-vacation" formControlName="futureVacationBookingsExist"
-              [attr.aria-invalid]="form.controls.sellerStatements.controls.southCarolina.controls.futureVacationBookingsExist.touched && form.controls.sellerStatements.controls.southCarolina.controls.futureVacationBookingsExist.invalid">
-              <option [ngValue]="null">Select an answer</option>
-              <option [ngValue]="true">Yes</option>
-              <option [ngValue]="false">No</option>
-            </select>
-            <p>Answer Yes when future vacation rental periods are already booked. Ordinary residential leases are addressed separately.</p>
-            @if (form.controls.sellerStatements.controls.southCarolina.controls.futureVacationBookingsExist.touched && form.controls.sellerStatements.controls.southCarolina.controls.futureVacationBookingsExist.hasError('required')) {
-              <p class="field-error">Select whether future vacation rental bookings exist.</p>
-            }
-          </div>
-        </div>
+    @for (group of stateListingPackage().questionGroups ?? []; track group.id) {
+      <fieldset class="seller-statements">
+        <legend>{{ group.title }}</legend>
+        @for (question of group.questions; track question.id) {
+          @if (stateQuestionControl(question.fieldPath); as control) {
+            <div class="form-field">
+              <label [for]="question.id">{{ question.label }}</label>
+              <select [id]="question.id" [formControl]="control"
+                [attr.aria-invalid]="control.touched && control.invalid">
+                <option [ngValue]="null">Select an answer</option>
+                <option [ngValue]="true">Yes</option>
+                <option [ngValue]="false">No</option>
+              </select>
+              <p>{{ question.description }}</p>
+              @if (control.touched && control.hasError('required')) {
+                <p class="field-error">{{ question.requiredMessage }}</p>
+              }
+            </div>
+          }
+        }
       </fieldset>
     }
     <fieldset class="additional-seller" formGroupName="sellerStatements">

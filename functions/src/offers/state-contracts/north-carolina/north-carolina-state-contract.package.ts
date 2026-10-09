@@ -12,10 +12,6 @@ import {
 } from './north-carolina-initial-terms';
 
 import {
-  generateOfferPdf,
-} from './north-carolina-offer-pdf.service';
-
-import {
   validateNorthCarolinaSubmission,
 } from './north-carolina-submission-validator';
 
@@ -86,10 +82,10 @@ export const northCarolinaStateContractPackage:
       : `${summaryText(t.deposits.dueDiligenceDaysAfterEffectiveDate)} days after Effective Date, at 5:00 p.m. Eastern` },
   ],
   generateAgreement:
-      input =>
-        generateOfferPdf(
-          input
-        ),
+      async input => {
+    const { generateOfferPdf } = require('./north-carolina-offer-pdf.service') as typeof import('./north-carolina-offer-pdf.service');
+    return generateOfferPdf(input);
+  },
 
     validateSubmission:
       input =>

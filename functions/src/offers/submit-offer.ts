@@ -1,30 +1,11 @@
-import {
-  HttpsError,
-  onCall,
-} from 'firebase-functions/v2/https';
-
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
-import {
-  FieldValue,
-  Timestamp,
-} from 'firebase-admin/firestore';
-
-import {
-  adminFirestore,
-} from '../shared/firebase-admin';
-
-import {
-  callableFunctionOptions,
-} from '../shared/function-options';
-
-import {
-  verifyOfferSubmissionEligibility,
-} from './verify-offer-eligibility';
-
-import {
-  requireStateContractPackage,
-} from './state-contracts/state-contract-registry';
+import { adminFirestore } from '../shared/firebase-admin';
+import { callableFunctionOptions } from '../shared/function-options';
+import { verifyOfferSubmissionEligibility } from './verify-offer-eligibility';
+import { requireStateContractPackage } from './state-contracts/state-contract-registry';
 import { assertFloridaListingDisclosures } from './florida-listing-disclosure-gate';
 import { assertLouisianaListingDisclosures } from './louisiana-listing-disclosure-gate';
 import { assertColoradoListingDisclosures } from './colorado-listing-disclosure-gate';
@@ -36,436 +17,395 @@ import type {
   SubmitOfferResponse,
 } from './offer-types';
 
-
 /*
  * Validates and freezes the current offer or counteroffer
  * version before electronic signatures begin.
  *
  * Once submitted, the version can never be edited.
  */
-export const submitOffer =
-  onCall<
-    SubmitOfferData,
-    Promise<SubmitOfferResponse>
-  >(
-    callableFunctionOptions,
-    async request => {
-      const startedAt = Date.now();
-      const userUid =
-        request.auth?.uid;
+export const submitOffer = onCall<
+  SubmitOfferData,
+  Promise<SubmitOfferResponse>
+>(callableFunctionOptions, async request => {
+  const startedAt = Date.now();
+  const userUid = request.auth?.uid;
 
-      if (!userUid) {
-        throw new HttpsError(
-          'unauthenticated',
-          'You must sign in before submitting an offer.'
-        );
-      }
+  if (!userUid) {
+    throw new HttpsError(
+      'unauthenticated',
+      'You must sign in before submitting an offer.',
+    );
+  }
 
-      const offerUid =
-        requireIdentifier(
-          request.data?.offerUid,
-          'offerUid'
-        );
-
-      const offerVersionUid =
-        requireIdentifier(
-          request.data?.offerVersionUid,
-          'offerVersionUid'
-        );
-
-      const offerReference =
-        adminFirestore
-          .collection('offers')
-          .doc(offerUid);
-
-      const versionReference =
-        offerReference
-          .collection('versions')
-          .doc(offerVersionUid);
-
-      const [
-        initialOfferSnapshot,
-        initialVersionSnapshot,
-      ] = await Promise.all([
-        offerReference.get(),
-        versionReference.get(),
-      ]);
-
-      if (!initialOfferSnapshot.exists) {
-        throw new HttpsError(
-          'not-found',
-          'The offer could not be found.'
-        );
-      }
-
-      if (!initialVersionSnapshot.exists) {
-        throw new HttpsError(
-          'not-found',
-          'The offer version could not be found.'
-        );
-      }
-
-      const initialOffer =
-        initialOfferSnapshot.data() as
-          OfferDocument;
-
-      /*
-       * This also verifies that the listing remains active,
-       * is accepting offers and is still owned by someone
-       * other than the buyer.
-       */
-      await verifyOfferSubmissionEligibility(
-        initialOffer.listingUid,
-        initialOffer.primaryBuyerUid
-      );
-      const eligibilityCheckedAt = Date.now();
-
-      await adminFirestore.runTransaction(
-        async transaction => {
-          const listingReference =
-            adminFirestore
-              .collection('listings')
-              .doc(
-                initialOffer.listingUid
-              );
-
-          const [
-            offerSnapshot,
-            versionSnapshot,
-            listingSnapshot,
-          ] = await Promise.all([
-            transaction.get(
-              offerReference
-            ),
-
-            transaction.get(
-              versionReference
-            ),
-
-            transaction.get(
-              listingReference
-            ),
-          ]);
-
-          if (!offerSnapshot.exists) {
-            throw new HttpsError(
-              'not-found',
-              'The offer could not be found.'
-            );
-          }
-
-          if (!versionSnapshot.exists) {
-            throw new HttpsError(
-              'not-found',
-              'The offer version could not be found.'
-            );
-          }
-
-          if (!listingSnapshot.exists) {
-            throw new HttpsError(
-              'not-found',
-              'The property listing could not be found.'
-            );
-          }
-
-          const offer =
-            offerSnapshot.data() as
-              OfferDocument;
-
-          const version =
-            versionSnapshot.data() as
-              OfferVersionDocument;
-
-          const stateContractPackage =
-            requireStateContractPackage(
-              offer.stateCode
-            );
-
-          const listingData =
-            listingSnapshot.data();
-
-          if (!listingData) {
-            throw new HttpsError(
-              'data-loss',
-              'The property listing contains no data.'
-            );
-          }
-
-          verifySubmissionAccess(
-            offer,
-            version,
-            userUid,
-            offerVersionUid
-          );
-
-          verifyListingStillActive(
-            listingData
-          );
-
-          if (
-            version.stateCode !==
-              stateContractPackage.stateCode ||
-            version.terms.stateCode !==
-              stateContractPackage.stateCode
-          ) {
-            throw new HttpsError(
-              'data-loss',
-              'The offer state does not match its current contract version.'
-            );
-          }
-
-          stateContractPackage.validateSubmission({ offer, version });
-          if (offer.stateCode === 'FL') {
-            await assertFloridaListingDisclosures(transaction, listingReference, listingData);
-          }
-          if (offer.stateCode === 'LA') {
-            await assertLouisianaListingDisclosures(transaction, listingReference, listingData);
-          }
-if (offer.stateCode === 'CO') {
-            await assertColoradoListingDisclosures(transaction, listingReference, listingData);
-          }
-
-          const requiredDisclosureTypes = stateContractPackage.requiredListingDisclosures?.({ offer, version }) ?? [];
-          const listingDisclosureSnapshots: Array<{
-            documentType: string;
-            versionId: string;
-            storagePath: string;
-          }> = [];
-          const reviewedDisclosureVersionIds = ['CA','SC'].includes(offer.stateCode)
-            ? (version.terms as unknown as {documentVersions: Readonly<Record<string,string>>}).documentVersions : undefined;
-          if (reviewedDisclosureVersionIds && requiredDisclosureTypes.some(type => !reviewedDisclosureVersionIds[type])) {
-            throw new HttpsError('failed-precondition', 'The offer is missing the uploaded disclosure versions shared when it was created.');
-          }
-          const disclosureSnapshots = await Promise.all(requiredDisclosureTypes.map(
-            documentType => transaction.get(
-              reviewedDisclosureVersionIds
-                ? listingReference.collection('disclosures').doc(documentType).collection('versions').doc(reviewedDisclosureVersionIds[documentType])
-                : listingReference.collection('disclosures').doc(documentType)
-            )
-          ));
-          for (const [index, documentType] of requiredDisclosureTypes.entries()) {
-            const disclosureSnapshot = disclosureSnapshots[index];
-            const currentDocument = (reviewedDisclosureVersionIds ? disclosureSnapshot.data() : disclosureSnapshot.data()?.['currentDocument']) as Record<string, unknown> | undefined;
-            if (!currentDocument ||
-              currentDocument['listingUid'] !== offer.listingUid ||
-              currentDocument['stateAbbreviation'] !== offer.stateCode ||
-              typeof currentDocument['storagePath'] !== 'string' ||
-              !currentDocument['storagePath']) {
-              throw new HttpsError('failed-precondition', `Upload the ${documentType.replace(/-/g, ' ')} disclosure before submitting.`);
-            }
-            if (typeof currentDocument['versionId'] !== 'string' || !currentDocument['versionId']) {
-              throw new HttpsError('failed-precondition', `The ${documentType.replace(/-/g, ' ')} disclosure has no immutable version.`);
-            }
-            if (reviewedDisclosureVersionIds && (currentDocument['documentType'] !== documentType || currentDocument['versionId'] !== reviewedDisclosureVersionIds[documentType])) {
-              throw new HttpsError('failed-precondition', 'The disclosure version does not match its stored record.');
-            }
-            listingDisclosureSnapshots.push({
-              documentType,
-              versionId: currentDocument['versionId'],
-              storagePath: currentDocument['storagePath'],
-            });
-          }
-
-
-          const now =
-            Timestamp.now();
-
-          const shouldIncrementPendingOfferCount =
-            offer.pendingOfferCounted !== true;
-
-          transaction.update(
-            versionReference,
-            {
-              status:
-                'awaiting_signatures',
-
-              immutable: true,
-
-              ...(listingDisclosureSnapshots.length ? { listingDisclosureSnapshots } : {}),
-
-              lockedAt: now,
-              lockedByUid: userUid,
-
-              submittedAt: now,
-              updatedAt: now,
-
-              statusHistory:
-                FieldValue.arrayUnion({
-                  fromStatus: 'draft',
-
-                  toStatus:
-                    'awaiting_signatures',
-
-                  action: 'submitted',
-
-                  actorUid: userUid,
-
-                  actorRole:
-                    version.initiatedBy,
-
-                  note:
-                    'Offer version locked for document generation and electronic signatures.',
-
-                  occurredAt: now,
-                }),
-            }
-          );
-
-          transaction.update(
-            offerReference,
-            {
-              status: 'submitted',
-
-              pendingOfferCounted: true,
-
-              submittedAt:
-                offer.submittedAt ??
-                now,
-
-              lastActivityAt: now,
-              updatedAt: now,
-
-              statusHistory:
-                FieldValue.arrayUnion({
-                  fromStatus:
-                    offer.status,
-
-                  toStatus:
-                    'submitted',
-
-                  action:
-                    'submitted',
-
-                  actorUid: userUid,
-
-                  actorRole:
-                    version.initiatedBy,
-
-                  offerVersionUid,
-                  offerVersionNumber:
-                    version.versionNumber,
-
-                  occurredAt: now,
-                }),
-            }
-          );
-
-          if (shouldIncrementPendingOfferCount) {
-            transaction.update(
-              listingReference,
-              {
-                pendingOfferCount:
-                  FieldValue.increment(1),
-
-                updatedAt: now,
-              }
-            );
-          }
-        }
-      );
-
-      logger.info('Offer submission timing', {
-        eligibilityMs: eligibilityCheckedAt - startedAt,
-        transactionMs: Date.now() - eligibilityCheckedAt,
-        totalMs: Date.now() - startedAt,
-        stateCode: initialOffer.stateCode,
-      });
-
-      return {
-        success: true,
-      };
-    }
+  const offerUid = requireIdentifier(
+    request.data?.offerUid,
+    'offerUid',
   );
 
+  const offerVersionUid = requireIdentifier(
+    request.data?.offerVersionUid,
+    'offerVersionUid',
+  );
+
+  const offerReference = adminFirestore
+    .collection('offers')
+    .doc(offerUid);
+
+  const versionReference = offerReference
+    .collection('versions')
+    .doc(offerVersionUid);
+
+  const initialOfferSnapshot = await offerReference.get();
+
+  if (!initialOfferSnapshot.exists) {
+    throw new HttpsError(
+      'not-found',
+      'The offer could not be found.',
+    );
+  }
+
+  const initialOffer = initialOfferSnapshot.data() as OfferDocument;
+  const eligibilityCheckedAt = Date.now();
+
+  await adminFirestore.runTransaction(async transaction => {
+    const listingReference = adminFirestore
+      .collection('listings')
+      .doc(initialOffer.listingUid);
+
+    const [
+      offerSnapshot,
+      versionSnapshot,
+      listingSnapshot,
+    ] = await Promise.all([
+      transaction.get(offerReference),
+      transaction.get(versionReference),
+      transaction.get(listingReference),
+    ]);
+
+    if (!offerSnapshot.exists) {
+      throw new HttpsError(
+        'not-found',
+        'The offer could not be found.',
+      );
+    }
+
+    if (!versionSnapshot.exists) {
+      throw new HttpsError(
+        'not-found',
+        'The offer version could not be found.',
+      );
+    }
+
+    if (!listingSnapshot.exists) {
+      throw new HttpsError(
+        'not-found',
+        'The property listing could not be found.',
+      );
+    }
+
+    const offer = offerSnapshot.data() as OfferDocument;
+    const version = versionSnapshot.data() as OfferVersionDocument;
+
+    const stateContractPackage = requireStateContractPackage(
+      offer.stateCode,
+    );
+
+    const listingData = listingSnapshot.data();
+
+    if (!listingData) {
+      throw new HttpsError(
+        'data-loss',
+        'The property listing contains no data.',
+      );
+    }
+
+    verifySubmissionAccess(
+      offer,
+      version,
+      userUid,
+      offerVersionUid,
+    );
+
+    verifyListingStillActive(listingData);
+
+    // Reuse the transaction snapshot so eligibility is checked against
+    // the same listing data protected by the submission transaction.
+    await verifyOfferSubmissionEligibility(
+      offer.listingUid,
+      offer.primaryBuyerUid,
+      listingSnapshot,
+    );
+
+    if (
+      version.stateCode !== stateContractPackage.stateCode ||
+      version.terms.stateCode !== stateContractPackage.stateCode
+    ) {
+      throw new HttpsError(
+        'data-loss',
+        'The offer state does not match its current contract version.',
+      );
+    }
+
+    stateContractPackage.validateSubmission({ offer, version });
+
+    if (offer.stateCode === 'FL') {
+      await assertFloridaListingDisclosures(
+        transaction,
+        listingReference,
+        listingData,
+      );
+    }
+
+    if (offer.stateCode === 'LA') {
+      await assertLouisianaListingDisclosures(
+        transaction,
+        listingReference,
+        listingData,
+      );
+    }
+
+    if (offer.stateCode === 'CO') {
+      await assertColoradoListingDisclosures(
+        transaction,
+        listingReference,
+        listingData,
+      );
+    }
+
+    const requiredDisclosureTypes =
+      stateContractPackage.requiredListingDisclosures?.({
+        offer,
+        version,
+      }) ?? [];
+
+    const listingDisclosureSnapshots: Array<{
+      documentType: string;
+      versionId: string;
+      storagePath: string;
+    }> = [];
+
+    const reviewedDisclosureVersionIds =
+      ['CA', 'SC'].includes(offer.stateCode)
+        ? (
+            version.terms as unknown as {
+              documentVersions: Readonly<Record<string, string>>;
+            }
+          ).documentVersions
+        : undefined;
+
+    if (
+      reviewedDisclosureVersionIds &&
+      requiredDisclosureTypes.some(
+        type => !reviewedDisclosureVersionIds[type],
+      )
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'The offer is missing the uploaded disclosure versions shared when it was created.',
+      );
+    }
+
+    const disclosureSnapshots = await Promise.all(
+      requiredDisclosureTypes.map(documentType =>
+        transaction.get(
+          reviewedDisclosureVersionIds
+            ? listingReference
+                .collection('disclosures')
+                .doc(documentType)
+                .collection('versions')
+                .doc(reviewedDisclosureVersionIds[documentType])
+            : listingReference
+                .collection('disclosures')
+                .doc(documentType),
+        ),
+      ),
+    );
+
+    for (const [index, documentType] of requiredDisclosureTypes.entries()) {
+      const disclosureSnapshot = disclosureSnapshots[index];
+
+      const currentDocument = (
+        reviewedDisclosureVersionIds
+          ? disclosureSnapshot.data()
+          : disclosureSnapshot.data()?.['currentDocument']
+      ) as Record<string, unknown> | undefined;
+
+      if (
+        !currentDocument ||
+        currentDocument['listingUid'] !== offer.listingUid ||
+        currentDocument['stateAbbreviation'] !== offer.stateCode ||
+        typeof currentDocument['storagePath'] !== 'string' ||
+        !currentDocument['storagePath']
+      ) {
+        throw new HttpsError(
+          'failed-precondition',
+          `Upload the ${documentType.replace(/-/g, ' ')} disclosure before submitting.`,
+        );
+      }
+
+      if (
+        typeof currentDocument['versionId'] !== 'string' ||
+        !currentDocument['versionId']
+      ) {
+        throw new HttpsError(
+          'failed-precondition',
+          `The ${documentType.replace(/-/g, ' ')} disclosure has no immutable version.`,
+        );
+      }
+
+      if (
+        reviewedDisclosureVersionIds &&
+        (
+          currentDocument['documentType'] !== documentType ||
+          currentDocument['versionId'] !==
+            reviewedDisclosureVersionIds[documentType]
+        )
+      ) {
+        throw new HttpsError(
+          'failed-precondition',
+          'The disclosure version does not match its stored record.',
+        );
+      }
+
+      listingDisclosureSnapshots.push({
+        documentType,
+        versionId: currentDocument['versionId'],
+        storagePath: currentDocument['storagePath'],
+      });
+    }
+
+    const now = Timestamp.now();
+
+    const shouldIncrementPendingOfferCount =
+      offer.pendingOfferCounted !== true;
+
+    transaction.update(versionReference, {
+      status: 'awaiting_signatures',
+      immutable: true,
+
+      ...(listingDisclosureSnapshots.length
+        ? { listingDisclosureSnapshots }
+        : {}),
+
+      lockedAt: now,
+      lockedByUid: userUid,
+      submittedAt: now,
+      updatedAt: now,
+
+      statusHistory: FieldValue.arrayUnion({
+        fromStatus: 'draft',
+        toStatus: 'awaiting_signatures',
+        action: 'submitted',
+        actorUid: userUid,
+        actorRole: version.initiatedBy,
+        note: 'Offer version locked for document generation and electronic signatures.',
+        occurredAt: now,
+      }),
+    });
+
+    transaction.update(offerReference, {
+      status: 'submitted',
+      pendingOfferCounted: true,
+      submittedAt: offer.submittedAt ?? now,
+      lastActivityAt: now,
+      updatedAt: now,
+
+      statusHistory: FieldValue.arrayUnion({
+        fromStatus: offer.status,
+        toStatus: 'submitted',
+        action: 'submitted',
+        actorUid: userUid,
+        actorRole: version.initiatedBy,
+        offerVersionUid,
+        offerVersionNumber: version.versionNumber,
+        occurredAt: now,
+      }),
+    });
+
+    if (shouldIncrementPendingOfferCount) {
+      transaction.update(listingReference, {
+        pendingOfferCount: FieldValue.increment(1),
+        updatedAt: now,
+      });
+    }
+  });
+
+  logger.info('Offer submission timing', {
+    preflightMs: eligibilityCheckedAt - startedAt,
+    transactionMs: Date.now() - eligibilityCheckedAt,
+    totalMs: Date.now() - startedAt,
+    stateCode: initialOffer.stateCode,
+  });
+
+  return { success: true };
+});
 
 function verifySubmissionAccess(
   offer: OfferDocument,
   version: OfferVersionDocument,
   userUid: string,
-  offerVersionUid: string
+  offerVersionUid: string,
 ): void {
-  if (
-    offer.currentVersionUid !==
-    offerVersionUid
-  ) {
+  if (offer.currentVersionUid !== offerVersionUid) {
     throw new HttpsError(
       'failed-precondition',
-      'This is no longer the current offer version. Refresh the offer before submitting.'
+      'This is no longer the current offer version. Refresh the offer before submitting.',
     );
   }
 
-  if (
-    version.status !== 'draft' ||
-    version.immutable
-  ) {
+  if (version.status !== 'draft' || version.immutable) {
     throw new HttpsError(
       'failed-precondition',
-      'This offer version has already been submitted or locked.'
+      'This offer version has already been submitted or locked.',
     );
   }
 
-  if (
-    version.initiatedByUid !==
-    userUid
-  ) {
+  if (version.initiatedByUid !== userUid) {
     throw new HttpsError(
       'permission-denied',
-      'Only the party who created this version may submit it.'
+      'Only the party who created this version may submit it.',
     );
   }
 
   const authorized =
     version.initiatedBy === 'buyer'
-      ? offer.buyerUids.includes(
-        userUid
-      )
-      : offer.sellerUids.includes(
-        userUid
-      );
+      ? offer.buyerUids.includes(userUid)
+      : offer.sellerUids.includes(userUid);
 
   if (!authorized) {
     throw new HttpsError(
       'permission-denied',
-      'You do not have permission to submit this offer version.'
+      'You do not have permission to submit this offer version.',
     );
   }
 }
 
-
 function verifyListingStillActive(
-  listingData:
-    Record<string, unknown>
+  listingData: Record<string, unknown>,
 ): void {
-  const status =
-    listingData['status'];
+  const status = listingData['status'];
 
   if (
     typeof status !== 'string' ||
-    status.trim().toLowerCase() !==
-      'active'
+    status.trim().toLowerCase() !== 'active'
   ) {
     throw new HttpsError(
       'failed-precondition',
-      'This property is no longer active.'
+      'This property is no longer active.',
     );
   }
 
-  if (
-    listingData[
-      'acceptingOffers'
-    ] === false
-  ) {
+  if (listingData['acceptingOffers'] === false) {
     throw new HttpsError(
       'failed-precondition',
-      'This property is not currently accepting offers.'
+      'This property is not currently accepting offers.',
     );
   }
 }
 
-
 function requireIdentifier(
   value: unknown,
-  fieldName: string
+  fieldName: string,
 ): string {
   if (
     typeof value !== 'string' ||
@@ -473,12 +413,11 @@ function requireIdentifier(
   ) {
     throw new HttpsError(
       'invalid-argument',
-      fieldName + ' is required.'
+      fieldName + ' is required.',
     );
   }
 
-  const normalizedValue =
-    value.trim();
+  const normalizedValue = value.trim();
 
   if (
     normalizedValue.length > 200 ||
@@ -486,7 +425,7 @@ function requireIdentifier(
   ) {
     throw new HttpsError(
       'invalid-argument',
-      fieldName + ' is invalid.'
+      fieldName + ' is invalid.',
     );
   }
 

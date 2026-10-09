@@ -504,17 +504,23 @@ const TEXAS_DEPOSIT_DELIVERY_QUESTIONS:
 
 const TEXAS_ESCROW_AGENT_QUESTIONS:
   readonly OfferQuestionDefinition[] = [
+    {
+      id: 'escrow-agent-selection-note',
+      type: 'information',
+      label: 'Escrow company not selected yet?',
+      description:
+        'You can leave these fields blank while completing your offer draft. The escrow recipient and delivery address should be resolved before the contract becomes effective. Earnest money and any option fee are due within 3 days after the Effective Date.',
+      tone: 'important',
+    },
     textQuestion(
       'escrow-agent-name',
       'earnestMoneyAndOption.escrowAgentName',
-      'Escrow agent or title company',
-      REQUIRED
+      'Escrow agent or title company'
     ),
     textQuestion(
       'escrow-agent-address',
       'earnestMoneyAndOption.escrowAgentAddress',
-      'Escrow-agent address',
-      REQUIRED
+      'Escrow-agent address'
     ),
   ];
 
@@ -599,9 +605,6 @@ export const TEXAS_SHARED_TRANSACTION_SECTIONS:
             'salesPrice.cashPortionInCents',
             'Cash portion'
           ),
-          description:
-            'Calculated automatically as total sales price minus financing.',
-          readOnly: true,
         },
         multipleChoiceQuestion(
           'financing-addenda',

@@ -109,6 +109,8 @@ export async function generateFloridaOfferPdf(input: GenerateStateAgreementInput
   const pageCount = pdf.bufferedPageRange().count;
   for (let index = 0; index < pageCount; index++) {
     pdf.switchToPage(index);
+    // Footer text is outside the body margin; keep it on the current page.
+    pdf.page.margins.bottom = 0;
     drawNavStreetPdfChrome(pdf, {
       stateName: 'Florida',
       referenceNumber: input.offer.referenceNumber,

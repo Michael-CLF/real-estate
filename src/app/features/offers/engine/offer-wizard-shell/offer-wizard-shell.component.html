@@ -44,9 +44,12 @@
       track section.id;
       let index = $index
       ) {
-      <li [class.is-current]="index === normalizedSectionIndex()" [class.is-complete]="isSectionComplete(section.id)"
+      <li [class.is-current]="!reviewing() && index === normalizedSectionIndex()" [class.is-complete]="isSectionComplete(section.id)"
         [class.has-errors]="shouldShowSectionErrors(section.id)"
-        [attr.aria-current]="index === normalizedSectionIndex() ? 'step' : null">
+        >
+        <button type="button" class="offer-wizard-shell__section-link" [disabled]="busy()"
+          [attr.aria-current]="!reviewing() && index === normalizedSectionIndex() ? 'step' : null"
+          (click)="editReviewSection(section.id)">
         <span>
           @if (isSectionComplete(section.id)) {
           <span aria-hidden="true">✓</span>
@@ -61,12 +64,13 @@
           <small>{{ sectionLabel(section.title) }}</small>
           }
         </span>
+        </button>
       </li>
       }
     </ol>
 
   @if (reviewing()) {
-  <section class="offer-wizard-shell__section offer-wizard-shell__review">
+  <section #sectionTop style="scroll-margin-top: 6rem" class="offer-wizard-shell__section offer-wizard-shell__review">
     <header>
       <p class="offer-wizard-shell__section-number">Final review</p>
       <h2>Review your offer before submitting</h2>
@@ -84,12 +88,12 @@
         </header>
 
         @if (section.id === 'parties') {
-        <p><strong>Buyers:</strong> {{ partyNames(buyers()) }}</p>
-        <p><strong>Sellers:</strong> {{ partyNames(sellers()) }}</p>
+        <p><strong>Buyers</strong><span>{{ partyNames(buyers()) }}</span></p>
+        <p><strong>Sellers</strong><span>{{ partyNames(sellers()) }}</span></p>
         }
 
         @for (item of section.items; track item.label) {
-        <p><strong>{{ item.label }}:</strong> {{ item.value }}</p>
+        <p><strong>{{ item.label }}</strong><span>{{ item.value }}</span></p>
         }
 
         @if (section.id !== 'parties' && section.items.length === 0) {
@@ -104,7 +108,7 @@
     </p>
   </section>
   } @else if (currentSection(); as section) {
-  <section class="offer-wizard-shell__section" [attr.data-section-id]="section.id"
+  <section #sectionTop style="scroll-margin-top: 6rem" class="offer-wizard-shell__section" [attr.data-section-id]="section.id"
     [class.offer-wizard-shell__section--question-cards]="section.questionLayout === 'cards'"
     [class.offer-wizard-shell__section--disclosures]="section.id === 'disclosures'"
     [class.offer-wizard-shell__section--parties]="section.id === 'parties'"
@@ -128,8 +132,9 @@
       <span>
         Missing: {{ missingFields.join(', ') }}.
         These answers cannot be changed by the current party.
-        Review the last submitted offer to determine why they are missing
-        from this draft. Listing Enhancements cannot fill in buyer answers.
+        Seller-provided property facts must be completed by the seller in the listing.
+        After the seller saves those facts, reopen this draft to check for updated information.
+        For buyer-owned answers locked in a counteroffer, review the preceding offer version.
       </span>
     </aside>
   }

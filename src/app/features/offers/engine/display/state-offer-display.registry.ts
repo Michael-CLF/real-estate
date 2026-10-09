@@ -6,6 +6,7 @@ import type {
 
 import type {
   OfferDisplayFields,
+  StateOfferDisplayAdapter,
 } from './state-offer-display.adapter';
 
 import {
@@ -34,6 +35,33 @@ import {
 import { louisianaOfferDisplayAdapter } from '../../states/louisiana/display/louisiana-offer-display.adapter';
 import { coloradoOfferDisplayAdapter } from '../../states/colorado/display/colorado-offer-display.adapter';
 
+type DisplayTerms = (terms: StateOfferTerms) => OfferDisplayFields;
+const DISPLAY_ADAPTERS = new Map<string, DisplayTerms>();
+
+/** Keep the narrowing at the registration boundary; shared callers inspect no term paths. */
+function registerDisplayAdapter<TTerms extends StateOfferTerms>(adapter: StateOfferDisplayAdapter<TTerms>): void {
+  if (DISPLAY_ADAPTERS.has(adapter.stateCode)) {
+    throw new Error(`More than one offer display adapter is registered for ${adapter.stateCode}.`);
+  }
+  DISPLAY_ADAPTERS.set(adapter.stateCode, terms => {
+    if (terms.stateCode !== adapter.stateCode) {
+      throw new Error('Offer version and contract terms have different states.');
+    }
+    return adapter.display(terms as TTerms);
+  });
+}
+
+registerDisplayAdapter(northCarolinaOfferDisplayAdapter);
+registerDisplayAdapter(texasOfferDisplayAdapter);
+registerDisplayAdapter(oklahomaOfferDisplayAdapter);
+registerDisplayAdapter(utahOfferDisplayAdapter);
+registerDisplayAdapter(wisconsinOfferDisplayAdapter);
+registerDisplayAdapter(floridaOfferDisplayAdapter);
+registerDisplayAdapter(louisianaOfferDisplayAdapter);
+registerDisplayAdapter(southCarolinaOfferDisplayAdapter);
+registerDisplayAdapter(californiaOfferDisplayAdapter);
+registerDisplayAdapter(coloradoOfferDisplayAdapter);
+
 /**
  * The state stored on the offer version and the state stored
  * in its immutable contract terms must agree.
@@ -52,36 +80,9 @@ export function displayOfferTerms(
     );
   }
 
-  switch (version.terms.stateCode) {
-    case 'NC':
-      return northCarolinaOfferDisplayAdapter.display(version.terms);
-
-    case 'TX':
-      return texasOfferDisplayAdapter.display(version.terms);
-
-    case 'OK':
-      return oklahomaOfferDisplayAdapter.display(version.terms);
-
-    case 'UT':
-      return utahOfferDisplayAdapter.display(version.terms);
-
-    case 'WI':
-      return wisconsinOfferDisplayAdapter.display(version.terms);
-
-    case 'FL':
-      return floridaOfferDisplayAdapter.display(version.terms);
-    case 'LA':
-      return louisianaOfferDisplayAdapter.display(version.terms);
-    case 'SC':
-      return southCarolinaOfferDisplayAdapter.display(version.terms);
-    case 'CA':
-      return californiaOfferDisplayAdapter.display(version.terms);
-    case 'CO':
-      return coloradoOfferDisplayAdapter.display(version.terms);
-
-    default:
-      throw new Error(
-        `No offer display adapter is registered for ${state}.`
-      );
+  const display = DISPLAY_ADAPTERS.get(state);
+  if (!display) {
+    throw new Error(`No offer display adapter is registered for ${state}.`);
   }
+  return display(version.terms);
 }

@@ -2,7 +2,12 @@ import type { CaliforniaListingFacts } from '../../listings/state-packages/calif
 import { Injectable } from '@angular/core';
 import {
     collection,
+    doc,
+    getDoc,
     getDocs,
+    limit as queryLimit,
+    orderBy,
+    documentId,
     query,
     where
 } from 'firebase/firestore';
@@ -87,7 +92,7 @@ export class FirestoreMarketplaceListingRepository
     override searchListings(
         filters: ListingSearchFilters
     ): Observable<ListingSearchResult> {
-        return this.loadActiveListings().pipe(
+        return this.loadActiveListings(filters.listingStatuses).pipe(
             map(listings =>
                 this.createSearchResult(
                     listings,
@@ -100,14 +105,27 @@ export class FirestoreMarketplaceListingRepository
     override getListingById(
         listingUid: string
     ): Observable<MarketplaceListing | null> {
-        return this.loadActiveListings().pipe(
-            map(listings =>
-                listings.find(
-                    listing => listing.uid === listingUid
-                ) ?? null
-            )
-        );
+        return defer(async () => {
+            try {
+                const snapshot = await getDoc(doc(firestore, 'listings', listingUid));
+                if (!snapshot.exists()) return null;
+                const data = snapshot.data();
+                if (!['active', 'under_contract', 'sold'].includes(data['status'])) {
+                    return null;
+                }
+                return this.mapFirestoreListing(snapshot.id, data);
+            } catch (error) {
+                // Previously, nonpublic or absent properties were excluded by the
+                // status query. Keep the same unavailable result for denied reads.
+                if (typeof error === 'object' && error !== null &&
+                    'code' in error && error.code === 'permission-denied') {
+                    return null;
+                }
+                throw error;
+            }
+        });
     }
+
 
     override getListingsBySellerId(
         sellerUid: string
@@ -146,46 +164,37 @@ export class FirestoreMarketplaceListingRepository
     override getFeaturedListings(
         limit: number
     ): Observable<MarketplaceListingSummary[]> {
-        return this.loadActiveListings().pipe(
-            map(listings =>
-                listings
-                    .filter(listing =>
-                        this.isFeaturedListing(listing)
-                    )
-                    .sort(
-                        (
-                            firstListing,
-                            secondListing
-                        ) =>
-                            (
-                                secondListing
-                                    .publishedAt
-                                    ?.getTime() ??
-                                secondListing
-                                    .createdAt
-                                    .getTime()
-                            ) -
-                            (
-                                firstListing
-                                    .publishedAt
-                                    ?.getTime() ??
-                                firstListing
-                                    .createdAt
-                                    .getTime()
-                            )
-                    )
-                    .slice(
-                        0,
-                        Math.max(limit, 0)
-                    )
-                    .map(listing =>
-                        this.toListingSummary(listing)
-                    )
-            )
+        const resultLimit = Math.max(Math.floor(limit), 0);
+        if (!Number.isFinite(resultLimit) || resultLimit === 0) {
+            return defer(async () => []);
+        }
+        const featuredQuery = query(
+            collection(firestore, 'listings'),
+            where('status', '==', 'active'),
+            where('featuredListing', '==', true),
+            orderBy('publishedAt', 'desc'),
+            orderBy(documentId(), 'asc'),
+            queryLimit(resultLimit)
+        );
+        return defer(() => getDocs(featuredQuery)).pipe(
+            map(snapshot => snapshot.docs
+                .map(document => this.mapFirestoreListing(document.id, document.data()))
+                .filter((listing): listing is MarketplaceListing => listing !== null)
+                .map(listing => this.toListingSummary(listing)))
         );
     }
-    private loadActiveListings():
+
+    private loadActiveListings(
+        requestedStatuses?: ListingSearchFilters['listingStatuses']
+    ):
         Observable<MarketplaceListing[]> {
+        const publicStatuses = ['active', 'under_contract', 'sold'] as const;
+        const statuses = requestedStatuses?.length
+            ? publicStatuses.filter(status => requestedStatuses.includes(status))
+            : [...publicStatuses];
+        // Private-only requests cannot match the public marketplace.
+        if (statuses.length === 0) return defer(async () => []);
+
         const listingsReference = collection(
             firestore,
             'listings'
@@ -196,11 +205,7 @@ export class FirestoreMarketplaceListingRepository
             where(
                 'status',
                 'in',
-                [
-                    'active',
-                    'under_contract',
-                    'sold'
-                ]
+                statuses
             )
         );
 

@@ -1,3 +1,9 @@
+import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
+import { offerExpirationAfterHours } from '../../../engine/offer-expiration';
+import { createOfferPropertySnapshot } from '../../../engine/offer-property-snapshot';
+import { OfferDraftSaveQueue } from '../../../engine/services/offer-draft-save-queue';
+import { input } from '@angular/core';
+import { OfferWorkflowService } from '../../../engine/services/offer-workflow.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -101,6 +107,7 @@ const DEFAULT_EXPIRATION_HOURS = 48;
   ],
 
   providers: [
+    OfferWorkflowService,
     {
       provide:
         MarketplaceListingRepository,
@@ -121,6 +128,8 @@ const DEFAULT_EXPIRATION_HOURS = 48;
 })
 export class LouisianaOfferEntryComponent
   implements OnInit {
+  readonly listingContext = input<MarketplaceListing | null>(null);
+
   private readonly route =
     inject(ActivatedRoute);
 
@@ -223,18 +232,19 @@ export class LouisianaOfferEntryComponent
     computed(
       () =>
         this.creating() ||
-        this.saving() ||
         this.uploading() ||
         this.submitting()
     );
 
-  private pendingDraftChange:
-    LouisianaOfferDraftChange |
-    null = null;
+  private readonly draftSaveQueue = new OfferDraftSaveQueue<LouisianaOfferDraftChange>();
 
-  private activeSave:
-    Promise<void> |
-    null = null;
+  private get pendingDraftChange(): LouisianaOfferDraftChange | null {
+    return this.draftSaveQueue.pendingDraftChange;
+  }
+
+  private set pendingDraftChange(change: LouisianaOfferDraftChange | null) {
+    this.draftSaveQueue.pendingDraftChange = change;
+  }
 
   private listingUid =
     this.route.snapshot.paramMap.get('listingUid') ?? '';
@@ -264,12 +274,7 @@ export class LouisianaOfferEntryComponent
       }
 
       const listing =
-        await firstValueFrom(
-          this.listingRepository
-            .getListingById(
-              this.listingUid
-            )
-        );
+        await this.workflow.loadListing(this.listingUid, this.listingRepository, this.listingContext());
 
       if (!listing) {
         throw new Error(
@@ -347,7 +352,7 @@ export class LouisianaOfferEntryComponent
 
   private async createInitialDraft(): Promise<void> {
     if (
-      this.busy() ||
+      (this.busy() || this.saving()) ||
       this.currentVersion()
     ) {
       return;
@@ -357,17 +362,11 @@ export class LouisianaOfferEntryComponent
     this.errorMessage.set('');
 
     try {
-      const result =
-        await this.offerService
-          .createOrResumeDraft(
-            this.listingUid,
-            'lrec_louisiana_residential_agreement_2026'
-          );
-
-      await this.loadOfferSession(
-        result.offerUid,
-        result.offerVersionUid,
-        'lrec_louisiana_residential_agreement_2026'
+      await this.workflow.createAndLoadDraft(
+        this.listingUid,
+        'lrec_louisiana_residential_agreement_2026',
+        (offerUid, versionUid, contractType) =>
+          this.loadOfferSession(offerUid, versionUid, contractType),
       );
     } catch (error) {
       this.setError(
@@ -391,7 +390,7 @@ export class LouisianaOfferEntryComponent
     }
 
     this.pendingDraftChange = change;
-    void this.flushDraftSave();
+    void this.flushDraftSave().catch(() => undefined);
   }
 
 
@@ -404,7 +403,7 @@ export class LouisianaOfferEntryComponent
     if (
       !offer ||
       !version ||
-      this.busy()
+      (this.busy() || this.saving())
     ) {
       return;
     }
@@ -413,22 +412,16 @@ export class LouisianaOfferEntryComponent
     this.errorMessage.set('');
 
     try {
-      const result =
-        await this.offerDocumentService
-          .uploadAttachment(
-            offer.Uid,
-            version.Uid,
-            resolveAttachmentType(
-              selection.fieldPath
-            ),
-            selection.file
-          );
-
-      this.wizard()
-        ?.applyDocumentUid(
-          selection.fieldPath,
-          result.documentUid
-        );
+      await this.workflow.uploadAndSaveAttachment(
+        () => this.offerDocumentService.uploadAttachment(
+          offer.Uid,
+          version.Uid,
+          resolveAttachmentType(selection.fieldPath),
+          selection.file,
+        ),
+        documentUid => this.wizard()?.applyDocumentUid(selection.fieldPath, documentUid),
+        () => this.flushDraftSave(),
+      );
     } catch (error) {
       this.setError(
         error,
@@ -444,86 +437,34 @@ export class LouisianaOfferEntryComponent
   ): Promise<void> {
     const offer = this.currentOffer();
     const version = this.currentVersion();
-
-    if (!offer || !version || this.busy()) {
-      return;
-    }
-
+    if (!offer || !version || this.busy()) return;
     this.pendingDraftChange = change;
     this.submitting.set(true);
     this.errorMessage.set('');
-
     try {
-      await this.flushDraftSave();
-
-      await this.offerService.submitVersion(
-        offer.Uid,
-        version.Uid
+      await this.workflow.saveAndSubmit(
+        () => this.flushDraftSave(), offer.Uid, version.Uid, version.versionNumber,
       );
     } catch (error) {
-      this.setError(
-        error,
-        'The Louisiana offer could not be submitted.'
-      );
-      this.submitting.set(false);
-      return;
-    }
-
-    // Submission has frozen the version. Never return to its editable wizard.
-    try {
-      await this.offerDocumentService.generateAgreement(
-        offer.Uid,
-        version.Uid,
-        version.versionNumber === 1
-          ? 'offer_agreement'
-          : 'counteroffer_agreement'
-      );
-    } catch (error) {
-      console.error(
-        'Louisiana offer submitted; agreement PDF generation failed.',
-        error
-      );
-      // The offer details page provides Prepare agreement for a retry.
+      this.setError(error, 'The offer could not be completed. Please try again.');
     } finally {
       this.submitting.set(false);
-      await this.router.navigate(['/offers', offer.Uid]);
     }
   }
 
 
   protected async returnToListing():
     Promise<void> {
-    try {
-      await this.flushDraftSave();
-    } catch {
-      return;
-    }
-
-    await this.router.navigate([
-      '/listings',
-      this.listingUid,
-    ]);
+    await this.workflow.saveAndReturnToListing(
+      () => this.flushDraftSave(), this.listingUid,
+    );
   }
 
 
   private async resumeExistingDraft():
     Promise<void> {
-    const existingOffer =
-      await this.offerRepository
-        .getOpenOfferForBuyerAndListing(
-          this.offerService.currentUserUid,
-          this.listingUid
-        );
-
-    if (!existingOffer) {
-      return;
-    }
-
-    if (existingOffer.status !== 'draft') {
-      throw new Error(
-        'You already have an active offer for this property. Open it from your Offers dashboard.'
-      );
-    }
+    const existingOffer = await this.workflow.findResumableDraft(this.listingUid, this.offerRepository);
+    if (!existingOffer) return;
 
     await this.loadOfferSession(
       existingOffer.Uid,
@@ -538,46 +479,11 @@ export class LouisianaOfferEntryComponent
     expectedContractType?: string
   ): Promise<void> {
     const [offer, version] =
-      await Promise.all([
-        this.offerService.getOffer(
-          offerUid
-        ),
-        this.offerService
-          .getVersion<LouisianaOfferTerms>(
-            offerUid,
-            offerVersionUid
-          ),
-      ]);
-
-    if (!offer || !version) {
-      throw new Error(
-        'The Louisiana offer draft could not be loaded.'
+      await this.workflow.loadValidatedOfferVersion<LouisianaOfferTerms>(
+        offerUid, offerVersionUid, 'LA', 'Louisiana', expectedContractType
       );
-    }
 
-    if (
-      offer.stateCode !== 'LA' ||
-      version.stateCode !== 'LA' ||
-      version.terms.stateCode !== 'LA'
-    ) {
-      throw new Error(
-        'The saved offer does not contain a Louisiana contract.'
-      );
-    }
-
-    if (
-      expectedContractType &&
-      version.terms.contractType !==
-      expectedContractType
-    ) {
-      throw new Error(
-        'The existing draft uses a different Louisiana contract form.'
-      );
-    }
-
-    if (offer.listingUid !== this.listingUid || offer.currentVersionUid !== version.Uid || version.status !== 'draft' || offer.status !== 'draft' || version.initiatedByUid !== this.offerService.currentUserUid) {
-      throw new Error('This is not your current editable draft version.');
-    }
+    this.workflow.assertCurrentEditableDraft(offer, version, this.listingUid);
     this.currentOffer.set(offer);
     this.currentVersion.set(version);
     this.property.set(
@@ -586,74 +492,22 @@ export class LouisianaOfferEntryComponent
   }
 
 
+  private readonly workflow = inject(OfferWorkflowService);
+
   private flushDraftSave(): Promise<void> {
-    if (this.activeSave) {
-      return this.activeSave.then(
-        () =>
-          this.pendingDraftChange
-            ? this.flushDraftSave()
-            : undefined
-      );
-    }
-
-    const offer = this.currentOffer();
-    const version = this.currentVersion();
-    const change = this.pendingDraftChange;
-
-    if (!offer || !version || !change) {
-      return Promise.resolve();
-    }
-
-    this.pendingDraftChange = null;
-    this.saving.set(true);
-
-    const save =
-      this.offerService
-        .saveDraft<LouisianaOfferTerms>(
-          offer.Uid,
-          version.Uid,
-          {
-            terms:
-              change.terms,
-            expiresAt:
-              change.expiresAt,
-            ...(
-              version.initiatedBy === 'buyer'
-                ? {
-                  buyers:
-                    change.buyers.map(
-                      buyer =>
-                        this.toOfferVersionPartySnapshot(
-                          buyer
-                        )
-                    ),
-                }
-                : {}
-            ),
-            wizardData: {
-              stateCode: 'LA',
-              contractType:
-                change.terms
-                  .contractType,
-            },
-          }
-        )
-        .catch(error => {
-          this.setError(
-            error,
-            'Your latest Louisiana offer changes could not be saved.'
-          );
-
-          throw error;
-        })
-        .finally(() => {
-          this.activeSave = null;
-          this.saving.set(false);
-        });
-
-    this.activeSave = save;
-
-    return save;
+    return this.draftSaveQueue.flush(
+      change => {
+        const offer = this.currentOffer();
+        const version = this.currentVersion();
+        if (!offer || !version) return null;
+        const payload = this.workflow.buildDraftChanges(
+          'LA', change, version.initiatedBy === 'buyer',
+        );
+        return () => this.workflow.saveDraft(offer.Uid, version.Uid, payload);
+      },
+      saving => this.saving.set(saving),
+      error => this.setError(error, 'Your latest offer changes could not be saved. Please try again.'),
+    );
   }
 
 
@@ -661,53 +515,7 @@ export class LouisianaOfferEntryComponent
     parties:
       readonly OfferVersionPartySnapshot[]
   ): readonly OfferParty[] {
-    return parties.map(party => ({
-      Uid: party.partyUid,
-      role: party.role,
-      capacity: party.capacity,
-      ...(party.userUid ? { userUid: party.userUid } : {}),
-      firstName: party.firstName,
-      ...(party.middleName ? { middleName: party.middleName } : {}),
-      lastName: party.lastName,
-      ...(party.suffix ? { suffix: party.suffix } : {}),
-      legalName: party.legalName,
-      email: party.email,
-      phone: party.phone,
-      mailingAddress: party.mailingAddress,
-      ...(party.role === 'buyer'
-        ? {
-          buyerDetails: {
-            intendedUse: party.intendedUse ?? 'primary_residence',
-            proposedDeedName: party.proposedDeedName ?? party.legalName,
-            buyerSequence: party.sequence,
-            primaryBuyer: party.primaryParty,
-          },
-        }
-        : {
-          sellerDetails: {
-            sellerSequence: party.sequence,
-            primarySeller: party.primaryParty,
-            listingOwner: party.primaryParty,
-          },
-        }),
-      identityVerification: party.identityVerification,
-      signature: {
-        required: party.requiredSigner,
-        status: party.signature.status === 'not_started'
-          ? 'not_invited'
-          : party.signature.status,
-        ...(party.signature.providerEnvelopeUid
-          ? { providerEnvelopeUid: party.signature.providerEnvelopeUid }
-          : {}),
-        ...(party.signature.providerSignerUid
-          ? { providerSignerUid: party.signature.providerSignerUid }
-          : {}),
-      },
-      electronicTransactionsConsentAccepted:
-        party.electronicTransactionsConsentAccepted,
-      createdAt: new Date(0),
-      updatedAt: new Date(0),
-    }));
+    return this.workflow.toOfferParties(parties);
   }
 
 
@@ -728,55 +536,7 @@ export class LouisianaOfferEntryComponent
   private toOfferVersionPartySnapshot(
     party: OfferParty
   ): OfferVersionPartySnapshot {
-    return {
-      partyUid: party.Uid,
-      ...(party.userUid ? { userUid: party.userUid } : {}),
-      role: party.role,
-      capacity: party.capacity,
-      firstName: party.firstName,
-      ...(party.middleName ? { middleName: party.middleName } : {}),
-      lastName: party.lastName,
-      ...(party.suffix ? { suffix: party.suffix } : {}),
-      legalName: party.legalName,
-      email: party.email,
-      phone: party.phone,
-      mailingAddress: party.mailingAddress,
-      sequence:
-        party.buyerDetails?.buyerSequence ??
-        party.sellerDetails?.sellerSequence ??
-        1,
-      primaryParty:
-        party.buyerDetails?.primaryBuyer ??
-        party.sellerDetails?.primarySeller ??
-        false,
-      ...(party.buyerDetails
-        ? {
-          intendedUse: party.buyerDetails.intendedUse,
-          proposedDeedName: party.buyerDetails.proposedDeedName,
-        }
-        : {}),
-      requiredSigner: party.signature.required,
-      identityVerification: party.identityVerification,
-      signature: {
-        status: party.signature.status === 'not_invited'
-          ? 'not_started'
-          : party.signature.status,
-        ...(party.signature.providerEnvelopeUid
-          ? { providerEnvelopeUid: party.signature.providerEnvelopeUid }
-          : {}),
-        ...(party.signature.providerSignerUid
-          ? { providerSignerUid: party.signature.providerSignerUid }
-          : {}),
-      },
-      electronicTransactionsConsentAccepted:
-        party.electronicTransactionsConsentAccepted,
-      ...(party.electronicTransactionsConsentAcceptedAt
-        ? {
-          electronicTransactionsConsentAcceptedAt:
-            party.electronicTransactionsConsentAcceptedAt,
-        }
-        : {}),
-    };
+    return this.workflow.toOfferVersionPartySnapshot(party);
   }
 
 
@@ -801,62 +561,14 @@ export class LouisianaOfferEntryComponent
 function createPropertySnapshot(
   listing: MarketplaceListing
 ): OfferPropertySnapshot {
-  return {
-    listingUid:
-      listing.uid,
-
-    addressLine1:
-      listing.address.addressLine1,
-
-    ...(
-      listing.address.addressLine2
-        ? {
-          addressLine2:
-            listing.address.addressLine2,
-        }
-        : {}
-    ),
-
-    city:
-      listing.address.city,
-
-    state: 'LA',
-
-    zipCode:
-      listing.address.postalCode,
-
-    county:
-      listing.address.county ?? '',
-
-    propertyType:
-      String(listing.propertyType),
-
-    ...(
-      typeof listing.yearBuilt === 'number'
-        ? {
-          yearBuilt:
-            listing.yearBuilt,
-        }
-        : {}
-    ),
-
-    listPriceInCents:
-      Math.round(
-        listing.price * 100
-      ),
-  };
+  return createOfferPropertySnapshot(listing, 'LA');
 }
 
 
 function createDefaultExpiration(): string {
-  return new Date(
-    Date.now() +
-    DEFAULT_EXPIRATION_HOURS *
-    60 *
-    60 *
-    1000
-  ).toISOString();
+  return offerExpirationAfterHours(DEFAULT_EXPIRATION_HOURS);
 }
+
 
 
 function getLouisianaTimeZone(
@@ -869,46 +581,5 @@ function getLouisianaTimeZone(
 function resolveAttachmentType(
   fieldPath: string
 ): OfferAttachmentType {
-  if (fieldPath.startsWith('addenda.')) {
-    return 'contract_addendum';
-  }
-
-  const attachmentTypes:
-    Readonly<Record<string, OfferAttachmentType>> = {
-    'propertyIdentification.legalDescriptionExhibitDocumentUid':
-      'legal_description_exhibit',
-    'propertyTerms.reservationAddendumDocumentUid':
-      'reservation_addendum',
-    'leases.residentialLeasesAddendumDocumentUid':
-      'residential_lease_addendum',
-    'leases.fixtureLeasesAddendumDocumentUid':
-      'fixture_lease_addendum',
-    'propertyAssociation.associationAddendumDocumentUid':
-      'association_addendum',
-    'disclosures.propertyCondition.documentUid':
-      'property_condition_disclosure',
-    'disclosures.leadBasedPaintAddendumDocumentUid':
-      'lead_based_paint_addendum',
-    'closingAndPossession.temporaryResidentialLeaseDocumentUid':
-      'temporary_residential_lease',
-    'construction.plansAndSpecificationsDocumentUid':
-      'plans_and_specifications',
-    'construction.buyerSelectionDocumentsUid':
-      'buyer_selection_documents',
-    'construction.builderWarrantyDocumentUid':
-      'builder_warranty',
-    'construction.thirdPartyWarrantyDocumentUid':
-      'third_party_warranty',
-  };
-
-  const attachmentType =
-    attachmentTypes[fieldPath];
-
-  if (!attachmentType) {
-    throw new Error(
-      'The selected Louisiana document field is not supported.'
-    );
-  }
-
-  return attachmentType;
+  return resolveOfferAttachmentType(fieldPath, 'The selected Louisiana document field is not supported.', false);
 }

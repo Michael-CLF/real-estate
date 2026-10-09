@@ -1,3 +1,4 @@
+import type { MarketplaceListing } from '../../../../core/domains/marketplace/models/marketplace-listing.model';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -75,6 +76,8 @@ implements OnInit {
   private readonly listingRepository =
     inject(MarketplaceListingRepository);
 
+  readonly stateEntryInputs = signal<{ listingContext: MarketplaceListing } | undefined>(undefined);
+
   readonly loading =
     signal(true);
 
@@ -147,6 +150,8 @@ implements OnInit {
       const component =
         await stateRegistration
           .loadComponent();
+
+      this.stateEntryInputs.set({ listingContext: listing });
 
       this.offerComponent.set(
         component

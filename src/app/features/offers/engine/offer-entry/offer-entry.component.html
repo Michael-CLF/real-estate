@@ -47,6 +47,6 @@
   </main>
 } @else if (offerComponent(); as component) {
   <ng-container
-    *ngComponentOutlet="component"
+    *ngComponentOutlet="component; inputs: stateEntryInputs()"
   />
 }

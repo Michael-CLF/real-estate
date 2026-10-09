@@ -46,7 +46,7 @@ export class UtahOfferValidator implements StateOfferValidator<UtahOfferTerms> {
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'other_period' && (!Number.isSafeInteger(terms.disclosures.leadInspectionDays) || terms.disclosures.leadInspectionDays < 1 || terms.disclosures.leadInspectionDays > 60)) error('disclosures.leadInspectionDays', 'Set an agreed inspection period from 1 through 60 days.');
     if (terms.disclosures.hoaDocumentsStatus === 'unselected') error('disclosures.hoaDocumentsStatus', 'Select the association documents status.');
     if (terms.disclosures.sellerReportsCurrentMethContamination === null) error('disclosures.sellerReportsCurrentMethContamination', 'The seller must answer the contamination question on the listing.');
-    if (terms.conditions.saleOfBuyersProperty && !terms.additionalTerms.trim()) error('additionalTerms', 'Describe the sale of the buyer’s property in additional terms.');
+    if (terms.conditions.saleOfBuyersProperty && !terms.additionalTerms.trim()) error('additionalTerms', 'You selected that this purchase depends on selling another property you own. Describe that condition here, or select No in Purchase conditions if it does not apply.');
     if (terms.disclosures.methamphetamineContaminationAcknowledged !== true) error('disclosures.methamphetamineContaminationAcknowledged', 'Review and acknowledge the seller statement.');
     if (terms.delivery.electronicDeliveryAuthorized !== true) error('delivery.electronicDeliveryAuthorized', 'Electronic delivery consent is required.');
     const expiration = new Date(terms.delivery.expiresAt);

@@ -666,7 +666,7 @@
         </span>
 
         <span>
-          I consent to receive this offer, notices and
+          I consent to send and receive offers, notices, and
           related transaction records electronically.
         </span>
       </label>
@@ -693,53 +693,23 @@
         </span>
       </label>
 
-      <label
-        class="certification-card"
-        [class.certification-card--invalid]="
-          isInvalid('navStreetDisclaimerAccepted')
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="navStreetDisclaimerAccepted"
-        />
-
-        <span class="certification-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span>
-          I understand that NavStreet is a technology
-          platform and does not represent me as a real
-          estate broker or attorney.
-        </span>
-      </label>
-
-      <label
-        class="certification-card"
-        [class.certification-card--invalid]="
-          isInvalid('attorneyLanguageAcknowledged')
-        "
-      >
-        <input
-          type="checkbox"
-          formControlName="attorneyLanguageAcknowledged"
-        />
-
-        <span class="certification-card__indicator">
-          <span aria-hidden="true">✓</span>
-        </span>
-
-        <span>
-          I understand that NavStreet does not draft
-          special provisions or other language defining the
-          parties’ legal rights, and that separate legal
-          documents should be prepared or reviewed by a
-          qualified attorney.
-        </span>
-      </label>
     </div>
   </section>
+
+  <aside class="signature-notice" aria-label="About NavStreet">
+    <div>
+      <strong>About NavStreet</strong>
+      <p>
+        NavStreet is a technology platform and does not represent
+        you as a real estate broker or attorney.
+      </p>
+      <p>
+        NavStreet does not draft special provisions or other language
+        defining the parties’ legal rights. Separate legal documents
+        should be prepared or reviewed by a qualified attorney.
+      </p>
+    </div>
+  </aside>
 
   <aside class="signature-notice">
     <div>

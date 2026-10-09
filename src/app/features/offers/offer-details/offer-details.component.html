@@ -192,7 +192,9 @@
               <small>{{ document.fileName }}</small>
               } @else {
               <p>
-                The agreement PDF must be generated before this version can be signed.
+                {{ preparingAgreement()
+                ? 'Preparing your agreement PDF. Your offer is saved; signing will be available when the PDF is ready.'
+                : 'The agreement PDF must be generated before this version can be signed.' }}
               </p>
               }
             </div>

@@ -1,8 +1,11 @@
+import { removeUndefinedValues } from './draft-value-cleanup';
+import { readTexasListingLeaseFacts } from './state-contracts/texas/texas-initial-terms';
+import * as logger from 'firebase-functions/logger';
 import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
 import { readCaliforniaListingDisclosures } from './state-contracts/california/california-state-contract.package';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 
 import { adminAuth, adminFirestore } from '../shared/firebase-admin';
 
@@ -48,6 +51,7 @@ export const createOfferDraft = onCall<
   CreateOfferDraftData,
   Promise<CreateOfferDraftResponse>
 >(callableFunctionOptions, async (request) => {
+  const operationStartedAt = Date.now();
   const buyerUid = request.auth?.uid;
 
   if (!buyerUid) {
@@ -112,6 +116,7 @@ export const createOfferDraft = onCall<
       now.toDate()
     );
 
+  const transactionStartedAt = Date.now();
   const result = await adminFirestore.runTransaction(async (transaction) => {
     const listingReference = adminFirestore
       .collection('listings')
@@ -271,7 +276,61 @@ if (currentStateCode === 'CO') {
             ),
           );
 
+          const repairs: Record<string, unknown> = {};
+          // Repair only absent seller facts in an editable original buyer draft.
+          // Counteroffers and immutable/submitted versions keep their negotiated snapshot.
+          if (currentStateCode === 'TX' && existingVersionData['versionNumber'] === 1 && existingVersionData['initiatedBy'] === 'buyer') {
+            const terms = existingVersionData['terms'] as Record<string, unknown> | undefined;
+            const leases = terms?.['leases'] as Record<string, unknown> | undefined;
+            if (leases && typeof leases === 'object' && !Array.isArray(leases)) {
+              const facts = readTexasListingLeaseFacts(currentListingData);
+              for (const field of ['residentialLeasesExist', 'fixtureLeasesExist', 'naturalResourceLeasesExist'] as const) {
+                if (typeof leases[field] !== 'boolean' && typeof facts[field] === 'boolean') {
+                  repairs[`terms.leases.${field}`] = facts[field];
+                }
+              }
+              if (repairs['terms.leases.naturalResourceLeasesExist'] === false && leases['naturalResourceLeaseStatus'] === 'unselected') {
+                repairs['terms.leases.naturalResourceLeaseStatus'] = 'none';
+              }
+            }
+          }
+          if (currentStateCode === 'CO' && existingVersionData['versionNumber'] === 1 && existingVersionData['initiatedBy'] === 'buyer') {
+            const parties = [...existingBuyers, ...(Array.isArray(existingVersionData['sellers']) ? existingVersionData['sellers'] : [])];
+            const unsigned = parties.every(party => {
+              const signature = party?.signature;
+              return signature?.status !== 'signed' && !signature?.signedAt;
+            });
+            const terms = existingVersionData['terms'] as Record<string, unknown> | undefined;
+            const legalDescription = typeof currentListingData['legalDescription'] === 'string'
+              ? currentListingData['legalDescription'].trim() : '';
+            if (unsigned && terms && !String(terms['legalDescription'] ?? '').trim() && legalDescription && legalDescription.length <= 5000) {
+              repairs['terms.legalDescription'] = legalDescription;
+              const property = terms['property'] as Record<string, unknown> | undefined;
+              if (property && !String(property['legalDescription'] ?? '').trim()) {
+                repairs['terms.property.legalDescription'] = legalDescription;
+              }
+              const versionProperty = existingVersionData['property'] as Record<string, unknown> | undefined;
+              if (versionProperty && !String(versionProperty['legalDescription'] ?? '').trim()) {
+                repairs['property.legalDescription'] = legalDescription;
+              }
+            }
+            const facts = terms?.['propertyFacts'] as Record<string, unknown> | undefined;
+            const listingFacts = currentListingData['coloradoPropertyFacts'] as Record<string, unknown> | undefined;
+            const district = listingFacts?.['metroDistrict'];
+            if (unsigned && facts && !['covered', 'not_applicable'].includes(String(facts['metroDistrict'])) &&
+              (district === 'covered' || district === 'not_applicable')) {
+              repairs['terms.propertyFacts.metroDistrict'] = district;
+              if (district === 'covered') {
+                for (const field of ['metroDistrictWebsite', 'metroDistrictDisclosure'] as const) {
+                  if (!String(facts[field] ?? '').trim() && typeof listingFacts?.[field] === 'string') {
+                    repairs[`terms.propertyFacts.${field}`] = listingFacts[field].trim().slice(0, 4000);
+                  }
+                }
+              }
+            }
+          }
           transaction.update(existingVersionReference, {
+            ...repairs,
             buyers: refreshedBuyers,
             updatedAt: now,
           });
@@ -346,7 +405,7 @@ if (currentStateCode === 'CO') {
         stateContractPackage
       );
 
-    const initialTerms =
+    const generatedTerms =
       stateContractPackage
         .createInitialOfferTerms({
           contractType,
@@ -362,6 +421,12 @@ if (currentStateCode === 'CO') {
 
           listingData: { ...currentListingData, californiaReadiness, ...(southCarolinaDocuments ? {southCarolinaDocuments} : {}) },
         });
+
+    // Expiration is a buyer-selected term, not a creation-time default.
+    const initialTerms = {
+      ...generatedTerms,
+      delivery: { ...generatedTerms.delivery, expiresAt: '' },
+    };
 
     const offerData = removeUndefinedValues({
       Uid: offerReference.id,
@@ -483,6 +548,7 @@ if (currentStateCode === 'CO') {
     };
   });
 
+  logger.info('createOfferDraft timing', {totalMs: Date.now() - operationStartedAt, transactionMs: Date.now() - transactionStartedAt, resumedExistingDraft: result.resumedExistingDraft});
   return result;
 });
 
@@ -949,26 +1015,7 @@ function readFirstOptionalString(
   return undefined;
 }
 
-function removeUndefinedValues<T>(value: T): T {
-  if (Array.isArray(value)) {
-    return value.map((item) => removeUndefinedValues(item)) as T;
-  }
 
-  if (
-    value !== null &&
-    typeof value === 'object' &&
-    !(value instanceof Timestamp) &&
-    !(value instanceof FieldValue)
-  ) {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .filter(([, nestedValue]) => nestedValue !== undefined)
-        .map(([key, nestedValue]) => [key, removeUndefinedValues(nestedValue)]),
-    ) as T;
-  }
-
-  return value;
-}
 
 function refreshDraftBuyerIdentity(
   value: unknown,

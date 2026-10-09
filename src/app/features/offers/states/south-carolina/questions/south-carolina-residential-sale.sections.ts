@@ -72,7 +72,7 @@ export const SOUTH_CAROLINA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefin
   {...choice('disclosures.leadInspectionSelection','Buyer’s lead inspection opportunity',[{value:'ten_days',label:'10 days after acceptance'},{value:'waived',label:'Buyer waives the inspection opportunity'},{value:'other_period',label:'Another period agreed in writing'}]),visibleWhen:visible('disclosures.leadPaintStatus','received')},
   number('disclosures.leadInspectionDays','Agreed lead inspection days',1,60,visible('disclosures.leadInspectionSelection','other_period')),
   {...q('disclosures.sellerReportsExistingLeases','Seller reports existing leases','yes_no'),readOnly:true},
-  q('disclosures.leaseStatementAcknowledged','I reviewed the seller’s lease statement and any proposed continuing occupancy.','acknowledgement'),
+  {...q('disclosures.leaseStatementAcknowledged','I reviewed the seller’s lease statement and any proposed continuing occupancy.','acknowledgement'),visibleWhen:visible('disclosures.sellerReportsExistingLeases')},
   {...q('disclosures.coastalApplies','Does seller’s information identify property seaward of a beachfront setback or jurisdictional line?','yes_no'),helpText:notices.coastal},
   {...q('disclosures.coastalBaselineDescription','Seller-provided baseline location and source','textarea'),visibleWhen:visible('disclosures.coastalApplies')},
   {...q('disclosures.coastalSetbackDescription','Seller-provided setback / jurisdictional line location','textarea'),visibleWhen:visible('disclosures.coastalApplies')},

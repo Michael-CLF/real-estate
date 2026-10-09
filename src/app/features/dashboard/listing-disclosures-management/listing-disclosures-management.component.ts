@@ -1,3 +1,4 @@
+import { isStateListingDisclosureCardVisible } from '../../../core/domains/listings/state-packages/state-listing.registry';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle, getChecklistRestrictionMessages } from '../../../core/configuration/listing-document-checklist.config';
 import { FormsModule } from '@angular/forms';
 import { CALIFORNIA_LISTING_FACT_DEFAULTS, validCaliforniaDisclosureDecision, type CaliforniaDisclosureDecision, type CaliforniaDisclosureType } from '../../../core/domains/listings/state-packages/california/california-listing-facts.model';
@@ -68,12 +69,11 @@ export class ListingDisclosuresManagementComponent
   protected shouldShowDisclosure(requirement: StateDisclosureRequirement): boolean {
     const listing = this.listing();
     if (!listing) return false;
-    if (requirement.documentType === 'colorado-association-documents') return listing.sellerStatements?.ownersAssociationApplies === true;
-    if (!this.isSouthCarolinaListing()) return true;
-    if (requirement.documentType === 'south-carolina-association-documents') return listing.sellerStatements?.ownersAssociationApplies !== false;
-    if (requirement.documentType === 'south-carolina-coastal-disclosure') return this.southCarolinaSavedAnswers().beachfrontApplies === true;
-    if (requirement.documentType === 'south-carolina-vacation-rentals') return this.southCarolinaSavedAnswers().futureVacationBookingsExist === true;
-    return true;
+    return isStateListingDisclosureCardVisible(requirement.documentType, {
+      stateCode: normalizeDisclosureStateCode(listing.state ?? ''),
+      ownersAssociationApplies: listing.sellerStatements?.ownersAssociationApplies,
+      southCarolinaAnswers: this.southCarolinaSavedAnswers(),
+    });
   }
 
   private readonly route =

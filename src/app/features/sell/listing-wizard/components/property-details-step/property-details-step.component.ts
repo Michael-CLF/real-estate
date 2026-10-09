@@ -1,6 +1,10 @@
+import { getStateListingFormRestorer } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
+import { configureListingStatementValidators } from '../../../../../core/domains/listings/state-packages/listing-statement-validation';
+import { configureListingLeaseValidators } from '../../../../../core/domains/listings/state-packages/listing-lease-validation';
+import { COLORADO_LISTING_OPTIONAL_FACTS, type ColoradoSellerLoanFormValue } from '../../../../../core/domains/listings/state-packages/colorado/colorado-listing-form';
 /*property-details-step.component.ts*/
-import { CALIFORNIA_LISTING_FACT_DEFAULTS, type CaliforniaListingFacts } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
-import { COLORADO_FACT_DEFAULTS, type ColoradoPropertyFacts } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
+import type { CaliforniaListingFacts } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
+import type { ColoradoPropertyFacts } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,8 +17,8 @@ import {
   signal,
 } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
+  FormControl,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -26,8 +30,7 @@ import {
   LotSizeUnit,
   PropertyType,
 } from '../../../../../core/domains/listings/models/listing.model';
-import type { ColoradoSellerLoan } from '../../../../../core/domains/offers/state-contracts/colorado/models/colorado-offer-terms.model';
-import { getStateListingPackage } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
+import { showsStateListingPropertyField, getStateListingPackage, getStateListingQuestionGroups, getStateListingFormFactory, getStateListingFormValidator } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
 import { requiresStateListingField } from '../../../../../core/domains/listings/state-packages/state-listing-package';
 import { auth } from '../../../../../core/infrastructure/firebase/firebase';
 type TexasLeaseDocumentType = Extract<
@@ -80,11 +83,7 @@ export interface PropertyDetailsHoaFormValue {
   feeAmount: number | null;
   feeFrequency: ListingHoaFeeFrequency | '';
 }
-export interface ColoradoSellerLoanFormValue extends Omit<ColoradoSellerLoan,
-  'estimatedBalanceInCents' | 'principalInterestPaymentInCents'> {
-  estimatedBalanceDollars: number;
-  principalInterestPaymentDollars: number;
-}
+export type { ColoradoSellerLoanFormValue } from '../../../../../core/domains/listings/state-packages/colorado/colorado-listing-form';
 export interface PropertyDetailsFormValue {
   coloradoPropertyFacts?: ColoradoPropertyFacts;
   coloradoAssumableLoan?: ColoradoSellerLoanFormValue | null;
@@ -145,11 +144,9 @@ export class PropertyDetailsStepComponent
         'leadBasedPaintApplies',
       ),
   );
-    readonly showsListingLegalDescription = computed(
+  readonly showsListingLegalDescription = computed(
     () =>
-      ['WI', 'FL', 'LA', 'CA', 'SC'].includes(
-        this.stateCode().trim().toUpperCase(),
-      ),
+      showsStateListingPropertyField(this.stateCode(), 'legalDescription'),
   );
   readonly requiresFuelTank = computed(
     () =>
@@ -211,13 +208,22 @@ export class PropertyDetailsStepComponent
   protected readonly leaseDocumentMessage =
     signal('');
   readonly propertyTypes: PropertyTypeOption[] = [
+
+    {
+      value: 'single_family',
+      label: 'Single Family',
+    },
     {
       value: 'condo',
       label: 'Condo',
     },
     {
-      value: 'land',
-      label: 'Land',
+      value: 'townhome',
+      label: 'Townhome',
+    },
+    {
+      value: 'pud',
+      label: 'Pud',
     },
     {
       value: 'mobile',
@@ -228,16 +234,8 @@ export class PropertyDetailsStepComponent
       label: 'Multi-Family',
     },
     {
-      value: 'pud',
-      label: 'Pud',
-    },
-    {
-      value: 'single_family',
-      label: 'Single Family',
-    },
-    {
-      value: 'townhome',
-      label: 'Townhome',
+      value: 'land',
+      label: 'Land',
     },
   ];
   readonly hoaFeeFrequencies: {
@@ -261,90 +259,7 @@ export class PropertyDetailsStepComponent
         label: 'Annually',
       },
     ];
-  readonly coloradoOptionalFacts = [
-    {
-      key: 'leasedItems',
-      question: 'Is any equipment included in the sale leased?',
-      detail: 'Leased equipment and lease references',
-      guidance:
-        'Examples include rented propane tanks, security systems or equipment. Identify the equipment and lease document.',
-    },
-    {
-      key: 'encumberedItems',
-      question:
-        'Is any included equipment subject to debt or a PACE obligation?',
-      detail: 'Equipment debt or PACE obligation',
-      guidance:
-        'Identify the equipment, outstanding obligation and relevant agreement.',
-    },
-    {
-      key: 'solarPowerPlan',
-      question: 'Is there a solar lease or power purchase agreement?',
-      detail: 'Solar agreement and document reference',
-      guidance:
-        'Identify the provider, agreement and relevant document. Seller-owned solar equipment belongs in the included-items description.',
-    },
-    {
-      key: 'deededWaterRights',
-      question:
-        'Are separately deeded water rights included with this property?',
-      detail: 'Deeded water rights and their legal description',
-      guidance:
-        'Describe the separately deeded water rights and copy their legal description from your records. This is separate from the property legal description. Municipal water service alone does not establish separately deeded water rights.',
-    },
-    {
-      key: 'otherWaterRights',
-      question: 'Are other transferable water rights included?',
-      detail: 'Other transferable water rights',
-      guidance:
-        'Identify the rights and supporting documents. Do not assume water utility service is a transferable water right.',
-    },
-    {
-      key: 'wellPermit',
-      question: 'Does the property use a well?',
-      detail: 'Well and permit information',
-      guidance:
-        'Enter the permit number and identify any available permit copy. If a well exists but the permit number is unknown, state that in the details.',
-    },
-    {
-      key: 'waterStock',
-      question: 'Are water company shares included in the sale?',
-      detail: 'Water company and shares',
-      guidance:
-        'Identify the water company, shares and supporting ownership records.',
-    },
-    {
-      key: 'mineralRights',
-      question:
-        'Do your records identify mineral interests or reservations affecting the property?',
-      detail: 'Known mineral interests and reservations',
-      guidance:
-        'Describe what your deed or other records identify. NO means no known interests or reservations are reported; it does not establish ownership or guarantee clear title.',
-    },
-    {
-      key: 'offRecordMatters',
-      question:
-        'Are there known off-record title matters or existing surveys to identify?',
-      detail: 'Known off-record matters and surveys',
-      guidance:
-        'Identify known unrecorded claims, use agreements or existing survey documents. This answer is not a title guarantee.',
-    },
-    {
-      key: 'thirdPartyRights',
-      question:
-        'Does another party have an approval right, purchase option or right of first refusal?',
-      detail: 'Third-party approval or purchase rights',
-      guidance:
-        'Identify the party, right and relevant agreement or document.',
-    },
-    {
-      key: 'leases',
-      question: 'Are there existing occupancy agreements or leases?',
-      detail: 'Occupancy agreements and lease references',
-      guidance:
-        'Identify current rental, occupancy or lease agreements and their documents. Keep this answer consistent with Existing Leases below.',
-    },
-  ] as const;
+  readonly coloradoOptionalFacts = COLORADO_LISTING_OPTIONAL_FACTS;
   private readonly coloradoFactChoices: Partial<
     Record<
       typeof this.coloradoOptionalFacts[number]['key'],
@@ -398,33 +313,8 @@ export class PropertyDetailsStepComponent
     this.emitFormState();
   }
   readonly form = this.fb.nonNullable.group({
-    coloradoPropertyFacts: this.fb.nonNullable.group({
-      includedItems: [''],
-      excludedItems: [''],
-      leasedItems: [''],
-      encumberedItems: [''],
-      solarPowerPlan: [''],
-      parkingStorage: [''],
-      waterSource: [''],
-      deededWaterRights: [''],
-      otherWaterRights: [''],
-      wellPermit: [''],
-      waterStock: [''],
-      mineralRights: [''],
-      offRecordMatters: [''],
-      thirdPartyRights: [''],
-      leases: [''],
-      metroDistrictWebsite: [''],
-      metroDistrictDisclosure: [''],
-      metroDistrict: ['unselected' as ColoradoPropertyFacts['metroDistrict']],
-    }),
-    coloradoAssumableLoan: this.fb.nonNullable.group({
-      available: [false], ratePercent: [0],
-      estimatedBalanceDollars: [0], balanceAsOf: [''],
-      principalInterestPaymentDollars: [0], paymentPeriod: ['month'],
-      escrowRealEstateTaxes: [false], escrowPropertyInsurance: [false],
-      escrowMortgageInsurance: [false], escrowOther: [''],
-    }),
+    coloradoPropertyFacts: getStateListingFormFactory('coloradoPropertyFacts')(this.fb),
+    coloradoAssumableLoan: getStateListingFormFactory('coloradoAssumableLoan')(this.fb),
     propertyType: [
       '' as PropertyType | '',
       Validators.required,
@@ -515,16 +405,8 @@ export class PropertyDetailsStepComponent
     }),
     sellerStatements:
       this.fb.nonNullable.group({
-        southCarolina: this.fb.nonNullable.group({
-          beachfrontApplies: [null as boolean | null],
-          futureVacationBookingsExist: [null as boolean | null],
-        }),
-        california: this.fb.nonNullable.group({
-          transferDisclosure: ['unselected'], transferExemptionBasis: [''],
-          naturalHazardDisclosure: ['unselected'], naturalHazardExemptionBasis: [''],
-          fireHazardZone: ['unselected'], resaleWithin18Months: ['unselected'],
-          assistedWaterTank: ['unselected'], gasApplianceRestrictions: [''],
-        }),
+        southCarolina: getStateListingFormFactory('sellerStatements.southCarolina')(this.fb),
+        california: getStateListingFormFactory('sellerStatements.california')(this.fb),
         ownershipStatus: [
           '' as
           | PropertyDetailsSellerOwnershipStatus
@@ -575,7 +457,7 @@ export class PropertyDetailsStepComponent
         this.form.patchValue(
           {
             ...initialValue,
-            coloradoPropertyFacts: { ...COLORADO_FACT_DEFAULTS, ...initialValue.coloradoPropertyFacts },
+            coloradoPropertyFacts: getStateListingFormRestorer('coloradoPropertyFacts')(initialValue.coloradoPropertyFacts),
             coloradoAssumableLoan: initialValue.coloradoAssumableLoan ?? undefined,
             hoa:
               initialValue.hoa ?? {
@@ -613,13 +495,13 @@ export class PropertyDetailsStepComponent
           },
         );
       }
-      this.form.controls.sellerStatements.controls.southCarolina.patchValue({
-        beachfrontApplies: initialValue?.sellerStatements?.southCarolina?.beachfrontApplies ?? null,
-        futureVacationBookingsExist: initialValue?.sellerStatements?.southCarolina?.futureVacationBookingsExist ?? null,
-      }, { emitEvent: false });
-      this.configureSouthCarolinaValidators();
+      this.form.controls.sellerStatements.controls.southCarolina.patchValue(
+        getStateListingFormRestorer('sellerStatements.southCarolina')(initialValue?.sellerStatements?.southCarolina),
+        { emitEvent: false },
+      );
+      this.configureStateQuestionValidators();
       this.form.controls.sellerStatements.controls.california.patchValue(
-        { ...CALIFORNIA_LISTING_FACT_DEFAULTS, ...initialValue?.sellerStatements?.california },
+        getStateListingFormRestorer('sellerStatements.california')(initialValue?.sellerStatements?.california),
         { emitEvent: false },
       );
       this.configureHoaValidators(
@@ -636,9 +518,7 @@ export class PropertyDetailsStepComponent
           .controls.fuelTankPresent.value,
         false,
       );
-      this.configureLeaseValidators(
-        this.isTexasListing(),
-      );
+      this.configureLeaseValidators();
       this.configureAdditionalSellerValidators(
         this.form.controls.sellerStatements
           .controls.additionalSellerIncluded
@@ -719,87 +599,17 @@ export class PropertyDetailsStepComponent
     }
   }
   private configureColoradoFactValidators(): void {
-    const group = this.form.controls.coloradoPropertyFacts;
-    const c = group.controls;
-    const active = this.isColoradoListing();
-    const requiredText = (control: AbstractControl) =>
-      typeof control.value === 'string' && control.value.trim()
-        ? null
-        : { required: true };
-    // Errors belong to individual controls, not the whole section.
-    group.clearValidators();
-    for (const control of Object.values(c)) {
-      control.setValidators(Validators.maxLength(4000));
-    }
-    c.waterSource.setValidators(
-      active
-        ? [requiredText, Validators.maxLength(4000)]
-        : [],
+    getStateListingFormValidator('coloradoPropertyFacts')(
+      this.form.controls.coloradoPropertyFacts,
+      this.isColoradoListing(),
+      key => this.coloradoFactChoice(key),
     );
-    c.metroDistrict.setValidators(
-      active
-        ? [
-          (control: AbstractControl) =>
-            ['covered', 'not_applicable'].includes(control.value)
-              ? null
-              : control.value === 'unknown'
-                ? { districtUnknown: true }
-                : { required: true },
-        ]
-        : [],
-    );
-    const covered =
-      active && c.metroDistrict.value === 'covered';
-    c.metroDistrictWebsite.setValidators(
-      covered
-        ? [
-          requiredText,
-          (control: AbstractControl) => {
-            if (!control.value?.trim()) {
-              return null;
-            }
-            try {
-              const url = new URL(control.value.trim());
-              return url.protocol === 'https:' &&
-                url.hostname.includes('.')
-                ? null
-                : { districtUrl: true };
-            } catch {
-              return { districtUrl: true };
-            }
-          },
-          Validators.maxLength(4000),
-        ]
-        : [],
-    );
-    c.metroDistrictDisclosure.setValidators(
-      covered
-        ? [requiredText, Validators.maxLength(4000)]
-        : [],
-    );
-    for (const field of this.coloradoOptionalFacts) {
-      c[field.key].setValidators(
-        active && this.coloradoFactChoice(field.key) === 'yes'
-          ? [requiredText, Validators.maxLength(4000)]
-          : [Validators.maxLength(4000)],
-      );
-    }
-    for (const control of Object.values(c)) {
-      control.updateValueAndValidity({ emitEvent: false });
-    }
-    group.updateValueAndValidity({ emitEvent: false });
   }
   private configureColoradoLoanValidators(): void {
-    const controls = this.form.controls.coloradoAssumableLoan.controls;
-    const active = this.isColoradoListing() && controls.available.value;
-    const required = active ? [Validators.required] : [];
-    controls.balanceAsOf.setValidators(required);
-    controls.paymentPeriod.setValidators(required);
-    controls.ratePercent.setValidators(active ? [Validators.min(0.01), Validators.max(30)] : []);
-    controls.estimatedBalanceDollars.setValidators(active ? [Validators.min(1)] : []);
-    controls.principalInterestPaymentDollars.setValidators(active ? [Validators.min(1)] : []);
-    controls.escrowOther.setValidators(active ? [Validators.maxLength(180)] : []);
-    for (const control of Object.values(controls)) control.updateValueAndValidity({ emitEvent: false });
+    getStateListingFormValidator('coloradoAssumableLoan')(
+      this.form.controls.coloradoAssumableLoan,
+      this.isColoradoListing(),
+    );
   }
   protected leaseDocumentFor(
     documentType: TexasLeaseDocumentType,
@@ -1102,99 +912,17 @@ export class PropertyDetailsStepComponent
       emitEvent: false,
     });
   }
-  private configureLeaseValidators(
-    isTexasListing: boolean,
-  ): void {
-    const controls =
-      this.form.controls.sellerStatements
-        .controls;
-    const texasLeaseControls = [
-      controls.residentialLeasesExist,
-      controls.fixtureLeasesExist,
-      controls.naturalResourceLeasesExist,
-    ];
-    if (isTexasListing) {
-      controls.leasesExist.clearValidators();
-      texasLeaseControls.forEach(
-        control => {
-          control.setValidators([
-            Validators.required,
-          ]);
-        },
-      );
-    } else if (
-      this.requiresGeneralLeases()
-    ) {
-      controls.leasesExist.setValidators([
-        Validators.required,
-      ]);
-      texasLeaseControls.forEach(
-        control => {
-          control.clearValidators();
-        },
-      );
-    } else {
-      controls.leasesExist.clearValidators();
-      texasLeaseControls.forEach(
-        control => {
-          control.clearValidators();
-        },
-      );
-    }
-    controls.leasesExist.updateValueAndValidity({
-      emitEvent: false,
-    });
-    texasLeaseControls.forEach(
-      control => {
-        control.updateValueAndValidity({
-          emitEvent: false,
-        });
-      },
+  private configureLeaseValidators(): void {
+    configureListingLeaseValidators(
+      this.form.controls.sellerStatements.controls,
+      this.stateListingPackage(),
     );
   }
-  private configureStateStatementValidators():
-    void {
-    const controls =
-      this.form.controls.sellerStatements
-        .controls;
-    this.setRequired(
-      controls.ownershipStatus,
-      this.requiresOwnershipStatus(),
+  private configureStateStatementValidators(): void {
+    configureListingStatementValidators(
+      this.form.controls.sellerStatements.controls,
+      this.stateListingPackage(),
     );
-    this.setRequired(
-      controls.leadBasedPaintApplies,
-      this.requiresLeadBasedPaint(),
-    );
-    this.setRequired(
-      controls.methamphetamineContaminationKnown,
-      this.requiresUtahMethamphetamineStatement(),
-    );
-    this.setRequired(
-      controls.ownersAssociationApplies,
-      requiresStateListingField(
-        this.stateListingPackage(),
-        'ownersAssociationApplies',
-      ),
-    );
-    this.setRequired(
-      controls.fuelTankPresent,
-      this.requiresFuelTank(),
-    );
-  }
-  private setRequired(
-    control: AbstractControl,
-    required: boolean,
-  ): void {
-    if (required) {
-      control.setValidators([
-        Validators.required,
-      ]);
-    } else {
-      control.clearValidators();
-    }
-    control.updateValueAndValidity({
-      emitEvent: false,
-    });
   }
   private configureAdditionalSellerValidators(
     included: boolean,
@@ -1254,19 +982,25 @@ export class PropertyDetailsStepComponent
       this.form.valid,
     );
   }
-  protected isSouthCarolinaListing(): boolean {
-    const state = this.stateCode().trim().toUpperCase();
-    return state === 'SC' || state === 'SOUTH CAROLINA';
+  protected stateQuestionControl(fieldPath: string): FormControl<boolean | null> {
+    const control = this.form.get(fieldPath);
+    if (!(control instanceof FormControl)) {
+      throw new Error(`The state listing question control is missing: ${fieldPath}`);
+    }
+    return control as FormControl<boolean | null>;
   }
-  private configureSouthCarolinaValidators(): void {
-    const controls = this.form.controls.sellerStatements.controls.southCarolina.controls;
-    for (const control of [controls.beachfrontApplies, controls.futureVacationBookingsExist]) {
-      if (this.isSouthCarolinaListing()) {
-        control.setValidators([Validators.required]);
-      } else {
-        control.clearValidators();
+
+  private configureStateQuestionValidators(): void {
+    const activePaths = new Set(
+      (this.stateListingPackage().questionGroups ?? []).flatMap(group =>
+        group.questions.filter(question => question.required).map(question => question.fieldPath))
+    );
+    for (const group of getStateListingQuestionGroups()) {
+      for (const question of group.questions) {
+        const control = this.stateQuestionControl(question.fieldPath);
+        control.setValidators(activePaths.has(question.fieldPath) ? [Validators.required] : []);
+        control.updateValueAndValidity({ emitEvent: false });
       }
-      control.updateValueAndValidity({ emitEvent: false });
     }
   }
 

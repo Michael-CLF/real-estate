@@ -1,16 +1,11 @@
+import { record as obj, text as draftText, money as cash, finiteNumber as num, bool as flag, choice as select } from '../draft-term-values';
 import { normalizeColoradoTerms } from './colorado-terms-rules';
 import { COLORADO_ELECTION_DEFAULTS } from './colorado-contract-elections';
 import type { SanitizeDraftTermsInput } from '../state-contract-package';
 import type { ColoradoOfferTermsDocument } from './colorado-offer-terms.document';
 import { COLORADO_DEADLINE_KEYS } from './colorado-initial-terms';
 
-const obj = (v: unknown): Record<string, unknown> => v && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : {};
-const str = (v: unknown, n = 4000) => typeof v === 'string' ? v.trim().slice(0, n) : '';
-const cash = (v: unknown) => Number.isSafeInteger(v) && Number(v) >= 0 ? Number(v) : 0;
-const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v) ? v : 0;
-const flag = (v: unknown) => typeof v === 'boolean' ? v : null;
-const select = <T extends string>(v: unknown, choices: readonly T[], fallback: T): T =>
-  typeof v === 'string' && choices.includes(v as T) ? v as T : fallback;
+const str = (v: unknown, n = 4000) => draftText(v, n);
 
 export function sanitizeColoradoDraftTerms(input: SanitizeDraftTermsInput<ColoradoOfferTermsDocument>): ColoradoOfferTermsDocument {
   const r = obj(input.requestedTerms), p = obj(r['purchase']), a = obj(p['assumption']);

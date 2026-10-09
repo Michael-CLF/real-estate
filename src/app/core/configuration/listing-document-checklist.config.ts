@@ -1,3 +1,4 @@
+import { getListingUploadGateDocumentTypes, type ListingDisclosureGateFacts } from './listing-disclosure-gates';
 import { californiaDisclosureOutstanding, type CaliforniaListingFacts } from '../domains/listings/state-packages/california/california-listing-facts.model';
 import { getStateDisclosureRequirements, normalizeDisclosureStateCode } from './state-disclosures.config';
 import { STATES } from './states.config';
@@ -208,34 +209,16 @@ export function getListingDocumentChecklist(state: string): readonly ListingChec
   return items;
 }
 
-export interface ListingChecklistFacts {
+export interface ListingChecklistFacts extends ListingDisclosureGateFacts {
   readonly california?: CaliforniaListingFacts;
-  readonly yearBuilt?: number | null;
-  readonly propertyType?: string | null;
-  readonly leadBasedPaintApplies?: boolean | null;
-  readonly ownersAssociationApplies?: boolean | null;
   readonly methamphetamineContaminationKnown?: boolean | null;
 }
 
 /** Mirrors the supplied offer-creation gates for messaging; never enforces a gate. */
 export function getOfferBlockingDocumentTypes(state: string, facts: ListingChecklistFacts, now = Date.now()): readonly DisclosureDocumentType[] {
   const code = normalizeDisclosureStateCode(state);
-  const lead = facts.leadBasedPaintApplies === true;
-  const old = typeof facts.yearBuilt === 'number' && facts.yearBuilt < 1978;
   if (code === 'CA') return californiaDisclosureOutstanding(facts.california?.disclosureApplicability, new Set()) as DisclosureDocumentType[];
-  if (code === 'FL') return [
-    'florida-flood-disclosure',
-    ...(facts.ownersAssociationApplies === true ? ['florida-hoa-disclosure-summary' as const] : []),
-    ...(lead || (old && facts.leadBasedPaintApplies !== false) ? ['lead-based-paint' as const] : []),
-  ];
-  if (code === 'LA') {
-    if (facts.propertyType === 'land') return now >= Date.parse('2027-01-01T06:00:00Z')
-      ? ['louisiana-vacant-residential-property-disclosure'] : [];
-    return ['louisiana-property-disclosure', ...(facts.yearBuilt == null || old || lead ? ['lead-based-paint' as const] : [])];
-  }
-  if (code === 'CO') return ['colorado-property-disclosure', 'colorado-radon-brochure',
-    ...(facts.yearBuilt == null || old || lead ? ['lead-based-paint' as const] : [])];
-  return [];
+  return getListingUploadGateDocumentTypes(code, facts, now);
 }
 
 export function checklistDocumentTitle(state: string, type: DisclosureDocumentType): string {

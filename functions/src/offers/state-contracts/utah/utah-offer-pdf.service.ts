@@ -17,11 +17,14 @@ const FONT = join(ASSETS, 'node_modules/@fontsource/barlow/files');
 /** Renders original NavStreet contract text. No Utah Association form or REPC pages are reproduced. */
 export async function generateUtahOfferPdf(input: GenerateStateAgreementInput<UtahOfferTermsDocument>): Promise<GeneratedStateAgreement> {
   const t = input.version.terms;
-  if (input.documentStatus === 'approved' &&
-      [...input.version.buyers, ...input.version.sellers].some(party =>
-        party.requiredSigner && (party.signature.status !== 'signed' || !party.signature.signedAt))) {
-    throw new Error('A final Utah agreement requires an immutable signature timestamp for every required signer.');
+  const requiredSigners = [...input.version.buyers, ...input.version.sellers]
+    .filter(party => party.requiredSigner);
+  if (requiredSigners.some(party =>
+      party.signature.status === 'signed' && !party.signature.signedAt)) {
+    throw new Error('A signed Utah agreement requires an immutable signature timestamp for every signed required party.');
   }
+  const allSigned = requiredSigners.length > 0 && requiredSigners.every(party =>
+    party.signature.status === 'signed' && Boolean(party.signature.signedAt));
   const pdf = new PDFDocument({ size: 'LETTER', margins: { top: 104, left: 48, right: 48, bottom: 34 }, bufferPages: true, info: { Title: input.documentTitle, Author: 'NavStreet', CreationDate: input.generatedAt } });
   pdf.registerFont('Body', join(FONT, 'barlow-latin-400-normal.woff'));
   pdf.registerFont('Bold', join(FONT, 'barlow-latin-700-normal.woff'));
@@ -84,7 +87,7 @@ export async function generateUtahOfferPdf(input: GenerateStateAgreementInput<Ut
   clause('12. Other agreed terms', t.additionalTerms || 'None.');
   clause('13. Entire agreement', 'This signed version and any separately identified signed attachments constitute the parties’ agreement. Changes require another signed written version. Each party acknowledges the opportunity to consult an independent Utah real estate attorney and to review any applicable disclosure and supplement before signing.');
   page('Version signatures');
-  line('Document status', input.documentStatus === 'approved' ? 'Final accepted version' : 'Draft or delivered version');
+  line('Document status', input.documentStatus === 'approved' && allSigned ? 'Final accepted version' : 'Awaiting required signatures');
   line('Version created', formatTimestamp(input.version.createdAt?.toDate(), 'America/Denver'));
   for (const [label, parties] of [['Buyers', input.version.buyers], ['Sellers', input.version.sellers]] as const) {
     pdf.moveDown(); pdf.font('Bold').fillColor(BLUE).fontSize(12).text(label); pdf.moveDown(.5).fontSize(9);
@@ -97,7 +100,7 @@ export async function generateUtahOfferPdf(input: GenerateStateAgreementInput<Ut
       pdf.moveDown(.6);
     }
   }
-  if (input.documentStatus === 'approved') {
+  if (input.documentStatus === 'approved' && allSigned) {
     const signed = [...input.version.buyers, ...input.version.sellers].filter(p => p.requiredSigner).map(p => p.signature.signedAt?.toDate()).filter((v): v is Date => Boolean(v));
     if (signed.length) line('Effective signature time (property time)', formatTimestamp(new Date(Math.max(...signed.map(d => d.getTime()))), 'America/Denver'));
   }

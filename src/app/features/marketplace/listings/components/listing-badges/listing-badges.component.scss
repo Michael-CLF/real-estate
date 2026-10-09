@@ -58,6 +58,12 @@
   color: #216b38;
 }
 
+.listing-badges__badge--red {
+  background: #800000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
 @media (max-width: 430px) {
   .listing-badges {
     gap: 6px;

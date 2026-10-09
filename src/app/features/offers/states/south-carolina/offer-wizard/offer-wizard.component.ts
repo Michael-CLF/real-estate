@@ -52,14 +52,27 @@ import {
 // A seller counteroffer may negotiate price and concessions, but cannot
 // rewrite the buyer's funding, deposit promises, or receipt statements.
 const BUYER_OWNED_FIELDS = new Set([
-  'purchase.financingType','purchase.loanAmountInCents','purchase.loanTermYears',
-  'conditions.financing','conditions.appraisal','conditions.saleOfBuyersProperty','conditions.additionalEarnestMoney',
-  'disclosures.propertyConditionStatus','disclosures.naturalHazardStatus','disclosures.fireHardeningStatus',
-  'disclosures.defensibleSpaceStatus','disclosures.renovationStatus','disclosures.waterTankStatus',
-  'disclosures.hoaDocumentsStatus','disclosures.leadPaintStatus','disclosures.leadExemptionBasis',
-  'disclosures.leadInspectionSelection','disclosures.leadInspectionDays','disclosures.leaseStatementAcknowledged','disclosures.southCarolinaNoticesAcknowledged',
+  'purchase.financingType',
+  'purchase.loanAmountInCents',
+  'purchase.loanTermYears',
+  'conditions.financing',
+  'conditions.appraisal',
+  'conditions.saleOfBuyersProperty',
+  'conditions.additionalEarnestMoney',
+  'disclosures.propertyConditionStatus',
+  'disclosures.naturalHazardStatus',
+  'disclosures.fireHardeningStatus',
+  'disclosures.defensibleSpaceStatus',
+  'disclosures.renovationStatus',
+  'disclosures.waterTankStatus',
+  'disclosures.hoaDocumentsStatus',
+  'disclosures.leadPaintStatus',
+  'disclosures.leadExemptionBasis',
+  'disclosures.leadInspectionSelection',
+  'disclosures.leadInspectionDays',
+  'disclosures.leaseStatementAcknowledged',
+  'disclosures.southCarolinaNoticesAcknowledged',
 ]);
-
 
 export interface SouthCarolinaOfferDraftChange {
   readonly terms: SouthCarolinaOfferTerms;
@@ -67,46 +80,37 @@ export interface SouthCarolinaOfferDraftChange {
   readonly buyers: readonly OfferParty[];
 }
 
-
 @Component({
   selector: 'app-offer-wizard',
   standalone: true,
-
   imports: [
     OfferWizardShellComponent,
   ],
-
-  templateUrl:
-    './offer-wizard.component.html',
-
-  styleUrl:
-    './offer-wizard.component.scss',
-
-  changeDetection:
-    ChangeDetectionStrategy.OnPush,
+  templateUrl: './offer-wizard.component.html',
+  styleUrl: './offer-wizard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OfferWizardComponent {
-  readonly property =
-    input.required<OfferPropertySnapshot>();
+  readonly property = input.required<OfferPropertySnapshot>();
 
   readonly initiatedBy = input<'buyer' | 'seller'>('buyer');
 
-  readonly buyers =
-    input<readonly OfferParty[]>([]);
+  readonly buyers = input<readonly OfferParty[]>([]);
 
-  readonly sellers =
-    input<readonly OfferParty[]>([]);
+  readonly sellers = input<readonly OfferParty[]>([]);
 
   readonly listingDisclosures =
     input<readonly ListingDisclosureDocument[]>([]);
 
   readonly expiresAt = input.required<string>();
+
   readonly timeZone = input.required<string>();
 
   readonly initialTerms =
     input<SouthCarolinaOfferTerms | null>(null);
 
   readonly saving = input(false);
+
   readonly submitting = input(false);
 
   readonly draftChanged =
@@ -118,8 +122,7 @@ export class OfferWizardComponent {
   readonly submitRequested =
     output<SouthCarolinaOfferDraftChange>();
 
-  readonly returnToListingRequested =
-    output<void>();
+  readonly returnToListingRequested = output<void>();
 
   readonly listingDisclosureRequested =
     output<ListingDisclosureDocument>();
@@ -130,88 +133,140 @@ export class OfferWizardComponent {
   protected readonly draftBuyers =
     signal<readonly OfferParty[]>([]);
 
-  protected readonly submissionAttempted =
-    signal(false);
+  protected readonly submissionAttempted = signal(false);
 
   private initialTermsApplied = false;
+
   private initialBuyersApplied = false;
 
   protected readonly pendingDisclosureNotice = computed(() => {
     const terms = this.terms();
-    if (!terms) return null;
-    const pending = Object.entries(terms.disclosures).some(([key,value]) => key.endsWith('Status') && value === 'pending');
-    return pending ? 'Answer receipt questions truthfully. Pending South Carolina seller documents do not prevent a normal resale offer. Deliver them promptly; late statutory disclosures can create cancellation rights. Applicable federal lead materials must be received before this offer is submitted for signature.' : null;
+
+    if (!terms) {
+      return null;
+    }
+
+    const pending = Object.entries(terms.disclosures).some(
+      ([key, value]) =>
+        key.endsWith('Status') &&
+        value === 'pending',
+    );
+
+    return pending
+      ? 'Answer receipt questions truthfully. Pending South Carolina seller documents do not prevent a normal resale offer. Deliver them promptly; late statutory disclosures can create cancellation rights. Applicable federal lead materials must be received before this offer is submitted for signature.'
+      : null;
   });
 
-
   protected readonly busy = computed(
-    () => this.saving() || this.submitting()
+    () => this.submitting(),
   );
 
-  protected readonly contractDefinition = computed(
-    () => {
-      const terms = this.terms();
+  protected readonly contractDefinition = computed(() => {
+    const terms = this.terms();
 
-      return terms
-        ? SOUTH_CAROLINA_OFFER_PACKAGE.contracts[
-        terms.contractType
+    return terms
+      ? SOUTH_CAROLINA_OFFER_PACKAGE.contracts[
+          terms.contractType
         ]
-        : null;
-    }
-  );
+      : null;
+  });
 
-  protected readonly sections = computed(
-    () => {
-      const terms = this.terms();
-      if (!terms) return [];
-      const sections = SOUTH_CAROLINA_OFFER_PACKAGE.getSections(terms);
-      if (this.initiatedBy() !== 'seller') return sections;
-      return sections.map(section => ({
-        ...section,
-        questions: section.questions.map(question =>
-          question.fieldPath && BUYER_OWNED_FIELDS.has(question.fieldPath)
-            ? { ...question, readOnly: true }
-            : question
-        ),
-      }));
+  protected readonly sections = computed(() => {
+    const terms = this.terms();
+
+    if (!terms) {
+      return [];
     }
-  );
+
+    const sections =
+      SOUTH_CAROLINA_OFFER_PACKAGE.getSections(terms);
+
+    if (this.initiatedBy() !== 'seller') {
+      return sections;
+    }
+
+    return sections.map(section => ({
+      ...section,
+      questions: section.questions.map(question =>
+        question.fieldPath &&
+        BUYER_OWNED_FIELDS.has(question.fieldPath)
+          ? { ...question, readOnly: true }
+          : question,
+      ),
+    }));
+  });
 
   protected readonly validationIssues = computed<
     readonly OfferValidationIssue[]
-  >(
-    () => {
-      const terms = this.terms();
+  >(() => {
+    const terms = this.terms();
 
-      if (!terms) {
-        return [];
-      }
-
-      const result = SOUTH_CAROLINA_OFFER_PACKAGE.validate(
-        terms,
-        this.draftBuyers(),
-        this.sellers(),
-        {
-          mode: this.submissionAttempted()
-            ? 'submit'
-            : 'draft',
-          currentDateTime: new Date(),
-        }
-      );
-
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'south-carolina-property-condition', 'property condition statement'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'south-carolina-association-documents', 'association documents'],
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'federal lead packet'],
-      ] as const) {
-        if (status === 'received' && (!attached.has(documentType) || !terms.documentVersions[documentType])) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
-      return [...result.errors, ...missing, ...result.warnings];
+    if (!terms) {
+      return [];
     }
-  );
 
+    const result = SOUTH_CAROLINA_OFFER_PACKAGE.validate(
+      terms,
+      this.draftBuyers(),
+      this.sellers(),
+      {
+        mode: this.submissionAttempted()
+          ? 'submit'
+          : 'draft',
+        currentDateTime: new Date(),
+      },
+    );
+
+    const attached = new Set(
+      this.listingDisclosures().map(
+        document => document.documentType,
+      ),
+    );
+
+    const missing: OfferValidationIssue[] = [];
+
+    for (const [status, path, documentType, label] of [
+      [
+        terms.disclosures.propertyConditionStatus,
+        'disclosures.propertyConditionStatus',
+        'south-carolina-property-condition',
+        'property condition statement',
+      ],
+      [
+        terms.disclosures.hoaDocumentsStatus,
+        'disclosures.hoaDocumentsStatus',
+        'south-carolina-association-documents',
+        'association documents',
+      ],
+      [
+        terms.disclosures.leadPaintStatus,
+        'disclosures.leadPaintStatus',
+        'lead-based-paint',
+        'federal lead packet',
+      ],
+    ] as const) {
+      if (
+        status === 'received' &&
+        (
+          !attached.has(documentType) ||
+          !terms.documentVersions[documentType]
+        )
+      ) {
+        missing.push({
+          fieldPath: path,
+          severity: 'error',
+          message:
+            `The seller must upload the ${label} to the listing before it can be marked received.`,
+        });
+      }
+    }
+
+    return [
+      ...result.errors,
+      ...missing,
+      ...result.warnings,
+    ];
+  });
 
   constructor() {
     effect(() => {
@@ -228,16 +283,19 @@ export class OfferWizardComponent {
 
     effect(() => {
       const buyers = this.buyers();
-      if (!this.initialBuyersApplied && buyers.length > 0) {
+
+      if (
+        !this.initialBuyersApplied &&
+        buyers.length > 0
+      ) {
         this.draftBuyers.set(buyers);
         this.initialBuyersApplied = true;
       }
     });
   }
 
-
   protected onFieldValueChange(
-    change: OfferFieldValueChange
+    change: OfferFieldValueChange,
   ): void {
     const currentTerms = this.terms();
 
@@ -245,7 +303,10 @@ export class OfferWizardComponent {
       return;
     }
 
-    if (this.initiatedBy() === 'seller' && BUYER_OWNED_FIELDS.has(change.fieldPath)) {
+    if (
+      this.initiatedBy() === 'seller' &&
+      BUYER_OWNED_FIELDS.has(change.fieldPath)
+    ) {
       return;
     }
 
@@ -253,26 +314,58 @@ export class OfferWizardComponent {
       updateSouthCarolinaOfferTerms(
         currentTerms,
         change.fieldPath,
-        change.value
+        change.value,
       );
 
-    const receiptTypes: Record<string,string> = {
-      propertyConditionStatus:'south-carolina-transfer-disclosure',naturalHazardStatus:'south-carolina-natural-hazard-disclosure',
-      fireHardeningStatus:'south-carolina-fire-hardening',defensibleSpaceStatus:'south-carolina-defensible-space',
-      renovationStatus:'south-carolina-recent-renovations',waterTankStatus:'south-carolina-assisted-water-tank',
-      hoaDocumentsStatus:'south-carolina-association-documents',leadPaintStatus:'lead-based-paint',
+    const receiptTypes: Record<string, string> = {
+      propertyConditionStatus:
+        'south-carolina-transfer-disclosure',
+      naturalHazardStatus:
+        'south-carolina-natural-hazard-disclosure',
+      fireHardeningStatus:
+        'south-carolina-fire-hardening',
+      defensibleSpaceStatus:
+        'south-carolina-defensible-space',
+      renovationStatus:
+        'south-carolina-recent-renovations',
+      waterTankStatus:
+        'south-carolina-assisted-water-tank',
+      hoaDocumentsStatus:
+        'south-carolina-association-documents',
+      leadPaintStatus:
+        'lead-based-paint',
     };
-    const type=receiptTypes[change.fieldPath.replace('disclosures.','')];
-    const versions={...updatedTerms.documentVersions};
-    if(type) {
-      const document=this.listingDisclosures().find(d=>d.documentType===type);
-      if(change.value==='received' && document) versions[type]=document.versionId;
-      else delete versions[type];
+
+    const type = receiptTypes[
+      change.fieldPath.replace('disclosures.', '')
+    ];
+
+    const versions = {
+      ...updatedTerms.documentVersions,
+    };
+
+    if (type) {
+      const document = this.listingDisclosures().find(
+        item => item.documentType === type,
+      );
+
+      if (
+        change.value === 'received' &&
+        document
+      ) {
+        versions[type] = document.versionId;
+      } else {
+        delete versions[type];
+      }
     }
-    this.terms.set({...updatedTerms,documentVersions:versions});
+
+    this.terms.set({
+      ...updatedTerms,
+      documentVersions: versions,
+    });
+
     this.submissionAttempted.set(false);
   }
-
 
   protected onSectionChanged(): void {
     const currentTerms = this.terms();
@@ -284,11 +377,13 @@ export class OfferWizardComponent {
     this.emitDraftChange(currentTerms);
   }
 
-
   protected onCoBuyerChanged(
-    change: OfferCoBuyerChange | null
+    change: OfferCoBuyerChange | null,
   ): void {
-    if (this.initiatedBy() !== 'buyer') return;
+    if (this.initiatedBy() !== 'buyer') {
+      return;
+    }
+
     const primaryBuyer = this.draftBuyers()[0];
 
     if (!primaryBuyer) {
@@ -305,7 +400,9 @@ export class OfferWizardComponent {
       .filter(Boolean);
 
     const coBuyer: OfferParty = {
-      Uid: this.draftBuyers()[1]?.Uid ?? crypto.randomUUID(),
+      Uid:
+        this.draftBuyers()[1]?.Uid ??
+        crypto.randomUUID(),
       role: 'buyer',
       capacity: 'individual',
       firstName: nameParts[0] ?? '',
@@ -315,7 +412,9 @@ export class OfferWizardComponent {
       phone: change.phone,
       mailingAddress: primaryBuyer.mailingAddress,
       buyerDetails: {
-        intendedUse: primaryBuyer.buyerDetails?.intendedUse ?? 'primary_residence',
+        intendedUse:
+          primaryBuyer.buyerDetails?.intendedUse ??
+          'primary_residence',
         proposedDeedName: change.legalName,
         buyerSequence: 2,
         primaryBuyer: false,
@@ -334,9 +433,11 @@ export class OfferWizardComponent {
       updatedAt: new Date(),
     };
 
-    this.draftBuyers.set([primaryBuyer, coBuyer]);
+    this.draftBuyers.set([
+      primaryBuyer,
+      coBuyer,
+    ]);
   }
-
 
   /*
    * Called by the persistence container after an uploaded
@@ -344,7 +445,7 @@ export class OfferWizardComponent {
    */
   applyDocumentUid(
     fieldPath: string,
-    documentUid: string
+    documentUid: string,
   ): void {
     const currentTerms = this.terms();
 
@@ -356,12 +457,11 @@ export class OfferWizardComponent {
       updateSouthCarolinaOfferTerms(
         currentTerms,
         fieldPath,
-        documentUid
+        documentUid,
       );
 
     this.terms.set(updatedTerms);
   }
-
 
   protected onSubmitRequested(): void {
     const currentTerms = this.terms();
@@ -379,10 +479,15 @@ export class OfferWizardComponent {
       {
         mode: 'submit',
         currentDateTime: new Date(),
-      }
+      },
     );
 
-    if (!result.valid || this.validationIssues().some(issue => issue.severity === 'error')) {
+    if (
+      !result.valid ||
+      this.validationIssues().some(
+        issue => issue.severity === 'error',
+      )
+    ) {
       return;
     }
 
@@ -393,9 +498,8 @@ export class OfferWizardComponent {
     });
   }
 
-
   private emitDraftChange(
-    terms: SouthCarolinaOfferTerms
+    terms: SouthCarolinaOfferTerms,
   ): void {
     this.draftChanged.emit({
       terms,

@@ -1,3 +1,4 @@
+import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import type { WisconsinOfferTermsDocument } from './wisconsin-offer-terms.document';
@@ -6,7 +7,6 @@ import { createWisconsinInitialOfferTerms } from './wisconsin-initial-terms';
 import { sanitizeWisconsinDraftTerms } from './wisconsin-draft-terms-sanitizer';
 import { validateWisconsinSubmission } from './wisconsin-submission-validator';
 import { createWisconsinContractMilestones } from './wisconsin-contract-milestones';
-import { generateWisconsinOfferPdf } from './wisconsin-offer-pdf.service';
 export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferTermsDocument> = {
   stateCode: 'WI', offerCreationEnabled: true,
   contractTypes: ['navstreet_wisconsin_residential_sale_2026'], contractTypeRequired: true,
@@ -15,14 +15,10 @@ export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferT
   createInitialOfferTerms: input => createWisconsinInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeWisconsinDraftTerms(input),
   validateSubmission: input => validateWisconsinSubmission(input),
-  requiredListingDisclosures: input => {
-    const t = input.version.terms;
-    return [
-      ...(t.disclosures.leadPaintStatus === 'received' ? ['lead-based-paint'] : []),
-      ...(t.disclosures.propertyConditionStatus === 'received' ? ['wisconsin-real-estate-condition-report'] : []),
-      ...(t.disclosures.hoaDocumentsStatus === 'received' ? ['wisconsin-association-documents'] : []),
-    ];
-  },
+  requiredListingDisclosures: ({ version }) => selectReceivedListingDisclosures(version.terms.disclosures, [
+      ['leadPaintStatus', 'lead-based-paint'],
+      ['propertyConditionStatus', 'wisconsin-real-estate-condition-report'],
+      ['hoaDocumentsStatus', 'wisconsin-association-documents'],    ]),
   createContractMilestones: input => createWisconsinContractMilestones(input),
     getAgreementSummary: ({ version: { terms: t } }) => [
     ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
@@ -31,5 +27,8 @@ export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferT
     { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
     { label: 'Inspection / due diligence', value: summaryText(t.deadlines.dueDiligenceDate) },
   ],
-  generateAgreement: input => generateWisconsinOfferPdf(input),
+  generateAgreement: async input => {
+    const { generateWisconsinOfferPdf } = require('./wisconsin-offer-pdf.service') as typeof import('./wisconsin-offer-pdf.service');
+    return generateWisconsinOfferPdf(input);
+  },
 };

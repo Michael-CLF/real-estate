@@ -106,6 +106,8 @@ export async function generateWisconsinOfferPdf(input: GenerateStateAgreementInp
   const pageCount = pdf.bufferedPageRange().count;
   for (let index = 0; index < pageCount; index++) {
     pdf.switchToPage(index);
+    // Footer text is outside the body margin; keep it on the current page.
+    pdf.page.margins.bottom = 0;
     drawNavStreetPdfChrome(pdf, {
       stateName: 'Wisconsin',
       referenceNumber: input.offer.referenceNumber,

@@ -159,10 +159,12 @@ export class OfferService {
       'An offer identifier is required.'
     );
 
-    return this.offerRepository
+    const version = await this.offerRepository
       .getCurrentOfferVersion<TTerms>(
         offerUid
       );
+
+    return this.clearExpiredDraftExpiration(version);
   }
 
 
@@ -182,11 +184,13 @@ export class OfferService {
       'An offer-version identifier is required.'
     );
 
-    return this.offerRepository
+    const version = await this.offerRepository
       .getOfferVersionByUid<TTerms>(
         offerUid,
         offerVersionUid
       );
+
+    return this.clearExpiredDraftExpiration(version);
   }
 
 
@@ -585,6 +589,33 @@ export class OfferService {
             offer.status === 'countered'
           )
         )
+    };
+  }
+
+
+  private clearExpiredDraftExpiration<TTerms extends StateOfferTerms>(
+    version: OfferVersion<TTerms> | null,
+  ): OfferVersion<TTerms> | null {
+    // Normalize only the editable view; submission and history remain immutable.
+    if (!version || version.status !== 'draft' ||
+      [...version.buyers, ...version.sellers].some(party =>
+        party.signature.status === 'signed' || !!party.signature.signedAt)) {
+      return version;
+    }
+
+    const expiration = version.terms.delivery.expiresAt;
+    const timestamp = Date.parse(expiration);
+    if (!expiration || !Number.isFinite(timestamp) || timestamp > Date.now()) {
+      return version;
+    }
+
+    return {
+      ...version,
+      expiresAt: '',
+      terms: {
+        ...version.terms,
+        delivery: { ...version.terms.delivery, expiresAt: '' },
+      },
     };
   }
 

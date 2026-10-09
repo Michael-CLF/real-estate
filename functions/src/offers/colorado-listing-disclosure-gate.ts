@@ -1,3 +1,4 @@
+import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 
 import type {
@@ -32,21 +33,7 @@ export async function assertColoradoListingDisclosures(
 ): Promise<void> {
   const required = coloradoRequiredDisclosureTypes(listing);
 
-  const snapshots = await Promise.all(
-    required.map(documentType =>
-      transaction.get(
-        listingReference
-          .collection('disclosures')
-          .doc(documentType),
-      ),
-    ),
-  );
-
-  const missing = required.filter((documentType, index) => {
-    const file = snapshots[index].data()?.['currentDocument'] as
-      | Record<string, unknown>
-      | undefined;
-
+  const missing = await readMissingListingDisclosures(transaction, listingReference, required, file => {
     return (
       !file ||
       file['listingUid'] !== listingReference.id ||

@@ -48,3 +48,9 @@ export const CALIFORNIA_LISTING_FACT_DEFAULTS: CaliforniaListingFacts = {
   fireHazardZone: 'unselected', resaleWithin18Months: 'unselected',
   assistedWaterTank: 'unselected', gasApplianceRestrictions: '',
 };
+/** Preserves the existing draft restore merge, including explicit stored values. */
+export function restoreCaliforniaListingFacts(
+  stored: Partial<CaliforniaListingFacts> | null | undefined,
+): CaliforniaListingFacts {
+  return { ...CALIFORNIA_LISTING_FACT_DEFAULTS, ...stored };
+}

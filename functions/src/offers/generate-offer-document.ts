@@ -1,44 +1,26 @@
-import {
-    createHash,
-} from 'node:crypto';
-
+import * as logger from 'firebase-functions/logger';
+import { createHash } from 'node:crypto';
 import {
     HttpsError,
     onCall,
 } from 'firebase-functions/v2/https';
-
 import {
     FieldValue,
     Timestamp,
 } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
-import {
-    getStorage,
-} from 'firebase-admin/storage';
-
-import {
-    adminFirestore,
-} from '../shared/firebase-admin';
-
-import {
-    callableFunctionOptions,
-} from '../shared/function-options';
-
-import {
-    requireStateContractPackage,
-} from './state-contracts/state-contract-registry';
-
+import { adminFirestore } from '../shared/firebase-admin';
+import { callableFunctionOptions } from '../shared/function-options';
+import { requireStateContractPackage } from './state-contracts/state-contract-registry';
 import type {
     OfferDocument,
     OfferVersionDocument,
 } from './offer-types';
-
 import type {
     StateContractTerms,
     StateOfferVersionDocument,
 } from './state-contracts/state-contract-package';
-
-
 import { prependNavStreetContractSummary } from './state-contracts/navstreet-pdf-layout';
 
 type GeneratedAgreementType =
@@ -46,682 +28,515 @@ type GeneratedAgreementType =
     | 'counteroffer_agreement'
     | 'accepted_agreement';
 
-
 interface GenerateOfferDocumentData {
     offerUid: string;
     offerVersionUid: string;
-
-    documentType:
-    GeneratedAgreementType;
+    documentType: GeneratedAgreementType;
 }
-
 
 interface GenerateOfferDocumentResponse {
     documentUid: string;
-
     fileName: string;
     storagePath: string;
-
     pageCount: number;
-
     hashAlgorithm: 'SHA-256';
     hashValue: string;
 }
 
-
-const GENERATABLE_VERSION_STATUSES =
-    new Set([
-        'awaiting_signatures',
-        'partially_signed',
-        'signed',
-        'accepted',
-    ]);
-
+const GENERATABLE_VERSION_STATUSES = new Set([
+    'awaiting_signatures',
+    'partially_signed',
+    'signed',
+    'accepted',
+]);
 
 /*
  * Generates and permanently stores one printable PDF for
  * an immutable offer or counteroffer version.
  */
-export const generateOfferDocument =
-    onCall<
-        GenerateOfferDocumentData,
-        Promise<GenerateOfferDocumentResponse>
-    >(
-        callableFunctionOptions,
-        async request => {
-            const userUid =
-                request.auth?.uid;
+export const generateOfferDocument = onCall<
+    GenerateOfferDocumentData,
+    Promise<GenerateOfferDocumentResponse>
+>(
+    callableFunctionOptions,
+    async request => {
+        const startedAt = Date.now();
+        const userUid = request.auth?.uid;
 
-            if (!userUid) {
-                throw new HttpsError(
-                    'unauthenticated',
-                    'You must sign in before generating an offer document.'
-                );
-            }
-
-            const offerUid =
-                requireIdentifier(
-                    request.data?.offerUid,
-                    'offerUid'
-                );
-
-            const offerVersionUid =
-                requireIdentifier(
-                    request.data?.offerVersionUid,
-                    'offerVersionUid'
-                );
-
-            const documentType =
-                requireDocumentType(
-                    request.data?.documentType
-                );
-
-            const offerReference =
-                adminFirestore
-                    .collection('offers')
-                    .doc(offerUid);
-
-            const versionReference =
-                offerReference
-                    .collection('versions')
-                    .doc(offerVersionUid);
-
-            const documentUid = [
-                offerVersionUid,
-                documentType,
-            ].join('-');
-
-            const documentReference =
-                offerReference
-                    .collection('documents')
-                    .doc(documentUid);
-
-            const [
-                offerSnapshot,
-                versionSnapshot,
-                existingDocumentSnapshot,
-            ] = await Promise.all([
-                offerReference.get(),
-                versionReference.get(),
-                documentReference.get(),
-            ]);
-
-            if (!offerSnapshot.exists) {
-                throw new HttpsError(
-                    'not-found',
-                    'The offer could not be found.'
-                );
-            }
-
-            if (!versionSnapshot.exists) {
-                throw new HttpsError(
-                    'not-found',
-                    'The offer version could not be found.'
-                );
-            }
-
-            const offer =
-                offerSnapshot.data() as
-                OfferDocument;
-
-            const version =
-                versionSnapshot.data() as
-                OfferVersionDocument;
-
-            verifyDocumentAccess(
-                offer,
-                version,
-                userUid,
-                offerVersionUid,
-                documentType
+        if (!userUid) {
+            throw new HttpsError(
+                'unauthenticated',
+                'You must sign in before generating an offer document.'
             );
+        }
 
-            const stateContractPackage =
-                requireStateContractPackage(
-                    offer.stateCode
-                );
+        const offerUid = requireIdentifier(
+            request.data?.offerUid,
+            'offerUid'
+        );
 
-            if (
-                version.stateCode !==
-                stateContractPackage.stateCode
-            ) {
+        const offerVersionUid = requireIdentifier(
+            request.data?.offerVersionUid,
+            'offerVersionUid'
+        );
+
+        const documentType = requireDocumentType(
+            request.data?.documentType
+        );
+
+        const offerReference = adminFirestore
+            .collection('offers')
+            .doc(offerUid);
+
+        const versionReference = offerReference
+            .collection('versions')
+            .doc(offerVersionUid);
+
+        const documentUid = [
+            offerVersionUid,
+            documentType,
+        ].join('-');
+
+        const documentReference = offerReference
+            .collection('documents')
+            .doc(documentUid);
+
+        const [
+            offerSnapshot,
+            versionSnapshot,
+            existingDocumentSnapshot,
+        ] = await adminFirestore.getAll(
+            offerReference,
+            versionReference,
+            documentReference
+        );
+
+        if (!offerSnapshot.exists) {
+            throw new HttpsError(
+                'not-found',
+                'The offer could not be found.'
+            );
+        }
+
+        if (!versionSnapshot.exists) {
+            throw new HttpsError(
+                'not-found',
+                'The offer version could not be found.'
+            );
+        }
+
+        const offer =
+            offerSnapshot.data() as OfferDocument;
+
+        const version =
+            versionSnapshot.data() as OfferVersionDocument;
+
+        verifyDocumentAccess(
+            offer,
+            version,
+            userUid,
+            offerVersionUid,
+            documentType
+        );
+
+        const stateContractPackage =
+            requireStateContractPackage(offer.stateCode);
+
+        if (
+            version.stateCode !==
+            stateContractPackage.stateCode
+        ) {
+            throw new HttpsError(
+                'failed-precondition',
+                'The offer version state does not match its contract package.'
+            );
+        }
+
+        /*
+         * The same immutable version and document type always
+         * resolve to the same permanent document.
+         */
+        if (existingDocumentSnapshot.exists) {
+            const existingDocument =
+                existingDocumentSnapshot.data();
+
+            if (!existingDocument) {
                 throw new HttpsError(
-                    'failed-precondition',
-                    'The offer version state does not match its contract package.'
+                    'data-loss',
+                    'The stored offer document contains no data.'
                 );
             }
 
-            /*
-             * The same immutable version and document type always
-             * resolve to the same permanent document.
-             */
-            if (existingDocumentSnapshot.exists) {
-                const existingDocument =
-                    existingDocumentSnapshot.data();
-
-                if (!existingDocument) {
-                    throw new HttpsError(
-                        'data-loss',
-                        'The stored offer document contains no data.'
-                    );
-                }
-
-                if (
-                    documentType ===
-                    'accepted_agreement'
-                ) {
-                    const linkUpdatedAt =
-                        Timestamp.now();
-
-                    await Promise.all([
-                        offerReference.update({
-                            'contract.finalAgreementDocumentUid':
-                                documentUid,
-
-                            updatedAt:
-                                linkUpdatedAt,
-                        }),
-
-                        adminFirestore
-                            .collection('contracts')
-                            .doc(offerUid)
-                            .set(
-                                {
-                                    finalAgreementDocumentUid:
-                                        documentUid,
-
-                                    updatedAt:
-                                        linkUpdatedAt,
-                                },
-                                {
-                                    merge: true,
-                                }
-                            ),
-                    ]);
-                }
-
-                return {
-                    documentUid,
-
-                    fileName:
-                        readRequiredString(
-                            existingDocument,
-                            'fileName'
-                        ),
-
-                    storagePath:
-                        readRequiredString(
-                            existingDocument,
-                            'storagePath'
-                        ),
-
-                    pageCount:
-                        readRequiredNumber(
-                            existingDocument,
-                            'pageCount'
-                        ),
-
-                    hashAlgorithm:
-                        'SHA-256',
-
-                    hashValue:
-                        readNestedHashValue(
-                            existingDocument
-                        ),
-                };
-            }
-
-            const generatedAt =
-                new Date();
-
-            const documentTitle =
-                getDocumentTitle(
-                    documentType,
-                    version.versionNumber,
-                    stateContractPackage
-                        .agreementTemplate
-                        .templateName,
-                    stateContractPackage
-                        .stateCode
-                );
-
-            const agreementInput = {
-                    offer,
-
-                    version:
-                        version as
-                        StateOfferVersionDocument<
-                            StateContractTerms
-                        >,
-
-                    documentTitle,
-
-                    generatedAt,
-
-                    documentStatus:
-                        'approved' as const,
-                    };
-            const generatedPdf = await prependNavStreetContractSummary(
-                agreementInput,
-                stateContractPackage.getAgreementSummary(agreementInput),
-                await stateContractPackage.generateAgreement(agreementInput),
-            );
-
-            const hashValue =
-                createHash('sha256')
-                    .update(
-                        generatedPdf.buffer
-                    )
-                    .digest('hex');
-
-            const storagePath = [
-                'offers',
-                offerUid,
-                'versions',
-                offerVersionUid,
-                generatedPdf.fileName,
-            ].join('/');
-
-            const bucket =
-                getStorage().bucket();
-
-            const storageFile =
-                bucket.file(
-                    storagePath
-                );
-
-            await storageFile.save(
-                generatedPdf.buffer,
-                {
-                    resumable: false,
-
-                    contentType:
-                        'application/pdf',
-
-                    metadata: {
-                        cacheControl:
-                            'private, no-store, max-age=0',
-
-                        contentDisposition:
-                            `attachment; filename="${generatedPdf.fileName}"`,
-
-                        metadata: {
-                            offerUid,
-                            offerVersionUid,
-
-                            offerReferenceNumber:
-                                offer.referenceNumber,
-
-                            versionNumber:
-                                version.versionNumber
-                                    .toString(),
-
-                            documentType,
-
-                            sha256:
-                                hashValue,
-                        },
-                    },
-                }
-            );
-
-            const now =
-                Timestamp.now();
-
-            const template = {
-                stateCode:
-                    stateContractPackage
-                        .agreementTemplate
-                        .stateCode,
-
-                templateUid:
-                    stateContractPackage
-                        .agreementTemplate
-                        .templateUid,
-
-                templateName:
-                    stateContractPackage
-                        .agreementTemplate
-                        .templateName,
-
-                templateVersion:
-                    stateContractPackage
-                        .agreementTemplate
-                        .templateVersion,
-
-                effectiveDate:
-                    generatedAt
-                        .toISOString()
-                        .slice(0, 10),
-
-                releaseStatus:
-                    'approved',
-            };
-
-            const hash = {
-                algorithm:
-                    'SHA-256',
-
-                value:
-                    hashValue,
-
-                calculatedAt:
-                    now,
-            };
-
-            const isAcceptedAgreement =
-                documentType ===
-                'accepted_agreement';
-
-            const documentData = {
-                Uid: documentUid,
-
-                offerUid,
-                offerVersionUid,
-
-                ...(
-                    isAcceptedAgreement
-                        ? {
-                            contractUid:
-                                offerUid,
-                        }
-                        : {}
-                ),
-
-                type:
-                    documentType,
-
-                source:
-                    'navstreet',
-
-                visibility:
-                    'buyer_and_seller',
-
-                title:
-                    documentTitle,
-
-                fileName:
-                    generatedPdf.fileName,
-
-                contentType:
-                    'application/pdf',
-
-                storagePath,
-
-                sizeInBytes:
-                    generatedPdf.buffer
-                        .byteLength,
-
-                pageCount:
-                    generatedPdf.pageCount,
-
-                status:
-                    'generated',
-
-                template,
-                hash,
-
-                signatureRequest: {
-                    status:
-                        isAcceptedAgreement
-                            ? 'completed'
-                            : 'not_started',
-
-                    signers: [
-                        ...version.buyers,
-                        ...version.sellers,
-                    ].map(
-                        party => ({
-                            partyUid:
-                                party.partyUid,
-
-                            userUid:
-                                party.userUid,
-
-                            role:
-                                party.role,
-
-                            legalName:
-                                party.legalName,
-
-                            email:
-                                party.email,
-
-                            required:
-                                party.requiredSigner,
-
-                            status:
-                                isAcceptedAgreement
-                                    ? party.signature
-                                        .status
-                                    : 'not_started',
-
-                            ...(
-                                isAcceptedAgreement &&
-                                party.signature
-                                    .signedAt
-                                    ? {
-                                        signedAt:
-                                            party.signature
-                                                .signedAt,
-
-                                        signatureUid:
-                                            party.partyUid,
-                                    }
-                                    : {}
-                            ),
-                        })
-                    ),
-
-                    ...(
-                        isAcceptedAgreement
-                            ? {
-                                completedAt:
-                                    now,
-                            }
-                            : {}
-                    ),
-                },
-
-                deliveries: [],
-
-                downloadable: true,
-                printable: true,
-
-                generatedAt: now,
-
-                createdByUid:
-                    userUid,
-
-                createdAt: now,
-                updatedAt: now,
-            };
-
-            const versionDocumentSnapshot = {
-                documentUid,
-
-                type:
-                    documentType,
-
-                title:
-                    documentTitle,
-
-                fileName:
-                    generatedPdf.fileName,
-
-                storagePath,
-
-                hash,
-                template,
-
-                generatedAt: now,
-
-                signatureRequestStatus:
-                    isAcceptedAgreement
-                        ? 'completed'
-                        : 'not_started',
-
-                fullySigned:
-                    isAcceptedAgreement,
-
-                ...(
-                    isAcceptedAgreement
-                        ? {
-                            signedAt: now,
-                        }
-                        : {}
-                ),
-
-                downloadable: true,
-                printable: true,
-            };
-
-            try {
-                await adminFirestore.runTransaction(
-                    async transaction => {
-                        const [
-                            currentVersionSnapshot,
-                            currentDocumentSnapshot,
-                        ] = await Promise.all([
-                            transaction.get(
-                                versionReference
-                            ),
-
-                            transaction.get(
-                                documentReference
-                            ),
-                        ]);
-
-                        if (
-                            !currentVersionSnapshot.exists
-                        ) {
-                            throw new HttpsError(
-                                'not-found',
-                                'The offer version no longer exists.'
-                            );
-                        }
-
-                        if (
-                            currentDocumentSnapshot.exists
-                        ) {
-                            return;
-                        }
-
-                        const currentVersion =
-                            currentVersionSnapshot.data() as
-                            OfferVersionDocument;
-
-                        if (!currentVersion.immutable) {
-                            throw new HttpsError(
-                                'failed-precondition',
-                                'The offer version is no longer locked.'
-                            );
-                        }
-
-                        transaction.create(
-                            documentReference,
-                            documentData
-                        );
-
-                        transaction.update(
-                            versionReference,
+            if (documentType === 'accepted_agreement') {
+                const linkUpdatedAt = Timestamp.now();
+
+                await Promise.all([
+                    offerReference.update({
+                        'contract.finalAgreementDocumentUid':
+                            documentUid,
+                        updatedAt: linkUpdatedAt,
+                    }),
+
+                    adminFirestore
+                        .collection('contracts')
+                        .doc(offerUid)
+                        .set(
                             {
-                                documents:
-                                    FieldValue.arrayUnion(
-                                        versionDocumentSnapshot
-                                    ),
-
-                                updatedAt: now,
-                            }
-                        );
-
-                        transaction.update(
-                            offerReference,
-                            {
-                                ...(
-                                    isAcceptedAgreement
-                                        ? {
-                                            'contract.finalAgreementDocumentUid':
-                                                documentUid,
-                                        }
-                                        : {}
-                                ),
-
-                                lastActivityAt: now,
-                                updatedAt: now,
-                            }
-                        );
-
-                        if (
-                            isAcceptedAgreement
-                        ) {
-                            transaction.set(
-                                adminFirestore
-                                    .collection('contracts')
-                                    .doc(offerUid),
-                                {
-                                    finalAgreementDocumentUid:
-                                        documentUid,
-
-                                    updatedAt: now,
-                                },
-                                {
-                                    merge: true,
-                                }
-                            );
-                        }
-                    }
-                );
-            } catch (error) {
-                /*
-                 * If Firestore persistence fails after upload, remove
-                 * the unreferenced file so Storage and Firestore do
-                 * not become inconsistent.
-                 */
-                await storageFile
-                    .delete({
-                        ignoreNotFound: true,
-                    })
-                    .catch(() => undefined);
-
-                throw error;
+                                finalAgreementDocumentUid:
+                                    documentUid,
+                                updatedAt: linkUpdatedAt,
+                            },
+                            { merge: true }
+                        ),
+                ]);
             }
 
             return {
                 documentUid,
-
-                fileName:
-                    generatedPdf.fileName,
-
-                storagePath,
-
-                pageCount:
-                    generatedPdf.pageCount,
-
-                hashAlgorithm:
-                    'SHA-256',
-
-                hashValue,
+                fileName: readRequiredString(
+                    existingDocument,
+                    'fileName'
+                ),
+                storagePath: readRequiredString(
+                    existingDocument,
+                    'storagePath'
+                ),
+                pageCount: readRequiredNumber(
+                    existingDocument,
+                    'pageCount'
+                ),
+                hashAlgorithm: 'SHA-256',
+                hashValue: readNestedHashValue(
+                    existingDocument
+                ),
             };
         }
-    );
 
+        const readsCompletedAt = Date.now();
+        const generatedAt = new Date();
+
+        const documentTitle = getDocumentTitle(
+            documentType,
+            version.versionNumber,
+            stateContractPackage.agreementTemplate.templateName,
+            stateContractPackage.stateCode
+        );
+
+        const agreementInput = {
+            offer,
+            version:
+                version as StateOfferVersionDocument<StateContractTerms>,
+            documentTitle,
+            generatedAt,
+            documentStatus: 'approved' as const,
+        };
+
+        const agreement =
+            await stateContractPackage.generateAgreement(
+                agreementInput
+            );
+
+        const agreementCompletedAt = Date.now();
+
+        const generatedPdf =
+            await prependNavStreetContractSummary(
+                agreementInput,
+                stateContractPackage.getAgreementSummary(
+                    agreementInput
+                ),
+                agreement
+            );
+
+        const pdfCompletedAt = Date.now();
+
+        const hashValue = createHash('sha256')
+            .update(generatedPdf.buffer)
+            .digest('hex');
+
+        const storagePath = [
+            'offers',
+            offerUid,
+            'versions',
+            offerVersionUid,
+            generatedPdf.fileName,
+        ].join('/');
+
+        const bucket = getStorage().bucket();
+        const storageFile = bucket.file(storagePath);
+
+        await storageFile.save(
+            generatedPdf.buffer,
+            {
+                resumable: false,
+                contentType: 'application/pdf',
+                metadata: {
+                    cacheControl:
+                        'private, no-store, max-age=0',
+                    contentDisposition:
+                        `attachment; filename="${generatedPdf.fileName}"`,
+                    metadata: {
+                        offerUid,
+                        offerVersionUid,
+                        offerReferenceNumber:
+                            offer.referenceNumber,
+                        versionNumber:
+                            version.versionNumber.toString(),
+                        documentType,
+                        sha256: hashValue,
+                    },
+                },
+            }
+        );
+
+        const uploadCompletedAt = Date.now();
+        const now = Timestamp.now();
+
+        const template = {
+            stateCode:
+                stateContractPackage.agreementTemplate.stateCode,
+            templateUid:
+                stateContractPackage.agreementTemplate.templateUid,
+            templateName:
+                stateContractPackage.agreementTemplate.templateName,
+            templateVersion:
+                stateContractPackage.agreementTemplate.templateVersion,
+            effectiveDate:
+                generatedAt.toISOString().slice(0, 10),
+            releaseStatus: 'approved',
+        };
+
+        const hash = {
+            algorithm: 'SHA-256',
+            value: hashValue,
+            calculatedAt: now,
+        };
+
+        const isAcceptedAgreement =
+            documentType === 'accepted_agreement';
+
+        const documentData = {
+            Uid: documentUid,
+            offerUid,
+            offerVersionUid,
+
+            ...(isAcceptedAgreement
+                ? { contractUid: offerUid }
+                : {}),
+
+            type: documentType,
+            source: 'navstreet',
+            visibility: 'buyer_and_seller',
+            title: documentTitle,
+            fileName: generatedPdf.fileName,
+            contentType: 'application/pdf',
+            storagePath,
+            sizeInBytes: generatedPdf.buffer.byteLength,
+            pageCount: generatedPdf.pageCount,
+            status: 'generated',
+            template,
+            hash,
+
+            signatureRequest: {
+                status: isAcceptedAgreement
+                    ? 'completed'
+                    : 'not_started',
+
+                signers: [
+                    ...version.buyers,
+                    ...version.sellers,
+                ].map(party => ({
+                    partyUid: party.partyUid,
+                    userUid: party.userUid,
+                    role: party.role,
+                    legalName: party.legalName,
+                    email: party.email,
+                    required: party.requiredSigner,
+
+                    status: isAcceptedAgreement
+                        ? party.signature.status
+                        : 'not_started',
+
+                    ...(isAcceptedAgreement &&
+                    party.signature.signedAt
+                        ? {
+                            signedAt:
+                                party.signature.signedAt,
+                            signatureUid:
+                                party.partyUid,
+                        }
+                        : {}),
+                })),
+
+                ...(isAcceptedAgreement
+                    ? { completedAt: now }
+                    : {}),
+            },
+
+            deliveries: [],
+            downloadable: true,
+            printable: true,
+            generatedAt: now,
+            createdByUid: userUid,
+            createdAt: now,
+            updatedAt: now,
+        };
+
+        const versionDocumentSnapshot = {
+            documentUid,
+            type: documentType,
+            title: documentTitle,
+            fileName: generatedPdf.fileName,
+            storagePath,
+            hash,
+            template,
+            generatedAt: now,
+
+            signatureRequestStatus: isAcceptedAgreement
+                ? 'completed'
+                : 'not_started',
+
+            fullySigned: isAcceptedAgreement,
+
+            ...(isAcceptedAgreement
+                ? { signedAt: now }
+                : {}),
+
+            downloadable: true,
+            printable: true,
+        };
+
+        try {
+            await adminFirestore.runTransaction(
+                async transaction => {
+                    const [
+                        currentVersionSnapshot,
+                        currentDocumentSnapshot,
+                    ] = await transaction.getAll(
+                        versionReference,
+                        documentReference
+                    );
+
+                    if (!currentVersionSnapshot.exists) {
+                        throw new HttpsError(
+                            'not-found',
+                            'The offer version no longer exists.'
+                        );
+                    }
+
+                    if (currentDocumentSnapshot.exists) {
+                        return;
+                    }
+
+                    const currentVersion =
+                        currentVersionSnapshot.data() as
+                        OfferVersionDocument;
+
+                    if (!currentVersion.immutable) {
+                        throw new HttpsError(
+                            'failed-precondition',
+                            'The offer version is no longer locked.'
+                        );
+                    }
+
+                    transaction.create(
+                        documentReference,
+                        documentData
+                    );
+
+                    transaction.update(
+                        versionReference,
+                        {
+                            documents: FieldValue.arrayUnion(
+                                versionDocumentSnapshot
+                            ),
+                            updatedAt: now,
+                        }
+                    );
+
+                    transaction.update(
+                        offerReference,
+                        {
+                            ...(isAcceptedAgreement
+                                ? {
+                                    'contract.finalAgreementDocumentUid':
+                                        documentUid,
+                                }
+                                : {}),
+
+                            lastActivityAt: now,
+                            updatedAt: now,
+                        }
+                    );
+
+                    if (isAcceptedAgreement) {
+                        transaction.set(
+                            adminFirestore
+                                .collection('contracts')
+                                .doc(offerUid),
+                            {
+                                finalAgreementDocumentUid:
+                                    documentUid,
+                                updatedAt: now,
+                            },
+                            { merge: true }
+                        );
+                    }
+                }
+            );
+        } catch (error) {
+            /*
+             * If Firestore persistence fails after upload, remove
+             * the unreferenced file so Storage and Firestore do
+             * not become inconsistent.
+             */
+            await storageFile
+                .delete({ ignoreNotFound: true })
+                .catch(() => undefined);
+
+            throw error;
+        }
+
+        logger.info(
+            'Offer document generation timing',
+            {
+                stateCode: offer.stateCode,
+                documentType,
+                readMs:
+                    readsCompletedAt - startedAt,
+                agreementMs:
+                    agreementCompletedAt - readsCompletedAt,
+                summaryMs:
+                    pdfCompletedAt - agreementCompletedAt,
+                hashAndUploadMs:
+                    uploadCompletedAt - pdfCompletedAt,
+                persistenceMs:
+                    Date.now() - uploadCompletedAt,
+                totalMs:
+                    Date.now() - startedAt,
+            }
+        );
+
+        return {
+            documentUid,
+            fileName: generatedPdf.fileName,
+            storagePath,
+            pageCount: generatedPdf.pageCount,
+            hashAlgorithm: 'SHA-256',
+            hashValue,
+        };
+    }
+);
 
 function verifyDocumentAccess(
     offer: OfferDocument,
     version: OfferVersionDocument,
     userUid: string,
     offerVersionUid: string,
-    documentType:
-        GeneratedAgreementType
+    documentType: GeneratedAgreementType
 ): void {
     const participant =
-        offer.buyerUids.includes(
-            userUid
-        ) ||
-        offer.sellerUids.includes(
-            userUid
-        );
+        offer.buyerUids.includes(userUid) ||
+        offer.sellerUids.includes(userUid);
 
     if (!participant) {
         throw new HttpsError(
@@ -730,20 +545,14 @@ function verifyDocumentAccess(
         );
     }
 
-    if (
-        version.offerUid !==
-        offer.Uid
-    ) {
+    if (version.offerUid !== offer.Uid) {
         throw new HttpsError(
             'failed-precondition',
             'The offer version does not belong to this offer.'
         );
     }
 
-    if (
-        version.Uid !==
-        offerVersionUid
-    ) {
+    if (version.Uid !== offerVersionUid) {
         throw new HttpsError(
             'failed-precondition',
             'The requested offer version is invalid.'
@@ -757,11 +566,7 @@ function verifyDocumentAccess(
         );
     }
 
-    if (
-        !GENERATABLE_VERSION_STATUSES.has(
-            version.status
-        )
-    ) {
+    if (!GENERATABLE_VERSION_STATUSES.has(version.status)) {
         throw new HttpsError(
             'failed-precondition',
             'This offer version is not ready for document generation.'
@@ -769,8 +574,7 @@ function verifyDocumentAccess(
     }
 
     if (
-        documentType ===
-        'accepted_agreement' &&
+        documentType === 'accepted_agreement' &&
         version.status !== 'accepted'
     ) {
         throw new HttpsError(
@@ -780,8 +584,7 @@ function verifyDocumentAccess(
     }
 
     if (
-        documentType ===
-        'offer_agreement' &&
+        documentType === 'offer_agreement' &&
         version.versionNumber !== 1
     ) {
         throw new HttpsError(
@@ -791,8 +594,7 @@ function verifyDocumentAccess(
     }
 
     if (
-        documentType ===
-        'counteroffer_agreement' &&
+        documentType === 'counteroffer_agreement' &&
         version.versionNumber === 1
     ) {
         throw new HttpsError(
@@ -802,16 +604,13 @@ function verifyDocumentAccess(
     }
 }
 
-
 function requireDocumentType(
     value: unknown
 ): GeneratedAgreementType {
     if (
         value === 'offer_agreement' ||
-        value ===
-        'counteroffer_agreement' ||
-        value ===
-        'accepted_agreement'
+        value === 'counteroffer_agreement' ||
+        value === 'accepted_agreement'
     ) {
         return value;
     }
@@ -822,10 +621,8 @@ function requireDocumentType(
     );
 }
 
-
 function getDocumentTitle(
-    documentType:
-        GeneratedAgreementType,
+    documentType: GeneratedAgreementType,
     versionNumber: number,
     templateName: string,
     stateCode: string
@@ -851,13 +648,11 @@ function getDocumentTitle(
     }
 }
 
-
 function readRequiredString(
     data: Record<string, unknown>,
     fieldName: string
 ): string {
-    const value =
-        data[fieldName];
+    const value = data[fieldName];
 
     if (
         typeof value !== 'string' ||
@@ -872,13 +667,11 @@ function readRequiredString(
     return value;
 }
 
-
 function readRequiredNumber(
     data: Record<string, unknown>,
     fieldName: string
 ): number {
-    const value =
-        data[fieldName];
+    const value = data[fieldName];
 
     if (
         typeof value !== 'number' ||
@@ -893,12 +686,10 @@ function readRequiredNumber(
     return value;
 }
 
-
 function readNestedHashValue(
     data: Record<string, unknown>
 ): string {
-    const hash =
-        data['hash'];
+    const hash = data['hash'];
 
     if (
         hash === null ||
@@ -912,12 +703,10 @@ function readNestedHashValue(
     }
 
     return readRequiredString(
-        hash as
-        Record<string, unknown>,
+        hash as Record<string, unknown>,
         'value'
     );
 }
-
 
 function requireIdentifier(
     value: unknown,
@@ -933,8 +722,7 @@ function requireIdentifier(
         );
     }
 
-    const normalizedValue =
-        value.trim();
+    const normalizedValue = value.trim();
 
     if (
         normalizedValue.length > 200 ||

@@ -1,3 +1,4 @@
+import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { StateContractPackage } from '../state-contract-package';
@@ -7,7 +8,6 @@ import { createLouisianaInitialOfferTerms } from './louisiana-initial-terms';
 import { sanitizeLouisianaDraftTerms } from './louisiana-draft-terms-sanitizer';
 import { validateLouisianaSubmission } from './louisiana-submission-validator';
 import { createLouisianaContractMilestones } from './louisiana-contract-milestones';
-import { generateLouisianaOfferPdf } from './louisiana-offer-pdf.service';
 
 export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferTermsDocument> = {
   stateCode: 'LA', offerCreationEnabled: true,
@@ -34,7 +34,8 @@ export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferT
   },
   requiredListingDisclosures: ({ version }) => [
     'louisiana-property-disclosure',
-    ...(version.terms.disclosures.leadPaintStatus === 'received' ? ['lead-based-paint'] : []),
+    ...selectReceivedListingDisclosures(version.terms.disclosures, [
+      ['leadPaintStatus', 'lead-based-paint'],    ]),
   ],
   createContractMilestones: createLouisianaContractMilestones,
     getAgreementSummary: ({ version: { terms: t } }) => [
@@ -44,5 +45,8 @@ export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferT
     { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
     { label: 'Inspection / due diligence', value: `${t.deadlines.inspectionPeriodDays} calendar days after the period begins on the day after acceptance; may end earlier upon a signed remedy request or extend for unavailable access/utilities — see contract` },
   ],
-  generateAgreement: generateLouisianaOfferPdf,
+  generateAgreement: async input => {
+    const { generateLouisianaOfferPdf } = require('./louisiana-offer-pdf.service') as typeof import('./louisiana-offer-pdf.service');
+    return generateLouisianaOfferPdf(input);
+  },
 };

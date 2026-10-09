@@ -1,3 +1,4 @@
+import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 
@@ -23,11 +24,7 @@ export async function assertFloridaListingDisclosures(
   listing: Record<string, unknown>,
 ): Promise<void> {
   const required = floridaRequiredDisclosureTypes(listing);
-  const snapshots = await Promise.all(required.map(type =>
-    transaction.get(listingReference.collection('disclosures').doc(type))
-  ));
-  const missing = required.filter((type, index) => {
-    const document = snapshots[index].data()?.['currentDocument'] as Record<string, unknown> | undefined;
+  const missing = await readMissingListingDisclosures(transaction, listingReference, required, document => {
     return !document || document['listingUid'] !== listingReference.id ||
       document['stateAbbreviation'] !== 'FL' ||
       typeof document['storagePath'] !== 'string' || !document['storagePath'] ||

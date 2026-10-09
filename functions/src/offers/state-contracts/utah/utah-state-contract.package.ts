@@ -1,3 +1,4 @@
+import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import type { UtahOfferTermsDocument } from './utah-offer-terms.document';
@@ -6,7 +7,6 @@ import { createUtahInitialOfferTerms } from './utah-initial-terms';
 import { sanitizeUtahDraftTerms } from './utah-draft-terms-sanitizer';
 import { validateUtahSubmission } from './utah-submission-validator';
 import { createUtahContractMilestones } from './utah-contract-milestones';
-import { generateUtahOfferPdf } from './utah-offer-pdf.service';
 export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocument> = {
   stateCode: 'UT', offerCreationEnabled: true,
   contractTypes: ['navstreet_utah_residential_sale_2026'], contractTypeRequired: true,
@@ -15,14 +15,10 @@ export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocume
   createInitialOfferTerms: input => createUtahInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeUtahDraftTerms(input),
   validateSubmission: input => validateUtahSubmission(input),
-  requiredListingDisclosures: input => {
-    const t = input.version.terms;
-    return [
-      ...(t.disclosures.leadPaintStatus === 'received' ? ['lead-based-paint'] : []),
-      ...(t.disclosures.propertyConditionStatus === 'received' ? ['utah-seller-property-condition'] : []),
-      ...(t.disclosures.hoaDocumentsStatus === 'received' ? ['utah-hoa-governing-documents'] : []),
-    ];
-  },
+  requiredListingDisclosures: ({ version }) => selectReceivedListingDisclosures(version.terms.disclosures, [
+      ['leadPaintStatus', 'lead-based-paint'],
+      ['propertyConditionStatus', 'utah-seller-property-condition'],
+      ['hoaDocumentsStatus', 'utah-hoa-governing-documents'],    ]),
   createContractMilestones: input => createUtahContractMilestones(input),
     getAgreementSummary: ({ version: { terms: t } }) => [
     ...summaryFunding(t.purchase.purchasePriceInCents, t.purchase.loanAmountInCents, t.purchase.financingType === 'cash'),
@@ -31,5 +27,8 @@ export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocume
     { label: 'Closing / settlement date', value: summaryText(t.deadlines.settlementDate) },
     { label: 'Inspection / due diligence', value: summaryText(t.deadlines.dueDiligenceDate) },
   ],
-  generateAgreement: input => generateUtahOfferPdf(input),
+  generateAgreement: async input => {
+    const { generateUtahOfferPdf } = require('./utah-offer-pdf.service') as typeof import('./utah-offer-pdf.service');
+    return generateUtahOfferPdf(input);
+  },
 };

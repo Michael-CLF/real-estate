@@ -1,6 +1,6 @@
 <section class="offer-question" [attr.data-question-id]="question().id"
   [class.offer-question--invalid]="validationMessage()" [attr.aria-labelledby]="controlId() + '-label'">
-  @if (question().type !== 'information') {
+  @if (question().type !== 'information' && question().type !== 'acknowledgement') {
   <div class="offer-question__heading">
     <label [id]="controlId() + '-label'" [for]="controlId()">
       {{ question().label }}
@@ -130,10 +130,18 @@
   }
 
   @case ('acknowledgement') {
+  @if (question().description) {
+  <p>{{ question().description }}</p>
+  }
   <label class="offer-question__acknowledgement">
     <input [id]="controlId()" type="checkbox" [checked]="booleanValue() === true" [disabled]="controlDisabled()"
       (change)="onAcknowledgementInput($event)" (blur)="markTouched()" />
-    <span>{{ question().label }}</span>
+    <span [id]="controlId() + '-label'">
+      {{ question().label }}
+      @if (question().validation?.required) {
+      <span class="offer-question__required" aria-hidden="true">*</span>
+      }
+    </span>
   </label>
   }
 
@@ -143,14 +151,14 @@
     {{ selectedChoiceLabel() }}
   </div>
   } @else {
-  <select [id]="controlId()" [value]="textValue()" [disabled]="controlDisabled()"
+  <select [id]="controlId()" [disabled]="controlDisabled()"
     [attr.required]="question().validation?.required ? '' : null"
     [attr.aria-invalid]="validationMessage() ? 'true' : null" (change)="onSingleChoiceInput($event)"
     (blur)="markTouched()">
-    <option value="">SELECT AN OPTION</option>
+    <option value="" [selected]="textValue() === ''">SELECT AN OPTION</option>
 
     @for (option of choiceOptions(); track option.value) {
-    <option [value]="option.value">
+    <option [value]="option.value" [selected]="option.value === textValue()">
       {{ option.label }}
     </option>
     }

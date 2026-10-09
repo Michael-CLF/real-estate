@@ -1,3 +1,4 @@
+import { COLORADO_FACT_DEFAULTS, type ColoradoPropertyFacts } from '../offers/state-contracts/colorado/colorado-contract-elections';
 import { CALIFORNIA_DISCLOSURE_TYPES, validCaliforniaDisclosureDecision, type CaliforniaDisclosureDecision, type CaliforniaDisclosureType } from './state-listing-packages/california-listing-facts';
 import * as logger from 'firebase-functions/logger';
 import {
@@ -26,6 +27,8 @@ interface EditableHoa {
     EditableHoaFeeFrequency | null;
 }
 interface PublishedListingChanges {
+  legalDescription?: string;
+  coloradoPropertyFacts?: ColoradoPropertyFacts;
   californiaDisclosure?: { documentType: CaliforniaDisclosureType; decision: CaliforniaDisclosureDecision };
   listPrice?: number;
   description?: string;
@@ -43,6 +46,8 @@ interface UpdatePublishedListingResponse {
 const EDITABLE_FIELDS =
   new Set([
     'californiaDisclosure',
+    'coloradoPropertyFacts',
+    'legalDescription',
     'listPrice',
     'description',
     'hoa'
@@ -145,6 +150,27 @@ export const updatePublishedListing =
                 const { documentType, decision } = validatedInput.changes.californiaDisclosure;
                 updates[`sellerStatements.california.disclosureApplicability.${documentType}`] = decision;
                 updatedFields.push('californiaDisclosure');
+              }
+              if (validatedInput.changes.legalDescription !== undefined) {
+                if (listingData['state'] !== 'CO' || listingStatus !== 'active' || listingData['activeContractUid']) {
+                  throw new HttpsError('failed-precondition', 'Colorado legal descriptions can only be edited on an active Colorado listing outside a contract.');
+                }
+                if ((listingData['legalDescription'] ?? '') !== validatedInput.changes.legalDescription) {
+                  updates['legalDescription'] = validatedInput.changes.legalDescription;
+                  updatedFields.push('legalDescription');
+                }
+              }
+              if (validatedInput.changes.coloradoPropertyFacts) {
+                if (listingData['state'] !== 'CO' || listingStatus !== 'active' || listingData['activeContractUid']) {
+                  throw new HttpsError('failed-precondition', 'Colorado seller facts can only be edited on an active Colorado listing outside a contract.');
+                }
+                const currentFacts = isRecord(listingData['coloradoPropertyFacts']) ? listingData['coloradoPropertyFacts'] : {};
+                for (const [key, value] of Object.entries(validatedInput.changes.coloradoPropertyFacts)) {
+                  if (currentFacts[key] !== value) {
+                    updates[`coloradoPropertyFacts.${key}`] = value;
+                    updatedFields.push(`coloradoPropertyFacts.${key}`);
+                  }
+                }
               }
               /*
                * LIST PRICE
@@ -395,6 +421,29 @@ function validateUpdateInput(
       validateHoa(
         changesValue['hoa']
       );
+  }
+  if (changesValue['legalDescription'] !== undefined) {
+    const description = changesValue['legalDescription'];
+    if (typeof description !== 'string' || description.length > 5000) {
+      throw new HttpsError('invalid-argument', 'Legal description must be text within 5,000 characters.');
+    }
+    changes.legalDescription = description.trim();
+  }
+  if (changesValue['coloradoPropertyFacts'] !== undefined) {
+    const value = changesValue['coloradoPropertyFacts'];
+    if (!isRecord(value)) throw new HttpsError('invalid-argument', 'Colorado property facts must be an object.');
+    const facts = Object.fromEntries(Object.entries(COLORADO_FACT_DEFAULTS).map(([key, fallback]) => {
+      const supplied = value[key];
+      if (supplied !== undefined && (typeof supplied !== 'string' || supplied.length > 4000)) {
+        throw new HttpsError('invalid-argument', 'Colorado property facts must be text within 4,000 characters.');
+      }
+      return [key, typeof supplied === 'string' ? supplied.trim() : fallback];
+    })) as unknown as ColoradoPropertyFacts;
+    if (!facts.waterSource || !['covered', 'not_applicable'].includes(facts.metroDistrict) ||
+      (facts.metroDistrict === 'covered' && (!/^https:\/\/[^\s]+$/.test(facts.metroDistrictWebsite) || !facts.metroDistrictDisclosure))) {
+      throw new HttpsError('invalid-argument', 'Complete the water source, district answer and applicable district website and records reference.');
+    }
+    changes.coloradoPropertyFacts = facts;
   }
   const californiaValue = changesValue['californiaDisclosure'];
   if (californiaValue !== undefined) {

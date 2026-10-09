@@ -1,4 +1,9 @@
 import {
+  afterNextRender,
+  ElementRef,
+  inject,
+  Injector,
+  viewChild,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -84,6 +89,15 @@ interface OfferReviewSection {
     ChangeDetectionStrategy.OnPush,
 })
 export class OfferWizardShellComponent {
+  private readonly renderInjector = inject(Injector);
+  private readonly sectionTop = viewChild<ElementRef<HTMLElement>>('sectionTop');
+
+  private scrollToSectionTop(): void {
+    afterNextRender(() => {
+      this.sectionTop()?.nativeElement.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }, { injector: this.renderInjector });
+  }
+
   readonly stateName = input.required<string>();
 
   readonly title = input('Make an offer');
@@ -118,6 +132,7 @@ export class OfferWizardShellComponent {
   readonly currentSectionIndex = model(0);
 
   readonly saving = input(false);
+  readonly allowEditingWhileSaving = input(false);
   readonly submitting = input(false);
 
   readonly submitLabel = input('Submit offer');
@@ -303,7 +318,7 @@ export class OfferWizardShellComponent {
 
 
   protected readonly busy = computed(
-    () => this.saving() || this.submitting()
+    () => (!this.allowEditingWhileSaving() && this.saving()) || this.submitting()
   );
 
 
@@ -549,7 +564,15 @@ export class OfferWizardShellComponent {
     );
 
     if (this.isLastSection()) {
+      if (!this.allSectionsValid()) {
+        const firstInvalid = this.visibleSections().findIndex(section =>
+          this.sectionErrorCount(section) > 0 ||
+          (section.id === 'disclosures' && !!this.disclosureNotice()));
+        if (firstInvalid >= 0) this.setSectionIndex(firstInvalid);
+        return;
+      }
       this.reviewing.set(true);
+      this.scrollToSectionTop();
       return;
     }
 
@@ -610,6 +633,7 @@ export class OfferWizardShellComponent {
 
   protected returnToCertification(): void {
     this.reviewing.set(false);
+    this.scrollToSectionTop();
   }
 
   protected editReviewSection(sectionId: string): void {
@@ -621,6 +645,20 @@ export class OfferWizardShellComponent {
       return;
     }
 
+    if (index > this.normalizedSectionIndex()) {
+      const firstInvalid = this.visibleSections().findIndex((section, sectionIndex) =>
+        sectionIndex < index && (this.sectionErrorCount(section) > 0 ||
+          (section.id === 'disclosures' && !!this.disclosureNotice())));
+      if (firstInvalid >= 0) {
+        const invalidSection = this.visibleSections()[firstInvalid];
+        this.attemptedSectionIds.set(
+          new Set([...this.attemptedSectionIds(), invalidSection.id])
+        );
+        this.reviewing.set(false);
+        this.setSectionIndex(firstInvalid);
+        return;
+      }
+    }
     this.reviewing.set(false);
     this.setSectionIndex(index);
   }
@@ -790,6 +828,7 @@ export class OfferWizardShellComponent {
   private setSectionIndex(index: number): void {
     this.currentSectionIndex.set(index);
     this.sectionChanged.emit(index);
+    this.scrollToSectionTop();
   }
 
 

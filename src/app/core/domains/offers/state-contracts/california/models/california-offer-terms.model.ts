@@ -87,7 +87,7 @@ export interface CaliforniaOfferTerms {
 
 export const CALIFORNIA_RESIDENTIAL_CONTRACT_DEFINITION = {
   contractType: 'navstreet_california_residential_sale_2026',
-  formId: 'NAVSTREET-FL-RESIDENTIAL-2026',
+  formId: 'NAVSTREET-CA-RESIDENTIAL-2026',
   formName: 'NavStreet California Residential Purchase and Sale Agreement',
   effectiveDate: '2026-10-03',
   revisionDate: '2026-10-03',

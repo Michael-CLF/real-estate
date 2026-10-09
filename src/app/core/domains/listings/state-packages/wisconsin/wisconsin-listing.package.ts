@@ -2,6 +2,7 @@ import type { StateListingPackage } from '../state-listing-package';
 
 /** Wisconsin resale disclosures are attached to the listing, not inferred from short answers. */
 export const wisconsinListingPackage: StateListingPackage = {
+  propertyDetailFields: ['legalDescription'],
   stateCode: 'WI',
   stateName: 'Wisconsin',
   requiredSellerStatementFields: [

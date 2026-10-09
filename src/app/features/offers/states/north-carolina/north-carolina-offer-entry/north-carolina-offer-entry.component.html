@@ -1,0 +1,17 @@
+<main class="north-carolina-offer-entry">
+  @if (session(); as loadedSession) {
+    <app-offer-wizard [session]="loadedSession" />
+  } @else {
+    <section class="north-carolina-offer-entry__status-card" [attr.role]="errorMessage() ? 'alert' : 'status'">
+      @if (errorMessage()) {
+        <h1>North Carolina offer unavailable</h1>
+        <p>{{ errorMessage() }}</p>
+        <button type="button" (click)="returnToListing()">Return to property details</button>
+      } @else {
+        <div class="north-carolina-offer-entry__spinner" aria-hidden="true"></div>
+        <h1>Opening your North Carolina offer</h1>
+        <p>NavStreet is loading the property and checking for an existing draft.</p>
+      }
+    </section>
+  }
+</main>

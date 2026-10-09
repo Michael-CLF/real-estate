@@ -2,6 +2,7 @@ import type { StateListingPackage } from '../state-listing-package';
 
 /** Uploaded disclosure is required before NavStreet will accept a Louisiana offer. */
 export const louisianaListingPackage: StateListingPackage = {
+  propertyDetailFields: ['legalDescription'],
   stateCode: 'LA',
   stateName: 'Louisiana',
   requiredSellerStatementFields: [

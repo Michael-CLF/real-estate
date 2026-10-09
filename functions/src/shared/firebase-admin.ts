@@ -8,7 +8,7 @@ import {
 } from 'firebase-admin/auth';
 
 import {
-  getFirestore,
+  initializeFirestore,
 } from 'firebase-admin/firestore';
 
 /**
@@ -30,4 +30,4 @@ export const adminAuth =
  * Server-side Cloud Firestore instance.
  */
 export const adminFirestore =
-  getFirestore(adminApp);
+  initializeFirestore(adminApp, { preferRest: true });

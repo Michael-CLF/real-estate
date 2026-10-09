@@ -65,7 +65,7 @@ export function validateNorthCarolinaSubmission(
     validateDeposits(terms);
     validateConcessions(terms);
     validateSettlement(terms);
-    validateDelivery(terms, version, configuration.stateCode);
+    validateDelivery(terms, version, configuration.defaultTimeZone);
     validateBuyerDisclosures(terms);
     validateSellerStatements(
         terms,

@@ -177,7 +177,7 @@ export class OfferWizardComponent {
   });
 
   protected readonly busy = computed(
-    () => this.saving() || this.submitting()
+    () => this.submitting()
   );
 
   protected readonly contractDefinition = computed(

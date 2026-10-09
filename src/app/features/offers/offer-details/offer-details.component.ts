@@ -2,6 +2,7 @@ import { editOfferPath } from '../engine/state-offer-registry';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   computed,
   inject,
@@ -92,6 +93,10 @@ export class OfferDetailsComponent
 
   private readonly offerDocumentService =
     inject(OfferDocumentService);
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly automaticallyPreparedVersions = new Set<string>();
+  readonly preparingAgreement = signal(false);
 
   readonly loading =
     signal(true);
@@ -866,6 +871,7 @@ export class OfferDetailsComponent
 
 
   openSigningPanel(): void {
+    if (!this.agreementDocument() || this.preparingAgreement() || this.processing()) return;
     this.clearMessages();
 
     const party =
@@ -967,42 +973,40 @@ export class OfferDetailsComponent
 
 
   async prepareAgreement(): Promise<void> {
-    const version =
-      this.currentVersion();
+    const version = this.currentVersion();
+    if (!version || this.processing() || this.preparingAgreement()) return;
 
-    if (!version) {
-      return;
-    }
-
+    this.preparingAgreement.set(true);
     this.processing.set(true);
     this.clearMessages();
-
     try {
-      await this.offerDocumentService
-        .generateAgreement(
-          this.offerUid,
-          version.Uid,
-          version.status === 'accepted'
-            ? 'accepted_agreement'
-            : version.versionNumber === 1
-              ? 'offer_agreement'
-              : 'counteroffer_agreement'
-        );
-
-      await this.loadOffer(false);
-
-      this.successMessage.set(
-        'The agreement PDF is ready for review and signature.'
+      const result = await this.offerDocumentService.generateAgreement(
+        this.offerUid,
+        version.Uid,
+        version.status === 'accepted'
+          ? 'accepted_agreement'
+          : version.versionNumber === 1
+            ? 'offer_agreement'
+            : 'counteroffer_agreement'
       );
+      const document = await this.offerDocumentService.getDocument(this.offerUid, result.documentUid);
+      if (!document || document.offerVersionUid !== version.Uid) {
+        throw new Error('The agreement was prepared but could not be loaded. Please try again.');
+      }
+      if (this.destroyRef.destroyed || this.currentVersion()?.Uid !== version.Uid) return;
+      this.agreementDocument.set(document);
+      this.successMessage.set('The agreement PDF is ready for review and signature.');
     } catch (error) {
-      this.errorMessage.set(
-        this.getErrorMessage(error)
-      );
+      if (!this.destroyRef.destroyed && this.currentVersion()?.Uid === version.Uid) {
+        this.errorMessage.set('Your offer is saved. The agreement PDF could not be prepared. Select Prepare Agreement PDF to retry. ' + this.getErrorMessage(error));
+      }
     } finally {
-      this.processing.set(false);
+      if (!this.destroyRef.destroyed) {
+        this.preparingAgreement.set(false);
+        this.processing.set(false);
+      }
     }
   }
-
 
   async signAgreement(): Promise<void> {
     this.signingForm.markAllAsTouched();
@@ -1046,6 +1050,15 @@ export class OfferDetailsComponent
           formValue.consentToElectronicSignature,
           formValue.certificationAccepted
         );
+
+      this.signingPanelOpen.set(false);
+      this.successMessage.set(
+        result.fullyExecuted
+          ? 'All required parties have signed. The property is now under contract. Preparing the final agreement PDF.'
+          : this.isReceivingParty()
+            ? 'Your signature was recorded.'
+            : 'Your signature was recorded and the offer was sent to the receiving party.'
+      );
 
       let finalAgreementPrepared =
         true;
@@ -1306,20 +1319,22 @@ export class OfferDetailsComponent
         );
       }
 
-      const [
-        latestVersion,
-        versions
-      ] = await Promise.all([
+      // Start history alongside essential reads, but handle its rejection immediately.
+      const historyRequest = this.readOfferData(
+        'the negotiation history',
+        this.offerService.getVersionHistory(offer.Uid)
+      ).then(
+        versions => ({ versions, error: null }),
+        (error: unknown) => ({ versions: null, error })
+      );
+      const [latestVersion, allDocuments] = await Promise.all([
         this.readOfferData('the current version', this.offerService.getVersion(
           offer.Uid,
           offer.currentVersionUid
         )),
-
-        this.readOfferData('the negotiation history', this.offerService
-          .getVersionHistory(
-            offer.Uid
-          ))
+        this.readOfferData('the agreement documents', this.offerDocumentService.getDocuments(offer.Uid))
       ]);
+      let history = null as Awaited<typeof historyRequest> | null;
 
       if (!latestVersion) {
         throw new Error(
@@ -1346,6 +1361,10 @@ export class OfferDetailsComponent
           );
         }
 
+        // A receiving party must resolve the delivered version before rendering.
+        history = await historyRequest;
+        if (history.error) throw history.error;
+        const versions = history.versions ?? [];
         visibleVersion =
           versions.find(
             version =>
@@ -1359,18 +1378,15 @@ export class OfferDetailsComponent
           latestVersion;
       }
 
-      const documents =
-        await this.readOfferData('the agreement documents', this.offerDocumentService
-          .getDocumentsForVersion(
-            offer.Uid,
-            visibleVersion.Uid
-          ));
+      const documents = allDocuments.filter(document => document.offerVersionUid === visibleVersion.Uid);
 
       this.offer.set(offer);
       this.currentVersion.set(
         visibleVersion
       );
 
+      // Render the authorized current version while secondary history completes.
+      const versions = history?.versions ?? [visibleVersion];
       this.versions.set(
         versions
           .filter(
@@ -1397,6 +1413,29 @@ export class OfferDetailsComponent
           visibleVersion
         )
       );
+      if (
+        !this.agreementDocument() &&
+        this.access()?.canSign &&
+        !this.display(visibleVersion).signingBlockReason &&
+        !this.automaticallyPreparedVersions.has(visibleVersion.Uid) &&
+        !this.destroyRef.destroyed
+      ) {
+        this.automaticallyPreparedVersions.add(visibleVersion.Uid);
+        // Do not hold the loading screen while preparing the PDF.
+        void this.prepareAgreement();
+      }
+      this.loading.set(false);
+      history ??= await historyRequest;
+      if (this.destroyRef.destroyed) return;
+      if (history.error) {
+        console.error('Unable to load offer negotiation history:', history.error);
+        this.errorMessage.set('The offer is loaded, but its negotiation history could not be loaded. Refresh the page to retry.');
+      } else {
+        this.versions.set((history.versions ?? []).filter(version =>
+          !this.isUndeliveredVersion(offer, version) ||
+          this.isUserOnInitiatingSide(offer, version)
+        ).sort((left, right) => right.versionNumber - left.versionNumber));
+      }
     } catch (error: unknown) {
       console.error(
         'Unable to load offer details:',

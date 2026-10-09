@@ -1,3 +1,5 @@
+import { resetPartySignatures, createCounterofferTerms } from './counteroffer-draft-data';
+import { removeUndefinedValues } from './draft-value-cleanup';
 import { readSouthCarolinaListingDisclosures } from './state-contracts/south-carolina/south-carolina-state-contract.package';
 import {
   HttpsError,
@@ -29,9 +31,7 @@ import type {
   CreateCounterofferResponse,
   OfferDocument,
   OfferInitiatingParty,
-  OfferTermsDocument,
-  OfferVersionDocument,
-  OfferVersionPartySnapshotDocument
+  OfferVersionDocument
 } from './offer-types';
 
 
@@ -470,88 +470,6 @@ function getCounteringParty(
 }
 
 
-function resetPartySignatures(
-  parties:
-    OfferVersionPartySnapshotDocument[]
-): OfferVersionPartySnapshotDocument[] {
-  return parties.map(
-    party =>
-      removeUndefinedValues({
-        ...party,
-
-        signature: {
-          status:
-            'not_started'
-        },
-
-        electronicTransactionsConsentAccepted:
-          false,
-
-        electronicTransactionsConsentAcceptedAt:
-          undefined
-      }) as
-      OfferVersionPartySnapshotDocument
-  );
-}
-
-
-function createCounterofferTerms(
-  sourceTerms: OfferTermsDocument
-): OfferTermsDocument {
-  const terms =
-    clonePlainValue(
-      sourceTerms
-    );
-
-  return {
-    ...terms,
-
-    delivery: {
-      ...terms.delivery,
-
-      expiresAt: '',
-
-      electronicDeliveryAuthorized:
-        false
-    }
-  };
-}
-
-
-function clonePlainValue<T>(
-  value: T
-): T {
-  if (Array.isArray(value)) {
-    return value.map(
-      item =>
-        clonePlainValue(item)
-    ) as T;
-  }
-
-  if (
-    value !== null &&
-    typeof value === 'object' &&
-    !(value instanceof Timestamp) &&
-    !(value instanceof FieldValue)
-  ) {
-    return Object.fromEntries(
-      Object.entries(
-        value as Record<string, unknown>
-      ).map(
-        ([key, nestedValue]) => [
-          key,
-          clonePlainValue(
-            nestedValue
-          )
-        ]
-      )
-    ) as T;
-  }
-
-  return value;
-}
-
-
 function requireIdentifier(
   value: unknown,
   fieldName: string
@@ -583,40 +501,3 @@ function requireIdentifier(
 }
 
 
-function removeUndefinedValues<T>(
-  value: T
-): T {
-  if (Array.isArray(value)) {
-    return value.map(
-      item =>
-        removeUndefinedValues(item)
-    ) as T;
-  }
-
-  if (
-    value !== null &&
-    typeof value === 'object' &&
-    !(value instanceof Timestamp) &&
-    !(value instanceof FieldValue)
-  ) {
-    return Object.fromEntries(
-      Object.entries(
-        value as Record<string, unknown>
-      )
-        .filter(
-          ([, nestedValue]) =>
-            nestedValue !== undefined
-        )
-        .map(
-          ([key, nestedValue]) => [
-            key,
-            removeUndefinedValues(
-              nestedValue
-            )
-          ]
-        )
-    ) as T;
-  }
-
-  return value;
-}

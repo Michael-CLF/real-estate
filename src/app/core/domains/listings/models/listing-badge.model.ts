@@ -13,7 +13,8 @@ export type ListingBadgeTone =
   | 'teal'
   | 'dark-green'
   | 'coral'
-  | 'green';
+  | 'green'
+  | 'red';
 
 export interface ListingBadge {
   type: ListingBadgeType;

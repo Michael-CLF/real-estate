@@ -3,7 +3,6 @@ import type { StateContractPackage } from '../state-contract-package';
 import { createOklahomaContractMilestones } from './oklahoma-contract-milestones';
 import { sanitizeOklahomaDraftTerms } from './oklahoma-draft-terms-sanitizer';
 import { createOklahomaInitialOfferTerms } from './oklahoma-initial-terms';
-import { generateOklahomaOfferPdf } from './oklahoma-offer-pdf.service';
 import type { OklahomaOfferTermsDocument } from './oklahoma-offer-terms.document';
 import { validateOklahomaSubmission } from './oklahoma-submission-validator';
 import { OREC_RESIDENTIAL_SALE_TEMPLATE } from './contracts/residential-sale/orec-residential-sale-template';
@@ -30,7 +29,10 @@ export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTer
     { label: 'Inspection period', value: `${t.timePeriods.inspectionDays} days from Time Reference Date (${summaryText(t.timePeriods.referenceDate)}); see contract counting rules` },
     { label: 'Possession', value: summaryText(t.closing.possessionTerms) },
   ],
-  generateAgreement: input => generateOklahomaOfferPdf(input),
+  generateAgreement: async input => {
+    const { generateOklahomaOfferPdf } = require('./oklahoma-offer-pdf.service') as typeof import('./oklahoma-offer-pdf.service');
+    return generateOklahomaOfferPdf(input);
+  },
   validateSubmission: input => validateOklahomaSubmission(input),
   sanitizeDraftTerms: input => sanitizeOklahomaDraftTerms(input),
   createContractMilestones: input => createOklahomaContractMilestones(input),

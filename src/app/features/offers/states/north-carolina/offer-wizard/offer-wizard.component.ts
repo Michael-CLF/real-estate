@@ -1,3 +1,4 @@
+import { createNorthCarolinaOfferTerms, createExpirationIso, toCents, optionalCents, optionalNumber, optionalInteger, optionalText } from './north-carolina-offer-wizard.mapping';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -5,7 +6,8 @@ import {
   OnInit,
   computed,
   inject,
-  signal
+  signal,
+  input,
 } from '@angular/core';
 
 import {
@@ -14,92 +16,85 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
-  Validators
+  Validators,
 } from '@angular/forms';
 
 import {
   debounceTime,
-  firstValueFrom
 } from 'rxjs';
 
 import {
-  takeUntilDestroyed
+  takeUntilDestroyed,
 } from '@angular/core/rxjs-interop';
 
 import {
-  ActivatedRoute,
-  Router
-} from '@angular/router';
-
-import {
-  AdditionalTermsSectionComponent
+  AdditionalTermsSectionComponent,
 } from '../../north-carolina/components/additional-terms-section/additional-terms-section.component';
 
 import {
-  BuyerPropertySectionComponent
+  BuyerPropertySectionComponent,
 } from '../../north-carolina/components/buyer-property-section/buyer-property-section.component';
 
 import {
-  ConcessionsSectionComponent
+  ConcessionsSectionComponent,
 } from '../../north-carolina/components/concessions-section/concessions-section.component';
 
 import {
-  DepositsDueDiligenceSectionComponent
+  DepositsDueDiligenceSectionComponent,
 } from '../../north-carolina/components/deposits-due-diligence-section/deposits-due-diligence-section.component';
 
 import {
-  DisclosuresAddendaSectionComponent
+  DisclosuresAddendaSectionComponent,
 } from '../../north-carolina/components/disclosures-addenda-section/disclosures-addenda-section.component';
 
 import {
-  OfferExpirationSectionComponent
+  OfferExpirationSectionComponent,
 } from '../../north-carolina/components/offer-expiration-section/offer-expiration-section.component';
 
 import {
-  OfferReviewSectionComponent
+  OfferReviewSectionComponent,
 } from '../../north-carolina/components/offer-review-section/offer-review-section.component';
 
 import {
-  PriceFinancingSectionComponent
+  PriceFinancingSectionComponent,
 } from '../../north-carolina/components/price-financing-section/price-financing-section.component';
 
 import {
-  PropertyInclusionsSectionComponent
+  PropertyInclusionsSectionComponent,
 } from '../../north-carolina/components/property-inclusions-section/property-inclusions-section.component';
 
 import {
-  SettlementPossessionSectionComponent
+  SettlementPossessionSectionComponent,
 } from '../../north-carolina/components/settlement-possession-section/settlement-possession-section.component';
 
 import {
-  AccountState
+  AccountState,
 } from '../../../../../core/authentication/state/account.state';
 
 import {
-  MarketplaceListingRepository
-} from '../../../../../core/domains/marketplace/repositories/marketplace-listing.repository';
-
-import {
-  FirestoreMarketplaceListingRepository
-} from '../../../../../core/domains/marketplace/repositories/firestore-marketplace-listing.repository';
-
-import {
-  OfferTerms
+  OfferTerms,
 } from '../../../../../core/domains/offers/models/offer-terms.model';
 
 import {
+  OfferVersionDraftChanges,
   OfferVersion,
-  OfferVersionPartySnapshot
+  OfferVersionPartySnapshot,
 } from '../../../../../core/domains/offers/models/offer-version.model';
 
-import {
-  OfferService
-} from '../../../../../core/domains/offers/services/offer.service';
-
-import {
-  OfferDocumentService
-} from '../../../../../core/domains/offers/services/offer-document.service';
-
+export interface NorthCarolinaOfferSession {
+  readonly listingUid: string;
+  readonly offerUid: string;
+  readonly offerVersionUid: string;
+  readonly offerVersion: OfferVersion;
+  readonly profile:
+    NonNullable<ReturnType<AccountState['profile']>>;
+  readonly propertyCounty: string;
+  readonly saveDraft:
+    (changes: OfferVersionDraftChanges<OfferTerms>) =>
+      Promise<void>;
+  readonly submitOffer: () => Promise<void>;
+  readonly returnToListing: () => Promise<void>;
+}
 
 export interface OfferWizardSection {
   key: string;
@@ -108,11 +103,9 @@ export interface OfferWizardSection {
   description: string;
 }
 
-
 @Component({
   selector: 'app-offer-wizard',
   standalone: true,
-
   imports: [
     ReactiveFormsModule,
     AdditionalTermsSectionComponent,
@@ -124,727 +117,516 @@ export interface OfferWizardSection {
     OfferReviewSectionComponent,
     PriceFinancingSectionComponent,
     PropertyInclusionsSectionComponent,
-    SettlementPossessionSectionComponent
+    SettlementPossessionSectionComponent,
   ],
-
-  providers: [
-    {
-      provide:
-        MarketplaceListingRepository,
-
-      useClass:
-        FirestoreMarketplaceListingRepository
-    }
-  ],
-
-  templateUrl:
-    './offer-wizard.component.html',
-
-  styleUrl:
-    './offer-wizard.component.scss',
-
-  changeDetection:
-    ChangeDetectionStrategy.OnPush
+  templateUrl: './offer-wizard.component.html',
+  styleUrl: './offer-wizard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OfferWizardComponent
-implements OnInit {
+export class OfferWizardComponent implements OnInit {
+  private readonly formBuilder = inject(FormBuilder);
 
-  private readonly formBuilder =
-    inject(FormBuilder);
-
-  private readonly destroyRef =
-    inject(DestroyRef);
-
-  private readonly offerService =
-    inject(OfferService);
-
-  private readonly offerDocumentService =
-    inject(OfferDocumentService);
-
-  private readonly route =
-    inject(ActivatedRoute);
-
-  private readonly router =
-    inject(Router);
-
-  private readonly accountState =
-    inject(AccountState);
-
-  private readonly listingRepository =
-    inject(MarketplaceListingRepository);
+  private readonly destroyRef = inject(DestroyRef);
 
   offerUid = '';
+
   offerVersionUid = '';
 
-  private existingTerms:
-    OfferTerms | null = null;
+  private existingTerms: OfferTerms | null = null;
 
-  private primaryBuyer: OfferVersionPartySnapshot | null = null;
+  private primaryBuyer:
+    OfferVersionPartySnapshot | null = null;
+
   private coBuyerUid = '';
+
   readonly coBuyerLocked = signal(false);
+
   readonly canAddCoBuyer = signal(false);
 
   private offerVersionNumber = 1;
 
-  private lastSavedSnapshot = '';
+  private saveChain: Promise<void> = Promise.resolve();
 
-  private saveChain:
-    Promise<void> =
-    Promise.resolve();
+  readonly session =
+    input.required<NorthCarolinaOfferSession>();
 
-  readonly listingUid =
-    this.route.snapshot.paramMap.get(
-      'listingUid'
-    ) ??
-    this.route.snapshot.paramMap.get(
-      'id'
-    ) ??
-    '';
+  get listingUid(): string {
+    return this.session().listingUid;
+  }
 
-  readonly currentSectionIndex =
-    signal(0);
+  readonly currentSectionIndex = signal(0);
 
-  readonly saving =
-    signal(false);
+  readonly saving = signal(false);
 
-  readonly submitting =
-    signal(false);
+  readonly submitting = signal(false);
 
-  readonly loading =
-    signal(true);
+  readonly loading = signal(true);
 
-  readonly errorMessage =
-    signal('');
+  readonly errorMessage = signal('');
 
-  readonly saveMessage =
-    signal('');
+  readonly saveMessage = signal('');
 
   readonly validationAttemptedSection =
     signal<string | null>(null);
 
-  readonly sections:
-    readonly OfferWizardSection[] = [
+  readonly sections: readonly OfferWizardSection[] = [
+    {
+      key: 'buyerProperty',
+      title: 'Buyer and Property',
+      shortTitle: 'Buyer',
+      description:
+        'Confirm the buyer, seller and property information pulled from NavStreet.',
+    },
+    {
+      key: 'priceFinancing',
+      title: 'Purchase Price and Funding',
+      shortTitle: 'Price',
+      description:
+        'Enter the proposed purchase price and indicate whether the purchase will use cash or a loan.',
+    },
+    {
+      key: 'depositsDueDiligence',
+      title: 'Deposit and Due Diligence',
+      shortTitle: 'Deposit',
+      description:
+        'Enter the Deposit, escrow agent and proposed due-diligence deadline.',
+    },
+    {
+      key: 'concessions',
+      title: 'Seller Concessions',
+      shortTitle: 'Concessions',
+      description:
+        'Enter any seller concession and home-warranty amount requested by the buyer.',
+    },
+    {
+      key: 'propertyInclusions',
+      title: 'Property Inclusions and Exclusions',
+      shortTitle: 'Property',
+      description:
+        'Identify included, excluded, leased and separately included property.',
+    },
+    {
+      key: 'settlementPossession',
+      title: 'Settlement and Possession',
+      shortTitle: 'Settlement',
+      description:
+        'Enter the proposed settlement date and when possession will be delivered.',
+    },
+    {
+      key: 'disclosuresAddenda',
+      title: 'Buyer Disclosure Acknowledgements',
+      shortTitle: 'Disclosures',
+      description:
+        'Record the buyer’s selections for the required North Carolina disclosure statements.',
+    },
+    {
+      key: 'additionalTerms',
+      title: 'Additional Terms Exhibit',
+      shortTitle: 'Terms',
+      description:
+        'Attach separately prepared additional terms when they are part of the offer.',
+    },
+    {
+      key: 'offerExpiration',
+      title: 'Offer Expiration',
+      shortTitle: 'Expiration',
+      description:
+        'Specify when the offer expires if it has not been accepted.',
+    },
+    {
+      key: 'offerReview',
+      title: 'Review and Certification',
+      shortTitle: 'Review',
+      description:
+        'Review the offer and accept the required electronic records and platform acknowledgements.',
+    },
+  ];
+
+  readonly currentSection = computed(
+    () => this.sections[this.currentSectionIndex()],
+  );
+
+  readonly isFirstSection = computed(
+    () => this.currentSectionIndex() === 0,
+  );
+
+  readonly isLastSection = computed(
+    () =>
+      this.currentSectionIndex() ===
+      this.sections.length - 1,
+  );
+
+  readonly progressPercentage = computed(
+    () =>
+      (
+        (this.currentSectionIndex() + 1) /
+        this.sections.length
+      ) * 100,
+  );
+
+  readonly offerForm = this.formBuilder.group({
+    buyerProperty: this.formBuilder.group({
+      coBuyerEnabled: [false],
+      coBuyerLegalName: [
+        { value: '', disabled: true },
+        Validators.required,
+      ],
+      coBuyerEmail: [
+        { value: '', disabled: true },
+        [
+          Validators.required,
+          Validators.email,
+        ],
+      ],
+      coBuyerPhone: [
+        { value: '', disabled: true },
+        [
+          Validators.required,
+          Validators.pattern(/^\+?[0-9() .-]{7,20}$/),
+        ],
+      ],
+      buyerFirstName: [
+        { value: '', disabled: true },
+      ],
+      buyerMiddleName: [
+        { value: '', disabled: true },
+      ],
+      buyerLastName: [
+        { value: '', disabled: true },
+      ],
+      buyerSuffix: [
+        { value: '', disabled: true },
+      ],
+      buyerEmail: [
+        { value: '', disabled: true },
+      ],
+      buyerPhone: [
+        { value: '', disabled: true },
+      ],
+      sellerLegalName: [
+        { value: '', disabled: true },
+      ],
+      sellerEmail: [
+        { value: '', disabled: true },
+      ],
+      propertyAddress: [
+        { value: '', disabled: true },
+      ],
+      propertyCity: [
+        { value: '', disabled: true },
+      ],
+      propertyCounty: [
+        { value: '', disabled: true },
+      ],
+      propertyState: [
+        { value: 'NC', disabled: true },
+      ],
+      propertyPostalCode: [
+        { value: '', disabled: true },
+      ],
+      propertyParcelId: [
+        { value: '', disabled: true },
+      ],
+      propertyDeedBook: [
+        { value: '', disabled: true },
+      ],
+      propertyDeedPage: [
+        { value: '', disabled: true },
+      ],
+      propertyOtherReference: [
+        { value: '', disabled: true },
+      ],
+    }),
+
+    priceFinancing: this.formBuilder.group(
       {
-        key: 'buyerProperty',
-        title: 'Buyer and Property',
-        shortTitle: 'Buyer',
-        description:
-          'Confirm the buyer, seller and property information pulled from NavStreet.'
+        purchasePrice: [
+          null as number | null,
+          [
+            Validators.required,
+            Validators.min(1),
+          ],
+        ],
+        financingMethod: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(/^(cash|loan)$/),
+          ],
+        ],
+        otherPropertyWillFundPurchase: [false],
+        otherPropertyDescription: [
+          '',
+          [
+            Validators.maxLength(500),
+          ],
+        ],
       },
       {
-        key: 'priceFinancing',
-        title: 'Purchase Price and Funding',
-        shortTitle: 'Price',
-        description:
-          'Enter the proposed purchase price and indicate whether the purchase will use cash or a loan.'
+        validators: [
+          priceFundingValidator,
+        ],
+      },
+    ),
+
+    depositsDueDiligence: this.formBuilder.group(
+      {
+        depositAmount: [
+          null as number | null,
+          [
+            Validators.required,
+            Validators.min(0),
+          ],
+        ],
+        depositDeliveryDays: [
+          4,
+          [
+            Validators.required,
+            Validators.min(1),
+            Validators.max(30),
+            Validators.pattern(/^[1-9]\d*$/),
+          ],
+        ],
+        escrowAgentName: [
+          '',
+          [
+            Validators.maxLength(200),
+          ],
+        ],
+        dueDiligenceDeadlineType: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(
+              /^(specific_date|days_after_effective_date)$/,
+            ),
+          ],
+        ],
+        dueDiligenceEndDate: [''],
+        dueDiligenceDaysAfterEffectiveDate: [
+          null as number | null,
+          [
+            Validators.min(1),
+            Validators.max(365),
+          ],
+        ],
+        dueDiligenceEndTime: [
+          { value: '17:00', disabled: true },
+        ],
       },
       {
-        key: 'depositsDueDiligence',
-        title: 'Deposit and Due Diligence',
-        shortTitle: 'Deposit',
-        description:
-          'Enter the Deposit, escrow agent and proposed due-diligence deadline.'
+        validators: [
+          dueDiligenceValidator,
+        ],
+      },
+    ),
+
+    concessions: this.formBuilder.group(
+      {
+        concessionType: [
+          'none',
+          [
+            Validators.required,
+            Validators.pattern(/^(none|amount|percentage)$/),
+          ],
+        ],
+        sellerConcessionAmount: [
+          null as number | null,
+          [
+            Validators.min(0),
+          ],
+        ],
+        sellerConcessionPercentage: [
+          null as number | null,
+          [
+            Validators.min(0),
+            Validators.max(100),
+          ],
+        ],
+        homeWarrantyRequested: [false],
+        homeWarrantyAmount: [
+          null as number | null,
+          [
+            Validators.min(0),
+          ],
+        ],
       },
       {
-        key: 'concessions',
-        title: 'Seller Concessions',
-        shortTitle: 'Concessions',
-        description:
-          'Enter any seller concession and home-warranty amount requested by the buyer.'
+        validators: [
+          concessionsValidator,
+        ],
+      },
+    ),
+
+    propertyInclusions: this.formBuilder.group(
+      {
+        manufacturedHomeIncluded: [false],
+        separatePropertyIncluded: [false],
+        separatePropertyDescription: [
+          '',
+          [
+            Validators.maxLength(1500),
+          ],
+        ],
+        includedItemsDescription: [
+          '',
+          [
+            Validators.maxLength(1500),
+          ],
+        ],
+        excludedItemsDescription: [
+          '',
+          [
+            Validators.maxLength(1500),
+          ],
+        ],
+        leasedItemsDescription: [
+          '',
+          [
+            Validators.maxLength(1500),
+          ],
+        ],
       },
       {
-        key: 'propertyInclusions',
-        title: 'Property Inclusions and Exclusions',
-        shortTitle: 'Property',
-        description:
-          'Identify included, excluded, leased and separately included property.'
+        validators: [
+          propertyInclusionsValidator,
+        ],
+      },
+    ),
+
+    settlementPossession: this.formBuilder.group(
+      {
+        settlementDate: [
+          '',
+          [
+            Validators.required,
+          ],
+        ],
+        possessionTiming: [
+          'at_closing',
+          [
+            Validators.required,
+            Validators.pattern(/^(at_closing|other)$/),
+          ],
+        ],
+        possessionAgreementDocumentUid: [''],
       },
       {
-        key: 'settlementPossession',
-        title: 'Settlement and Possession',
-        shortTitle: 'Settlement',
-        description:
-          'Enter the proposed settlement date and when possession will be delivered.'
+        validators: [
+          settlementPossessionValidator,
+        ],
+      },
+    ),
+
+    disclosuresAddenda: this.formBuilder.group({
+      residentialPropertyStatus: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^(received|not_received|exempt)$/),
+        ],
+      ],
+      residentialPropertyDocumentUid: [''],
+      residentialPropertyDocumentVersionId: [''],
+      residentialPropertyExemptionReason: [
+        '',
+        [
+          Validators.maxLength(500),
+        ],
+      ],
+      residentialPropertyAcknowledged: [
+        false,
+        [
+          Validators.requiredTrue,
+        ],
+      ],
+      mineralOilGasRightsStatus: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^(received|not_received|exempt)$/),
+        ],
+      ],
+      mineralOilGasRightsDocumentUid: [''],
+      mineralOilGasRightsDocumentVersionId: [''],
+      mineralOilGasRightsExemptionReason: [
+        '',
+        [
+          Validators.maxLength(500),
+        ],
+      ],
+      mineralOilGasRightsAcknowledged: [
+        false,
+        [
+          Validators.requiredTrue,
+        ],
+      ],
+    }),
+
+    additionalTerms: this.formBuilder.group(
+      {
+        hasAdditionalTerms: [false],
+        preparedBy: [''],
+        documentUid: [''],
       },
       {
-        key: 'disclosuresAddenda',
-        title: 'Buyer Disclosure Acknowledgements',
-        shortTitle: 'Disclosures',
-        description:
-          'Record the buyer’s selections for the required North Carolina disclosure statements.'
+        validators: [
+          additionalTermsValidator,
+        ],
       },
+    ),
+
+    offerExpiration: this.formBuilder.group(
       {
-        key: 'additionalTerms',
-        title: 'Additional Terms Exhibit',
-        shortTitle: 'Terms',
-        description:
-          'Attach separately prepared additional terms when they are part of the offer.'
-      },
-      {
-        key: 'offerExpiration',
-        title: 'Offer Expiration',
-        shortTitle: 'Expiration',
-        description:
-          'Specify when the offer expires if it has not been accepted.'
-      },
-      {
-        key: 'offerReview',
-        title: 'Review and Certification',
-        shortTitle: 'Review',
-        description:
-          'Review the offer and accept the required electronic records and platform acknowledgements.'
-      }
-    ];
-
-  readonly currentSection =
-    computed(
-      () =>
-        this.sections[
-          this.currentSectionIndex()
-        ]
-    );
-
-  readonly isFirstSection =
-    computed(
-      () =>
-        this.currentSectionIndex() === 0
-    );
-
-  readonly isLastSection =
-    computed(
-      () =>
-        this.currentSectionIndex() ===
-        this.sections.length - 1
-    );
-
-  readonly progressPercentage =
-    computed(
-      () =>
-        (
-          (
-            this.currentSectionIndex() +
-            1
-          ) /
-          this.sections.length
-        ) *
-        100
-    );
-
-  readonly offerForm =
-    this.formBuilder.group({
-      buyerProperty:
-        this.formBuilder.group({
-          coBuyerEnabled: [false],
-          coBuyerLegalName: [{ value: '', disabled: true }, Validators.required],
-          coBuyerEmail: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
-          coBuyerPhone: [{ value: '', disabled: true }, [Validators.required, Validators.pattern(/^\+?[0-9() .-]{7,20}$/)]],
-          buyerFirstName: [
-            {
-              value: '',
-              disabled: true
-            }
+        expirationDate: [
+          '',
+          [
+            Validators.required,
           ],
-
-          buyerMiddleName: [
-            {
-              value: '',
-              disabled: true
-            }
+        ],
+        expirationTime: [
+          '',
+          [
+            Validators.required,
           ],
-
-          buyerLastName: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          buyerSuffix: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          buyerEmail: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          buyerPhone: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          sellerLegalName: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          sellerEmail: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyAddress: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyCity: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyCounty: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyState: [
-            {
-              value: 'NC',
-              disabled: true
-            }
-          ],
-
-          propertyPostalCode: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyParcelId: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyDeedBook: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyDeedPage: [
-            {
-              value: '',
-              disabled: true
-            }
-          ],
-
-          propertyOtherReference: [
-            {
-              value: '',
-              disabled: true
-            }
-          ]
-        }),
-
-      priceFinancing:
-        this.formBuilder.group(
+        ],
+        timeZone: [
           {
-            purchasePrice: [
-              null as number | null,
-              [
-                Validators.required,
-                Validators.min(1)
-              ]
-            ],
-
-            financingMethod: [
-              '',
-              [
-                Validators.required,
-                Validators.pattern(
-                  /^(cash|loan)$/
-                )
-              ]
-            ],
-
-            otherPropertyWillFundPurchase: [
-              false
-            ],
-
-            otherPropertyDescription: [
-              '',
-              [
-                Validators.maxLength(500)
-              ]
-            ]
+            value: 'America/New_York',
+            disabled: true,
           },
-          {
-            validators: [
-              priceFundingValidator
-            ]
-          }
-        ),
+        ],
+      },
+      {
+        validators: [
+          offerExpirationValidator,
+        ],
+      },
+    ),
 
-      depositsDueDiligence:
-        this.formBuilder.group(
-          {
-            depositAmount: [
-              null as number | null,
-              [
-                Validators.required,
-                Validators.min(0)
-              ]
-            ],
-
-            depositDeliveryDays: [
-              4,
-              [
-                Validators.required,
-                Validators.min(1),
-                Validators.max(30),
-                Validators.pattern(
-                  /^[1-9]\d*$/
-                )
-              ]
-            ],
-
-            escrowAgentName: [
-              '',
-              [
-                Validators.maxLength(200)
-              ]
-            ],
-
-            dueDiligenceDeadlineType: [
-              '',
-              [
-                Validators.required,
-                Validators.pattern(
-                  /^(specific_date|days_after_effective_date)$/
-                )
-              ]
-            ],
-
-            dueDiligenceEndDate: [
-              ''
-            ],
-
-            dueDiligenceDaysAfterEffectiveDate: [
-              null as number | null,
-              [
-                Validators.min(1),
-                Validators.max(365)
-              ]
-            ],
-
-            dueDiligenceEndTime: [
-              {
-                value: '17:00',
-                disabled: true
-              }
-            ]
-          },
-          {
-            validators: [
-              dueDiligenceValidator
-            ]
-          }
-        ),
-
-      concessions:
-        this.formBuilder.group(
-          {
-            concessionType: [
-              'none',
-              [
-                Validators.required,
-                Validators.pattern(
-                  /^(none|amount|percentage)$/
-                )
-              ]
-            ],
-
-            sellerConcessionAmount: [
-              null as number | null,
-              [
-                Validators.min(0)
-              ]
-            ],
-
-            sellerConcessionPercentage: [
-              null as number | null,
-              [
-                Validators.min(0),
-                Validators.max(100)
-              ]
-            ],
-
-            homeWarrantyRequested: [
-              false
-            ],
-
-            homeWarrantyAmount: [
-              null as number | null,
-              [
-                Validators.min(0)
-              ]
-            ]
-          },
-          {
-            validators: [
-              concessionsValidator
-            ]
-          }
-        ),
-
-      propertyInclusions:
-        this.formBuilder.group(
-          {
-            manufacturedHomeIncluded: [
-              false
-            ],
-
-            separatePropertyIncluded: [
-              false
-            ],
-
-            separatePropertyDescription: [
-              '',
-              [
-                Validators.maxLength(1500)
-              ]
-            ],
-
-            includedItemsDescription: [
-              '',
-              [
-                Validators.maxLength(1500)
-              ]
-            ],
-
-            excludedItemsDescription: [
-              '',
-              [
-                Validators.maxLength(1500)
-              ]
-            ],
-
-            leasedItemsDescription: [
-              '',
-              [
-                Validators.maxLength(1500)
-              ]
-            ]
-          },
-          {
-            validators: [
-              propertyInclusionsValidator
-            ]
-          }
-        ),
-
-      settlementPossession:
-        this.formBuilder.group(
-          {
-            settlementDate: [
-              '',
-              [
-                Validators.required
-              ]
-            ],
-
-            possessionTiming: [
-              'at_closing',
-              [
-                Validators.required,
-                Validators.pattern(
-                  /^(at_closing|other)$/
-                )
-              ]
-            ],
-
-            possessionAgreementDocumentUid: [
-              ''
-            ]
-          },
-          {
-            validators: [
-              settlementPossessionValidator
-            ]
-          }
-        ),
-
-      disclosuresAddenda:
-        this.formBuilder.group({
-          residentialPropertyStatus: [
-            '',
-            [
-              Validators.required,
-              Validators.pattern(
-                /^(received|not_received|exempt)$/
-              )
-            ]
-          ],
-
-          residentialPropertyDocumentUid: [
-            ''
-          ],
-
-          residentialPropertyDocumentVersionId: [
-            ''
-          ],
-
-          residentialPropertyExemptionReason: [
-            '',
-            [
-              Validators.maxLength(500)
-            ]
-          ],
-
-          residentialPropertyAcknowledged: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ],
-
-          mineralOilGasRightsStatus: [
-            '',
-            [
-              Validators.required,
-              Validators.pattern(
-                /^(received|not_received|exempt)$/
-              )
-            ]
-          ],
-
-          mineralOilGasRightsDocumentUid: [
-            ''
-          ],
-
-          mineralOilGasRightsDocumentVersionId: [
-            ''
-          ],
-
-          mineralOilGasRightsExemptionReason: [
-            '',
-            [
-              Validators.maxLength(500)
-            ]
-          ],
-
-          mineralOilGasRightsAcknowledged: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ]
-        }),
-
-      additionalTerms:
-        this.formBuilder.group(
-          {
-            hasAdditionalTerms: [
-              false
-            ],
-
-            preparedBy: [
-              ''
-            ],
-
-            documentUid: [
-              ''
-            ]
-          },
-          {
-            validators: [
-              additionalTermsValidator
-            ]
-          }
-        ),
-
-      offerExpiration:
-        this.formBuilder.group(
-          {
-            expirationDate: [
-              '',
-              [
-                Validators.required
-              ]
-            ],
-
-            expirationTime: [
-              '',
-              [
-                Validators.required
-              ]
-            ],
-
-            timeZone: [
-              {
-                value:
-                  'America/New_York',
-                disabled: true
-              }
-            ]
-          },
-          {
-            validators: [
-              offerExpirationValidator
-            ]
-          }
-        ),
-
-      offerReview:
-        this.formBuilder.group({
-          informationCertified: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ],
-
-          electronicRecordsConsent: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ],
-
-          electronicSignatureConsent: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ],
-
-          navStreetDisclaimerAccepted: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ],
-
-          attorneyLanguageAcknowledged: [
-            false,
-            [
-              Validators.requiredTrue
-            ]
-          ]
-        })
-    });
+    offerReview: this.formBuilder.group({
+      informationCertified: [
+        false,
+        [
+          Validators.requiredTrue,
+        ],
+      ],
+      electronicRecordsConsent: [
+        false,
+        [
+          Validators.requiredTrue,
+        ],
+      ],
+      electronicSignatureConsent: [
+        false,
+        [
+          Validators.requiredTrue,
+        ],
+      ],
+      navStreetDisclaimerAccepted: [false],
+      attorneyLanguageAcknowledged: [false],
+    }),
+  });
 
   async ngOnInit(): Promise<void> {
     this.loading.set(true);
@@ -852,524 +634,260 @@ implements OnInit {
     this.saveMessage.set('');
 
     try {
-      if (!this.listingUid) {
-        throw new Error(
-          'The property listing identifier is missing.'
-        );
-      }
+      const {
+        profile,
+        offerVersion,
+        offerUid,
+        offerVersionUid,
+      } = this.session();
 
-      const profile =
-        this.accountState.profile();
+      this.offerUid = offerUid;
+      this.offerVersionUid = offerVersionUid;
+      this.existingTerms = offerVersion.terms;
+      this.offerVersionNumber = offerVersion.versionNumber;
 
-      if (!profile) {
-        throw new Error(
-          'The authenticated NavStreet account could not be loaded.'
-        );
-      }
-
-      const requestedOfferUid =
-        this.route.snapshot
-          .queryParamMap
-          .get('offerUid');
-
-      const requestedOfferVersionUid =
-        this.route.snapshot
-          .queryParamMap
-          .get('offerVersionUid');
-
-      if (
-        !!requestedOfferUid !==
-        !!requestedOfferVersionUid
-      ) {
-        throw new Error(
-          'Both the offer and offer-version identifiers are required to open a counteroffer draft.'
-        );
-      }
-
-      let offerVersion:
-        OfferVersion | null;
-
-      if (
-        requestedOfferUid &&
-        requestedOfferVersionUid
-      ) {
-        const requestedOffer =
-          await this.offerService.getOffer(
-            requestedOfferUid
-          );
-
-        if (
-          !requestedOffer ||
-          requestedOffer.listingUid !==
-            this.listingUid ||
-          requestedOffer.currentVersionUid !==
-            requestedOfferVersionUid
-        ) {
-          throw new Error(
-            'The requested counteroffer draft is not the current version for this property.'
-          );
-        }
-
-        offerVersion =
-          await this.offerService.getVersion(
-            requestedOfferUid,
-            requestedOfferVersionUid
-          );
-
-        if (
-          !offerVersion ||
-          !this.offerService
-            .getParticipantAccess(
-              requestedOffer,
-              offerVersion
-            )
-            .canEditCurrentDraft
-        ) {
-          throw new Error(
-            'You do not have permission to edit this counteroffer draft.'
-          );
-        }
-
-        this.offerUid =
-          requestedOfferUid;
-
-        this.offerVersionUid =
-          requestedOfferVersionUid;
-      } else {
-        const draftResult =
-          await this.offerService
-            .createOrResumeDraft(
-              this.listingUid
-            );
-
-        this.offerUid =
-          draftResult.offerUid;
-
-        this.offerVersionUid =
-          draftResult.offerVersionUid;
-
-        offerVersion =
-          await this.offerService.getVersion(
-            this.offerUid,
-            this.offerVersionUid
-          );
-      }
-
-      const listing =
-        await firstValueFrom(
-          this.listingRepository
-            .getListingById(
-              this.listingUid
-            )
-        );
-
-      if (!listing) {
-        throw new Error(
-          'The selected property listing could not be found.'
-        );
-      }
-
-      if (!offerVersion) {
-        throw new Error(
-          'The offer draft could not be loaded.'
-        );
-      }
-
-      this.existingTerms =
-        offerVersion.terms;
-
-      this.offerVersionNumber =
-        offerVersion.versionNumber;
-
-      const buyer =
-        offerVersion.buyers[0];
+      const buyer = offerVersion.buyers[0];
 
       this.primaryBuyer = buyer ?? null;
-      this.coBuyerUid = offerVersion.buyers[1]?.partyUid ?? crypto.randomUUID();
-      this.coBuyerLocked.set(offerVersion.buyers.length > 1);
-      this.canAddCoBuyer.set(offerVersion.initiatedBy === 'buyer' && offerVersion.versionNumber === 1);
 
-      const seller =
-        offerVersion.sellers[0];
+      this.coBuyerUid =
+        offerVersion.buyers[1]?.partyUid ??
+        crypto.randomUUID();
 
-      const property =
-        offerVersion.terms.property;
+      this.coBuyerLocked.set(
+        offerVersion.buyers.length > 1,
+      );
+
+      this.canAddCoBuyer.set(
+        offerVersion.initiatedBy === 'buyer' &&
+        offerVersion.versionNumber === 1,
+      );
+
+      const seller = offerVersion.sellers[0];
+
+      const property = offerVersion.terms.property;
 
       const propertyAddress = [
         property.addressLine1,
-        property.addressLine2
+        property.addressLine2,
       ]
         .filter(Boolean)
         .join(', ');
 
-      const expiration =
-        splitExpiration(
-          offerVersion.terms
-            .delivery.expiresAt
-        );
+      const expiration = splitExpiration(
+        offerVersion.terms.delivery.expiresAt,
+      );
 
       this.offerForm.patchValue(
         {
           buyerProperty: {
-            coBuyerEnabled: offerVersion.buyers.length > 1,
-            coBuyerLegalName: offerVersion.buyers[1]?.legalName ?? '',
-            coBuyerEmail: offerVersion.buyers[1]?.email ?? '',
-            coBuyerPhone: offerVersion.buyers[1]?.phone ?? '',
+            coBuyerEnabled:
+              offerVersion.buyers.length > 1,
+            coBuyerLegalName:
+              offerVersion.buyers[1]?.legalName ?? '',
+            coBuyerEmail:
+              offerVersion.buyers[1]?.email ?? '',
+            coBuyerPhone:
+              offerVersion.buyers[1]?.phone ?? '',
             buyerFirstName:
-              buyer?.firstName ??
-              profile.firstName,
-
+              buyer?.firstName ?? profile.firstName,
             buyerMiddleName:
               buyer?.middleName ?? '',
-
             buyerLastName:
-              buyer?.lastName ??
-              profile.lastName,
-
+              buyer?.lastName ?? profile.lastName,
             buyerSuffix:
               buyer?.suffix ?? '',
-
             buyerEmail:
-              buyer?.email ??
-              profile.email,
-
-            buyerPhone:
-              formatUsPhoneNumber(
-                buyer?.phone ??
-                profile.phone ??
-                ''
-              ),
-
+              buyer?.email ?? profile.email,
+            buyerPhone: formatUsPhoneNumber(
+              buyer?.phone ?? profile.phone ?? '',
+            ),
             sellerLegalName:
               seller?.legalName ?? '',
-
             sellerEmail:
               seller?.email ?? '',
-
             propertyAddress,
-
-            propertyCity:
-              property.city,
-
+            propertyCity: property.city,
             propertyCounty:
               property.county ||
-              listing.address.county ||
+              this.session().propertyCounty ||
               'Not provided',
-
-            propertyState:
-              property.state,
-
-            propertyPostalCode:
-              property.zipCode,
-
+            propertyState: property.state,
+            propertyPostalCode: property.zipCode,
             propertyParcelId:
-              property
-                .parcelIdentificationNumber ??
+              property.parcelIdentificationNumber ??
               'Not provided',
-
             propertyDeedBook:
-              property.deedBook ??
-              'Not provided',
-
+              property.deedBook ?? 'Not provided',
             propertyDeedPage:
-              property.deedPage ??
-              'Not provided',
-
+              property.deedPage ?? 'Not provided',
             propertyOtherReference:
               property.otherPropertyReference ??
               property.legalDescription ??
-              'Not provided'
+              'Not provided',
           },
 
           priceFinancing: {
-            purchasePrice:
-              fromCents(
-                offerVersion.terms
-                  .purchase
-                  .purchasePriceInCents
-              ),
-
+            purchasePrice: fromCents(
+              offerVersion.terms.purchase.purchasePriceInCents,
+            ),
             financingMethod:
-              offerVersion.terms
-                .purchase
-                .financingType ===
-                  'unselected'
+              offerVersion.terms.purchase.financingType ===
+              'unselected'
                 ? ''
-                : offerVersion.terms
-                  .purchase
-                  .financingType,
-
+                : offerVersion.terms.purchase.financingType,
             otherPropertyWillFundPurchase:
-              offerVersion.terms
-                .purchase
+              offerVersion.terms.purchase
                 .otherPropertyWillFundPurchase,
-
             otherPropertyDescription:
-              offerVersion.terms
-                .purchase
-                .otherPropertyDescription ??
-              ''
+              offerVersion.terms.purchase
+                .otherPropertyDescription ?? '',
           },
 
           depositsDueDiligence: {
-            depositAmount:
-              fromCents(
-                offerVersion.terms
-                  .deposits
-                  .depositInCents
-              ),
-
+            depositAmount: fromCents(
+              offerVersion.terms.deposits.depositInCents,
+            ),
             depositDeliveryDays:
-              offerVersion.terms
-                .deposits
-                .depositDeliveryDays,
-
+              offerVersion.terms.deposits.depositDeliveryDays,
             escrowAgentName:
-              offerVersion.terms
-                .deposits
-                .escrowAgentName,
-
+              offerVersion.terms.deposits.escrowAgentName,
             dueDiligenceDeadlineType:
-              offerVersion.terms
-                .deposits
-                .dueDiligenceDeadlineType ===
-                  'unselected'
+              offerVersion.terms.deposits
+                .dueDiligenceDeadlineType === 'unselected'
                 ? ''
-                : offerVersion.terms
-                  .deposits
-                  .dueDiligenceDeadlineType,
-
+                : offerVersion.terms.deposits
+                    .dueDiligenceDeadlineType,
             dueDiligenceEndDate:
-              offerVersion.terms
-                .deposits
-                .dueDiligenceEndDate ??
-              '',
-
+              offerVersion.terms.deposits
+                .dueDiligenceEndDate ?? '',
             dueDiligenceDaysAfterEffectiveDate:
-              offerVersion.terms
-                .deposits
-                .dueDiligenceDaysAfterEffectiveDate ??
-              null,
-
-            dueDiligenceEndTime:
-              '17:00'
+              offerVersion.terms.deposits
+                .dueDiligenceDaysAfterEffectiveDate ?? null,
+            dueDiligenceEndTime: '17:00',
           },
 
           concessions: {
             concessionType:
-              offerVersion.terms
-                .concessions
-                .concessionType,
-
-            sellerConcessionAmount:
-              fromOptionalCents(
-                offerVersion.terms
-                  .concessions
-                  .sellerConcessionInCents
-              ),
-
+              offerVersion.terms.concessions.concessionType,
+            sellerConcessionAmount: fromOptionalCents(
+              offerVersion.terms.concessions
+                .sellerConcessionInCents,
+            ),
             sellerConcessionPercentage:
-              offerVersion.terms
-                .concessions
-                .sellerConcessionPercentage ??
-              null,
-
+              offerVersion.terms.concessions
+                .sellerConcessionPercentage ?? null,
             homeWarrantyRequested:
-              offerVersion.terms
-                .concessions
+              offerVersion.terms.concessions
                 .homeWarrantyRequested,
-
-            homeWarrantyAmount:
-              fromOptionalCents(
-                offerVersion.terms
-                  .concessions
-                  .homeWarrantyInCents
-              )
+            homeWarrantyAmount: fromOptionalCents(
+              offerVersion.terms.concessions
+                .homeWarrantyInCents,
+            ),
           },
 
           propertyInclusions: {
             manufacturedHomeIncluded:
-              offerVersion.terms
-                .propertyTerms
+              offerVersion.terms.propertyTerms
                 .manufacturedHomeIncluded,
-
             separatePropertyIncluded:
-              offerVersion.terms
-                .propertyTerms
+              offerVersion.terms.propertyTerms
                 .separatePropertyIncluded,
-
             separatePropertyDescription:
-              offerVersion.terms
-                .propertyTerms
-                .separatePropertyDescription ??
-              '',
-
+              offerVersion.terms.propertyTerms
+                .separatePropertyDescription ?? '',
             includedItemsDescription:
-              offerVersion.terms
-                .propertyTerms
-                .includedItemsDescription ??
-              '',
-
+              offerVersion.terms.propertyTerms
+                .includedItemsDescription ?? '',
             excludedItemsDescription:
-              offerVersion.terms
-                .propertyTerms
-                .excludedItemsDescription ??
-              '',
-
+              offerVersion.terms.propertyTerms
+                .excludedItemsDescription ?? '',
             leasedItemsDescription:
-              offerVersion.terms
-                .propertyTerms
-                .leasedItemsDescription ??
-              ''
+              offerVersion.terms.propertyTerms
+                .leasedItemsDescription ?? '',
           },
 
           settlementPossession: {
             settlementDate:
-              offerVersion.terms
-                .settlement
-                .settlementDate,
-
+              offerVersion.terms.settlement.settlementDate,
             possessionTiming:
-              offerVersion.terms
-                .settlement
-                .possessionTiming,
-
+              offerVersion.terms.settlement.possessionTiming,
             possessionAgreementDocumentUid:
-              offerVersion.terms
-                .settlement
-                .possessionAgreementDocumentUid ??
-              ''
+              offerVersion.terms.settlement
+                .possessionAgreementDocumentUid ?? '',
           },
 
           disclosuresAddenda: {
             residentialPropertyStatus:
               disclosureStatusForForm(
-                offerVersion.terms
-                  .buyerDisclosures
-                  .residentialProperty
-                  .status
+                offerVersion.terms.buyerDisclosures
+                  .residentialProperty.status,
               ),
-
             residentialPropertyDocumentUid:
-              offerVersion.terms
-                .buyerDisclosures
-                .residentialProperty
-                .documentUid ??
-              '',
-
+              offerVersion.terms.buyerDisclosures
+                .residentialProperty.documentUid ?? '',
             residentialPropertyDocumentVersionId:
-              offerVersion.terms
-                .buyerDisclosures
-                .residentialProperty
-                .documentVersionId ??
-              '',
-
+              offerVersion.terms.buyerDisclosures
+                .residentialProperty.documentVersionId ?? '',
             residentialPropertyExemptionReason:
-              offerVersion.terms
-                .buyerDisclosures
-                .residentialProperty
-                .exemptionReason ??
-              '',
-
+              offerVersion.terms.buyerDisclosures
+                .residentialProperty.exemptionReason ?? '',
             residentialPropertyAcknowledged:
-              offerVersion.terms
-                .buyerDisclosures
-                .residentialProperty
-                .acknowledged,
-
+              offerVersion.terms.buyerDisclosures
+                .residentialProperty.acknowledged,
             mineralOilGasRightsStatus:
               disclosureStatusForForm(
-                offerVersion.terms
-                  .buyerDisclosures
-                  .mineralOilGasRights
-                  .status
+                offerVersion.terms.buyerDisclosures
+                  .mineralOilGasRights.status,
               ),
-
             mineralOilGasRightsDocumentUid:
-              offerVersion.terms
-                .buyerDisclosures
-                .mineralOilGasRights
-                .documentUid ??
-              '',
-
+              offerVersion.terms.buyerDisclosures
+                .mineralOilGasRights.documentUid ?? '',
             mineralOilGasRightsDocumentVersionId:
-              offerVersion.terms
-                .buyerDisclosures
-                .mineralOilGasRights
-                .documentVersionId ??
-              '',
-
+              offerVersion.terms.buyerDisclosures
+                .mineralOilGasRights.documentVersionId ?? '',
             mineralOilGasRightsExemptionReason:
-              offerVersion.terms
-                .buyerDisclosures
-                .mineralOilGasRights
-                .exemptionReason ??
-              '',
-
+              offerVersion.terms.buyerDisclosures
+                .mineralOilGasRights.exemptionReason ?? '',
             mineralOilGasRightsAcknowledged:
-              offerVersion.terms
-                .buyerDisclosures
-                .mineralOilGasRights
-                .acknowledged
+              offerVersion.terms.buyerDisclosures
+                .mineralOilGasRights.acknowledged,
           },
 
           additionalTerms: {
             hasAdditionalTerms:
-              offerVersion.terms
-                .additionalTermsExhibit
-                .included,
-
+              offerVersion.terms.additionalTermsExhibit.included,
             preparedBy:
-              offerVersion.terms
-                .additionalTermsExhibit
-                .preparedBy ??
-              '',
-
+              offerVersion.terms.additionalTermsExhibit
+                .preparedBy ?? '',
             documentUid:
-              offerVersion.terms
-                .additionalTermsExhibit
-                .documentUid ??
-              ''
+              offerVersion.terms.additionalTermsExhibit
+                .documentUid ?? '',
           },
 
           offerExpiration: {
-            expirationDate:
-              expiration.date,
-
-            expirationTime:
-              expiration.time,
-
-            timeZone:
-              'America/New_York'
+            expirationDate: expiration.date,
+            expirationTime: expiration.time,
+            timeZone: 'America/New_York',
           },
 
           offerReview: {
             electronicRecordsConsent:
-              offerVersion.terms
-                .delivery
-                .electronicDeliveryAuthorized
-          }
+              offerVersion.terms.delivery
+                .electronicDeliveryAuthorized,
+          },
         },
         {
-          emitEvent: false
-        }
+          emitEvent: false,
+        },
       );
 
-      const savedWizardData =
-        offerVersion.wizardData;
-
-      const savedForm =
-        savedWizardData?.['form'];
-
+      const savedWizardData = offerVersion.wizardData;
+      const savedForm = savedWizardData?.['form'];
       const savedSectionIndex =
-        savedWizardData?.[
-          'currentSectionIndex'
-        ];
-
+        savedWizardData?.['currentSectionIndex'];
       const schemaVersion =
-        savedWizardData?.[
-          'schemaVersion'
-        ];
+        savedWizardData?.['schemaVersion'];
 
       const hasSavedForm =
         schemaVersion === 2 &&
@@ -1377,61 +895,54 @@ implements OnInit {
         typeof savedForm === 'object' &&
         !Array.isArray(savedForm) &&
         Object.keys(
-          savedForm as
-            Record<string, unknown>
+          savedForm as Record<string, unknown>,
         ).length > 0;
 
       if (hasSavedForm) {
         this.offerForm.patchValue(
-          savedForm as
-            ReturnType<
-              typeof this.offerForm.getRawValue
-            >,
+          savedForm as ReturnType<
+            typeof this.offerForm.getRawValue
+          >,
           {
-            emitEvent: false
-          }
+            emitEvent: false,
+          },
         );
       }
 
       // The signed party snapshot takes precedence over an old wizard cache.
       if (this.coBuyerLocked()) {
-        this.offerForm.controls.buyerProperty.patchValue({
-          coBuyerEnabled: true,
-          coBuyerLegalName: offerVersion.buyers[1].legalName,
-          coBuyerEmail: offerVersion.buyers[1].email,
-          coBuyerPhone: offerVersion.buyers[1].phone,
-        }, { emitEvent: false });
+        this.offerForm.controls.buyerProperty.patchValue(
+          {
+            coBuyerEnabled: true,
+            coBuyerLegalName:
+              offerVersion.buyers[1].legalName,
+            coBuyerEmail:
+              offerVersion.buyers[1].email,
+            coBuyerPhone:
+              offerVersion.buyers[1].phone,
+          },
+          {
+            emitEvent: false,
+          },
+        );
       }
+
       this.updateCoBuyerControls();
 
       if (
-        typeof savedSectionIndex ===
-          'number' &&
-        Number.isInteger(
-          savedSectionIndex
-        ) &&
+        typeof savedSectionIndex === 'number' &&
+        Number.isInteger(savedSectionIndex) &&
         savedSectionIndex >= 0 &&
-        savedSectionIndex <
-          this.sections.length
+        savedSectionIndex < this.sections.length
       ) {
-        this.currentSectionIndex.set(
-          savedSectionIndex
-        );
+        this.currentSectionIndex.set(savedSectionIndex);
       }
 
       this.resetCurrentSectionValidationState();
-
       this.startAutosave();
 
       if (hasSavedForm) {
-        this.lastSavedSnapshot =
-          JSON.stringify(
-            this.createWizardData()
-          );
-
-        this.saveMessage.set(
-          'Draft restored'
-        );
+        this.saveMessage.set('Draft restored');
       }
 
       this.loading.set(false);
@@ -1442,13 +953,13 @@ implements OnInit {
     } catch (error: unknown) {
       console.error(
         'Unable to initialize the offer wizard.',
-        error
+        error,
       );
 
       this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'The offer form could not be loaded.'
+          : 'The offer form could not be loaded.',
       );
 
       this.loading.set(false);
@@ -1459,436 +970,140 @@ implements OnInit {
     this.offerForm.valueChanges
       .pipe(
         debounceTime(800),
-
-        takeUntilDestroyed(
-          this.destroyRef
-        )
+        takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(
-        () => {
-          void this.queueDraftSave();
-        }
-      );
+      .subscribe(() => {
+        void this.queueDraftSave().catch(
+          () => undefined,
+        );
+      });
   }
 
   updateCoBuyerControls(): void {
-    const toggle = this.offerForm.controls.buyerProperty.controls.coBuyerEnabled;
-    if (this.coBuyerLocked()) toggle.disable({ emitEvent: false });
-    else toggle.enable({ emitEvent: false });
+    const toggle =
+      this.offerForm.controls.buyerProperty
+        .controls.coBuyerEnabled;
+
+    if (this.coBuyerLocked()) {
+      toggle.disable({ emitEvent: false });
+    } else {
+      toggle.enable({ emitEvent: false });
+    }
+
     const enabled = toggle.value === true;
-    for (const field of ['coBuyerLegalName', 'coBuyerEmail', 'coBuyerPhone']) {
-      const control = this.offerForm.get(`buyerProperty.${field}`);
-      if (enabled && !this.coBuyerLocked()) control?.enable({ emitEvent: false });
-      else control?.disable({ emitEvent: false });
+
+    for (const field of [
+      'coBuyerLegalName',
+      'coBuyerEmail',
+      'coBuyerPhone',
+    ]) {
+      const control = this.offerForm.get(
+        `buyerProperty.${field}`,
+      );
+
+      if (enabled && !this.coBuyerLocked()) {
+        control?.enable({ emitEvent: false });
+      } else {
+        control?.disable({ emitEvent: false });
+      }
     }
   }
 
-  private draftBuyers(): OfferVersionPartySnapshot[] | null {
+  private draftBuyers():
+    OfferVersionPartySnapshot[] | null {
     const primary = this.primaryBuyer;
-    if (!primary) return null;
-    const form = this.offerForm.getRawValue().buyerProperty;
-    if (!form.coBuyerEnabled || this.coBuyerLocked()) return null;
-    const group = this.offerForm.get('buyerProperty');
-    if (!group?.valid) return null;
-    const legalName = (form.coBuyerLegalName ?? '').trim();
+
+    if (!primary) {
+      return null;
+    }
+
+    const form =
+      this.offerForm.getRawValue().buyerProperty;
+
+    if (
+      !form.coBuyerEnabled ||
+      this.coBuyerLocked()
+    ) {
+      return null;
+    }
+
+    const group =
+      this.offerForm.get('buyerProperty');
+
+    if (!group?.valid) {
+      return null;
+    }
+
+    const legalName =
+      (form.coBuyerLegalName ?? '').trim();
+
     const nameParts = legalName.split(/\s+/);
-    return [primary, {
-      partyUid: this.coBuyerUid,
-      role: 'buyer',
-      capacity: 'individual',
-      firstName: nameParts[0] ?? '',
-      lastName: nameParts.slice(1).join(' '),
-      legalName,
-      email: (form.coBuyerEmail ?? '').trim().toLowerCase(),
-      phone: (form.coBuyerPhone ?? '').trim(),
-      mailingAddress: { ...primary.mailingAddress },
-      sequence: 2,
-      primaryParty: false,
-      intendedUse: primary.intendedUse ?? 'primary_residence',
-      proposedDeedName: legalName,
-      requiredSigner: true,
-      identityVerification: { status: 'not_started', provider: 'stripe_identity', legalNameApplied: false },
-      signature: { status: 'not_started' },
-      electronicTransactionsConsentAccepted: false,
-    }];
+
+    return [
+      primary,
+      {
+        partyUid: this.coBuyerUid,
+        role: 'buyer',
+        capacity: 'individual',
+        firstName: nameParts[0] ?? '',
+        lastName: nameParts.slice(1).join(' '),
+        legalName,
+        email:
+          (form.coBuyerEmail ?? '')
+            .trim()
+            .toLowerCase(),
+        phone:
+          (form.coBuyerPhone ?? '').trim(),
+        mailingAddress: {
+          ...primary.mailingAddress,
+        },
+        sequence: 2,
+        primaryParty: false,
+        intendedUse:
+          primary.intendedUse ??
+          'primary_residence',
+        proposedDeedName: legalName,
+        requiredSigner: true,
+        identityVerification: {
+          status: 'not_started',
+          provider: 'stripe_identity',
+          legalNameApplied: false,
+        },
+        signature: {
+          status: 'not_started',
+        },
+        electronicTransactionsConsentAccepted:
+          false,
+      },
+    ];
   }
 
   private createWizardData():
     Record<string, unknown> {
     return {
       schemaVersion: 2,
-
       currentSectionIndex:
         this.currentSectionIndex(),
-
-      form:
-        this.offerForm.getRawValue()
+      form: this.offerForm.getRawValue(),
     };
   }
 
   private createTerms(): OfferTerms {
     if (!this.existingTerms) {
-      throw new Error(
-        'The existing offer terms are unavailable.'
-      );
+      throw new Error('The existing offer terms are unavailable.');
     }
-
-    const form =
-      this.offerForm.getRawValue();
-
-    const expiration =
-      createExpirationIso(
-        form.offerExpiration
-          .expirationDate,
-        form.offerExpiration
-          .expirationTime
-      );
-
-    return {
-      stateCode: 'NC',
-
-      property:
-        this.existingTerms.property,
-
-      propertyTerms: {
-        manufacturedHomeIncluded:
-          form.propertyInclusions
-            .manufacturedHomeIncluded ===
-          true,
-
-        separatePropertyIncluded:
-          form.propertyInclusions
-            .separatePropertyIncluded ===
-          true,
-
-        separatePropertyDescription:
-          optionalText(
-            form.propertyInclusions
-              .separatePropertyDescription
-          ),
-
-        includedItemsDescription:
-          optionalText(
-            form.propertyInclusions
-              .includedItemsDescription
-          ),
-
-        excludedItemsDescription:
-          optionalText(
-            form.propertyInclusions
-              .excludedItemsDescription
-          ),
-
-        leasedItemsDescription:
-          optionalText(
-            form.propertyInclusions
-              .leasedItemsDescription
-          )
-      },
-
-      purchase: {
-        purchasePriceInCents:
-          toCents(
-            form.priceFinancing
-              .purchasePrice
-          ),
-
-        financingType:
-          (
-            form.priceFinancing
-              .financingMethod ||
-            'unselected'
-          ) as
-            OfferTerms[
-              'purchase'
-            ][
-              'financingType'
-            ],
-
-        otherPropertyWillFundPurchase:
-          form.priceFinancing
-            .otherPropertyWillFundPurchase ===
-          true,
-
-        otherPropertyDescription:
-          optionalText(
-            form.priceFinancing
-              .otherPropertyDescription
-          )
-      },
-
-      deposits: {
-        depositInCents:
-          toCents(
-            form.depositsDueDiligence
-              .depositAmount
-          ),
-
-        depositDeliveryDays:
-          Number(
-            form.depositsDueDiligence
-              .depositDeliveryDays
-          ),
-
-        escrowAgentName:
-          String(
-            form.depositsDueDiligence
-              .escrowAgentName ??
-            ''
-          ).trim(),
-
-        dueDiligenceDeadlineType:
-          (
-            form.depositsDueDiligence
-              .dueDiligenceDeadlineType ||
-            'unselected'
-          ) as
-            OfferTerms[
-              'deposits'
-            ][
-              'dueDiligenceDeadlineType'
-            ],
-
-        dueDiligenceEndDate:
-          optionalText(
-            form.depositsDueDiligence
-              .dueDiligenceEndDate
-          ),
-
-        dueDiligenceDaysAfterEffectiveDate:
-          optionalInteger(
-            form.depositsDueDiligence
-              .dueDiligenceDaysAfterEffectiveDate
-          ),
-
-        dueDiligenceEndTime: '17:00'
-      },
-
-      concessions: {
-        concessionType:
-          (
-            form.concessions
-              .concessionType ||
-            'none'
-          ) as
-              OfferTerms[
-                'concessions'
-              ][
-                'concessionType'
-              ],
-
-        sellerConcessionInCents:
-          optionalCents(
-            form.concessions
-              .sellerConcessionAmount
-          ),
-
-        sellerConcessionPercentage:
-          optionalNumber(
-            form.concessions
-              .sellerConcessionPercentage
-          ),
-
-        homeWarrantyRequested:
-          form.concessions
-            .homeWarrantyRequested ===
-          true,
-
-        homeWarrantyInCents:
-          optionalCents(
-            form.concessions
-              .homeWarrantyAmount
-          )
-      },
-
-      settlement: {
-        settlementDate:
-          String(
-            form.settlementPossession
-              .settlementDate ??
-            ''
-          ),
-
-        possessionTiming:
-          (
-            form.settlementPossession
-              .possessionTiming ||
-            'at_closing'
-          ) as
-              OfferTerms[
-                'settlement'
-              ][
-                'possessionTiming'
-              ],
-
-        possessionAgreementDocumentUid:
-          optionalText(
-            form.settlementPossession
-              .possessionAgreementDocumentUid
-          )
-      },
-
-      buyerDisclosures: {
-        residentialProperty: {
-          status:
-            (
-              form.disclosuresAddenda
-                .residentialPropertyStatus ||
-              'unselected'
-            ) as
-              OfferTerms[
-                'buyerDisclosures'
-              ][
-                'residentialProperty'
-              ][
-                'status'
-              ],
-
-          documentUid:
-            optionalText(
-              form.disclosuresAddenda
-                .residentialPropertyDocumentUid
-            ),
-
-          documentVersionId:
-            optionalText(
-              form.disclosuresAddenda
-                .residentialPropertyDocumentVersionId
-            ),
-
-          exemptionReason:
-            optionalText(
-              form.disclosuresAddenda
-                .residentialPropertyExemptionReason
-            ),
-
-          acknowledged:
-            form.disclosuresAddenda
-              .residentialPropertyAcknowledged ===
-            true
-        },
-
-        mineralOilGasRights: {
-          status:
-            (
-              form.disclosuresAddenda
-                .mineralOilGasRightsStatus ||
-              'unselected'
-            ) as
-              OfferTerms[
-                'buyerDisclosures'
-              ][
-                'mineralOilGasRights'
-              ][
-                'status'
-              ],
-
-          documentUid:
-            optionalText(
-              form.disclosuresAddenda
-                .mineralOilGasRightsDocumentUid
-            ),
-
-          documentVersionId:
-            optionalText(
-              form.disclosuresAddenda
-                .mineralOilGasRightsDocumentVersionId
-            ),
-
-          exemptionReason:
-            optionalText(
-              form.disclosuresAddenda
-                .mineralOilGasRightsExemptionReason
-            ),
-
-          acknowledged:
-            form.disclosuresAddenda
-              .mineralOilGasRightsAcknowledged ===
-            true
-        }
-      },
-
-      sellerStatements:
-        this.existingTerms
-          .sellerStatements,
-
-      addenda:
-        this.existingTerms.addenda,
-
-      additionalTermsExhibit: {
-        included:
-          form.additionalTerms
-            .hasAdditionalTerms ===
-          true,
-
-        preparedBy:
-          form.additionalTerms
-            .hasAdditionalTerms ===
-              true
-            ? (
-              form.additionalTerms
-                .preparedBy ||
-              undefined
-            ) as
-                OfferTerms[
-                  'additionalTermsExhibit'
-                ][
-                  'preparedBy'
-                ]
-            : undefined,
-
-        documentUid:
-          form.additionalTerms
-            .hasAdditionalTerms ===
-              true
-            ? optionalText(
-              form.additionalTerms
-                .documentUid
-            )
-            : undefined
-      },
-
-      delivery: {
-        expiresAt: expiration,
-
-        timeZone:
-          'America/New_York',
-
-        buyerDeliveryEmail:
-          this.existingTerms
-            .delivery
-            .buyerDeliveryEmail,
-
-        sellerDeliveryEmail:
-          this.existingTerms
-            .delivery
-            .sellerDeliveryEmail,
-
-        electronicDeliveryAuthorized:
-          form.offerReview
-            .electronicRecordsConsent ===
-          true
-      }
-    };
+    return createNorthCarolinaOfferTerms(this.offerForm.getRawValue(), this.existingTerms);
   }
 
-  private queueDraftSave():
-    Promise<void> {
-    this.saveChain =
-      this.saveChain
-        .catch(
-          () => undefined
-        )
-        .then(
-          () =>
-            this.saveCurrentDraft()
-        );
+  private queueDraftSave(): Promise<void> {
+    this.saveChain = this.saveChain
+      .catch(() => undefined)
+      .then(() => this.saveCurrentDraft());
 
     return this.saveChain;
   }
 
-  private async saveCurrentDraft():
-    Promise<void> {
+  private async saveCurrentDraft(): Promise<void> {
     if (
       !this.offerUid ||
       !this.offerVersionUid ||
@@ -1898,42 +1113,20 @@ implements OnInit {
       return;
     }
 
-    const wizardData =
-      this.createWizardData();
-
-    const terms =
-      this.createTerms();
-
+    const wizardData = this.createWizardData();
+    const terms = this.createTerms();
     const buyers = this.draftBuyers();
-
-    const serializedSnapshot =
-      JSON.stringify({
-        wizardData,
-        terms
-      });
-
-    if (
-      serializedSnapshot ===
-      this.lastSavedSnapshot
-    ) {
-      return;
-    }
 
     this.saving.set(true);
     this.saveMessage.set('');
 
     try {
-      await this.offerService.saveDraft(
-        this.offerUid,
-        this.offerVersionUid,
-        {
-          terms,
-          wizardData,
-          ...(buyers ? { buyers } : {}),
-          expiresAt:
-            terms.delivery.expiresAt
-        }
-      );
+      await this.session().saveDraft({
+        terms,
+        wizardData,
+        ...(buyers ? { buyers } : {}),
+        expiresAt: terms.delivery.expiresAt,
+      });
 
       this.existingTerms = terms;
 
@@ -1942,16 +1135,11 @@ implements OnInit {
         this.updateCoBuyerControls();
       }
 
-      this.lastSavedSnapshot =
-        serializedSnapshot;
-
-      this.saveMessage.set(
-        'Draft saved'
-      );
+      this.saveMessage.set('Draft saved');
     } catch (error: unknown) {
       console.error(
         'Unable to save the offer draft.',
-        error
+        error,
       );
 
       this.saveMessage.set('');
@@ -1959,7 +1147,7 @@ implements OnInit {
       this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Your offer draft could not be saved. Please try again.'
+          : 'Your offer draft could not be saved. Please try again.',
       );
 
       throw error;
@@ -1968,57 +1156,46 @@ implements OnInit {
     }
   }
 
-  get currentSectionGroup():
-    FormGroup {
-    const section =
-      this.offerForm.get(
-        this.currentSection().key
-      );
+  get currentSectionGroup(): FormGroup {
+    const section = this.offerForm.get(
+      this.currentSection().key,
+    );
 
     if (!(section instanceof FormGroup)) {
       throw new Error(
-        'The requested offer section is unavailable.'
+        'The requested offer section is unavailable.',
       );
     }
 
     return section;
   }
 
-  isSectionComplete(
-    sectionKey: string
-  ): boolean {
-    return this.offerForm.get(
-      sectionKey
-    )?.valid === true;
+  isSectionComplete(sectionKey: string): boolean {
+    return this.offerForm.get(sectionKey)?.valid === true;
   }
 
   async goToSection(
-    sectionIndex: number
+    sectionIndex: number,
   ): Promise<void> {
     if (
       sectionIndex < 0 ||
-      sectionIndex >=
-        this.sections.length
+      sectionIndex >= this.sections.length
     ) {
       return;
     }
 
     if (
-      sectionIndex >
-      this.currentSectionIndex()
+      sectionIndex > this.currentSectionIndex()
     ) {
       this.validationAttemptedSection.set(
-        this.currentSection().key
+        this.currentSection().key,
       );
 
-      this.currentSectionGroup
-        .markAllAsTouched();
+      this.currentSectionGroup.markAllAsTouched();
 
-      if (
-        this.currentSectionGroup.invalid
-      ) {
+      if (this.currentSectionGroup.invalid) {
         this.errorMessage.set(
-          'Please complete the required information before continuing.'
+          'Please complete the required information before continuing.',
         );
 
         return;
@@ -2026,14 +1203,8 @@ implements OnInit {
     }
 
     this.errorMessage.set('');
-
-    this.validationAttemptedSection.set(
-      null
-    );
-
-    this.currentSectionIndex.set(
-      sectionIndex
-    );
+    this.validationAttemptedSection.set(null);
+    this.currentSectionIndex.set(sectionIndex);
 
     this.resetCurrentSectionValidationState();
 
@@ -2044,27 +1215,21 @@ implements OnInit {
 
   async continue(): Promise<void> {
     this.validationAttemptedSection.set(
-      this.currentSection().key
+      this.currentSection().key,
     );
 
-    this.currentSectionGroup
-      .markAllAsTouched();
+    this.currentSectionGroup.markAllAsTouched();
 
-    if (
-      this.currentSectionGroup.invalid
-    ) {
+    if (this.currentSectionGroup.invalid) {
       this.errorMessage.set(
-        'Please complete the required information before continuing.'
+        'Please complete the required information before continuing.',
       );
 
       return;
     }
 
     this.errorMessage.set('');
-
-    this.validationAttemptedSection.set(
-      null
-    );
+    this.validationAttemptedSection.set(null);
 
     if (this.isLastSection()) {
       await this.submitCurrentOffer();
@@ -2072,7 +1237,7 @@ implements OnInit {
     }
 
     this.currentSectionIndex.update(
-      index => index + 1
+      index => index + 1,
     );
 
     this.resetCurrentSectionValidationState();
@@ -2089,13 +1254,10 @@ implements OnInit {
     }
 
     this.errorMessage.set('');
-
-    this.validationAttemptedSection.set(
-      null
-    );
+    this.validationAttemptedSection.set(null);
 
     this.currentSectionIndex.update(
-      index => index - 1
+      index => index - 1,
     );
 
     this.resetCurrentSectionValidationState();
@@ -2105,8 +1267,7 @@ implements OnInit {
     this.scrollToTop();
   }
 
-  async returnToListing():
-    Promise<void> {
+  async returnToListing(): Promise<void> {
     if (
       this.offerUid &&
       this.offerVersionUid
@@ -2118,18 +1279,7 @@ implements OnInit {
       }
     }
 
-    if (this.listingUid) {
-      await this.router.navigate([
-        '/listings',
-        this.listingUid
-      ]);
-
-      return;
-    }
-
-    await this.router.navigate([
-      '/buy'
-    ]);
+    await this.session().returnToListing();
   }
 
   private resetCurrentSectionValidationState():
@@ -2151,34 +1301,17 @@ implements OnInit {
     try {
       await this.queueDraftSave();
 
-      await this.offerService.submitVersion(
-        this.offerUid,
-        this.offerVersionUid
-      );
-
-      await this.offerDocumentService
-        .generateAgreement(
-          this.offerUid,
-          this.offerVersionUid,
-          this.offerVersionNumber === 1
-            ? 'offer_agreement'
-            : 'counteroffer_agreement'
-        );
-
-      await this.router.navigate([
-        '/offers',
-        this.offerUid
-      ]);
+      await this.session().submitOffer();
     } catch (error: unknown) {
       console.error(
         'Unable to prepare the offer for signature.',
-        error
+        error,
       );
 
       this.errorMessage.set(
         error instanceof Error
           ? error.message
-          : 'Your agreement could not be prepared. Please try again.'
+          : 'Your agreement could not be prepared. Please try again.',
       );
 
       this.scrollToTop();
@@ -2187,8 +1320,7 @@ implements OnInit {
     }
   }
 
-  private prepareForSubmission():
-    boolean {
+  private prepareForSubmission(): boolean {
     this.offerForm.markAllAsTouched();
 
     if (this.offerForm.invalid) {
@@ -2196,15 +1328,15 @@ implements OnInit {
         this.findFirstInvalidSection();
 
       this.currentSectionIndex.set(
-        firstInvalidSection
+        firstInvalidSection,
       );
 
       this.validationAttemptedSection.set(
-        this.currentSection().key
+        this.currentSection().key,
       );
 
       this.errorMessage.set(
-        'The offer contains missing or invalid information. Please review the highlighted fields.'
+        'The offer contains missing or invalid information. Please review the highlighted fields.',
       );
 
       this.scrollToTop();
@@ -2214,15 +1346,11 @@ implements OnInit {
     return true;
   }
 
-  private findFirstInvalidSection():
-    number {
-    const invalidIndex =
-      this.sections.findIndex(
-        section =>
-          this.offerForm
-            .get(section.key)
-            ?.invalid === true
-      );
+  private findFirstInvalidSection(): number {
+    const invalidIndex = this.sections.findIndex(
+      section =>
+        this.offerForm.get(section.key)?.invalid === true,
+    );
 
     return invalidIndex >= 0
       ? invalidIndex
@@ -2232,67 +1360,60 @@ implements OnInit {
   private scrollToTop(): void {
     globalThis.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }
 }
 
-
 function priceFundingValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
   if (
     control.get(
-      'otherPropertyWillFundPurchase'
+      'otherPropertyWillFundPurchase',
     )?.value === true &&
     !hasText(
       control.get(
-        'otherPropertyDescription'
-      )?.value
+        'otherPropertyDescription',
+      )?.value,
     )
   ) {
     return {
-      otherPropertyDescriptionRequired:
-        true
+      otherPropertyDescriptionRequired: true,
     };
   }
 
   return null;
 }
 
-
 function dueDiligenceValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
-  const deadlineType =
-    control.get(
-      'dueDiligenceDeadlineType'
-    )?.value;
+  const deadlineType = control.get(
+    'dueDiligenceDeadlineType',
+  )?.value;
 
   if (
     deadlineType === 'specific_date' &&
     !hasText(
       control.get(
-        'dueDiligenceEndDate'
-      )?.value
+        'dueDiligenceEndDate',
+      )?.value,
     )
   ) {
     return {
-      dueDiligenceEndDateRequired:
-        true
+      dueDiligenceEndDateRequired: true,
     };
   }
 
   if (
-    deadlineType ===
-      'days_after_effective_date'
+    deadlineType === 'days_after_effective_date'
   ) {
-    const days =
-      Number(
-        control.get(
-          'dueDiligenceDaysAfterEffectiveDate'
-        )?.value
-      );
+    const days = Number(
+      control.get(
+        'dueDiligenceDaysAfterEffectiveDate',
+      )?.value,
+    );
 
     if (
       !Number.isInteger(days) ||
@@ -2300,8 +1421,7 @@ function dueDiligenceValidator(
       days > 365
     ) {
       return {
-        dueDiligenceDaysRequired:
-          true
+        dueDiligenceDaysRequired: true,
       };
     }
   }
@@ -2309,26 +1429,23 @@ function dueDiligenceValidator(
   return null;
 }
 
-
 function concessionsValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
-  const type =
-    control.get(
-      'concessionType'
-    )?.value;
+  const type = control.get(
+    'concessionType',
+  )?.value;
 
   if (
     type === 'amount' &&
     !isPositiveNumber(
       control.get(
-        'sellerConcessionAmount'
-      )?.value
+        'sellerConcessionAmount',
+      )?.value,
     )
   ) {
     return {
-      concessionAmountRequired:
-        true
+      concessionAmountRequired: true,
     };
   }
 
@@ -2336,97 +1453,89 @@ function concessionsValidator(
     type === 'percentage' &&
     !isPositiveNumber(
       control.get(
-        'sellerConcessionPercentage'
-      )?.value
+        'sellerConcessionPercentage',
+      )?.value,
     )
   ) {
     return {
-      concessionPercentageRequired:
-        true
+      concessionPercentageRequired: true,
     };
   }
 
   if (
     control.get(
-      'homeWarrantyRequested'
+      'homeWarrantyRequested',
     )?.value === true &&
     !isPositiveNumber(
       control.get(
-        'homeWarrantyAmount'
-      )?.value
+        'homeWarrantyAmount',
+      )?.value,
     )
   ) {
     return {
-      homeWarrantyAmountRequired:
-        true
+      homeWarrantyAmountRequired: true,
     };
   }
 
   return null;
 }
 
-
 function propertyInclusionsValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
   if (
     control.get(
-      'separatePropertyIncluded'
+      'separatePropertyIncluded',
     )?.value === true &&
     !hasText(
       control.get(
-        'separatePropertyDescription'
-      )?.value
+        'separatePropertyDescription',
+      )?.value,
     )
   ) {
     return {
-      separatePropertyDescriptionRequired:
-        true
+      separatePropertyDescriptionRequired: true,
     };
   }
 
   return null;
 }
 
-
 function settlementPossessionValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
   if (
     control.get(
-      'possessionTiming'
+      'possessionTiming',
     )?.value === 'other' &&
     !hasText(
       control.get(
-        'possessionAgreementDocumentUid'
-      )?.value
+        'possessionAgreementDocumentUid',
+      )?.value,
     )
   ) {
     return {
-      possessionAgreementRequired:
-        true
+      possessionAgreementRequired: true,
     };
   }
 
   return null;
 }
 
-
 function additionalTermsValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
   if (
     control.get(
-      'hasAdditionalTerms'
+      'hasAdditionalTerms',
     )?.value !== true
   ) {
     return null;
   }
 
-  const preparedBy =
-    control.get(
-      'preparedBy'
-    )?.value;
+  const preparedBy = control.get(
+    'preparedBy',
+  )?.value;
 
   if (
     preparedBy !== 'buyer' &&
@@ -2434,40 +1543,35 @@ function additionalTermsValidator(
     preparedBy !== 'attorney'
   ) {
     return {
-      preparedByRequired:
-        true
+      preparedByRequired: true,
     };
   }
 
   if (
     !hasText(
       control.get(
-        'documentUid'
-      )?.value
+        'documentUid',
+      )?.value,
     )
   ) {
     return {
-      additionalTermsDocumentRequired:
-        true
+      additionalTermsDocumentRequired: true,
     };
   }
 
   return null;
 }
 
-
 function offerExpirationValidator(
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null {
-  const expirationDate =
-    control.get(
-      'expirationDate'
-    )?.value;
+  const expirationDate = control.get(
+    'expirationDate',
+  )?.value;
 
-  const expirationTime =
-    control.get(
-      'expirationTime'
-    )?.value;
+  const expirationTime = control.get(
+    'expirationTime',
+  )?.value;
 
   if (
     !expirationDate ||
@@ -2476,64 +1580,32 @@ function offerExpirationValidator(
     return null;
   }
 
-  const expiration =
-    new Date(
-      String(expirationDate) +
-      'T' +
-      String(expirationTime) +
-      ':00'
-    );
+  const expiration = new Date(
+    String(expirationDate) +
+    'T' +
+    String(expirationTime) +
+    ':00',
+  );
 
   if (
-    Number.isNaN(
-      expiration.getTime()
-    )
+    Number.isNaN(expiration.getTime())
   ) {
     return {
-      invalidExpiration:
-        true
+      invalidExpiration: true,
     };
   }
 
-  return expiration.getTime() <=
-    Date.now()
+  return expiration.getTime() <= Date.now()
     ? {
-      expirationNotFuture:
-        true
-    }
+        expirationNotFuture: true,
+      }
     : null;
 }
 
 
-function createExpirationIso(
-  expirationDate: unknown,
-  expirationTime: unknown
-): string {
-  if (
-    !expirationDate ||
-    !expirationTime
-  ) {
-    return '';
-  }
-
-  const expiration =
-    new Date(
-      String(expirationDate) +
-      'T' +
-      String(expirationTime) +
-      ':00'
-    );
-
-  return Number.isNaN(
-    expiration.getTime()
-  )
-    ? ''
-    : expiration.toISOString();
-}
-
 
 function splitExpiration(
-  expiresAt: string
+  expiresAt: string,
 ): {
   date: string;
   time: string;
@@ -2541,99 +1613,59 @@ function splitExpiration(
   if (!expiresAt) {
     return {
       date: '',
-      time: ''
+      time: '',
     };
   }
 
-  const expiration =
-    new Date(expiresAt);
+  const expiration = new Date(expiresAt);
 
   if (
-    Number.isNaN(
-      expiration.getTime()
-    )
+    Number.isNaN(expiration.getTime())
   ) {
     return {
       date: '',
-      time: ''
+      time: '',
     };
   }
 
-  const year =
-    expiration.getFullYear();
+  const year = expiration.getFullYear();
 
-  const month =
-    String(
-      expiration.getMonth() + 1
-    )
-      .padStart(2, '0');
+  const month = String(
+    expiration.getMonth() + 1,
+  ).padStart(2, '0');
 
-  const day =
-    String(
-      expiration.getDate()
-    )
-      .padStart(2, '0');
+  const day = String(
+    expiration.getDate(),
+  ).padStart(2, '0');
 
-  const hours =
-    String(
-      expiration.getHours()
-    )
-      .padStart(2, '0');
+  const hours = String(
+    expiration.getHours(),
+  ).padStart(2, '0');
 
-  const minutes =
-    String(
-      expiration.getMinutes()
-    )
-      .padStart(2, '0');
+  const minutes = String(
+    expiration.getMinutes(),
+  ).padStart(2, '0');
 
   return {
     date:
       year + '-' + month + '-' + day,
-
     time:
-      hours + ':' + minutes
+      hours + ':' + minutes,
   };
 }
 
 
-function toCents(
-  value: unknown
-): number {
-  const amount =
-    Number(value ?? 0);
 
-  return Number.isFinite(amount)
-    ? Math.round(amount * 100)
-    : 0;
-}
-
-
-function optionalCents(
-  value: unknown
-): number | undefined {
-  if (
-    value === null ||
-    value === undefined ||
-    value === ''
-  ) {
-    return undefined;
-  }
-
-  return toCents(
-    Number(value)
-  );
-}
 
 
 function fromCents(
-  value: number
+  value: number,
 ): number {
   return value / 100;
 }
 
-
 function fromOptionalCents(
-  value: number | undefined
+  value: number | undefined,
 ): number | null {
   return typeof value === 'number'
     ? fromCents(value)
@@ -2641,73 +1673,23 @@ function fromOptionalCents(
 }
 
 
-function optionalNumber(
-  value: unknown
-): number | undefined {
-  if (
-    value === null ||
-    value === undefined ||
-    value === ''
-  ) {
-    return undefined;
-  }
-
-  const parsed =
-    Number(value);
-
-  return Number.isFinite(parsed)
-    ? parsed
-    : undefined;
-}
 
 
-function optionalInteger(
-  value: unknown
-): number | undefined {
-  const parsed =
-    optionalNumber(value);
 
-  return (
-    typeof parsed === 'number' &&
-    Number.isInteger(parsed)
-  )
-    ? parsed
-    : undefined;
-}
-
-
-function optionalText(
-  value: unknown
-): string | undefined {
-  const normalized =
-    typeof value === 'string'
-      ? value.trim()
-      : '';
-
-  return normalized.length > 0
-    ? normalized
-    : undefined;
-}
 
 
 function disclosureStatusForForm(
-  value:
-    OfferTerms[
-      'buyerDisclosures'
-    ][
-      'residentialProperty'
-    ][
-      'status'
-    ]
+  value: OfferTerms[
+    'buyerDisclosures'
+  ]['residentialProperty']['status'],
 ): string {
   return value === 'unselected'
     ? ''
     : value;
 }
 
-
 function hasText(
-  value: unknown
+  value: unknown,
 ): boolean {
   return (
     typeof value === 'string' &&
@@ -2715,12 +1697,10 @@ function hasText(
   );
 }
 
-
 function isPositiveNumber(
-  value: unknown
+  value: unknown,
 ): boolean {
-  const parsed =
-    Number(value);
+  const parsed = Number(value);
 
   return (
     Number.isFinite(parsed) &&
@@ -2728,26 +1708,22 @@ function isPositiveNumber(
   );
 }
 
-
 function formatUsPhoneNumber(
-  value: string
+  value: string,
 ): string {
-  let digits =
-    value.replace(
-      /\D/g,
-      ''
-    );
+  let digits = value.replace(
+    /\D/g,
+    '',
+  );
 
   if (
     digits.length === 11 &&
     digits.startsWith('1')
   ) {
-    digits =
-      digits.slice(1);
+    digits = digits.slice(1);
   }
 
-  digits =
-    digits.slice(0, 10);
+  digits = digits.slice(0, 10);
 
   if (digits.length !== 10) {
     return value;

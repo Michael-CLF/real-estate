@@ -2,6 +2,7 @@ import type { StateListingPackage } from '../state-listing-package';
 
 /** Florida resale disclosures are attached to the listing, not inferred from short answers. */
 export const floridaListingPackage: StateListingPackage = {
+  propertyDetailFields: ['legalDescription'],
   stateCode: 'FL',
   stateName: 'Florida',
   requiredSellerStatementFields: [

@@ -1,11 +1,6 @@
-import { HttpsError } from 'firebase-functions/v2/https';
+import { requireValue, money, days, date } from '../submission-values';
 import type { ValidateStateSubmissionInput } from '../state-contract-package';
 import type { LouisianaOfferTermsDocument } from './louisiana-offer-terms.document';
-
-const requireValue = (ok: unknown, message: string): void => { if (!ok) throw new HttpsError('failed-precondition', message); };
-const money = (v: number, positive = false) => Number.isSafeInteger(v) && (positive ? v > 0 : v >= 0);
-const days = (v: number, min: number, max: number) => Number.isSafeInteger(v) && v >= min && v <= max;
-const date = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(`${v}T12:00:00Z`));
 
 export function validateLouisianaSubmission({ offer, version }: ValidateStateSubmissionInput<LouisianaOfferTermsDocument>): void {
   const t = version.terms, p = t.purchase, c = t.conditions, d = t.deadlines;

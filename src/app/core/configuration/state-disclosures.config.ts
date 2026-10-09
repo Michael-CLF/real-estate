@@ -1,3 +1,4 @@
+import { isListingLeadUploadRequired } from './listing-disclosure-gates';
 import {
   StateDisclosureRequirement
 } from '../domains/disclosures/models/state-disclosure-requirement.model';
@@ -511,27 +512,8 @@ export function isDisclosureRequiredForListing(
 
   const stateCode = normalizeDisclosureStateCode(state);
 
-  if (stateCode === 'CO') {
-    if (requirement.documentType === 'lead-based-paint') return listing.leadBasedPaintApplies === true || listing.yearBuilt == null || listing.yearBuilt < 1978;
-    if (requirement.documentType === 'colorado-association-documents') {
-      return false;
-    }
-    return false;
-  }
-
-  if (stateCode === 'LA') {
-    return requirement.documentType === 'lead-based-paint' &&
-      (
-        listing.leadBasedPaintApplies === true ||
-        listing.yearBuilt == null ||
-        listing.yearBuilt < 1978
-      );
-  }
-  if (stateCode !== 'FL') return false;
-  return (requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||
-    (requirement.documentType === 'lead-based-paint' &&
-      (listing.leadBasedPaintApplies === true ||
-        (typeof listing.yearBuilt === 'number' && listing.yearBuilt < 1978 && listing.leadBasedPaintApplies !== false)));
+  return (stateCode === 'FL' && requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||
+    (requirement.documentType === 'lead-based-paint' && isListingLeadUploadRequired(stateCode, listing));
 }
 
 /** Accept both the two-letter code and the full name stored on older listings. */

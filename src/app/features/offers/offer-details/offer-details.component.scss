@@ -247,7 +247,7 @@ textarea {
 
 .terms-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   margin: 22px 0 0;
   border-top: 1px solid #e4eaee;
@@ -261,8 +261,8 @@ textarea {
 
 .terms-grid > div:nth-child(even) {
   padding-right: 0;
-  padding-left: 18px;
-  border-left: 1px solid #e4eaee;
+  padding-left: 0;
+  border-left: 0;
 }
 
 .terms-grid dt {

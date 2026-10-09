@@ -145,7 +145,7 @@ export class OfferWizardComponent {
 
 
   protected readonly busy = computed(
-    () => this.saving() || this.submitting()
+    () => this.submitting()
   );
 
   protected readonly contractDefinition = computed(
@@ -192,9 +192,8 @@ export class OfferWizardComponent {
         this.draftBuyers(),
         this.sellers(),
         {
-          mode: this.submissionAttempted()
-            ? 'submit'
-            : 'draft',
+          // Apply signature-readiness rules before leaving their section.
+          mode: 'submit',
           currentDateTime: new Date(),
         }
       );

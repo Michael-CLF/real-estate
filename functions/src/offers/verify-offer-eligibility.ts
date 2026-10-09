@@ -1,14 +1,11 @@
-import {
-  HttpsError,
-} from 'firebase-functions/v2/https';
+import { HttpsError } from 'firebase-functions/v2/https';
 
 import {
   DocumentData,
+  DocumentSnapshot,
 } from 'firebase-admin/firestore';
 
-import {
-  adminFirestore,
-} from '../shared/firebase-admin';
+import { adminFirestore } from '../shared/firebase-admin';
 
 import type {
   OfferEligibleListing,
@@ -18,80 +15,83 @@ import {
   requireEnabledStateContractPackage,
 } from './state-contracts/state-contract-registry';
 
-
-
 /*
  * Loads the published listing and confirms that an
  * authenticated buyer may begin or continue an offer.
+ *
+ * An existing transaction snapshot can be supplied to
+ * avoid reading the listing again.
  */
 export async function verifyOfferEligibility(
   listingUid: string,
-  buyerUid: string
+  buyerUid: string,
+  listingSnapshotOverride?: DocumentSnapshot,
 ): Promise<OfferEligibleListing> {
-  const normalizedListingUid =
-    requireIdentifier(
-      listingUid,
-      'listingUid'
-    );
+  const normalizedListingUid = requireIdentifier(
+    listingUid,
+    'listingUid',
+  );
 
-  const normalizedBuyerUid =
-    requireIdentifier(
-      buyerUid,
-      'buyerUid'
-    );
+  const normalizedBuyerUid = requireIdentifier(
+    buyerUid,
+    'buyerUid',
+  );
 
-  const listingReference =
-    adminFirestore
-      .collection('listings')
-      .doc(normalizedListingUid);
+  const listingReference = adminFirestore
+    .collection('listings')
+    .doc(normalizedListingUid);
 
   const listingSnapshot =
-    await listingReference.get();
+    listingSnapshotOverride ?? await listingReference.get();
+
+  if (listingSnapshot.ref.path !== listingReference.path) {
+    throw new HttpsError(
+      'data-loss',
+      'The listing snapshot does not match the requested property.',
+    );
+  }
 
   if (!listingSnapshot.exists) {
     throw new HttpsError(
       'not-found',
-      'The property listing could not be found.'
+      'The property listing could not be found.',
     );
   }
 
-  const listingData =
-    listingSnapshot.data();
+  const listingData = listingSnapshot.data();
 
   if (!listingData) {
     throw new HttpsError(
       'not-found',
-      'The property listing does not contain any data.'
+      'The property listing does not contain any data.',
     );
   }
 
-  const sellerUid =
-    readRequiredString(
-      listingData,
-      'sellerUid',
-      'The listing does not identify its seller.'
-    );
+  const sellerUid = readRequiredString(
+    listingData,
+    'sellerUid',
+    'The listing does not identify its seller.',
+  );
 
   if (sellerUid === normalizedBuyerUid) {
     throw new HttpsError(
       'failed-precondition',
-      'You cannot submit an offer on your own property.'
+      'You cannot submit an offer on your own property.',
     );
   }
 
-  const listingStatus =
-    readRequiredString(
-      listingData,
-      'status',
-      'The listing does not contain a valid status.'
-    )
-      .trim()
-      .toLowerCase();
+  const listingStatus = readRequiredString(
+    listingData,
+    'status',
+    'The listing does not contain a valid status.',
+  )
+    .trim()
+    .toLowerCase();
 
   if (listingStatus !== 'active') {
     throw new HttpsError(
       'failed-precondition',
-      'This property is not currently accepting offers.'
+      'This property is not currently accepting offers.',
     );
   }
 
@@ -104,143 +104,117 @@ export async function verifyOfferEligibility(
   if (listingData['acceptingOffers'] === false) {
     throw new HttpsError(
       'failed-precondition',
-      'The seller is not currently accepting offers for this property.'
+      'The seller is not currently accepting offers for this property.',
     );
   }
 
-  const stateCode =
-    readRequiredString(
-      listingData,
-      'state',
-      'The listing does not identify its state.'
-    )
-      .trim()
-      .toUpperCase();
+  const stateCode = readRequiredString(
+    listingData,
+    'state',
+    'The listing does not identify its state.',
+  )
+    .trim()
+    .toUpperCase();
 
-requireEnabledStateContractPackage(
-  stateCode
-);
+  requireEnabledStateContractPackage(stateCode);
 
-  const listPrice =
-    readRequiredNumber(
-      listingData,
-      'listPrice',
-      'The listing does not contain a valid list price.'
-    );
+  const listPrice = readRequiredNumber(
+    listingData,
+    'listPrice',
+    'The listing does not contain a valid list price.',
+  );
 
   if (listPrice <= 0) {
     throw new HttpsError(
       'failed-precondition',
-      'The listing does not contain a valid list price.'
+      'The listing does not contain a valid list price.',
     );
   }
 
   return {
     Uid: listingSnapshot.id,
-
     sellerUid,
-
     status: listingStatus,
+    acceptingOffers: listingData['acceptingOffers'] !== false,
 
-    acceptingOffers:
-      listingData['acceptingOffers'] !==
-      false,
+    addressLine1: readRequiredString(
+      listingData,
+      'addressLine1',
+      'The listing does not contain a street address.',
+    ),
 
-    addressLine1:
-      readRequiredString(
-        listingData,
-        'addressLine1',
-        'The listing does not contain a street address.'
-      ),
+    addressLine2: readOptionalString(
+      listingData,
+      'addressLine2',
+    ),
 
-    addressLine2:
-      readOptionalString(
-        listingData,
-        'addressLine2'
-      ),
-
-    city:
-      readRequiredString(
-        listingData,
-        'city',
-        'The listing does not contain a city.'
-      ),
+    city: readRequiredString(
+      listingData,
+      'city',
+      'The listing does not contain a city.',
+    ),
 
     state: stateCode,
 
-    zipCode:
-      readRequiredString(
-        listingData,
-        'zipCode',
-        'The listing does not contain a ZIP code.'
-      ),
+    zipCode: readRequiredString(
+      listingData,
+      'zipCode',
+      'The listing does not contain a ZIP code.',
+    ),
 
-    county:
-      readRequiredString(
-        listingData,
-        'county',
-        'The listing does not contain a county.'
-      ),
+    county: readRequiredString(
+      listingData,
+      'county',
+      'The listing does not contain a county.',
+    ),
 
-    parcelIdentificationNumber:
-      readFirstOptionalString(
-        listingData,
-        [
-          'parcelIdentificationNumber',
-          'parcelNumber',
-        ]
-      ),
+    parcelIdentificationNumber: readFirstOptionalString(
+      listingData,
+      [
+        'parcelIdentificationNumber',
+        'parcelNumber',
+      ],
+    ),
 
-    deedBook:
-      readOptionalString(
-        listingData,
-        'deedBook'
-      ),
+    deedBook: readOptionalString(
+      listingData,
+      'deedBook',
+    ),
 
-    deedPage:
-      readOptionalString(
-        listingData,
-        'deedPage'
-      ),
+    deedPage: readOptionalString(
+      listingData,
+      'deedPage',
+    ),
 
-    legalDescription:
-      readOptionalString(
-        listingData,
-        'legalDescription'
-      ),
+    legalDescription: readOptionalString(
+      listingData,
+      'legalDescription',
+    ),
 
-    otherPropertyReference:
-      readFirstOptionalString(
-        listingData,
-        [
-          'otherPropertyReference',
-          'legalDescription',
-        ]
-      ),
+    otherPropertyReference: readFirstOptionalString(
+      listingData,
+      [
+        'otherPropertyReference',
+        'legalDescription',
+      ],
+    ),
 
-    propertyType:
-      readRequiredString(
-        listingData,
-        'propertyType',
-        'The listing does not identify the property type.'
-      ),
+    propertyType: readRequiredString(
+      listingData,
+      'propertyType',
+      'The listing does not identify the property type.',
+    ),
 
-    yearBuilt:
-      readOptionalNumber(
-        listingData,
-        'yearBuilt'
-      ),
+    yearBuilt: readOptionalNumber(
+      listingData,
+      'yearBuilt',
+    ),
 
     listPrice,
-
-    createdAt:
-      listingData['createdAt'],
-
-    updatedAt:
-      listingData['updatedAt'],
+    createdAt: listingData['createdAt'],
+    updatedAt: listingData['updatedAt'],
   };
 }
-
 
 /*
  * Rechecks eligibility immediately before a legally
@@ -252,18 +226,19 @@ requireEnabledStateContractPackage(
  */
 export async function verifyOfferSubmissionEligibility(
   listingUid: string,
-  buyerUid: string
+  buyerUid: string,
+  listingSnapshotOverride?: DocumentSnapshot,
 ): Promise<OfferEligibleListing> {
   return verifyOfferEligibility(
     listingUid,
-    buyerUid
+    buyerUid,
+    listingSnapshotOverride,
   );
 }
 
-
 function requireIdentifier(
   value: unknown,
-  fieldName: string
+  fieldName: string,
 ): string {
   if (
     typeof value !== 'string' ||
@@ -271,12 +246,11 @@ function requireIdentifier(
   ) {
     throw new HttpsError(
       'invalid-argument',
-      `${fieldName} is required.`
+      `${fieldName} is required.`,
     );
   }
 
-  const normalizedValue =
-    value.trim();
+  const normalizedValue = value.trim();
 
   if (
     normalizedValue.length > 200 ||
@@ -284,21 +258,19 @@ function requireIdentifier(
   ) {
     throw new HttpsError(
       'invalid-argument',
-      `${fieldName} is invalid.`
+      `${fieldName} is invalid.`,
     );
   }
 
   return normalizedValue;
 }
 
-
 function readRequiredString(
   data: DocumentData,
   fieldName: string,
-  errorMessage: string
+  errorMessage: string,
 ): string {
-  const value =
-    data[fieldName];
+  const value = data[fieldName];
 
   if (
     typeof value !== 'string' ||
@@ -306,44 +278,36 @@ function readRequiredString(
   ) {
     throw new HttpsError(
       'failed-precondition',
-      errorMessage
+      errorMessage,
     );
   }
 
   return value.trim();
 }
 
-
 function readOptionalString(
   data: DocumentData,
-  fieldName: string
+  fieldName: string,
 ): string | undefined {
-  const value =
-    data[fieldName];
+  const value = data[fieldName];
 
   if (typeof value !== 'string') {
     return undefined;
   }
 
-  const normalizedValue =
-    value.trim();
+  const normalizedValue = value.trim();
 
   return normalizedValue.length > 0
     ? normalizedValue
     : undefined;
 }
 
-
 function readFirstOptionalString(
   data: DocumentData,
-  fieldNames: string[]
+  fieldNames: string[],
 ): string | undefined {
   for (const fieldName of fieldNames) {
-    const value =
-      readOptionalString(
-        data,
-        fieldName
-      );
+    const value = readOptionalString(data, fieldName);
 
     if (value) {
       return value;
@@ -353,14 +317,12 @@ function readFirstOptionalString(
   return undefined;
 }
 
-
 function readRequiredNumber(
   data: DocumentData,
   fieldName: string,
-  errorMessage: string
+  errorMessage: string,
 ): number {
-  const value =
-    data[fieldName];
+  const value = data[fieldName];
 
   if (
     typeof value !== 'number' ||
@@ -368,20 +330,18 @@ function readRequiredNumber(
   ) {
     throw new HttpsError(
       'failed-precondition',
-      errorMessage
+      errorMessage,
     );
   }
 
   return value;
 }
 
-
 function readOptionalNumber(
   data: DocumentData,
-  fieldName: string
+  fieldName: string,
 ): number | undefined {
-  const value =
-    data[fieldName];
+  const value = data[fieldName];
 
   if (
     typeof value !== 'number' ||

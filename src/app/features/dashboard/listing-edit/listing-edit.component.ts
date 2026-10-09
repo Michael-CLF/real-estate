@@ -1,4 +1,5 @@
-import { ColoradoPropertyFactsEditorComponent } from './colorado-property-facts-editor.component';
+import { getStateListingFormFactory, getStateListingFormValidator, getStateListingFormRestorer, getStateListingEditFields } from '../../../core/domains/listings/state-packages/state-listing.registry';
+import type { ColoradoPropertyFacts } from '../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -63,12 +64,16 @@ interface ListingEditHoaValue {
 }
 
 interface ListingEditFormValue {
+  legalDescription: string;
+  coloradoPropertyFacts: Record<string, string>;
   listPrice: number;
   description: string;
   hoa: ListingEditHoaValue;
 }
 
 interface UpdatePublishedListingChanges {
+  legalDescription?: string;
+  coloradoPropertyFacts?: ColoradoPropertyFacts;
   listPrice: number;
   description: string;
 
@@ -98,8 +103,7 @@ interface UpdatePublishedListingResponse {
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    ListingPhotoEditorComponent,
-    ColoradoPropertyFactsEditorComponent
+    ListingPhotoEditorComponent
   ],
   templateUrl:
     './listing-edit.component.html',
@@ -212,8 +216,12 @@ export class ListingEditComponent
       }
     ];
 
+  protected readonly coloradoFields = getStateListingEditFields('coloradoPropertyFacts');
+
   protected readonly form =
     this.fb.nonNullable.group({
+      legalDescription: ['', Validators.maxLength(5000)],
+      coloradoPropertyFacts: getStateListingFormFactory('coloradoPropertyFacts')(this.fb),
       listPrice: [
         0,
         [
@@ -769,6 +777,14 @@ protected async savePhotoChanges():
       });
   }
 
+  private refreshColoradoValidators(): void {
+    const listing = this.listing();
+    getStateListingFormValidator('coloradoPropertyFactsEdit')(
+      this.form.controls.coloradoPropertyFacts,
+      listing?.state,
+      listing?.status,
+    );
+  }
   private watchFormChanges(): void {
     this.form.valueChanges
       .pipe(
@@ -777,6 +793,7 @@ protected async savePhotoChanges():
         )
       )
       .subscribe(() => {
+        this.refreshColoradoValidators();
         this.hasChanges.set(
           this.form.dirty
         );
@@ -792,6 +809,8 @@ protected async savePhotoChanges():
   ): void {
     this.form.patchValue(
       {
+        legalDescription: listing.legalDescription ?? '',
+        coloradoPropertyFacts: getStateListingFormRestorer('coloradoPropertyFacts')(listing.coloradoPropertyFacts),
         listPrice:
           listing.listPrice,
 
@@ -819,6 +838,7 @@ protected async savePhotoChanges():
     );
 
     this.refreshHoaValidators();
+    this.refreshColoradoValidators();
 
     this.form.markAsPristine();
     this.form.markAsUntouched();
@@ -874,6 +894,10 @@ protected async savePhotoChanges():
       formValue.hoa.hasHoa;
 
     return {
+      ...(this.form.controls.coloradoPropertyFacts.enabled ? {
+        legalDescription: formValue.legalDescription.trim(),
+        coloradoPropertyFacts: Object.fromEntries(Object.entries(formValue.coloradoPropertyFacts).map(([key, value]) => [key, value.trim()])) as unknown as ColoradoPropertyFacts,
+      } : {}),
       listPrice:
         formValue.listPrice,
 
@@ -913,6 +937,7 @@ protected async savePhotoChanges():
 
         return {
           ...currentListing,
+          ...(this.form.controls.coloradoPropertyFacts.enabled ? { legalDescription: formValue.legalDescription.trim(), coloradoPropertyFacts: { ...currentListing.coloradoPropertyFacts, ...formValue.coloradoPropertyFacts } as ColoradoPropertyFacts } : {}),
 
           listPrice:
             formValue.listPrice,

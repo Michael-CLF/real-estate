@@ -1,3 +1,4 @@
+import * as logger from 'firebase-functions/logger';
 import {
   DocumentReference,
   FieldValue,
@@ -131,6 +132,7 @@ export const signOffer =
   >(
     callableFunctionOptions,
     async request => {
+      const operationStartedAt = Date.now();
       const userUid =
         request.auth?.uid;
 
@@ -179,7 +181,8 @@ export const signOffer =
           .collection('documents')
           .doc(documentUid);
 
-      return adminFirestore.runTransaction(
+      const transactionStartedAt = Date.now();
+      const result = await adminFirestore.runTransaction(
         async transaction => {
           const [
             offerSnapshot,
@@ -961,6 +964,8 @@ export const signOffer =
           };
         }
       );
+      logger.info('signOffer timing', {totalMs: Date.now() - operationStartedAt, transactionMs: Date.now() - transactionStartedAt});
+      return result;
     }
   );
 

@@ -1,9 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import PDFDocument from 'pdfkit';
-import { PDFDocument as MergePdfDocument } from 'pdf-lib';
+import { inflateSync } from 'node:zlib';
 import type { AgreementSummaryRow, GenerateStateAgreementInput, GeneratedStateAgreement, StateContractTerms } from './state-contract-package';
-import SVGtoPDF from 'svg-to-pdfkit';
 
 /** Shared NavStreet page chrome for state-authored agreements. Official state forms keep their own pages. */
 export const NAVSTREET_PDF = {
@@ -18,12 +16,16 @@ export const NAVSTREET_PDF = {
 } as const;
 
 const root = join(__dirname, '../../../');
-const logo = readFileSync(join(root, 'assets/navstreet-transparent.svg'), 'utf8');
+let logo: string | undefined;
 const fonts = join(root, 'node_modules/@fontsource/barlow/files');
+let regularFont: Buffer | undefined;
+let boldFont: Buffer | undefined;
 
 export function registerNavStreetPdfFonts(pdf: PDFKit.PDFDocument): void {
-  pdf.registerFont('NavStreet-Regular', join(fonts, 'barlow-latin-400-normal.woff'));
-  pdf.registerFont('NavStreet-Bold', join(fonts, 'barlow-latin-700-normal.woff'));
+  regularFont ??= preparePdfFont(readFileSync(join(fonts, 'barlow-latin-400-normal.woff')));
+  boldFont ??= preparePdfFont(readFileSync(join(fonts, 'barlow-latin-700-normal.woff')));
+  pdf.registerFont('NavStreet-Regular', regularFont);
+  pdf.registerFont('NavStreet-Bold', boldFont);
 }
 
 export function drawNavStreetPdfChrome(pdf: PDFKit.PDFDocument, input: {
@@ -36,6 +38,8 @@ export function drawNavStreetPdfChrome(pdf: PDFKit.PDFDocument, input: {
   const { blue, teal, margin, contentWidth } = NAVSTREET_PDF;
   pdf.save();
   pdf.rect(36, 24, 540, 48).fill(blue);
+  const SVGtoPDF = require('svg-to-pdfkit') as typeof import('svg-to-pdfkit');
+  logo ??= readFileSync(join(root, 'assets/navstreet-transparent.svg'), 'utf8');
   SVGtoPDF(pdf, logo, 44, 25, { width: 118, height: 46, preserveAspectRatio: 'xMidYMid meet' });
   pdf.restore();
 
@@ -110,6 +114,8 @@ export async function prependNavStreetContractSummary(
   rows: readonly AgreementSummaryRow[],
   agreement: GeneratedStateAgreement,
 ): Promise<GeneratedStateAgreement> {
+  const PDFDocument = require('pdfkit') as typeof import('pdfkit');
+  const { PDFDocument: MergePdfDocument } = require('pdf-lib') as typeof import('pdf-lib');
   const pdf = new PDFDocument({ size: 'LETTER', margin: NAVSTREET_PDF.margin, bufferPages: true });
   const chunks: Buffer[] = [];
   const completed = new Promise<Buffer>((resolve, reject) => {
@@ -172,4 +178,55 @@ export async function prependNavStreetContractSummary(
   coverPages.forEach((page, index) => merged.insertPage(index, page));
   return { ...agreement, buffer: Buffer.from(await merged.save({ updateFieldAppearances: false })),
     pageCount: merged.getPageCount() };
+}
+
+/** Reconstruct bundled WOFF1 tables once; each PDF still gets its own font object. */
+function preparePdfFont(source: Buffer): Buffer {
+  if (source.toString('ascii', 0, 4) !== 'wOFF') return source;
+  const count = source.readUInt16BE(12);
+  const tables = Array.from({ length: count }, (_, index) => {
+    const position = 44 + index * 20;
+    const tag = source.toString('ascii', position, position + 4);
+    const offset = source.readUInt32BE(position + 4);
+    const compressedLength = source.readUInt32BE(position + 8);
+    const length = source.readUInt32BE(position + 12);
+    const compressed = source.subarray(offset, offset + compressedLength);
+    const bytes = compressedLength < length ? inflateSync(compressed) : compressed;
+    if (bytes.length !== length) throw new Error('Invalid bundled PDF font table.');
+    return { tag, bytes, checksum: source.readUInt32BE(position + 16) };
+  });
+  // Preserve signed font containers rather than invalidating their signatures.
+  if (tables.some(table => table.tag === 'DSIG')) return source;
+  const size = 12 + count * 16 + tables.reduce((sum, table) => sum + Math.ceil(table.bytes.length / 4) * 4, 0);
+  const font = Buffer.alloc(size);
+  font.writeUInt32BE(source.readUInt32BE(4), 0);
+  font.writeUInt16BE(count, 4);
+  const selector = Math.floor(Math.log2(count));
+  const searchRange = 16 * 2 ** selector;
+  font.writeUInt16BE(searchRange, 6);
+  font.writeUInt16BE(selector, 8);
+  font.writeUInt16BE(count * 16 - searchRange, 10);
+  let offset = 12 + count * 16;
+  let headOffset: number | undefined;
+  tables.forEach((table, index) => {
+    const position = 12 + index * 16;
+    font.write(table.tag, position, 4, 'ascii');
+    font.writeUInt32BE(table.checksum, position + 4);
+    font.writeUInt32BE(offset, position + 8);
+    font.writeUInt32BE(table.bytes.length, position + 12);
+    table.bytes.copy(font, offset);
+    if (table.tag === 'head') {
+      headOffset = offset;
+      font.writeUInt32BE(0, offset + 8);
+    }
+    offset += Math.ceil(table.bytes.length / 4) * 4;
+  });
+  if (headOffset !== undefined) {
+    let checksum = 0;
+    for (let position = 0; position < font.length; position += 4) {
+      checksum = (checksum + font.readUInt32BE(position)) >>> 0;
+    }
+    font.writeUInt32BE((0xB1B0AFBA - checksum) >>> 0, headOffset + 8);
+  }
+  return font;
 }

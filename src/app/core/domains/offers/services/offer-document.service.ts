@@ -109,6 +109,8 @@ export interface RegisterOfferAttachmentResponse {
 })
 export class OfferDocumentService {
 
+  private readonly agreementRequests = new Map<string, Promise<GenerateOfferDocumentResponse>>();
+
   private readonly storage =
     getStorage();
 
@@ -241,14 +243,23 @@ export class OfferDocumentService {
       'An offer-version identifier is required.'
     );
 
-    const result =
-      await this.generateOfferDocumentFunction({
-        offerUid,
-        offerVersionUid,
-        documentType
-      });
+    const key = JSON.stringify([offerUid, offerVersionUid, documentType]);
+    const existing = this.agreementRequests.get(key);
+    if (existing) return existing;
 
-    return result.data;
+    const request = this.generateOfferDocumentFunction({
+      offerUid,
+      offerVersionUid,
+      documentType
+    }).then(result => result.data);
+    this.agreementRequests.set(key, request);
+    try {
+      return await request;
+    } finally {
+      if (this.agreementRequests.get(key) === request) {
+        this.agreementRequests.delete(key);
+      }
+    }
   }
 
 

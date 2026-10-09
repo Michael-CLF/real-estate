@@ -124,7 +124,7 @@ export class OfferWizardComponent {
   private initialBuyersApplied = false;
 
   protected readonly busy = computed(
-    () => this.saving() || this.submitting()
+    () => this.submitting()
   );
 
   protected readonly contractDefinition = computed(

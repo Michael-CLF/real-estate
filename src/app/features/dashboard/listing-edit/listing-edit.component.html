@@ -395,6 +395,64 @@
         </div>
         }
 
+        @if (currentListing.state === 'CO' && currentListing.status === 'active') {
+        <section class="form-card" aria-labelledby="colorado-legal-heading">
+          <header class="form-card__header"><div class="form-card__heading">
+            <h2 id="colorado-legal-heading">Recorded legal property description</h2>
+            <p>Copy the complete description from the deed or recorded property documents. Buyers need it to complete a Colorado offer.</p>
+          </div></header>
+          <div class="form-card__body"><div class="form-field">
+            <label for="co-legalDescription">Complete legal description</label>
+            <textarea id="co-legalDescription" formControlName="legalDescription" rows="4" maxlength="5000"
+              [attr.aria-invalid]="form.controls.legalDescription.touched && form.controls.legalDescription.invalid" aria-describedby="co-legal-error"></textarea>
+            @if (form.controls.legalDescription.touched && form.controls.legalDescription.invalid) {
+              <p id="co-legal-error" class="field-error">Keep the legal description within 5,000 characters.</p>
+            }
+          </div></div>
+        </section>
+        <section class="form-card" aria-labelledby="colorado-facts-heading" formGroupName="coloradoPropertyFacts">
+          <header class="form-card__header"><div class="form-card__heading">
+            <h2 id="colorado-facts-heading">Colorado property information</h2>
+            <p>Provide the seller facts buyers will review when making an offer.</p>
+          </div></header>
+          <div class="form-card__body colorado-facts-grid">
+            <div class="form-field colorado-facts-grid__wide">
+              <label for="co-metroDistrict">Is the property in a metropolitan district organized on or after January 1, 2000?</label>
+              <p class="field-notice">This is separate from an HOA. Confirm the district and formation date using property tax records or the county assessor.</p>
+              <select id="co-metroDistrict" formControlName="metroDistrict" [attr.aria-invalid]="form.controls.coloradoPropertyFacts.get('metroDistrict')!.touched && form.controls.coloradoPropertyFacts.get('metroDistrict')!.invalid" aria-describedby="co-metro-error">
+                <option value="unselected">Select an answer</option>
+                <option value="covered">Yes — covered metropolitan district</option>
+                <option value="not_applicable">No — not a covered metropolitan district</option>
+                <option value="unknown">Unknown — need to confirm</option>
+              </select>
+              @if (form.controls.coloradoPropertyFacts.get('metroDistrict')!.touched && form.controls.coloradoPropertyFacts.get('metroDistrict')!.invalid) {
+                <p class="field-error" id="co-metro-error">Confirm district applicability before saving. Unknown is not recorded as No.</p>
+              }
+            </div>
+            @if (form.controls.coloradoPropertyFacts.get('metroDistrict')!.value === 'covered') {
+              @for (field of [{key: 'metroDistrictWebsite', label: 'Official district website'}, {key: 'metroDistrictDisclosure', label: 'District disclosure and accessible records reference'}]; track field.key) {
+              <div class="form-field">
+                <label [for]="'co-' + field.key">{{ field.label }} (required)</label>
+                <input [id]="'co-' + field.key" [type]="field.key === 'metroDistrictWebsite' ? 'url' : 'text'" [formControlName]="field.key" maxlength="4000" />
+                @if (form.controls.coloradoPropertyFacts.get(field.key)!.touched && form.controls.coloradoPropertyFacts.get(field.key)!.invalid) {
+                  <p class="field-error">{{ field.key === 'metroDistrictWebsite' ? 'Enter the official website beginning with https://.' : 'Provide the district disclosure and records reference.' }}</p>
+                }
+              </div>
+              }
+            }
+            @for (field of coloradoFields; track field.key) {
+            <div class="form-field">
+              <label [for]="'co-' + field.key">{{ field.label }}</label>
+              <textarea [id]="'co-' + field.key" [formControlName]="field.key" rows="2" maxlength="4000"></textarea>
+              @if (form.controls.coloradoPropertyFacts.get(field.key)!.touched && form.controls.coloradoPropertyFacts.get(field.key)!.invalid) {
+                <p class="field-error">{{ field.key === 'waterSource' ? 'Enter the potable water source.' : 'Keep this answer within 4,000 characters.' }}</p>
+              }
+            </div>
+            }
+          </div>
+        </section>
+        }
+
         <footer class="form-actions">
           <button type="button" class="secondary-button" [disabled]="
                 isSaving() ||
@@ -452,8 +510,3 @@
   </div>
   }
 </section>
-@if (listing(); as currentListing) {
-  @if (currentListing.state === 'CO' && currentListing.status === 'active') {
-    <app-colorado-property-facts-editor [listingUid]="currentListing.Uid" [facts]="currentListing.coloradoPropertyFacts" />
-  }
-}
