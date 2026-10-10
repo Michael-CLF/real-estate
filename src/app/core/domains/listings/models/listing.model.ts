@@ -430,6 +430,10 @@ export type ListingSellerOwnershipStatus =
   'owned_at_least_one_year' | 'owned_less_than_one_year' | 'does_not_yet_own';
 export type ListingFuelTankOwnership = 'owned' | 'leased';
 export interface ListingSellerStatements {
+  newHampshire?: { methProductionKnown?: boolean; utilityTariffChargesKnown?: boolean; };
+  nebraska?: { usesMountainTime?: boolean; };
+  missouri?: { methProductionKnown?: boolean; drugConvictionKnown?: boolean; };
+  oregon?: { historicSpecialAssessmentApplies?: boolean; usesMountainTime?: boolean; domesticWellApplies?: boolean; uncertifiedWoodDevicePresent?: boolean; };
   southCarolina?: {
     beachfrontApplies?: boolean;
     futureVacationBookingsExist?: boolean;

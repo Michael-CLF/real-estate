@@ -1,3 +1,7 @@
+import type { NewHampshireListingAnswers } from './new-hampshire/new-hampshire-listing-form';
+import type { NebraskaListingAnswers } from './nebraska/nebraska-listing-form';
+import type { MissouriListingAnswers } from './missouri/missouri-listing-form';
+import type { OregonListingAnswers } from './oregon/oregon-listing-form';
 import { mapStateListingSellerStatements } from './state-listing.registry';
 import type { ListingHoa, ListingSellerStatements } from '../models/listing.model';
 import type { CaliforniaListingFacts } from './california/california-listing-facts.model';
@@ -9,6 +13,10 @@ export interface ListingStatementMappingAnswers extends Omit<ListingStatementSav
   'ownershipStatus' | 'fuelTankOwnership'> {
   ownershipStatus: NonNullable<ListingSellerStatements['ownershipStatus']> | '';
   fuelTankOwnership: NonNullable<ListingSellerStatements['fuelTankOwnership']> | '';
+  oregon?: OregonListingAnswers;
+  missouri?: MissouriListingAnswers;
+  nebraska?: NebraskaListingAnswers;
+  newHampshire?: NewHampshireListingAnswers;
   southCarolina?: SouthCarolinaListingAnswers;
   california?: CaliforniaListingFacts;
   additionalSellerIncluded: boolean;

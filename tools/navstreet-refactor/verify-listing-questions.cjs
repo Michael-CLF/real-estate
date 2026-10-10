@@ -330,6 +330,12 @@ const resolve = name => pathToFileURL(require.resolve(name, { paths: [project] }
   assert(wizardSource.includes('validateStateListingQuestionAnswers(statePackage, propertyDetails)'));
   assert(!wizardSource.includes("typeof statements.southCarolina?.beachfrontApplies"));
   console.log(`PASS: ${saveQuestionComparisons} ten-state question save comparisons; invalid types, missing groups, optional questions and original error preserved.`);
+  const fourStateRestoreDefaults = {
+    oregon: { usesMountainTime: null, domesticWellApplies: null, uncertifiedWoodDevicePresent: null, historicSpecialAssessmentApplies: null },
+    missouri: { methProductionKnown: null, drugConvictionKnown: null },
+    nebraska: { usesMountainTime: null },
+    newHampshire: { methProductionKnown: null, utilityTariffChargesKnown: null }
+  };
   let outerRestoreCount = 0;
   for (const california of [undefined,null,{}, { transferDisclosure: 'exempt' },
     { resaleWithin18Months: 'no', gasApplianceRestrictions: 'local text' }])
@@ -338,6 +344,7 @@ const resolve = name => pathToFileURL(require.resolve(name, { paths: [project] }
         const saved = { california, southCarolina: { beachfrontApplies, futureVacationBookingsExist } };
         const restored = registry.restoreStateListingSellerStatements(saved);
         const expected = {
+          ...fourStateRestoreDefaults,
           southCarolina: { beachfrontApplies: beachfrontApplies ?? null,
             futureVacationBookingsExist: futureVacationBookingsExist ?? null },
           california: california ?? { ...ca.CALIFORNIA_LISTING_FACT_DEFAULTS }
@@ -349,6 +356,7 @@ const resolve = name => pathToFileURL(require.resolve(name, { paths: [project] }
   for (const saved of [undefined,null,{}]) {
     const restored = registry.restoreStateListingSellerStatements(saved);
     assert.deepEqual(JSON.parse(normalize(restored)), {
+      ...fourStateRestoreDefaults,
       california: JSON.parse(normalize(ca.CALIFORNIA_LISTING_FACT_DEFAULTS)),
       southCarolina: { beachfrontApplies: null, futureVacationBookingsExist: null }
     });

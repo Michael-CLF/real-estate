@@ -66,6 +66,10 @@ const STATE_OFFER_REGISTRATIONS:
     },
     MN: { stateCode: 'MN', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/minnesota/minnesota-offer-entry/minnesota-offer-entry.component').then(component => component.MinnesotaOfferEntryComponent) },
     AZ: { stateCode: 'AZ', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/arizona/arizona-offer-entry/arizona-offer-entry.component').then(component => component.ArizonaOfferEntryComponent) },
+    OR: { stateCode: 'OR', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/oregon/oregon-offer-entry/oregon-offer-entry.component').then(component => component.OregonOfferEntryComponent) },
+    MO: { stateCode: 'MO', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/missouri/missouri-offer-entry/missouri-offer-entry.component').then(component => component.MissouriOfferEntryComponent) },
+    NE: { stateCode: 'NE', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/nebraska/nebraska-offer-entry/nebraska-offer-entry.component').then(component => component.NebraskaOfferEntryComponent) },
+    NH: { stateCode: 'NH', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/new-hampshire/new-hampshire-offer-entry/new-hampshire-offer-entry.component').then(component => component.NewHampshireOfferEntryComponent) },
     ID: { stateCode: 'ID', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/idaho/idaho-offer-entry/idaho-offer-entry.component').then(component => component.IdahoOfferEntryComponent) },
     MI: { stateCode: 'MI', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/michigan/michigan-offer-entry/michigan-offer-entry.component').then(component => component.MichiganOfferEntryComponent) },
     FL: {

@@ -412,6 +412,22 @@ form {
   line-height: 1.4;
 }
 
+#or-historic-assessment,
+#or-usesMountainTime,
+#or-domesticWellApplies,
+#or-uncertifiedWoodDevicePresent,
+#ne-usesMountainTime,
+#mo-methProductionKnown,
+#mo-drugConvictionKnown,
+#nh-utilityTariffChargesKnown,
+#nh-methProductionKnown {
+  padding: 10px 10px;
+  margin-left: 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+
 @media (max-width: 768px) {
   .three-column {
     grid-template-columns: 1fr;

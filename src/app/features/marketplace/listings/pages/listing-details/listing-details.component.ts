@@ -1196,8 +1196,8 @@ export class ListingDetailsComponent
       case 'single_family':
         return 'Single-family home';
 
-      case 'condominium':
-        return 'Condominium';
+      case 'condo':
+        return 'Condo';
 
       case 'townhome':
         return 'Townhome';

@@ -24,6 +24,7 @@ const checks = [
   'verify-backend-submission-values.cjs',
   'verify-state-contract-integration.cjs',
   'verify-arizona-idaho.cjs',
+  'verify-oregon-missouri-nebraska-new-hampshire.cjs',
   'verify-minnesota-michigan.cjs',
   'verify-marketplace-status-search.cjs',
   'verify-offer-display-registry.cjs',

@@ -65,6 +65,10 @@ export interface MarketplaceListing {
   yearBuilt?: number;
   sellerStatements?: {
     california?: CaliforniaListingFacts;
+    oregon?: { historicSpecialAssessmentApplies?: boolean | null; usesMountainTime?: boolean | null; domesticWellApplies?: boolean | null; uncertifiedWoodDevicePresent?: boolean | null };
+    missouri?: { methProductionKnown?: boolean | null; drugConvictionKnown?: boolean | null };
+    nebraska?: { usesMountainTime?: boolean | null };
+    newHampshire?: { methProductionKnown?: boolean | null; utilityTariffChargesKnown?: boolean | null };
     ownersAssociationApplies?: boolean | null;
     leadBasedPaintApplies?: boolean | null;
   };

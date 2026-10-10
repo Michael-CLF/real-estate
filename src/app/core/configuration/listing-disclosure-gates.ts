@@ -2,6 +2,7 @@ import type { DisclosureDocumentType } from '../domains/disclosures/models/state
 
 /** Existing upload-gate facts. State codes are normalized by the callers. */
 export interface ListingDisclosureGateFacts {
+ readonly missouri?: { readonly methProductionKnown?: boolean | null; readonly drugConvictionKnown?: boolean | null };
   readonly yearBuilt?: number | null;
   readonly propertyType?: string | null;
   readonly leadBasedPaintApplies?: boolean | null;
@@ -10,7 +11,7 @@ export interface ListingDisclosureGateFacts {
 
 /** Preserve each state's existing lead-applicability decision, including unknown-year behavior. */
 export function isListingLeadUploadRequired(code: string, facts: ListingDisclosureGateFacts): boolean {
-  if (code === 'CO' || code === 'LA' || code === 'MN' || code === 'MI' || code === 'AZ' || code === 'ID')
+  if (code === 'CO' || code === 'LA' || code === 'MN' || code === 'MI' || code === 'AZ' || code === 'ID' || code === 'OR' || code === 'MO' || code === 'NE' || code === 'NH')
     return facts.leadBasedPaintApplies === true || facts.yearBuilt == null || facts.yearBuilt < 1978;
   if (code === 'FL')
     return facts.leadBasedPaintApplies === true ||
@@ -27,6 +28,10 @@ export function getListingUploadGateDocumentTypes(
   if (code === 'AZ') return ['arizona-seller-disclosure', 'arizona-statutory-packet',
     ...(facts.ownersAssociationApplies === true ? ['arizona-association-documents' as const] : []),
     ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'OR') return [...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'MO') return [...(facts.missouri?.methProductionKnown !== false || facts.missouri?.drugConvictionKnown !== false ? ['missouri-statutory-packet' as const] : []), ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'NE') return ['nebraska-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'NH') return ['new-hampshire-seller-disclosure','new-hampshire-statutory-packet', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'ID') return ['idaho-statutory-packet',
     ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'MN') return ['minnesota-seller-disclosure', 'minnesota-statutory-packet',

@@ -231,7 +231,7 @@ export class SearchResultsComponent {
   ): PropertyType[] | undefined {
     switch (value) {
       case 'single_family':
-      case 'condominium':
+      case 'condo':
       case 'townhome':
       case 'multifamily':
       case 'manufactured':

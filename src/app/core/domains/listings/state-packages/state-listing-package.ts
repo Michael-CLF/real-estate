@@ -1,3 +1,7 @@
+import type { createNewHampshireListingAnswersForm, restoreNewHampshireListingAnswers } from './new-hampshire/new-hampshire-listing-form';
+import type { createNebraskaListingAnswersForm, restoreNebraskaListingAnswers } from './nebraska/nebraska-listing-form';
+import type { createMissouriListingAnswersForm, restoreMissouriListingAnswers } from './missouri/missouri-listing-form';
+import type { createOregonListingAnswersForm, restoreOregonListingAnswers } from './oregon/oregon-listing-form';
 import type { COLORADO_LISTING_EDIT_FIELDS } from './colorado/colorado-listing-edit-fields';
 import type { restoreColoradoPropertyFacts } from './colorado/colorado-listing-facts';
 import type { ListingSellerStatements } from '../models/listing.model';
@@ -12,6 +16,10 @@ import type { createColoradoPropertyFactsForm, createColoradoAssumableLoanForm }
 
 /** Typed factories for existing persisted form groups; no new storage paths. */
 export interface StateListingFormFactories {
+ readonly 'sellerStatements.newHampshire': typeof createNewHampshireListingAnswersForm;
+ readonly 'sellerStatements.nebraska': typeof createNebraskaListingAnswersForm;
+ readonly 'sellerStatements.missouri': typeof createMissouriListingAnswersForm;
+ readonly 'sellerStatements.oregon': typeof createOregonListingAnswersForm;
   readonly 'sellerStatements.southCarolina': typeof createSouthCarolinaListingAnswersForm;
   readonly 'sellerStatements.california': typeof createCaliforniaListingFactsForm;
   readonly 'coloradoPropertyFacts': typeof createColoradoPropertyFactsForm;
@@ -50,6 +58,10 @@ export interface StateListingFormValidators {
 
 /** Restore existing persisted answers through their owning package. */
 export interface StateListingFormRestorers {
+ readonly 'sellerStatements.newHampshire': typeof restoreNewHampshireListingAnswers;
+ readonly 'sellerStatements.nebraska': typeof restoreNebraskaListingAnswers;
+ readonly 'sellerStatements.missouri': typeof restoreMissouriListingAnswers;
+ readonly 'sellerStatements.oregon': typeof restoreOregonListingAnswers;
   readonly coloradoPropertyFacts: typeof restoreColoradoPropertyFacts;
   readonly coloradoAssumableLoan: typeof restoreColoradoAssumableLoan;
   readonly 'sellerStatements.california': typeof restoreCaliforniaListingFacts;
@@ -61,7 +73,7 @@ export interface StateListingFormSerializers {
 }
 
 export type StateListingStatementDraftExtensions = Partial<Pick<ListingStatementMappingAnswers,
-  'california' | 'southCarolina'>>;
+  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'southCarolina'>>;
 
 export type StateListingPropertyField = 'legalDescription';
 
@@ -96,6 +108,7 @@ export function requiresStateListingField(
 }
 
 export interface StateListingBooleanQuestion {
+  readonly options?: readonly {readonly value: boolean; readonly label: string}[];
   readonly id: string;
   readonly fieldPath: string;
   readonly label: string;

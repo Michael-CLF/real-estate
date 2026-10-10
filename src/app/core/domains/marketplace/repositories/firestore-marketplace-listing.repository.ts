@@ -595,6 +595,10 @@ export class FirestoreMarketplaceListingRepository
                 data['sellerStatements'] && typeof data['sellerStatements'] === 'object'
                     ? {
                         california: (data['sellerStatements'] as Record<string, unknown>)['california'] as CaliforniaListingFacts | undefined,
+                        oregon: (data['sellerStatements'] as Record<string, unknown>)['oregon'] as NonNullable<MarketplaceListing['sellerStatements']>['oregon'],
+                        missouri: (data['sellerStatements'] as Record<string, unknown>)['missouri'] as NonNullable<MarketplaceListing['sellerStatements']>['missouri'],
+                        nebraska: (data['sellerStatements'] as Record<string, unknown>)['nebraska'] as NonNullable<MarketplaceListing['sellerStatements']>['nebraska'],
+                        newHampshire: (data['sellerStatements'] as Record<string, unknown>)['newHampshire'] as NonNullable<MarketplaceListing['sellerStatements']>['newHampshire'],
                         ownersAssociationApplies: (data['sellerStatements'] as Record<string, unknown>)['ownersAssociationApplies'] as boolean | null | undefined,
                         leadBasedPaintApplies: (data['sellerStatements'] as Record<string, unknown>)['leadBasedPaintApplies'] as boolean | null | undefined,
                     }

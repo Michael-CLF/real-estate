@@ -1,3 +1,7 @@
+import { newHampshireListingPackage } from './new-hampshire/new-hampshire-listing.package';
+import { nebraskaListingPackage } from './nebraska/nebraska-listing.package';
+import { missouriListingPackage } from './missouri/missouri-listing.package';
+import { oregonListingPackage } from './oregon/oregon-listing.package';
 import { idahoListingPackage } from './idaho/idaho-listing.package';
 import { arizonaListingPackage } from './arizona/arizona-listing.package';
 import type { StateListingEditFields } from './state-listing-package';
@@ -46,6 +50,10 @@ const PACKAGES =
     ['FL', floridaListingPackage],
     ['MI', michiganListingPackage],
 ['ID', idahoListingPackage],
+['NH', newHampshireListingPackage],
+['NE', nebraskaListingPackage],
+['MO', missouriListingPackage],
+['OR', oregonListingPackage],
 ['AZ', arizonaListingPackage],
     ['MN', minnesotaListingPackage],
     ['LA', louisianaListingPackage],
