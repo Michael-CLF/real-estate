@@ -232,7 +232,7 @@ export class SearchResultsComponent {
     switch (value) {
       case 'single_family':
       case 'condominium':
-      case 'townhouse':
+      case 'townhome':
       case 'multifamily':
       case 'manufactured':
       case 'land':

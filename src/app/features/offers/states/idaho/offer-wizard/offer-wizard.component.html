@@ -1,0 +1,46 @@
+
+@if (terms(); as currentTerms) {
+  <section class="idaho-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="idaho-offer-wizard__contract">
+        <span>Selected Idaho contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    @if (pendingDisclosureNotice(); as notice) {
+      <p class="idaho-offer-wizard__pending-disclosures" role="status">{{ notice }}</p>
+    }
+
+    <app-offer-wizard-shell
+      stateName="Idaho"
+      title="Idaho purchase offer"
+      description="Complete the questions for the selected Idaho contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [allowBuyerEdits]="initiatedBy() === 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [allowEditingWhileSaving]="true"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="idaho-offer-wizard__loading" aria-live="polite">
+    Preparing the Idaho residential sale contract from the property listing…
+  </section>
+}

@@ -1,4 +1,10 @@
 export type DisclosureDocumentType =
+  | 'idaho-seller-disclosure'
+  | 'idaho-statutory-packet'
+  | 'idaho-association-documents'
+  | 'arizona-seller-disclosure'
+  | 'arizona-statutory-packet'
+  | 'arizona-association-documents'
   | 'michigan-seller-disclosure'
   | 'michigan-statutory-packet'
   | 'michigan-association-documents'

@@ -686,3 +686,37 @@ textarea {
     border-radius: 16px 16px 0 0;
   }
 }
+
+.offer-processing {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(15, 35, 50, 0.55);
+}
+.offer-processing__card {
+  width: min(100%, 25rem);
+  padding: 2rem;
+  border-radius: 1rem;
+  background: #fff;
+  color: #154360;
+  text-align: center;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
+}
+.offer-processing__card p { margin: 1rem 0 0; font-size: 1.1rem; font-weight: 600; }
+.offer-processing__card small { display: block; margin-top: 0.75rem; color: #526575; }
+.offer-processing__spinner {
+  display: inline-block;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 4px solid #dce7ed;
+  border-top-color: #154360;
+  border-radius: 50%;
+  animation: offer-processing-spin 0.9s linear infinite;
+}
+@keyframes offer-processing-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .offer-processing__spinner { animation: none; }
+}

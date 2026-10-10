@@ -50,7 +50,7 @@ export type PropertyType =
   | 'multi_family'
   | 'other'
   | 'single_family'
-  | 'townhouse';
+  | 'townhome';
 
 export type SewerType =
   | 'none'

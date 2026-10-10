@@ -69,6 +69,108 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     ]
   }
 ],
+  AZ: [
+  {
+    "documentType": "arizona-seller-disclosure",
+    "title": "Arizona seller disclosure or exemption evidence",
+    "shortTitle": "Arizona seller disclosure or exemption evidence",
+    "description": "Seller shall disclose known material facts affecting value or desirability. This original agreement does not require a proprietary association SPDS form. Under A.R.S. 33-422, covered sales of five or fewer parcels other than subdivided land in an unincorporated county area, and subsequent sales of those parcels, require the current notarized statutory affidavit in at least twelve-point type at least seven days before transfer. Buyer shall acknowledge receipt, has five days after furnishing to rescind, and the affidavit is recorded with the deed. Omission/misrepresentation liability cannot be released or waived. Early upload does not waive rescission or later corrections.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://www.azleg.gov/ars/33/00422.htm",
+    "required": true,
+    "formCode": "AZ-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "arizona-statutory-packet",
+    "title": "Arizona property-specific records and scope review",
+    "shortTitle": "Arizona property-specific records and scope review",
+    "description": "Provide a seller-signed applicability review and applicable documents for rural-parcel affidavit (A.R.S. 33-422), pool safety notice (36-1681(E)), military-airport vicinity (28-8484(E)), septic transfer inspection and water/well rights, flood, access, solar/battery leases and local transfer rules. Explain each nonapplicable item. The notarized rural affidavit must use the current statutory form and at least 12-point type; this packet does not replace it. Pool notice must be provided on entering the sale agreement. Septic inspection must be within six months before transfer, report delivered to buyer, and buyer files the Notice of Transfer within 15 calendar days after transfer. Wholesale assignments, tribal trust/leasehold interests, subdivision/developer and new-construction sales are outside this agreement.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://azre.gov/consumers",
+    "required": true,
+    "formCode": "AZ-RECORDS",
+    "sortOrder": 1,
+    "additionalDownloads": [
+      {
+        "label": "Arizona approved pool safety notice",
+        "url": "https://www.azdhs.gov/documents/preparedness/epidemiology-disease-control/environmental-health/residential-pool-safety-notice.pdf"
+      },
+      {
+        "label": "Arizona septic transfer guidance",
+        "url": "https://azdeq.gov/wqd-onsite-wastewater-notice-transfer-and-inspection"
+      }
+    ]
+  },
+  {
+    "documentType": "arizona-association-documents",
+    "title": "Arizona association records",
+    "shortTitle": "Arizona association records",
+    "description": "When A.R.S. 33-1806 applies, communities with fewer than fifty properties require seller delivery within ten days after offer acceptance. For fifty or more properties seller gives written notice to the association, which delivers within ten days after receipt of the notice. Include all current statutory records, including the previous three open board-meeting minutes, financial and reserve information, violations, lawsuits and applicable fees. Obtain the separately signed statutory close-of-escrow acknowledgement. Early copies do not excuse updated statutory delivery. No general HOA cancellation period is created by this agreement.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://www.azleg.gov/ars/33/01806.htm",
+    "required": false,
+    "formCode": "AZ-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or exemption evidence",
+    "shortTitle": "Federal lead disclosure packet or exemption evidence",
+    "description": "For covered pre-1978 housing provide the signed lead statement, available reports and EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "AZ-RECORDS",
+    "sortOrder": 1
+  }
+],
+  ID: [
+  {
+    "documentType": "idaho-seller-disclosure",
+    "title": "Idaho seller disclosure or exemption evidence",
+    "shortTitle": "Idaho seller disclosure or exemption evidence",
+    "description": "For covered residential transfers under Idaho Code 55-2504, including non-owner-occupied rental property, seller shall deliver a signed and dated completed 55-2508 form, or a compliant alternative with all 55-2506 information and 55-2507 mandatory statements, within ten days after acceptance of buyer\u2019s offer. Buyer acknowledges by signing and dating a copy and delivering it back. Unknown/not-available answers remain available. The form is a knowledge disclosure, not a warranty or substitute for inspections. A specific 55-2505 exemption must be identified and documented; an as-is provision alone is not an exemption. The NavStreet receipt selection does not sign the separate statutory form.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://legislature.idaho.gov/wp-content/uploads/statutesrules/idstat/Title55/T55CH25.pdf",
+    "required": false,
+    "formCode": "ID-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "idaho-statutory-packet",
+    "title": "Idaho property-specific records and scope review",
+    "shortTitle": "Idaho property-specific records and scope review",
+    "description": "Provide a seller-signed scope and property-record review covering water/well and irrigation rights, septic permits and known problems, annexation/city-service notices, environmental hazards, access, existing leases and local transfer requirements. Identify applicable records or signed nonapplicability explanations. This is a NavStreet preparation packet, not a state-mandated omnibus form. The separate statutory seller disclosure may remain pending until its Idaho Code 55-2509 deadline. New construction, subdivisions/developer sales, tribal trust/leasehold interests and assignment/wholesale transactions are outside this agreement.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://dopl.idaho.gov/rec/rec-enforcement/",
+    "required": true,
+    "formCode": "ID-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "idaho-association-documents",
+    "title": "Idaho association records",
+    "shortTitle": "Idaho association records",
+    "description": "Provide a seller-signed scope and property-record review covering water/well and irrigation rights, septic permits and known problems, annexation/city-service notices, environmental hazards, access, existing leases and local transfer requirements. Identify applicable records or signed nonapplicability explanations. This is a NavStreet preparation packet, not a state-mandated omnibus form. The separate statutory seller disclosure may remain pending until its Idaho Code 55-2509 deadline. New construction, subdivisions/developer sales, tribal trust/leasehold interests and assignment/wholesale transactions are outside this agreement. Association governing documents, dues, transfer fees, special assessments and restrictions shall be provided by the negotiated document date or sufficiently before closing for review. No statewide association rescission period is created here. Condominium/developer sales require a separate workflow.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://dopl.idaho.gov/rec/",
+    "required": false,
+    "formCode": "ID-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or exemption evidence",
+    "shortTitle": "Federal lead disclosure packet or exemption evidence",
+    "description": "For covered pre-1978 housing provide the signed lead statement, available reports and EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "ID-RECORDS",
+    "sortOrder": 1
+  }
+],
   MI: [
   {
     "documentType": "michigan-seller-disclosure",

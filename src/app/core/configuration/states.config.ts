@@ -8,7 +8,7 @@ export interface StateConfiguration {
 export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'AL', isActive: false, name: 'Alabama', slug: 'alabama' },
   { abbreviation: 'AK', isActive: false, name: 'Alaska', slug: 'alaska' },
-  { abbreviation: 'AZ', isActive: false, name: 'Arizona', slug: 'arizona' },
+  { abbreviation: 'AZ', isActive: true, name: 'Arizona', slug: 'arizona' },
   { abbreviation: 'AR', isActive: false, name: 'Arkansas', slug: 'arkansas' },
   { abbreviation: 'CA', isActive: true, name: 'California', slug: 'california' },
   { abbreviation: 'CO', isActive: true, name: 'Colorado', slug: 'colorado' },
@@ -17,7 +17,7 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'FL', isActive: true, name: 'Florida', slug: 'florida' },
   { abbreviation: 'GA', isActive: false, name: 'Georgia', slug: 'georgia' },
   { abbreviation: 'HI', isActive: false, name: 'Hawaii', slug: 'hawaii' },
-  { abbreviation: 'ID', isActive: false, name: 'Idaho', slug: 'idaho' },
+  { abbreviation: 'ID', isActive: true, name: 'Idaho', slug: 'idaho' },
   { abbreviation: 'IL', isActive: false, name: 'Illinois', slug: 'illinois' },
   { abbreviation: 'IN', isActive: false, name: 'Indiana', slug: 'indiana' },
   { abbreviation: 'IA', isActive: false, name: 'Iowa', slug: 'iowa' },

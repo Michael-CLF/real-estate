@@ -1,3 +1,5 @@
+import { idahoListingPackage } from './idaho/idaho-listing.package';
+import { arizonaListingPackage } from './arizona/arizona-listing.package';
 import type { StateListingEditFields } from './state-listing-package';
 import type { ListingSellerStatements } from '../models/listing.model';
 import type { ListingStatementMappingAnswers } from './listing-statement-mapping';
@@ -43,6 +45,8 @@ const PACKAGES =
     ['WI', wisconsinListingPackage],
     ['FL', floridaListingPackage],
     ['MI', michiganListingPackage],
+['ID', idahoListingPackage],
+['AZ', arizonaListingPackage],
     ['MN', minnesotaListingPackage],
     ['LA', louisianaListingPackage],
   ]);

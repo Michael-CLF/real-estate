@@ -1,3 +1,32 @@
+@if (loading() || processing() || preparingAgreement()) {
+  <div
+    class="offer-processing"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <div class="offer-processing__card">
+      <span
+        class="offer-processing__spinner"
+        aria-hidden="true"
+      ></span>
+
+      <p>
+        {{
+          loading() || preparingAgreement()
+            ? 'Preparing your contract…'
+            : signingPanelOpen()
+              ? 'Signing and sending your offer…'
+              : 'Processing your offer…'
+        }}
+      </p>
+
+      <small>
+        Please keep this page open while we complete your request.
+      </small>
+    </div>
+  </div>
+}
 <main class="offer-page">
   <header class="offer-page__header">
     <div class="offer-page__header-content">

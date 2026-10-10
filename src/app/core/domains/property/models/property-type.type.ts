@@ -1,7 +1,7 @@
 export type PropertyType =
   | 'single_family'
   | 'condominium'
-  | 'townhouse'
+  | 'townhome'
   | 'multifamily'
   | 'manufactured'
   | 'land'
@@ -23,8 +23,8 @@ export const PROPERTY_TYPE_OPTIONS: readonly PropertyTypeOption[] = [
     value: 'condominium'
   },
   {
-    label: 'Townhouse',
-    value: 'townhouse'
+    label: 'Townhome',
+    value: 'townhome'
   },
   {
     label: 'Multifamily',

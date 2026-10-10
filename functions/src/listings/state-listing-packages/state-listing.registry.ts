@@ -1,3 +1,5 @@
+import { idahoListingPackage } from './idaho-listing.package';
+import { arizonaListingPackage } from './arizona-listing.package';
 import { southCarolinaListingPackage } from './south-carolina-listing.package';
 import { northCarolinaListingPackage } from './north-carolina-listing.package';
 import { oklahomaListingPackage } from './oklahoma-listing.package';
@@ -22,6 +24,8 @@ const PACKAGES = new Map<string, StateListingPackage>([
   ['WI', wisconsinListingPackage],
   ['FL', floridaListingPackage],
   ['MI', michiganListingPackage],
+['ID', idahoListingPackage],
+['AZ', arizonaListingPackage],
   ['MN', minnesotaListingPackage],
   ['LA', louisianaListingPackage],
   ['CO', coloradoListingPackage],

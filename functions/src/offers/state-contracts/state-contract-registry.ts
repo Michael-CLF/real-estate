@@ -1,3 +1,5 @@
+import { idahoStateContractPackage } from './idaho/idaho-state-contract.package';
+import { arizonaStateContractPackage } from './arizona/arizona-state-contract.package';
 import { southCarolinaStateContractPackage } from './south-carolina/south-carolina-state-contract.package';
 import { californiaStateContractPackage } from './california/california-state-contract.package';
 import {
@@ -81,6 +83,8 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
     [wisconsinStateContractPackage.stateCode, wisconsinStateContractPackage],
     [floridaStateContractPackage.stateCode, floridaStateContractPackage],
     [michiganStateContractPackage.stateCode, michiganStateContractPackage],
+[idahoStateContractPackage.stateCode, idahoStateContractPackage],
+[arizonaStateContractPackage.stateCode, arizonaStateContractPackage],
     [minnesotaStateContractPackage.stateCode, minnesotaStateContractPackage],
     [louisianaStateContractPackage.stateCode, louisianaStateContractPackage],
     [coloradoStateContractPackage.stateCode, coloradoStateContractPackage],
