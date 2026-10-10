@@ -14,6 +14,8 @@ import {
 
 import { utahStateContractPackage } from './utah/utah-state-contract.package';
 import { wisconsinStateContractPackage } from './wisconsin/wisconsin-state-contract.package';
+import { minnesotaStateContractPackage } from './minnesota/minnesota-state-contract.package';
+import { michiganStateContractPackage } from './michigan/michigan-state-contract.package';
 import { floridaStateContractPackage } from './florida/florida-state-contract.package';
 import { louisianaStateContractPackage } from './louisiana/louisiana-state-contract.package';
 import { coloradoStateContractPackage } from './colorado/colorado-state-contract.package';
@@ -78,6 +80,8 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
     [utahStateContractPackage.stateCode, utahStateContractPackage],
     [wisconsinStateContractPackage.stateCode, wisconsinStateContractPackage],
     [floridaStateContractPackage.stateCode, floridaStateContractPackage],
+    [michiganStateContractPackage.stateCode, michiganStateContractPackage],
+    [minnesotaStateContractPackage.stateCode, minnesotaStateContractPackage],
     [louisianaStateContractPackage.stateCode, louisianaStateContractPackage],
     [coloradoStateContractPackage.stateCode, coloradoStateContractPackage],
     [californiaStateContractPackage.stateCode, californiaStateContractPackage],

@@ -1,3 +1,4 @@
+import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { californiaDisclosureOutstanding, validCaliforniaDisclosureDecision, type CaliforniaDisclosureType } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import { STATES } from '../../../../../core/configuration/states.config';
 import { PageSeoService } from '../../../../../core/seo/page-seo.service';
@@ -114,8 +115,7 @@ import {
 } from '../../../../../core/domains/disclosures/services/listing-disclosure.service';
 
 import {
-  getStateDisclosureRequirements,
-  isDisclosureRequiredForListing
+  getStateDisclosureRequirements
 } from '../../../../../core/configuration/state-disclosures.config';
 
 
@@ -301,47 +301,42 @@ export class ListingDetailsComponent
   readonly disclosureOpenError =
     signal('');
 
-requiredOfferDisclosureTitles(
-  listing: MarketplaceListing
-): string[] {
-  const state = listing.address.stateAbbreviation;
-
-  if (!['FL', 'LA', 'CO'].includes(state)) {
-    return [];
+  requiredOfferDocumentTypes(listing: MarketplaceListing): readonly DisclosureDocumentType[] {
+    const state = listing.address.stateAbbreviation;
+    const required = new Set(getOfferBlockingDocumentTypes(state, {
+      ...listing.sellerStatements,
+      yearBuilt: listing.yearBuilt,
+      propertyType: listing.propertyType
+    }));
+    // Show documents needed before signing before the buyer enters the wizard.
+    // California uses the seller's recorded applicability and exemption decisions.
+    if (state !== 'CA' && listing.propertyType !== 'land' &&
+        (listing.sellerStatements?.leadBasedPaintApplies === true ||
+         (listing.sellerStatements?.leadBasedPaintApplies !== false &&
+          (listing.yearBuilt == null || listing.yearBuilt < 1978)))) {
+      required.add('lead-based-paint');
+    }
+    return [...required];
   }
 
-  const uploaded = new Set(
-    this.disclosures().map(document => document.documentType)
-  );
-
-  return getStateDisclosureRequirements(state)
-    .filter(requirement =>
-      isDisclosureRequiredForListing(
-        state,
-        requirement,
-        {
-          ...listing.sellerStatements,
-          yearBuilt: listing.yearBuilt
-        }
-      ) && !uploaded.has(requirement.documentType)
-    )
-    .map(requirement => requirement.shortTitle);
-}
-
-offerDisclosuresAreReady(
-  listing: MarketplaceListing
-): boolean {
-  const state = listing.address.stateAbbreviation;
-
-  if (!['FL', 'LA', 'CO'].includes(state)) {
-    return true;
+  requiredOfferDisclosureTitles(listing: MarketplaceListing): string[] {
+    const state = listing.address.stateAbbreviation;
+    const uploaded = new Set(this.disclosures()
+      .filter(document => document.listingUid === listing.uid &&
+        document.stateAbbreviation === state &&
+        Boolean(document.storagePath) && Boolean(document.versionId))
+      .map(document => document.documentType));
+    return this.requiredOfferDocumentTypes(listing)
+      .filter(type => !uploaded.has(type))
+      .map(type => checklistDocumentTitle(state, type));
   }
 
-  return this.isAuthenticated()
-    && !this.disclosuresAreLoading()
-    && !this.disclosureLoadError()
-    && this.requiredOfferDisclosureTitles(listing).length === 0;
-}
+  offerDisclosuresAreReady(listing: MarketplaceListing): boolean {
+    if (this.requiredOfferDocumentTypes(listing).length === 0) return true;
+    return !this.authenticationIsLoading() && this.isAuthenticated()
+      && !this.disclosuresAreLoading() && !this.disclosureLoadError()
+      && this.requiredOfferDisclosureTitles(listing).length === 0;
+  }
 
   californiaDisclosureExplanations(listing: MarketplaceListing): { type: string; title: string; status: string; basis: string }[] {
     if (listing.address.stateAbbreviation !== 'CA') return [];

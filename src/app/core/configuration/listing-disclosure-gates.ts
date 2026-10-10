@@ -10,7 +10,7 @@ export interface ListingDisclosureGateFacts {
 
 /** Preserve each state's existing lead-applicability decision, including unknown-year behavior. */
 export function isListingLeadUploadRequired(code: string, facts: ListingDisclosureGateFacts): boolean {
-  if (code === 'CO' || code === 'LA')
+  if (code === 'CO' || code === 'LA' || code === 'MN' || code === 'MI')
     return facts.leadBasedPaintApplies === true || facts.yearBuilt == null || facts.yearBuilt < 1978;
   if (code === 'FL')
     return facts.leadBasedPaintApplies === true ||
@@ -21,6 +21,12 @@ export function isListingLeadUploadRequired(code: string, facts: ListingDisclosu
 export function getListingUploadGateDocumentTypes(
   code: string, facts: ListingDisclosureGateFacts, now: number,
 ): readonly DisclosureDocumentType[] {
+  if (code === 'MN') return ['minnesota-seller-disclosure', 'minnesota-statutory-packet',
+    ...(facts.ownersAssociationApplies === true ? ['minnesota-association-documents' as const] : []),
+    ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'MI') return ['michigan-seller-disclosure', 'michigan-statutory-packet',
+    ...(facts.ownersAssociationApplies === true ? ['michigan-association-documents' as const] : []),
+    ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'FL') return [
     'florida-flood-disclosure',
     ...(facts.ownersAssociationApplies === true ? ['florida-hoa-disclosure-summary' as const] : []),

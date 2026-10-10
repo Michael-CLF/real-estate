@@ -16,7 +16,7 @@ function stringsForProperty(source,property) {
  function visit(node){if(ts.isPropertyAssignment(node)&&node.name.getText(tree).replace(/['"]/g,'')===property&&ts.isStringLiteral(node.initializer))values.push(node.initializer.text);ts.forEachChild(node,visit);}visit(tree);return values;
 }
 const tree=ts.createSourceFile(frontPath,frontSource,ts.ScriptTarget.Latest,true);let loaders=0;
-function checkImports(node){if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){const target=node.arguments[0];assert(ts.isStringLiteral(target));assert(fs.existsSync(path.resolve(path.dirname(frontPath),target.text+'.ts')),`Missing offer component ${target.text}`);loaders++;}ts.forEachChild(node,checkImports);}checkImports(tree);assert.equal(loaders,10);
+function checkImports(node){if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){const target=node.arguments[0];assert(ts.isStringLiteral(target));assert(fs.existsSync(path.resolve(path.dirname(frontPath),target.text+'.ts')),`Missing offer component ${target.text}`);loaders++;}ts.forEachChild(node,checkImports);}checkImports(tree);assert.equal(loaders,12);
 const templateIds=new Set();
 for(const [code,folder] of Object.entries(states)) {
  const front=frontend.getEnabledStateOfferRegistration(' '+code.toLowerCase()+' ');

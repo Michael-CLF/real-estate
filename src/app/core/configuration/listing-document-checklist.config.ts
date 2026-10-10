@@ -23,6 +23,16 @@ export const LISTING_CHECKLIST_STATES = STATES.filter(state =>
 
 // Presentation guidance only. Do not use these labels as upload or publication gates.
 const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
+  ...Object.fromEntries(getStateDisclosureRequirements('MI').filter(r => r.documentType !== 'lead-based-paint').map(r => [r.documentType, {
+    category: 'Required when applicable' as const, applicability: 'Applicable Michigan residential resale; identify statutory exceptions separately.',
+    timing: 'NavStreet requires the applicable packet before offer creation. Preserve all statutory delivery deadlines and cancellation rights.',
+    instructions: r.description, suppliedBy: 'Seller and the applicable association or public agency',
+  }])),
+  ...Object.fromEntries(getStateDisclosureRequirements('MN').filter(r => r.documentType !== 'lead-based-paint').map(r => [r.documentType, {
+    category: 'Required when applicable' as const, applicability: 'Applicable Minnesota residential resale; identify statutory exceptions separately.',
+    timing: 'NavStreet requires the applicable packet before offer creation. Preserve all statutory delivery deadlines and cancellation rights.',
+    instructions: r.description, suppliedBy: 'Seller and the applicable association or public agency',
+  }])),
   ...Object.fromEntries(getStateDisclosureRequirements('SC').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{
     category:'Required when applicable' as const, applicability:'South Carolina residential sale; property-specific conditions and lawful exemptions determine applicability.',
     timing:r.documentType==='south-carolina-property-condition'?'Before signing or by the delivery date expressly agreed in the contract.':r.documentType==='south-carolina-vacation-rentals'?'Disclose all future rental periods before ratification.':r.documentType==='south-carolina-coastal-disclosure'?'Include required beachfront information in the purchase contract.':'Provide at the applicable agreed stage.',

@@ -11,6 +11,122 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  MN: [
+  {
+    "documentType": "minnesota-seller-disclosure",
+    "title": "Minnesota seller disclosure or lawful exception evidence",
+    "shortTitle": "Minnesota seller disclosure or lawful exception evidence",
+    "formCode": "MN-RECORDS",
+    "description": "Seller-signed known material facts statement under Minn. Stat. 513.55, or signed evidence of a specific 513.54 exception or lawful written mutual 513.60 waiver. Independent radon, well, sewage and other disclosure duties remain.",
+    "sourceInstructions": "Complete and sign the applicable statement; identify and support any statutory exception or lawful waiver separately.",
+    "required": true,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.revisor.mn.gov/statutes/cite/513.55"
+  },
+  {
+    "documentType": "minnesota-statutory-packet",
+    "title": "Minnesota property-specific statutory and local records",
+    "shortTitle": "Minnesota property-specific statutory and local records",
+    "formCode": "MN-RECORDS",
+    "description": "Provide the applicable radon disclosure, current known reports and mitigation records, exact warning and MDH Radon in Real Estate Transactions publication; wells location/status/map or no-known-well statement; permitted-sewer or onsite-sewage statement/map and available reports. Include Washington County special-well-construction-area information when applicable, known meth production and CWD premises notices, and local records such as Minneapolis Truth in Sale of Housing. Identify any independent statutory exception in signed evidence. New uninhabited construction is not a blanket radon exception.",
+    "sourceInstructions": "Combine the applicable signed statements, maps, notices, publications and available reports into the uploaded packet. NavStreet requires this packet before offer creation.",
+    "required": true,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.revisor.mn.gov/statutes/cite/144.496",
+    "additionalDownloads": [
+      {
+        "label": "MDH radon publication and disclosure guidance",
+        "url": "https://www.health.mn.gov/communities/environment/air/radon/radonre.html"
+      }
+    ]
+  },
+  {
+    "documentType": "minnesota-association-documents",
+    "title": "Minnesota association resale packet",
+    "shortTitle": "Minnesota association resale packet",
+    "formCode": "MN-RECORDS",
+    "description": "For a covered Chapter 515B resale provide governing documents, required financial/association information and a resale certificate not more than 90 days old. Effective January 1, 2027 include required fine/remedy and collection policies, any reserve study obtained within the preceding three years and updated certificate information. This upload does not waive the buyer’s cancellation rights.",
+    "sourceInstructions": "Request current property-specific records from the association or manager.",
+    "required": false,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.revisor.mn.gov/statutes/cite/515B.4-107"
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or exemption evidence",
+    "shortTitle": "Federal lead disclosure packet or exemption evidence",
+    "formCode": "MN-RECORDS",
+    "description": "For covered housing provide the signed seller disclosure, available records and EPA pamphlet before the buyer is bound. A written waiver of the inspection opportunity does not waive disclosure. A claimed federal exemption requires signed evidence.",
+    "sourceInstructions": "Complete the federal disclosure and provide all applicable materials.",
+    "required": false,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "additionalDownloads": [
+      {
+        "label": "EPA lead pamphlet",
+        "url": "https://www.epa.gov/lead/protect-your-family-lead-your-home"
+      }
+    ]
+  }
+],
+  MI: [
+  {
+    "documentType": "michigan-seller-disclosure",
+    "title": "Michigan seller disclosure or lawful exception evidence",
+    "shortTitle": "Michigan seller disclosure or lawful exception evidence",
+    "formCode": "MI-RECORDS",
+    "description": "Use the complete prescribed MCL 565.957 Seller Disclosure Statement for covered residential sales. Unknown and not-available answers remain available. A specific 565.953 exception requires signed supporting evidence; nonoccupancy alone is not an exception.",
+    "sourceInstructions": "Complete and sign the applicable statement; identify and support any statutory exception or lawful waiver separately.",
+    "required": true,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.michigan.gov/leo/-/media/Project/Websites/leo/Documents/MIOSHA/Asbestos-Program/mcl-Act-92-of-1993.pdf"
+  },
+  {
+    "documentType": "michigan-statutory-packet",
+    "title": "Michigan property-specific statutory and local records",
+    "shortTitle": "Michigan property-specific statutory and local records",
+    "formCode": "MI-RECORDS",
+    "description": "Provide applicable local transfer records, including Washtenaw water/septic time-of-sale approval when applicable, or a signed explanation of nonapplicability. Identify the property county and confirm this is an ordinary resale rather than a developer condominium, new-construction or installment-land-contract transaction.",
+    "sourceInstructions": "Combine the applicable signed statements, maps, notices, publications and available reports into the uploaded packet. NavStreet requires this packet before offer creation.",
+    "required": true,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.washtenaw.org/1364/Time-of-Sale-Program",
+    "additionalDownloads": [
+      {
+        "label": "Property Transfer Affidavit (Form 2766)",
+        "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/treasury/Forms/Local-Government/2766.pdf"
+      }
+    ]
+  },
+  {
+    "documentType": "michigan-association-documents",
+    "title": "Michigan association resale packet",
+    "shortTitle": "Michigan association resale packet",
+    "formCode": "MI-RECORDS",
+    "description": "Provide governing documents, fees, assessments, restrictions and property-specific association records. Developer condominium sales require a separate workflow and are not supported by this agreement.",
+    "sourceInstructions": "Request current property-specific records from the association or manager.",
+    "required": false,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.michigan.gov/lara"
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or exemption evidence",
+    "shortTitle": "Federal lead disclosure packet or exemption evidence",
+    "formCode": "MI-RECORDS",
+    "description": "For covered housing provide the signed seller disclosure, available records and EPA pamphlet before the buyer is bound. A written waiver of the inspection opportunity does not waive disclosure. A claimed federal exemption requires signed evidence.",
+    "sourceInstructions": "Complete the federal disclosure and provide all applicable materials.",
+    "required": false,
+    "sortOrder": 1,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "additionalDownloads": [
+      {
+        "label": "EPA lead pamphlet",
+        "url": "https://www.epa.gov/lead/protect-your-family-lead-your-home"
+      }
+    ]
+  }
+],
   SC: [
     { documentType:'south-carolina-property-condition',title:'South Carolina Residential Property Condition Disclosure Statement',shortTitle:'Property condition',formCode:'SC REC — updated June 2025',required:false,sortOrder:1,
       description:'For covered residential transfers, seller completes and signs the official statement. Deliver before signing or by the different deadline expressly agreed in the purchase contract. Statutory exemptions and a mutual written waiver are separate options; upload is not required to advertise the property.',
@@ -512,7 +628,8 @@ export function isDisclosureRequiredForListing(
 
   const stateCode = normalizeDisclosureStateCode(state);
 
-  return (stateCode === 'FL' && requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||
+  return ((stateCode === 'MN' || stateCode === 'MI') && requirement.documentType === (stateCode === 'MN' ? 'minnesota-association-documents' : 'michigan-association-documents') && listing.ownersAssociationApplies === true) ||
+    (stateCode === 'FL' && requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||
     (requirement.documentType === 'lead-based-paint' && isListingLeadUploadRequired(stateCode, listing));
 }
 

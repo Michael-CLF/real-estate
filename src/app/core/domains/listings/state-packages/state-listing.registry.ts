@@ -26,6 +26,8 @@ import {
 } from './texas/texas-listing.package';
 import { utahListingPackage } from './utah/utah-listing.package';
 import { wisconsinListingPackage } from './wisconsin/wisconsin-listing.package';
+import { minnesotaListingPackage } from './minnesota/minnesota-listing.package';
+import { michiganListingPackage } from './michigan/michigan-listing.package';
 import { floridaListingPackage } from './florida/florida-listing.package';
 import { louisianaListingPackage } from './louisiana/louisiana-listing.package';
 
@@ -40,6 +42,8 @@ const PACKAGES =
     ['UT', utahListingPackage],
     ['WI', wisconsinListingPackage],
     ['FL', floridaListingPackage],
+    ['MI', michiganListingPackage],
+    ['MN', minnesotaListingPackage],
     ['LA', louisianaListingPackage],
   ]);
 

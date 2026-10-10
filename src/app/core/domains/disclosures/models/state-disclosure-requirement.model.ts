@@ -1,4 +1,10 @@
 export type DisclosureDocumentType =
+  | 'michigan-seller-disclosure'
+  | 'michigan-statutory-packet'
+  | 'michigan-association-documents'
+  | 'minnesota-seller-disclosure'
+  | 'minnesota-statutory-packet'
+  | 'minnesota-association-documents'
   | 'south-carolina-property-condition'
   | 'south-carolina-association-documents'
   | 'south-carolina-coastal-disclosure'

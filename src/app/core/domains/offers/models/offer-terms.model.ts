@@ -1,3 +1,5 @@
+import type { MinnesotaOfferTerms } from '../state-contracts/minnesota/models/minnesota-offer-terms.model';
+import type { MichiganOfferTerms } from '../state-contracts/michigan/models/michigan-offer-terms.model';
 import type { SouthCarolinaOfferTerms } from '../state-contracts/south-carolina/models/south-carolina-offer-terms.model';
 import type {
   NorthCarolinaOfferTerms,
@@ -98,6 +100,8 @@ export type StateOfferTerms =
   | OklahomaOfferTerms
   | UtahOfferTerms
   | WisconsinOfferTerms
+  | MinnesotaOfferTerms
+  | MichiganOfferTerms
   | FloridaOfferTerms
   | LouisianaOfferTerms
   | ColoradoOfferTerms

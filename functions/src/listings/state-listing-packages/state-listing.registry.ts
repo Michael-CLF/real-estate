@@ -5,6 +5,8 @@ import type { StateListingField, StateListingPackage } from './state-listing-pac
 import { texasListingPackage } from './texas-listing.package';
 import { utahListingPackage } from './utah-listing.package';
 import { wisconsinListingPackage } from './wisconsin-listing.package';
+import { minnesotaListingPackage } from './minnesota-listing.package';
+import { michiganListingPackage } from './michigan-listing.package';
 import { floridaListingPackage } from './florida-listing.package';
 import { louisianaListingPackage } from './louisiana-listing.package';
 import { coloradoListingPackage } from './colorado-listing.package';
@@ -19,6 +21,8 @@ const PACKAGES = new Map<string, StateListingPackage>([
   ['UT', utahListingPackage],
   ['WI', wisconsinListingPackage],
   ['FL', floridaListingPackage],
+  ['MI', michiganListingPackage],
+  ['MN', minnesotaListingPackage],
   ['LA', louisianaListingPackage],
   ['CO', coloradoListingPackage],
 ]);

@@ -86,6 +86,7 @@ export async function generateCaliforniaOfferPdf(input:GenerateStateAgreementInp
  pdf.addPage();drawNavStreetSectionBar(pdf,'Version signature record');
  value('Offer / version',`${input.offer.referenceNumber} / ${input.version.versionNumber}`);
  value('Version created',timestamp(input.version.createdAt?.toDate()));
+ value('Electronic delivery and offer signatures authorized',yes(t.delivery.electronicDeliveryAuthorized));
  const compactValue=(label:string,v:unknown)=>{room(30);pdf.font('NavStreet-Regular').fontSize(9.5).fillColor(NAVSTREET_PDF.ink).text(`${label}: ${v ?? 'Not supplied'}`,NAVSTREET_PDF.margin,pdf.y,{width:NAVSTREET_PDF.contentWidth,lineGap:2});pdf.moveDown(.4);};
  for(const [role,parties] of [['Buyer',input.version.buyers],['Seller',input.version.sellers]] as const) for(const party of parties) {
   room(230);value(role,party.legalName);
@@ -100,7 +101,6 @@ export async function generateCaliforniaOfferPdf(input:GenerateStateAgreementInp
    if(party.intendedUse)compactValue('Intended use',label(party.intendedUse));
   }
   compactValue('Required signer',party.requiredSigner?'Yes':'No');
-  compactValue('Electronic transactions consent',yes(party.electronicTransactionsConsentAccepted ?? null));
   compactValue('Electronic signature',party.signature.status==='signed'&&party.signature.signedAt?'/s/ '+party.legalName:'Awaiting signature');
   compactValue('Signature time — Pacific',timestamp(party.signature.signedAt?.toDate()));
  }

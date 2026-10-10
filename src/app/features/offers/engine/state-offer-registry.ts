@@ -64,6 +64,8 @@ const STATE_OFFER_REGISTRATIONS:
       offerCreationEnabled: true,
       loadComponent: () => import('../states/wisconsin/wisconsin-offer-entry/wisconsin-offer-entry.component').then(component => component.WisconsinOfferEntryComponent),
     },
+    MN: { stateCode: 'MN', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/minnesota/minnesota-offer-entry/minnesota-offer-entry.component').then(component => component.MinnesotaOfferEntryComponent) },
+    MI: { stateCode: 'MI', routeStyle: 'version', offerCreationEnabled: true, loadComponent: () => import('../states/michigan/michigan-offer-entry/michigan-offer-entry.component').then(component => component.MichiganOfferEntryComponent) },
     FL: {
       stateCode: 'FL', routeStyle: 'version',
       offerCreationEnabled: true,
