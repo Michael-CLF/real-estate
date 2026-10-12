@@ -1,3 +1,11 @@
+import type { MontanaOfferTerms } from '../state-contracts/montana/models/montana-offer-terms.model';
+import type { IowaOfferTerms } from '../state-contracts/iowa/models/iowa-offer-terms.model';
+import type { WashingtonOfferTerms } from '../state-contracts/washington/models/washington-offer-terms.model';
+import type { DelawareOfferTerms } from '../state-contracts/delaware/models/delaware-offer-terms.model';
+import type { OhioOfferTerms } from '../state-contracts/ohio/models/ohio-offer-terms.model';
+import type { KansasOfferTerms } from '../state-contracts/kansas/models/kansas-offer-terms.model';
+import type { IndianaOfferTerms } from '../state-contracts/indiana/models/indiana-offer-terms.model';
+import type { AlabamaOfferTerms } from '../state-contracts/alabama/models/alabama-offer-terms.model';
 import type { NewHampshireOfferTerms } from '../state-contracts/new-hampshire/models/new-hampshire-offer-terms.model';
 import type { NebraskaOfferTerms } from '../state-contracts/nebraska/models/nebraska-offer-terms.model';
 import type { MissouriOfferTerms } from '../state-contracts/missouri/models/missouri-offer-terms.model';
@@ -109,6 +117,14 @@ export type StateOfferTerms =
   | MinnesotaOfferTerms
   | MichiganOfferTerms
   | IdahoOfferTerms
+  | MontanaOfferTerms
+  | IowaOfferTerms
+  | WashingtonOfferTerms
+  | DelawareOfferTerms
+  | OhioOfferTerms
+  | KansasOfferTerms
+  | IndianaOfferTerms
+  | AlabamaOfferTerms
   | NewHampshireOfferTerms
   | NebraskaOfferTerms
   | MissouriOfferTerms

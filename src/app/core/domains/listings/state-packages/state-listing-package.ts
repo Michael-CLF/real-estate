@@ -1,3 +1,11 @@
+import type { createMontanaListingAnswersForm, restoreMontanaListingAnswers } from './montana/montana-listing-form';
+import type { createIowaListingAnswersForm, restoreIowaListingAnswers } from './iowa/iowa-listing-form';
+import type { createWashingtonListingAnswersForm, restoreWashingtonListingAnswers } from './washington/washington-listing-form';
+import type { createDelawareListingAnswersForm, restoreDelawareListingAnswers } from './delaware/delaware-listing-form';
+import type { createOhioListingAnswersForm, restoreOhioListingAnswers } from './ohio/ohio-listing-form';
+import type { createKansasListingAnswersForm, restoreKansasListingAnswers } from './kansas/kansas-listing-form';
+import type { createIndianaListingAnswersForm, restoreIndianaListingAnswers } from './indiana/indiana-listing-form';
+import type { createAlabamaListingAnswersForm, restoreAlabamaListingAnswers } from './alabama/alabama-listing-form';
 import type { createNewHampshireListingAnswersForm, restoreNewHampshireListingAnswers } from './new-hampshire/new-hampshire-listing-form';
 import type { createNebraskaListingAnswersForm, restoreNebraskaListingAnswers } from './nebraska/nebraska-listing-form';
 import type { createMissouriListingAnswersForm, restoreMissouriListingAnswers } from './missouri/missouri-listing-form';
@@ -16,6 +24,14 @@ import type { createColoradoPropertyFactsForm, createColoradoAssumableLoanForm }
 
 /** Typed factories for existing persisted form groups; no new storage paths. */
 export interface StateListingFormFactories {
+ readonly 'sellerStatements.montana': typeof createMontanaListingAnswersForm;
+ readonly 'sellerStatements.iowa': typeof createIowaListingAnswersForm;
+ readonly 'sellerStatements.washington': typeof createWashingtonListingAnswersForm;
+ readonly 'sellerStatements.delaware': typeof createDelawareListingAnswersForm;
+ readonly 'sellerStatements.ohio': typeof createOhioListingAnswersForm;
+ readonly 'sellerStatements.kansas': typeof createKansasListingAnswersForm;
+ readonly 'sellerStatements.indiana': typeof createIndianaListingAnswersForm;
+ readonly 'sellerStatements.alabama': typeof createAlabamaListingAnswersForm;
  readonly 'sellerStatements.newHampshire': typeof createNewHampshireListingAnswersForm;
  readonly 'sellerStatements.nebraska': typeof createNebraskaListingAnswersForm;
  readonly 'sellerStatements.missouri': typeof createMissouriListingAnswersForm;
@@ -58,6 +74,14 @@ export interface StateListingFormValidators {
 
 /** Restore existing persisted answers through their owning package. */
 export interface StateListingFormRestorers {
+ readonly 'sellerStatements.montana': typeof restoreMontanaListingAnswers;
+ readonly 'sellerStatements.iowa': typeof restoreIowaListingAnswers;
+ readonly 'sellerStatements.washington': typeof restoreWashingtonListingAnswers;
+ readonly 'sellerStatements.delaware': typeof restoreDelawareListingAnswers;
+ readonly 'sellerStatements.ohio': typeof restoreOhioListingAnswers;
+ readonly 'sellerStatements.kansas': typeof restoreKansasListingAnswers;
+ readonly 'sellerStatements.indiana': typeof restoreIndianaListingAnswers;
+ readonly 'sellerStatements.alabama': typeof restoreAlabamaListingAnswers;
  readonly 'sellerStatements.newHampshire': typeof restoreNewHampshireListingAnswers;
  readonly 'sellerStatements.nebraska': typeof restoreNebraskaListingAnswers;
  readonly 'sellerStatements.missouri': typeof restoreMissouriListingAnswers;
@@ -73,7 +97,7 @@ export interface StateListingFormSerializers {
 }
 
 export type StateListingStatementDraftExtensions = Partial<Pick<ListingStatementMappingAnswers,
-  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'southCarolina'>>;
+  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'alabama' | 'indiana' | 'kansas' | 'ohio' | 'delaware' | 'washington' | 'iowa' | 'montana' | 'southCarolina'>>;
 
 export type StateListingPropertyField = 'legalDescription';
 

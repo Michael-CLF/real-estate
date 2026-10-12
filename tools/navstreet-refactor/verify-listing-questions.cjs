@@ -331,6 +331,14 @@ const resolve = name => pathToFileURL(require.resolve(name, { paths: [project] }
   assert(!wizardSource.includes("typeof statements.southCarolina?.beachfrontApplies"));
   console.log(`PASS: ${saveQuestionComparisons} ten-state question save comparisons; invalid types, missing groups, optional questions and original error preserved.`);
   const fourStateRestoreDefaults = {
+    delaware: { disclosureExemptionClaimed: null, radonReportsKnown: null },
+    washington: { disclosureExemptionClaimed: null, oilTankHeating: null },
+    iowa: { disclosureExemptionClaimed: null, privateSewageApplies: null, leadServiceLineKnown: null },
+    montana: { disclosureExemptionClaimed: null, radonTestsKnown: null, drugContaminationKnown: null, appurtenantWaterRightsKnown: null },
+    alabama: { usesEasternTime: null, hiddenHealthSafetyKnown: null },
+    indiana: { usesCentralTime: null, disclosureExemptionClaimed: null },
+    kansas: { usesMountainTime: null, elevatedRadonKnown: null },
+    ohio: { disclosureExemptionClaimed: null },
     oregon: { usesMountainTime: null, domesticWellApplies: null, uncertifiedWoodDevicePresent: null, historicSpecialAssessmentApplies: null },
     missouri: { methProductionKnown: null, drugConvictionKnown: null },
     nebraska: { usesMountainTime: null },

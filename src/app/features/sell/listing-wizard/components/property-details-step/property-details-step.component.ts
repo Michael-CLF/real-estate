@@ -51,6 +51,14 @@ export type PropertyDetailsFuelTankOwnership =
   | 'owned'
   | 'leased';
 export interface PropertyDetailsSellerStatementsFormValue {
+  montana?: { disclosureExemptionClaimed: boolean | null; radonTestsKnown: boolean | null; drugContaminationKnown: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
+  iowa?: { disclosureExemptionClaimed: boolean | null; privateSewageApplies: boolean | null; leadServiceLineKnown: boolean | null; };
+  washington?: { disclosureExemptionClaimed: boolean | null; oilTankHeating: boolean | null; };
+  delaware?: { disclosureExemptionClaimed: boolean | null; radonReportsKnown: boolean | null; };
+  ohio?: { disclosureExemptionClaimed: boolean | null; };
+  kansas?: { usesMountainTime: boolean | null; elevatedRadonKnown: boolean | null; };
+  indiana?: { usesCentralTime: boolean | null; disclosureExemptionClaimed: boolean | null; };
+  alabama?: { usesEasternTime: boolean | null; hiddenHealthSafetyKnown: boolean | null; };
   newHampshire?: { methProductionKnown: boolean | null; utilityTariffChargesKnown: boolean | null; };
   nebraska?: { usesMountainTime: boolean | null; };
   missouri?: { methProductionKnown: boolean | null; drugConvictionKnown: boolean | null; };
@@ -413,6 +421,14 @@ export class PropertyDetailsStepComponent
         missouri: getStateListingFormFactory('sellerStatements.missouri')(this.fb),
         nebraska: getStateListingFormFactory('sellerStatements.nebraska')(this.fb),
         newHampshire: getStateListingFormFactory('sellerStatements.newHampshire')(this.fb),
+        alabama: getStateListingFormFactory('sellerStatements.alabama')(this.fb),
+        indiana: getStateListingFormFactory('sellerStatements.indiana')(this.fb),
+        kansas: getStateListingFormFactory('sellerStatements.kansas')(this.fb),
+        ohio: getStateListingFormFactory('sellerStatements.ohio')(this.fb),
+        delaware: getStateListingFormFactory('sellerStatements.delaware')(this.fb),
+        washington: getStateListingFormFactory('sellerStatements.washington')(this.fb),
+        iowa: getStateListingFormFactory('sellerStatements.iowa')(this.fb),
+        montana: getStateListingFormFactory('sellerStatements.montana')(this.fb),
         southCarolina: getStateListingFormFactory('sellerStatements.southCarolina')(this.fb),
         california: getStateListingFormFactory('sellerStatements.california')(this.fb),
         ownershipStatus: [
@@ -511,6 +527,14 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements.controls.missouri.patchValue(getStateListingFormRestorer('sellerStatements.missouri')(initialValue?.sellerStatements?.missouri), {emitEvent: false});
       this.form.controls.sellerStatements.controls.nebraska.patchValue(getStateListingFormRestorer('sellerStatements.nebraska')(initialValue?.sellerStatements?.nebraska), {emitEvent: false});
       this.form.controls.sellerStatements.controls.newHampshire.patchValue(getStateListingFormRestorer('sellerStatements.newHampshire')(initialValue?.sellerStatements?.newHampshire), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.alabama.patchValue(getStateListingFormRestorer('sellerStatements.alabama')(initialValue?.sellerStatements?.alabama), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.indiana.patchValue(getStateListingFormRestorer('sellerStatements.indiana')(initialValue?.sellerStatements?.indiana), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.kansas.patchValue(getStateListingFormRestorer('sellerStatements.kansas')(initialValue?.sellerStatements?.kansas), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.ohio.patchValue(getStateListingFormRestorer('sellerStatements.ohio')(initialValue?.sellerStatements?.ohio), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.delaware.patchValue(getStateListingFormRestorer('sellerStatements.delaware')(initialValue?.sellerStatements?.delaware), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.washington.patchValue(getStateListingFormRestorer('sellerStatements.washington')(initialValue?.sellerStatements?.washington), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.iowa.patchValue(getStateListingFormRestorer('sellerStatements.iowa')(initialValue?.sellerStatements?.iowa), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.montana.patchValue(getStateListingFormRestorer('sellerStatements.montana')(initialValue?.sellerStatements?.montana), {emitEvent: false});
       this.configureStateQuestionValidators();
       this.form.controls.sellerStatements.controls.california.patchValue(
         getStateListingFormRestorer('sellerStatements.california')(initialValue?.sellerStatements?.california),

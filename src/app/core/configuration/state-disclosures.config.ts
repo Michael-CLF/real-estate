@@ -11,6 +11,375 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  AL: [
+  {
+    "documentType": "alabama-seller-disclosure",
+    "title": "Alabama seller condition disclosure or supported exception",
+    "shortTitle": "Alabama seller condition disclosure or supported exception",
+    "description": "Alabama generally applies caveat emptor to used residential homes. Buyer should obtain independent inspections and make specific written inquiries during the negotiated inspection period. Applicable exceptions include fiduciary relationships, responses to specific inquiries and known material health or safety defects not known to or readily observable by buyer. This agreement requires truthful written answers and disclosure of applicable known hidden health/safety conditions; it does not impose a universal state seller-disclosure form or seller duty to inspect. No general statutory cooling-off period is created. The parties should obtain advice before adding an as-is or nonreliance provision, which can materially affect remedies under Alabama case law. This agreement does not add a blanket as-is/nonreliance waiver.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://arec.alabama.gov/pages/consumer/information/consumerinformation.aspx",
+    "required": false,
+    "formCode": "AL-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "alabama-statutory-packet",
+    "title": "Alabama applicable property-specific records",
+    "shortTitle": "Alabama applicable property-specific records",
+    "description": "Seller shall provide applicable written health/safety information and truthful responses to buyer inquiries, available reports, leases and association records. Seller must update statements known to be inaccurate. Coastal wind/flood insurance, termite/wood-infestation conditions, septic/well systems, access, surveys and local occupancy requirements should be investigated. Applicable federal lead disclosures remain separate. Alabama homestead conveyances may require voluntary spouse signature and assent under Alabama Code 6-10-3; title shall evaluate actual interests. Contract deadline time is the expressly selected zone shown in this agreement, including any agreed Eastern-time convention in a border community.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://arec.alabama.gov/pages/consumer/information/consumerinformation.aspx",
+    "required": false,
+    "formCode": "AL-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "alabama-association-documents",
+    "title": "Alabama association records",
+    "shortTitle": "Alabama association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://arec.alabama.gov/pages/consumer/information/consumerinformation.aspx",
+    "required": false,
+    "formCode": "AL-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "AL-LEAD",
+    "sortOrder": 4
+  }
+],
+  IN: [
+  {
+    "documentType": "indiana-seller-disclosure",
+    "title": "Indiana seller condition disclosure or supported exception",
+    "shortTitle": "Indiana seller condition disclosure or supported exception",
+    "description": "For covered transactions under IC 32-21-5, seller shall complete and sign the required residential real estate sales disclosure form and provide it before accepting an offer. Use the current prescribed form or a compliant equivalent containing the required information. Document any specific IC 32-21-5-1 exception; an as-is sale is not an exception. The form addresses known physical conditions, defects and applicable association information under section 8.5, including required contacts and unpaid assessments. Unknown information may be identified as unknown. The statement is not a warranty or inspection substitute. The separate seller form is not made part of this agreement merely by an upload or receipt status.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.in.gov/dA/cdbd3760ae/46234-fill-in.pdf?language_id=1",
+    "required": false,
+    "requiredBeforeAcceptance": true,
+    "formCode": "IN-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "indiana-statutory-packet",
+    "title": "Indiana applicable property-specific records",
+    "shortTitle": "Indiana applicable property-specific records",
+    "description": "IC 32-21-5-12 governs condition at closing and matters arising after delivery. Under IC 32-21-5-13, when a disclosure form or amendment delivered after acceptance discloses a defect, buyer may nullify by delivering written rescission to owner or owner\u2019s agent within two business days after receipt, without liability, and is entitled to return of deposits. This is a defect-disclosure protection, not an automatic cooling-off period for every sale. Receipt selection, early upload and electronic signing do not waive that right. Buyers may submit and sign an offer while the Indiana condition disclosure is pending. The seller must provide the condition form or supported exemption before acceptance. A pending receipt status on an immutable submitted version requires a replacement offer acknowledging actual receipt after delivery.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.in.gov/dA/cdbd3760ae/46234-fill-in.pdf?language_id=1",
+    "required": false,
+    "formCode": "IN-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "indiana-association-documents",
+    "title": "Indiana association records",
+    "shortTitle": "Indiana association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.in.gov/dA/cdbd3760ae/46234-fill-in.pdf?language_id=1",
+    "required": false,
+    "formCode": "IN-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "IN-LEAD",
+    "sortOrder": 4
+  }
+],
+  KS: [
+  {
+    "documentType": "kansas-seller-disclosure",
+    "title": "Kansas seller condition disclosure or supported exception",
+    "shortTitle": "Kansas seller condition disclosure or supported exception",
+    "description": "This FSBO resale agreement does not require a proprietary association seller form as a universal statutory prerequisite. Seller shall provide truthful written known material-condition information and applicable known elevated-radon information and available reports. Buyer may investigate radon, structure, pests, water/septic systems, environmental hazards, access, insurability and title during the negotiated inspection period. The required radon warning recommends testing; it does not itself require a new test for every sale. Any actual licensed broker has separate brokerage relationship and adverse material-fact disclosure duties; NavStreet does not represent either party as a broker.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.kslegislature.gov/b2025_26/laws/058_000_0000_chapter/058_030_0000_article/058_030_0078a_section/058_030_0078a_k/",
+    "required": false,
+    "formCode": "KS-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "kansas-statutory-packet",
+    "title": "Kansas applicable property-specific records",
+    "shortTitle": "Kansas applicable property-specific records",
+    "description": "This original NavStreet agreement supports ordinary existing fee-simple single-family, townhome and PUD resales with cash or conventional financing. Condominiums, manufactured homes, vacant land, new construction/developer offerings, ground leases, installment seller financing and wholesale assignments require separate review and are outside this initial product. The narrower product scope does not change statutory coverage. Title shall verify the recorded legal description, owners, necessary spouse signatures, liens, deed execution, recording, taxes, association obligations and local transfer requirements. Seller tax bills do not guarantee buyer taxes. The Kansas Constitution Article 15 section 9 requires applicable joint consent of husband and wife to homestead alienation; title shall determine necessary execution and spouse interests. Obtain current association records, payoff/release evidence, applicable permit and local transfer records. No generic statewide cancellation period is created. Confirm Central/Mountain time for the physical property.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.kslegislature.gov/b2025_26/laws/058_000_0000_chapter/058_030_0000_article/058_030_0078a_section/058_030_0078a_k/",
+    "required": false,
+    "formCode": "KS-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "kansas-association-documents",
+    "title": "Kansas association records",
+    "shortTitle": "Kansas association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.kslegislature.gov/b2025_26/laws/058_000_0000_chapter/058_030_0000_article/058_030_0078a_section/058_030_0078a_k/",
+    "required": false,
+    "formCode": "KS-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "KS-LEAD",
+    "sortOrder": 4
+  }
+],
+  OH: [
+  {
+    "documentType": "ohio-seller-disclosure",
+    "title": "Ohio seller condition disclosure or supported exception",
+    "shortTitle": "Ohio seller condition disclosure or supported exception",
+    "description": "For a covered R.C. 5302.30 transfer, seller shall complete applicable items in the current prescribed Residential Property Disclosure Form and deliver a signed, dated copy as soon as practicable. State actual knowledge in good faith; the form is not a warranty or substitute for inspection. Buyer shall sign/date a copy acknowledging receipt and return it to seller or seller\u2019s agent by a legally permitted method. A NavStreet received dropdown does not sign or return that separate form. Document the specific subsection (B)(2) exception when claimed. Amendments and independent fraud/common-law disclosure duties remain. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://codes.ohio.gov/ohio-revised-code/section-5302.30",
+    "required": false,
+    "formCode": "OH-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "ohio-statutory-packet",
+    "title": "Ohio applicable property-specific records",
+    "shortTitle": "Ohio applicable property-specific records",
+    "description": "Under R.C. 5302.30(K), when the form or amendment is received after entering the transfer agreement, buyer may rescind in a written, signed, dated notice delivered to seller or seller\u2019s agent within three business days after receipt, and no later than the earlier of thirty days after seller acceptance or closing, subject to statutory conditions. If no form is received, the missing-form rescission deadline is the earlier of thirty days after acceptance or closing. Applicable deposits must be returned. Receipt before submission of the offer and entry into the agreement affects the statutory rescission entitlement. No automatic waiver is created by selecting received, signing this agreement or entering an inspection period. Other remedies remain. Statutory delivery methods and legally valid electronic-consent requirements must be observed.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://codes.ohio.gov/ohio-revised-code/section-5302.30",
+    "required": false,
+    "formCode": "OH-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "ohio-association-documents",
+    "title": "Ohio association records",
+    "shortTitle": "Ohio association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://codes.ohio.gov/ohio-revised-code/section-5302.30",
+    "required": false,
+    "formCode": "OH-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "OH-LEAD",
+    "sortOrder": 4
+  }
+],
+  DE: [
+  {
+    "documentType": "delaware-seller-disclosure",
+    "title": "Delaware seller condition disclosure or supported exception",
+    "shortTitle": "Delaware seller condition disclosure or supported exception",
+    "description": "For covered transfers, 6 Del. C. 2572 requires written disclosure of known material defects when offered for sale and updates for material changes through final settlement. Under section 2573, seller, agent or subagent shall give the current Commission Seller\u2019s Disclosure of Real Property Condition Report to prospective buyer or buyer\u2019s agent before buyer makes an offer. The report signed by buyer and seller becomes part of this purchase agreement. Seller shall provide the current report and obtain both parties\u2019 required signatures separately; a receipt dropdown or signature on this agreement does not sign that separate form. Claimed section 2577 exceptions require signed supporting certification. Heirs selling inherited property are not automatically exempt. The report is not a warranty or substitute for inspection.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://dpr.delaware.gov/boards/realestate/forms/",
+    "required": false,
+    "formCode": "DE-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "delaware-statutory-packet",
+    "title": "Delaware applicable property-specific records",
+    "shortTitle": "Delaware applicable property-specific records",
+    "description": "For covered transfers, section 2572A requires notice of radon exposure potential, possessed testing/inspection information, known radon hazards, health-department information, and the Commission radon form with buyer and seller acknowledgments, dates and signatures. Buyer has an option to test; selecting received is not execution of the separate form and the statute does not require a new test in every sale. The statutory packet shall include the current radon form, informational notices and possessed reports, or signed evidence of an applicable exception. Review the condition form\u2019s allocation of street repair/repaving costs. Applicable septic, well, coastal, flood and insurance records shall be investigated during the agreed inspection period.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://dpr.delaware.gov/boards/realestate/forms/",
+    "required": false,
+    "formCode": "DE-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "delaware-association-documents",
+    "title": "Delaware association records",
+    "shortTitle": "Delaware association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://dpr.delaware.gov/boards/realestate/forms/",
+    "required": false,
+    "formCode": "DE-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "DE-LEAD",
+    "sortOrder": 4
+  }
+],
+  WA: [
+  {
+    "documentType": "washington-seller-disclosure",
+    "title": "Washington seller condition disclosure or supported exception",
+    "shortTitle": "Washington seller condition disclosure or supported exception",
+    "description": "For covered improved residential transfers under chapter 64.06 RCW, seller shall provide the completed, signed and dated statutory disclosure statement, ordinarily within five business days after mutual acceptance unless otherwise agreed. Buyer ordinarily has three business days after receipt to deliver written rescission under RCW 64.06.030, with immediate return of deposits and other consideration less agreed disbursements. This agreement does not waive receipt or shorten that statutory period. Missing-form and later-inaccuracy rights, corrective-action provisions and required closing extensions under RCW 64.06.040 remain. A Pending selection permits the offer but does not certify delivery or waive rights. A Received selection is not acceptance of the disclosure or execution of the separate buyer acknowledgment. This workflow permits only supported statutory transfer exceptions, not a buyer waiver. If any Environmental answer would be Yes, receipt of that section cannot be waived under RCW 64.06.010(7).",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://app.leg.wa.gov/rcw/default.aspx?cite=64.06.020",
+    "required": false,
+    "formCode": "WA-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "washington-statutory-packet",
+    "title": "Washington applicable property-specific records",
+    "shortTitle": "Washington applicable property-specific records",
+    "description": "Use the prescribed RCW 64.06.020 form, including title, water, sewage, structure, systems, association and environmental information and attachments. Provide applicable locally required notices under RCW 64.06.080 and known tank/leak, well, septic and environmental records. For a community governed by RCW 64.90.640, obtain the resale certificate and records, and preserve its five-business-day cancellation protections and conveyance limits, including when supplied shortly before contract execution. Determine the actual declaration, creation date, governing statute and exceptions; older community regimes may differ and January 2028 changes are not applied early. Seller shall comply with applicable smoke and carbon-monoxide alarm requirements before occupancy. This agreement creates no automatic earnest-money forfeiture or exclusive liquidated-damages election; RCW 64.04.005 has a five-percent statutory safe harbor for qualifying separate provisions.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://app.leg.wa.gov/rcw/default.aspx?cite=64.06.020",
+    "required": false,
+    "formCode": "WA-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "washington-association-documents",
+    "title": "Washington association records",
+    "shortTitle": "Washington association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://app.leg.wa.gov/rcw/default.aspx?cite=64.06.020",
+    "required": false,
+    "formCode": "WA-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "WA-LEAD",
+    "sortOrder": 4
+  }
+],
+  IA: [
+  {
+    "documentType": "iowa-seller-disclosure",
+    "title": "Iowa seller condition disclosure or supported exception",
+    "shortTitle": "Iowa seller condition disclosure or supported exception",
+    "description": "For covered transfers under Iowa Code chapter 558A, seller shall deliver the written property disclosure before seller makes a written offer or accepts a written offer. NavStreet requires the form or supported exception evidence before a buyer creates an offer as an earlier platform safeguard. Permitted delivery includes personal delivery, certified or registered mail and electronic delivery with acknowledgment under Commission rules. When untimely delivered, buyer may withdraw the offer or revoke acceptance without liability within three days after personal delivery or five days after electronic or mail delivery under 558A.2. These are statutory days, not a universal three-business-day rule. Receipt selection and signature on this agreement do not waive these rights or execute a separate acknowledgment. Exceptions must identify the actual 558A.1 basis, including its limits on fiduciary exemptions. Amendments are governed by 558A.3.",
+    "sourceInstructions": "For covered transfers include the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
+    "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
+    "required": false,
+    "formCode": "IA-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "iowa-statutory-packet",
+    "title": "Iowa radon fact sheet and applicable property records",
+    "shortTitle": "Iowa radon fact sheet and applicable property records",
+    "description": "The 2026 disclosure under 558A.4 must address lead service lines, including qualifying galvanized lines downstream of lead or unknown material. Seller shall complete the current full form, state actual information and use appropriate Unknown/approximation disclosures rather than certify lead-free plumbing from a No known-line answer. This service-line disclosure is separate from federal lead-based-paint requirements. Review roofs, basements, pests, radon, wells, sewage, environmental hazards, restrictions, assessments and association records. The parties retain the negotiated independent inspection period; this ordinary resale package does not use the separate seven-day installment-contract workflow.",
+    "sourceInstructions": "For covered transfers include the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
+    "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
+    "required": false,
+    "formCode": "IA-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "iowa-association-documents",
+    "title": "Iowa association records",
+    "shortTitle": "Iowa association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "For covered transfers include the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
+    "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
+    "required": false,
+    "formCode": "IA-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "IA-LEAD",
+    "sortOrder": 4
+  }
+],
+  MT: [
+  {
+    "documentType": "montana-seller-disclosure",
+    "title": "Montana seller condition disclosure or supported exception",
+    "shortTitle": "Montana seller condition disclosure or supported exception",
+    "description": "For covered residential transfers under MCA 70-20-502, seller shall disclose actual knowledge of adverse material facts before or contemporaneously with contract execution, including title, water source/service, wastewater, utilities, structure/water intrusion, systems and known physical problems. No duty to inspect is imposed solely by this statement. Identify any actual 70-20-503 exception in signed evidence. NavStreet requires the statement or exception evidence before buyer offer creation as an earlier platform safeguard. Under 70-20-504, unless otherwise agreed in writing, late delivery gives buyer three days from delivery to deliver a separately signed written rescission statement. This agreement does not waive that right. The separate statement is not a warranty under 70-20-505; a receipt selection does not sign a separate statement.",
+    "sourceInstructions": "Use Montana-specific seller, radon, contamination and water-right records as applicable. Complete separately required forms and acknowledgments; a receipt dropdown does not execute a separate document.",
+    "officialFormUrl": "https://mca.legmt.gov/bills/mca/title_0700/chapter_0200/part_0050/section_0020/0700-0200-0050-0020.html",
+    "required": false,
+    "formCode": "MT-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "montana-statutory-packet",
+    "title": "Montana applicable property-specific records",
+    "shortTitle": "Montana applicable property-specific records",
+    "description": "MCA 75-3-606 requires the radon warning with or before the offer and buyer signature acknowledging a copy. Buyer\u2019s signature on this agreement acknowledges receipt of the radon statement printed below, after reviewing it in the offer questions. Known prior tests and subsequent mitigation/treatment evidence shall be provided before or upon contract entry. That statute does not independently require a new test or create a cancellation contingency; the negotiated inspection contingency remains. Under current MCA 75-10-1305, known methamphetamine or fentanyl lab use/contamination requires written notice before agreement to sale when not remediated to certified standards; provide certified compliance/remediation evidence and appropriate notice when applicable. A seller-statement exception does not waive these separate requirements.",
+    "sourceInstructions": "Use Montana-specific seller, radon, contamination and water-right records as applicable. Complete separately required forms and acknowledgments; a receipt dropdown does not execute a separate document.",
+    "officialFormUrl": "https://mca.legmt.gov/bills/mca/title_0700/chapter_0200/part_0050/section_0020/0700-0200-0050-0020.html",
+    "required": false,
+    "formCode": "MT-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "montana-association-documents",
+    "title": "Montana association records",
+    "shortTitle": "Montana association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use Montana-specific seller, radon, contamination and water-right records as applicable. Complete separately required forms and acknowledgments; a receipt dropdown does not execute a separate document.",
+    "officialFormUrl": "https://mca.legmt.gov/bills/mca/title_0700/chapter_0200/part_0050/section_0020/0700-0200-0050-0020.html",
+    "required": false,
+    "formCode": "MT-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MT-LEAD",
+    "sortOrder": 4
+  }
+],
   MN: [
   {
     "documentType": "minnesota-seller-disclosure",

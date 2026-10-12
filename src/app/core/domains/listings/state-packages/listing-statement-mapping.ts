@@ -1,3 +1,11 @@
+import type { MontanaListingAnswers } from './montana/montana-listing-form';
+import type { IowaListingAnswers } from './iowa/iowa-listing-form';
+import type { WashingtonListingAnswers } from './washington/washington-listing-form';
+import type { DelawareListingAnswers } from './delaware/delaware-listing-form';
+import type { OhioListingAnswers } from './ohio/ohio-listing-form';
+import type { KansasListingAnswers } from './kansas/kansas-listing-form';
+import type { IndianaListingAnswers } from './indiana/indiana-listing-form';
+import type { AlabamaListingAnswers } from './alabama/alabama-listing-form';
 import type { NewHampshireListingAnswers } from './new-hampshire/new-hampshire-listing-form';
 import type { NebraskaListingAnswers } from './nebraska/nebraska-listing-form';
 import type { MissouriListingAnswers } from './missouri/missouri-listing-form';
@@ -17,6 +25,14 @@ export interface ListingStatementMappingAnswers extends Omit<ListingStatementSav
   missouri?: MissouriListingAnswers;
   nebraska?: NebraskaListingAnswers;
   newHampshire?: NewHampshireListingAnswers;
+  alabama?: AlabamaListingAnswers;
+  indiana?: IndianaListingAnswers;
+  kansas?: KansasListingAnswers;
+  ohio?: OhioListingAnswers;
+  delaware?: DelawareListingAnswers;
+  washington?: WashingtonListingAnswers;
+  iowa?: IowaListingAnswers;
+  montana?: MontanaListingAnswers;
   southCarolina?: SouthCarolinaListingAnswers;
   california?: CaliforniaListingFacts;
   additionalSellerIncluded: boolean;

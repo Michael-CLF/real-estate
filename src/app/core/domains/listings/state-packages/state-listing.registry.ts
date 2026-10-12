@@ -1,3 +1,11 @@
+import { montanaListingPackage } from './montana/montana-listing.package';
+import { iowaListingPackage } from './iowa/iowa-listing.package';
+import { washingtonListingPackage } from './washington/washington-listing.package';
+import { delawareListingPackage } from './delaware/delaware-listing.package';
+import { ohioListingPackage } from './ohio/ohio-listing.package';
+import { kansasListingPackage } from './kansas/kansas-listing.package';
+import { indianaListingPackage } from './indiana/indiana-listing.package';
+import { alabamaListingPackage } from './alabama/alabama-listing.package';
 import { newHampshireListingPackage } from './new-hampshire/new-hampshire-listing.package';
 import { nebraskaListingPackage } from './nebraska/nebraska-listing.package';
 import { missouriListingPackage } from './missouri/missouri-listing.package';
@@ -50,6 +58,14 @@ const PACKAGES =
     ['FL', floridaListingPackage],
     ['MI', michiganListingPackage],
 ['ID', idahoListingPackage],
+['MT', montanaListingPackage],
+['IA', iowaListingPackage],
+['WA', washingtonListingPackage],
+['DE', delawareListingPackage],
+['OH', ohioListingPackage],
+['KS', kansasListingPackage],
+['IN', indianaListingPackage],
+['AL', alabamaListingPackage],
 ['NH', newHampshireListingPackage],
 ['NE', nebraskaListingPackage],
 ['MO', missouriListingPackage],

@@ -264,13 +264,13 @@ export const signOffer =
             offerVersionUid
           );
 
-          stateContractPackage.validateBeforeSigning?.({ offer, version });
-
           const signer =
             findSigner(
               version,
               userUid
             );
+
+          stateContractPackage.validateBeforeSigning?.({ offer, version, signerRole: signer.role });
 
           verifySigningOrder(
             version,

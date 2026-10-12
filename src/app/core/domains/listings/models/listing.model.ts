@@ -430,6 +430,14 @@ export type ListingSellerOwnershipStatus =
   'owned_at_least_one_year' | 'owned_less_than_one_year' | 'does_not_yet_own';
 export type ListingFuelTankOwnership = 'owned' | 'leased';
 export interface ListingSellerStatements {
+  montana?: { disclosureExemptionClaimed?: boolean; radonTestsKnown?: boolean; drugContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
+  iowa?: { disclosureExemptionClaimed?: boolean; privateSewageApplies?: boolean; leadServiceLineKnown?: boolean; };
+  washington?: { disclosureExemptionClaimed?: boolean; oilTankHeating?: boolean; };
+  delaware?: { disclosureExemptionClaimed?: boolean; radonReportsKnown?: boolean; };
+  ohio?: { disclosureExemptionClaimed?: boolean; };
+  kansas?: { usesMountainTime?: boolean; elevatedRadonKnown?: boolean; };
+  indiana?: { usesCentralTime?: boolean; disclosureExemptionClaimed?: boolean; };
+  alabama?: { usesEasternTime?: boolean; hiddenHealthSafetyKnown?: boolean; };
   newHampshire?: { methProductionKnown?: boolean; utilityTariffChargesKnown?: boolean; };
   nebraska?: { usesMountainTime?: boolean; };
   missouri?: { methProductionKnown?: boolean; drugConvictionKnown?: boolean; };

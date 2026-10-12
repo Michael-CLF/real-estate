@@ -1,3 +1,11 @@
+import { montanaListingPackage } from './montana-listing.package';
+import { iowaListingPackage } from './iowa-listing.package';
+import { washingtonListingPackage } from './washington-listing.package';
+import { delawareListingPackage } from './delaware-listing.package';
+import { ohioListingPackage } from './ohio-listing.package';
+import { kansasListingPackage } from './kansas-listing.package';
+import { indianaListingPackage } from './indiana-listing.package';
+import { alabamaListingPackage } from './alabama-listing.package';
 import { newHampshireListingPackage } from './new-hampshire-listing.package';
 import { nebraskaListingPackage } from './nebraska-listing.package';
 import { missouriListingPackage } from './missouri-listing.package';
@@ -29,6 +37,14 @@ const PACKAGES = new Map<string, StateListingPackage>([
   ['FL', floridaListingPackage],
   ['MI', michiganListingPackage],
 ['ID', idahoListingPackage],
+['MT', montanaListingPackage],
+['IA', iowaListingPackage],
+['WA', washingtonListingPackage],
+['DE', delawareListingPackage],
+['OH', ohioListingPackage],
+['KS', kansasListingPackage],
+['IN', indianaListingPackage],
+['AL', alabamaListingPackage],
 ['NH', newHampshireListingPackage],
 ['NE', nebraskaListingPackage],
 ['MO', missouriListingPackage],

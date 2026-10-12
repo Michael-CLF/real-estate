@@ -1,3 +1,11 @@
+import { montanaStateContractPackage } from './montana/montana-state-contract.package';
+import { iowaStateContractPackage } from './iowa/iowa-state-contract.package';
+import { washingtonStateContractPackage } from './washington/washington-state-contract.package';
+import { delawareStateContractPackage } from './delaware/delaware-state-contract.package';
+import { ohioStateContractPackage } from './ohio/ohio-state-contract.package';
+import { kansasStateContractPackage } from './kansas/kansas-state-contract.package';
+import { indianaStateContractPackage } from './indiana/indiana-state-contract.package';
+import { alabamaStateContractPackage } from './alabama/alabama-state-contract.package';
 import { newHampshireStateContractPackage } from './new-hampshire/new-hampshire-state-contract.package';
 import { nebraskaStateContractPackage } from './nebraska/nebraska-state-contract.package';
 import { missouriStateContractPackage } from './missouri/missouri-state-contract.package';
@@ -88,6 +96,14 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
     [floridaStateContractPackage.stateCode, floridaStateContractPackage],
     [michiganStateContractPackage.stateCode, michiganStateContractPackage],
 [idahoStateContractPackage.stateCode, idahoStateContractPackage],
+[montanaStateContractPackage.stateCode, montanaStateContractPackage],
+[iowaStateContractPackage.stateCode, iowaStateContractPackage],
+[washingtonStateContractPackage.stateCode, washingtonStateContractPackage],
+[delawareStateContractPackage.stateCode, delawareStateContractPackage],
+[ohioStateContractPackage.stateCode, ohioStateContractPackage],
+[kansasStateContractPackage.stateCode, kansasStateContractPackage],
+[indianaStateContractPackage.stateCode, indianaStateContractPackage],
+[alabamaStateContractPackage.stateCode, alabamaStateContractPackage],
 [newHampshireStateContractPackage.stateCode, newHampshireStateContractPackage],
 [nebraskaStateContractPackage.stateCode, nebraskaStateContractPackage],
 [missouriStateContractPackage.stateCode, missouriStateContractPackage],

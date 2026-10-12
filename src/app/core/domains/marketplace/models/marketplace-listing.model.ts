@@ -66,6 +66,14 @@ export interface MarketplaceListing {
   sellerStatements?: {
     california?: CaliforniaListingFacts;
     oregon?: { historicSpecialAssessmentApplies?: boolean | null; usesMountainTime?: boolean | null; domesticWellApplies?: boolean | null; uncertifiedWoodDevicePresent?: boolean | null };
+    alabama?: { usesEasternTime?: boolean | null; hiddenHealthSafetyKnown?: boolean | null; };
+    indiana?: { usesCentralTime?: boolean | null; disclosureExemptionClaimed?: boolean | null; };
+    kansas?: { usesMountainTime?: boolean | null; elevatedRadonKnown?: boolean | null; };
+    ohio?: { disclosureExemptionClaimed?: boolean | null; };
+    delaware?: { disclosureExemptionClaimed?: boolean | null; radonReportsKnown?: boolean | null; };
+    washington?: { disclosureExemptionClaimed?: boolean | null; oilTankHeating?: boolean | null; };
+    iowa?: { disclosureExemptionClaimed?: boolean | null; privateSewageApplies?: boolean | null; leadServiceLineKnown?: boolean | null; };
+    montana?: { disclosureExemptionClaimed?: boolean | null; radonTestsKnown?: boolean | null; drugContaminationKnown?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
     missouri?: { methProductionKnown?: boolean | null; drugConvictionKnown?: boolean | null };
     nebraska?: { usesMountainTime?: boolean | null };
     newHampshire?: { methProductionKnown?: boolean | null; utilityTariffChargesKnown?: boolean | null };

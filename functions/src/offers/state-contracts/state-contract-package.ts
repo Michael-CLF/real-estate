@@ -209,7 +209,7 @@ export interface StateContractPackage<
   ): void;
 
   /** State-specific prerequisites before any party signs an immutable version. */
-  validateBeforeSigning?(input: ValidateStateSubmissionInput<TTerms>): void;
+  validateBeforeSigning?(input: ValidateStateSubmissionInput<TTerms> & { readonly signerRole?: string }): void;
 
   sanitizeDraftTerms(
     input: SanitizeDraftTermsInput<TTerms>

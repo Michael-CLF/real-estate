@@ -590,6 +590,11 @@ export class OfferDetailsComponent
   }
 
 
+  signingBlockReason(version: OfferVersion): string | undefined {
+    const fields = this.display(version);
+    return fields.signingBlockReason ?? (this.access()?.isSeller ? fields.sellerSigningBlockReason : undefined);
+  }
+
   isTexasVersion(
     version: OfferVersion
   ): boolean {
@@ -1416,7 +1421,7 @@ export class OfferDetailsComponent
       if (
         !this.agreementDocument() &&
         this.access()?.canSign &&
-        !this.display(visibleVersion).signingBlockReason &&
+        !this.signingBlockReason(visibleVersion) &&
         !this.automaticallyPreparedVersions.has(visibleVersion.Uid) &&
         !this.destroyRef.destroyed
       ) {

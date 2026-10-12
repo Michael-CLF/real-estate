@@ -234,7 +234,7 @@
               {{ openingDocument() ? 'Opening…' : 'Open Agreement PDF' }}
             </button>
             } @else if (
-            (access()?.canSign && !display(version).signingBlockReason) ||
+            (access()?.canSign && !signingBlockReason(version)) ||
             version.status === 'accepted'
             ) {
             <button class="button button--secondary" type="button" [disabled]="processing()"
@@ -333,11 +333,11 @@
           <p class="action-card__note">Your unsigned version stays in history. An editable revision will open with your existing terms.</p>
           }
 
-          @if (display(version).signingBlockReason) {
-          <p class="action-card__note" role="alert">{{ display(version).signingBlockReason }}</p>
+          @if (signingBlockReason(version)) {
+          <p class="action-card__note" role="alert">{{ signingBlockReason(version) }}</p>
           }
 
-          @if (access()?.canSign && !display(version).signingBlockReason) {
+          @if (access()?.canSign && !signingBlockReason(version)) {
           @if (agreementDocument()) {
           <button class="button button--primary" type="button" [disabled]="processing()" (click)="openSigningPanel()">
             {{ signButtonLabel() }}

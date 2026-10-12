@@ -158,6 +158,10 @@
         <span class="status-badge status-badge--complete">
           Uploaded
         </span>
+        } @else if (requirement.requiredBeforeAcceptance) {
+        <span class="status-badge status-badge--required">
+          Required before acceptance, or supported exemption
+        </span>
         } @else if (isRequiredForCurrentListing(requirement)) {
         <span class="status-badge status-badge--required">
           Required

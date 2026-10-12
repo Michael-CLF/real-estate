@@ -1,4 +1,28 @@
 export type DisclosureDocumentType =
+  | 'montana-seller-disclosure'
+  | 'montana-statutory-packet'
+  | 'montana-association-documents'
+  | 'iowa-seller-disclosure'
+  | 'iowa-statutory-packet'
+  | 'iowa-association-documents'
+  | 'washington-seller-disclosure'
+  | 'washington-statutory-packet'
+  | 'washington-association-documents'
+  | 'delaware-seller-disclosure'
+  | 'delaware-statutory-packet'
+  | 'delaware-association-documents'
+  | 'ohio-seller-disclosure'
+  | 'ohio-statutory-packet'
+  | 'ohio-association-documents'
+  | 'kansas-seller-disclosure'
+  | 'kansas-statutory-packet'
+  | 'kansas-association-documents'
+  | 'indiana-seller-disclosure'
+  | 'indiana-statutory-packet'
+  | 'indiana-association-documents'
+  | 'alabama-seller-disclosure'
+  | 'alabama-statutory-packet'
+  | 'alabama-association-documents'
   | 'new-hampshire-seller-disclosure'
   | 'new-hampshire-statutory-packet'
   | 'new-hampshire-association-documents'
@@ -76,6 +100,7 @@ export interface StateDisclosureRequirement {
   /** Where to obtain a property-specific document without a blank form. */
   readonly sourceInstructions?: string;
   readonly required: boolean;
+  readonly requiredBeforeAcceptance?: boolean;
   readonly shortTitle: string;
   readonly sortOrder: number;
   readonly title: string;

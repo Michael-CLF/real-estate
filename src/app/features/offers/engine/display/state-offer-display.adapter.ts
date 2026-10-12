@@ -25,6 +25,8 @@ export interface OfferDisplayFields {
   readonly possessionLabel: string;
   /** Existing immutable versions that cannot proceed to signature. */
   readonly signingBlockReason?: string;
+  /** Acceptance prerequisites that do not block buyer signatures. */
+  readonly sellerSigningBlockReason?: string;
 }
 
 export interface StateOfferDisplayAdapter<
