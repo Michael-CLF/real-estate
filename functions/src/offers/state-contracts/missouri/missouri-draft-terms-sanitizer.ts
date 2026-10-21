@@ -13,6 +13,8 @@ export function sanitizeMissouriDraftTerms(
   const settlement = record(request['settlement']);
   const disclosures = record(request['disclosures']);
   const delivery = record(request['delivery']);
+  const special = record(request['specialProperty']);
+  const versions = record(request['documentVersions']);
 
   const hasDeposit = bool(purchase['hasEarnestMoney']);
   const financingType = choice(
@@ -26,6 +28,18 @@ export function sanitizeMissouriDraftTerms(
 
   const sanitized: MissouriOfferTermsDocument = {
     ...input.currentTerms,
+    ...(input.currentTerms.contractType === 'navstreet_missouri_condominium_resale_2026' ? {condominiumOfferEntryRevision:'2026-10-19' as const} : {}),
+
+    ...(input.currentTerms.specialProperty ? {specialProperty:{
+      projectName:text(special['projectName'],300),unitDesignation:text(special['unitDesignation'],300),
+      commonElements:text(special['commonElements'],3000),parkingStorage:text(special['parkingStorage'],3000),
+      resaleCertificateStatus:choice(special['resaleCertificateStatus'],['unselected','received','pending'] as const,'unselected'),
+      certificateReceivedDate:special['resaleCertificateStatus'] === 'received' ? text(special['certificateReceivedDate'],10) : '',
+      condominiumRightsAcknowledged:bool(special['condominiumRightsAcknowledged']),intendedUse:text(special['intendedUse'],3000),surveyRequired:bool(special['surveyRequired']),landReviewAcknowledged:bool(special['landReviewAcknowledged']),
+      tenantDocumentsStatus:choice(special['tenantDocumentsStatus'],['unselected','received','pending','not_applicable'] as const,'unselected'),tenancyTransferAcknowledged:bool(special['tenancyTransferAcknowledged'])
+    }} : {}),
+
+    ...(input.currentTerms.documentVersions ? {documentVersions:Object.fromEntries(Object.entries(versions).filter(([key,value]) => ['missouri-statutory-packet','missouri-seller-disclosure','missouri-association-documents','missouri-condominium-resale-certificate','missouri-tenant-records','lead-based-paint'].includes(key) && typeof value === 'string' && value.length > 0 && value.length <= 200 && !value.includes('/')).map(([key,value]) => [key,String(value)]))} : {}),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,
@@ -141,7 +155,7 @@ export function sanitizeMissouriDraftTerms(
         ['unselected', 'received', 'pending', 'exempt'] as const,
         'unselected'
       ),
-      leadPaintStatus: choice(
+      leadPaintStatus: input.currentTerms.property.propertyType === 'land' ? 'not_applicable' : choice(
         disclosures['leadPaintStatus'],
         [
           'unselected',
@@ -149,6 +163,7 @@ export function sanitizeMissouriDraftTerms(
           'pending',
           'built_1978_or_later',
           'exempt',
+          'not_applicable',
         ] as const,
         'unselected'
       ),
@@ -165,7 +180,7 @@ export function sanitizeMissouriDraftTerms(
       leadInspectionDays: integer(
         disclosures['leadInspectionDays']
       ),
-      hoaDocumentsStatus: choice(
+      hoaDocumentsStatus: input.currentTerms.contractType === 'navstreet_missouri_condominium_resale_2026' ? choice(special['resaleCertificateStatus'],['unselected','received','pending'] as const,'unselected') : choice(
         disclosures['hoaDocumentsStatus'],
         [
           'unselected',

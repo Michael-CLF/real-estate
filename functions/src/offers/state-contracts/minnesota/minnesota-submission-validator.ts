@@ -1,3 +1,4 @@
+import { isMinnesotaContractCompatible } from './minnesota-contract-selection';
 import { minnesotaAssociationPacketProblem } from './minnesota-association-packet';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -7,8 +8,14 @@ export function validateMinnesotaSubmission(input: ValidateStateSubmissionInput<
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'MN' && version.stateCode === 'MN' && t.stateCode === 'MN', 'The offer must belong to Minnesota.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
-  requireValue(t.contractType === 'navstreet_minnesota_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'MN', 'The contract or property snapshot is invalid.');
-  requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Minnesota agreement.');
+  requireValue(['navstreet_minnesota_residential_sale_2026','navstreet_minnesota_condominium_resale_2026'].includes(t.contractType) && t.property.listingUid === offer.listingUid && t.property.state === 'MN', 'The contract or property snapshot is invalid.');
+  requireValue(isMinnesotaContractCompatible(t.contractType,t.property.propertyType,t.property.contractFacts), 'Condominium, vacant land and other property types need a separate Minnesota agreement.');
+  if(t.contractType === 'navstreet_minnesota_condominium_resale_2026') {
+    const c=t.condominium;
+    requireValue(c && c.projectName.trim() && c.unitDesignation.trim() && c.commonElements.trim() && c.parkingStorage.trim() && c.rightsAcknowledged===true,'Complete the condominium identification, rights and acknowledgement.');
+    requireValue(t.disclosures.sellerReportsHoa===true && t.disclosures.hoaDocumentsStatus==='received','Review the complete condominium resale packet before submitting.');
+    requireValue(Boolean(t.documentVersions?.['minnesota-association-documents']),'Open and acknowledge the uploaded condominium packet version.');
+  }
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');

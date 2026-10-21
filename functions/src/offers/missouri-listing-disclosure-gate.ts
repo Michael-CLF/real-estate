@@ -1,14 +1,14 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function missouriRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
   const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
   const facts = statements?.['missouri'] as Record<string, unknown> | undefined;
-  const year = listing['yearBuilt'];
   return [
     ...(facts?.['methProductionKnown'] !== false || facts?.['drugConvictionKnown'] !== false ? ['missouri-statutory-packet'] : []),
     
-    ...(statements?.['leadBasedPaintApplies'] === true || typeof year !== 'number' || year < 1978 ? ['lead-based-paint'] : [])];
+    ...(listing['propertyType'] !== 'land' && (!isFederalLeadExcluded(listing)) ? ['lead-based-paint'] : [])];
 }
 /** Only required applicable documents gate draft creation; statutory exceptions require supporting evidence. */
 export async function assertMissouriListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {

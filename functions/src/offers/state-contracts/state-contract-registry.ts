@@ -1,3 +1,7 @@
+import { wyomingStateContractPackage } from './wyoming/wyoming-state-contract.package';
+import { southDakotaStateContractPackage } from './south-dakota/south-dakota-state-contract.package';
+import { newMexicoStateContractPackage } from './new-mexico/new-mexico-state-contract.package';
+import { marylandStateContractPackage } from './maryland/maryland-state-contract.package';
 import { montanaStateContractPackage } from './montana/montana-state-contract.package';
 import { iowaStateContractPackage } from './iowa/iowa-state-contract.package';
 import { washingtonStateContractPackage } from './washington/washington-state-contract.package';
@@ -96,6 +100,10 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
     [floridaStateContractPackage.stateCode, floridaStateContractPackage],
     [michiganStateContractPackage.stateCode, michiganStateContractPackage],
 [idahoStateContractPackage.stateCode, idahoStateContractPackage],
+[wyomingStateContractPackage.stateCode, wyomingStateContractPackage],
+[southDakotaStateContractPackage.stateCode, southDakotaStateContractPackage],
+[newMexicoStateContractPackage.stateCode, newMexicoStateContractPackage],
+[marylandStateContractPackage.stateCode, marylandStateContractPackage],
 [montanaStateContractPackage.stateCode, montanaStateContractPackage],
 [iowaStateContractPackage.stateCode, iowaStateContractPackage],
 [washingtonStateContractPackage.stateCode, washingtonStateContractPackage],
@@ -238,6 +246,8 @@ function createStateContractRegistration<
   stateContractPackage:
     StateContractPackage<TTerms>
 ): StateContractRegistration {
+  if(stateContractPackage.offerCreationEnabled && !stateContractPackage.hoaPolicyIntegrated)throw new Error('State contract packages must integrate the seller HOA applicability policy before registration.');
+  if(stateContractPackage.offerCreationEnabled && !stateContractPackage.federalLeadPolicyIntegrated)throw new Error('State contract packages must integrate the federal lead applicability policy before registration.');
   return {
     stateCode:
       stateContractPackage.stateCode,
@@ -250,12 +260,7 @@ function createStateContractRegistration<
       stateContractPackage
         .defaultTimeZone,
 
-    agreementTemplates: [
-      {
-        ...stateContractPackage
-          .agreementTemplate,
-      },
-    ],
+    agreementTemplates: stateContractPackage.agreementTemplates ?? [{...stateContractPackage.agreementTemplate}],
   };
 }
 

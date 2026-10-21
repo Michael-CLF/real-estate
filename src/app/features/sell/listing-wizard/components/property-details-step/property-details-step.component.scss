@@ -425,7 +425,18 @@ form {
 #in-disclosureExemptionClaimed,
 #ks-usesMountainTime,
 #ks-elevatedRadonKnown,
-#oh-disclosureExemptionClaimed {
+#oh-disclosureExemptionClaimed,
+#de-disclosureExemptionClaimed,
+#de-radonReportsKnown,
+#wa-disclosureExemptionClaimed,
+#wa-oilTankHeating,
+#ia-disclosureExemptionClaimed,
+#ia-privateSewageApplies,
+#ia-leadServiceLineKnown,
+#mt-disclosureExemptionClaimed,
+#mt-radonTestsKnown,
+#mt-drugContaminationKnown,
+#mt-appurtenantWaterRightsKnown {
   padding: 10px 10px;
   margin-left: 10px;
   border-radius: 6px;
@@ -507,3 +518,6 @@ form {
 .california-disclosures select[aria-invalid='true'] { border-color: #8b0000; }
 
 
+
+// Generic state questions share the established property-details field styling.
+.form-field { @extend .field; }

@@ -1,3 +1,5 @@
+import {selectMinnesotaContract} from '../../../../../core/domains/offers/state-contracts/minnesota/minnesota-contract-selection';
+import {pinMinnesotaReviewedDocumentVersions} from '../services/minnesota-reviewed-document-versions';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
 import { offerExpirationAfterHours } from '../../../engine/offer-expiration';
@@ -298,9 +300,6 @@ export class MinnesotaOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This Minnesota agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
-      }
 
       this.listing.set(listing);
       this.property.set(
@@ -343,7 +342,7 @@ export class MinnesotaOfferEntryComponent
         await this.loadOfferSession(
           this.requestedOfferUid,
           this.requestedOfferVersionUid,
-          'navstreet_minnesota_residential_sale_2026'
+          undefined
         );
       } else {
         await this.resumeExistingDraft();
@@ -378,7 +377,7 @@ export class MinnesotaOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_minnesota_residential_sale_2026',
+        selectMinnesotaContract(String(this.listing()!.propertyType),this.listing()!.sellerStatements?.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );
@@ -393,6 +392,14 @@ export class MinnesotaOfferEntryComponent
   }
 
 
+  private lastReviewedTerms:MinnesotaOfferTerms|null=null;
+  private prepareDraftChange(change:MinnesotaOfferDraftChange):MinnesotaOfferDraftChange {
+    const current=this.lastReviewedTerms ?? this.currentVersion()?.terms;
+    if(!current)return change;
+    const terms=pinMinnesotaReviewedDocumentVersions(current,change.terms,this.listingDisclosures());
+    this.lastReviewedTerms=terms;
+    return {...change,terms};
+  }
   protected onDraftChanged(
     change: MinnesotaOfferDraftChange
   ): void {
@@ -403,7 +410,7 @@ export class MinnesotaOfferEntryComponent
       return;
     }
 
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     void this.flushDraftSave().catch(() => undefined);
   }
 
@@ -453,7 +460,7 @@ export class MinnesotaOfferEntryComponent
     const offer = this.currentOffer();
     const version = this.currentVersion();
     if (!offer || !version || this.busy()) return;
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     this.submitting.set(true);
     this.errorMessage.set('');
     try {
@@ -485,6 +492,12 @@ export class MinnesotaOfferEntryComponent
       existingOffer.Uid,
       existingOffer.currentVersionUid
     );
+    const facts=this.listing()?.sellerStatements?.contractFacts;
+    if(facts && [facts.isCondominium,facts.isDeveloperSale,facts.isLeasehold].every(v=>typeof v==='boolean')) {
+      let expected:string|undefined;
+      try{expected=selectMinnesotaContract(String(this.listing()!.propertyType),facts);}catch{expected=undefined;}
+      if(expected!==this.currentVersion()?.terms.contractType) await this.router.navigate(['/offers',existingOffer.Uid],{queryParams:{draftAgreementChanged:'true'}});
+    }
   }
 
 
@@ -501,6 +514,7 @@ export class MinnesotaOfferEntryComponent
     this.workflow.assertCurrentEditableDraft(offer, version, this.listingUid);
     this.currentOffer.set(offer);
     this.currentVersion.set(version);
+    this.lastReviewedTerms=version.terms;
     this.property.set(
       version.terms.property
     );

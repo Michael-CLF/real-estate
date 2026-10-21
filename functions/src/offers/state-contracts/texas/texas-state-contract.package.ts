@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import {
   createTexasContractMilestones,
@@ -42,10 +45,14 @@ const TEXAS_DEFAULT_TIME_ZONE =
 export const texasStateContractPackage:
   StateContractPackage<
     TexasOneToFourFamilyResaleOfferTermsDocument
-  > = {
+  > = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(texasStateContractPackage, listing),
   stateCode: TEXAS_STATE_CODE,
 
   offerCreationEnabled: true,
+  maximumDwellingUnits:4,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'multi_family'],
 
   contractTypes: [
     TREC_20_19_TEMPLATE.contractType,
@@ -106,4 +113,4 @@ export const texasStateContractPackage:
 
   createContractMilestones: input =>
     createTexasContractMilestones(input),
-};
+}, {listingStatementRequired:true,values:{'disclosures.leadBasedPaintApplies':false,'disclosures.leadBasedPaintAddendumDocumentUid':undefined},hiddenFields:['disclosures.leadBasedPaintApplies'],addendum:{path:'addenda',idKey:'formId',id:'lead-based-paint',selectedKey:'included'}}), {"sellerFactPath":"propertyAssociation.mandatoryMembership","documentTypes":[],"evidencePaths":["propertyAssociation.associationAddendumDocumentUid"]});

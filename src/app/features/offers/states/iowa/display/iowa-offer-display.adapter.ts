@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import type { IowaOfferTerms } from '../../../../../core/domains/offers/state-contracts/iowa/models/iowa-offer-terms.model';
 import type { StateOfferDisplayAdapter } from '../../../engine/display/state-offer-display.adapter';
 export const iowaOfferDisplayAdapter: StateOfferDisplayAdapter<IowaOfferTerms> = {
@@ -14,8 +15,9 @@ export const iowaOfferDisplayAdapter: StateOfferDisplayAdapter<IowaOfferTerms> =
       importantDeadline: { label: 'inspection period', value: `${terms.deadlines.inspectionPeriodDays} calendar days after acceptance` },
       closingDate: { label: 'Settlement deadline', value: terms.deadlines.settlementDate },
       possessionLabel: 'Vacant at closing',
+      sellerSigningBlockReason: (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received')) ? "Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery." : undefined,
       signingBlockReason:         
-        (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received') || (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus)) || terms.disclosures.leadPaintStatus === 'pending'
+        (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) || (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'
         : undefined,
     };

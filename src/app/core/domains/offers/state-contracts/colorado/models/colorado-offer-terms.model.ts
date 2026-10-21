@@ -135,5 +135,5 @@ export const COLORADO_RESIDENTIAL_CONTRACT_DEFINITION = {
   formName: 'NavStreet Colorado Residential Purchase and Sale Agreement',
   effectiveDate: '2026-01-01',
   revisionDate: '2026-09-30',
-  description: 'A NavStreet agreement for Colorado resale homes, townhomes and condos.',
+  description: 'A NavStreet agreement for Colorado resale homes, townhomes, PUD homes and condos.',
 } as const;

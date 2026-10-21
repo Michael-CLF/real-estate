@@ -20,6 +20,7 @@ export function createIndianaInitialOfferTerms(
     throw new Error('A qualifying Indiana residential resale listing is required.');
   }
   return {
+    documentVersions: {},
     stateCode: 'IN', contractType: input.contractType,
     property: { ...input.property, state: 'IN' },
     legalDescription: input.property.legalDescription ?? '',

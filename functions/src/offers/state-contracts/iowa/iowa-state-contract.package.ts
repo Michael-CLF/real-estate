@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertIowaListingDisclosures } from '../../iowa-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,20 +12,22 @@ import { sanitizeIowaDraftTerms } from './iowa-draft-terms-sanitizer';
 import { validateIowaSubmission } from './iowa-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createIowaContractMilestones } from './iowa-contract-milestones';
-export const iowaStateContractPackage: StateContractPackage<IowaOfferTermsDocument> = {
+export const iowaStateContractPackage: StateContractPackage<IowaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(iowaStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertIowaListingDisclosures },
   stateCode: 'IA', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_iowa_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'IA', templateUid: IOWA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Iowa Residential Purchase and Sale Agreement', templateVersion: IOWA_DOCUMENT_RULES.version },
   createInitialOfferTerms: input => createIowaInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeIowaDraftTerms(input),
   validateSubmission: input => validateIowaSubmission(input),
-  validateBeforeSigning: ({ version }) => {
+  validateBeforeSigning: ({ version, signerRole }) => {
     const { disclosures } = version.terms;
+    if (signerRole !== 'buyer' && (!['received','exempt'].includes(disclosures.propertyConditionStatus) || (disclosures.requiredKnownFacts && disclosures.statutoryPacketStatus !== 'received'))) throw new HttpsError('failed-precondition',"Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery.");
     if (disclosures.radonNoticeAcknowledged !== true) throw new HttpsError('failed-precondition','Read and acknowledge the Iowa notices before signing.');
-    if (!['received','exempt'].includes(disclosures.propertyConditionStatus)) throw new HttpsError('failed-precondition',"Review the seller statement or supported exception before submitting or signing.");
-    if (disclosures.requiredKnownFacts && disclosures.statutoryPacketStatus !== 'received') throw new HttpsError('failed-precondition',"Review the required property records before submitting or signing.");
     if (disclosures.propertyConditionStatus === 'exempt' && !disclosures.disclosureExemptionClaimed) throw new HttpsError('failed-precondition',"A seller disclosure exception must match the supported listing exception.");
     if (
         
@@ -48,4 +53,4 @@ export const iowaStateContractPackage: StateContractPackage<IowaOfferTermsDocume
     const { generateIowaOfferPdf } = require('./iowa-offer-pdf.service') as typeof import('./iowa-offer-pdf.service');
     return generateIowaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["iowa-association-documents"]});

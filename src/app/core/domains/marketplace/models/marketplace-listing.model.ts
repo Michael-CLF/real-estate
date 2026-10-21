@@ -1,3 +1,4 @@
+import type { ListingContractFacts } from '../../listings/models/listing.model';
 import type { CaliforniaListingFacts } from '../../listings/state-packages/california/california-listing-facts.model';
 import { ListingPhoto } from '../../listings/models/listing-photo.model';
 import { ListingStatus } from '../../listings/models/listing-status.type';
@@ -62,8 +63,10 @@ export interface MarketplaceListing {
    */
   lotSizeAcres?: number;
 
+  legalDescription?: string;
   yearBuilt?: number;
   sellerStatements?: {
+    contractFacts?: ListingContractFacts;
     california?: CaliforniaListingFacts;
     oregon?: { historicSpecialAssessmentApplies?: boolean | null; usesMountainTime?: boolean | null; domesticWellApplies?: boolean | null; uncertifiedWoodDevicePresent?: boolean | null };
     alabama?: { usesEasternTime?: boolean | null; hiddenHealthSafetyKnown?: boolean | null; };
@@ -74,6 +77,10 @@ export interface MarketplaceListing {
     washington?: { disclosureExemptionClaimed?: boolean | null; oilTankHeating?: boolean | null; };
     iowa?: { disclosureExemptionClaimed?: boolean | null; privateSewageApplies?: boolean | null; leadServiceLineKnown?: boolean | null; };
     montana?: { disclosureExemptionClaimed?: boolean | null; radonTestsKnown?: boolean | null; drugContaminationKnown?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
+    maryland?: { disclosureExemptionClaimed?: boolean | null; usesDisclaimer?: boolean | null; privateWellApplies?: boolean | null; onsiteSewageApplies?: boolean | null; deferredWaterSewerCharges?: boolean | null; superfundNearby?: boolean | null; otherPropertyNoticeApplies?: boolean | null; rentalLeadObligationApplies?: boolean | null; groundRentApplies?: boolean | null; };
+    newMexico?: { privateWastewaterApplies?: boolean | null; drugLabContaminationKnown?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
+    southDakota?: { usesMountainTime?: boolean | null; disclosureExemptionClaimed?: boolean | null; privateTransferFeeKnown?: boolean | null; };
+    wyoming?: { privateWastewaterApplies?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
     missouri?: { methProductionKnown?: boolean | null; drugConvictionKnown?: boolean | null };
     nebraska?: { usesMountainTime?: boolean | null };
     newHampshire?: { methProductionKnown?: boolean | null; utilityTariffChargesKnown?: boolean | null };

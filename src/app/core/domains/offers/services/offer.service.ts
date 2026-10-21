@@ -434,6 +434,11 @@ export class OfferService {
   }
 
 
+  async discardOfferDraft(offerUid: string): Promise<void> {
+    this.requireText(offerUid, 'An offer identifier is required.');
+    await this.offerRepository.discardOfferDraft(offerUid);
+  }
+
   async withdrawOffer(
     offerUid: string,
     offerVersionUid: string

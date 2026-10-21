@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 
@@ -9,17 +10,12 @@ import type {
 export function coloradoRequiredDisclosureTypes(
   listing: Record<string, unknown>,
 ): string[] {
-  const statements = listing['sellerStatements'] as
-    | Record<string, unknown>
-    | undefined;
 
   return [
     'colorado-property-disclosure',
     'colorado-radon-brochure',
 
-    ...(listing['yearBuilt'] == null ||
-    Number(listing['yearBuilt']) < 1978 ||
-    statements?.['leadBasedPaintApplies'] === true
+    ...(!isFederalLeadExcluded(listing)
       ? ['lead-based-paint']
       : []),
   ];

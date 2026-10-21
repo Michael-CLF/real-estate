@@ -1,3 +1,5 @@
+import { isMissouriContractCompatible } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-contract-selection';
+import { validateMissouriSpecialProperty } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-special-property-validation';
 import { resolveMissouriPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +11,10 @@ export class MissouriOfferValidator implements StateOfferValidator<MissouriOffer
   validate(terms: MissouriOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'MO' || terms.contractType !== 'navstreet_missouri_residential_sale_2026') error('form', 'Select the NavStreet Missouri residential agreement.');
+    if (terms.stateCode !== 'MO' || !isMissouriContractCompatible(terms.contractType,terms.property.propertyType,terms.property.contractFacts)) error('form', 'Select the NavStreet Missouri residential agreement.');
     if (terms.property.state !== 'MO') error('property.state', 'The listing must be in Missouri.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    for(const issue of validateMissouriSpecialProperty(terms.contractType,terms.specialProperty,terms.disclosures.sellerReportsExistingLeases)) error(issue.fieldPath,issue.message);
+    if(terms.contractType === 'navstreet_missouri_land_sale_2026' && terms.disclosures.leadPaintStatus !== 'not_applicable') error('disclosures.leadPaintStatus','Vacant land cannot include a residential lead status.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {
@@ -66,13 +69,13 @@ export class MissouriOfferValidator implements StateOfferValidator<MissouriOffer
     if (!['received', 'pending', 'exempt'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.propertyConditionStatus', 'Select whether you received the seller condition statement.');
     if (!['received', 'pending'].includes(terms.disclosures.statutoryPacketStatus)) error('disclosures.statutoryPacketStatus', 'Select whether you received the statutory property-specific statutory disclosure packet.');
     if (terms.disclosures.sellerReportsHoa === null) error('disclosures.sellerReportsHoa', 'The seller must answer the association question on the listing.');
-    if (terms.disclosures.sellerReportsHoa === true && !['received', 'pending'].includes(terms.disclosures.hoaDocumentsStatus)) error('disclosures.hoaDocumentsStatus', 'Select whether you received the association resale packet.');
-    if (terms.disclosures.sellerReportsHoa === false && terms.disclosures.hoaDocumentsStatus !== 'not_applicable') error('disclosures.hoaDocumentsStatus', 'Select that no HOA applies to match the seller’s listing.');
+    if (terms.contractType !== 'navstreet_missouri_condominium_resale_2026' && terms.disclosures.sellerReportsHoa === true && !['received', 'pending'].includes(terms.disclosures.hoaDocumentsStatus)) error('disclosures.hoaDocumentsStatus', 'Select whether you received the association resale packet.');
+    if (terms.contractType !== 'navstreet_missouri_condominium_resale_2026' && terms.disclosures.sellerReportsHoa === false && terms.disclosures.hoaDocumentsStatus !== 'not_applicable') error('disclosures.hoaDocumentsStatus', 'Select that no HOA applies to match the seller’s listing.');
     if (terms.disclosures.taxNoticeAcknowledged !== true) error('disclosures.taxNoticeAcknowledged', 'Read and acknowledge the Missouri property tax notice.');
     if (terms.disclosures.radonNoticeAcknowledged !== true) error('disclosures.radonNoticeAcknowledged', 'Read and acknowledge the Missouri radon notice.');
-    if (terms.disclosures.leadPaintStatus === 'unselected' || (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && !['received', 'exempt', 'pending'].includes(terms.disclosures.leadPaintStatus))) error('disclosures.leadPaintStatus', 'For a pre-1978 home, select whether the signed lead packet has been received or is pending, or confirm a federal exemption.');
-    if (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The listing year indicates this home was built before 1978.');
-    if (terms.property.yearBuilt == null && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The year built is unknown; obtain the lead packet or document an exemption.');
+    if (terms.disclosures.leadPaintStatus === 'unselected' || (terms.property.propertyType !== 'land' && terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && !['received', 'exempt', 'pending'].includes(terms.disclosures.leadPaintStatus))) error('disclosures.leadPaintStatus', 'For a pre-1978 home, select whether the signed lead packet has been received or is pending, or confirm a federal exemption.');
+    if (terms.property.propertyType !== 'land' && terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The listing year indicates this home was built before 1978.');
+    if (terms.property.propertyType !== 'land' && terms.property.yearBuilt == null && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The year built is unknown; obtain the lead packet or document an exemption.');
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'unselected') error('disclosures.leadInspectionSelection', 'Select the buyer’s lead inspection option.');
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'other_period' && (!Number.isSafeInteger(terms.disclosures.leadInspectionDays) || terms.disclosures.leadInspectionDays < 1 || terms.disclosures.leadInspectionDays > 60)) error('disclosures.leadInspectionDays', 'Set an agreed inspection period from 1 through 60 days.');
     if (terms.disclosures.sellerReportsExistingLeases === null) error('disclosures.sellerReportsExistingLeases', 'The seller must answer the leases question on the listing.');

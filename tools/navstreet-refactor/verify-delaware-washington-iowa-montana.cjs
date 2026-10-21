@@ -57,7 +57,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const yearBuilt of [undefined,null,1900,1977,1978,2026])for(const leadBasedPaintApplies of [null,false,true])for(const known of [null,false,true])for(const exempt of [false,true]){
    const stateFacts={...facts(code)[slug],disclosureExemptionClaimed:exempt,radonTestsKnown:known,drugContaminationKnown:known,appurtenantWaterRightsKnown:known};
    const f={yearBuilt,leadBasedPaintApplies,[slug]:stateFacts};
-   const expected=[...(code!=='WA'?[slug+'-seller-disclosure']:[]),...((code==='DE'||code==='IA')&&!exempt||code==='MT'&&known!==false?[slug+'-statutory-packet']:[]),...(leadBasedPaintApplies===true||yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
+   const expected=[...(code!=='WA'&&code!=='IA'?[slug+'-seller-disclosure']:[]),...(code==='DE'&&!exempt||code==='MT'&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
    assert.deepEqual(normalize(gates.getListingUploadGateDocumentTypes(code,f,Date.now())),expected);
    assert.deepEqual(requiredTypes({yearBuilt,sellerStatements:{leadBasedPaintApplies,[slug]:stateFacts}}),expected);parity++;
   }
@@ -86,10 +86,18 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
    const result=pkg.createContractMilestones({version:v,effectiveAt});assert.equal(result.timeZone,zone);assert.equal(result.dueDiligenceEndsAt,'2026-11-02');
   }
   const reject=change=>{const v=structuredClone(version);change(v.terms);assert.throws(()=>pkg.validateSubmission({offer,version:v}));assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);};
-  reject(t=>t.delivery.electronicDeliveryAuthorized=false);reject(t=>t.delivery.timeZone='UTC');reject(t=>t.purchase.financingType='fha');reject(t=>t.deadlines.settlementDate='2099-02-31');reject(t=>t.disclosures.leadPaintStatus='pending');
+  reject(t=>t.delivery.electronicDeliveryAuthorized=false);reject(t=>t.delivery.timeZone='UTC');reject(t=>t.purchase.financingType='fha');reject(t=>t.deadlines.settlementDate='2099-02-31');reject(t=>{t.property.yearBuilt=1977;t.disclosures.leadPaintStatus='pending';});
   for(const key of ['propertyConditionStatus','statutoryPacketStatus']){
    const v=structuredClone(version);v.terms.disclosures[key]='pending';
-   if(code!=='WA'&&key==='propertyConditionStatus'||(code==='DE'||code==='IA')&&key==='statutoryPacketStatus')reject(t=>t.disclosures[key]='pending');else validate(v);
+   if(code==='IA') {
+    pkg.validateSubmission({offer,version:v});pkg.validateBeforeSigning({offer,version:v,signerRole:'buyer'});
+    assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,true);
+    assert.throws(()=>pkg.validateBeforeSigning({offer,version:v,signerRole:'seller'}));
+    assert.throws(()=>pkg.validateSubmission({offer,version:{...v,initiatedBy:'seller'}}));
+    assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'counteroffer'}).valid,false);
+    const adapter=load(path.join(project,'src/app/features/offers/states/iowa/display/iowa-offer-display.adapter.ts')).iowaOfferDisplayAdapter;
+    assert.equal(adapter.display(v.terms).signingBlockReason,undefined);assert(adapter.display(v.terms).sellerSigningBlockReason);
+   } else if(code!=='WA'&&key==='propertyConditionStatus'||code==='DE'&&key==='statutoryPacketStatus')reject(t=>t.disclosures[key]='pending');else validate(v);
   }
   reject(t=>t.disclosures.propertyConditionStatus='exempt');
   const exemption=structuredClone(version);exemption.terms.disclosures.disclosureExemptionClaimed=true;exemption.terms.disclosures.propertyConditionStatus='exempt';validate(exemption);assert(pkg.requiredListingDisclosures({offer,version:exemption}).includes(slug+'-seller-disclosure'));

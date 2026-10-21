@@ -91,6 +91,7 @@ export interface UtahOfferTerms {
       | 'waived'
       | 'other_period';
     readonly leadInspectionDays: number;
+    readonly sellerReportsHoa?: boolean | null;
     readonly hoaDocumentsStatus:
       | 'unselected'
       | 'received'

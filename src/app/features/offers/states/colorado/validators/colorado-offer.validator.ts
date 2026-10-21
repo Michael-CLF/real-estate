@@ -8,7 +8,7 @@ export class ColoradoOfferValidator implements StateOfferValidator<ColoradoOffer
  validate(t:ColoradoOfferTerms,buyers:OfferParty[],sellers:OfferParty[],context:OfferValidationContext): OfferValidationResult {
   const errors:OfferValidationIssue[]=[];
   const error=(fieldPath:string,message:string)=>errors.push({fieldPath,message,severity:'error'});
-  if(t.stateCode!=='CO'||t.contractType!=='navstreet_colorado_residential_2026'||t.property.state!=='CO'||!['single_family','townhome','condo'].includes(t.property.propertyType))error('form','Choose a Colorado resale home and the NavStreet Colorado agreement.');
+  if(t.stateCode!=='CO'||t.contractType!=='navstreet_colorado_residential_2026'||t.property.state!=='CO'||!['single_family','townhome','pud','condo'].includes(t.property.propertyType))error('form','Choose a Colorado resale home and the NavStreet Colorado agreement.');
   if(!t.legalDescription?.trim())error('legalDescription','The seller must enter the legal description in the listing.');
   for(const [side,parties] of [['buyers',buyers],['sellers',sellers]] as const){
    if(!parties.length)error(side,`Identify at least one ${side==='buyers'?'buyer':'seller'}.`);

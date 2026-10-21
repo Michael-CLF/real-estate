@@ -1,3 +1,8 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { isArizonaContractCompatible, type ArizonaOwnershipFacts } from './arizona-contract-selection';
+import { HttpsError as ContractScopeError } from 'firebase-functions/v2/https';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertArizonaListingDisclosures } from '../../arizona-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,12 +14,21 @@ import { sanitizeArizonaDraftTerms } from './arizona-draft-terms-sanitizer';
 import { validateArizonaSubmission } from './arizona-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createArizonaContractMilestones } from './arizona-contract-milestones';
-export const arizonaStateContractPackage: StateContractPackage<ArizonaOfferTermsDocument> = {
-  listingDisclosurePolicy: { assertReady: assertArizonaListingDisclosures },
+export const arizonaStateContractPackage: StateContractPackage<ArizonaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: (listing,version) => {
+    assertListingContractScope(arizonaStateContractPackage,listing);
+    const statements=listing['sellerStatements'] as Record<string,unknown>|undefined;
+    if (!isArizonaContractCompatible(version.terms.contractType,String(listing['propertyType']),statements?.['contractFacts'] as ArizonaOwnershipFacts | undefined)) throw new ContractScopeError('failed-precondition','The listing ownership now requires a different agreement. Discard an unsigned draft on its offer page and start again.');
+  },
+  listingDisclosurePolicy: { reviewedVersions: ({version}) => version.terms.documentVersions, assertReady: assertArizonaListingDisclosures },
   stateCode: 'AZ', offerCreationEnabled: true,
-  contractTypes: ['navstreet_arizona_residential_sale_2026'], contractTypeRequired: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
+  contractTypes: ['navstreet_arizona_residential_sale_2026','navstreet_arizona_condominium_resale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Phoenix',
   agreementTemplate: { stateCode: 'AZ', templateUid: ARIZONA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Arizona Residential Purchase and Sale Agreement', templateVersion: ARIZONA_DOCUMENT_RULES.version },
+  agreementTemplates: [{stateCode:'AZ',templateUid:ARIZONA_DOCUMENT_RULES.templateUid,templateName:'NavStreet Arizona Residential Purchase and Sale Agreement',templateVersion:ARIZONA_DOCUMENT_RULES.version},{stateCode:'AZ',templateUid:'navstreet-az-condominium-2026',templateName:'NavStreet Arizona Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-12'}],
+  getAgreementTemplate: terms => terms.contractType === 'navstreet_arizona_condominium_resale_2026' ? {stateCode:'AZ',templateUid:'navstreet-az-condominium-2026',templateName:'NavStreet Arizona Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-12'} : arizonaStateContractPackage.agreementTemplate,
   createInitialOfferTerms: input => createArizonaInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeArizonaDraftTerms(input),
   validateSubmission: input => validateArizonaSubmission(input),
@@ -44,4 +58,4 @@ export const arizonaStateContractPackage: StateContractPackage<ArizonaOfferTerms
     const { generateArizonaOfferPdf } = require('./arizona-offer-pdf.service') as typeof import('./arizona-offer-pdf.service');
     return generateArizonaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["arizona-association-documents"]});

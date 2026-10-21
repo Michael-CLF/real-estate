@@ -379,6 +379,11 @@
           </div>
         </section>
 
+        @if (currentListing.status === 'active') {
+        <section class="form-card"><div class="form-card__body">
+        <app-listing-contract-facts [group]="form.controls.contractFacts" [propertyType]="currentListing.propertyType" [requireAnswers]="requiresOwnershipFacts()" [requireUnitCount]="requiresUnitCount()" />
+        </div></section>
+        }
         @if (saveError()) {
         <div class="form-message form-message--error" role="alert">
           <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
@@ -395,11 +400,11 @@
         </div>
         }
 
-        @if (currentListing.state === 'CO' && currentListing.status === 'active') {
+        @if (currentListing.status === 'active') {
         <section class="form-card" aria-labelledby="colorado-legal-heading">
           <header class="form-card__header"><div class="form-card__heading">
             <h2 id="colorado-legal-heading">Recorded legal property description</h2>
-            <p>Copy the complete description from the deed or recorded property documents. Buyers need it to complete a Colorado offer.</p>
+            <p>Copy the complete description from the deed or recorded property documents. Buyers need it to complete the purchase agreement.</p>
           </div></header>
           <div class="form-card__body"><div class="form-field">
             <label for="co-legalDescription">Complete legal description</label>
@@ -410,6 +415,7 @@
             }
           </div></div>
         </section>
+        @if (currentListing.state === 'CO') {
         <section class="form-card" aria-labelledby="colorado-facts-heading" formGroupName="coloradoPropertyFacts">
           <header class="form-card__header"><div class="form-card__heading">
             <h2 id="colorado-facts-heading">Colorado property information</h2>
@@ -451,6 +457,7 @@
             }
           </div>
         </section>
+        }
         }
 
         <footer class="form-actions">

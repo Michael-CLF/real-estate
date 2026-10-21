@@ -1,3 +1,6 @@
+import { getEnabledStateOfferRegistration } from '../../offers/engine/state-offer-registry';
+import { ListingContractFactsComponent, createListingContractFactsForm, restoreListingContractFacts } from '../../../shared/components/listings/listing-contract-facts/listing-contract-facts.component';
+import type { ListingContractFacts } from '../../../core/domains/listings/models/listing.model';
 import { getStateListingFormFactory, getStateListingFormValidator, getStateListingFormRestorer, getStateListingEditFields } from '../../../core/domains/listings/state-packages/state-listing.registry';
 import type { ColoradoPropertyFacts } from '../../../core/domains/offers/state-contracts/colorado/models/colorado-contract-elections';
 import {
@@ -64,6 +67,7 @@ interface ListingEditHoaValue {
 }
 
 interface ListingEditFormValue {
+  contractFacts: ListingContractFacts;
   legalDescription: string;
   coloradoPropertyFacts: Record<string, string>;
   listPrice: number;
@@ -72,6 +76,7 @@ interface ListingEditFormValue {
 }
 
 interface UpdatePublishedListingChanges {
+  contractFacts?: ListingContractFacts;
   legalDescription?: string;
   coloradoPropertyFacts?: ColoradoPropertyFacts;
   listPrice: number;
@@ -103,7 +108,7 @@ interface UpdatePublishedListingResponse {
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    ListingPhotoEditorComponent
+    ListingPhotoEditorComponent, ListingContractFactsComponent
   ],
   templateUrl:
     './listing-edit.component.html',
@@ -216,10 +221,13 @@ export class ListingEditComponent
       }
     ];
 
+  requiresOwnershipFacts(): boolean {const listing=this.listing();const registration=getEnabledStateOfferRegistration(listing?.state ?? '');return registration?.requireOwnershipFacts === true && registration.supportedPropertyTypes.includes(listing?.propertyType ?? '');}
+  requiresUnitCount(): boolean {return Boolean(getEnabledStateOfferRegistration(this.listing()?.state ?? '')?.maximumDwellingUnits);}
   protected readonly coloradoFields = getStateListingEditFields('coloradoPropertyFacts');
 
   protected readonly form =
     this.fb.nonNullable.group({
+      contractFacts: createListingContractFactsForm(this.fb),
       legalDescription: ['', Validators.maxLength(5000)],
       coloradoPropertyFacts: getStateListingFormFactory('coloradoPropertyFacts')(this.fb),
       listPrice: [
@@ -809,6 +817,7 @@ protected async savePhotoChanges():
   ): void {
     this.form.patchValue(
       {
+        contractFacts: restoreListingContractFacts(listing.sellerStatements?.contractFacts, listing.propertyType),
         legalDescription: listing.legalDescription ?? '',
         coloradoPropertyFacts: getStateListingFormRestorer('coloradoPropertyFacts')(listing.coloradoPropertyFacts),
         listPrice:
@@ -894,6 +903,7 @@ protected async savePhotoChanges():
       formValue.hoa.hasHoa;
 
     return {
+      ...(this.listing()?.status === 'active' ? {contractFacts:formValue.contractFacts,legalDescription:formValue.legalDescription.trim()} : {}),
       ...(this.form.controls.coloradoPropertyFacts.enabled ? {
         legalDescription: formValue.legalDescription.trim(),
         coloradoPropertyFacts: Object.fromEntries(Object.entries(formValue.coloradoPropertyFacts).map(([key, value]) => [key, value.trim()])) as unknown as ColoradoPropertyFacts,
@@ -937,6 +947,7 @@ protected async savePhotoChanges():
 
         return {
           ...currentListing,
+          ...(currentListing.status === 'active' ? {legalDescription:formValue.legalDescription.trim(),sellerStatements:{...currentListing.sellerStatements,contractFacts:{...formValue.contractFacts}}} : {}),
           ...(this.form.controls.coloradoPropertyFacts.enabled ? { legalDescription: formValue.legalDescription.trim(), coloradoPropertyFacts: { ...currentListing.coloradoPropertyFacts, ...formValue.coloradoPropertyFacts } as ColoradoPropertyFacts } : {}),
 
           listPrice:

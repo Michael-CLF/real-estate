@@ -1,13 +1,13 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function alabamaRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
   const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
-  const year = listing['yearBuilt'];
   return [
  ...( (statements?.['alabama'] as Record<string,unknown> | undefined)?.['hiddenHealthSafetyKnown'] !== false ? ['alabama-statutory-packet'] : []),
     
-    ...(statements?.['leadBasedPaintApplies'] === true || typeof year !== 'number' || year < 1978 ? ['lead-based-paint'] : [])];
+    ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertAlabamaListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {

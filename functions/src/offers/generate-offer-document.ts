@@ -215,10 +215,12 @@ export const generateOfferDocument = onCall<
         const readsCompletedAt = Date.now();
         const generatedAt = new Date();
 
+        const agreementTemplate = stateContractPackage.getAgreementTemplate?.(version.terms as StateContractTerms) ?? stateContractPackage.agreementTemplate;
+
         const documentTitle = getDocumentTitle(
             documentType,
             version.versionNumber,
-            stateContractPackage.agreementTemplate.templateName,
+            agreementTemplate.templateName,
             stateContractPackage.stateCode
         );
 
@@ -293,13 +295,13 @@ export const generateOfferDocument = onCall<
 
         const template = {
             stateCode:
-                stateContractPackage.agreementTemplate.stateCode,
+                agreementTemplate.stateCode,
             templateUid:
-                stateContractPackage.agreementTemplate.templateUid,
+                agreementTemplate.templateUid,
             templateName:
-                stateContractPackage.agreementTemplate.templateName,
+                agreementTemplate.templateName,
             templateVersion:
-                stateContractPackage.agreementTemplate.templateVersion,
+                agreementTemplate.templateVersion,
             effectiveDate:
                 generatedAt.toISOString().slice(0, 10),
             releaseStatus: 'approved',
@@ -463,7 +465,8 @@ export const generateOfferDocument = onCall<
                                 }
                                 : {}),
 
-                            lastActivityAt: now,
+                            draftLastActivityAt: now,
+              lastActivityAt: now,
                             updatedAt: now,
                         }
                     );

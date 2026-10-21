@@ -1,3 +1,5 @@
+import {selectArizonaContract} from '../../../../../core/domains/offers/state-contracts/arizona/arizona-contract-selection';
+import {pinArizonaReviewedDocumentVersions} from '../services/arizona-reviewed-document-versions';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveArizonaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/arizona/arizona-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -299,9 +301,6 @@ export class ArizonaOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This Arizona agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
-      }
 
       resolveArizonaPropertyTimeZone(createPropertySnapshot(listing).county);
       this.listing.set(listing);
@@ -345,7 +344,7 @@ export class ArizonaOfferEntryComponent
         await this.loadOfferSession(
           this.requestedOfferUid,
           this.requestedOfferVersionUid,
-          'navstreet_arizona_residential_sale_2026'
+          undefined
         );
       } else {
         await this.resumeExistingDraft();
@@ -380,7 +379,7 @@ export class ArizonaOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_arizona_residential_sale_2026',
+        selectArizonaContract(String(this.listing()!.propertyType),this.listing()!.sellerStatements?.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );
@@ -395,6 +394,14 @@ export class ArizonaOfferEntryComponent
   }
 
 
+  private lastReviewedTerms:ArizonaOfferTerms|null=null;
+  private prepareDraftChange(change:ArizonaOfferDraftChange):ArizonaOfferDraftChange {
+    const current=this.lastReviewedTerms ?? this.currentVersion()?.terms;
+    if(!current)return change;
+    const terms=pinArizonaReviewedDocumentVersions(current,change.terms,this.listingDisclosures());
+    this.lastReviewedTerms=terms;
+    return {...change,terms};
+  }
   protected onDraftChanged(
     change: ArizonaOfferDraftChange
   ): void {
@@ -405,7 +412,7 @@ export class ArizonaOfferEntryComponent
       return;
     }
 
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     void this.flushDraftSave().catch(() => undefined);
   }
 
@@ -455,7 +462,7 @@ export class ArizonaOfferEntryComponent
     const offer = this.currentOffer();
     const version = this.currentVersion();
     if (!offer || !version || this.busy()) return;
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     this.submitting.set(true);
     this.errorMessage.set('');
     try {
@@ -487,6 +494,12 @@ export class ArizonaOfferEntryComponent
       existingOffer.Uid,
       existingOffer.currentVersionUid
     );
+    const facts=this.listing()?.sellerStatements?.contractFacts;
+    if(facts && [facts.isCondominium,facts.isDeveloperSale,facts.isLeasehold].every(v=>typeof v==='boolean')) {
+      let expected:string|undefined;
+      try{expected=selectArizonaContract(String(this.listing()!.propertyType),facts);}catch{expected=undefined;}
+      if(expected!==this.currentVersion()?.terms.contractType) await this.router.navigate(['/offers',existingOffer.Uid],{queryParams:{draftAgreementChanged:'true'}});
+    }
   }
 
 
@@ -503,6 +516,7 @@ export class ArizonaOfferEntryComponent
     this.workflow.assertCurrentEditableDraft(offer, version, this.listingUid);
     this.currentOffer.set(offer);
     this.currentVersion.set(version);
+    this.lastReviewedTerms=version.terms;
     this.property.set(
       version.terms.property
     );

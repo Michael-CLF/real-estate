@@ -12,6 +12,7 @@ export function createIndianaInitialOfferTerms(input: CreateInitialOfferTermsInp
   const construction = input.listingData['construction'] as Record<string, unknown> | undefined;
   if (construction?.['newConstruction'] === true) throw new Error('New-construction and developer sales require a separate agreement.');
   return {
+    documentVersions: {},
     stateCode: 'IN', contractType: 'navstreet_indiana_residential_sale_2026',
     property: { ...input.property, state: 'IN' }, legalDescription: input.property.legalDescription ?? '',
     purchase: { purchasePriceInCents: input.property.listPriceInCents, hasEarnestMoney: null, earnestMoneyInCents: 0, additionalEarnestMoneyInCents: 0, additionalEarnestMoneyDueDays: 10, earnestMoneyHolder: '', earnestMoneyDueDays: 3, financingType: 'unselected', loanAmountInCents: 0, loanApplicationDays: 5, loanApprovalDays: 30, loanTermYears: 30, sellerConcessionsInCents: 0 },

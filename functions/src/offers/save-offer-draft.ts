@@ -210,6 +210,7 @@ export const saveOfferDraft =
           transaction.update(
             offerReference,
             {
+              draftLastActivityAt: now,
               lastActivityAt: now,
               updatedAt: now,
 

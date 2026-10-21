@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
 import { createOklahomaContractMilestones } from './oklahoma-contract-milestones';
@@ -7,11 +10,14 @@ import type { OklahomaOfferTermsDocument } from './oklahoma-offer-terms.document
 import { validateOklahomaSubmission } from './oklahoma-submission-validator';
 import { OREC_RESIDENTIAL_SALE_TEMPLATE } from './contracts/residential-sale/orec-residential-sale-template';
 
-export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTermsDocument> = {
+export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(oklahomaStateContractPackage, listing),
   stateCode: 'OK',
   // Keep new public offers gated until selected OREC supplements and the
   // Oklahoma seller-disclosure packet are appended and lifecycle-tested.
   offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
   contractTypes: [OREC_RESIDENTIAL_SALE_TEMPLATE.contractType],
   contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
@@ -36,4 +42,4 @@ export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTer
   validateSubmission: input => validateOklahomaSubmission(input),
   sanitizeDraftTerms: input => sanitizeOklahomaDraftTerms(input),
   createContractMilestones: input => createOklahomaContractMilestones(input),
-};
+}, {values:{'disclosures.leadBasedPaintStatus':'built_1978_or_later'},nonHousingValues:{'disclosures.leadBasedPaintStatus':'not_residential'},hiddenFields:['disclosures.leadBasedPaintStatus']}), {"documentTypes":[],"auditedNoReceiptQuestion":true});

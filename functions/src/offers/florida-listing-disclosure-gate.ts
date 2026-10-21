@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
@@ -11,8 +12,8 @@ export function floridaRequiredDisclosureTypes(
     'florida-flood-disclosure',
     ...(statements?.['ownersAssociationApplies'] === true
       ? ['florida-hoa-disclosure-summary'] : []),
-    ...(statements?.['leadBasedPaintApplies'] === true ||
-      (typeof yearBuilt === 'number' && yearBuilt < 1978 && statements?.['leadBasedPaintApplies'] !== false)
+    ...(!isFederalLeadExcluded(listing) && (statements?.['leadBasedPaintApplies'] === true ||
+      (typeof yearBuilt === 'number' && yearBuilt < 1978 && statements?.['leadBasedPaintApplies'] !== false))
       ? ['lead-based-paint'] : []),
   ];
 }

@@ -1,3 +1,4 @@
+import { isMinnesotaContractCompatible } from '../../../../../core/domains/offers/state-contracts/minnesota/minnesota-contract-selection';
 import { minnesotaAssociationPacketProblem } from '../../../../../core/domains/offers/state-contracts/minnesota/minnesota-association-packet';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +10,9 @@ export class MinnesotaOfferValidator implements StateOfferValidator<MinnesotaOff
   validate(terms: MinnesotaOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'MN' || terms.contractType !== 'navstreet_minnesota_residential_sale_2026') error('form', 'Select the NavStreet Minnesota residential agreement.');
+    if (terms.stateCode !== 'MN' || !['navstreet_minnesota_residential_sale_2026','navstreet_minnesota_condominium_resale_2026'].includes(terms.contractType)) error('form', 'Select the NavStreet Minnesota residential agreement.');
     if (terms.property.state !== 'MN') error('property.state', 'The listing must be in Minnesota.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (!isMinnesotaContractCompatible(terms.contractType,terms.property.propertyType,terms.property.contractFacts)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {
@@ -21,6 +22,12 @@ export class MinnesotaOfferValidator implements StateOfferValidator<MinnesotaOff
       });
     }
     if (!terms.legalDescription.trim()) error('legalDescription', 'The seller must provide the recorded legal description on the listing.');
+    if(terms.contractType === 'navstreet_minnesota_condominium_resale_2026') {
+      const c=terms.condominium;
+      for(const key of ['projectName','unitDesignation','commonElements','parkingStorage'] as const) if(!c?.[key]?.trim()) error('condominium.'+key,'Complete this condominium term.');
+      if(c?.rightsAcknowledged!==true) error('condominium.rightsAcknowledged','Acknowledge the condominium protections.');
+      if(terms.disclosures.hoaDocumentsStatus!=='received') error('disclosures.hoaDocumentsStatus','Review the complete condominium resale packet before submitting.');
+    }
     const p = terms.purchase;
     if (!money(p.purchasePriceInCents, true)) error('purchase.purchasePriceInCents', 'Enter a price above $0.');
     if (typeof p.hasEarnestMoney !== 'boolean') error('purchase.hasEarnestMoney', 'Choose whether to offer an initial deposit.');

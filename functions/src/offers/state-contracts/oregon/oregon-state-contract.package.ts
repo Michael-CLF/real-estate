@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertOregonListingDisclosures } from '../../oregon-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeOregonDraftTerms } from './oregon-draft-terms-sanitizer';
 import { validateOregonSubmission } from './oregon-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createOregonContractMilestones } from './oregon-contract-milestones';
-export const oregonStateContractPackage: StateContractPackage<OregonOfferTermsDocument> = {
+export const oregonStateContractPackage: StateContractPackage<OregonOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(oregonStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertOregonListingDisclosures },
   stateCode: 'OR', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_oregon_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Los_Angeles',
   agreementTemplate: { stateCode: 'OR', templateUid: OREGON_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Oregon Residential Purchase and Sale Agreement', templateVersion: OREGON_DOCUMENT_RULES.version },
@@ -44,4 +50,4 @@ export const oregonStateContractPackage: StateContractPackage<OregonOfferTermsDo
     const { generateOregonOfferPdf } = require('./oregon-offer-pdf.service') as typeof import('./oregon-offer-pdf.service');
     return generateOregonOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["oregon-association-documents"]});

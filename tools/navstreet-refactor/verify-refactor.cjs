@@ -4,7 +4,18 @@ const { spawnSync } = require('node:child_process');
 
 const project = path.resolve(process.argv[2] || '.');
 const checks = [
+  'verify-hoa-applicability.cjs',
+  'verify-federal-lead-applicability.cjs',
+  'verify-federal-lead-listing.cjs',
+  'verify-federal-lead-submission.cjs',
   'verify-offer-loading.cjs',
+  'verify-indiana-offer-actions.cjs',
+  'verify-listing-contract-facts.cjs',
+  'verify-automatic-condominium-ownership.cjs',
+  'verify-missouri-contract-coverage.cjs',
+  'verify-condominium-minnesota-arizona.cjs',
+  'verify-vacant-land-listing.cjs',
+  'verify-offer-draft-discard.cjs',
   'verify-offer-attachment-save.cjs',
   'verify-offer-initial-draft.cjs',
   'verify-offer-disclosure-resume.cjs',
@@ -26,7 +37,9 @@ const checks = [
   'verify-arizona-idaho.cjs',
   'verify-oregon-missouri-nebraska-new-hampshire.cjs',
   'verify-alabama-indiana-kansas-ohio.cjs',
+  'verify-seller-disclosure-status.cjs',
   'verify-delaware-washington-iowa-montana.cjs',
+  'verify-maryland-new-mexico-south-dakota-wyoming.cjs',
   'verify-minnesota-michigan.cjs',
   'verify-marketplace-status-search.cjs',
   'verify-offer-display-registry.cjs',
@@ -64,6 +77,8 @@ for (const check of checks) {
   }
 }
 
+// Arizona/Idaho fixtures write samples alongside the project.
+fs.mkdirSync(path.resolve(project, '../deliverables'), { recursive: true });
 const functionsProject = path.join(project, 'functions');
 let compiler;
 try {

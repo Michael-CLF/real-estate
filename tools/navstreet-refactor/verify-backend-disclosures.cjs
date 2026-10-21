@@ -11,6 +11,7 @@ function load(source, reader) {
  vm.runInNewContext(compile(source),{module,exports:module.exports,require: name => {
   if(name==='firebase-functions/v2/https') return {HttpsError};
   if(name==='./listing-disclosure-gate-reader') return reader;
+  if(name==='./state-contracts/federal-lead-policy')return require(path.join(project,'functions/lib/offers/state-contracts/federal-lead-policy.js'));
   throw new Error('Unexpected dependency '+name);
  }});
  return module.exports;

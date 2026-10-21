@@ -161,12 +161,13 @@
       </p>
 
       <h1>
-        Let’s try that again
+        Continue identity verification
       </h1>
 
       <p class="intro">
-        Stripe could not complete the verification. No payment
-        has been collected, and you can safely try again.
+        We have not received a completed verification yet. You can
+        return to Stripe to continue. This page will update automatically
+        when your verification is confirmed.
       </p>
 
       @if (errorMessage()) {
@@ -190,7 +191,7 @@
           </span>
         } @else {
           <span>
-            Try Verification Again
+            Continue Verification
           </span>
         }
       </button>

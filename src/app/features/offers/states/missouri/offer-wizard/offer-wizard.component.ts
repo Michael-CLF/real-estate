@@ -52,6 +52,7 @@ import {
 // A seller counteroffer may negotiate price and concessions, but cannot
 // rewrite the buyer's funding, deposit promises, or receipt statements.
 const BUYER_OWNED_FIELDS = new Set([
+  'specialProperty.projectName','specialProperty.unitDesignation','specialProperty.commonElements','specialProperty.parkingStorage','specialProperty.resaleCertificateStatus','specialProperty.certificateReceivedDate','specialProperty.condominiumRightsAcknowledged','specialProperty.intendedUse','specialProperty.surveyRequired','specialProperty.landReviewAcknowledged','specialProperty.tenantDocumentsStatus','specialProperty.tenancyTransferAcknowledged',
   'purchase.earnestMoneyInCents',
   'purchase.additionalEarnestMoneyInCents',
   'purchase.earnestMoneyHolder',
@@ -239,8 +240,10 @@ export class OfferWizardComponent {
         [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'missouri-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
         [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'missouri-association-documents', 'seller-provided association resale packet'],
       ] as const) {
+        if (terms.contractType === 'navstreet_missouri_condominium_resale_2026' && documentType === 'missouri-association-documents') continue;
         if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
       }
+      if (terms.specialProperty?.resaleCertificateStatus === 'received' && !attached.has('missouri-condominium-resale-certificate')) missing.push({fieldPath:'specialProperty.resaleCertificateStatus',severity:'error',message:'The recorded condominium receipt requires the seller-uploaded resale certificate.'});
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -254,7 +257,7 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(initialTerms);
+        this.terms.set(MISSOURI_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
         this.initialTermsApplied = true;
       }
     });

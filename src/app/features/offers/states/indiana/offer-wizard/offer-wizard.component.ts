@@ -154,7 +154,7 @@ export class OfferWizardComponent {
       return 'Applicable federal lead disclosures must be uploaded and reviewed before submitting and signing this offer.';
     }
     return terms.disclosures.propertyConditionStatus === 'pending'
-      ? 'You may send this offer while the Indiana condition disclosure is pending. The seller must deliver it or supported exemption evidence before acceptance. After delivery, create a replacement offer acknowledging receipt; submitted receipt answers cannot be edited.'
+      ? 'Review the uploaded Indiana condition disclosure or supported exception evidence before submitting this offer.'
       : null;
   });
 
@@ -236,7 +236,7 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(initialTerms);
+        this.terms.set(INDIANA_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
         this.initialTermsApplied = true;
       }
     });

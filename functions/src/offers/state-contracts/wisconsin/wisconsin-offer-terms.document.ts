@@ -54,6 +54,7 @@ export interface WisconsinOfferTermsDocument {
     readonly leadPaintStatus: 'unselected' | 'received' | 'built_1978_or_later' | 'exempt';
     readonly leadInspectionSelection: 'unselected' | 'ten_days' | 'waived' | 'other_period';
     readonly leadInspectionDays: number;
+    readonly sellerReportsHoa?: boolean | null;
     readonly hoaDocumentsStatus: 'unselected' | 'received' | 'pending' | 'not_applicable';
     readonly sellerReportsExistingLeases: boolean | null;
     readonly leaseStatementAcknowledged: boolean | null;

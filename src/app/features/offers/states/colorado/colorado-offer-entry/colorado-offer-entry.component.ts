@@ -297,7 +297,7 @@ export class ColoradoOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'condo'].includes(String(listing.propertyType))) {
+      if (!['single_family', 'townhome', 'pud', 'condo'].includes(String(listing.propertyType))) {
         throw new Error('This Colorado agreement supports residential resales. Vacant land, income property and manufactured homes need their own agreement.');
       }
 

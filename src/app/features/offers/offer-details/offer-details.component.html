@@ -337,16 +337,22 @@
           <p class="action-card__note" role="alert">{{ signingBlockReason(version) }}</p>
           }
 
-          @if (access()?.canSign && !signingBlockReason(version)) {
-          @if (agreementDocument()) {
-          <button class="button button--primary" type="button" [disabled]="processing()" (click)="openSigningPanel()">
+          @if (access()?.canAccept && access()?.canSign) {
+          <button class="button button--primary" type="button"
+            [disabled]="processing() || preparingAgreement() || !agreementDocument() || !!signingBlockReason(version)"
+            (click)="openSigningPanel()">
+            Accept offer
+          </button>
+          <p class="action-card__note">Acceptance requires your electronic signature on this agreement.</p>
+          } @else if (access()?.canSign && !signingBlockReason(version)) {
+          <button class="button button--primary" type="button"
+            [disabled]="processing() || preparingAgreement() || !agreementDocument()"
+            (click)="openSigningPanel()">
             {{ signButtonLabel() }}
           </button>
-          } @else {
-          <p class="action-card__note">
-            Prepare and review the agreement PDF before signing.
-          </p>
           }
+          @if (access()?.canSign && !agreementDocument() && !signingBlockReason(version)) {
+          <p class="action-card__note">Prepare and review the agreement PDF before signing.</p>
           }
 
           @if (access()?.canCounter) {
@@ -363,7 +369,12 @@
           </button>
           }
 
-          @if (access()?.canWithdraw) {
+          @if (canDiscardUnsignedDraft()) {
+          @if (draftAgreementChanged()) {<p class="action-card__note" role="status">The listing ownership now requires a different agreement. Discard this unsigned draft, then start a new offer from the listing.</p>}
+          <button class="button button--text-danger" type="button" [disabled]="processing()" (click)="discardUnsignedDraft()">Discard draft</button>
+          <p class="action-card__note">Unfinished unsigned offers are deleted after 7 days of inactivity.</p>
+          }
+          @if (access()?.canWithdraw && !canDiscardUnsignedDraft()) {
           <button class="button button--text-danger" type="button" [disabled]="processing()" (click)="withdrawOffer()">
             {{ offer.status === 'draft' ? 'Discard Draft' : 'Withdraw Offer' }}
           </button>

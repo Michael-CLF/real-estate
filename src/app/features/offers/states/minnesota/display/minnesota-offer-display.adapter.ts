@@ -1,10 +1,11 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import type { MinnesotaOfferTerms } from '../../../../../core/domains/offers/state-contracts/minnesota/models/minnesota-offer-terms.model';
 import type { StateOfferDisplayAdapter } from '../../../engine/display/state-offer-display.adapter';
 export const minnesotaOfferDisplayAdapter: StateOfferDisplayAdapter<MinnesotaOfferTerms> = {
   stateCode: 'MN',
   display(terms) {
     return {
-      agreementTitle: 'NavStreet Minnesota Residential Purchase and Sale Agreement',
+      agreementTitle: terms.contractType === 'navstreet_minnesota_condominium_resale_2026' ? 'NavStreet Minnesota Condominium Resale Purchase and Sale Agreement' : 'NavStreet Minnesota Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet Minnesota agreement PDF',
       purchasePriceInCents: terms.purchase.purchasePriceInCents,
       fundingLabel: terms.purchase.financingType === 'cash' ? 'Cash' : `${terms.purchase.financingType.toUpperCase()} loan`,
@@ -16,7 +17,7 @@ export const minnesotaOfferDisplayAdapter: StateOfferDisplayAdapter<MinnesotaOff
       possessionLabel: 'Vacant at closing',
       signingBlockReason: terms.disclosures.propertyConditionStatus !== 'received' || terms.disclosures.statutoryPacketStatus !== 'received' ||
         (terms.disclosures.sellerReportsHoa === true && terms.disclosures.hoaDocumentsStatus !== 'received') ||
-        terms.disclosures.leadPaintStatus === 'pending'
+        (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'
         : undefined,
     };

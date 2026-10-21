@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../../../core/domains/offers/federal-lead-policy';
 import type { ListingDisclosureDocument } from '../../../core/domains/disclosures/models/listing-disclosure-document.model';
 import { texasListingDocumentPolicy } from '../states/texas/texas-listing-document-policy';
 
@@ -13,6 +14,7 @@ export function selectOfferListingDocuments(
   sectionId: string, terms: unknown, documents: readonly ListingDisclosureDocument[],
 ): readonly ListingDisclosureDocument[] {
   return documents.filter(document => {
+    if(document.documentType === 'lead-based-paint' && isFederalLeadExcluded((terms as {property?:{yearBuilt?:unknown;propertyType?:unknown}})?.property ?? {}))return false;
     const rules = POLICIES.map(policy => policy(document.documentType)).filter(Boolean);
     if (rules.length > 1) throw new Error(`More than one listing document policy owns ${document.documentType}.`);
     const rule = rules[0] ?? { sectionId: 'disclosures' };

@@ -1,3 +1,4 @@
+import { isArizonaContractCompatible } from './arizona-contract-selection';
 import { resolveArizonaPropertyTimeZone } from './arizona-property-time-zone';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -7,8 +8,14 @@ export function validateArizonaSubmission(input: ValidateStateSubmissionInput<Ar
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'AZ' && version.stateCode === 'AZ' && t.stateCode === 'AZ', 'The offer must belong to Arizona.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
-  requireValue(t.contractType === 'navstreet_arizona_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'AZ', 'The contract or property snapshot is invalid.');
-  requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Arizona agreement.');
+  requireValue(['navstreet_arizona_residential_sale_2026','navstreet_arizona_condominium_resale_2026'].includes(t.contractType) && t.property.listingUid === offer.listingUid && t.property.state === 'AZ', 'The contract or property snapshot is invalid.');
+  requireValue(isArizonaContractCompatible(t.contractType,t.property.propertyType,t.property.contractFacts), 'Condominium, vacant land and other property types need a separate Arizona agreement.');
+  if(t.contractType === 'navstreet_arizona_condominium_resale_2026') {
+    const c=t.condominium;
+    requireValue(c && c.projectName.trim() && c.unitDesignation.trim() && c.commonElements.trim() && c.parkingStorage.trim() && c.rightsAcknowledged===true,'Complete the condominium identification, rights and acknowledgement.');
+    requireValue(t.disclosures.sellerReportsHoa===true && t.disclosures.hoaDocumentsStatus==='received','Review the complete condominium resale packet before submitting.');
+    requireValue(Boolean(t.documentVersions?.['arizona-association-documents']),'Open and acknowledge the uploaded condominium packet version.');
+  }
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');

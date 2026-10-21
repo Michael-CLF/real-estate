@@ -3,7 +3,7 @@ import { updatePath } from '../../../engine/offer-term-path';
 import type { MinnesotaOfferTerms } from '../../../../../core/domains/offers/state-contracts/minnesota/models/minnesota-offer-terms.model';
 
 const FORBIDDEN = new Set(['__proto__', 'constructor', 'prototype']);
-const ALLOWED_ROOTS = new Set(['purchase', 'deadlines', 'conditions', 'propertyItems', 'settlement', 'disclosures', 'additionalTerms', 'delivery']);
+const ALLOWED_ROOTS = new Set(['purchase', 'deadlines', 'conditions', 'propertyItems', 'settlement', 'disclosures', 'additionalTerms', 'delivery', 'condominium']);
 
 export function updateMinnesotaOfferTerms(terms: MinnesotaOfferTerms, fieldPath: string, value: unknown): MinnesotaOfferTerms {
   const segments = fieldPath.split('.');

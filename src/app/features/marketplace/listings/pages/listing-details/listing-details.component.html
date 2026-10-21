@@ -267,7 +267,9 @@
             Make an offer
           </button>
           <p id="offer-disclosure-requirements" class="listing-details__offer-note" role="status">
-            @if (authenticationIsLoading() || (isAuthenticated() && disclosuresAreLoading())) {
+            @if (contractCoverageMessage(listing)) {
+              {{ contractCoverageMessage(listing) }}
+            } @else if (authenticationIsLoading() || (isAuthenticated() && disclosuresAreLoading())) {
               Checking required seller disclosures…
             } @else if (!isAuthenticated()) {
               Sign in to check seller disclosures and make an offer.

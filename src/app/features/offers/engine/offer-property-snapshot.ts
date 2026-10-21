@@ -33,6 +33,8 @@ export function createOfferPropertySnapshot(
     county:
       listing.address.county ?? '',
 
+    ...(listing.sellerStatements?.contractFacts ? {contractFacts:{...listing.sellerStatements.contractFacts}} : {}),
+    ...(listing.legalDescription ? {legalDescription:listing.legalDescription} : {}),
     propertyType:
       String(listing.propertyType),
 

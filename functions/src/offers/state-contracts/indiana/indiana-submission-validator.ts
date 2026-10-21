@@ -34,7 +34,7 @@ export function validateIndianaSubmission(input: ValidateStateSubmissionInput<In
   requireValue(t.settlement.possession === 'at_recording' && t.settlement.specialAssessmentPayer !== 'unselected', 'Complete possession and special assessment allocation.');
   requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && t.settlement.closingAgentName.trim() && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete title insurance, closing agent and title evidence period.');
   requireValue(t.disclosures.sellerReportsHoa !== true || t.settlement.hoaTransferFeePayer !== 'unselected', 'Allocate association transfer fees.');
-  requireValue(['received','pending','exempt'].includes(t.disclosures.propertyConditionStatus), 'Select whether you received the seller condition statement.');
+  requireValue(['received','exempt'].includes(t.disclosures.propertyConditionStatus), 'Review the uploaded Indiana condition disclosure or supported exception evidence before continuing.');
   requireValue(['received','pending'].includes(t.disclosures.statutoryPacketStatus), 'Review the seller-signed Indiana property-specific statutory disclosure packet before submitting. Ask the seller to upload it if it is missing.');
   requireValue(t.disclosures.propertyConditionStatus !== 'exempt' || t.disclosures.disclosureExemptionClaimed, 'Review the required Indiana disclosure or supported exemption evidence.');
   requireValue(typeof t.disclosures.sellerReportsHoa === 'boolean', 'The listing must state whether an HOA applies.');

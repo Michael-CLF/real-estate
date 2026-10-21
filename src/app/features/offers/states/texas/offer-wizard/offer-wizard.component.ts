@@ -187,7 +187,7 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(initialTerms);
+        this.terms.set(TEXAS_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
         this.initialTermsApplied = true;
       }
     });

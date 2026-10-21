@@ -327,8 +327,11 @@
           </strong>
           Upload the flood disclosure, and provide a seller condition
           statement when applicable. If you reported an HOA, also upload
-          the HOA summary; if you reported that lead disclosures apply,
-          upload the lead packet. Buyers cannot start a NavStreet offer
+          the HOA summary.
+          @if (requires('leadBasedPaintApplies')) {
+          For covered pre-1978 housing, upload the applicable lead packet.
+          }
+          Buyers cannot start a NavStreet offer
           until the required documents are uploaded. You can upload the
           documents from Manage listing → Property Disclosures after
           publication.

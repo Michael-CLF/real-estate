@@ -270,6 +270,11 @@ export const signOffer =
               userUid
             );
 
+          if (stateContractPackage.assertListingContractCompatible) {
+            const scopeListing = await transaction.get(adminFirestore.collection('listings').doc(offer.listingUid));
+            if (!scopeListing.exists) throw new HttpsError('not-found','The listing needed to verify the agreement is missing.');
+            stateContractPackage.assertListingContractCompatible(scopeListing.data() ?? {}, version);
+          }
           stateContractPackage.validateBeforeSigning?.({ offer, version, signerRole: signer.role });
 
           verifySigningOrder(

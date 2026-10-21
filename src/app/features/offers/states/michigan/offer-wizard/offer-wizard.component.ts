@@ -254,7 +254,7 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(initialTerms);
+        this.terms.set(MICHIGAN_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
         this.initialTermsApplied = true;
       }
     });

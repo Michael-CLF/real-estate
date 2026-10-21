@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertColoradoListingDisclosures } from '../../colorado-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -10,9 +13,12 @@ import { sanitizeColoradoDraftTerms } from './colorado-draft-terms-sanitizer';
 import { validateColoradoSubmission } from './colorado-submission-validator';
 import { createColoradoContractMilestones } from './colorado-contract-milestones';
 
-export const coloradoStateContractPackage: StateContractPackage<ColoradoOfferTermsDocument> = {
+export const coloradoStateContractPackage: StateContractPackage<ColoradoOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(coloradoStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertColoradoListingDisclosures, assertCounterofferReady: assertColoradoListingDisclosures, counterofferMissingListingMessage: 'The Colorado listing could not be found.' },
   stateCode: 'CO', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
   contractTypes: ['navstreet_colorado_residential_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Denver',
   agreementTemplate: {
@@ -51,4 +57,4 @@ export const coloradoStateContractPackage: StateContractPackage<ColoradoOfferTer
     const { generateColoradoOfferPdf } = require('./colorado-offer-pdf.service') as typeof import('./colorado-offer-pdf.service');
     return generateColoradoOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'not_applicable','disclosures.leadInspectionChoice':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionChoice','disclosures.leadInspectionDays','deadlines.leadDisclosure','deadlines.leadTermination']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.associationStatus","documentTypes":["colorado-association-documents"]});

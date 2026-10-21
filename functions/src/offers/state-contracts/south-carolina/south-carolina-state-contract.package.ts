@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -8,14 +11,16 @@ import { sanitizeSouthCarolinaDraftTerms } from './south-carolina-draft-terms-sa
 import { validateSouthCarolinaSubmission } from './south-carolina-submission-validator';
 import { createSouthCarolinaContractMilestones } from './south-carolina-contract-milestones';
 import { SOUTH_CAROLINA_DOCUMENT_RULES } from './south-carolina-document-rules';
-export const southCarolinaStateContractPackage: StateContractPackage<SouthCarolinaOfferTermsDocument> = {
+export const southCarolinaStateContractPackage: StateContractPackage<SouthCarolinaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(southCarolinaStateContractPackage, listing),
   listingDisclosurePolicy: {
     readVersions: readSouthCarolinaListingDisclosures,
     initialListingData: async (transaction, reference, listing) => ({ southCarolinaDocuments: await readSouthCarolinaListingDisclosures(transaction, reference, listing) }),
     reviewedVersions: ({ version }) => version.terms.documentVersions,
     supportsUnsignedRevision: true,
   },
-  stateCode:'SC', offerCreationEnabled:true, contractTypes:['navstreet_south_carolina_residential_sale_2026'],contractTypeRequired:true,
+  stateCode:'SC', offerCreationEnabled:true,requireOwnershipFacts:true,
+  supportedPropertyTypes:['single_family','townhome','pud','condo'], contractTypes:['navstreet_south_carolina_residential_sale_2026'],contractTypeRequired:true,
   defaultTimeZone:'America/New_York', agreementTemplate:{stateCode:'SC',templateUid:SOUTH_CAROLINA_DOCUMENT_RULES.templateUid,templateName:'NavStreet South Carolina Residential Purchase and Sale Agreement',templateVersion:SOUTH_CAROLINA_DOCUMENT_RULES.version},
   createInitialOfferTerms:createSouthCarolinaInitialOfferTerms,sanitizeDraftTerms:sanitizeSouthCarolinaDraftTerms,validateSubmission:validateSouthCarolinaSubmission,
   validateBeforeSigning:({version})=> {if(version.terms.disclosures.leadPaintStatus==='pending' && (version.terms.property.yearBuilt == null || version.terms.property.yearBuilt < 1978)) throw new HttpsError('failed-precondition','Applicable federal lead disclosures must be received before signing.');},
@@ -34,7 +39,7 @@ export const southCarolinaStateContractPackage: StateContractPackage<SouthCaroli
     const { generateSouthCarolinaOfferPdf } = require('./south-carolina-offer-pdf.service') as typeof import('./south-carolina-offer-pdf.service');
     return generateSouthCarolinaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'disclosures.leadExemptionBasis':'','documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays','disclosures.leadExemptionBasis']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["south-carolina-association-documents"]});
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export async function readSouthCarolinaListingDisclosures(transaction: Transaction, listingReference: DocumentReference, listing: Record<string,unknown>): Promise<{documentVersions: Record<string,string>}> {
   const types=['south-carolina-property-condition','south-carolina-association-documents','south-carolina-coastal-disclosure','south-carolina-vacation-rentals','lead-based-paint'];

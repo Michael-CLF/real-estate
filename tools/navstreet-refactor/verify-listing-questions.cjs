@@ -74,7 +74,7 @@ const resolve = name => pathToFileURL(require.resolve(name, { paths: [project] }
   const caFolder = path.join(project,'src/app/core/domains/listings/state-packages/california');
   const caModule = { exports: {} };
   vm.runInNewContext(compile(fs.readFileSync(path.join(caFolder,'california-listing-facts.model.ts'),'utf8')),
-    { module: caModule, exports: caModule.exports });
+    { module: caModule, exports: caModule.exports, require:()=>require(path.join(project,'functions/lib/offers/state-contracts/federal-lead-policy.js')) });
   const ca = caModule.exports;
   const formModule = { exports: {} };
   vm.runInNewContext(compile(fs.readFileSync(path.join(caFolder,'california-listing-form.ts'),'utf8')),
@@ -335,6 +335,10 @@ const resolve = name => pathToFileURL(require.resolve(name, { paths: [project] }
     washington: { disclosureExemptionClaimed: null, oilTankHeating: null },
     iowa: { disclosureExemptionClaimed: null, privateSewageApplies: null, leadServiceLineKnown: null },
     montana: { disclosureExemptionClaimed: null, radonTestsKnown: null, drugContaminationKnown: null, appurtenantWaterRightsKnown: null },
+    maryland: { disclosureExemptionClaimed: null, usesDisclaimer: null, privateWellApplies: null, onsiteSewageApplies: null, deferredWaterSewerCharges: null, superfundNearby: null, otherPropertyNoticeApplies: null, rentalLeadObligationApplies: null, groundRentApplies: null },
+    newMexico: { privateWastewaterApplies: null, drugLabContaminationKnown: null, appurtenantWaterRightsKnown: null },
+    southDakota: { usesMountainTime: null, disclosureExemptionClaimed: null, privateTransferFeeKnown: null },
+    wyoming: { privateWastewaterApplies: null, appurtenantWaterRightsKnown: null },
     alabama: { usesEasternTime: null, hiddenHealthSafetyKnown: null },
     indiana: { usesCentralTime: null, disclosureExemptionClaimed: null },
     kansas: { usesMountainTime: null, elevatedRadonKnown: null },

@@ -1,4 +1,16 @@
 export type DisclosureDocumentType =
+  | 'wyoming-seller-disclosure'
+  | 'wyoming-statutory-packet'
+  | 'wyoming-association-documents'
+  | 'south-dakota-seller-disclosure'
+  | 'south-dakota-statutory-packet'
+  | 'south-dakota-association-documents'
+  | 'new-mexico-seller-disclosure'
+  | 'new-mexico-statutory-packet'
+  | 'new-mexico-association-documents'
+  | 'maryland-seller-disclosure'
+  | 'maryland-statutory-packet'
+  | 'maryland-association-documents'
   | 'montana-seller-disclosure'
   | 'montana-statutory-packet'
   | 'montana-association-documents'
@@ -32,6 +44,8 @@ export type DisclosureDocumentType =
   | 'missouri-seller-disclosure'
   | 'missouri-statutory-packet'
   | 'missouri-association-documents'
+  | 'missouri-condominium-resale-certificate'
+  | 'missouri-tenant-records'
   | 'oregon-seller-disclosure'
   | 'oregon-statutory-packet'
   | 'oregon-association-documents'
@@ -99,8 +113,12 @@ export interface StateDisclosureRequirement {
   readonly officialFormUrl?: string;
   /** Where to obtain a property-specific document without a blank form. */
   readonly sourceInstructions?: string;
+  readonly appliesToListing?: (listing:{propertyType:string;sellerStatements?:{contractFacts?:{isCondominium?:boolean|null};leasesExist?:boolean}}) => boolean;
+  readonly requiredBeforeClosing?: boolean;
+  readonly requiredBeforeClosingLabel?: string;
   readonly required: boolean;
   readonly requiredBeforeAcceptance?: boolean;
+  readonly requiredBeforeAcceptanceLabel?: string;
   readonly shortTitle: string;
   readonly sortOrder: number;
   readonly title: string;

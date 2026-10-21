@@ -5,7 +5,7 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type ArizonaContractType = 'navstreet_arizona_residential_sale_2026';
+export type ArizonaContractType = 'navstreet_arizona_residential_sale_2026' | 'navstreet_arizona_condominium_resale_2026';
 export type ArizonaFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type ArizonaDisclosureStatus = 'unselected' | 'received' | 'pending';
 
@@ -14,6 +14,8 @@ export interface ArizonaOfferTermsDocument {
   readonly stateCode: 'AZ';
   readonly contractType: ArizonaContractType;
   readonly property: OfferPropertySnapshot;
+  readonly condominium?: {readonly projectName:string;readonly unitDesignation:string;readonly commonElements:string;readonly parkingStorage:string;readonly rightsAcknowledged:boolean|null;};
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;

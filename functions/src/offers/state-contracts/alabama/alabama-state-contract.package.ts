@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertAlabamaListingDisclosures } from '../../alabama-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeAlabamaDraftTerms } from './alabama-draft-terms-sanitizer';
 import { validateAlabamaSubmission } from './alabama-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createAlabamaContractMilestones } from './alabama-contract-milestones';
-export const alabamaStateContractPackage: StateContractPackage<AlabamaOfferTermsDocument> = {
+export const alabamaStateContractPackage: StateContractPackage<AlabamaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(alabamaStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertAlabamaListingDisclosures },
   stateCode: 'AL', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_alabama_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'AL', templateUid: ALABAMA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Alabama Residential Purchase and Sale Agreement', templateVersion: ALABAMA_DOCUMENT_RULES.version },
@@ -45,4 +51,4 @@ export const alabamaStateContractPackage: StateContractPackage<AlabamaOfferTerms
     const { generateAlabamaOfferPdf } = require('./alabama-offer-pdf.service') as typeof import('./alabama-offer-pdf.service');
     return generateAlabamaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["alabama-association-documents"]});

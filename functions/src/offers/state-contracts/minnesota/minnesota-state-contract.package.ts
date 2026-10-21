@@ -1,3 +1,8 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { isMinnesotaContractCompatible, type MinnesotaOwnershipFacts } from './minnesota-contract-selection';
+import { HttpsError as ContractScopeError } from 'firebase-functions/v2/https';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { minnesotaAssociationPacketProblem } from './minnesota-association-packet';
 import { assertMinnesotaListingDisclosures } from '../../minnesota-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
@@ -10,12 +15,21 @@ import { sanitizeMinnesotaDraftTerms } from './minnesota-draft-terms-sanitizer';
 import { validateMinnesotaSubmission } from './minnesota-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createMinnesotaContractMilestones } from './minnesota-contract-milestones';
-export const minnesotaStateContractPackage: StateContractPackage<MinnesotaOfferTermsDocument> = {
-  listingDisclosurePolicy: { assertReady: assertMinnesotaListingDisclosures },
+export const minnesotaStateContractPackage: StateContractPackage<MinnesotaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: (listing,version) => {
+    assertListingContractScope(minnesotaStateContractPackage,listing);
+    const statements=listing['sellerStatements'] as Record<string,unknown>|undefined;
+    if (!isMinnesotaContractCompatible(version.terms.contractType,String(listing['propertyType']),statements?.['contractFacts'] as MinnesotaOwnershipFacts | undefined)) throw new ContractScopeError('failed-precondition','The listing ownership now requires a different agreement. Discard an unsigned draft on its offer page and start again.');
+  },
+  listingDisclosurePolicy: { reviewedVersions: ({version}) => version.terms.documentVersions, assertReady: assertMinnesotaListingDisclosures },
   stateCode: 'MN', offerCreationEnabled: true,
-  contractTypes: ['navstreet_minnesota_residential_sale_2026'], contractTypeRequired: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
+  contractTypes: ['navstreet_minnesota_residential_sale_2026','navstreet_minnesota_condominium_resale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'MN', templateUid: MINNESOTA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Minnesota Residential Purchase and Sale Agreement', templateVersion: MINNESOTA_DOCUMENT_RULES.version },
+  agreementTemplates: [{stateCode:'MN',templateUid:MINNESOTA_DOCUMENT_RULES.templateUid,templateName:'NavStreet Minnesota Residential Purchase and Sale Agreement',templateVersion:MINNESOTA_DOCUMENT_RULES.version},{stateCode:'MN',templateUid:'navstreet-mn-condominium-2026',templateName:'NavStreet Minnesota Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-12'}],
+  getAgreementTemplate: terms => terms.contractType === 'navstreet_minnesota_condominium_resale_2026' ? {stateCode:'MN',templateUid:'navstreet-mn-condominium-2026',templateName:'NavStreet Minnesota Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-12'} : minnesotaStateContractPackage.agreementTemplate,
   createInitialOfferTerms: input => createMinnesotaInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeMinnesotaDraftTerms(input),
   validateSubmission: input => validateMinnesotaSubmission(input),
@@ -49,4 +63,4 @@ export const minnesotaStateContractPackage: StateContractPackage<MinnesotaOfferT
     const { generateMinnesotaOfferPdf } = require('./minnesota-offer-pdf.service') as typeof import('./minnesota-offer-pdf.service');
     return generateMinnesotaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["minnesota-association-documents"]});

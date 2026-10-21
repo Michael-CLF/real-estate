@@ -5,7 +5,23 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type MissouriContractType = 'navstreet_missouri_residential_sale_2026';
+import type { MissouriContractType } from './missouri-contract-selection';
+export type { MissouriContractType } from './missouri-contract-selection';
+export interface MissouriSpecialPropertyTerms {
+ readonly projectName: string;
+ readonly unitDesignation: string;
+ readonly commonElements: string;
+ readonly parkingStorage: string;
+ readonly resaleCertificateStatus: 'unselected' | 'received' | 'pending';
+ readonly certificateReceivedDate: string;
+ readonly condominiumRightsAcknowledged: boolean | null;
+ readonly intendedUse: string;
+ readonly surveyRequired: boolean | null;
+ readonly landReviewAcknowledged: boolean | null;
+ readonly tenantDocumentsStatus: 'unselected' | 'received' | 'pending' | 'not_applicable';
+ readonly tenancyTransferAcknowledged: boolean | null;
+}
+
 export type MissouriFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type MissouriDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -13,8 +29,11 @@ export type MissouriDisclosureStatus = 'unselected' | 'received' | 'pending' | '
 export interface MissouriOfferTermsDocument {
   readonly stateCode: 'MO';
   readonly contractType: MissouriContractType;
+  readonly condominiumOfferEntryRevision?: '2026-10-19';
   readonly property: OfferPropertySnapshot;
   readonly legalDescription: string;
+  readonly specialProperty?: MissouriSpecialPropertyTerms;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
     readonly hasEarnestMoney: boolean | null;
@@ -61,7 +80,7 @@ export interface MissouriOfferTermsDocument {
   };
   readonly disclosures: {
     readonly propertyConditionStatus: MissouriDisclosureStatus;
-    readonly leadPaintStatus: 'unselected' | 'received' | 'pending' | 'built_1978_or_later' | 'exempt';
+    readonly leadPaintStatus: 'unselected' | 'received' | 'pending' | 'built_1978_or_later' | 'exempt' | 'not_applicable';
     readonly leadInspectionSelection: 'unselected' | 'ten_days' | 'waived' | 'other_period';
     readonly leadInspectionDays: number;
     readonly hoaDocumentsStatus: 'unselected' | 'received' | 'pending' | 'not_applicable';
@@ -88,3 +107,9 @@ export const MISSOURI_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a Missouri residential resale between the parties.',
 } as const;
+
+export const MISSOURI_CONDOMINIUM_RESALE_CONTRACT_DEFINITION = {contractType:'navstreet_missouri_condominium_resale_2026',formId:'NAVSTREET_MISSOURI_CONDOMINIUM_RESALE_2026',formName:'NavStreet Missouri Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-12',revisionDate:'2026-10-12'} as const;
+
+export const MISSOURI_LAND_SALE_CONTRACT_DEFINITION = {contractType:'navstreet_missouri_land_sale_2026',formId:'NAVSTREET_MISSOURI_LAND_SALE_2026',formName:'NavStreet Missouri Vacant Land Purchase and Sale Agreement',effectiveDate:'2026-10-12',revisionDate:'2026-10-12'} as const;
+
+export const MISSOURI_SMALL_MULTIFAMILY_RESALE_CONTRACT_DEFINITION = {contractType:'navstreet_missouri_small_multifamily_resale_2026',formId:'NAVSTREET_MISSOURI_SMALL_MULTIFAMILY_RESALE_2026',formName:'NavStreet Missouri Two to Four Unit Purchase and Sale Agreement',effectiveDate:'2026-10-12',revisionDate:'2026-10-12'} as const;

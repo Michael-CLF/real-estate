@@ -54,6 +54,7 @@ export interface UtahOfferTermsDocument {
     readonly leadPaintStatus: 'unselected' | 'received' | 'built_1978_or_later' | 'exempt';
     readonly leadInspectionSelection: 'unselected' | 'ten_days' | 'waived' | 'other_period';
     readonly leadInspectionDays: number;
+    readonly sellerReportsHoa?: boolean | null;
     readonly hoaDocumentsStatus: 'unselected' | 'received' | 'pending' | 'not_applicable';
     readonly sellerReportsCurrentMethContamination: boolean | null;
     readonly methamphetamineContaminationAcknowledged: boolean | null;

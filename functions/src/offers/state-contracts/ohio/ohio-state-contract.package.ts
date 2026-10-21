@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertOhioListingDisclosures } from '../../ohio-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeOhioDraftTerms } from './ohio-draft-terms-sanitizer';
 import { validateOhioSubmission } from './ohio-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createOhioContractMilestones } from './ohio-contract-milestones';
-export const ohioStateContractPackage: StateContractPackage<OhioOfferTermsDocument> = {
+export const ohioStateContractPackage: StateContractPackage<OhioOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(ohioStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertOhioListingDisclosures },
   stateCode: 'OH', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_ohio_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/New_York',
   agreementTemplate: { stateCode: 'OH', templateUid: OHIO_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Ohio Residential Purchase and Sale Agreement', templateVersion: OHIO_DOCUMENT_RULES.version },
@@ -45,4 +51,4 @@ export const ohioStateContractPackage: StateContractPackage<OhioOfferTermsDocume
     const { generateOhioOfferPdf } = require('./ohio-offer-pdf.service') as typeof import('./ohio-offer-pdf.service');
     return generateOhioOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["ohio-association-documents"]});

@@ -175,6 +175,7 @@ export interface OfferEligibleListing {
   legalDescription?: string;
   otherPropertyReference?: string;
 
+  contractFacts?: {isCondominium: boolean | null; isDeveloperSale: boolean | null; isLeasehold: boolean | null; dwellingUnitCount: number | null};
   propertyType: string;
   yearBuilt?: number;
 
@@ -240,6 +241,7 @@ export interface OfferPropertySnapshotDocument {
   legalDescription?: string;
   otherPropertyReference?: string;
 
+  contractFacts?: {isCondominium: boolean | null; isDeveloperSale: boolean | null; isLeasehold: boolean | null; dwellingUnitCount: number | null};
   propertyType: string;
   yearBuilt?: number;
 

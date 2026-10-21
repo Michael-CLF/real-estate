@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type MinnesotaContractType = 'navstreet_minnesota_residential_sale_2026';
+export type MinnesotaContractType = 'navstreet_minnesota_residential_sale_2026' | 'navstreet_minnesota_condominium_resale_2026';
 export type MinnesotaFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type MinnesotaDisclosureStatus = 'unselected' | 'received' | 'pending';
 
@@ -10,6 +10,8 @@ export interface MinnesotaOfferTerms {
   readonly stateCode: 'MN';
   readonly contractType: MinnesotaContractType;
   readonly property: OfferPropertySnapshot;
+  readonly condominium?: {readonly projectName:string;readonly unitDesignation:string;readonly commonElements:string;readonly parkingStorage:string;readonly rightsAcknowledged:boolean|null;};
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -86,3 +88,5 @@ export const MINNESOTA_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-09',
   description: 'NavStreet-written agreement for a Minnesota residential resale between the parties.',
 } as const;
+
+export const MINNESOTA_CONDOMINIUM_CONTRACT_DEFINITION = {contractType:'navstreet_minnesota_condominium_resale_2026',formId:'NAVSTREET-MN-CONDOMINIUM-2026',formName:'NavStreet Minnesota Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-12',revisionDate:'2026-10-12',description:'NavStreet-written agreement for an ordinary fee-simple residential condominium resale.'} as const;

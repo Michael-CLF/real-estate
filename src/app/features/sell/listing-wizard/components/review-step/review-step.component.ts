@@ -1,3 +1,5 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
+import { isDisclosureVisibleForListing } from '../../../../../core/configuration/state-disclosures.config';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -49,7 +51,7 @@ export class ReviewStepComponent {
   readonly address = input<AddressFormValue | null>(null);
 
   protected readonly stateDisclosureRequirements = computed(() =>
-    getStateDisclosureRequirements(this.address()?.state ?? '')
+    getStateDisclosureRequirements(this.address()?.state ?? '').filter(requirement => isDisclosureVisibleForListing(requirement,{...this.propertyDetails()?.sellerStatements,yearBuilt:this.propertyDetails()?.yearBuilt,propertyType:this.propertyDetails()?.propertyType}))
   );
 
   protected readonly floridaDisclosureNotice = computed(() =>
@@ -59,6 +61,8 @@ export class ReviewStepComponent {
   protected isDisclosureRequired(requirement: StateDisclosureRequirement): boolean {
     const statements = this.propertyDetails()?.sellerStatements;
     return isDisclosureRequiredForListing(this.address()?.state ?? '', requirement, {
+      contractFacts: statements?.contractFacts,
+      propertyType: this.propertyDetails()?.propertyType,
       ownersAssociationApplies: statements?.ownersAssociationApplies,
       leadBasedPaintApplies: statements?.leadBasedPaintApplies,
       yearBuilt: this.propertyDetails()?.yearBuilt,
@@ -341,6 +345,7 @@ export class ReviewStepComponent {
     const stateCode =
       this.address()?.state ?? '';
 
+    if(field === 'leadBasedPaintApplies' && isFederalLeadExcluded(this.propertyDetails() ?? {}))return false;
     return requiresStateListingField(
       getStateListingPackage(stateCode),
       field,

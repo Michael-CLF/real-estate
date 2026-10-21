@@ -16,6 +16,9 @@
           </option>
           }
         </select>
+        @if (contractCoverageMessage()) {
+        <p class="field-help" role="status">{{ contractCoverageMessage() }}</p>
+        }
         @if (
         form.controls.propertyType.touched &&
         form.controls.propertyType.hasError('required')
@@ -23,6 +26,7 @@
         <p class="field-error">Property type is required.</p>
         }
       </div>
+      @if (form.controls.propertyType.value !== 'land') {
       <div class="field">
         <label for="bedrooms">Bedrooms</label>
         <input id="bedrooms" type="number" formControlName="bedrooms" min="0" max="99" step="1" />
@@ -53,8 +57,10 @@
         }
         }
       </div>
+      }
     </div>
     <div class="three-column">
+      @if (form.controls.propertyType.value !== 'land') {
       <div class="field">
         <label for="squareFeet">Square Feet</label>
         <input id="squareFeet" type="number" formControlName="squareFeet" min="1" max="1000000" step="1" />
@@ -85,6 +91,7 @@
         }
         }
       </div>
+      }
       <div class="field">
         <label for="lotSize">
           Lot Size
@@ -525,6 +532,7 @@
       </div>
       }
     </div>
+    <app-listing-contract-facts [group]="form.controls.sellerStatements.controls.contractFacts" [propertyType]="form.controls.propertyType.value" [requireAnswers]="requiresOwnershipFacts()" [requireUnitCount]="requiresUnitCount()" />
     <fieldset class="seller-statements" formGroupName="sellerStatements">
       <legend>Seller Statements and Representations</legend>
       <p class="seller-statements__description">

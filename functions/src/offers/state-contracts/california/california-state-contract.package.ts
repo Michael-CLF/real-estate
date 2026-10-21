@@ -1,3 +1,7 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { isFederalLeadExcluded } from '../federal-lead-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -8,14 +12,16 @@ import { sanitizeCaliforniaDraftTerms } from './california-draft-terms-sanitizer
 import { validateCaliforniaSubmission } from './california-submission-validator';
 import { createCaliforniaContractMilestones } from './california-contract-milestones';
 import { CALIFORNIA_DOCUMENT_RULES } from './california-document-rules';
-export const californiaStateContractPackage: StateContractPackage<CaliforniaOfferTermsDocument> = {
+export const californiaStateContractPackage: StateContractPackage<CaliforniaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(californiaStateContractPackage, listing),
   listingDisclosurePolicy: {
     readVersions: readCaliforniaListingDisclosures,
     initialListingData: async (transaction, reference, listing) => ({ californiaReadiness: await readCaliforniaListingDisclosures(transaction, reference, listing) }),
     reviewedVersions: ({ version }) => version.terms.documentVersions,
     supportsUnsignedRevision: true,
   },
-  stateCode:'CA',offerCreationEnabled:true,contractTypes:['navstreet_california_residential_sale_2026'],contractTypeRequired:true,
+  stateCode:'CA',offerCreationEnabled:true,requireOwnershipFacts:true,
+  supportedPropertyTypes:['single_family','townhome','pud','condo'],contractTypes:['navstreet_california_residential_sale_2026'],contractTypeRequired:true,
   defaultTimeZone:'America/Los_Angeles',agreementTemplate:{stateCode:'CA',templateUid:CALIFORNIA_DOCUMENT_RULES.templateUid,templateName:'NavStreet California Residential Purchase and Sale Agreement',templateVersion:CALIFORNIA_DOCUMENT_RULES.version},
   createInitialOfferTerms:createCaliforniaInitialOfferTerms,sanitizeDraftTerms:sanitizeCaliforniaDraftTerms,validateSubmission:validateCaliforniaSubmission,
   validateBeforeSigning:({version})=> {if(version.terms.disclosures.leadPaintStatus==='pending' && (version.terms.property.yearBuilt == null || version.terms.property.yearBuilt < 1978)) throw new HttpsError('failed-precondition','Applicable federal lead disclosures must be received before signing.');},
@@ -39,8 +45,7 @@ export const californiaStateContractPackage: StateContractPackage<CaliforniaOffe
     const { generateCaliforniaOfferPdf } = require('./california-offer-pdf.service') as typeof import('./california-offer-pdf.service');
     return generateCaliforniaOfferPdf(input);
   },
-};
-
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'disclosures.leadExemptionBasis':'','documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays','disclosures.leadExemptionBasis']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["california-association-documents"]});
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 import { CALIFORNIA_DISCLOSURE_TYPES, validCaliforniaDisclosureDecision, type CaliforniaDisclosureApplicability } from '../../../listings/state-listing-packages/california-listing-facts';
 export async function readCaliforniaListingDisclosures(
@@ -52,6 +57,7 @@ export async function readCaliforniaListingDisclosures(
   const requiredDisclosureTypes: string[] = [];
   const documentVersions: Record<string, string> = {};
   for (const [index, type] of CALIFORNIA_DISCLOSURE_TYPES.entries()) {
+    if(type === 'lead-based-paint' && isFederalLeadExcluded(listing))continue;
     const decision = applicability[type];
     const file = snapshots[index].data()?.['currentDocument'] as Record<string, unknown> | undefined;
     const validFile = file && file['listingUid'] === listingReference.id &&

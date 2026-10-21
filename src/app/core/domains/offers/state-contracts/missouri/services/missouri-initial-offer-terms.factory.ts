@@ -1,3 +1,4 @@
+import { isMissouriContractCompatible } from '../missouri-contract-selection';
 import { resolveMissouriPropertyTimeZone } from '../missouri-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -13,16 +14,14 @@ export interface CreateMissouriInitialOfferTermsInput {
 export function createMissouriInitialOfferTerms(
   input: CreateMissouriInitialOfferTermsInput
 ): MissouriOfferTerms {
-  if (input.contractType !== 'navstreet_missouri_residential_sale_2026') {
-    throw new Error('Unsupported Missouri agreement.');
-  }
-  if (input.property.state !== 'MO' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
-    throw new Error('A qualifying Missouri residential resale listing is required.');
-  }
+  if (input.property.state !== 'MO' || !isMissouriContractCompatible(input.contractType, input.property.propertyType, input.property.contractFacts)) throw new Error('Select the Missouri agreement matching the listing ownership and property type.');
   return {
     stateCode: 'MO', contractType: input.contractType,
     property: { ...input.property, state: 'MO' },
     legalDescription: input.property.legalDescription ?? '',
+    ...(input.contractType !== 'navstreet_missouri_residential_sale_2026' ? {specialProperty:{projectName:'',unitDesignation:'',commonElements:'',parkingStorage:'',resaleCertificateStatus:'unselected' as const,certificateReceivedDate:'',condominiumRightsAcknowledged:null,intendedUse:'',surveyRequired:null,landReviewAcknowledged:null,tenantDocumentsStatus:'unselected' as const,tenancyTransferAcknowledged:null}} : {}),
+    ...(input.contractType === 'navstreet_missouri_condominium_resale_2026' ? {condominiumOfferEntryRevision:'2026-10-19' as const} : {}),
+    documentVersions: {},
     purchase: {
       purchasePriceInCents: input.property.listPriceInCents,
       hasEarnestMoney: null, earnestMoneyInCents: 0, additionalEarnestMoneyInCents: 0,
@@ -50,7 +49,7 @@ export function createMissouriInitialOfferTerms(
       titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15,
     },
     disclosures: {
-      propertyConditionStatus: 'unselected', methDisclosureRequired: false, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
+      propertyConditionStatus: 'unselected', methDisclosureRequired: false, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: input.contractType === 'navstreet_missouri_condominium_resale_2026' ? true : null, leadPaintStatus: input.property.propertyType === 'land' ? 'not_applicable' : 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
       hoaDocumentsStatus: 'unselected',
       sellerReportsExistingLeases: null,
       leaseStatementAcknowledged: null,

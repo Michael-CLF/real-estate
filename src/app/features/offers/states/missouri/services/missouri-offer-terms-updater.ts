@@ -3,7 +3,7 @@ import { updatePath } from '../../../engine/offer-term-path';
 import type { MissouriOfferTerms } from '../../../../../core/domains/offers/state-contracts/missouri/models/missouri-offer-terms.model';
 
 const FORBIDDEN = new Set(['__proto__', 'constructor', 'prototype']);
-const ALLOWED_ROOTS = new Set(['purchase', 'deadlines', 'conditions', 'propertyItems', 'settlement', 'disclosures', 'additionalTerms', 'delivery']);
+const ALLOWED_ROOTS = new Set(['specialProperty', 'purchase', 'deadlines', 'conditions', 'propertyItems', 'settlement', 'disclosures', 'additionalTerms', 'delivery']);
 
 export function updateMissouriOfferTerms(terms: MissouriOfferTerms, fieldPath: string, value: unknown): MissouriOfferTerms {
   const segments = fieldPath.split('.');
@@ -13,6 +13,7 @@ export function updateMissouriOfferTerms(terms: MissouriOfferTerms, fieldPath: s
   // The renderer's choice controls emit strings. Missouri yes/no choices are persisted as booleans.
   const selected = value === 'true' ? true : value === 'false' ? false : value;
   const updated = updatePath(terms, segments, selected) as unknown as MissouriOfferTerms;
+  if (fieldPath === 'specialProperty.resaleCertificateStatus' && terms.contractType === 'navstreet_missouri_condominium_resale_2026') return {...updated,disclosures:{...updated.disclosures,hoaDocumentsStatus:selected === 'received' ? 'received' : selected === 'pending' ? 'pending' : 'unselected'}};
   if (fieldPath === 'purchase.hasEarnestMoney' && selected === false) {
     return {
       ...updated,

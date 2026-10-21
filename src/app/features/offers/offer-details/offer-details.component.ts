@@ -253,6 +253,8 @@ export class OfferDetailsComponent
             : 'Contract effective';
         }
 
+        if (offer?.status === 'withdrawn') return 'Offer withdrawn';
+
         if (this.isReceivingParty()) {
           return 'Respond to this offer';
         }
@@ -276,6 +278,8 @@ export class OfferDetailsComponent
 
         const version =
           this.currentVersion();
+
+        if (offer?.status === 'withdrawn') return 'This withdrawn offer will be automatically deleted within 72 hours of withdrawal.';
 
         if (
           offer?.status ===
@@ -876,7 +880,9 @@ export class OfferDetailsComponent
 
 
   openSigningPanel(): void {
-    if (!this.agreementDocument() || this.preparingAgreement() || this.processing()) return;
+    const version = this.currentVersion();
+    if (!version || !this.access()?.canSign || this.signingBlockReason(version) ||
+        !this.agreementDocument() || this.preparingAgreement() || this.processing()) return;
     this.clearMessages();
 
     const party =
@@ -1237,6 +1243,24 @@ export class OfferDetailsComponent
   }
 
 
+  readonly draftAgreementChanged = computed(() => this.route.snapshot.queryParamMap.get('draftAgreementChanged') === 'true');
+  readonly canDiscardUnsignedDraft = computed(() => {
+    const offer = this.offer(), version = this.currentVersion();
+    return !!offer && !!version && this.access()?.isBuyer && !offer.lastDeliveredVersionUid &&
+      !offer.contract && offer.currentVersionNumber === 1 &&
+      ['draft','submitted','expired'].includes(offer.status) &&
+      ['draft','awaiting_signatures','expired','withdrawn'].includes(version.status) &&
+      [...version.buyers,...version.sellers].every(party => party.signature.status !== 'signed' && !party.signature.signedAt);
+  });
+  async discardUnsignedDraft(): Promise<void> {
+    if (!this.canDiscardUnsignedDraft() || this.processing()) return;
+    if (!window.confirm('Permanently discard this unfinished offer and its uploaded files? This cannot be undone.')) return;
+    this.processing.set(true);this.clearMessages();
+    try {await this.offerService.discardOfferDraft(this.offerUid);await this.router.navigate(['/dashboard/offers']);}
+    catch(error) {this.errorMessage.set(this.getErrorMessage(error));}
+    finally {this.processing.set(false);}
+  }
+
   async withdrawOffer(): Promise<void> {
     const offer =
       this.offer();
@@ -1277,7 +1301,7 @@ export class OfferDetailsComponent
       this.successMessage.set(
         isUnsignedDraft
           ? 'The unsigned offer draft was discarded.'
-          : 'The current offer was withdrawn. Its history remains available.'
+          : 'The offer was withdrawn and will be automatically deleted within 72 hours.'
       );
     } catch (error) {
       this.errorMessage.set(

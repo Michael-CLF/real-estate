@@ -1,3 +1,7 @@
+import type { WyomingOfferTerms } from '../state-contracts/wyoming/models/wyoming-offer-terms.model';
+import type { SouthDakotaOfferTerms } from '../state-contracts/south-dakota/models/south-dakota-offer-terms.model';
+import type { NewMexicoOfferTerms } from '../state-contracts/new-mexico/models/new-mexico-offer-terms.model';
+import type { MarylandOfferTerms } from '../state-contracts/maryland/models/maryland-offer-terms.model';
 import type { MontanaOfferTerms } from '../state-contracts/montana/models/montana-offer-terms.model';
 import type { IowaOfferTerms } from '../state-contracts/iowa/models/iowa-offer-terms.model';
 import type { WashingtonOfferTerms } from '../state-contracts/washington/models/washington-offer-terms.model';
@@ -93,6 +97,7 @@ export interface OfferPropertySnapshot {
 
   otherPropertyReference?: string;
 
+  contractFacts?: {isCondominium: boolean | null; isDeveloperSale: boolean | null; isLeasehold: boolean | null; dwellingUnitCount: number | null};
   propertyType: string;
   yearBuilt?: number;
 
@@ -117,6 +122,10 @@ export type StateOfferTerms =
   | MinnesotaOfferTerms
   | MichiganOfferTerms
   | IdahoOfferTerms
+  | WyomingOfferTerms
+  | SouthDakotaOfferTerms
+  | NewMexicoOfferTerms
+  | MarylandOfferTerms
   | MontanaOfferTerms
   | IowaOfferTerms
   | WashingtonOfferTerms

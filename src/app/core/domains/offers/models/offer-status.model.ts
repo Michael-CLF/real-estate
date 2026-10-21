@@ -147,7 +147,7 @@ export const OFFER_STATUS_LABELS:
     closed_due_to_contract:
       'Closed — property under contract',
     converted_to_contract:
-      'Accepted — contract effective'
+      'Accepted — Contract effective'
   };
 
 

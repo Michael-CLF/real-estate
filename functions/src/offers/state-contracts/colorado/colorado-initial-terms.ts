@@ -84,11 +84,11 @@ export function createColoradoInitialOfferTerms(
 ): ColoradoOfferTermsDocument {
   if (
     input.property.state !== 'CO' ||
-    !['single_family', 'townhome', 'condo'].includes(input.property.propertyType) ||
+    !['single_family', 'townhome', 'pud', 'condo'].includes(input.property.propertyType) ||
     input.contractType !== 'navstreet_colorado_residential_2026'
   ) {
     throw new Error(
-      'Choose a Colorado single-family home, townhome or condo and the NavStreet residential agreement.',
+      'Choose a Colorado single-family home, townhome, PUD home or condo and the NavStreet residential agreement.',
     );
   }
 

@@ -65,6 +65,10 @@ export interface StateOfferPackage<
       >
     >;
 
+  readonly hoaPolicyIntegrated?: true;
+
+  prepareTerms?(terms:TTerms):TTerms;
+
   createInitialTerms(
     input:
       CreateStateOfferTermsInput<

@@ -9,6 +9,7 @@ export function validateIowaSubmission(input: ValidateStateSubmissionInput<IowaO
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
   requireValue(t.contractType === 'navstreet_iowa_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'IA', 'The contract or property snapshot is invalid.');
   requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Iowa agreement.');
+  if (version.initiatedBy === 'seller') requireValue(!(!['received','exempt'].includes(t.disclosures.propertyConditionStatus) || (t.disclosures.requiredKnownFacts && t.disclosures.statutoryPacketStatus !== 'received')), "Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery.");
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');
@@ -38,8 +39,6 @@ export function validateIowaSubmission(input: ValidateStateSubmissionInput<IowaO
   requireValue(['received','pending','exempt'].includes(t.disclosures.propertyConditionStatus), 'Select whether you received the seller condition statement.');
   requireValue(['received','pending'].includes(t.disclosures.statutoryPacketStatus), 'Review the seller-signed Iowa property-specific statutory disclosure packet before submitting. Ask the seller to upload it if it is missing.');
   requireValue(!(t.disclosures.propertyConditionStatus === 'exempt' && !t.disclosures.disclosureExemptionClaimed), "A seller disclosure exception must match the supported listing exception.");
-  requireValue(!(t.disclosures.requiredKnownFacts && t.disclosures.statutoryPacketStatus !== 'received'), "Review the required property records before submitting or signing.");
-  requireValue(!(!['received','exempt'].includes(t.disclosures.propertyConditionStatus)), "Review the seller statement or supported exception before submitting or signing.");
   requireValue(typeof t.disclosures.sellerReportsHoa === 'boolean', 'The listing must state whether an HOA applies.');
   requireValue(t.disclosures.sellerReportsHoa ? ['received','pending'].includes(t.disclosures.hoaDocumentsStatus) : t.disclosures.hoaDocumentsStatus === 'not_applicable', 'Review the association resale packet before submitting when an association applies.');
   requireValue(t.disclosures.taxNoticeAcknowledged === true && t.disclosures.radonNoticeAcknowledged === true, 'Read and acknowledge the Iowa tax and radon notices.');

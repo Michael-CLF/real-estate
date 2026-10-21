@@ -1,3 +1,5 @@
+import { isMissouriContractCompatible } from './missouri-contract-selection';
+import { validateMissouriSpecialProperty } from './missouri-special-property-validation';
 import { resolveMissouriPropertyTimeZone } from './missouri-property-time-zone';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -7,8 +9,10 @@ export function validateMissouriSubmission(input: ValidateStateSubmissionInput<M
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'MO' && version.stateCode === 'MO' && t.stateCode === 'MO', 'The offer must belong to Missouri.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
-  requireValue(t.contractType === 'navstreet_missouri_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'MO', 'The contract or property snapshot is invalid.');
-  requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Missouri agreement.');
+  requireValue(isMissouriContractCompatible(t.contractType,t.property.propertyType,t.property.contractFacts) && t.property.listingUid === offer.listingUid && t.property.state === 'MO', 'The contract or property snapshot is invalid.');
+  const specialIssues=validateMissouriSpecialProperty(t.contractType,t.specialProperty,t.disclosures.sellerReportsExistingLeases);
+  requireValue(!specialIssues.length,specialIssues[0]?.message ?? 'Invalid property-specific terms.');
+  requireValue(t.property.propertyType !== 'land' || t.disclosures.leadPaintStatus === 'not_applicable','Vacant land cannot include a residential lead status.');
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');
@@ -38,12 +42,12 @@ export function validateMissouriSubmission(input: ValidateStateSubmissionInput<M
   requireValue(['received','pending'].includes(t.disclosures.statutoryPacketStatus), 'Select whether applicable property-specific records were received or remain pending.');
   requireValue(!t.disclosures.methDisclosureRequired || t.disclosures.statutoryPacketStatus === 'received', 'Review required Missouri known-history disclosure before submitting.');
   requireValue(typeof t.disclosures.sellerReportsHoa === 'boolean', 'The listing must state whether an HOA applies.');
-  requireValue(t.disclosures.sellerReportsHoa ? ['received','pending'].includes(t.disclosures.hoaDocumentsStatus) : t.disclosures.hoaDocumentsStatus === 'not_applicable', 'Select the actual association-document receipt status.');
+  requireValue(t.contractType === 'navstreet_missouri_condominium_resale_2026' || (t.disclosures.sellerReportsHoa ? ['received','pending'].includes(t.disclosures.hoaDocumentsStatus) : t.disclosures.hoaDocumentsStatus === 'not_applicable'), 'Select the actual association-document receipt status.');
   requireValue(t.disclosures.taxNoticeAcknowledged === true && t.disclosures.radonNoticeAcknowledged === true, 'Read and acknowledge the Missouri tax and radon notices.');
   requireValue(t.disclosures.leadPaintStatus !== 'unselected', 'Select lead paint status.');
-  requireValue(t.property.yearBuilt == null || t.property.yearBuilt >= 1978 || ['received','exempt','pending'].includes(t.disclosures.leadPaintStatus), 'Choose whether the pre-1978 lead packet is received, pending, or exempt.');
+  requireValue(t.property.propertyType === 'land' || t.property.yearBuilt == null || t.property.yearBuilt >= 1978 || ['received','exempt','pending'].includes(t.disclosures.leadPaintStatus), 'Choose whether the pre-1978 lead packet is received, pending, or exempt.');
   requireValue(t.disclosures.leadPaintStatus !== 'pending', 'Review the applicable lead disclosure before submitting, or document a valid exemption.');
-  requireValue(t.property.yearBuilt != null || t.disclosures.leadPaintStatus !== 'built_1978_or_later', 'The listing has no construction year; a post-1977 claim needs support.');
+  requireValue(t.property.propertyType === 'land' || t.property.yearBuilt != null || t.disclosures.leadPaintStatus !== 'built_1978_or_later', 'The listing has no construction year; a post-1977 claim needs support.');
   requireValue(typeof t.disclosures.sellerReportsExistingLeases === 'boolean', 'Seller must state whether leases exist.');
   requireValue(!t.conditions.saleOfBuyersProperty || t.additionalTerms.trim(), 'Describe the sale of buyer’s property in additional terms.');
   requireValue(t.disclosures.leadPaintStatus !== 'received' || t.disclosures.leadInspectionSelection !== 'unselected', 'Choose the federal lead inspection opportunity.');

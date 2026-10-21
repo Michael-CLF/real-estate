@@ -150,11 +150,10 @@ export class OfferWizardComponent {
     const terms = this.terms();
     if (!terms) return null;
 
-    const outstanding: string[] = [];
-    if (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus === 'pending') outstanding.push('the applicable property records');
-    if (terms.disclosures.propertyConditionStatus === 'pending') outstanding.push('the seller condition statement or supported exception');
-    if (terms.disclosures.leadPaintStatus === 'pending') outstanding.push('the federal lead disclosure or supported exemption');
-    return outstanding.length ? `Review ${outstanding.join(', ')} before submitting. The seller must upload required records and the buyer must review them. Seller counteroffers cannot change buyer receipt answers.` : null;
+    if (terms.disclosures.leadPaintStatus === 'pending') return 'Applicable federal lead records must be uploaded and reviewed before signing.';
+    return terms.disclosures.propertyConditionStatus === 'pending' || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus === 'pending')
+      ? 'You may send this initial offer while the Iowa condition disclosure or radon fact sheet is pending. The seller must deliver required documents and record buyer receipt before making a counteroffer or accepting. After delivery, create a replacement offer acknowledging receipt; submitted receipt answers cannot be edited.'
+      : null;
   });
 
   protected readonly busy = computed(
@@ -235,7 +234,7 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(initialTerms);
+        this.terms.set(IOWA_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
         this.initialTermsApplied = true;
       }
     });

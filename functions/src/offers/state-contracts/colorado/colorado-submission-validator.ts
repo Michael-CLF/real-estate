@@ -10,7 +10,7 @@ export function validateColoradoSubmission({ offer, version }: ValidateStateSubm
   demand(offer.stateCode === 'CO' && version.stateCode === 'CO' && t.stateCode === 'CO', 'Colorado state mismatch.');
   demand(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && !version.immutable, 'Submit the current editable version.');
   demand(t.contractType === 'navstreet_colorado_residential_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'CO', 'Colorado property or agreement mismatch.');
-  demand(['single_family', 'townhome', 'condo'].includes(t.property.propertyType), 'This Colorado agreement supports homes, townhomes and condos only.');
+  demand(['single_family', 'townhome', 'pud', 'condo'].includes(t.property.propertyType), 'This Colorado agreement supports homes, townhomes, PUD homes and condos only.');
   demand(t.legalDescription.trim(), 'The seller must enter the recorded legal description.');
   demand(version.buyers.length && version.sellers.length, 'Identify buyer and seller.');
   for (const party of [...version.buyers, ...version.sellers]) {

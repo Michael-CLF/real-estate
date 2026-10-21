@@ -170,6 +170,8 @@ export interface StateContractPackage<
   TTerms extends StateContractTerms =
     OfferTermsDocument,
 > {
+  readonly federalLeadPolicyIntegrated?: true;
+  readonly hoaPolicyIntegrated?: true;
   stateCode: string;
 
   listingDisclosurePolicy?: StateListingOfferPolicy<TTerms>;
@@ -186,10 +188,16 @@ export interface StateContractPackage<
 
   contractTypeRequired?: boolean;
 
+  supportedPropertyTypes?: readonly string[];
+  maximumDwellingUnits?: number;
+  requireOwnershipFacts?: boolean;
+
   defaultTimeZone: string;
 
   agreementTemplate:
     StateAgreementTemplate;
+  agreementTemplates?: readonly StateAgreementTemplate[];
+  getAgreementTemplate?(terms: TTerms): StateAgreementTemplate;
 
   createInitialOfferTerms(
     input: CreateInitialOfferTermsInput
@@ -203,6 +211,11 @@ export interface StateContractPackage<
   ): Promise<GeneratedStateAgreement>;
 
   requiredListingDisclosures?(input: ValidateStateSubmissionInput<TTerms>): readonly string[];
+
+  assertListingContractCompatible?(listingData: Record<string,unknown>, version: StateOfferVersionDocument<TTerms>): void;
+
+  /** Prepare only an authorized mutable draft before it is frozen; never rewrite signed versions. */
+  prepareSubmissionTerms?(input:ValidateStateSubmissionInput<TTerms> & {readonly listingData?:Record<string,unknown>}):TTerms;
 
   validateSubmission(
     input: ValidateStateSubmissionInput<TTerms>

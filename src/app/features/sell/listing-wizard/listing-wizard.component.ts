@@ -248,7 +248,7 @@ export class ListingWizardComponent implements OnInit {
           draft.propertyDetails.fullBathrooms +
           draft.propertyDetails.halfBathrooms * 0.5,
         squareFeet: draft.propertyDetails.squareFeet,
-        yearBuilt: draft.propertyDetails.yearBuilt,
+        yearBuilt: draft.propertyDetails.yearBuilt ?? null,
         lotSize: draft.propertyDetails.lotSize ?? null,
         lotSizeUnit: draft.propertyDetails.lotSizeUnit ?? 'acres',
         lotNumber: draft.propertyDetails.lotNumber ?? '',
@@ -277,6 +277,7 @@ export class ListingWizardComponent implements OnInit {
           },
         sellerStatements: {
           ...restoreStateListingSellerStatements(draft.sellerStatements),
+          contractFacts: draft.sellerStatements?.contractFacts,
           ownershipStatus: draft.sellerStatements?.ownershipStatus ?? '',
           leadBasedPaintApplies:
             draft.sellerStatements?.leadBasedPaintApplies ?? null,
@@ -556,10 +557,10 @@ export class ListingWizardComponent implements OnInit {
         if (
           !propertyDetails ||
           !propertyDetails.propertyType ||
-          propertyDetails.bedrooms === null ||
+          (propertyDetails.propertyType !== 'land' && (propertyDetails.bedrooms === null ||
           propertyDetails.bathrooms === null ||
           propertyDetails.squareFeet === null ||
-          propertyDetails.yearBuilt === null
+          propertyDetails.yearBuilt === null))
         ) {
           throw new Error('Please complete all required property details.');
         }
@@ -582,11 +583,11 @@ export class ListingWizardComponent implements OnInit {
           user.uid,
           {
             propertyType: propertyDetails.propertyType,
-            bedrooms: propertyDetails.bedrooms,
-            fullBathrooms: Math.floor(propertyDetails.bathrooms),
-            halfBathrooms: propertyDetails.bathrooms % 1 === 0 ? 0 : 1,
-            squareFeet: propertyDetails.squareFeet,
-            yearBuilt: propertyDetails.yearBuilt,
+            bedrooms: propertyDetails.propertyType === 'land' ? 0 : propertyDetails.bedrooms!,
+            fullBathrooms: propertyDetails.propertyType === 'land' ? 0 : Math.floor(propertyDetails.bathrooms!),
+            halfBathrooms: propertyDetails.propertyType === 'land' || propertyDetails.bathrooms! % 1 === 0 ? 0 : 1,
+            squareFeet: propertyDetails.propertyType === 'land' ? 0 : propertyDetails.squareFeet!,
+            ...(propertyDetails.propertyType !== 'land' ? {yearBuilt:propertyDetails.yearBuilt!} : {}),
             lotSize: propertyDetails.lotSize ?? undefined,
             lotSizeUnit:
               propertyDetails.lotSize !== null

@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertDelawareListingDisclosures } from '../../delaware-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeDelawareDraftTerms } from './delaware-draft-terms-sanitizer';
 import { validateDelawareSubmission } from './delaware-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createDelawareContractMilestones } from './delaware-contract-milestones';
-export const delawareStateContractPackage: StateContractPackage<DelawareOfferTermsDocument> = {
+export const delawareStateContractPackage: StateContractPackage<DelawareOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(delawareStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertDelawareListingDisclosures },
   stateCode: 'DE', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_delaware_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/New_York',
   agreementTemplate: { stateCode: 'DE', templateUid: DELAWARE_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Delaware Residential Purchase and Sale Agreement', templateVersion: DELAWARE_DOCUMENT_RULES.version },
@@ -48,4 +54,4 @@ export const delawareStateContractPackage: StateContractPackage<DelawareOfferTer
     const { generateDelawareOfferPdf } = require('./delaware-offer-pdf.service') as typeof import('./delaware-offer-pdf.service');
     return generateDelawareOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["delaware-association-documents"]});

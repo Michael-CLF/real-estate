@@ -344,7 +344,7 @@ export class UtahOfferEntryComponent
         ].includes(String(listing.propertyType))
       ) {
         throw new Error(
-          'This listing requires a Utah contract form that is not yet enabled. NavStreet currently supports the OREC Residential Sale form for qualifying residential property.'
+          'This listing requires a Utah contract form that is not yet enabled. NavStreet currently supports its Utah residential resale agreement for qualifying residential property.'
         );
       }
     } catch (error) {

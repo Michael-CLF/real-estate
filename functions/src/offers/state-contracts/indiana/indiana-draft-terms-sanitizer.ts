@@ -26,6 +26,10 @@ export function sanitizeIndianaDraftTerms(
 
   const sanitized: IndianaOfferTermsDocument = {
     ...input.currentTerms,
+    documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions']))
+      .filter(([key,value]) => ['indiana-seller-disclosure','indiana-statutory-packet','indiana-association-documents','lead-based-paint'].includes(key) &&
+        typeof value === 'string' && value.length > 0 && value.length <= 200 && !value.includes('/') && value !== '.' && value !== '..')
+      .map(([key,value]) => [key,String(value)])),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,

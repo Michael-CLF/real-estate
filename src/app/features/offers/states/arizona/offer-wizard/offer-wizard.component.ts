@@ -201,7 +201,7 @@ export class OfferWizardComponent {
       return sections.map(section => ({
         ...section,
         questions: section.questions.map(question =>
-          question.fieldPath && BUYER_OWNED_FIELDS.has(question.fieldPath)
+          question.fieldPath && (question.fieldPath.startsWith('condominium.') || BUYER_OWNED_FIELDS.has(question.fieldPath))
             ? { ...question, readOnly: true }
             : question
         ),
@@ -254,7 +254,7 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(initialTerms);
+        this.terms.set(ARIZONA_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
         this.initialTermsApplied = true;
       }
     });
@@ -278,7 +278,7 @@ export class OfferWizardComponent {
       return;
     }
 
-    if (this.initiatedBy() === 'seller' && BUYER_OWNED_FIELDS.has(change.fieldPath)) {
+    if (this.initiatedBy() === 'seller' && (change.fieldPath.startsWith('condominium.') || BUYER_OWNED_FIELDS.has(change.fieldPath))) {
       return;
     }
 

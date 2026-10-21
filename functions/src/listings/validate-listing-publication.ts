@@ -27,6 +27,7 @@ export interface PublicationValidationDraft {
     fullBathrooms?: number;
     halfBathrooms?: number;
     squareFeet?: number;
+    yearBuilt?: number;
     legalDescription?: string;
   };
 
@@ -101,6 +102,7 @@ export function validateDraftForPublication(
     listingUid,
     draft.address.state,
     sellerStatements as unknown as Record<string, unknown>,
+    draft.propertyDetails,
   );
 
   const additionalSeller = sellerStatements.additionalSeller;

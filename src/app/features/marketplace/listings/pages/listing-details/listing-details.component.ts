@@ -1,3 +1,5 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
+import { getListingContractCoverageMessage } from '../../../../offers/engine/state-offer-registry';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { californiaDisclosureOutstanding, validCaliforniaDisclosureDecision, type CaliforniaDisclosureType } from '../../../../../core/domains/listings/state-packages/california/california-listing-facts.model';
 import { STATES } from '../../../../../core/configuration/states.config';
@@ -316,6 +318,7 @@ export class ListingDetailsComponent
           (listing.yearBuilt == null || listing.yearBuilt < 1978)))) {
       required.add('lead-based-paint');
     }
+    if (isFederalLeadExcluded(listing)) required.delete('lead-based-paint');
     return [...required];
   }
 
@@ -331,7 +334,12 @@ export class ListingDetailsComponent
       .map(type => checklistDocumentTitle(state, type));
   }
 
+  contractCoverageMessage(listing: MarketplaceListing): string | null {
+    return getListingContractCoverageMessage(listing.address.stateAbbreviation, listing.propertyType, listing.sellerStatements?.contractFacts);
+  }
+
   offerDisclosuresAreReady(listing: MarketplaceListing): boolean {
+    if (this.contractCoverageMessage(listing)) return false;
     if (this.requiredOfferDocumentTypes(listing).length === 0) return true;
     return !this.authenticationIsLoading() && this.isAuthenticated()
       && !this.disclosuresAreLoading() && !this.disclosureLoadError()
@@ -340,7 +348,7 @@ export class ListingDetailsComponent
 
   californiaDisclosureExplanations(listing: MarketplaceListing): { type: string; title: string; status: string; basis: string }[] {
     if (listing.address.stateAbbreviation !== 'CA') return [];
-    return getStateDisclosureRequirements('CA').flatMap(requirement => {
+    return getStateDisclosureRequirements('CA').filter(requirement => requirement.documentType !== 'lead-based-paint' || !isFederalLeadExcluded(listing)).flatMap(requirement => {
       const decision = listing.sellerStatements?.california?.disclosureApplicability?.[requirement.documentType as CaliforniaDisclosureType];
       return validCaliforniaDisclosureDecision(decision) && decision.status !== 'required'
         ? [{ type: requirement.documentType, title: requirement.shortTitle, status: decision.status === 'exempt' ? 'Seller reports an exemption' : 'Seller reports this does not apply', basis: decision.basis }]

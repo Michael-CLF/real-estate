@@ -63,7 +63,7 @@ export class IndianaOfferValidator implements StateOfferValidator<IndianaOfferTe
     if (!wholeDays(terms.settlement.titleEvidenceDaysBeforeClosing, 1, 45)) error('settlement.titleEvidenceDaysBeforeClosing', 'Enter 1 to 45 days.');
     if (terms.settlement.specialAssessmentPayer === 'unselected') error('settlement.specialAssessmentPayer', 'Select who pays special assessments.');
     if (terms.disclosures.sellerReportsHoa === true && terms.settlement.hoaTransferFeePayer === 'unselected') error('settlement.hoaTransferFeePayer', 'Select who pays association transfer fees.');
-    if (!['received', 'pending', 'exempt'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.propertyConditionStatus', 'Select whether you received the seller condition statement.');
+    if (!['received', 'exempt'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.propertyConditionStatus', 'Review the uploaded Indiana condition disclosure or supported exception evidence before continuing.');
     if (!['received', 'pending'].includes(terms.disclosures.statutoryPacketStatus)) error('disclosures.statutoryPacketStatus', 'Select whether you received the statutory property-specific statutory disclosure packet.');
     if (terms.disclosures.sellerReportsHoa === null) error('disclosures.sellerReportsHoa', 'The seller must answer the association question on the listing.');
     if (terms.disclosures.sellerReportsHoa === true && !['received', 'pending'].includes(terms.disclosures.hoaDocumentsStatus)) error('disclosures.hoaDocumentsStatus', 'Select whether you received the association resale packet.');

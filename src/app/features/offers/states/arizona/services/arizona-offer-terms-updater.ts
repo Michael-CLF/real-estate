@@ -3,7 +3,7 @@ import { updatePath } from '../../../engine/offer-term-path';
 import type { ArizonaOfferTerms } from '../../../../../core/domains/offers/state-contracts/arizona/models/arizona-offer-terms.model';
 
 const FORBIDDEN = new Set(['__proto__', 'constructor', 'prototype']);
-const ALLOWED_ROOTS = new Set(['purchase', 'deadlines', 'conditions', 'propertyItems', 'settlement', 'disclosures', 'additionalTerms', 'delivery']);
+const ALLOWED_ROOTS = new Set(['purchase', 'deadlines', 'conditions', 'propertyItems', 'settlement', 'disclosures', 'additionalTerms', 'delivery', 'condominium']);
 
 export function updateArizonaOfferTerms(terms: ArizonaOfferTerms, fieldPath: string, value: unknown): ArizonaOfferTerms {
   const segments = fieldPath.split('.');

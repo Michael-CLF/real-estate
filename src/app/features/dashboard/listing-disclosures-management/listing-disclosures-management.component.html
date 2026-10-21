@@ -158,10 +158,12 @@
         <span class="status-badge status-badge--complete">
           Uploaded
         </span>
-        } @else if (requirement.requiredBeforeAcceptance) {
+        } @else if (isRequiredBeforeAcceptance(requirement)) {
         <span class="status-badge status-badge--required">
-          Required before acceptance, or supported exemption
+          {{ requirement.requiredBeforeAcceptanceLabel ?? 'Required before acceptance, or supported exemption' }}
         </span>
+        } @else if (requirement.requiredBeforeClosing) {
+        <span class="status-badge status-badge--required">{{ requirement.requiredBeforeClosingLabel ?? 'Required before closing when applicable' }}</span>
         } @else if (isRequiredForCurrentListing(requirement)) {
         <span class="status-badge status-badge--required">
           Required

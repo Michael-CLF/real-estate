@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertNebraskaListingDisclosures } from '../../nebraska-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeNebraskaDraftTerms } from './nebraska-draft-terms-sanitizer';
 import { validateNebraskaSubmission } from './nebraska-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createNebraskaContractMilestones } from './nebraska-contract-milestones';
-export const nebraskaStateContractPackage: StateContractPackage<NebraskaOfferTermsDocument> = {
+export const nebraskaStateContractPackage: StateContractPackage<NebraskaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(nebraskaStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertNebraskaListingDisclosures },
   stateCode: 'NE', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_nebraska_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'NE', templateUid: NEBRASKA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Nebraska Residential Purchase and Sale Agreement', templateVersion: NEBRASKA_DOCUMENT_RULES.version },
@@ -45,4 +51,4 @@ export const nebraskaStateContractPackage: StateContractPackage<NebraskaOfferTer
     const { generateNebraskaOfferPdf } = require('./nebraska-offer-pdf.service') as typeof import('./nebraska-offer-pdf.service');
     return generateNebraskaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["nebraska-association-documents"]});

@@ -1,3 +1,5 @@
+import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
+import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type { StateOfferPackage } from '../../engine/models/state-offer-package';
 import type { ColoradoOfferTerms, ColoradoContractType } from '../../../../core/domains/offers/state-contracts/colorado/models/colorado-offer-terms.model';
 import { COLORADO_RESIDENTIAL_CONTRACT_DEFINITION } from '../../../../core/domains/offers/state-contracts/colorado/models/colorado-offer-terms.model';
@@ -5,7 +7,7 @@ import { createColoradoInitialOfferTerms } from '../../../../core/domains/offers
 import { COLORADO_RESIDENTIAL_SALE_SECTIONS } from './questions/colorado-residential-sale.sections';
 import { ColoradoOfferValidator } from './validators/colorado-offer.validator';
 const validator = new ColoradoOfferValidator();
-export const COLORADO_OFFER_PACKAGE: StateOfferPackage<ColoradoOfferTerms, ColoradoContractType> = {
+export const COLORADO_OFFER_PACKAGE: StateOfferPackage<ColoradoOfferTerms, ColoradoContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'CO', stateName: 'Colorado',
   contracts: { navstreet_colorado_residential_2026: COLORADO_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createColoradoInitialOfferTerms(input),
@@ -19,4 +21,4 @@ export const COLORADO_OFFER_PACKAGE: StateOfferPackage<ColoradoOfferTerms, Color
     ),
   })),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-};
+}, {values:{'disclosures.leadPaintStatus':'not_applicable','disclosures.leadInspectionChoice':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionChoice','disclosures.leadInspectionDays','deadlines.leadDisclosure','deadlines.leadTermination']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.associationStatus","documentTypes":["colorado-association-documents"]});

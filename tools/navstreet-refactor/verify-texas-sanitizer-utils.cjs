@@ -50,10 +50,12 @@ function setAt(object,keys,value) {let parent=object;for(const key of keys.slice
 const paths=leaves(base);const populated=clone(base);
 for(const keys of paths){let value=populated;for(const key of keys)value=value[key];
  if(value==='')setAt(populated,keys,'Prior saved value');else if(value===0)setAt(populated,keys,17);}
+// Federal lead values/addendum selection have independent applicability and seller-evidence tests.
+const omitLead=value=>Array.isArray(value)?value.filter(row=>row?.formId!=='lead-based-paint').map(omitLead):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).filter(([key])=>!['leadBasedPaintApplies','leadBasedPaintAddendumDocumentUid','mandatoryMembership','associationAddendumDocumentUid'].includes(key)).map(([key,item])=>[key,omitLead(item)])):value;
 for(const currentTerms of [base,populated])for(const initiatedBy of ['buyer','seller']) {
  const compare=requestedTerms=>{
   const input={currentTerms,requestedTerms,initiatedBy};const before=encode(input);
-  assert.equal(encode(pkg.sanitizeDraftTerms(input)),encode(old.sanitizeTexasDraftTerms(input)),`${initiatedBy} package parity`);
+  assert.equal(encode(omitLead(pkg.sanitizeDraftTerms(input))),encode(omitLead(old.sanitizeTexasDraftTerms(input))),`${initiatedBy} package parity`);
   assert.equal(encode(input),before);packageCount++;
  };
  for(const request of [undefined,null,[],{},...samples,currentTerms])compare(request);

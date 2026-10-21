@@ -14,6 +14,7 @@ export interface IndianaOfferTermsDocument {
   readonly stateCode: 'IN';
   readonly contractType: IndianaContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string, string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;

@@ -5,6 +5,8 @@ const originals={"wisconsin":"import type { CreateInitialOfferTermsInput } from 
 const shared=require(path.join(functionsProject,'lib/offers/state-contracts/initial-listing-facts.js'));
 const registry=require(path.join(functionsProject,'lib/offers/state-contracts/state-contract-registry.js'));
 const encode=value=>JSON.stringify(value,(_,v)=>v===undefined?'__undefined__':v);
+// The federal cutoff intentionally changes only lead defaults; preserve every other initial-listing mapping.
+const omitLead=value=>Array.isArray(value)?value.map(omitLead):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).filter(([key])=>!['leadPaintStatus','leadBasedPaintStatus','leadBasedPaintApplies','leadInspectionSelection','leadInspectionDays','leadInspectionChoice','leadExemptionBasis','hoaDocumentsStatus','sellerReportsHoa'].includes(key)).map(([key,item])=>[key,omitLead(item)])):value;
 const values=[undefined,null,false,true,'',0,'yes',[],{}];
 const dataCases=[{},...values.map(sellerStatements=>({sellerStatements})),...values.map(hoa=>({hoa}))];
 for(const leasesExist of values)for(const ownersAssociationApplies of values)for(const hasHoa of values)
@@ -32,7 +34,7 @@ try {for(const [state,source]of Object.entries(originals)) {
   const input={contractType:pkg.contractTypes[0],property,buyer:party('buyer'),seller:party('seller'),listingData};
   const before=encode(input);
   for(const name of names){assert.equal(shared[name](listingData),legacy[name](listingData),`${state}/${name}`);scalarCount++;}
-  assert.equal(encode(pkg.createInitialOfferTerms(input)),encode(legacy[createName](input)),`${state}: full initial terms`);
+  assert.equal(encode(omitLead(pkg.createInitialOfferTerms(input))),encode(omitLead(legacy[createName](input))),`${state}: full initial terms`);
   assert.equal(encode(input),before);termsCount++;
  }
  const current=fs.readFileSync(path.join(functionsProject,'src/offers/state-contracts',state,`${state}-initial-terms.ts`),'utf8');

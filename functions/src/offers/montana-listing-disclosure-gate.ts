@@ -1,11 +1,11 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function montanaRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
   const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
-  const year = listing['yearBuilt'];
   const stateFacts = statements?.['montana'] as Record<string,unknown> | undefined;
-  return ['montana-seller-disclosure',...(stateFacts?.['radonTestsKnown'] !== false || stateFacts?.['drugContaminationKnown'] !== false || stateFacts?.['appurtenantWaterRightsKnown'] !== false ? ['montana-statutory-packet'] : []),...(statements?.['leadBasedPaintApplies'] === true || typeof year !== 'number' || year < 1978 ? ['lead-based-paint'] : [])];
+  return ['montana-seller-disclosure',...(stateFacts?.['radonTestsKnown'] !== false || stateFacts?.['drugContaminationKnown'] !== false || stateFacts?.['appurtenantWaterRightsKnown'] !== false ? ['montana-statutory-packet'] : []),...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertMontanaListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {

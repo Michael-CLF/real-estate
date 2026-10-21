@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../domains/offers/federal-lead-policy';
 import { getListingUploadGateDocumentTypes, type ListingDisclosureGateFacts } from './listing-disclosure-gates';
 import { californiaDisclosureOutstanding, type CaliforniaListingFacts } from '../domains/listings/state-packages/california/california-listing-facts.model';
 import { getStateDisclosureRequirements, normalizeDisclosureStateCode } from './state-disclosures.config';
@@ -31,6 +32,10 @@ const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
   ...Object.fromEntries(getStateDisclosureRequirements('WA').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('IA').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('MT').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
+  ...Object.fromEntries(getStateDisclosureRequirements('MD').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
+  ...Object.fromEntries(getStateDisclosureRequirements('NM').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
+  ...Object.fromEntries(getStateDisclosureRequirements('SD').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
+  ...Object.fromEntries(getStateDisclosureRequirements('WY').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('NH').filter(r => r.documentType !== 'lead-based-paint').map(r => [r.documentType, {category: 'Required when applicable' as const, applicability: 'Read the state-specific scope and property applicability instructions.', timing: 'Follow the stated statutory deadline; optional documents do not universally block an offer.', instructions: r.description, suppliedBy: 'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('NE').filter(r => r.documentType !== 'lead-based-paint').map(r => [r.documentType, {category: 'Required when applicable' as const, applicability: 'Read the state-specific scope and property applicability instructions.', timing: 'Follow the stated statutory deadline; optional documents do not universally block an offer.', instructions: r.description, suppliedBy: 'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('MO').filter(r => r.documentType !== 'lead-based-paint').map(r => [r.documentType, {category: 'Required when applicable' as const, applicability: 'Read the state-specific scope and property applicability instructions.', timing: 'Follow the stated statutory deadline; optional documents do not universally block an offer.', instructions: r.description, suppliedBy: 'Seller or applicable agency/association'}])),
@@ -242,7 +247,7 @@ export interface ListingChecklistFacts extends ListingDisclosureGateFacts {
 /** Mirrors the supplied offer-creation gates for messaging; never enforces a gate. */
 export function getOfferBlockingDocumentTypes(state: string, facts: ListingChecklistFacts, now = Date.now()): readonly DisclosureDocumentType[] {
   const code = normalizeDisclosureStateCode(state);
-  if (code === 'CA') return californiaDisclosureOutstanding(facts.california?.disclosureApplicability, new Set()) as DisclosureDocumentType[];
+  if (code === 'CA') return californiaDisclosureOutstanding(facts.california?.disclosureApplicability, new Set(), facts) as DisclosureDocumentType[];
   return getListingUploadGateDocumentTypes(code, facts, now);
 }
 
@@ -253,6 +258,7 @@ export function checklistDocumentTitle(state: string, type: DisclosureDocumentTy
 
 export function checklistApplicability(id: string, facts: ListingChecklistFacts): string {
   if (id === 'lead-based-paint') {
+    if (isFederalLeadExcluded(facts)) return 'Not applicable to this property';
     if (facts.leadBasedPaintApplies === true || (facts.yearBuilt != null && facts.yearBuilt < 1978)) return 'Pre-1978 / lead disclosure: confirm any federal exemption';
     if (facts.yearBuilt != null && facts.yearBuilt >= 1978) return 'Generally not applicable: built in 1978 or later';
     return 'Confirm construction year in Property Details';
@@ -285,6 +291,6 @@ export function getChecklistRestrictionMessages(state: string, facts: ListingChe
   if (['NC', 'LA'].includes(code) && facts.propertyType !== 'land') messages.push('Provide the applicable seller disclosure statements no later than the buyer makes an offer. Confirm any statutory exemption before relying on it.');
   if (code === 'TX') messages.push('Provide the applicable Seller’s Disclosure Notice by the contract effective date. Late delivery can give the buyer termination rights.');
   if (code === 'OK') messages.push('Provide the applicable disclosure or legally eligible disclaimer before accepting an offer. If delivered after an offer, obtain the buyer’s required acknowledgment and confirmation before acceptance.');
-  if (!(facts.yearBuilt != null && facts.yearBuilt >= 1978 && facts.leadBasedPaintApplies !== true)) messages.push('For most housing built before 1978, the lead disclosure, available records and EPA pamphlet must be delivered before the buyer signs the purchase contract. Confirm any federal exemption.');
+  if (!isFederalLeadExcluded(facts)) messages.push('For most housing built before 1978, the lead disclosure, available records and EPA pamphlet must be delivered before the buyer signs the purchase contract. Confirm any federal exemption.');
   return messages;
 }

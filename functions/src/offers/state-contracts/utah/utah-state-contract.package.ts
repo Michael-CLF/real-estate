@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
@@ -7,8 +10,11 @@ import { createUtahInitialOfferTerms } from './utah-initial-terms';
 import { sanitizeUtahDraftTerms } from './utah-draft-terms-sanitizer';
 import { validateUtahSubmission } from './utah-submission-validator';
 import { createUtahContractMilestones } from './utah-contract-milestones';
-export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocument> = {
+export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(utahStateContractPackage, listing),
   stateCode: 'UT', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
   contractTypes: ['navstreet_utah_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Denver',
   agreementTemplate: { stateCode: 'UT', templateUid: UTAH_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Utah Residential Purchase and Sale Agreement', templateVersion: UTAH_DOCUMENT_RULES.version },
@@ -31,4 +37,4 @@ export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocume
     const { generateUtahOfferPdf } = require('./utah-offer-pdf.service') as typeof import('./utah-offer-pdf.service');
     return generateUtahOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["utah-hoa-governing-documents"],"snapshotSellerFact":true});

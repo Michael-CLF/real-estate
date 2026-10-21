@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import type { IndianaOfferTerms } from '../../../../../core/domains/offers/state-contracts/indiana/models/indiana-offer-terms.model';
 import type { StateOfferDisplayAdapter } from '../../../engine/display/state-offer-display.adapter';
 export const indianaOfferDisplayAdapter: StateOfferDisplayAdapter<IndianaOfferTerms> = {
@@ -15,11 +16,11 @@ export const indianaOfferDisplayAdapter: StateOfferDisplayAdapter<IndianaOfferTe
       closingDate: { label: 'Settlement deadline', value: terms.deadlines.settlementDate },
       possessionLabel: 'Vacant at closing',
       sellerSigningBlockReason: !['received','exempt'].includes(terms.disclosures.propertyConditionStatus)
-        ? 'Before seller acceptance, deliver the Indiana condition disclosure or supported exemption. This version records it as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery.'
+        ? 'This saved version does not record buyer review of the Indiana condition disclosure or supported exception evidence. Its signatures and receipt answers cannot be changed. Acceptance is unavailable for this version.'
         : undefined,
       signingBlockReason:         
-        (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) || terms.disclosures.leadPaintStatus === 'pending'
-        ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'
+        !['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) || (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
+        ? 'This offer records a required disclosure as not received. Signing is unavailable for this saved version. Its existing signatures and receipt answers cannot be changed.'
         : undefined,
     };
   },

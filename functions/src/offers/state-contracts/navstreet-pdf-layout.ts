@@ -31,6 +31,7 @@ export function registerNavStreetPdfFonts(pdf: PDFKit.PDFDocument): void {
 
 export function drawNavStreetPdfChrome(pdf: PDFKit.PDFDocument, input: {
   readonly stateName: string;
+  readonly agreementTitle?: string;
   readonly referenceNumber: string;
   readonly versionNumber: number;
   readonly pageNumber: number;
@@ -45,7 +46,7 @@ export function drawNavStreetPdfChrome(pdf: PDFKit.PDFDocument, input: {
   pdf.restore();
 
   pdf.font('NavStreet-Bold').fillColor('#FFFFFF').fontSize(9.4)
-    .text(`${input.stateName.toUpperCase()} RESIDENTIAL PURCHASE\nAND SALE AGREEMENT`, 181, 33,
+    .text((input.agreementTitle ?? `${input.stateName.toUpperCase()} RESIDENTIAL PURCHASE\nAND SALE AGREEMENT`).toUpperCase(), 181, 33,
       { width: 380, lineGap: 1.5, characterSpacing: 0.5 });
   pdf.font('NavStreet-Regular').fontSize(5.6)
     .text(`Offer | ${input.referenceNumber} | Version ${input.versionNumber}`, 181, 60,

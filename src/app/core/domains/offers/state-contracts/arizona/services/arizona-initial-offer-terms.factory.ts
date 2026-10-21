@@ -1,3 +1,4 @@
+import { isArizonaContractCompatible, ARIZONA_CONDOMINIUM_TERMS } from '../arizona-contract-selection';
 import { resolveArizonaPropertyTimeZone } from '../arizona-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -13,13 +14,14 @@ export interface CreateArizonaInitialOfferTermsInput {
 export function createArizonaInitialOfferTerms(
   input: CreateArizonaInitialOfferTermsInput
 ): ArizonaOfferTerms {
-  if (input.contractType !== 'navstreet_arizona_residential_sale_2026') {
+  if (!['navstreet_arizona_residential_sale_2026','navstreet_arizona_condominium_resale_2026'].includes(input.contractType)) {
     throw new Error('Unsupported Arizona agreement.');
   }
-  if (input.property.state !== 'AZ' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+  if (input.property.state !== 'AZ' || !isArizonaContractCompatible(input.contractType,input.property.propertyType,input.property.contractFacts)) {
     throw new Error('A qualifying Arizona residential resale listing is required.');
   }
   return {
+    ...(input.contractType === 'navstreet_arizona_condominium_resale_2026' ? {condominium:{...ARIZONA_CONDOMINIUM_TERMS},documentVersions:{}} : {}),
     stateCode: 'AZ', contractType: input.contractType,
     property: { ...input.property, state: 'AZ' },
     legalDescription: input.property.legalDescription ?? '',
@@ -50,7 +52,7 @@ export function createArizonaInitialOfferTerms(
       titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15,
     },
     disclosures: {
-      propertyConditionStatus: 'unselected', statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
+      propertyConditionStatus: 'unselected', statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: input.contractType === 'navstreet_arizona_condominium_resale_2026' ? true : null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
       hoaDocumentsStatus: 'unselected',
       sellerReportsExistingLeases: null,
       leaseStatementAcknowledged: null,

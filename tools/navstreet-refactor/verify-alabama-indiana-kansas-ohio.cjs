@@ -66,7 +66,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const yearBuilt of [undefined,null,1900,1977,1978,2026])for(const leadBasedPaintApplies of [null,false,true])for(const known of [null,false,true]){
    const stateFacts={...facts(code)[slug],hiddenHealthSafetyKnown:known,elevatedRadonKnown:known};
    const f={yearBuilt,leadBasedPaintApplies,[slug]:stateFacts};
-   const expected=[...((code==='AL'||code==='KS')&&known!==false?[slug+'-statutory-packet']:[]),...(leadBasedPaintApplies===true||yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
+   const expected=[...(code==='IN'?['indiana-seller-disclosure']:[]),...((code==='AL'||code==='KS')&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
    assert.deepEqual(normalize(gates.getListingUploadGateDocumentTypes(code,f,Date.now())),expected);
    assert.deepEqual(requiredTypes({yearBuilt,sellerStatements:{leadBasedPaintApplies,[slug]:stateFacts}}),expected);parity++;
   }
@@ -82,6 +82,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   Object.assign(terms.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});Object.assign(terms.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});
   terms.deadlines.settlementDate='2099-12-01';Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName:'Test Title',specialAssessmentPayer:'seller'});
   Object.assign(terms.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',hoaDocumentsStatus:'not_applicable',leadPaintStatus:'built_1978_or_later',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});
+  if(code==='IN') terms.documentVersions={'indiana-seller-disclosure':'v1','indiana-statutory-packet':'v1'};
   terms.delivery.expiresAt='2099-10-01T12:00:00Z';terms.delivery.electronicDeliveryAuthorized=true;
   const version={Uid:'version',offerUid:'offer',stateCode:code,status:'draft',immutable:false,expiresAt:terms.delivery.expiresAt,terms,buyers:[party('buyer')],sellers:[party('seller')],initiatedBy:'buyer',initiatedByUid:'buyer'},offer={Uid:'offer',stateCode:code,listingUid:'sample',currentVersionUid:'version'};
   const validator=new (load(path.join(project,'src/app/features/offers/states',slug,'validators',slug+'-offer.validator.ts')))[name+'OfferValidator']();
@@ -94,19 +95,16 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
    const result=pkg.createContractMilestones({version:v,effectiveAt});assert.equal(result.timeZone,zone);assert.equal(result.dueDiligenceEndsAt,'2026-11-02');
   }
   const reject=change=>{const v=structuredClone(version);change(v.terms);assert.throws(()=>pkg.validateSubmission({offer,version:v}));assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);};
-  reject(t=>t.delivery.electronicDeliveryAuthorized=false);reject(t=>t.delivery.timeZone='UTC');reject(t=>t.purchase.financingType='fha');reject(t=>t.deadlines.settlementDate='2099-02-31');reject(t=>t.disclosures.leadPaintStatus='pending');
+  reject(t=>t.delivery.electronicDeliveryAuthorized=false);reject(t=>t.delivery.timeZone='UTC');reject(t=>t.purchase.financingType='fha');reject(t=>t.deadlines.settlementDate='2099-02-31');reject(t=>{t.property.yearBuilt=1977;t.disclosures.leadPaintStatus='pending';});
   for(const key of ['propertyConditionStatus','statutoryPacketStatus']){
    const v=structuredClone(version);v.terms.disclosures[key]='pending';
-   validate(v);
    if(code==='IN'&&key==='propertyConditionStatus'){
+    assert.throws(()=>pkg.validateSubmission({offer,version:v}),/Review the uploaded/);
+    assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);
     const adapter=load(path.join(project,'src/app/features/offers/states/indiana/display/indiana-offer-display.adapter.ts')).indianaOfferDisplayAdapter;
-    assert.equal(adapter.display(v.terms).signingBlockReason,undefined);
     assert(adapter.display(v.terms).sellerSigningBlockReason);
-    assert.throws(()=>pkg.validateBeforeSigning({offer,version:{...v,terms:{...v.terms,disclosures:{...v.terms.disclosures,leadPaintStatus:'pending'}}},signerRole:'buyer'}),/required disclosures/);
-    pkg.validateBeforeSigning({offer,version:v,signerRole:'buyer'});
-    assert.throws(()=>pkg.validateBeforeSigning({offer,version:v,signerRole:'seller'}),/before seller acceptance/);
-    assert.equal(pkg.requiredListingDisclosures({offer,version:v}).includes('indiana-seller-disclosure'),false);
-   }
+    for(const signerRole of ['buyer','seller']) assert.throws(()=>pkg.validateBeforeSigning({offer,version:v,signerRole}),/does not record buyer review/);
+   }else validate(v);
   }
   if(code==='AL'||code==='KS'){
    const key=code==='AL'?'hiddenHealthSafetyKnown':'elevatedRadonKnown';

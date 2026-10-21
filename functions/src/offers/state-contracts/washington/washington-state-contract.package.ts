@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertWashingtonListingDisclosures } from '../../washington-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeWashingtonDraftTerms } from './washington-draft-terms-sanitizer
 import { validateWashingtonSubmission } from './washington-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createWashingtonContractMilestones } from './washington-contract-milestones';
-export const washingtonStateContractPackage: StateContractPackage<WashingtonOfferTermsDocument> = {
+export const washingtonStateContractPackage: StateContractPackage<WashingtonOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(washingtonStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertWashingtonListingDisclosures },
   stateCode: 'WA', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_washington_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Los_Angeles',
   agreementTemplate: { stateCode: 'WA', templateUid: WASHINGTON_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Washington Residential Purchase and Sale Agreement', templateVersion: WASHINGTON_DOCUMENT_RULES.version },
@@ -47,4 +53,4 @@ export const washingtonStateContractPackage: StateContractPackage<WashingtonOffe
     const { generateWashingtonOfferPdf } = require('./washington-offer-pdf.service') as typeof import('./washington-offer-pdf.service');
     return generateWashingtonOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["washington-association-documents"]});

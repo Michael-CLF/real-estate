@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertLouisianaListingDisclosures } from '../../louisiana-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -10,9 +13,12 @@ import { sanitizeLouisianaDraftTerms } from './louisiana-draft-terms-sanitizer';
 import { validateLouisianaSubmission } from './louisiana-submission-validator';
 import { createLouisianaContractMilestones } from './louisiana-contract-milestones';
 
-export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferTermsDocument> = {
+export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(louisianaStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertLouisianaListingDisclosures, assertCounterofferReady: assertLouisianaListingDisclosures, counterofferMissingListingMessage: 'The Louisiana listing could not be found.' },
   stateCode: 'LA', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['lrec_louisiana_residential_agreement_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: {
@@ -51,4 +57,4 @@ export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferT
     const { generateLouisianaOfferPdf } = require('./louisiana-offer-pdf.service') as typeof import('./louisiana-offer-pdf.service');
     return generateLouisianaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"documentTypes":[],"auditedNoReceiptQuestion":true});

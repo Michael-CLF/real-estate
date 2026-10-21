@@ -26,6 +26,10 @@ export function sanitizeArizonaDraftTerms(
 
   const sanitized: ArizonaOfferTermsDocument = {
     ...input.currentTerms,
+    ...(input.currentTerms.contractType === 'navstreet_arizona_condominium_resale_2026' ? {
+      condominium: {projectName:text(record(request['condominium'])['projectName'],300),unitDesignation:text(record(request['condominium'])['unitDesignation'],300),commonElements:text(record(request['condominium'])['commonElements'],3000),parkingStorage:text(record(request['condominium'])['parkingStorage'],3000),rightsAcknowledged:bool(record(request['condominium'])['rightsAcknowledged'])},
+      documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value])=>['arizona-seller-disclosure','arizona-statutory-packet','arizona-association-documents','lead-based-paint'].includes(key) && typeof value==='string' && value.length>0 && value.length<=200 && !value.includes('/')).map(([key,value])=>[key,String(value)])),
+    } : {}),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,

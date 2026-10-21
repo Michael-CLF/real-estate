@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import type { StateContractPackage } from '../state-contract-package';
@@ -7,8 +10,11 @@ import { createWisconsinInitialOfferTerms } from './wisconsin-initial-terms';
 import { sanitizeWisconsinDraftTerms } from './wisconsin-draft-terms-sanitizer';
 import { validateWisconsinSubmission } from './wisconsin-submission-validator';
 import { createWisconsinContractMilestones } from './wisconsin-contract-milestones';
-export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferTermsDocument> = {
+export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(wisconsinStateContractPackage, listing),
   stateCode: 'WI', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_wisconsin_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'WI', templateUid: WISCONSIN_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Wisconsin Residential Purchase and Sale Agreement', templateVersion: WISCONSIN_DOCUMENT_RULES.version },
@@ -31,4 +37,4 @@ export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferT
     const { generateWisconsinOfferPdf } = require('./wisconsin-offer-pdf.service') as typeof import('./wisconsin-offer-pdf.service');
     return generateWisconsinOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["wisconsin-association-documents"],"snapshotSellerFact":true});

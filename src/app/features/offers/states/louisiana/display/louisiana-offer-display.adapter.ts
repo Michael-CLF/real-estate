@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import type { LouisianaOfferTerms } from '../../../../../core/domains/offers/state-contracts/louisiana/models/louisiana-offer-terms.model';
 import type { StateOfferDisplayAdapter } from '../../../engine/display/state-offer-display.adapter';
 
@@ -16,7 +17,7 @@ export const louisianaOfferDisplayAdapter: StateOfferDisplayAdapter<LouisianaOff
       importantDeadline: { label: 'Due diligence and inspection', value: `${terms.deadlines.inspectionPeriodDays} calendar days after acceptance` },
       closingDate: { label: 'Act of Sale', value: terms.deadlines.settlementDate },
       possessionLabel: 'At Act of Sale',
-      signingBlockReason: terms.disclosures.propertyDisclosureStatus !== 'received' || terms.disclosures.leadPaintStatus === 'pending'
+      signingBlockReason: terms.disclosures.propertyDisclosureStatus !== 'received' || (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'The buyer must receive the applicable seller disclosure before submitting a new offer.'
         : undefined,
     };

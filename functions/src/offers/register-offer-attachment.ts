@@ -514,6 +514,7 @@ export const registerOfferAttachment =
           transaction.update(
             offerReference,
             {
+              draftLastActivityAt: now,
               lastActivityAt: now,
               updatedAt: now,
             }

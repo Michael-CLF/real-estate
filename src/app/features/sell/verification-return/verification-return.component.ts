@@ -73,6 +73,14 @@ export class VerificationReturnComponent
 
   private paymentNavigationStarted = false;
 
+  private attentionTimer: ReturnType<typeof setTimeout> | null = null;
+  private latestIdentityStatus: ListingIdentityStatus | null = null;
+
+  private clearAttentionTimer(): void {
+    if (this.attentionTimer !== null) clearTimeout(this.attentionTimer);
+    this.attentionTimer = null;
+  }
+
 
   protected readonly pageState =
     signal<PageState>('loading');
@@ -148,6 +156,7 @@ export class VerificationReturnComponent
 
   ngOnDestroy(): void {
     this.componentDestroyed = true;
+    this.clearAttentionTimer();
     this.unsubscribeFromDraft?.();
   }
 
@@ -290,11 +299,16 @@ export class VerificationReturnComponent
     this.unsubscribeFromDraft =
       onSnapshot(
         draftReference,
+        { includeMetadataChanges: true },
 
         snapshot => {
           if (this.componentDestroyed) {
             return;
           }
+
+          // A cached pre-redirect status is not a current Stripe result.
+          // Listen for metadata changes so an identical server result is handled.
+          if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
 
           if (!snapshot.exists()) {
             this.showError(
@@ -348,6 +362,12 @@ export class VerificationReturnComponent
     listingUid: string
   ): void {
 
+    if (this.componentDestroyed || this.latestIdentityStatus === 'verified') return;
+    const unchanged = this.latestIdentityStatus === identityStatus;
+    this.latestIdentityStatus = identityStatus;
+    this.errorMessage.set('');
+    if (!unchanged) this.clearAttentionTimer();
+
     switch (identityStatus) {
       case 'verified':
         this.pageState.set('verified');
@@ -356,7 +376,16 @@ export class VerificationReturnComponent
 
       case 'requires_input':
       case 'failed':
-        this.pageState.set('requires_input');
+        // Stripe starts sessions in requires_input. Allow webhook updates to
+        // settle before offering a retry; this status alone is not a failure.
+        if (unchanged && (this.attentionTimer !== null || this.pageState() === 'requires_input')) break;
+        this.pageState.set('processing');
+        this.attentionTimer = setTimeout(() => {
+          this.attentionTimer = null;
+          if (!this.componentDestroyed && this.latestIdentityStatus === identityStatus) {
+            this.pageState.set('requires_input');
+          }
+        }, 2500);
         break;
 
       case 'pending':
@@ -398,9 +427,8 @@ export class VerificationReturnComponent
 
       this.paymentNavigationStarted = false;
 
-      this.showError(
-        'We confirmed your identity, but could not open the payment page. Please try again.'
-      );
+      this.errorMessage.set('We confirmed your identity, but could not open the payment page. Please try again.');
+      this.pageState.set('error');
     }).catch(error => {
       this.paymentNavigationStarted = false;
 
@@ -409,14 +437,15 @@ export class VerificationReturnComponent
         error
       );
 
-      this.showError(
-        'We confirmed your identity, but could not open the payment page. Please try again.'
-      );
+      this.errorMessage.set('We confirmed your identity, but could not open the payment page. Please try again.');
+      this.pageState.set('error');
     });
   }
 
 
   private showError(message: string): void {
+    if (this.componentDestroyed || this.latestIdentityStatus === 'verified') return;
+    this.clearAttentionTimer();
     this.errorMessage.set(message);
     this.pageState.set('error');
   }

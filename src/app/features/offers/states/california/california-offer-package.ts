@@ -1,3 +1,5 @@
+import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
+import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type { StateOfferPackage } from '../../engine/models/state-offer-package';
 import type { CaliforniaOfferTerms, CaliforniaContractType } from '../../../../core/domains/offers/state-contracts/california/models/california-offer-terms.model';
 import { CALIFORNIA_RESIDENTIAL_CONTRACT_DEFINITION } from '../../../../core/domains/offers/state-contracts/california/models/california-offer-terms.model';
@@ -5,10 +7,10 @@ import { createCaliforniaInitialOfferTerms } from '../../../../core/domains/offe
 import { CALIFORNIA_RESIDENTIAL_SALE_SECTIONS } from './questions/california-residential-sale.sections';
 import { CaliforniaOfferValidator } from './validators/california-offer.validator';
 const validator = new CaliforniaOfferValidator();
-export const CALIFORNIA_OFFER_PACKAGE: StateOfferPackage<CaliforniaOfferTerms, CaliforniaContractType> = {
+export const CALIFORNIA_OFFER_PACKAGE: StateOfferPackage<CaliforniaOfferTerms, CaliforniaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'CA', stateName: 'California',
   contracts: { navstreet_california_residential_sale_2026: CALIFORNIA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createCaliforniaInitialOfferTerms(input),
   getSections: () => CALIFORNIA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'disclosures.leadExemptionBasis':'','documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays','disclosures.leadExemptionBasis']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["california-association-documents"]});

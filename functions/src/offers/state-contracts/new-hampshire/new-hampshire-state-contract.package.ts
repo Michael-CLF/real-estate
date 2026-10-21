@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertNewHampshireListingDisclosures } from '../../new-hampshire-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeNewHampshireDraftTerms } from './new-hampshire-draft-terms-sani
 import { validateNewHampshireSubmission } from './new-hampshire-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createNewHampshireContractMilestones } from './new-hampshire-contract-milestones';
-export const newHampshireStateContractPackage: StateContractPackage<NewHampshireOfferTermsDocument> = {
+export const newHampshireStateContractPackage: StateContractPackage<NewHampshireOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(newHampshireStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertNewHampshireListingDisclosures },
   stateCode: 'NH', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_new_hampshire_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/New_York',
   agreementTemplate: { stateCode: 'NH', templateUid: NEW_HAMPSHIRE_DOCUMENT_RULES.templateUid, templateName: 'NavStreet New Hampshire Residential Purchase and Sale Agreement', templateVersion: NEW_HAMPSHIRE_DOCUMENT_RULES.version },
@@ -45,4 +51,4 @@ export const newHampshireStateContractPackage: StateContractPackage<NewHampshire
     const { generateNewHampshireOfferPdf } = require('./new-hampshire-offer-pdf.service') as typeof import('./new-hampshire-offer-pdf.service');
     return generateNewHampshireOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["new-hampshire-association-documents"]});

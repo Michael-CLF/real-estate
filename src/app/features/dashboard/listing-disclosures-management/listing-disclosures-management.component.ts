@@ -1,3 +1,4 @@
+import { isDisclosureVisibleForListing } from '../../../core/configuration/state-disclosures.config';
 import { isStateListingDisclosureCardVisible } from '../../../core/domains/listings/state-packages/state-listing.registry';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle, getChecklistRestrictionMessages } from '../../../core/configuration/listing-document-checklist.config';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +24,7 @@ import {
 import {
   getStateDisclosureRequirements,
   isDisclosureRequiredForListing,
+  isDisclosureRequiredBeforeAcceptanceForListing,
   normalizeDisclosureStateCode
 } from '../../../core/configuration/state-disclosures.config';
 import {
@@ -119,7 +121,13 @@ export class ListingDisclosuresManagementComponent
     }
     return listing !== null && isDisclosureRequiredForListing(listing.state, requirement, {
       ...listing.sellerStatements,
-      yearBuilt: listing.yearBuilt,
+      yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
+    });
+  }
+  protected isRequiredBeforeAcceptance(requirement: StateDisclosureRequirement): boolean {
+    const listing = this.listing();
+    return !!listing && isDisclosureRequiredBeforeAcceptanceForListing(listing.state, requirement, {
+      ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
     });
   }
   protected readonly requirements =
@@ -231,7 +239,7 @@ export class ListingDisclosuresManagementComponent
         ),
       });
       this.requirements.set(
-        [...requirements].sort(
+        requirements.filter(requirement => isDisclosureVisibleForListing(requirement,{...listing.sellerStatements,yearBuilt:listing.yearBuilt,propertyType:listing.propertyType}) && (!requirement.appliesToListing || requirement.appliesToListing(listing))).sort(
           (
             firstRequirement,
             secondRequirement

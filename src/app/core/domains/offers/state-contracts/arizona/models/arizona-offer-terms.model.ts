@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type ArizonaContractType = 'navstreet_arizona_residential_sale_2026';
+export type ArizonaContractType = 'navstreet_arizona_residential_sale_2026' | 'navstreet_arizona_condominium_resale_2026';
 export type ArizonaFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type ArizonaDisclosureStatus = 'unselected' | 'received' | 'pending';
 
@@ -10,6 +10,8 @@ export interface ArizonaOfferTerms {
   readonly stateCode: 'AZ';
   readonly contractType: ArizonaContractType;
   readonly property: OfferPropertySnapshot;
+  readonly condominium?: {readonly projectName:string;readonly unitDesignation:string;readonly commonElements:string;readonly parkingStorage:string;readonly rightsAcknowledged:boolean|null;};
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -84,3 +86,5 @@ export const ARIZONA_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a Arizona residential resale between the parties.',
 } as const;
+
+export const ARIZONA_CONDOMINIUM_CONTRACT_DEFINITION = {contractType:'navstreet_arizona_condominium_resale_2026',formId:'NAVSTREET-AZ-CONDOMINIUM-2026',formName:'NavStreet Arizona Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-12',revisionDate:'2026-10-12',description:'NavStreet-written agreement for an ordinary fee-simple residential condominium resale.'} as const;

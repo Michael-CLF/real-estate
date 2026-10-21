@@ -238,6 +238,8 @@ export abstract class OfferRepository {
   ): Promise<SignOfferResult>;
 
 
+  abstract discardOfferDraft(offerUid: string): Promise<void>;
+
   abstract withdrawOffer(
     offerUid: string,
     offerVersionUid: string

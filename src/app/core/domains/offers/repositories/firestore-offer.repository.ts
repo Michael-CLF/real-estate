@@ -203,6 +203,8 @@ export class FirestoreOfferRepository
     );
 
 
+  private readonly discardOfferDraftFunction = httpsCallable<{offerUid:string}, {deleted:boolean}>(functions, 'discardOfferDraft');
+
   private readonly withdrawOfferFunction =
     httpsCallable<
       WithdrawOfferFunctionRequest,
@@ -360,7 +362,7 @@ export class FirestoreOfferRepository
     const snapshot =
       await getDocs(offerQuery);
 
-    let offers = snapshot.docs.map(
+    let offers = snapshot.docs.filter(doc => doc.data()['draftCleanupPending'] !== true).map(
       offerDocument =>
         this.mapDocumentData<Offer>(
           offerDocument.id,
@@ -598,6 +600,10 @@ export class FirestoreOfferRepository
     return result.data;
   }
 
+
+  override async discardOfferDraft(offerUid: string): Promise<void> {
+    await this.discardOfferDraftFunction({offerUid});
+  }
 
   override async withdrawOffer(
     offerUid: string,

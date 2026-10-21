@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
@@ -15,19 +16,10 @@ export function louisianaRequiredDisclosureTypes(
       : [];
   }
 
-  const year = listing['yearBuilt'];
-  const statements = listing['sellerStatements'];
-  const sellerStatements =
-    statements && typeof statements === 'object' && !Array.isArray(statements)
-      ? statements as Record<string, unknown>
-      : {};
-
   return [
     'louisiana-property-disclosure',
     ...(
-      year == null ||
-      (typeof year === 'number' && year < 1978) ||
-      sellerStatements['leadBasedPaintApplies'] === true
+      !isFederalLeadExcluded(listing)
         ? ['lead-based-paint']
         : []
     ),

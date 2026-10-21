@@ -1,3 +1,5 @@
+import { pinMissouriReviewedDocumentVersions } from '../services/missouri-reviewed-document-versions';
+import { selectMissouriContract } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-contract-selection';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveMissouriPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -299,9 +301,6 @@ export class MissouriOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This Missouri agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
-      }
 
       resolveMissouriPropertyTimeZone(createPropertySnapshot(listing).county);
       this.listing.set(listing);
@@ -345,12 +344,12 @@ export class MissouriOfferEntryComponent
         await this.loadOfferSession(
           this.requestedOfferUid,
           this.requestedOfferVersionUid,
-          'navstreet_missouri_residential_sale_2026'
+          undefined
         );
       } else {
-        await this.resumeExistingDraft();
+        const resumed = await this.resumeExistingDraft();
 
-        if (!this.currentVersion()) {
+        if (!resumed) {
           await this.createInitialDraft();
         }
       }
@@ -380,7 +379,7 @@ export class MissouriOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_missouri_residential_sale_2026',
+        selectMissouriContract(String(this.listing()!.propertyType), this.listing()!.sellerStatements?.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );
@@ -395,6 +394,13 @@ export class MissouriOfferEntryComponent
   }
 
 
+  private lastReviewedTerms: MissouriOfferTerms | null = null;
+  private prepareDraftChange(change: MissouriOfferDraftChange): MissouriOfferDraftChange {
+    const terms = pinMissouriReviewedDocumentVersions(this.lastReviewedTerms ?? this.currentVersion()!.terms, change.terms, this.listingDisclosures());
+    this.lastReviewedTerms = terms;
+    return {...change,terms};
+  }
+
   protected onDraftChanged(
     change: MissouriOfferDraftChange
   ): void {
@@ -405,7 +411,7 @@ export class MissouriOfferEntryComponent
       return;
     }
 
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     void this.flushDraftSave().catch(() => undefined);
   }
 
@@ -455,7 +461,7 @@ export class MissouriOfferEntryComponent
     const offer = this.currentOffer();
     const version = this.currentVersion();
     if (!offer || !version || this.busy()) return;
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     this.submitting.set(true);
     this.errorMessage.set('');
     try {
@@ -479,14 +485,23 @@ export class MissouriOfferEntryComponent
 
 
   private async resumeExistingDraft():
-    Promise<void> {
+    Promise<boolean> {
     const existingOffer = await this.workflow.findResumableDraft(this.listingUid, this.offerRepository);
-    if (!existingOffer) return;
+    if (!existingOffer) return false;
 
     await this.loadOfferSession(
       existingOffer.Uid,
       existingOffer.currentVersionUid
     );
+    const facts = this.listing()?.sellerStatements?.contractFacts;
+    if (facts && ['isCondominium','isDeveloperSale','isLeasehold'].every(key => typeof facts[key as keyof typeof facts] === 'boolean')) {
+      let expected: string | undefined;
+      try {expected = selectMissouriContract(String(this.listing()!.propertyType), facts);} catch {expected = undefined;}
+      if (expected !== this.currentVersion()?.terms.contractType) {
+        await this.router.navigate(['/offers', existingOffer.Uid], {queryParams:{draftAgreementChanged:'true'}});
+      }
+    }
+    return true;
   }
 
 
@@ -503,6 +518,7 @@ export class MissouriOfferEntryComponent
     this.workflow.assertCurrentEditableDraft(offer, version, this.listingUid);
     this.currentOffer.set(offer);
     this.currentVersion.set(version);
+    this.lastReviewedTerms = version.terms;
     this.property.set(
       version.terms.property
     );

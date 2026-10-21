@@ -559,16 +559,16 @@ export class FirestoreMarketplaceListingRepository
             featuredListing:
                 data['featuredListing'] === true,
 
-            bedrooms:
+            bedrooms: data['propertyType'] === 'land' ? undefined :
                 this.readNumber(
                     data['bedrooms']
                 ),
-            bathrooms:
+            bathrooms: data['propertyType'] === 'land' ? undefined :
                 this.readNumber(
                     data['bathrooms']
                 ),
 
-            squareFeet:
+            squareFeet: data['propertyType'] === 'land' ? undefined :
                 this.readNumber(
                     data['squareFeet']
                 ),
@@ -586,7 +586,8 @@ export class FirestoreMarketplaceListingRepository
                     ? lotSize
                     : undefined,
 
-            yearBuilt:
+            legalDescription: this.readString(data['legalDescription']) || undefined,
+            yearBuilt: data['propertyType'] === 'land' ? undefined :
                 this.readNumber(
                     data['yearBuilt']
                 ),
@@ -604,6 +605,11 @@ export class FirestoreMarketplaceListingRepository
                         washington: (data['sellerStatements'] as Record<string, unknown>)['washington'] as NonNullable<MarketplaceListing['sellerStatements']>['washington'],
                         iowa: (data['sellerStatements'] as Record<string, unknown>)['iowa'] as NonNullable<MarketplaceListing['sellerStatements']>['iowa'],
                         montana: (data['sellerStatements'] as Record<string, unknown>)['montana'] as NonNullable<MarketplaceListing['sellerStatements']>['montana'],
+                        maryland: (data['sellerStatements'] as Record<string, unknown>)['maryland'] as NonNullable<MarketplaceListing['sellerStatements']>['maryland'],
+                        newMexico: (data['sellerStatements'] as Record<string, unknown>)['newMexico'] as NonNullable<MarketplaceListing['sellerStatements']>['newMexico'],
+                        southDakota: (data['sellerStatements'] as Record<string, unknown>)['southDakota'] as NonNullable<MarketplaceListing['sellerStatements']>['southDakota'],
+                        wyoming: (data['sellerStatements'] as Record<string, unknown>)['wyoming'] as NonNullable<MarketplaceListing['sellerStatements']>['wyoming'],
+                        contractFacts: (data['sellerStatements'] as Record<string, unknown>)['contractFacts'] as NonNullable<MarketplaceListing['sellerStatements']>['contractFacts'],
                         missouri: (data['sellerStatements'] as Record<string, unknown>)['missouri'] as NonNullable<MarketplaceListing['sellerStatements']>['missouri'],
                         nebraska: (data['sellerStatements'] as Record<string, unknown>)['nebraska'] as NonNullable<MarketplaceListing['sellerStatements']>['nebraska'],
                         newHampshire: (data['sellerStatements'] as Record<string, unknown>)['newHampshire'] as NonNullable<MarketplaceListing['sellerStatements']>['newHampshire'],

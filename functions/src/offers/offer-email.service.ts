@@ -591,7 +591,7 @@ function getTemplatePresentation(
         headline:
           'Your agreement is fully executed',
         statusLabel:
-          'Accepted — contract effective',
+          'Accepted — Contract effective',
         buttonText: 'View Contract'
       };
 

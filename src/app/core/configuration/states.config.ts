@@ -25,7 +25,7 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'KY', isActive: false, name: 'Kentucky', slug: 'kentucky' },
   { abbreviation: 'LA', isActive: true, name: 'Louisiana', slug: 'louisiana' },
   { abbreviation: 'ME', isActive: false, name: 'Maine', slug: 'maine' },
-  { abbreviation: 'MD', isActive: false, name: 'Maryland', slug: 'maryland' },
+  { abbreviation: 'MD', isActive: true, name: 'Maryland', slug: 'maryland' },
   { abbreviation: 'MA', isActive: false, name: 'Massachusetts', slug: 'massachusetts' },
   { abbreviation: 'MI', isActive: true, name: 'Michigan', slug: 'michigan' },
   { abbreviation: 'MN', isActive: true, name: 'Minnesota', slug: 'minnesota' },
@@ -36,7 +36,7 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'NV', isActive: false, name: 'Nevada', slug: 'nevada' },
   { abbreviation: 'NH', isActive: true, name: 'New Hampshire', slug: 'new-hampshire' },
   { abbreviation: 'NJ', isActive: false, name: 'New Jersey', slug: 'new-jersey' },
-  { abbreviation: 'NM', isActive: false, name: 'New Mexico', slug: 'new-mexico' },
+  { abbreviation: 'NM', isActive: true, name: 'New Mexico', slug: 'new-mexico' },
   { abbreviation: 'NY', isActive: false, name: 'New York', slug: 'new-york' },
 
   { abbreviation: 'NC', isActive: true, name: 'North Carolina', slug: 'north-carolina' },
@@ -48,7 +48,7 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'PA', isActive: false, name: 'Pennsylvania', slug: 'pennsylvania' },
   { abbreviation: 'RI', isActive: false, name: 'Rhode Island', slug: 'rhode-island' },
   { abbreviation: 'SC', isActive: true, name: 'South Carolina', slug: 'south-carolina' },
-  { abbreviation: 'SD', isActive: false, name: 'South Dakota', slug: 'south-dakota' },
+  { abbreviation: 'SD', isActive: true, name: 'South Dakota', slug: 'south-dakota' },
   { abbreviation: 'TN', isActive: false, name: 'Tennessee', slug: 'tennessee' },
   { abbreviation: 'TX', isActive: true, name: 'Texas', slug: 'texas' },
   { abbreviation: 'UT', isActive: true, name: 'Utah', slug: 'utah' },
@@ -57,5 +57,5 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'WA', isActive: true, name: 'Washington', slug: 'washington' },
   { abbreviation: 'WV', isActive: false, name: 'West Virginia', slug: 'west-virginia' },
   { abbreviation: 'WI', isActive: true, name: 'Wisconsin', slug: 'wisconsin' },
-  { abbreviation: 'WY', isActive: false, name: 'Wyoming', slug: 'wyoming' }
+  { abbreviation: 'WY', isActive: true, name: 'Wyoming', slug: 'wyoming' }
 ];

@@ -1,3 +1,8 @@
+import type { ListingContractFacts } from '../models/listing.model';
+import type { WyomingListingAnswers } from './wyoming/wyoming-listing-form';
+import type { SouthDakotaListingAnswers } from './south-dakota/south-dakota-listing-form';
+import type { NewMexicoListingAnswers } from './new-mexico/new-mexico-listing-form';
+import type { MarylandListingAnswers } from './maryland/maryland-listing-form';
 import type { MontanaListingAnswers } from './montana/montana-listing-form';
 import type { IowaListingAnswers } from './iowa/iowa-listing-form';
 import type { WashingtonListingAnswers } from './washington/washington-listing-form';
@@ -19,6 +24,7 @@ import { requiresStateListingField, type StateListingPackage } from './state-lis
 
 export interface ListingStatementMappingAnswers extends Omit<ListingStatementSaveAnswers,
   'ownershipStatus' | 'fuelTankOwnership'> {
+  contractFacts?: ListingContractFacts;
   ownershipStatus: NonNullable<ListingSellerStatements['ownershipStatus']> | '';
   fuelTankOwnership: NonNullable<ListingSellerStatements['fuelTankOwnership']> | '';
   oregon?: OregonListingAnswers;
@@ -33,6 +39,10 @@ export interface ListingStatementMappingAnswers extends Omit<ListingStatementSav
   washington?: WashingtonListingAnswers;
   iowa?: IowaListingAnswers;
   montana?: MontanaListingAnswers;
+  maryland?: MarylandListingAnswers;
+  newMexico?: NewMexicoListingAnswers;
+  southDakota?: SouthDakotaListingAnswers;
+  wyoming?: WyomingListingAnswers;
   southCarolina?: SouthCarolinaListingAnswers;
   california?: CaliforniaListingFacts;
   additionalSellerIncluded: boolean;
@@ -116,6 +126,7 @@ export function buildListingStatementPayload(
     ListingSellerStatements = {
     stateCode,
     schemaVersion: 1,
+    ...(statements.contractFacts ? {contractFacts: statements.contractFacts} : {}),
     ...mapStateListingSellerStatements(stateCode, statements),
     ...(requiresStateListingField(
       statePackage,

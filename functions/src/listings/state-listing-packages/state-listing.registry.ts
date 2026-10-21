@@ -1,3 +1,8 @@
+import { isFederalLeadExcluded } from '../../offers/state-contracts/federal-lead-policy';
+import { wyomingListingPackage } from './wyoming-listing.package';
+import { southDakotaListingPackage } from './south-dakota-listing.package';
+import { newMexicoListingPackage } from './new-mexico-listing.package';
+import { marylandListingPackage } from './maryland-listing.package';
 import { montanaListingPackage } from './montana-listing.package';
 import { iowaListingPackage } from './iowa-listing.package';
 import { washingtonListingPackage } from './washington-listing.package';
@@ -37,6 +42,10 @@ const PACKAGES = new Map<string, StateListingPackage>([
   ['FL', floridaListingPackage],
   ['MI', michiganListingPackage],
 ['ID', idahoListingPackage],
+['WY', wyomingListingPackage],
+['SD', southDakotaListingPackage],
+['NM', newMexicoListingPackage],
+['MD', marylandListingPackage],
 ['MT', montanaListingPackage],
 ['IA', iowaListingPackage],
 ['WA', washingtonListingPackage],
@@ -72,6 +81,7 @@ export function validateStateSellerStatements(
   listingUid: string,
   stateCode: string,
   statements: Record<string, unknown>,
+  property: {yearBuilt?:unknown;propertyType?:unknown} = {},
 ): void {
   const statePackage = getStateListingPackage(stateCode);
   const storedStateCode = typeof statements['stateCode'] === 'string'
@@ -93,6 +103,7 @@ export function validateStateSellerStatements(
     ['ownersAssociationApplies', 'owners-association'],
     ['fuelTankPresent', 'fuel-tank'],
   ] as const) {
+    if (field === 'leadBasedPaintApplies' && isFederalLeadExcluded(property)) continue;
     if (requiresField(statePackage, field) && typeof statements[field] !== 'boolean') {
       throw new Error(`Listing draft ${listingUid} has no ${message} statement.`);
     }

@@ -1,3 +1,4 @@
+import { pinIndianaReviewedDocumentVersions } from '../services/indiana-reviewed-document-versions';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveIndianaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/indiana/indiana-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -395,6 +396,21 @@ export class IndianaOfferEntryComponent
   }
 
 
+  private lastReviewedTerms: IndianaOfferTerms | null = null;
+  private lastReviewedVersionUid: string | null = null;
+  private prepareDraftChange(change: IndianaOfferDraftChange): IndianaOfferDraftChange {
+    const version = this.currentVersion();
+    if (!version || version.initiatedBy === 'seller') return change;
+    if (this.lastReviewedVersionUid !== version.Uid) {
+      this.lastReviewedTerms = null;
+      this.lastReviewedVersionUid = version.Uid;
+    }
+    const current = this.lastReviewedTerms ?? version.terms;
+    const terms = pinIndianaReviewedDocumentVersions(current, change.terms, this.listingDisclosures());
+    this.lastReviewedTerms = terms;
+    return { ...change, terms };
+  }
+
   protected onDraftChanged(
     change: IndianaOfferDraftChange
   ): void {
@@ -405,7 +421,7 @@ export class IndianaOfferEntryComponent
       return;
     }
 
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     void this.flushDraftSave().catch(() => undefined);
   }
 
@@ -455,7 +471,7 @@ export class IndianaOfferEntryComponent
     const offer = this.currentOffer();
     const version = this.currentVersion();
     if (!offer || !version || this.busy()) return;
-    this.pendingDraftChange = change;
+    this.pendingDraftChange = this.prepareDraftChange(change);
     this.submitting.set(true);
     this.errorMessage.set('');
     try {

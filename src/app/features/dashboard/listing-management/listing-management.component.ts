@@ -134,7 +134,7 @@ export class ListingManagementComponent implements OnInit {
   protected readonly allDisclosuresUploaded =
     computed(
       () =>
-        this.requiredDisclosureCount() > 0 &&
+        !this.disclosureStatusIsLoading() && !this.disclosureStatusError() &&
         this.uploadedDisclosureCount() ===
         this.requiredDisclosureCount()
     );
@@ -329,6 +329,15 @@ export class ListingManagementComponent implements OnInit {
       .map(type => checklistDocumentTitle(listing.state, type));
   });
 
+  protected readonly requiredOfferDocumentTypes = computed(() => {
+    const listing = this.listing();
+    return listing ? getOfferBlockingDocumentTypes(listing.state, {
+      ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
+    }) : [];
+  });
+  protected readonly uploadedOfferDisclosureCount = computed(() =>
+    this.requiredOfferDocumentTypes().filter(type => this.verifiedDisclosureTypes().includes(type)).length,
+  );
   protected readonly offerDisclosureMessages = computed(() => {
     const listing = this.listing();
     if (!listing) return [];
@@ -359,7 +368,7 @@ export class ListingManagementComponent implements OnInit {
               requirement,
               {
                 ...this.listing()?.sellerStatements,
-                yearBuilt: this.listing()?.yearBuilt,
+                yearBuilt: this.listing()?.yearBuilt, propertyType: this.listing()?.propertyType,
               }
             )
         );
@@ -375,13 +384,7 @@ export class ListingManagementComponent implements OnInit {
         return document.listingUid === this.listingUid && document.stateAbbreviation === stateAbbreviation && !!document.storagePath && !!document.versionId;
       }).map(summary => summary.documentType));
 
-      const uploadedDocumentTypes =
-        new Set(
-          summaries.map(
-            summary =>
-              summary.documentType
-          )
-        );
+      const uploadedDocumentTypes = new Set(this.verifiedDisclosureTypes());
 
       const uploadedRequiredCount =
         requiredRequirements.filter(

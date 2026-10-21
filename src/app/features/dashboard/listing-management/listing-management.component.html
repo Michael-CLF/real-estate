@@ -292,7 +292,7 @@
               </span>
               } @else if (allDisclosuresUploaded()) {
               <span class="available-badge">
-                Uploads ready
+                @if (requiredDisclosureCount() === 0) { No required uploads } @else { Uploads ready }
               </span>
               } @else {
               <span class="pending-count-badge">
@@ -316,7 +316,7 @@
               {{ uploadedDisclosureCount() }}
               of
               {{ requiredDisclosureCount() }}
-              listed documents uploaded
+              required documents uploaded
             </span>
 
             <div class="management-card__progress-track" role="progressbar" [attr.aria-valuemin]="0"

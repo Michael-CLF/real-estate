@@ -8,12 +8,13 @@ const compile = source => ts.transpileModule(source, { compilerOptions: {
   module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 function load(source, globals = {}) {
   const module = { exports: {} };
-  vm.runInNewContext(compile(source), { module, exports: module.exports, ...globals });
+  vm.runInNewContext(compile(source), { module, exports: module.exports, require:()=>require(path.join(project,'functions/lib/offers/state-contracts/federal-lead-policy.js')), ...globals });
   return module.exports;
 }
 const config = path.join(project, 'src/app/core/configuration');
 const policy = load(fs.readFileSync(path.join(config,'listing-disclosure-gates.ts'),'utf8'));
-const globals = { ...policy, normalizeDisclosureStateCode: code => code.trim().toUpperCase(),
+const federal = require(path.join(project,'functions/lib/offers/state-contracts/federal-lead-policy.js'));
+const globals = { ...policy, ...federal, normalizeDisclosureStateCode: code => code.trim().toUpperCase(),
   californiaDisclosureOutstanding: decisions => Object.keys(decisions || {}).filter(k => decisions[k].status === 'required') };
 const legacy = load("export function getOfferBlockingDocumentTypes(state: string, facts: ListingChecklistFacts, now = Date.now()): readonly DisclosureDocumentType[] {\n  const code = normalizeDisclosureStateCode(state);\n  const lead = facts.leadBasedPaintApplies === true;\n  const old = typeof facts.yearBuilt === 'number' && facts.yearBuilt < 1978;\n  if (code === 'CA') return californiaDisclosureOutstanding(facts.california?.disclosureApplicability, new Set()) as DisclosureDocumentType[];\n  if (code === 'FL') return [\n    'florida-flood-disclosure',\n    ...(facts.ownersAssociationApplies === true ? ['florida-hoa-disclosure-summary' as const] : []),\n    ...(lead || (old && facts.leadBasedPaintApplies !== false) ? ['lead-based-paint' as const] : []),\n  ];\n  if (code === 'LA') {\n    if (facts.propertyType === 'land') return now >= Date.parse('2027-01-01T06:00:00Z')\n      ? ['louisiana-vacant-residential-property-disclosure'] : [];\n    return ['louisiana-property-disclosure', ...(facts.yearBuilt == null || old || lead ? ['lead-based-paint' as const] : [])];\n  }\n  if (code === 'CO') return ['colorado-property-disclosure', 'colorado-radon-brochure',\n    ...(facts.yearBuilt == null || old || lead ? ['lead-based-paint' as const] : [])];\n  return [];\n}\n\n\nexport function isDisclosureRequiredForListing(\n  state: string,\n  requirement: StateDisclosureRequirement,\n  listing: { ownersAssociationApplies?: boolean | null; leadBasedPaintApplies?: boolean | null; yearBuilt?: number | null }\n): boolean {\n  if (requirement.required) return true;\n\n  const stateCode = normalizeDisclosureStateCode(state);\n\n  if (stateCode === 'CO') {\n    if (requirement.documentType === 'lead-based-paint') return listing.leadBasedPaintApplies === true || listing.yearBuilt == null || listing.yearBuilt < 1978;\n    if (requirement.documentType === 'colorado-association-documents') {\n      return false;\n    }\n    return false;\n  }\n\n  if (stateCode === 'LA') {\n    return requirement.documentType === 'lead-based-paint' &&\n      (\n        listing.leadBasedPaintApplies === true ||\n        listing.yearBuilt == null ||\n        listing.yearBuilt < 1978\n      );\n  }\n  if (stateCode !== 'FL') return false;\n  return (requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||\n    (requirement.documentType === 'lead-based-paint' &&\n      (listing.leadBasedPaintApplies === true ||\n        (typeof listing.yearBuilt === 'number' && listing.yearBuilt < 1978 && listing.leadBasedPaintApplies !== false)));\n}\n\n",globals);
 function currentFunction(file,name,end) {
@@ -32,13 +33,13 @@ for (const state of ['NC','TX','OK','UT','WI','FL','LA','CO','CA','SC','XX'])
       const facts = { yearBuilt,leadBasedPaintApplies,ownersAssociationApplies,propertyType,
         california: { disclosureApplicability: { a: {status:'required'}, b: {status:'exempt'} } } };
       assert.equal(JSON.stringify(current.getOfferBlockingDocumentTypes(state,facts,now)),
-        JSON.stringify(legacy.getOfferBlockingDocumentTypes(state,facts,now)));
+        JSON.stringify(legacy.getOfferBlockingDocumentTypes(state,facts,now).filter(type=>type!=='lead-based-paint'||!federal.isFederalLeadExcluded(facts))));
       comparisons++;
       for (const required of [false,true])
        for (const documentType of ['lead-based-paint','florida-hoa-disclosure-summary','colorado-association-documents','other']) {
         const requirement = { required,documentType };
         assert.equal(current.isDisclosureRequiredForListing(state,requirement,facts),
-          legacy.isDisclosureRequiredForListing(state,requirement,facts));
+          requirement.documentType === 'lead-based-paint' ? !federal.isFederalLeadExcluded(facts) : legacy.isDisclosureRequiredForListing(state,requirement,facts));
         comparisons++;
        }
      }
@@ -58,7 +59,7 @@ for (const code of ['FL','CO','LA'])
       const expected = code === 'FL' ? backend.floridaRequiredDisclosureTypes(listing)
         : code === 'CO' ? backend.coloradoRequiredDisclosureTypes(listing)
         : backend.louisianaRequiredDisclosureTypes(listing,new Date(now));
-      assert.equal(JSON.stringify(policy.getListingUploadGateDocumentTypes(code,facts,now)),JSON.stringify(expected));
+      assert.equal(JSON.stringify(policy.getListingUploadGateDocumentTypes(code,facts,now)),JSON.stringify(expected.filter(type=>type!=='lead-based-paint'||!federal.isFederalLeadExcluded(facts))));
       backendComparisons++;
      }
 console.log(`PASS: ${backendComparisons} comparisons with supplied FL/CO/LA backend gates for valid listing facts.`);

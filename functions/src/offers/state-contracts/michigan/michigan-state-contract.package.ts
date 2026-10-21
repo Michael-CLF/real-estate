@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertMichiganListingDisclosures } from '../../michigan-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeMichiganDraftTerms } from './michigan-draft-terms-sanitizer';
 import { validateMichiganSubmission } from './michigan-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createMichiganContractMilestones } from './michigan-contract-milestones';
-export const michiganStateContractPackage: StateContractPackage<MichiganOfferTermsDocument> = {
+export const michiganStateContractPackage: StateContractPackage<MichiganOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(michiganStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertMichiganListingDisclosures },
   stateCode: 'MI', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_michigan_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Detroit',
   agreementTemplate: { stateCode: 'MI', templateUid: MICHIGAN_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Michigan Residential Purchase and Sale Agreement', templateVersion: MICHIGAN_DOCUMENT_RULES.version },
@@ -44,4 +50,4 @@ export const michiganStateContractPackage: StateContractPackage<MichiganOfferTer
     const { generateMichiganOfferPdf } = require('./michigan-offer-pdf.service') as typeof import('./michigan-offer-pdf.service');
     return generateMichiganOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["michigan-association-documents"]});

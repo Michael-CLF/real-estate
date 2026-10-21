@@ -7,9 +7,10 @@ import { callableFunctionOptions } from '../shared/function-options';
 import { verifyOfferSubmissionEligibility } from './verify-offer-eligibility';
 import { requireStateContractPackage } from './state-contracts/state-contract-registry';
 
+import type { StateOfferVersionDocument, StateContractTerms } from './state-contracts/state-contract-package';
+
 import type {
   OfferDocument,
-  OfferVersionDocument,
   SubmitOfferData,
   SubmitOfferResponse,
 } from './offer-types';
@@ -101,7 +102,7 @@ export const submitOffer = onCall<
     }
 
     const offer = offerSnapshot.data() as OfferDocument;
-    const version = versionSnapshot.data() as OfferVersionDocument;
+    let version = versionSnapshot.data() as StateOfferVersionDocument<StateContractTerms>;
 
     const stateContractPackage = requireStateContractPackage(
       offer.stateCode,
@@ -143,6 +144,10 @@ export const submitOffer = onCall<
       );
     }
 
+    if (stateContractPackage.prepareSubmissionTerms) {
+      version = {...version,terms:stateContractPackage.prepareSubmissionTerms({offer,version,listingData})};
+    }
+    stateContractPackage.assertListingContractCompatible?.(listingData, version);
     stateContractPackage.validateSubmission({ offer, version });
 
     await stateContractPackage.listingDisclosurePolicy?.assertReady?.(transaction, listingReference, listingData);
@@ -248,6 +253,7 @@ export const submitOffer = onCall<
       offer.pendingOfferCounted !== true;
 
     transaction.update(versionReference, {
+      ...(stateContractPackage.prepareSubmissionTerms ? {terms:version.terms} : {}),
       status: 'awaiting_signatures',
       immutable: true,
 
@@ -275,7 +281,8 @@ export const submitOffer = onCall<
       status: 'submitted',
       pendingOfferCounted: true,
       submittedAt: offer.submittedAt ?? now,
-      lastActivityAt: now,
+      draftLastActivityAt: now,
+              lastActivityAt: now,
       updatedAt: now,
 
       statusHistory: FieldValue.arrayUnion({
@@ -310,7 +317,7 @@ export const submitOffer = onCall<
 
 function verifySubmissionAccess(
   offer: OfferDocument,
-  version: OfferVersionDocument,
+  version: StateOfferVersionDocument<StateContractTerms>,
   userUid: string,
   offerVersionUid: string,
 ): void {

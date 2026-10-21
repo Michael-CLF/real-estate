@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import type { OregonOfferTerms } from '../../../../../core/domains/offers/state-contracts/oregon/models/oregon-offer-terms.model';
 import type { StateOfferDisplayAdapter } from '../../../engine/display/state-offer-display.adapter';
 export const oregonOfferDisplayAdapter: StateOfferDisplayAdapter<OregonOfferTerms> = {
@@ -14,7 +15,7 @@ export const oregonOfferDisplayAdapter: StateOfferDisplayAdapter<OregonOfferTerm
       importantDeadline: { label: 'inspection period', value: `${terms.deadlines.inspectionPeriodDays} calendar days after acceptance` },
       closingDate: { label: 'Settlement deadline', value: terms.deadlines.settlementDate },
       possessionLabel: 'Vacant at closing',
-      signingBlockReason: terms.disclosures.leadPaintStatus === 'pending'
+      signingBlockReason: (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'
         : undefined,
     };

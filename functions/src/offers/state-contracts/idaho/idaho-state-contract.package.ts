@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertIdahoListingDisclosures } from '../../idaho-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeIdahoDraftTerms } from './idaho-draft-terms-sanitizer';
 import { validateIdahoSubmission } from './idaho-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createIdahoContractMilestones } from './idaho-contract-milestones';
-export const idahoStateContractPackage: StateContractPackage<IdahoOfferTermsDocument> = {
+export const idahoStateContractPackage: StateContractPackage<IdahoOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(idahoStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertIdahoListingDisclosures },
   stateCode: 'ID', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_idaho_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Boise',
   agreementTemplate: { stateCode: 'ID', templateUid: IDAHO_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Idaho Residential Purchase and Sale Agreement', templateVersion: IDAHO_DOCUMENT_RULES.version },
@@ -44,4 +50,4 @@ export const idahoStateContractPackage: StateContractPackage<IdahoOfferTermsDocu
     const { generateIdahoOfferPdf } = require('./idaho-offer-pdf.service') as typeof import('./idaho-offer-pdf.service');
     return generateIdahoOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["idaho-association-documents"]});

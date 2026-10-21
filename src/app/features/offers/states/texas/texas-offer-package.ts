@@ -1,3 +1,5 @@
+import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
+import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type {
   StateOfferPackage,
 } from '../../engine/models/state-offer-package';
@@ -42,7 +44,7 @@ export const TEXAS_OFFER_PACKAGE:
   StateOfferPackage<
     TexasOfferTerms,
     TexasContractType
-  > = {
+  > = withHoaOfferPolicy(withFederalLeadOfferPolicy({
     stateCode: 'TX',
     stateName: 'Texas',
 
@@ -75,4 +77,4 @@ export const TEXAS_OFFER_PACKAGE:
         [...sellers],
         context
       ),
-  };
+  }, {listingStatementRequired:true,values:{'disclosures.leadBasedPaintApplies':false,'disclosures.leadBasedPaintAddendumDocumentUid':undefined},hiddenFields:['disclosures.leadBasedPaintApplies'],addendum:{path:'addenda',idKey:'formId',id:'lead-based-paint',selectedKey:'included'}}), {"sellerFactPath":"propertyAssociation.mandatoryMembership","documentTypes":[],"evidencePaths":["propertyAssociation.associationAddendumDocumentUid"]});

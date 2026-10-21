@@ -1,3 +1,6 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
+import { assertListingContractScope } from '../listing-contract-scope';
 import { assertMontanaListingDisclosures } from '../../montana-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -9,9 +12,12 @@ import { sanitizeMontanaDraftTerms } from './montana-draft-terms-sanitizer';
 import { validateMontanaSubmission } from './montana-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createMontanaContractMilestones } from './montana-contract-milestones';
-export const montanaStateContractPackage: StateContractPackage<MontanaOfferTermsDocument> = {
+export const montanaStateContractPackage: StateContractPackage<MontanaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  assertListingContractCompatible: listing => assertListingContractScope(montanaStateContractPackage, listing),
   listingDisclosurePolicy: { assertReady: assertMontanaListingDisclosures },
   stateCode: 'MT', offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_montana_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Denver',
   agreementTemplate: { stateCode: 'MT', templateUid: MONTANA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Montana Residential Purchase and Sale Agreement', templateVersion: MONTANA_DOCUMENT_RULES.version },
@@ -48,4 +54,4 @@ export const montanaStateContractPackage: StateContractPackage<MontanaOfferTerms
     const { generateMontanaOfferPdf } = require('./montana-offer-pdf.service') as typeof import('./montana-offer-pdf.service');
     return generateMontanaOfferPdf(input);
   },
-};
+}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["montana-association-documents"]});

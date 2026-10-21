@@ -1,3 +1,4 @@
+import { isFederalLeadExcluded } from '../../../offers/federal-lead-policy';
 export const CALIFORNIA_DISCLOSURE_TYPES = [
   'california-transfer-disclosure', 'california-natural-hazard-disclosure',
   'california-fire-hardening', 'california-defensible-space',
@@ -23,8 +24,10 @@ export function validCaliforniaDisclosureDecision(value: unknown): value is Cali
 export function californiaDisclosureOutstanding(
   decisions: CaliforniaDisclosureApplicability | undefined,
   uploaded: ReadonlySet<string>,
+  property: {yearBuilt?:unknown;propertyType?:unknown} = {},
 ): string[] {
   return CALIFORNIA_DISCLOSURE_TYPES.filter(type => {
+    if(type === 'lead-based-paint' && isFederalLeadExcluded(property))return false;
     const decision = decisions?.[type];
     if (!validCaliforniaDisclosureDecision(decision)) return !uploaded.has(type);
     return decision.status === 'required' && !uploaded.has(type);

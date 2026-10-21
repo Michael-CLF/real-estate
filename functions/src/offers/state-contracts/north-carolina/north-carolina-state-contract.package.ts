@@ -1,3 +1,5 @@
+import { withHoaContractPolicy } from '../hoa-contract-policy';
+import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import {
   createNorthCarolinaContractMilestones,
@@ -28,11 +30,13 @@ const NORTH_CAROLINA_DEFAULT_TIME_ZONE =
 
 
 export const northCarolinaStateContractPackage:
-  StateContractPackage = {
+  StateContractPackage = withHoaContractPolicy(withFederalLeadContractPolicy({
     stateCode:
       NORTH_CAROLINA_STATE_CODE,
 
     offerCreationEnabled: true,
+  requireOwnershipFacts:true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
 
     /*
      * North Carolina currently has one NavStreet contract
@@ -118,4 +122,4 @@ export const northCarolinaStateContractPackage:
         createNorthCarolinaContractMilestones(
           input
         ),
-  };
+  }, {listingStatementRequired:true,values:{'sellerStatements.leadBasedPaintApplies':false,'sellerStatements.leadBasedPaintDisclosureDocumentUid':undefined},hiddenFields:[]}), {"sellerFactPath":"sellerStatements.ownersAssociationApplies","documentTypes":[],"auditedNoReceiptQuestion":true});

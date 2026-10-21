@@ -1,3 +1,7 @@
+import type { createWyomingListingAnswersForm, restoreWyomingListingAnswers } from './wyoming/wyoming-listing-form';
+import type { createSouthDakotaListingAnswersForm, restoreSouthDakotaListingAnswers } from './south-dakota/south-dakota-listing-form';
+import type { createNewMexicoListingAnswersForm, restoreNewMexicoListingAnswers } from './new-mexico/new-mexico-listing-form';
+import type { createMarylandListingAnswersForm, restoreMarylandListingAnswers } from './maryland/maryland-listing-form';
 import type { createMontanaListingAnswersForm, restoreMontanaListingAnswers } from './montana/montana-listing-form';
 import type { createIowaListingAnswersForm, restoreIowaListingAnswers } from './iowa/iowa-listing-form';
 import type { createWashingtonListingAnswersForm, restoreWashingtonListingAnswers } from './washington/washington-listing-form';
@@ -24,6 +28,10 @@ import type { createColoradoPropertyFactsForm, createColoradoAssumableLoanForm }
 
 /** Typed factories for existing persisted form groups; no new storage paths. */
 export interface StateListingFormFactories {
+ readonly 'sellerStatements.wyoming': typeof createWyomingListingAnswersForm;
+ readonly 'sellerStatements.southDakota': typeof createSouthDakotaListingAnswersForm;
+ readonly 'sellerStatements.newMexico': typeof createNewMexicoListingAnswersForm;
+ readonly 'sellerStatements.maryland': typeof createMarylandListingAnswersForm;
  readonly 'sellerStatements.montana': typeof createMontanaListingAnswersForm;
  readonly 'sellerStatements.iowa': typeof createIowaListingAnswersForm;
  readonly 'sellerStatements.washington': typeof createWashingtonListingAnswersForm;
@@ -74,6 +82,10 @@ export interface StateListingFormValidators {
 
 /** Restore existing persisted answers through their owning package. */
 export interface StateListingFormRestorers {
+ readonly 'sellerStatements.wyoming': typeof restoreWyomingListingAnswers;
+ readonly 'sellerStatements.southDakota': typeof restoreSouthDakotaListingAnswers;
+ readonly 'sellerStatements.newMexico': typeof restoreNewMexicoListingAnswers;
+ readonly 'sellerStatements.maryland': typeof restoreMarylandListingAnswers;
  readonly 'sellerStatements.montana': typeof restoreMontanaListingAnswers;
  readonly 'sellerStatements.iowa': typeof restoreIowaListingAnswers;
  readonly 'sellerStatements.washington': typeof restoreWashingtonListingAnswers;
@@ -97,7 +109,7 @@ export interface StateListingFormSerializers {
 }
 
 export type StateListingStatementDraftExtensions = Partial<Pick<ListingStatementMappingAnswers,
-  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'alabama' | 'indiana' | 'kansas' | 'ohio' | 'delaware' | 'washington' | 'iowa' | 'montana' | 'southCarolina'>>;
+  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'alabama' | 'indiana' | 'kansas' | 'ohio' | 'delaware' | 'washington' | 'iowa' | 'montana' | 'maryland' | 'newMexico' | 'southDakota' | 'wyoming' | 'southCarolina'>>;
 
 export type StateListingPropertyField = 'legalDescription';
 

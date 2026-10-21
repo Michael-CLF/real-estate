@@ -1,10 +1,9 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
 import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function washingtonRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
-  const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
-  const year = listing['yearBuilt'];
-  return [...(statements?.['leadBasedPaintApplies'] === true || typeof year !== 'number' || year < 1978 ? ['lead-based-paint'] : [])];
+  return [...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertWashingtonListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {

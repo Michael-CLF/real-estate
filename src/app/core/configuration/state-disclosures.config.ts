@@ -1,4 +1,5 @@
-import { isListingLeadUploadRequired } from './listing-disclosure-gates';
+import { isFederalLeadExcluded } from '../domains/offers/federal-lead-policy';
+import { getListingUploadGateDocumentTypes, type ListingDisclosureGateFacts } from './listing-disclosure-gates';
 import {
   StateDisclosureRequirement
 } from '../domains/disclosures/models/state-disclosure-requirement.model';
@@ -65,8 +66,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "description": "For covered transactions under IC 32-21-5, seller shall complete and sign the required residential real estate sales disclosure form and provide it before accepting an offer. Use the current prescribed form or a compliant equivalent containing the required information. Document any specific IC 32-21-5-1 exception; an as-is sale is not an exception. The form addresses known physical conditions, defects and applicable association information under section 8.5, including required contacts and unpaid assessments. Unknown information may be identified as unknown. The statement is not a warranty or inspection substitute. The separate seller form is not made part of this agreement merely by an upload or receipt status.",
     "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
     "officialFormUrl": "https://www.in.gov/dA/cdbd3760ae/46234-fill-in.pdf?language_id=1",
-    "required": false,
-    "requiredBeforeAcceptance": true,
+    "required": true,
     "formCode": "IN-RECORDS",
     "sortOrder": 1
   },
@@ -74,7 +74,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "documentType": "indiana-statutory-packet",
     "title": "Indiana applicable property-specific records",
     "shortTitle": "Indiana applicable property-specific records",
-    "description": "IC 32-21-5-12 governs condition at closing and matters arising after delivery. Under IC 32-21-5-13, when a disclosure form or amendment delivered after acceptance discloses a defect, buyer may nullify by delivering written rescission to owner or owner\u2019s agent within two business days after receipt, without liability, and is entitled to return of deposits. This is a defect-disclosure protection, not an automatic cooling-off period for every sale. Receipt selection, early upload and electronic signing do not waive that right. Buyers may submit and sign an offer while the Indiana condition disclosure is pending. The seller must provide the condition form or supported exemption before acceptance. A pending receipt status on an immutable submitted version requires a replacement offer acknowledging actual receipt after delivery.",
+    "description": "IC 32-21-5-12 governs condition at closing and matters arising after delivery. Under IC 32-21-5-13, when a disclosure form or amendment delivered after acceptance discloses a defect, buyer may nullify by delivering written rescission to owner or owner\u2019s agent within two business days after receipt, without liability, and is entitled to return of deposits. This is a defect-disclosure protection, not an automatic cooling-off period for every sale. Receipt selection, early upload and electronic signing do not waive that right. NavStreet requires the seller to upload the condition disclosure or supported exception evidence before a buyer can start an offer. This earlier upload requirement is NavStreet workflow policy; statutory delivery is required before seller acceptance. The buyer must review the uploaded document before submitting. Upload alone does not establish buyer receipt.",
     "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
     "officialFormUrl": "https://www.in.gov/dA/cdbd3760ae/46234-fill-in.pdf?language_id=1",
     "required": false,
@@ -291,10 +291,11 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
   IA: [
   {
     "documentType": "iowa-seller-disclosure",
+    "requiredBeforeAcceptance": true,
     "title": "Iowa seller condition disclosure or supported exception",
     "shortTitle": "Iowa seller condition disclosure or supported exception",
-    "description": "For covered transfers under Iowa Code chapter 558A, seller shall deliver the written property disclosure before seller makes a written offer or accepts a written offer. NavStreet requires the form or supported exception evidence before a buyer creates an offer as an earlier platform safeguard. Permitted delivery includes personal delivery, certified or registered mail and electronic delivery with acknowledgment under Commission rules. When untimely delivered, buyer may withdraw the offer or revoke acceptance without liability within three days after personal delivery or five days after electronic or mail delivery under 558A.2. These are statutory days, not a universal three-business-day rule. Receipt selection and signature on this agreement do not waive these rights or execute a separate acknowledgment. Exceptions must identify the actual 558A.1 basis, including its limits on fiduciary exemptions. Amendments are governed by 558A.3.",
-    "sourceInstructions": "For covered transfers include the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
+    "description": "For covered transfers under Iowa Code chapter 558A, seller shall deliver the written property disclosure before seller makes a written offer or accepts a written offer. Buyers may submit and sign an initial offer while this document is pending. Before the seller makes a counteroffer or accepts, deliver the condition disclosure or supported exception evidence and record buyer receipt. A pending immutable offer requires replacement after delivery. Permitted delivery includes personal delivery, certified or registered mail and electronic delivery with acknowledgment under Commission rules. When untimely delivered, buyer may withdraw the offer or revoke acceptance without liability within three days after personal delivery or five days after electronic or mail delivery under 558A.2. These are statutory days, not a universal three-business-day rule. Receipt selection and signature on this agreement do not waive these rights or execute a separate acknowledgment. Exceptions must identify the actual 558A.1 basis, including its limits on fiduciary exemptions. Amendments are governed by 558A.3.",
+    "sourceInstructions": "Required for covered transfers before the seller makes or accepts an offer: provide the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
     "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
     "required": false,
     "formCode": "IA-RECORDS",
@@ -302,10 +303,11 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
   },
   {
     "documentType": "iowa-statutory-packet",
+    "requiredBeforeAcceptance": true,
     "title": "Iowa radon fact sheet and applicable property records",
     "shortTitle": "Iowa radon fact sheet and applicable property records",
     "description": "The 2026 disclosure under 558A.4 must address lead service lines, including qualifying galvanized lines downstream of lead or unknown material. Seller shall complete the current full form, state actual information and use appropriate Unknown/approximation disclosures rather than certify lead-free plumbing from a No known-line answer. This service-line disclosure is separate from federal lead-based-paint requirements. Review roofs, basements, pests, radon, wells, sewage, environmental hazards, restrictions, assessments and association records. The parties retain the negotiated independent inspection period; this ordinary resale package does not use the separate seven-day installment-contract workflow.",
-    "sourceInstructions": "For covered transfers include the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
+    "sourceInstructions": "Required for covered transfers before the seller makes or accepts an offer: provide the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
     "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
     "required": false,
     "formCode": "IA-RECORDS",
@@ -316,7 +318,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "title": "Iowa association records",
     "shortTitle": "Iowa association records",
     "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
-    "sourceInstructions": "For covered transfers include the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
+    "sourceInstructions": "Required for covered transfers before the seller makes or accepts an offer: provide the Iowa Radon Home-Buyers and Sellers Fact Sheet and available radon results. Septic inspection and groundwater recording records follow their separate transfer deadlines. Complete actual written delivery and acknowledgment under 481 IAC 2014.1.",
     "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
     "required": false,
     "formCode": "IA-RECORDS",
@@ -380,6 +382,193 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "sortOrder": 4
   }
 ],
+  MD: [
+  {
+    "documentType": "maryland-seller-disclosure",
+    "requiredBeforeAcceptance": true,
+    "title": "Maryland seller condition disclosure or supported exception",
+    "shortTitle": "Maryland seller condition disclosure or supported exception",
+    "description": "For covered resales, Real Property 10-702 requires delivery of the current Commission disclosure or disclaimer on or before entering into the contract. A disclaimer still discloses actually known latent health or safety defects; it is not a statutory exemption. Each purchaser shall date and sign receipt, attached to or included in this contract. Where the receipt status is Received, each buyer electronic signature and its timestamp expressly acknowledge receipt of the identified uploaded statement; Pending is not an acknowledgment. An actual 10-702(b)(2) exception requires supporting evidence. If delivery is late, buyer may rescind by written notice before receipt or within five days after receipt and obtain return of deposits, subject to the specific lender-notice limits in 10-702(h) and closing/occupancy limits in 10-702(k). These rights cannot be waived in this agreement. Early receipt does not itself create a statutory right to cancel because of the disclosed information. Independent inspections remain available under the negotiated inspection condition.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.labor.maryland.gov/forms/propertydanddform.pdf",
+    "required": false,
+    "formCode": "MD-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "maryland-statutory-packet",
+    "title": "Maryland applicable property-specific records",
+    "shortTitle": "Maryland applicable property-specific records",
+    "description": "Any applicable completed and separately executed deferred water/sewer notice, NPL Superfund addendum, rental lead risk-reduction notice, local enforcement/impact-fee notice or agricultural-transfer-tax notice selected as Received in the statutory packet is expressly attached to and incorporated in this agreement. Seller must identify property-specific applicability and provide the complete facts and statutory text before contract formation. A generic receipt answer does not complete or sign a separate addendum. For recorded deferred charges, include the annual amount, payment month, ending date and collector name/address, prepayment information, and the statutory explanation that these are contractual private charges rather than county charges. Preserve the specific 14-117(b)(3) rescission, deposit-return and undisclosed-charge remedies. For property within one mile of an NPL site, separately identify the site and EPA search/dashboard URLs, obtain both dated signatures, and preserve the five-day cancellation and full-refund right under 10-714. The seller condition statement does not replace these contract addenda.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.labor.maryland.gov/forms/propertydanddform.pdf",
+    "required": false,
+    "formCode": "MD-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "maryland-association-documents",
+    "title": "Maryland association records",
+    "shortTitle": "Maryland association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.labor.maryland.gov/forms/propertydanddform.pdf",
+    "required": false,
+    "formCode": "MD-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MD-LEAD",
+    "sortOrder": 4
+  }
+],
+  NM: [
+  {
+    "documentType": "new-mexico-seller-disclosure",
+    "title": "New Mexico optional seller condition information",
+    "shortTitle": "New Mexico optional seller condition information",
+    "description": "This ordinary resale package does not impose a universal state-prescribed seller condition form as a prerequisite to an offer. Seller shall disclose known adverse material facts and shall not misrepresent or actively conceal conditions. A voluntarily supplied condition statement is not a warranty or substitute for inspection. Professional broker duties under 16.61.19 NMAC apply to licensed brokers; they do not make NavStreet a broker or create a statewide FSBO form requirement. A receipt answer records actual delivery, not a completed or signed separate statement.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.santafecountynm.gov/assessor/tools/tax-levy-certificate",
+    "required": false,
+    "formCode": "NM-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "new-mexico-statutory-packet",
+    "requiredBeforeAcceptanceLabel": "Required before seller acceptance",
+    "requiredBeforeAcceptance": true,
+    "title": "New Mexico assessor tax estimate and applicable notices",
+    "shortTitle": "New Mexico assessor tax estimate and applicable notices",
+    "description": "Under NMSA 47-13-4, before accepting an offer the seller or seller broker shall request the county assessor tax-levy estimate at the listed price and provide the written response to buyer or buyer broker. The response includes current/prior taxes, the estimated following-year levy and the statutory warning about the stated price, current-and-correct value and actual future rates. A current seller tax bill alone is insufficient. County online printable estimates may satisfy the response requirement. When the statutory packet is marked Received, buyer electronic signature and timestamp expressly acknowledge written receipt of the assessor estimate. Pending is not an acknowledgment. Buyer may send an offer while the estimate is pending; seller acceptance requires its delivery and recorded buyer receipt. No state tax-estimate requirement is invented at draft creation.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.santafecountynm.gov/assessor/tools/tax-levy-certificate",
+    "required": false,
+    "formCode": "NM-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "new-mexico-association-documents",
+    "title": "New Mexico association records",
+    "shortTitle": "New Mexico association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.santafecountynm.gov/assessor/tools/tax-levy-certificate",
+    "required": false,
+    "formCode": "NM-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "NM-LEAD",
+    "sortOrder": 4
+  }
+],
+  SD: [
+  {
+    "documentType": "south-dakota-seller-disclosure",
+    "title": "South Dakota seller condition disclosure or supported exception",
+    "shortTitle": "South Dakota seller condition disclosure or supported exception",
+    "description": "For covered residential transfers, SDCL 43-4-38 requires the current 43-4-44 condition statement before buyer makes a written offer. The statement covers the property and known conditions, including applicable water, radon, hazardous materials and private transfer fees; it is not a warranty or substitute for independent inspection. Identify an actual 43-4-43 exception in signed evidence. Each buyer and seller must complete the separate required signature/initial spaces; an agreement signature does not fill or initial the seven-page statement. Seller must deliver written material amendments before closing or possession, whichever comes first. If a statement or material amendment arrives after the written offer, 43-4-39 permits written termination within three days after in-person delivery or six days after deposit in mail. Do not silently substitute business days or assume electronic delivery changes these statutory periods.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://dlr.sd.gov/realestate/forms/sellers_property_condition_disclosure_statement.pdf",
+    "required": false,
+    "formCode": "SD-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "south-dakota-statutory-packet",
+    "title": "South Dakota applicable property-specific records",
+    "shortTitle": "South Dakota applicable property-specific records",
+    "description": "SDCL 43-4-44.1 independently requires, before buyer makes a written offer, notice that the property is governed by an HOA, its governing documents, assessment amount/frequency/purpose and special one-time assessments from the most recent three years. This applies to all residential transfers after July 1, 2024. A condition-statement exception does not remove this separate HOA duty. Supply written amendments for material changes before closing or possession, whichever comes first. The ordinary condition statement alone is not the complete HOA packet.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://dlr.sd.gov/realestate/forms/sellers_property_condition_disclosure_statement.pdf",
+    "required": false,
+    "formCode": "SD-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "south-dakota-association-documents",
+    "title": "South Dakota association records",
+    "shortTitle": "South Dakota association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://dlr.sd.gov/realestate/forms/sellers_property_condition_disclosure_statement.pdf",
+    "required": false,
+    "formCode": "SD-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "SD-LEAD",
+    "sortOrder": 4
+  }
+],
+  WY: [
+  {
+    "documentType": "wyoming-seller-disclosure",
+    "title": "Wyoming seller condition disclosure or supported exception",
+    "shortTitle": "Wyoming seller condition disclosure or supported exception",
+    "description": "This ordinary resale package does not require a universal Wyoming statutory seller condition form before an offer. Seller shall truthfully disclose known material conditions, answer specific inquiries and avoid misrepresentation or active concealment. Any voluntarily supplied condition statement remains separate from this agreement and is not a warranty or independent inspection. Licensed agent adverse-material-fact and relationship duties under W.S. 33-28-303 and 33-28-306 apply when such professionals participate; they do not make this FSBO platform a broker. This agreement does not add a broad as-is waiver of fraud or other available remedies.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.wyoleg.gov/statutes/compress/title33.pdf",
+    "required": false,
+    "formCode": "WY-RECORDS",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "wyoming-statutory-packet",
+    "title": "Wyoming applicable property-specific records",
+    "shortTitle": "Wyoming applicable property-specific records",
+    "description": "Verify water and irrigation rights with the State Engineer, including permits, adjudication, well access and any deed reservations or severance. Under applicable Wyoming water law, identify seller-owned appurtenant rights intended to convey rather than infer ownership from a visible well or ditch. Seller shall provide existing records; title and closing professionals shall complete required transfers and ownership updates. Review mineral/surface estates, easements, physical/legal access, shared wells and development restrictions during inspection. No new water test or radon test is universally required solely by this agreement.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.wyoleg.gov/statutes/compress/title33.pdf",
+    "required": false,
+    "formCode": "WY-RECORDS",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "wyoming-association-documents",
+    "title": "Wyoming association records",
+    "shortTitle": "Wyoming association records",
+    "description": "Obtain applicable governing documents, dues, assessments, restrictions, transfer fees and current association information. Optional association records do not universally block an offer.",
+    "sourceInstructions": "Use current official requirements and separately sign required forms and acknowledgments. A dropdown does not execute a separate form.",
+    "officialFormUrl": "https://www.wyoleg.gov/statutes/compress/title33.pdf",
+    "required": false,
+    "formCode": "WY-RECORDS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet or supported exemption",
+    "shortTitle": "Federal lead disclosure",
+    "description": "For covered pre-1978 housing, provide signed disclosures, available records and the EPA pamphlet before buyer is bound. Inspection waiver does not waive disclosure.",
+    "sourceInstructions": "Complete the separate federal packet.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "WY-LEAD",
+    "sortOrder": 4
+  }
+],
   MN: [
   {
     "documentType": "minnesota-seller-disclosure",
@@ -414,7 +603,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "title": "Minnesota association resale packet",
     "shortTitle": "Minnesota association resale packet",
     "formCode": "MN-RECORDS",
-    "description": "For a covered Chapter 515B resale provide governing documents, required financial/association information and a resale certificate not more than 90 days old. Effective January 1, 2027 include required fine/remedy and collection policies, any reserve study obtained within the preceding three years and updated certificate information. This upload does not waive the buyer’s cancellation rights.",
+    "description": "For a covered Chapter 515B resale provide governing documents, required financial/association information and a resale certificate not more than 90 days old, including the current preventative maintenance plan, schedule and budget or their electronic availability as specified by the certificate. Effective January 1, 2027 include required fine/remedy and collection policies, any reserve study obtained within the preceding three years and updated certificate information. This upload does not waive the buyer’s cancellation rights.",
     "sourceInstructions": "Request current property-specific records from the association or manager.",
     "required": false,
     "sortOrder": 1,
@@ -475,7 +664,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "documentType": "arizona-association-documents",
     "title": "Arizona association records",
     "shortTitle": "Arizona association records",
-    "description": "When A.R.S. 33-1806 applies, communities with fewer than fifty properties require seller delivery within ten days after offer acceptance. For fifty or more properties seller gives written notice to the association, which delivers within ten days after receipt of the notice. Include all current statutory records, including the previous three open board-meeting minutes, financial and reserve information, violations, lawsuits and applicable fees. Obtain the separately signed statutory close-of-escrow acknowledgement. Early copies do not excuse updated statutory delivery. No general HOA cancellation period is created by this agreement.",
+    "description": "For condominium units use A.R.S. 33-1260; for planned communities use A.R.S. 33-1806. When either applies, communities with fewer than fifty properties require seller delivery within ten days after offer acceptance. For fifty or more properties seller gives written notice to the association, which delivers within ten days after receipt of the notice. Include all current statutory records, including the previous three open board-meeting minutes, financial and reserve information, violations, lawsuits and applicable fees. Obtain the separately signed statutory close-of-escrow acknowledgement. Early copies do not excuse updated statutory delivery. No general HOA cancellation period is created by this agreement. Condominium packets must cover all associations and include the current plat, declaration, bylaws/rules, three open board-meeting minutes, assessment/lien and fee information, operating and reserve financial records, budget, applicable audit/review/compilation and reserve study, litigation, insurance certificates, violations, declarant-control/ownership information, rights to request full reports and the separately signed close-of-escrow acknowledgement.",
     "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
     "officialFormUrl": "https://www.azleg.gov/ars/33/01806.htm",
     "required": false,
@@ -541,6 +730,33 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
   }
 ],
   MO: [
+{
+  appliesToListing: listing => listing.propertyType === 'condo' || listing.sellerStatements?.contractFacts?.isCondominium === true,
+  requiredBeforeClosing:true, requiredBeforeClosingLabel:'Required before conveyance',
+  "documentType": "missouri-condominium-resale-certificate",
+  "title": "Missouri condominium resale certificate and governing documents",
+  "shortTitle": "Condominium resale certificate",
+  "description": "For condominium ownership, obtain the complete association resale certificate, declaration, bylaws, rules, assessments and fees, budgets/financials, reserves and anticipated expenditures, litigation, insurance and other applicable information. Confirm declaration date and statutory applicability under RSMo 448.1-102, 448.4-101 and 448.4-109. Pending receipt does not universally block an offer. Actual provision triggers applicable buyer protections; an upload is not proof of buyer receipt.",
+  "sourceInstructions": "Request the complete packet from the association. Include all applicable statutory information and amendments; preserve delivery evidence. Covered Missouri resale contracts remain voidable until provision and for five days afterward or until conveyance, whichever occurs first.",
+  "officialFormUrl": "https://revisor.mo.gov/main/OneSection.aspx?section=448.4-109",
+  "required": false,
+  "formCode": "MO-CONDO-RESALE",
+  "sortOrder": 4
+},
+{
+  appliesToListing: listing => listing.propertyType === 'multi_family' && listing.sellerStatements?.leasesExist === true,
+  requiredBeforeClosing:true, requiredBeforeClosingLabel:'Required before closing',
+  "documentType": "missouri-tenant-records",
+  "title": "Missouri leases, rent roll and security deposit records",
+  "shortTitle": "Tenant and lease records",
+  "description": "For occupied small multifamily property, supply complete leases and amendments, rent roll, deposits and prepaid rents, concessions, notices and known disputes. Lawful tenant rights continue through sale; reconcile and transfer rents/deposits at closing.",
+  "sourceInstructions": "Combine the complete records into a PDF. Redact Social Security numbers, bank details and unnecessary personal identifiers while preserving tenancy, rent and deposit information. Confirm security deposit, assignment and closing requirements with the closing agent. A received selection records actual buyer receipt and review.",
+  "officialFormUrl": "https://revisor.mo.gov/main/OneSection.aspx?section=535.300",
+  "required": false,
+  "formCode": "MO-TENANCIES",
+  "sortOrder": 5
+},
+
   {
     "documentType": "missouri-seller-disclosure",
     "title": "Missouri seller disclosure or supported exemption evidence",
@@ -556,7 +772,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "documentType": "missouri-statutory-packet",
     "title": "Missouri applicable statutory records",
     "shortTitle": "Missouri applicable statutory records",
-    "description": "This agreement does not represent a proprietary association seller form as universally mandated by Missouri statute. A general seller condition report may remain pending, but that does not excuse truthful disclosure, known material defects, fraud/concealment rules, applicable federal lead requirements or the specific statutory duties above. Buyer shall investigate structure, environmental conditions, water/septic systems, easements and insurability during the negotiated inspection period. RSMo 442.600 addresses psychologically impacted property; it does not authorize false statements or override RSMo 442.606. RSMo 432.010 requires the applicable signed writing and written agent authority for land sale contracts. Title shall verify all necessary owners, marital/homestead interests, legal description, deed execution, liens, recorded restrictions and recording. Seller shall provide known leases and association records when applicable; no universal pre-offer HOA upload or generic state cooling-off period is created. Seller property tax history does not guarantee buyer assessments or charges. Applicable local permit, occupancy, sewer/septic and transfer obligations remain. This original NavStreet agreement supports ordinary existing fee-simple single-family, townhome and PUD resale transactions with cash or conventional financing. Condominium, vacant land, manufactured/mobile homes, new construction/developer, installment seller financing, leasehold and wholesale assignment transactions require separate review and are outside this initial agreement. The parties must disclose any unsupported transaction structure to title/closing professionals and must not rely on a dropdown to establish legal eligibility.",
+    "description": "This agreement does not represent a proprietary association seller form as universally mandated by Missouri statute. A general seller condition report may remain pending, but that does not excuse truthful disclosure, known material defects, fraud/concealment rules, applicable federal lead requirements or the specific statutory duties above. Buyer shall investigate structure, environmental conditions, water/septic systems, easements and insurability during the negotiated inspection period. RSMo 442.600 addresses psychologically impacted property; it does not authorize false statements or override RSMo 442.606. RSMo 432.010 requires the applicable signed writing and written agent authority for land sale contracts. Title shall verify all necessary owners, marital/homestead interests, legal description, deed execution, liens, recorded restrictions and recording. Seller shall provide known leases and association records when applicable; no universal pre-offer HOA upload or generic state cooling-off period is created. Seller property tax history does not guarantee buyer assessments or charges. Applicable local permit, occupancy, sewer/septic and transfer obligations remain. Select the Missouri agreement matching actual ownership and transaction type. Residential, condominium resale, vacant land and qualifying two-to-four-unit resales have distinct agreement paths. Manufactured/mobile, developer, installment seller financing, leasehold and wholesale assignment transactions require separate review. The parties must disclose any unsupported transaction structure to title/closing professionals and must not rely on a dropdown to establish legal eligibility.",
     "sourceInstructions": "Use current official requirements and separately execute required seller and buyer acknowledgments. Upload complete applicable records; a status selection does not sign separate forms.",
     "officialFormUrl": "https://www.revisor.mo.gov/main/OneSection.aspx?section=442.606",
     "required": false,
@@ -1273,19 +1489,33 @@ export function getStateDisclosureRequirements(
   ] ?? [];
 }
 
+export function isDisclosureVisibleForListing(requirement:StateDisclosureRequirement,listing:ListingDisclosureGateFacts):boolean {
+  return (requirement.documentType !== 'lead-based-paint' || !isFederalLeadExcluded(listing));
+}
+
 /** Use listing answers when a form is conditional; keep other states' rules unchanged. */
 export function isDisclosureRequiredForListing(
   state: string,
   requirement: StateDisclosureRequirement,
-  listing: { ownersAssociationApplies?: boolean | null; leadBasedPaintApplies?: boolean | null; yearBuilt?: number | null }
+  listing: ListingDisclosureGateFacts
 ): boolean {
-  if (requirement.required) return true;
+  if (requirement.documentType === 'lead-based-paint') return !isFederalLeadExcluded(listing);
+  if (requirement.required || isDisclosureRequiredBeforeAcceptanceForListing(state, requirement, listing)) return true;
 
   const stateCode = normalizeDisclosureStateCode(state);
+  if (getListingUploadGateDocumentTypes(stateCode, listing, Date.now()).includes(requirement.documentType)) return true;
 
   return ((stateCode === 'MN' || stateCode === 'MI') && requirement.documentType === (stateCode === 'MN' ? 'minnesota-association-documents' : 'michigan-association-documents') && listing.ownersAssociationApplies === true) ||
-    (stateCode === 'FL' && requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true) ||
-    (requirement.documentType === 'lead-based-paint' && isListingLeadUploadRequired(stateCode, listing));
+    (stateCode === 'FL' && requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true);
+}
+
+/** Acceptance-stage documents remain required without blocking a buyer's initial offer. */
+export function isDisclosureRequiredBeforeAcceptanceForListing(
+  state: string, requirement: StateDisclosureRequirement, listing: ListingDisclosureGateFacts,
+): boolean {
+  if (!requirement.requiredBeforeAcceptance) return false;
+  return !(normalizeDisclosureStateCode(state) === 'IA' &&
+    requirement.documentType === 'iowa-statutory-packet' && listing.iowa?.disclosureExemptionClaimed === true);
 }
 
 /** Accept both the two-letter code and the full name stored on older listings. */

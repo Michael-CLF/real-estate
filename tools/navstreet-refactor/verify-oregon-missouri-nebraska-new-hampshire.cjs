@@ -89,7 +89,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
    const result=pkg.createContractMilestones({version:v,effectiveAt});assert.equal(result.timeZone,zone);assert.equal(result.dueDiligenceEndsAt,'2026-11-02');
   }
   const reject=change=>{const v=structuredClone(version);change(v.terms);assert.throws(()=>pkg.validateSubmission({offer,version:v}));assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);};
-  reject(t=>t.delivery.electronicDeliveryAuthorized=false);reject(t=>t.delivery.timeZone='UTC');reject(t=>t.purchase.financingType='fha');reject(t=>t.deadlines.settlementDate='2099-02-31');reject(t=>t.disclosures.leadPaintStatus='pending');
+  reject(t=>t.delivery.electronicDeliveryAuthorized=false);reject(t=>t.delivery.timeZone='UTC');reject(t=>t.purchase.financingType='fha');reject(t=>t.deadlines.settlementDate='2099-02-31');reject(t=>{t.property.yearBuilt=1977;t.disclosures.leadPaintStatus='pending';});
   for(const key of ['propertyConditionStatus','statutoryPacketStatus']){
    const v=structuredClone(version);v.terms.disclosures[key]='pending';
    if(code==='NH'||code==='NE'&&key==='propertyConditionStatus')reject(t=>t.disclosures[key]='pending');else validate(v);

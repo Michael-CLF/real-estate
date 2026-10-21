@@ -1,3 +1,10 @@
+export interface ListingContractFacts {
+  isCondominium: boolean | null;
+  isDeveloperSale: boolean | null;
+  isLeasehold: boolean | null;
+  dwellingUnitCount: number | null;
+}
+
 /*listing.model.ts*/
 import type { CaliforniaListingFacts } from '../state-packages/california/california-listing-facts.model';
 import type { ColoradoPropertyFacts } from '../../offers/state-contracts/colorado/models/colorado-contract-elections';
@@ -430,6 +437,11 @@ export type ListingSellerOwnershipStatus =
   'owned_at_least_one_year' | 'owned_less_than_one_year' | 'does_not_yet_own';
 export type ListingFuelTankOwnership = 'owned' | 'leased';
 export interface ListingSellerStatements {
+  contractFacts?: ListingContractFacts;
+  wyoming?: { privateWastewaterApplies?: boolean; appurtenantWaterRightsKnown?: boolean; };
+  southDakota?: { usesMountainTime?: boolean; disclosureExemptionClaimed?: boolean; privateTransferFeeKnown?: boolean; };
+  newMexico?: { privateWastewaterApplies?: boolean; drugLabContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
+  maryland?: { disclosureExemptionClaimed?: boolean; usesDisclaimer?: boolean; privateWellApplies?: boolean; onsiteSewageApplies?: boolean; deferredWaterSewerCharges?: boolean; superfundNearby?: boolean; otherPropertyNoticeApplies?: boolean; rentalLeadObligationApplies?: boolean; groundRentApplies?: boolean; };
   montana?: { disclosureExemptionClaimed?: boolean; radonTestsKnown?: boolean; drugContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
   iowa?: { disclosureExemptionClaimed?: boolean; privateSewageApplies?: boolean; leadServiceLineKnown?: boolean; };
   washington?: { disclosureExemptionClaimed?: boolean; oilTankHeating?: boolean; };
@@ -555,7 +567,7 @@ export interface ListingDraftPropertyDetails {
   blockNumber?: string;
   subdivisionName?: string;
   legalDescription?: string;
-  yearBuilt: number;
+  yearBuilt?: number;
   stories?: number;
   description?: string;
 }

@@ -1,3 +1,4 @@
+import { normalizeFederalLeadTerms } from '../../../federal-lead-policy';
 import {
   OfferParty
 } from '../../../models/offer-party.model';
@@ -33,6 +34,7 @@ implements StateOfferValidator<NorthCarolinaOfferTerms> {
     sellers: OfferParty[],
     context: OfferValidationContext
   ): OfferValidationResult {
+    terms = normalizeFederalLeadTerms(terms, {values:{'sellerStatements.leadBasedPaintApplies':false,'sellerStatements.leadBasedPaintDisclosureDocumentUid':undefined},hiddenFields:[]});
     const issues: OfferValidationIssue[] = [];
 
     this.validateState(

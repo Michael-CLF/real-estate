@@ -27,6 +27,7 @@ interface EditableHoa {
     EditableHoaFeeFrequency | null;
 }
 interface PublishedListingChanges {
+  contractFacts?: Record<string, boolean | number | null>;
   legalDescription?: string;
   coloradoPropertyFacts?: ColoradoPropertyFacts;
   californiaDisclosure?: { documentType: CaliforniaDisclosureType; decision: CaliforniaDisclosureDecision };
@@ -45,6 +46,7 @@ interface UpdatePublishedListingResponse {
 }
 const EDITABLE_FIELDS =
   new Set([
+    'contractFacts',
     'californiaDisclosure',
     'coloradoPropertyFacts',
     'legalDescription',
@@ -145,6 +147,11 @@ export const updatePublishedListing =
               const updatedFields:
                 string[] = [];
               let priceChanged = false;
+              if (validatedInput.changes.contractFacts) {
+                if (listingStatus !== 'active' || listingData['activeContractUid']) throw new HttpsError('failed-precondition','Ownership facts can only be edited on an active listing outside a contract.');
+                updates['sellerStatements.contractFacts'] = validatedInput.changes.contractFacts;
+                updatedFields.push('contractFacts');
+              }
               if (validatedInput.changes.californiaDisclosure) {
                 if (listingData['state'] !== 'CA') throw new HttpsError('failed-precondition', 'California disclosure applicability is only available for California listings.');
                 const { documentType, decision } = validatedInput.changes.californiaDisclosure;
@@ -152,8 +159,8 @@ export const updatePublishedListing =
                 updatedFields.push('californiaDisclosure');
               }
               if (validatedInput.changes.legalDescription !== undefined) {
-                if (listingData['state'] !== 'CO' || listingStatus !== 'active' || listingData['activeContractUid']) {
-                  throw new HttpsError('failed-precondition', 'Colorado legal descriptions can only be edited on an active Colorado listing outside a contract.');
+                if (listingStatus !== 'active' || listingData['activeContractUid']) {
+                  throw new HttpsError('failed-precondition', 'Legal descriptions can only be edited on an active listing outside a contract.');
                 }
                 if ((listingData['legalDescription'] ?? '') !== validatedInput.changes.legalDescription) {
                   updates['legalDescription'] = validatedInput.changes.legalDescription;
@@ -265,6 +272,11 @@ export const updatePublishedListing =
                 validatedInput.changes
                   .hoa !== undefined
               ) {
+                const statements = listingData['sellerStatements'] as Record<string,unknown> | undefined;
+                if (statements?.['ownersAssociationApplies'] !== validatedInput.changes.hoa.hasHoa) {
+                  updates['sellerStatements.ownersAssociationApplies'] = validatedInput.changes.hoa.hasHoa;
+                  updatedFields.push('ownersAssociationApplies');
+                }
                 applyHoaChanges(
                   validatedInput.changes.hoa,
                   listingData['hoa'],
@@ -428,6 +440,14 @@ function validateUpdateInput(
       throw new HttpsError('invalid-argument', 'Legal description must be text within 5,000 characters.');
     }
     changes.legalDescription = description.trim();
+  }
+  if (changesValue['contractFacts'] !== undefined) {
+    const facts = changesValue['contractFacts'];
+    if (!isRecord(facts) || Object.keys(facts).some(key => !['isCondominium','isDeveloperSale','isLeasehold','dwellingUnitCount'].includes(key))) throw new HttpsError('invalid-argument','Invalid ownership facts.');
+    for (const key of ['isCondominium','isDeveloperSale','isLeasehold']) if (facts[key] !== null && typeof facts[key] !== 'boolean') throw new HttpsError('invalid-argument','Ownership answers must be Yes, No or unanswered.');
+    const count = facts['dwellingUnitCount'];
+    if (count !== null && (!Number.isSafeInteger(count) || Number(count) < 2 || Number(count) > 999)) throw new HttpsError('invalid-argument','Enter a valid dwelling unit count.');
+    changes.contractFacts = {...facts} as Record<string, boolean | number | null>;
   }
   if (changesValue['coloradoPropertyFacts'] !== undefined) {
     const value = changesValue['coloradoPropertyFacts'];

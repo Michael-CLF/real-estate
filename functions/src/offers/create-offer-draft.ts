@@ -334,7 +334,9 @@ export const createOfferDraft = onCall<
       };
     }
 
-    const propertySnapshot = createPropertySnapshot(eligibleListing);
+    const currentEligibleListing = await verifyOfferEligibility(listingUid, buyerUid, currentListingSnapshot);
+    const ownershipFacts = (currentListingData['sellerStatements'] as Record<string,unknown> | undefined)?.['contractFacts'] as OfferPropertySnapshotDocument['contractFacts'] | undefined;
+    const propertySnapshot: OfferPropertySnapshotDocument = {...createPropertySnapshot(currentEligibleListing), ...(ownershipFacts ? {contractFacts:{...ownershipFacts}} : {})};
 
     const buyerParty = createPartySnapshot({
       role: 'buyer',
@@ -386,6 +388,16 @@ export const createOfferDraft = onCall<
         requestedContractType,
         stateContractPackage
       );
+
+    if (stateContractPackage.supportedPropertyTypes && !stateContractPackage.supportedPropertyTypes.includes(propertySnapshot.propertyType)) {
+      throw new HttpsError('failed-precondition', 'This property type does not have an implemented purchase agreement in this state.');
+    }
+
+    const contractFacts = (currentListingData['sellerStatements'] as Record<string, any> | undefined)?.['contractFacts'];
+    if (contractFacts?.isDeveloperSale === true || contractFacts?.isLeasehold === true || (currentListingData['construction'] as Record<string,unknown> | undefined)?.['newConstruction'] === true) throw new HttpsError('failed-precondition','This transaction requires a developer or leasehold agreement that is not implemented.');
+    if (stateContractPackage.requireOwnershipFacts && ['isCondominium','isDeveloperSale','isLeasehold'].some(key => typeof contractFacts?.[key] !== 'boolean')) throw new HttpsError('failed-precondition','The seller must complete the ownership and sale type questions in Edit listing.');
+    if ((propertySnapshot.propertyType === 'condo' && contractFacts?.isCondominium === false) || (contractFacts?.isCondominium === true && !stateContractPackage.supportedPropertyTypes?.includes('condo'))) throw new HttpsError('failed-precondition','This property needs a supported condominium agreement.');
+    if (propertySnapshot.propertyType === 'multi_family' && stateContractPackage.maximumDwellingUnits && (!Number.isSafeInteger(contractFacts?.dwellingUnitCount) || contractFacts.dwellingUnitCount < 2 || contractFacts.dwellingUnitCount > stateContractPackage.maximumDwellingUnits)) throw new HttpsError('failed-precondition','The seller must supply a dwelling unit count within the supported agreement scope.');
 
     const generatedTerms =
       stateContractPackage
@@ -458,7 +470,8 @@ export const createOfferDraft = onCall<
         },
       ],
 
-      lastActivityAt: now,
+      draftLastActivityAt: now,
+              lastActivityAt: now,
       createdAt: now,
       updatedAt: now,
     });
