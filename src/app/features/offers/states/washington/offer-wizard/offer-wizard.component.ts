@@ -1,3 +1,4 @@
+import { pinWashingtonReviewedDocumentVersions } from '../services/washington-reviewed-document-versions';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -149,11 +150,11 @@ export class OfferWizardComponent {
   protected readonly pendingDisclosureNotice = computed(() => {
     const terms = this.terms();
     if (!terms) return null;
-
-    const outstanding: string[] = [];
-    if (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus === 'pending') outstanding.push('the applicable property records');
-    if (terms.disclosures.leadPaintStatus === 'pending') outstanding.push('the federal lead disclosure or supported exemption');
-    return outstanding.length ? `Review ${outstanding.join(', ')} before submitting. The seller must upload required records and the buyer must review them. Seller counteroffers cannot change buyer receipt answers.` : null;
+    const messages: string[] = [];
+    if (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus === 'pending') messages.push('Review the applicable federal lead disclosure before submitting this offer or counteroffer.');
+    if (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received') messages.push('Review the required property records before submitting or signing.');
+    if (terms.disclosures.propertyConditionStatus === 'pending' || terms.disclosures.statutoryPacketStatus === 'pending' || terms.disclosures.hoaDocumentsStatus === 'pending') messages.push('Pending seller or association documents do not by themselves prevent an offer or counteroffer. Statutory delivery and cancellation rights remain. Acknowledge receipt only after actual review; a seller counteroffer cannot change the buyer receipt answers.');
+    return messages.length ? messages.join(' ') : null;
   });
 
   protected readonly busy = computed(
@@ -262,13 +263,14 @@ export class OfferWizardComponent {
       return;
     }
 
-    const updatedTerms =
+    let updatedTerms =
       updateWashingtonOfferTerms(
         currentTerms,
         change.fieldPath,
         change.value
       );
 
+    if (this.initiatedBy() === 'buyer') updatedTerms = pinWashingtonReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
   }
@@ -352,7 +354,7 @@ export class OfferWizardComponent {
       return;
     }
 
-    const updatedTerms =
+    let updatedTerms =
       updateWashingtonOfferTerms(
         currentTerms,
         fieldPath,

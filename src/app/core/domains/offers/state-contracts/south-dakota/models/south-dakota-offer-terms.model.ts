@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type SouthDakotaContractType = 'navstreet_south_dakota_residential_sale_2026';
+export type SouthDakotaContractType = 'navstreet_south_dakota_residential_sale_2026' | 'navstreet_south_dakota_condominium_resale_2026';
 export type SouthDakotaFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type SouthDakotaDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -10,6 +10,7 @@ export interface SouthDakotaOfferTerms {
   readonly stateCode: 'SD';
   readonly contractType: SouthDakotaContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -84,3 +85,5 @@ export const SOUTH_DAKOTA_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a SouthDakota residential resale between the parties.',
 } as const;
+
+export const SOUTH_DAKOTA_CONDOMINIUM_CONTRACT_DEFINITION = {contractType:'navstreet_south_dakota_condominium_resale_2026',formId:'NAVSTREET-SD-CONDOMINIUM-2026',formName:'NavStreet South Dakota Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-22',revisionDate:'2026-10-22',description:'Original agreement for an existing fee-simple residential condominium resale; developer and leasehold offerings excluded.'} as const;

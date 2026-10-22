@@ -6,13 +6,14 @@ export const southDakotaListingPackage: StateListingPackage = {
  formFactories: { 'sellerStatements.southDakota': createSouthDakotaListingAnswersForm },
  formRestorers: { 'sellerStatements.southDakota': restoreSouthDakotaListingAnswers },
  restoreSellerStatements: saved => ({southDakota: restoreSouthDakotaListingAnswers(saved?.southDakota)}),
- mapSellerStatements: answers => ({southDakota: {usesMountainTime: answers.southDakota!.usesMountainTime!,disclosureExemptionClaimed: answers.southDakota!.disclosureExemptionClaimed!,privateTransferFeeKnown: answers.southDakota!.privateTransferFeeKnown!}}),
+ mapSellerStatements: answers => ({southDakota: {condominiumReportIssued: answers.southDakota!.condominiumReportIssued!,usesMountainTime: answers.southDakota!.usesMountainTime!,disclosureExemptionClaimed: answers.southDakota!.disclosureExemptionClaimed!,privateTransferFeeKnown: answers.southDakota!.privateTransferFeeKnown!}}),
  disclosureRequirements: [],
  questionGroups: [
   {
     "id": "south-dakota-applicability",
     "title": "South Dakota property and disclosure facts",
     "questions": [
+ {"id":"sd-condominium-report","fieldPath":"sellerStatements.southDakota.condominiumReportIssued","label":"For condominium ownership, has the project final or substitute Commission public report been issued?","description":"SDCL 43-15A-17 requires issuance before a project unit is offered for sale. Confirm with the association/Commission and upload the available report and supplements with the required condominium packet. Non-condominium sellers may leave this unanswered. Developer/new-construction offerings use a different agreement.","required":false,"requiredMessage":"Confirm condominium project report issuance."},
       {
         "id": "sd-usesMountainTime",
         "fieldPath": "sellerStatements.southDakota.usesMountainTime",

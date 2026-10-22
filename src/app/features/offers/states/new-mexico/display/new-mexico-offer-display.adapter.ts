@@ -5,7 +5,7 @@ export const newMexicoOfferDisplayAdapter: StateOfferDisplayAdapter<NewMexicoOff
   stateCode: 'NM',
   display(terms) {
     return {
-      agreementTitle: 'NavStreet New Mexico Residential Purchase and Sale Agreement',
+      agreementTitle: terms.contractType === 'navstreet_new_mexico_condominium_resale_2026' ? 'NavStreet New Mexico Condominium Resale Purchase and Sale Agreement' : 'NavStreet New Mexico Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet New Mexico agreement PDF',
       purchasePriceInCents: terms.purchase.purchasePriceInCents,
       fundingLabel: terms.purchase.financingType === 'cash' ? 'Cash' : `${terms.purchase.financingType.toUpperCase()} loan`,
@@ -15,7 +15,7 @@ export const newMexicoOfferDisplayAdapter: StateOfferDisplayAdapter<NewMexicoOff
       importantDeadline: { label: 'inspection period', value: `${terms.deadlines.inspectionPeriodDays} calendar days after acceptance` },
       closingDate: { label: 'Settlement deadline', value: terms.deadlines.settlementDate },
       possessionLabel: 'Vacant at closing',
-      sellerSigningBlockReason: terms.disclosures.statutoryPacketStatus !== 'received' ? "New Mexico county assessor tax-levy estimate and buyer receipt are required before seller acceptance. If this immutable offer records Pending, deliver the document and have the buyer create a replacement offer acknowledging receipt." : undefined,
+      sellerSigningBlockReason: terms.disclosures.statutoryPacketStatus !== 'received' ? "New Mexico county assessor tax-levy estimate and buyer receipt are required before seller acceptance. Required receipt is pending; review seller disclosures before submitting." : undefined,
       signingBlockReason:         
         (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received') || (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'

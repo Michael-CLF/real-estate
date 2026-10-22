@@ -1,3 +1,4 @@
+import { isWashingtonContractCompatible } from './washington-contract-selection';
 import { resolveWashingtonPropertyTimeZone } from './washington-property-time-zone';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -7,8 +8,9 @@ export function validateWashingtonSubmission(input: ValidateStateSubmissionInput
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'WA' && version.stateCode === 'WA' && t.stateCode === 'WA', 'The offer must belong to Washington.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
-  requireValue(t.contractType === 'navstreet_washington_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'WA', 'The contract or property snapshot is invalid.');
-  requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Washington agreement.');
+  requireValue(['navstreet_washington_residential_sale_2026', 'navstreet_washington_condominium_resale_2026'].includes(t.contractType) && t.property.listingUid === offer.listingUid && t.property.state === 'WA', 'The contract or property snapshot is invalid.');
+  requireValue(isWashingtonContractCompatible(t.contractType, t.property.propertyType, t.property.contractFacts), 'Condominium, vacant land and other property types need a separate Washington agreement.');
+  if (t.contractType === 'navstreet_washington_condominium_resale_2026') requireValue(t.disclosures.sellerReportsHoa === true, 'Condominium ownership retains its association disclosure protections.');
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');

@@ -39,6 +39,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   }
   form.reset();assert.deepEqual(normalize(form.getRawValue()),normalize(defaults));
   for(const key of Object.keys(defaults)){
+   if (['condominiumFewerThanSevenUnits','taxEstimateUnavailable','condominiumReportIssued'].includes(key)) continue; // Conditional facts exercised by resale coverage verifier.
    const incomplete={...listingFacts(code),[camel]:{...listingFacts(code)[camel],[key]:null}};
    assert.throws(()=>backendListings.validateStateSellerStatements('sample',code,incomplete));
    assert.throws(()=>validateAnswers(listingPkg,{sellerStatements:incomplete}));
@@ -60,12 +61,12 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const yearBuilt of [undefined,null,1900,1977,1978,2026])for(const leadBasedPaintApplies of [null,false,true])for(const known of [null,false,true])for(const exempt of [false,true])for(const hoa of [false,true]){
    const stateFacts={...stateDefaults[code],disclosureExemptionClaimed:exempt,deferredWaterSewerCharges:known,superfundNearby:known,otherPropertyNoticeApplies:known,rentalLeadObligationApplies:known,drugLabContaminationKnown:known,privateTransferFeeKnown:known};
    const f={yearBuilt,leadBasedPaintApplies,ownersAssociationApplies:hoa,[camel]:stateFacts};
-   const expected=[...(code==='SD'?[slug+'-seller-disclosure']:[]),...((code==='MD'||code==='NM')&&known!==false||code==='SD'&&exempt&&known!==false?[slug+'-statutory-packet']:[]),...(code==='SD'&&hoa?[slug+'-association-documents']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
+   const expected=[...((code==='SD'||code==='MD')?[slug+'-seller-disclosure']:[]),...(code==='NM'||code==='MD'&&known!==false||code==='SD'&&exempt&&known!==false?[slug+'-statutory-packet']:[]),...(code==='SD'&&hoa?[slug+'-association-documents']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
    assert.deepEqual(normalize(gates.getListingUploadGateDocumentTypes(code,f,Date.now())),expected);
    assert.deepEqual(requiredTypes({yearBuilt,sellerStatements:{leadBasedPaintApplies,ownersAssociationApplies:hoa,[camel]:stateFacts}}),expected);parity++;
   }
   const reference={id:'sample',collection:()=>({doc:type=>({type})})};
-  const valid=type=>({currentDocument:{listingUid:'sample',stateAbbreviation:code,storagePath:'files/'+type,versionId:'v1'}});
+  const valid=type=>({currentDocument:{listingUid:'sample',stateAbbreviation:code,documentType:type,storagePath:'files/'+type,versionId:'v1'}});
   const transaction=bad=>({get:async ref=>({data:()=>ref.type===bad?undefined:valid(ref.type)})});
   await gate['assert'+name+'ListingDisclosures'](transaction(),reference,listingData);
   const required=requiredTypes(listingData);
@@ -93,7 +94,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
    const v=structuredClone(version);v.terms.disclosures[key]='pending';
    if(code==='SD'&&key==='propertyConditionStatus')reject(t=>t.disclosures[key]='pending');
    else if(code==='MD'&&key==='propertyConditionStatus'||code==='NM'&&key==='statutoryPacketStatus'){
-    pkg.validateSubmission({offer,version:v});pkg.validateBeforeSigning({offer,version:v,signerRole:'buyer'});assert.throws(()=>pkg.validateBeforeSigning({offer,version:v,signerRole:'seller'}));assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,true);
+    assert.throws(()=>pkg.validateSubmission({offer,version:v}));assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);
    }else validate(v);
   }
   if(code==='MD'||code==='SD')reject(t=>t.disclosures.propertyConditionStatus='exempt');

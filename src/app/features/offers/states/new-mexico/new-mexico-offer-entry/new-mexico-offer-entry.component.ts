@@ -1,3 +1,4 @@
+import { selectNewMexicoContract } from '../../../../../core/domains/offers/state-contracts/new-mexico/new-mexico-contract-selection';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveNewMexicoPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/new-mexico/new-mexico-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -344,8 +345,7 @@ export class NewMexicoOfferEntryComponent
       ) {
         await this.loadOfferSession(
           this.requestedOfferUid,
-          this.requestedOfferVersionUid,
-          'navstreet_new_mexico_residential_sale_2026'
+          this.requestedOfferVersionUid
         );
       } else {
         await this.resumeExistingDraft();
@@ -380,7 +380,7 @@ export class NewMexicoOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_new_mexico_residential_sale_2026',
+        selectNewMexicoContract(this.property()!.propertyType,this.property()!.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );
@@ -503,6 +503,13 @@ export class NewMexicoOfferEntryComponent
     this.workflow.assertCurrentEditableDraft(offer, version, this.listingUid);
     this.currentOffer.set(offer);
     this.currentVersion.set(version);
+    if (version.terms.documentVersions) {
+      this.listingDisclosures.set(await this.workflow.restoreAcknowledgedDisclosures(
+        this.listingUid,version.terms.documentVersions,
+        (listingUid,type,id) => this.listingDisclosureService.getDisclosureVersion(listingUid,type,id),
+        () => this.listingDisclosures(),
+      ));
+    }
     this.property.set(
       version.terms.property
     );

@@ -24,6 +24,8 @@ export interface OfferValidationContext {
     | 'counteroffer'
     | 'signature';
 
+  /** Server-owned thread evidence, interpreted only by the state package. */
+  offer?: unknown;
   currentUserUid?: string;
   currentDateTime?: Date;
 }

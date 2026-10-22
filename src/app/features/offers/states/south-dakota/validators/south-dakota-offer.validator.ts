@@ -1,3 +1,4 @@
+import { isSouthDakotaContractCompatible } from '../../../../../core/domains/offers/state-contracts/south-dakota/south-dakota-contract-selection';
 import { resolveSouthDakotaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/south-dakota/south-dakota-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +10,9 @@ export class SouthDakotaOfferValidator implements StateOfferValidator<SouthDakot
   validate(terms: SouthDakotaOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'SD' || terms.contractType !== 'navstreet_south_dakota_residential_sale_2026') error('form', 'Select the NavStreet South Dakota residential agreement.');
+    if (terms.stateCode !== 'SD' || !['navstreet_south_dakota_residential_sale_2026','navstreet_south_dakota_condominium_resale_2026'].includes(terms.contractType)) error('form', 'Select the NavStreet South Dakota residential agreement.');
     if (terms.property.state !== 'SD') error('property.state', 'The listing must be in South Dakota.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (!isSouthDakotaContractCompatible(terms.contractType,terms.property.propertyType,terms.property.contractFacts)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {
@@ -77,6 +78,8 @@ export class SouthDakotaOfferValidator implements StateOfferValidator<SouthDakot
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'other_period' && (!Number.isSafeInteger(terms.disclosures.leadInspectionDays) || terms.disclosures.leadInspectionDays < 1 || terms.disclosures.leadInspectionDays > 60)) error('disclosures.leadInspectionDays', 'Set an agreed inspection period from 1 through 60 days.');
     if (terms.disclosures.sellerReportsExistingLeases === null) error('disclosures.sellerReportsExistingLeases', 'The seller must answer the leases question on the listing.');
     if (context.mode !== 'draft') {
+      if (terms.contractType === 'navstreet_south_dakota_condominium_resale_2026' && terms.disclosures.hoaDocumentsStatus !== 'received') error('disclosures.hoaDocumentsStatus','Review the condominium association packet before the written offer.');
+
       if (terms.disclosures.sellerReportsHoa && terms.disclosures.hoaDocumentsStatus !== 'received') error('disclosures.statutoryPacketStatus',"Review the South Dakota HOA packet before the written offer.");
       if (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.statutoryPacketStatus',"Review the South Dakota condition statement or supported exception before the written offer.");
       if (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) error('disclosures.statutoryPacketStatus',"A disclosure exception must match supported seller evidence.");

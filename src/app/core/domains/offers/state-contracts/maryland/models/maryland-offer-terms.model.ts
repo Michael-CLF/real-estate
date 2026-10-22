@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type MarylandContractType = 'navstreet_maryland_residential_sale_2026';
+export type MarylandContractType = 'navstreet_maryland_residential_sale_2026' | 'navstreet_maryland_condominium_resale_2026';
 export type MarylandFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type MarylandDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -10,6 +10,8 @@ export interface MarylandOfferTerms {
   readonly stateCode: 'MD';
   readonly contractType: MarylandContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
+  readonly condominium?: { readonly fewerThanSevenUnits: boolean | null };
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -84,3 +86,5 @@ export const MARYLAND_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a Maryland residential resale between the parties.',
 } as const;
+
+export const MARYLAND_CONDOMINIUM_CONTRACT_DEFINITION = {contractType:'navstreet_maryland_condominium_resale_2026',formId:'NAVSTREET-MD-CONDOMINIUM-2026',formName:'NavStreet Maryland Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-22',revisionDate:'2026-10-22',description:'Original agreement for an existing fee-simple residential condominium resale; developer and leasehold offerings excluded.'} as const;

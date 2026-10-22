@@ -3,9 +3,9 @@ import { readMissingListingDisclosures } from './listing-disclosure-gate-reader'
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function iowaRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
-  return [...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
+  return ['iowa-seller-disclosure', ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
-/** Initial buyer offers require applicable lead records; state disclosure receipt is enforced for seller offers and acceptance. */
+/** NavStreet pre-offer policy: seller disclosure/exception first; statutory delivery timing remains separate. */
 export async function assertIowaListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {
   const missing = await readMissingListingDisclosures(transaction, reference, iowaRequiredDisclosureTypes(listing), doc =>
     !doc || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'IA' ||

@@ -5,7 +5,7 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type WashingtonContractType = 'navstreet_washington_residential_sale_2026';
+export type WashingtonContractType = 'navstreet_washington_residential_sale_2026' | 'navstreet_washington_condominium_resale_2026';
 export type WashingtonFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type WashingtonDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -72,6 +72,7 @@ export interface WashingtonOfferTermsDocument {
     readonly sellerReportsExistingLeases: boolean | null;
     readonly leaseStatementAcknowledged: boolean | null;
   };
+  readonly documentVersions?: Readonly<Record<string, string>>;
   readonly additionalTerms: string;
   readonly delivery: {
     readonly expiresAt: OfferDateTime;

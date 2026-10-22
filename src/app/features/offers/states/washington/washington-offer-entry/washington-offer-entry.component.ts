@@ -1,3 +1,4 @@
+import { selectWashingtonContract } from '../../../../../core/domains/offers/state-contracts/washington/washington-contract-selection';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveWashingtonPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/washington/washington-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -299,8 +300,8 @@ export class WashingtonOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This Washington agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
+      if (!['single_family', 'townhome', 'pud', 'condo'].includes(String(listing.propertyType))) {
+        throw new Error('This Washington agreement supports residential resales. Vacant land, manufactured homes and other unsupported property types need their own agreement.');
       }
 
       resolveWashingtonPropertyTimeZone(createPropertySnapshot(listing).county);
@@ -345,7 +346,7 @@ export class WashingtonOfferEntryComponent
         await this.loadOfferSession(
           this.requestedOfferUid,
           this.requestedOfferVersionUid,
-          'navstreet_washington_residential_sale_2026'
+          selectWashingtonContract(String(this.listing()!.propertyType), this.listing()!.sellerStatements?.contractFacts)
         );
       } else {
         await this.resumeExistingDraft();
@@ -380,7 +381,7 @@ export class WashingtonOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_washington_residential_sale_2026',
+        selectWashingtonContract(String(this.listing()!.propertyType), this.listing()!.sellerStatements?.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );

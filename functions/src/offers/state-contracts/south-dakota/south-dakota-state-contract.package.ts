@@ -1,3 +1,4 @@
+import { isSouthDakotaContractCompatible } from './south-dakota-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -13,14 +14,16 @@ import { validateSouthDakotaSubmission } from './south-dakota-submission-validat
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createSouthDakotaContractMilestones } from './south-dakota-contract-milestones';
 export const southDakotaStateContractPackage: StateContractPackage<SouthDakotaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
-  assertListingContractCompatible: listing => assertListingContractScope(southDakotaStateContractPackage, listing),
-  listingDisclosurePolicy: { assertReady: assertSouthDakotaListingDisclosures },
+  assertListingContractCompatible: (listing,version) => { assertListingContractScope(southDakotaStateContractPackage,listing); if (!isSouthDakotaContractCompatible(version.terms.contractType,String(listing['propertyType']),(listing['sellerStatements'] as Record<string,any> | undefined)?.['contractFacts'])) throw new HttpsError('failed-precondition','The ownership facts require a different agreement. Start a new unsigned offer using the current listing.'); },
+  listingDisclosurePolicy: { assertReady: assertSouthDakotaListingDisclosures, assertCounterofferReady: assertSouthDakotaListingDisclosures, reviewedVersions: ({version}) => version.terms.documentVersions },
   stateCode: 'SD', offerCreationEnabled: true,
   requireOwnershipFacts:true,
-  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
-  contractTypes: ['navstreet_south_dakota_residential_sale_2026'], contractTypeRequired: true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
+  contractTypes: ['navstreet_south_dakota_residential_sale_2026','navstreet_south_dakota_condominium_resale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'SD', templateUid: SOUTH_DAKOTA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet South Dakota Residential Purchase and Sale Agreement', templateVersion: SOUTH_DAKOTA_DOCUMENT_RULES.version },
+  agreementTemplates: [{stateCode:'SD',templateUid:SOUTH_DAKOTA_DOCUMENT_RULES.templateUid,templateName:'NavStreet South Dakota Residential Purchase and Sale Agreement',templateVersion:SOUTH_DAKOTA_DOCUMENT_RULES.version},{stateCode:'SD',templateUid:'navstreet-sd-condominium-2026',templateName:'NavStreet South Dakota Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-22'},{stateCode:'SD',templateUid:'navstreet-sd-residential-2026',templateName:'NavStreet South Dakota Residential Purchase and Sale Agreement',templateVersion:'2026-10-22'}],
+  getAgreementTemplate: terms => terms.contractType === 'navstreet_south_dakota_condominium_resale_2026' ? {stateCode:'SD',templateUid:'navstreet-sd-condominium-2026',templateName:'NavStreet South Dakota Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-22'} : terms.documentVersions !== undefined ? {...southDakotaStateContractPackage.agreementTemplate,templateVersion:'2026-10-22'} : southDakotaStateContractPackage.agreementTemplate,
   createInitialOfferTerms: input => createSouthDakotaInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeSouthDakotaDraftTerms(input),
   validateSubmission: input => validateSouthDakotaSubmission(input),

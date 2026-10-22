@@ -6,7 +6,7 @@
         <span>Selected Iowa contract</span>
         <strong>{{ contract.formName }}</strong>
         <small>
-          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+          NavStreet agreement · Version effective {{ currentTerms.disclosurePolicyRevision ?? contract.effectiveDate }}
         </small>
       </aside>
     }
@@ -15,6 +15,13 @@
       <p class="iowa-offer-wizard__pending-disclosures" role="status">{{ notice }}</p>
     }
 
+    @if (currentTerms.disclosurePolicyRevision) {
+      <aside class="iowa-offer-wizard__contract">
+        <strong>Iowa Radon Home-Buyers and Sellers Fact Sheet</strong>
+        <a [href]="radonFactSheetUrl" target="_blank" rel="noopener noreferrer">Open the official radon fact sheet</a>
+        <small>Provided automatically. Read it before acknowledging receipt in Seller disclosures. A copy is included in this agreement PDF.</small>
+      </aside>
+    }
     <app-offer-wizard-shell
       stateName="Iowa"
       title="Iowa purchase offer"

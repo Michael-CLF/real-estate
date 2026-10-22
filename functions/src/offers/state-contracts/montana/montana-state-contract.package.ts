@@ -1,3 +1,5 @@
+import { isMontanaContractCompatible, type MontanaOwnershipFacts } from './montana-contract-selection';
+import { montanaCondominiumReceiptProblem, montanaCondominiumAcceptanceProblem } from './montana-condominium-policy';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -13,18 +15,35 @@ import { validateMontanaSubmission } from './montana-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createMontanaContractMilestones } from './montana-contract-milestones';
 export const montanaStateContractPackage: StateContractPackage<MontanaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
-  assertListingContractCompatible: listing => assertListingContractScope(montanaStateContractPackage, listing),
-  listingDisclosurePolicy: { assertReady: assertMontanaListingDisclosures },
+  assertListingContractCompatible: (listing, version) => {
+    assertListingContractScope(montanaStateContractPackage, listing);
+    const facts = (listing['sellerStatements'] as Record<string,unknown> | undefined)?.['contractFacts'] as MontanaOwnershipFacts | undefined;
+    if (!isMontanaContractCompatible(version.terms.contractType, String(listing['propertyType']), facts)) throw new HttpsError('failed-precondition','The listing ownership requires a different Montana agreement. Start a new unsigned draft with the correct agreement.');
+  },
+  listingDisclosurePolicy: { reviewedVersions: ({version}) => version.terms.documentVersions, assertReady: assertMontanaListingDisclosures, assertCounterofferReady: assertMontanaListingDisclosures },
   stateCode: 'MT', offerCreationEnabled: true,
   requireOwnershipFacts:true,
-  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
-  contractTypes: ['navstreet_montana_residential_sale_2026'], contractTypeRequired: true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
+  contractTypes: ['navstreet_montana_residential_sale_2026','navstreet_montana_condominium_resale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Denver',
   agreementTemplate: { stateCode: 'MT', templateUid: MONTANA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Montana Residential Purchase and Sale Agreement', templateVersion: MONTANA_DOCUMENT_RULES.version },
+  agreementTemplates: [
+    {stateCode:'MT',templateUid:MONTANA_DOCUMENT_RULES.templateUid,templateName:'NavStreet Montana Residential Purchase and Sale Agreement',templateVersion:MONTANA_DOCUMENT_RULES.version},
+    {stateCode:'MT',templateUid:'navstreet-mt-condominium-2026',templateName:'NavStreet Montana Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-22'},
+    {stateCode:'MT',templateUid:'navstreet-mt-condominium-2026',templateName:'NavStreet Montana Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-22.2'},
+  ],
+  getAgreementTemplate: terms => terms.contractType === 'navstreet_montana_condominium_resale_2026'
+    ? {stateCode:'MT',templateUid:'navstreet-mt-condominium-2026',templateName:'NavStreet Montana Condominium Resale Purchase and Sale Agreement',templateVersion:terms.condominiumAcceptancePolicy === 'accept_during_review_v2' ? '2026-10-22.2' : '2026-10-22'}
+    : montanaStateContractPackage.agreementTemplate,
+  agreementEffectiveNotBefore: ({version}) => version.terms.condominiumAcceptancePolicy === 'accept_during_review_v2' && version.terms.contractType === 'navstreet_montana_condominium_resale_2026'
+    ? new Date(Date.parse(version.terms.condominiumReceiptAt ?? '') + 72 * 60 * 60 * 1000) : undefined,
   createInitialOfferTerms: input => createMontanaInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeMontanaDraftTerms(input),
   validateSubmission: input => validateMontanaSubmission(input),
-  validateBeforeSigning: ({ version }) => {
+  validateBeforeSigning: ({ version, signerRole }) => {
+    const issue = signerRole && signerRole !== version.initiatedBy
+      ? montanaCondominiumAcceptanceProblem(version.terms) : montanaCondominiumReceiptProblem(version.terms);
+    if (issue) throw new HttpsError('failed-precondition', issue);
     const { disclosures } = version.terms;
     if (disclosures.radonNoticeAcknowledged !== true) throw new HttpsError('failed-precondition','Read and acknowledge the Montana notices before signing.');
     if (!['received','exempt'].includes(disclosures.propertyConditionStatus)) throw new HttpsError('failed-precondition',"Review the seller statement or supported exception before submitting or signing.");

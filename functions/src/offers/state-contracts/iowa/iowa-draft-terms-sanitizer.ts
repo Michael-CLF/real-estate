@@ -1,3 +1,4 @@
+import { IOWA_DISCLOSURE_REVISION, IOWA_RADON_VERSION } from './iowa-disclosure-policy';
 import { record, text, money, integer, bool, choice } from '../draft-term-values';
 import type { SanitizeDraftTermsInput } from '../state-contract-package';
 import type { IowaOfferTermsDocument } from './iowa-offer-terms.document';
@@ -26,6 +27,8 @@ export function sanitizeIowaDraftTerms(
 
   const sanitized: IowaOfferTermsDocument = {
     ...input.currentTerms,
+    disclosurePolicyRevision: IOWA_DISCLOSURE_REVISION, radonFactSheetVersion: IOWA_RADON_VERSION,
+    documentVersions:Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value]) => ['iowa-seller-disclosure','iowa-statutory-packet','iowa-association-documents','lead-based-paint'].includes(key) && typeof value === 'string' && /^[A-Za-z0-9_-]{1,200}$/.test(value)).map(([key,value]) => [key,String(value)])),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,
@@ -121,7 +124,7 @@ export function sanitizeIowaDraftTerms(
     },
 
     disclosures: {
-      requiredKnownFacts: input.currentTerms.disclosures.requiredKnownFacts,
+      requiredKnownFacts: false,
       disclosureExemptionClaimed: input.currentTerms.disclosures.disclosureExemptionClaimed,
       sellerReportsExistingLeases:
         input.currentTerms.disclosures.sellerReportsExistingLeases,

@@ -117,6 +117,7 @@ export interface SignOfferResult {
 
   fullyExecuted: boolean;
   alreadySigned: boolean;
+  pendingReview?: boolean;
 
   contractUid?: string;
 }

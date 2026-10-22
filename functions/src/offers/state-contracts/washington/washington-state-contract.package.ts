@@ -1,3 +1,4 @@
+import { isWashingtonContractCompatible, type WashingtonOwnershipFacts } from './washington-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -13,14 +14,25 @@ import { validateWashingtonSubmission } from './washington-submission-validator'
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createWashingtonContractMilestones } from './washington-contract-milestones';
 export const washingtonStateContractPackage: StateContractPackage<WashingtonOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
-  assertListingContractCompatible: listing => assertListingContractScope(washingtonStateContractPackage, listing),
-  listingDisclosurePolicy: { assertReady: assertWashingtonListingDisclosures },
+  assertListingContractCompatible: (listing, version) => {
+    assertListingContractScope(washingtonStateContractPackage, listing);
+    const facts = (listing['sellerStatements'] as Record<string, unknown> | undefined)?.['contractFacts'] as WashingtonOwnershipFacts | undefined;
+    if (!isWashingtonContractCompatible(version.terms.contractType, String(listing['propertyType']), facts)) throw new HttpsError('failed-precondition', 'The listing ownership requires a different Washington agreement. Discard an unsigned draft from its offer page and start again.');
+  },
+  listingDisclosurePolicy: { reviewedVersions: ({version}) => version.terms.documentVersions, assertReady: assertWashingtonListingDisclosures },
   stateCode: 'WA', offerCreationEnabled: true,
   requireOwnershipFacts:true,
-  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
-  contractTypes: ['navstreet_washington_residential_sale_2026'], contractTypeRequired: true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
+  contractTypes: ['navstreet_washington_residential_sale_2026', 'navstreet_washington_condominium_resale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Los_Angeles',
   agreementTemplate: { stateCode: 'WA', templateUid: WASHINGTON_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Washington Residential Purchase and Sale Agreement', templateVersion: WASHINGTON_DOCUMENT_RULES.version },
+  agreementTemplates: [
+    {stateCode:'WA', templateUid:WASHINGTON_DOCUMENT_RULES.templateUid, templateName:'NavStreet Washington Residential Purchase and Sale Agreement', templateVersion:WASHINGTON_DOCUMENT_RULES.version},
+    {stateCode:'WA', templateUid:'navstreet-wa-condominium-2026', templateName:'NavStreet Washington Condominium Resale Purchase and Sale Agreement', templateVersion:'2026-10-21'},
+  ],
+  getAgreementTemplate: terms => terms.contractType === 'navstreet_washington_condominium_resale_2026'
+    ? {stateCode:'WA', templateUid:'navstreet-wa-condominium-2026', templateName:'NavStreet Washington Condominium Resale Purchase and Sale Agreement', templateVersion:'2026-10-21'}
+    : washingtonStateContractPackage.agreementTemplate,
   createInitialOfferTerms: input => createWashingtonInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeWashingtonDraftTerms(input),
   validateSubmission: input => validateWashingtonSubmission(input),

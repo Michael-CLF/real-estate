@@ -439,9 +439,9 @@ export type ListingFuelTankOwnership = 'owned' | 'leased';
 export interface ListingSellerStatements {
   contractFacts?: ListingContractFacts;
   wyoming?: { privateWastewaterApplies?: boolean; appurtenantWaterRightsKnown?: boolean; };
-  southDakota?: { usesMountainTime?: boolean; disclosureExemptionClaimed?: boolean; privateTransferFeeKnown?: boolean; };
-  newMexico?: { privateWastewaterApplies?: boolean; drugLabContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
-  maryland?: { disclosureExemptionClaimed?: boolean; usesDisclaimer?: boolean; privateWellApplies?: boolean; onsiteSewageApplies?: boolean; deferredWaterSewerCharges?: boolean; superfundNearby?: boolean; otherPropertyNoticeApplies?: boolean; rentalLeadObligationApplies?: boolean; groundRentApplies?: boolean; };
+  southDakota?: { condominiumReportIssued?: boolean; usesMountainTime?: boolean; disclosureExemptionClaimed?: boolean; privateTransferFeeKnown?: boolean; };
+  newMexico?: {taxEstimateUnavailable?: boolean; privateWastewaterApplies?: boolean; drugLabContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
+  maryland?: {condominiumFewerThanSevenUnits?: boolean; disclosureExemptionClaimed?: boolean; usesDisclaimer?: boolean; privateWellApplies?: boolean; onsiteSewageApplies?: boolean; deferredWaterSewerCharges?: boolean; superfundNearby?: boolean; otherPropertyNoticeApplies?: boolean; rentalLeadObligationApplies?: boolean; groundRentApplies?: boolean; };
   montana?: { disclosureExemptionClaimed?: boolean; radonTestsKnown?: boolean; drugContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
   iowa?: { disclosureExemptionClaimed?: boolean; privateSewageApplies?: boolean; leadServiceLineKnown?: boolean; };
   washington?: { disclosureExemptionClaimed?: boolean; oilTankHeating?: boolean; };

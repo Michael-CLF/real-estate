@@ -26,6 +26,7 @@ export function sanitizeSouthDakotaDraftTerms(
 
   const sanitized: SouthDakotaOfferTermsDocument = {
     ...input.currentTerms,
+    documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value]) => ['south-dakota-seller-disclosure','south-dakota-statutory-packet','south-dakota-association-documents','lead-based-paint'].includes(key) && typeof value === 'string' && /^[A-Za-z0-9_-]{1,200}$/.test(value)).map(([key,value]) => [key,String(value)])),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,

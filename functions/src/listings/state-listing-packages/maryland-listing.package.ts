@@ -11,5 +11,6 @@ export const marylandListingPackage: StateListingPackage = {stateCode: 'MD', req
  if (typeof facts?.['otherPropertyNoticeApplies'] !== 'boolean') throw new HttpsError('failed-precondition','Answer the MD property applicability questions.');
  if (typeof facts?.['rentalLeadObligationApplies'] !== 'boolean') throw new HttpsError('failed-precondition','Answer the MD property applicability questions.');
  if (typeof facts?.['groundRentApplies'] !== 'boolean') throw new HttpsError('failed-precondition','Answer the MD property applicability questions.');
+ if ((statements['contractFacts'] as Record<string,unknown> | undefined)?.['isCondominium'] === true && typeof facts?.['condominiumFewerThanSevenUnits'] !== 'boolean') throw new HttpsError('failed-precondition','Answer the Maryland condominium size question.');
  }
 };

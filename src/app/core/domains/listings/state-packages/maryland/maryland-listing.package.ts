@@ -6,13 +6,21 @@ export const marylandListingPackage: StateListingPackage = {
  formFactories: { 'sellerStatements.maryland': createMarylandListingAnswersForm },
  formRestorers: { 'sellerStatements.maryland': restoreMarylandListingAnswers },
  restoreSellerStatements: saved => ({maryland: restoreMarylandListingAnswers(saved?.maryland)}),
- mapSellerStatements: answers => ({maryland: {disclosureExemptionClaimed: answers.maryland!.disclosureExemptionClaimed!,usesDisclaimer: answers.maryland!.usesDisclaimer!,privateWellApplies: answers.maryland!.privateWellApplies!,onsiteSewageApplies: answers.maryland!.onsiteSewageApplies!,deferredWaterSewerCharges: answers.maryland!.deferredWaterSewerCharges!,superfundNearby: answers.maryland!.superfundNearby!,otherPropertyNoticeApplies: answers.maryland!.otherPropertyNoticeApplies!,rentalLeadObligationApplies: answers.maryland!.rentalLeadObligationApplies!,groundRentApplies: answers.maryland!.groundRentApplies!}}),
+ mapSellerStatements: answers => ({maryland: {condominiumFewerThanSevenUnits: answers.maryland!.condominiumFewerThanSevenUnits!,disclosureExemptionClaimed: answers.maryland!.disclosureExemptionClaimed!,usesDisclaimer: answers.maryland!.usesDisclaimer!,privateWellApplies: answers.maryland!.privateWellApplies!,onsiteSewageApplies: answers.maryland!.onsiteSewageApplies!,deferredWaterSewerCharges: answers.maryland!.deferredWaterSewerCharges!,superfundNearby: answers.maryland!.superfundNearby!,otherPropertyNoticeApplies: answers.maryland!.otherPropertyNoticeApplies!,rentalLeadObligationApplies: answers.maryland!.rentalLeadObligationApplies!,groundRentApplies: answers.maryland!.groundRentApplies!}}),
  disclosureRequirements: [],
  questionGroups: [
   {
     "id": "maryland-applicability",
     "title": "Maryland property and disclosure facts",
     "questions": [
+{
+  "id": "md-condominiumFewerThanSevenUnits",
+  "fieldPath": "sellerStatements.maryland.condominiumFewerThanSevenUnits",
+  "label": "For a condominium resale, does the condominium contain fewer than seven units?",
+  "description": "Answer for condominium ownership, regardless of the physical property label. This selects the statutory resale notice and packet. For a non-condominium property, select No.",
+  "required": true,
+  "requiredMessage": "Select an answer."
+},
       {
         "id": "md-disclosureExemptionClaimed",
         "fieldPath": "sellerStatements.maryland.disclosureExemptionClaimed",

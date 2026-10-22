@@ -5,7 +5,7 @@ export const wyomingOfferDisplayAdapter: StateOfferDisplayAdapter<WyomingOfferTe
   stateCode: 'WY',
   display(terms) {
     return {
-      agreementTitle: 'NavStreet Wyoming Residential Purchase and Sale Agreement',
+      agreementTitle: terms.contractType === 'navstreet_wyoming_condominium_resale_2026' ? 'NavStreet Wyoming Condominium Resale Purchase and Sale Agreement' : 'NavStreet Wyoming Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet Wyoming agreement PDF',
       purchasePriceInCents: terms.purchase.purchasePriceInCents,
       fundingLabel: terms.purchase.financingType === 'cash' ? 'Cash' : `${terms.purchase.financingType.toUpperCase()} loan`,

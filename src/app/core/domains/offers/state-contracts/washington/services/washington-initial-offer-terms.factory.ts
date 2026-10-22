@@ -1,3 +1,4 @@
+import { isWashingtonContractCompatible } from '../washington-contract-selection';
 import { resolveWashingtonPropertyTimeZone } from '../washington-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -13,10 +14,10 @@ export interface CreateWashingtonInitialOfferTermsInput {
 export function createWashingtonInitialOfferTerms(
   input: CreateWashingtonInitialOfferTermsInput
 ): WashingtonOfferTerms {
-  if (input.contractType !== 'navstreet_washington_residential_sale_2026') {
+  if (!['navstreet_washington_residential_sale_2026', 'navstreet_washington_condominium_resale_2026'].includes(input.contractType ?? '')) {
     throw new Error('Unsupported Washington agreement.');
   }
-  if (input.property.state !== 'WA' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+  if (input.property.state !== 'WA' || !isWashingtonContractCompatible(input.contractType ?? '', input.property.propertyType, input.property.contractFacts)) {
     throw new Error('A qualifying Washington residential resale listing is required.');
   }
   return {
@@ -50,11 +51,12 @@ export function createWashingtonInitialOfferTerms(
       titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15,
     },
     disclosures: {
-      propertyConditionStatus: 'unselected', disclosureExemptionClaimed: false, requiredKnownFacts: false, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
+      propertyConditionStatus: 'unselected', disclosureExemptionClaimed: false, requiredKnownFacts: false, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: input.contractType === 'navstreet_washington_condominium_resale_2026' ? true : null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
       hoaDocumentsStatus: 'unselected',
       sellerReportsExistingLeases: null,
       leaseStatementAcknowledged: null,
     },
+    ...(input.contractType === 'navstreet_washington_condominium_resale_2026' ? {documentVersions: {}} : {}),
     additionalTerms: '',
     delivery: {
       expiresAt: input.expiresAt,

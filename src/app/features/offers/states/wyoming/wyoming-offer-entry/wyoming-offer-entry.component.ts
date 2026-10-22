@@ -1,3 +1,4 @@
+import { selectWyomingContract } from '../../../../../core/domains/offers/state-contracts/wyoming/wyoming-contract-selection';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveWyomingPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/wyoming/wyoming-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -344,8 +345,7 @@ export class WyomingOfferEntryComponent
       ) {
         await this.loadOfferSession(
           this.requestedOfferUid,
-          this.requestedOfferVersionUid,
-          'navstreet_wyoming_residential_sale_2026'
+          this.requestedOfferVersionUid
         );
       } else {
         await this.resumeExistingDraft();
@@ -380,7 +380,7 @@ export class WyomingOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_wyoming_residential_sale_2026',
+        selectWyomingContract(this.property()!.propertyType,this.property()!.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );
@@ -503,6 +503,13 @@ export class WyomingOfferEntryComponent
     this.workflow.assertCurrentEditableDraft(offer, version, this.listingUid);
     this.currentOffer.set(offer);
     this.currentVersion.set(version);
+    if (version.terms.documentVersions) {
+      this.listingDisclosures.set(await this.workflow.restoreAcknowledgedDisclosures(
+        this.listingUid,version.terms.documentVersions,
+        (listingUid,type,id) => this.listingDisclosureService.getDisclosureVersion(listingUid,type,id),
+        () => this.listingDisclosures(),
+      ));
+    }
     this.property.set(
       version.terms.property
     );

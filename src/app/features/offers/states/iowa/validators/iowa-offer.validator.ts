@@ -1,3 +1,4 @@
+import { iowaPreofferReceiptIssue, iowaLateReceiptsCover } from '../../../../../core/domains/offers/state-contracts/iowa/iowa-disclosure-policy';
 import { resolveIowaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/iowa/iowa-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -21,6 +22,10 @@ export class IowaOfferValidator implements StateOfferValidator<IowaOfferTerms> {
       });
     }
     if (!terms.legalDescription.trim()) error('legalDescription', 'The seller must provide the recorded legal description on the listing.');
+    const laterReceipt = iowaLateReceiptsCover(context.offer,buyers,terms);
+    const receiptIssue = iowaPreofferReceiptIssue(terms);
+    if (receiptIssue) error(receiptIssue.fieldPath, receiptIssue.message);
+    if (!laterReceipt && !['received','exempt'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.propertyConditionStatus','Review the Iowa condition disclosure or supported exception before continuing.');
     const p = terms.purchase;
     if (!money(p.purchasePriceInCents, true)) error('purchase.purchasePriceInCents', 'Enter a price above $0.');
     if (typeof p.hasEarnestMoney !== 'boolean') error('purchase.hasEarnestMoney', 'Choose whether to offer an initial deposit.');
@@ -70,14 +75,14 @@ export class IowaOfferValidator implements StateOfferValidator<IowaOfferTerms> {
     if (terms.disclosures.sellerReportsHoa === true && !['received', 'pending'].includes(terms.disclosures.hoaDocumentsStatus)) error('disclosures.hoaDocumentsStatus', 'Select whether you received the association resale packet.');
     if (terms.disclosures.sellerReportsHoa === false && terms.disclosures.hoaDocumentsStatus !== 'not_applicable') error('disclosures.hoaDocumentsStatus', 'Select that no HOA applies to match the seller’s listing.');
     if (terms.disclosures.taxNoticeAcknowledged !== true) error('disclosures.taxNoticeAcknowledged', 'Read and acknowledge the Iowa property tax notice.');
-    if (terms.disclosures.radonNoticeAcknowledged !== true) error('disclosures.radonNoticeAcknowledged', 'Read and acknowledge the Iowa radon notice.');
+    if (!terms.disclosurePolicyRevision && terms.disclosures.radonNoticeAcknowledged !== true) error('disclosures.radonNoticeAcknowledged', 'Read and acknowledge the Iowa radon notice.');
     if (terms.disclosures.leadPaintStatus === 'unselected' || (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && !['received', 'exempt', 'pending'].includes(terms.disclosures.leadPaintStatus))) error('disclosures.leadPaintStatus', 'For a pre-1978 home, select whether the signed lead packet has been received or is pending, or confirm a federal exemption.');
     if (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The listing year indicates this home was built before 1978.');
     if (terms.property.yearBuilt == null && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The year built is unknown; obtain the lead packet or document an exemption.');
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'unselected') error('disclosures.leadInspectionSelection', 'Select the buyer’s lead inspection option.');
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'other_period' && (!Number.isSafeInteger(terms.disclosures.leadInspectionDays) || terms.disclosures.leadInspectionDays < 1 || terms.disclosures.leadInspectionDays > 60)) error('disclosures.leadInspectionDays', 'Set an agreed inspection period from 1 through 60 days.');
     if (terms.disclosures.sellerReportsExistingLeases === null) error('disclosures.sellerReportsExistingLeases', 'The seller must answer the leases question on the listing.');
-    if (context.mode === 'counteroffer' && (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received'))) error('disclosures.propertyConditionStatus',"Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery.");
+    if (context.mode === 'counteroffer' && !laterReceipt && (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received'))) error('disclosures.propertyConditionStatus',"This saved Iowa version records required disclosure receipt as pending. Its signed answers cannot be rewritten. Actual later delivery and written buyer acknowledgement must be documented separately before seller acceptance or a seller counteroffer.");
     if (context.mode !== 'draft') {
       if (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) error('disclosures.propertyConditionStatus',"A seller disclosure exception must match the supported listing exception.");
       if (!['received','pending'].includes(terms.disclosures.statutoryPacketStatus)) error('disclosures.statutoryPacketStatus', 'Review the uploaded property-specific statutory disclosure packet before submitting.');

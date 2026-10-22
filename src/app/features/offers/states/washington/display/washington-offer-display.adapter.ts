@@ -5,7 +5,7 @@ export const washingtonOfferDisplayAdapter: StateOfferDisplayAdapter<WashingtonO
   stateCode: 'WA',
   display(terms) {
     return {
-      agreementTitle: 'NavStreet Washington Residential Purchase and Sale Agreement',
+      agreementTitle: terms.contractType === 'navstreet_washington_condominium_resale_2026' ? 'NavStreet Washington Condominium Resale Purchase and Sale Agreement' : 'NavStreet Washington Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet Washington agreement PDF',
       purchasePriceInCents: terms.purchase.purchasePriceInCents,
       fundingLabel: terms.purchase.financingType === 'cash' ? 'Cash' : `${terms.purchase.financingType.toUpperCase()} loan`,

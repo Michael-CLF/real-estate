@@ -1,3 +1,4 @@
+import { iowaPreofferReceiptProblem, iowaLateReceiptsCover } from './iowa-disclosure-policy';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -14,19 +15,22 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { createIowaContractMilestones } from './iowa-contract-milestones';
 export const iowaStateContractPackage: StateContractPackage<IowaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
   assertListingContractCompatible: listing => assertListingContractScope(iowaStateContractPackage, listing),
-  listingDisclosurePolicy: { assertReady: assertIowaListingDisclosures },
+  listingDisclosurePolicy: { assertReady: assertIowaListingDisclosures, assertCounterofferReady: assertIowaListingDisclosures, reviewedVersions: ({version}) => version.terms.documentVersions },
   stateCode: 'IA', offerCreationEnabled: true,
   requireOwnershipFacts:true,
   supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
   contractTypes: ['navstreet_iowa_residential_sale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Chicago',
   agreementTemplate: { stateCode: 'IA', templateUid: IOWA_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Iowa Residential Purchase and Sale Agreement', templateVersion: IOWA_DOCUMENT_RULES.version },
+  getAgreementTemplate: terms => terms.disclosurePolicyRevision ? {...iowaStateContractPackage.agreementTemplate, templateVersion:'2026-10-22'} : iowaStateContractPackage.agreementTemplate,
   createInitialOfferTerms: input => createIowaInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeIowaDraftTerms(input),
   validateSubmission: input => validateIowaSubmission(input),
-  validateBeforeSigning: ({ version, signerRole }) => {
+  validateBeforeSigning: ({ offer, version, signerRole }) => {
+    const problem = iowaPreofferReceiptProblem(version.terms);
+    if (problem) throw new HttpsError('failed-precondition', problem);
     const { disclosures } = version.terms;
-    if (signerRole !== 'buyer' && (!['received','exempt'].includes(disclosures.propertyConditionStatus) || (disclosures.requiredKnownFacts && disclosures.statutoryPacketStatus !== 'received'))) throw new HttpsError('failed-precondition',"Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery.");
+    if (signerRole !== 'buyer' && !iowaLateReceiptsCover(offer, version.buyers, version.terms) && (!['received','exempt'].includes(disclosures.propertyConditionStatus) || (disclosures.requiredKnownFacts && disclosures.statutoryPacketStatus !== 'received'))) throw new HttpsError('failed-precondition',"This saved Iowa version records required disclosure receipt as pending. Its signed answers cannot be rewritten. Actual later delivery and written buyer acknowledgement must be documented separately before seller acceptance or a seller counteroffer.");
     if (disclosures.radonNoticeAcknowledged !== true) throw new HttpsError('failed-precondition','Read and acknowledge the Iowa notices before signing.');
     if (disclosures.propertyConditionStatus === 'exempt' && !disclosures.disclosureExemptionClaimed) throw new HttpsError('failed-precondition',"A seller disclosure exception must match the supported listing exception.");
     if (

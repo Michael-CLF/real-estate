@@ -26,6 +26,7 @@ export function sanitizeWyomingDraftTerms(
 
   const sanitized: WyomingOfferTermsDocument = {
     ...input.currentTerms,
+    documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value]) => ['wyoming-seller-disclosure','wyoming-statutory-packet','wyoming-association-documents','lead-based-paint'].includes(key) && typeof value === 'string' && /^[A-Za-z0-9_-]{1,200}$/.test(value)).map(([key,value]) => [key,String(value)])),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,

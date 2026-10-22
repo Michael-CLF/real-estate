@@ -1,3 +1,4 @@
+import { isWashingtonContractCompatible } from '../../../../../core/domains/offers/state-contracts/washington/washington-contract-selection';
 import { resolveWashingtonPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/washington/washington-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +10,10 @@ export class WashingtonOfferValidator implements StateOfferValidator<WashingtonO
   validate(terms: WashingtonOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'WA' || terms.contractType !== 'navstreet_washington_residential_sale_2026') error('form', 'Select the NavStreet Washington residential agreement.');
+    if (terms.stateCode !== 'WA' || !['navstreet_washington_residential_sale_2026', 'navstreet_washington_condominium_resale_2026'].includes(terms.contractType)) error('form', 'Select the NavStreet Washington residential agreement.');
     if (terms.property.state !== 'WA') error('property.state', 'The listing must be in Washington.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (!isWashingtonContractCompatible(terms.contractType, terms.property.propertyType, terms.property.contractFacts)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (terms.contractType === 'navstreet_washington_condominium_resale_2026' && terms.disclosures.sellerReportsHoa !== true) error('disclosures.sellerReportsHoa', 'Condominium ownership retains association disclosure protections.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {

@@ -8,6 +8,7 @@ export type OfferStatus =
   | 'submitted'
   | 'viewed'
   | 'countered'
+  | 'accepted_pending_review'
   | 'declined'
   | 'withdrawn'
   | 'expired'
@@ -42,6 +43,7 @@ export type OfferResponseAction =
 
 export type ContractStatus =
   | 'awaiting_signatures'
+  | 'pending_review'
   | 'effective'
   | 'terminated'
   | 'closed';
@@ -397,6 +399,7 @@ export interface OfferDocument {
     transactionPhase: TransactionPhase;
 
     effectiveAt?: Timestamp;
+    reviewEndsAt?: Timestamp;
     dueDiligenceEndsAt?: string;
     anticipatedClosingDate?: string;
 

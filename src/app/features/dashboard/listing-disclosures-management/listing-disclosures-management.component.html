@@ -158,6 +158,8 @@
         <span class="status-badge status-badge--complete">
           Uploaded
         </span>
+        } @else if (requirement.requiredBeforeOffers && isRequiredForCurrentListing(requirement)) {
+        <span class="status-badge status-badge--required">Required before offers</span>
         } @else if (isRequiredBeforeAcceptance(requirement)) {
         <span class="status-badge status-badge--required">
           {{ requirement.requiredBeforeAcceptanceLabel ?? 'Required before acceptance, or supported exemption' }}

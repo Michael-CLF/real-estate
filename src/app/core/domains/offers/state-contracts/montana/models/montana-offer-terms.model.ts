@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type MontanaContractType = 'navstreet_montana_residential_sale_2026';
+export type MontanaContractType = 'navstreet_montana_residential_sale_2026' | 'navstreet_montana_condominium_resale_2026';
 export type MontanaFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type MontanaDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -68,6 +68,11 @@ export interface MontanaOfferTerms {
     readonly sellerReportsExistingLeases: boolean | null;
     readonly leaseStatementAcknowledged: boolean | null;
   };
+  readonly documentVersions?: Readonly<Record<string, string>>;
+  /** Server-recorded buyer acknowledgement; never a client-supplied delivery timestamp. */
+  readonly condominiumReceiptAt?: string;
+  /** Trusted revision marker; absent on preserved legacy agreements. */
+  readonly condominiumAcceptancePolicy?: 'accept_during_review_v2';
   readonly additionalTerms: string;
   readonly delivery: {
     readonly expiresAt: OfferDateTime;
@@ -83,4 +88,11 @@ export const MONTANA_RESIDENTIAL_CONTRACT_DEFINITION = {
   effectiveDate: '2026-10-10',
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a Montana residential resale between the parties.',
+} as const;
+
+export const MONTANA_CONDOMINIUM_CONTRACT_DEFINITION = {
+ contractType: 'navstreet_montana_condominium_resale_2026', formId: 'NAVSTREET-MT-CONDOMINIUM-2026',
+ formName: 'NavStreet Montana Condominium Resale Purchase and Sale Agreement',
+ effectiveDate: '2026-10-22', revisionDate: '2026-10-22.2',
+ description: 'Original NavStreet agreement for an existing fee-simple Montana condominium resale, including MCA 70-23-613 protections.',
 } as const;

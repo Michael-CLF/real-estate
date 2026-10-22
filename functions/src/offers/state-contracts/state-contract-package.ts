@@ -224,6 +224,9 @@ export interface StateContractPackage<
   /** State-specific prerequisites before any party signs an immutable version. */
   validateBeforeSigning?(input: ValidateStateSubmissionInput<TTerms> & { readonly signerRole?: string }): void;
 
+  /** Statutory effectiveness delay after timely acceptance; absent means immediate. */
+  agreementEffectiveNotBefore?(input: ValidateStateSubmissionInput<TTerms>): Date | undefined;
+
   sanitizeDraftTerms(
     input: SanitizeDraftTermsInput<TTerms>
   ): TTerms;

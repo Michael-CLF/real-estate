@@ -57,14 +57,33 @@ function run(source, bindings = {}) {
  const edit = fs.readFileSync(path.join(project,'src/app/features/dashboard/listing-edit/listing-edit.component.ts'),'utf8');
  const populate = edit.slice(edit.indexOf('  private populateForm('),edit.indexOf('  private refreshHoaValidators():'));
  const Edit = run('class Edit {'+populate+'} module.exports=Edit;', {restoreListingContractFacts:restore,getStateListingFormRestorer:() => value => value || {}});
- const editor = new Edit();let populated;
- editor.form={patchValue:value => populated=value,markAsPristine(){},markAsUntouched(){}};
- editor.refreshHoaValidators=() => {};editor.refreshColoradoValidators=() => {};editor.hasChanges={set(){}};
+ // Use real controls: populateForm also reads ownership controls and dirty state
+ // when it detects an older active listing with an unsaved derived answer.
+ const editor = new Edit();let changed;
+ editor.form=fb.group({
+  contractFacts:make(fb),legalDescription:[''],coloradoPropertyFacts:fb.group({}),
+  listPrice:[0],description:[''],
+  hoa:fb.group({hasHoa:[false],feeAmount:[null],feeFrequency:['']})
+ });
+ editor.refreshHoaValidators=() => {};editor.refreshColoradoValidators=() => {};
+ editor.hasChanges={set(value){changed=value;}};
  for(const propertyType of ['condo','single_family']) {
-  editor.populateForm({propertyType,listPrice:100,sellerStatements:{contractFacts:saved}});
-  assert.equal(populated.contractFacts.isCondominium,propertyType === 'condo');assert.equal(populated.contractFacts.isLeasehold,true);
-  editor.populateForm({propertyType,listPrice:100});assert.equal(populated.contractFacts.isCondominium,propertyType === 'condo');
-  assert.equal(populated.contractFacts.isDeveloperSale,null);assert.equal(populated.contractFacts.isLeasehold,null,'Do not invent either remaining answer');
+  for(const status of ['active','draft','under_contract','sold']) {
+   editor.populateForm({status,propertyType,listPrice:100,sellerStatements:{contractFacts:saved}});
+   let populated=editor.form.getRawValue();
+   assert.equal(populated.contractFacts.isCondominium,propertyType === 'condo');
+   assert.equal(populated.contractFacts.isDeveloperSale,false);assert.equal(populated.contractFacts.isLeasehold,true);
+   assert.equal(editor.form.touched,false,'Restoration must not touch the form');
+   assert.equal(changed,editor.form.dirty,'Change signal must reflect the real form state');
+   editor.populateForm({status,propertyType,listPrice:100});populated=editor.form.getRawValue();
+   assert.equal(populated.contractFacts.isCondominium,propertyType === 'condo');
+   assert.equal(populated.contractFacts.isDeveloperSale,null);assert.equal(populated.contractFacts.isLeasehold,null,'Do not invent either remaining answer');
+   assert.equal(editor.form.touched,false);assert.equal(changed,editor.form.dirty);
+   if(status !== 'active')assert(editor.form.pristine,'Inactive listings must not acquire a pending ownership repair');
+   const matching={...saved,isCondominium:propertyType === 'condo'};
+   editor.populateForm({status,propertyType,listPrice:100,sellerStatements:{contractFacts:matching}});
+   assert(editor.form.pristine,'Matching persisted ownership must remain pristine');assert.equal(changed,false);
+  }
  }
  console.log('PASS: real Angular form initialization/type switches/autosave values; saved draft and Edit listing restoration; removed duplicate question; preserved sale/leasehold/unit answers; Missouri residential/condominium selection.');
 })().catch(error => {console.error(error);process.exitCode=1;});

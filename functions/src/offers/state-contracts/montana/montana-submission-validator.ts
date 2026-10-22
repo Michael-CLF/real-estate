@@ -1,3 +1,5 @@
+import { isMontanaContractCompatible } from './montana-contract-selection';
+import { montanaCondominiumReceiptProblem } from './montana-condominium-policy';
 import { resolveMontanaPropertyTimeZone } from './montana-property-time-zone';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -7,8 +9,10 @@ export function validateMontanaSubmission(input: ValidateStateSubmissionInput<Mo
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'MT' && version.stateCode === 'MT' && t.stateCode === 'MT', 'The offer must belong to Montana.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
-  requireValue(t.contractType === 'navstreet_montana_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'MT', 'The contract or property snapshot is invalid.');
-  requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Montana agreement.');
+  requireValue(isMontanaContractCompatible(t.contractType, t.property.propertyType, t.property.contractFacts) && t.property.listingUid === offer.listingUid && t.property.state === 'MT', 'The contract or property snapshot is invalid.');
+  requireValue(['single_family', 'townhome', 'pud', 'condo'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Montana agreement.');
+  const condoIssue = montanaCondominiumReceiptProblem(t);
+  requireValue(!condoIssue, condoIssue ?? 'Review condominium records.');
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');

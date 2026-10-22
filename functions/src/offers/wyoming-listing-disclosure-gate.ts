@@ -7,8 +7,8 @@ export function wyomingRequiredDisclosureTypes(listing: Record<string, unknown>)
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertWyomingListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {
-  const missing = await readMissingListingDisclosures(transaction, reference, wyomingRequiredDisclosureTypes(listing), doc =>
-    !doc || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'WY' ||
+  const missing = await readMissingListingDisclosures(transaction, reference, wyomingRequiredDisclosureTypes(listing), (doc, documentType) =>
+    !doc || doc['documentType'] !== documentType || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'WY' ||
     typeof doc['storagePath'] !== 'string' || !doc['storagePath'] || typeof doc['versionId'] !== 'string' || !doc['versionId']);
   if (missing.length) throw new HttpsError('failed-precondition', `The seller must upload the applicable Wyoming documents or signed evidence of a lawful exception before an offer can be created: ${missing.join(', ')}.`);
 }

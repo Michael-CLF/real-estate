@@ -1,3 +1,4 @@
+import { IOWA_DISCLOSURE_REVISION, IOWA_RADON_VERSION } from '../iowa-disclosure-policy';
 import { resolveIowaPropertyTimeZone } from '../iowa-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -50,11 +51,12 @@ export function createIowaInitialOfferTerms(
       titleEvidenceSelection: 'unselected', titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15,
     },
     disclosures: {
-      propertyConditionStatus: 'unselected', disclosureExemptionClaimed: false, requiredKnownFacts: true, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
+      propertyConditionStatus: 'unselected', disclosureExemptionClaimed: false, requiredKnownFacts: false, statutoryPacketStatus: 'pending', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
       hoaDocumentsStatus: 'unselected',
       sellerReportsExistingLeases: null,
       leaseStatementAcknowledged: null,
     },
+    disclosurePolicyRevision:IOWA_DISCLOSURE_REVISION, radonFactSheetVersion:IOWA_RADON_VERSION, documentVersions:{},
     additionalTerms: '',
     delivery: {
       expiresAt: input.expiresAt,

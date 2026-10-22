@@ -1,3 +1,4 @@
+import { isMarylandContractCompatible } from '../maryland-contract-selection';
 import { resolveMarylandPropertyTimeZone } from '../maryland-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -13,13 +14,16 @@ export interface CreateMarylandInitialOfferTermsInput {
 export function createMarylandInitialOfferTerms(
   input: CreateMarylandInitialOfferTermsInput
 ): MarylandOfferTerms {
-  if (input.contractType !== 'navstreet_maryland_residential_sale_2026') {
+  if (!['navstreet_maryland_residential_sale_2026','navstreet_maryland_condominium_resale_2026'].includes(String(input.contractType))) {
     throw new Error('Unsupported Maryland agreement.');
   }
-  if (input.property.state !== 'MD' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+  if (input.property.state !== 'MD' || !isMarylandContractCompatible(String(input.contractType),input.property.propertyType,input.property.contractFacts)) {
     throw new Error('A qualifying Maryland residential resale listing is required.');
   }
   return {
+    documentVersions: {},
+    ...(input.contractType === 'navstreet_maryland_condominium_resale_2026' ? {condominium:{fewerThanSevenUnits:null}} : {}),
+
     stateCode: 'MD', contractType: input.contractType,
     property: { ...input.property, state: 'MD' },
     legalDescription: input.property.legalDescription ?? '',

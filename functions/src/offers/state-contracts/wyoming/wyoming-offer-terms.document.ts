@@ -5,7 +5,7 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type WyomingContractType = 'navstreet_wyoming_residential_sale_2026';
+export type WyomingContractType = 'navstreet_wyoming_residential_sale_2026' | 'navstreet_wyoming_condominium_resale_2026';
 export type WyomingFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type WyomingDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -14,6 +14,7 @@ export interface WyomingOfferTermsDocument {
   readonly stateCode: 'WY';
   readonly contractType: WyomingContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;

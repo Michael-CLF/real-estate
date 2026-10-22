@@ -36,6 +36,7 @@ const OPEN_OFFER_STATUSES = [
   'submitted',
   'viewed',
   'countered',
+  'accepted_pending_review',
 ] as const;
 
 /*

@@ -7,12 +7,13 @@ export async function readMissingListingDisclosures(
   transaction: Transaction,
   listingReference: DocumentReference,
   required: readonly string[],
-  isInvalid: (document: Record<string, unknown> | undefined) => boolean,
+  isInvalid: (document: Record<string, unknown> | undefined, documentType: string) => boolean,
 ): Promise<string[]> {
   const snapshots = await Promise.all(required.map(type =>
     transaction.get(listingReference.collection('disclosures').doc(type)),
   ));
-  return required.filter((_type, index) => isInvalid(
+  return required.filter((type, index) => isInvalid(
     snapshots[index].data()?.['currentDocument'] as Record<string, unknown> | undefined,
+    type,
   ));
 }

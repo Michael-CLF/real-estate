@@ -6,13 +6,21 @@ export const newMexicoListingPackage: StateListingPackage = {
  formFactories: { 'sellerStatements.newMexico': createNewMexicoListingAnswersForm },
  formRestorers: { 'sellerStatements.newMexico': restoreNewMexicoListingAnswers },
  restoreSellerStatements: saved => ({newMexico: restoreNewMexicoListingAnswers(saved?.newMexico)}),
- mapSellerStatements: answers => ({newMexico: {privateWastewaterApplies: answers.newMexico!.privateWastewaterApplies!,drugLabContaminationKnown: answers.newMexico!.drugLabContaminationKnown!,appurtenantWaterRightsKnown: answers.newMexico!.appurtenantWaterRightsKnown!}}),
+ mapSellerStatements: answers => ({newMexico: {taxEstimateUnavailable: answers.newMexico!.taxEstimateUnavailable!,privateWastewaterApplies: answers.newMexico!.privateWastewaterApplies!,drugLabContaminationKnown: answers.newMexico!.drugLabContaminationKnown!,appurtenantWaterRightsKnown: answers.newMexico!.appurtenantWaterRightsKnown!}}),
  disclosureRequirements: [],
  questionGroups: [
   {
     "id": "new-mexico-applicability",
     "title": "New Mexico property and disclosure facts",
     "questions": [
+{
+  "id": "nm-taxEstimateUnavailable",
+  "fieldPath": "sellerStatements.newMexico.taxEstimateUnavailable",
+  "label": "Is the county assessor tax-levy estimate not readily available?",
+  "description": "Normally request and upload the assessor estimate at the listed price. If not readily available, upload written evidence explaining that fact; the buyer must expressly sign the statutory waiver before making an offer. The seller cannot waive it for the buyer.",
+  "required": true,
+  "requiredMessage": "Select an answer."
+},
       {
         "id": "nm-privateWastewaterApplies",
         "fieldPath": "sellerStatements.newMexico.privateWastewaterApplies",

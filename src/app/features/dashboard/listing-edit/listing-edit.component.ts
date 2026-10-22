@@ -852,7 +852,15 @@ protected async savePhotoChanges():
     this.form.markAsPristine();
     this.form.markAsUntouched();
 
-    this.hasChanges.set(false);
+    // Restoration can derive the hidden ownership answer for an older listing.
+    // Keep that unsaved fact visible to change detection until the owner saves it.
+    const condominiumControl = this.form.controls.contractFacts.controls.isCondominium;
+    if (listing.status === 'active' &&
+        typeof condominiumControl.value === 'boolean' &&
+        condominiumControl.value !== listing.sellerStatements?.contractFacts?.isCondominium) {
+      condominiumControl.markAsDirty();
+    }
+    this.hasChanges.set(this.form.dirty);
   }
 
   private refreshHoaValidators():

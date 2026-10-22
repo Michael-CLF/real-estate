@@ -63,6 +63,7 @@ interface SignOfferResponse {
 
   fullyExecuted: boolean;
   alreadySigned: boolean;
+  pendingReview?: boolean;
 
   contractUid?: string;
 }
@@ -312,6 +313,7 @@ export const signOffer =
                 'accepted',
 
               alreadySigned: true,
+              pendingReview: offer.status === 'accepted_pending_review',
 
               ...(
                 offer.contract?.contractUid
@@ -327,6 +329,10 @@ export const signOffer =
 
           const now =
             Timestamp.now();
+
+          if (!Number.isFinite(Date.parse(version.terms.delivery.expiresAt)) || Date.parse(version.terms.delivery.expiresAt) <= now.toMillis()) {
+            throw new HttpsError('failed-precondition', 'This offer expired before acceptance. Create a new offer or counteroffer with a future deadline.');
+          }
 
           const updatedBuyers =
             applyPartySignature(
@@ -367,6 +373,10 @@ export const signOffer =
           const fullyExecuted =
             initiatingSideSigned &&
             receivingSideSigned;
+
+          const notBefore = stateContractPackage.agreementEffectiveNotBefore?.({offer, version});
+          if (notBefore && !Number.isFinite(notBefore.getTime())) throw new HttpsError('failed-precondition', 'The required document receipt time is missing.');
+          const pendingReview = fullyExecuted && !!notBefore && notBefore.getTime() > now.toMillis();
 
           const versionDeliveredNow =
             initiatingSideSigned &&
@@ -577,6 +587,15 @@ export const signOffer =
               );
             }
 
+            if (competingOffersSnapshot.docs.some(snapshot => snapshot.id !== offerUid && snapshot.get('status') === 'accepted_pending_review')) {
+              throw new HttpsError('failed-precondition', 'Another accepted agreement is awaiting its review period.');
+            }
+            const listingData = listingSnapshot.data() ?? {};
+            if ((listingData['activeContractUid'] && listingData['activeContractUid'] !== contractUid) ||
+                (listingData['pendingAgreementOfferUid'] && listingData['pendingAgreementOfferUid'] !== offerUid)) {
+              throw new HttpsError('failed-precondition', 'Another accepted agreement is effective or awaiting its review period.');
+            }
+
             competingOffers =
               competingOffersSnapshot.docs
                 .filter(
@@ -721,7 +740,7 @@ export const signOffer =
 
                   note:
                     fullyExecuted
-                      ? 'The final required party signed and the agreement became effective.'
+                      ? pendingReview ? 'All required parties signed; agreement effectiveness awaits the document review deadline.' : 'The final required party signed and the agreement became effective.'
                       : initiatingSideSigned
                         ? 'The initiating party completed signing and the offer version was delivered.'
                         : 'A required party signed the agreement.',
@@ -733,7 +752,34 @@ export const signOffer =
             }
           );
 
-          if (fullyExecuted) {
+          if (pendingReview) {
+            const reviewEndsAt = Timestamp.fromDate(notBefore!);
+            const contract = {
+              contractUid, acceptedOfferVersionUid: offerVersionUid,
+              acceptedOfferVersionNumber: version.versionNumber,
+              status: 'pending_review', transactionPhase: 'contract_formation', reviewEndsAt,
+            };
+            transaction.update(offerReference, {
+              status: 'accepted_pending_review', contract, lastActivityAt: now, updatedAt: now,
+              statusHistory: FieldValue.arrayUnion({fromStatus: offer.status, toStatus: 'accepted_pending_review',
+                action: 'accepted', actorUid: userUid, actorRole: signerRole,
+                offerVersionUid, offerVersionNumber: version.versionNumber,
+                note: 'Timely acceptance recorded; buyer may withdraw without penalty before the document review deadline.', occurredAt: now}),
+            });
+            transaction.set(contractReference!, {Uid: contractUid, offerUid, offerVersionUid,
+              offerVersionNumber: version.versionNumber, listingUid: offer.listingUid,
+              referenceNumber: offer.referenceNumber, buyerUids: offer.buyerUids, sellerUids: offer.sellerUids,
+              ...contract, acceptedAt: now, createdAt: now, updatedAt: now}, {merge: true});
+            transaction.update(listingReference, {pendingAgreementOfferUid: offerUid, updatedAt: now});
+            for (const recipientUid of uniqueStrings([...offer.buyerUids, ...offer.sellerUids])) {
+              addOfferNotificationToTransaction(transaction, adminFirestore, {
+                recipientUid, actorUid: userUid, offerUid, offerVersionUid, listingUid: offer.listingUid,
+                type: 'offer_submitted', title: 'Offer accepted — document review pending',
+                message: 'All required parties signed. Effectiveness awaits the document review deadline. Buyer may withdraw without penalty during review.',
+                channels: ['in_app', 'email'], eventKey: 'accepted-pending-review',
+              });
+            }
+          } else if (fullyExecuted) {
             const contractMilestones =
               stateContractPackage
                 .createContractMilestones({
@@ -958,6 +1004,7 @@ export const signOffer =
 
             fullyExecuted,
             alreadySigned: false,
+            pendingReview,
 
             ...(
               fullyExecuted
@@ -1302,7 +1349,7 @@ function notifySignatureProgress(
 }
 
 
-function notifyFullyExecuted(
+export function notifyFullyExecuted(
   transaction:
     Transaction,
   offer: OfferDocument,
@@ -1367,7 +1414,7 @@ function notifyFullyExecuted(
 }
 
 
-function closeCompetingOffers(
+export function closeCompetingOffers(
   transaction:
     Transaction,
   competingOffers: Array<{

@@ -1,3 +1,4 @@
+import { pinMontanaReviewedDocumentVersions } from '../services/montana-reviewed-document-versions';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -263,13 +264,14 @@ export class OfferWizardComponent {
       return;
     }
 
-    const updatedTerms =
+    let updatedTerms =
       updateMontanaOfferTerms(
         currentTerms,
         change.fieldPath,
         change.value
       );
 
+    if (this.initiatedBy() === 'buyer') updatedTerms = pinMontanaReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
   }
@@ -353,13 +355,14 @@ export class OfferWizardComponent {
       return;
     }
 
-    const updatedTerms =
+    let updatedTerms =
       updateMontanaOfferTerms(
         currentTerms,
         fieldPath,
         documentUid
       );
 
+    if (this.initiatedBy() === 'buyer') updatedTerms = pinMontanaReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
     this.terms.set(updatedTerms);
   }
 

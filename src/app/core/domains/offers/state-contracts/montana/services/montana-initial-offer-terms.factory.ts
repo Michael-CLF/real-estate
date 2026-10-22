@@ -13,10 +13,10 @@ export interface CreateMontanaInitialOfferTermsInput {
 export function createMontanaInitialOfferTerms(
   input: CreateMontanaInitialOfferTermsInput
 ): MontanaOfferTerms {
-  if (input.contractType !== 'navstreet_montana_residential_sale_2026') {
+  if (!['navstreet_montana_residential_sale_2026','navstreet_montana_condominium_resale_2026'].includes(input.contractType)) {
     throw new Error('Unsupported Montana agreement.');
   }
-  if (input.property.state !== 'MT' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+  if (input.property.state !== 'MT' || !['single_family', 'townhome', 'pud', 'condo'].includes(input.property.propertyType)) {
     throw new Error('A qualifying Montana residential resale listing is required.');
   }
   return {
@@ -50,11 +50,12 @@ export function createMontanaInitialOfferTerms(
       titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15,
     },
     disclosures: {
-      propertyConditionStatus: 'unselected', disclosureExemptionClaimed: false, requiredKnownFacts: false, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
+      propertyConditionStatus: 'unselected', disclosureExemptionClaimed: false, requiredKnownFacts: false, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: input.contractType === 'navstreet_montana_condominium_resale_2026' ? true : null, leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10,
       hoaDocumentsStatus: 'unselected',
       sellerReportsExistingLeases: null,
       leaseStatementAcknowledged: null,
     },
+    ...(input.contractType === 'navstreet_montana_condominium_resale_2026' ? {documentVersions: {}, condominiumAcceptancePolicy: 'accept_during_review_v2' as const} : {}),
     additionalTerms: '',
     delivery: {
       expiresAt: input.expiresAt,

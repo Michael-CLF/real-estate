@@ -463,7 +463,8 @@ export class OfferService {
 
   getParticipantAccess(
     offer: Offer,
-    version: OfferVersion
+    version: OfferVersion,
+    buyerWithdrawalEndsAt?: string
   ): OfferParticipantAccess {
     const userUid =
       this.currentUserUid;
@@ -584,6 +585,8 @@ export class OfferService {
         isReceivingParty,
 
       canWithdraw:
+        (isBuyer && !!buyerWithdrawalEndsAt && Date.parse(buyerWithdrawalEndsAt) > Date.now() &&
+          ['submitted','viewed','countered','accepted_pending_review'].includes(offer.status)) ||
         canDiscardInitialDraft ||
         (
           actionableStatus &&

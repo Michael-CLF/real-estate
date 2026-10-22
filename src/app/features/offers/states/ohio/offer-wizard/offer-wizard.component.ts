@@ -163,17 +163,19 @@ export class OfferWizardComponent {
       outstanding.push('the association resale packet');
     }
 
+    const notices: string[] = [];
     if (
       terms.property.yearBuilt != null &&
       terms.property.yearBuilt < 1978 &&
       terms.disclosures.leadPaintStatus === 'pending'
     ) {
-      outstanding.push('the federal lead-based paint packet');
+      notices.push('The applicable federal lead-based paint packet must be reviewed, or a valid exemption documented, before this offer or counteroffer can be submitted.');
     }
 
-    return outstanding.length
-      ? `This offer cannot be submitted while ${outstanding.join(', ')} is pending. The seller must upload the document and the buyer must review it before acknowledging receipt. A seller counteroffer cannot change the buyer's receipt answers.`
-      : null;
+    if (outstanding.length) {
+      notices.push(`Pending documents: ${outstanding.join(', ')}. These pending entries do not prevent submission of an offer or counteroffer. The buyer must actually review the documents before acknowledging receipt. A seller counteroffer cannot change the buyer's receipt answers.`);
+    }
+    return notices.length ? notices.join(' ') : null;
   });
 
   protected readonly busy = computed(

@@ -3,14 +3,12 @@ import { readMissingListingDisclosures } from './listing-disclosure-gate-reader'
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function newMexicoRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
-  const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
-  const stateFacts = statements?.['newMexico'] as Record<string,unknown> | undefined;
-  return [...(stateFacts?.['drugLabContaminationKnown'] !== false ? ['new-mexico-statutory-packet'] : []),...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
+  return ['new-mexico-statutory-packet',...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertNewMexicoListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {
-  const missing = await readMissingListingDisclosures(transaction, reference, newMexicoRequiredDisclosureTypes(listing), doc =>
-    !doc || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'NM' ||
+  const missing = await readMissingListingDisclosures(transaction, reference, newMexicoRequiredDisclosureTypes(listing), (doc, documentType) =>
+    !doc || doc['documentType'] !== documentType || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'NM' ||
     typeof doc['storagePath'] !== 'string' || !doc['storagePath'] || typeof doc['versionId'] !== 'string' || !doc['versionId']);
   if (missing.length) throw new HttpsError('failed-precondition', `The seller must upload the applicable NewMexico documents or signed evidence of a lawful exception before an offer can be created: ${missing.join(', ')}.`);
 }

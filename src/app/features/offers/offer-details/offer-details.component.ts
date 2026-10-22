@@ -1,5 +1,6 @@
-import { editOfferPath } from '../engine/state-offer-registry';
+import { editOfferPath, getEnabledStateOfferRegistration } from '../engine/state-offer-registry';
 import {
+  Type,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 
 import {
+  NgComponentOutlet,
   CurrencyPipe,
   DatePipe
 } from '@angular/common';
@@ -62,6 +64,7 @@ import {
   standalone: true,
 
   imports: [
+    NgComponentOutlet,
     CurrencyPipe,
     DatePipe,
     ReactiveFormsModule
@@ -122,6 +125,8 @@ export class OfferDetailsComponent
   readonly offer =
     signal<Offer | null>(null);
 
+  readonly supplementalDisclosureComponent = signal<Type<unknown>|null>(null);
+
   readonly currentVersion =
     signal<OfferVersion | null>(null);
 
@@ -155,7 +160,8 @@ export class OfferDetailsComponent
         return this.offerService
           .getParticipantAccess(
             offer,
-            version
+            version,
+            this.display(version).buyerWithdrawalEndsAt
           );
       }
     );
@@ -253,6 +259,7 @@ export class OfferDetailsComponent
             : 'Contract effective';
         }
 
+        if (offer?.status === 'accepted_pending_review') return 'Accepted — document review pending';
         if (offer?.status === 'withdrawn') return 'Offer withdrawn';
 
         if (this.isReceivingParty()) {
@@ -279,7 +286,15 @@ export class OfferDetailsComponent
         const version =
           this.currentVersion();
 
-        if (offer?.status === 'withdrawn') return 'This withdrawn offer will be automatically deleted within 72 hours of withdrawal.';
+        if (offer?.status === 'accepted_pending_review') {
+          const end = offer.contract?.reviewEndsAt;
+          return 'All required parties signed before expiration. The agreement becomes effective after document review ends' +
+            (end ? ' (' + end.toLocaleString() + ')' : '') +
+            '. Buyer may withdraw without penalty before that deadline. Refresh to see the latest status.';
+        }
+        if (offer?.status === 'withdrawn') return offer.contract
+          ? 'Buyer withdrew during document review. The signed agreement and withdrawal record remain available.'
+          : 'This withdrawn offer will be automatically deleted within 72 hours of withdrawal.';
 
         if (
           offer?.status ===
@@ -590,13 +605,13 @@ export class OfferDetailsComponent
 
 
   display(version: OfferVersion) {
-    return displayOfferTerms(version);
+    return displayOfferTerms(version,{offer:this.offer(),version});
   }
 
 
   signingBlockReason(version: OfferVersion): string | undefined {
     const fields = this.display(version);
-    return fields.signingBlockReason ?? (this.access()?.isSeller ? fields.sellerSigningBlockReason : undefined);
+    return fields.signingBlockReason ?? (this.access()?.isSeller ? fields.sellerSigningBlockReason : fields.buyerSigningBlockReason);
   }
 
   isTexasVersion(
@@ -1064,7 +1079,9 @@ export class OfferDetailsComponent
 
       this.signingPanelOpen.set(false);
       this.successMessage.set(
-        result.fullyExecuted
+        result.pendingReview
+          ? 'Offer accepted. Effectiveness awaits document review; buyer may withdraw without penalty during review. Preparing the signed agreement PDF.'
+          : result.fullyExecuted
           ? 'All required parties have signed. The property is now under contract. Preparing the final agreement PDF.'
           : this.isReceivingParty()
             ? 'Your signature was recorded.'
@@ -1098,7 +1115,9 @@ export class OfferDetailsComponent
       await this.loadOffer(false);
 
       this.successMessage.set(
-        result.fullyExecuted
+        result.pendingReview
+          ? 'Offer accepted — document review pending. The buyer may withdraw without penalty before review ends.'
+          : result.fullyExecuted
           ? finalAgreementPrepared
             ? 'All required parties have signed. The property is now under contract, and the final agreement PDF is ready.'
             : 'All required parties have signed. The property is now under contract.'
@@ -1301,6 +1320,7 @@ export class OfferDetailsComponent
       this.successMessage.set(
         isUnsignedDraft
           ? 'The unsigned offer draft was discarded.'
+          : offer.contract ? 'Buyer withdrew during document review. The signed agreement and withdrawal record are preserved.'
           : 'The offer was withdrawn and will be automatically deleted within 72 hours.'
       );
     } catch (error) {
@@ -1410,6 +1430,8 @@ export class OfferDetailsComponent
       const documents = allDocuments.filter(document => document.offerVersionUid === visibleVersion.Uid);
 
       this.offer.set(offer);
+      const loadSupplement = getEnabledStateOfferRegistration(offer.stateCode)?.loadSupplementalDisclosureComponent;
+      this.supplementalDisclosureComponent.set(loadSupplement ? await loadSupplement() : null);
       this.currentVersion.set(
         visibleVersion
       );

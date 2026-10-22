@@ -16,12 +16,13 @@ function stringsForProperty(source,property) {
  function visit(node){if(ts.isPropertyAssignment(node)&&node.name.getText(tree).replace(/['"]/g,'')===property&&ts.isStringLiteral(node.initializer))values.push(node.initializer.text);ts.forEachChild(node,visit);}visit(tree);return values;
 }
 const tree=ts.createSourceFile(frontPath,frontSource,ts.ScriptTarget.Latest,true);let loaders=0;
-function checkImports(node){if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){const target=node.arguments[0];assert(ts.isStringLiteral(target));assert(fs.existsSync(path.resolve(path.dirname(frontPath),target.text+'.ts')),`Missing offer component ${target.text}`);loaders++;}ts.forEachChild(node,checkImports);}checkImports(tree);assert.equal(loaders,30);
+function checkImports(node){if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){const target=node.arguments[0];assert(ts.isStringLiteral(target));assert(fs.existsSync(path.resolve(path.dirname(frontPath),target.text+'.ts')),`Missing offer component ${target.text}`);loaders++;}ts.forEachChild(node,checkImports);}checkImports(tree);assert.equal(loaders,31); // Thirty entry loaders and the Iowa later-delivery evidence panel.
 const templateIds=new Set();
 for(const [code,folder] of Object.entries(states)) {
  const front=frontend.getEnabledStateOfferRegistration(' '+code.toLowerCase()+' ');
  const registration=backend.getStateContractRegistration(code);
  const pkg=backend.requireEnabledStateContractPackage(code);
+ assert.equal(typeof front?.loadSupplementalDisclosureComponent,code==='IA'?'function':'undefined');
  assert(front,`${code}: frontend registration missing`);assert.equal(front.stateCode,code);
  assert.equal(front.offerCreationEnabled,registration.offerCreationEnabled);
  assert.equal(pkg.stateCode,code);assert.equal(pkg.agreementTemplate.stateCode,code);
@@ -44,4 +45,4 @@ for(const [code,folder] of Object.entries(states)) {
 }
 assert.equal(frontend.getEnabledStateOfferRegistration('XX'),null);
 assert.throws(()=>backend.requireEnabledStateContractPackage('XX'),/not yet available/);
-console.log('PASS: twenty-six-state contract integration; launch registration, contract selection, unique template identities, backend hooks, lazy PDF wiring and unknown-state rejection.');
+console.log('PASS: thirty-state contract integration; launch registration, contract selection, unique template identities, backend hooks, lazy PDF wiring and unknown-state rejection.');

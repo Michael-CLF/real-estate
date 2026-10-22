@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type NewMexicoContractType = 'navstreet_new_mexico_residential_sale_2026';
+export type NewMexicoContractType = 'navstreet_new_mexico_residential_sale_2026' | 'navstreet_new_mexico_condominium_resale_2026';
 export type NewMexicoFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type NewMexicoDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -10,6 +10,7 @@ export interface NewMexicoOfferTerms {
   readonly stateCode: 'NM';
   readonly contractType: NewMexicoContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -56,6 +57,8 @@ export interface NewMexicoOfferTerms {
     readonly titleEvidenceDaysBeforeClosing: number;
   };
   readonly disclosures: {
+    readonly taxEstimateUnavailable?: boolean;
+    readonly taxEstimateWaived?: boolean | null;
     readonly propertyConditionStatus: NewMexicoDisclosureStatus;
     readonly leadPaintStatus: 'unselected' | 'received' | 'pending' | 'built_1978_or_later' | 'exempt';
     readonly leadInspectionSelection: 'unselected' | 'ten_days' | 'waived' | 'other_period';
@@ -84,3 +87,5 @@ export const NEW_MEXICO_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a NewMexico residential resale between the parties.',
 } as const;
+
+export const NEW_MEXICO_CONDOMINIUM_CONTRACT_DEFINITION = {contractType:'navstreet_new_mexico_condominium_resale_2026',formId:'NAVSTREET-NM-CONDOMINIUM-2026',formName:'NavStreet New Mexico Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-22',revisionDate:'2026-10-22',description:'Original agreement for an existing fee-simple residential condominium resale; developer and leasehold offerings excluded.'} as const;

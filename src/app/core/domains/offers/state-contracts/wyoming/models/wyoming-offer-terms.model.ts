@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type WyomingContractType = 'navstreet_wyoming_residential_sale_2026';
+export type WyomingContractType = 'navstreet_wyoming_residential_sale_2026' | 'navstreet_wyoming_condominium_resale_2026';
 export type WyomingFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type WyomingDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -10,6 +10,7 @@ export interface WyomingOfferTerms {
   readonly stateCode: 'WY';
   readonly contractType: WyomingContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -84,3 +85,5 @@ export const WYOMING_RESIDENTIAL_CONTRACT_DEFINITION = {
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a Wyoming residential resale between the parties.',
 } as const;
+
+export const WYOMING_CONDOMINIUM_CONTRACT_DEFINITION = {contractType:'navstreet_wyoming_condominium_resale_2026',formId:'NAVSTREET-WY-CONDOMINIUM-2026',formName:'NavStreet Wyoming Condominium Resale Purchase and Sale Agreement',effectiveDate:'2026-10-22',revisionDate:'2026-10-22',description:'Original agreement for an existing fee-simple residential condominium resale; developer and leasehold offerings excluded.'} as const;

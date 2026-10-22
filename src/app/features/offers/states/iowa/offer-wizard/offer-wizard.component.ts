@@ -1,3 +1,5 @@
+import { IOWA_DISCLOSURE_REVISION, IOWA_RADON_VERSION, IOWA_RADON_ASSET, iowaLateReceiptsCover } from '../../../../../core/domains/offers/state-contracts/iowa/iowa-disclosure-policy';
+import { pinIowaReviewedDocumentVersions } from '../services/iowa-reviewed-document-versions';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -99,6 +101,7 @@ export class OfferWizardComponent {
   readonly property =
     input.required<OfferPropertySnapshot>();
 
+  readonly offerContext = input<unknown>(null);
   readonly initiatedBy = input<'buyer' | 'seller'>('buyer');
 
   readonly buyers =
@@ -143,17 +146,18 @@ export class OfferWizardComponent {
   protected readonly submissionAttempted =
     signal(false);
 
+  protected readonly radonFactSheetUrl = IOWA_RADON_ASSET;
   private initialTermsApplied = false;
   private initialBuyersApplied = false;
 
   protected readonly pendingDisclosureNotice = computed(() => {
     const terms = this.terms();
     if (!terms) return null;
-
-    if (terms.disclosures.leadPaintStatus === 'pending') return 'Applicable federal lead records must be uploaded and reviewed before signing.';
-    return terms.disclosures.propertyConditionStatus === 'pending' || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus === 'pending')
-      ? 'You may send this initial offer while the Iowa condition disclosure or radon fact sheet is pending. The seller must deliver required documents and record buyer receipt before making a counteroffer or accepting. After delivery, create a replacement offer acknowledging receipt; submitted receipt answers cannot be edited.'
-      : null;
+    if (terms.disclosures.leadPaintStatus === 'pending') return 'Review applicable federal lead records before submission.';
+    if (!terms.disclosurePolicyRevision && iowaLateReceiptsCover(this.offerContext(),this.buyers(),terms)) return null;
+    if (this.initiatedBy() === 'seller' && !terms.disclosurePolicyRevision && (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received'))) return 'The original signed offer keeps its pending receipt answers. A buyer must record actual later delivery on the offer details page before the seller can submit a counteroffer or accept.';
+    return !['received','exempt'].includes(terms.disclosures.propertyConditionStatus)
+      ? 'Review the uploaded Iowa condition disclosure or supported exception before submitting. Read the supplied radon fact sheet and acknowledge actual receipt.' : null;
   });
 
   protected readonly busy = computed(
@@ -208,6 +212,7 @@ export class OfferWizardComponent {
             ? 'submit'
             : 'draft',
           currentDateTime: new Date(),
+          offer: this.offerContext(),
         }
       );
 
@@ -234,7 +239,10 @@ export class OfferWizardComponent {
         !this.initialTermsApplied &&
         initialTerms
       ) {
-        this.terms.set(IOWA_OFFER_PACKAGE.prepareTerms?.(initialTerms) ?? initialTerms);
+        const mutableTerms = this.initiatedBy() === 'buyer' && !initialTerms.disclosurePolicyRevision
+          ? {...initialTerms,disclosurePolicyRevision:IOWA_DISCLOSURE_REVISION,radonFactSheetVersion:IOWA_RADON_VERSION,documentVersions:{},disclosures:{...initialTerms.disclosures,propertyConditionStatus:'unselected' as const,radonNoticeAcknowledged:null,requiredKnownFacts:false,statutoryPacketStatus:'pending' as const}}
+          : initialTerms;
+        this.terms.set(IOWA_OFFER_PACKAGE.prepareTerms?.(mutableTerms) ?? mutableTerms);
         this.initialTermsApplied = true;
       }
     });
@@ -262,13 +270,14 @@ export class OfferWizardComponent {
       return;
     }
 
-    const updatedTerms =
+    let updatedTerms =
       updateIowaOfferTerms(
         currentTerms,
         change.fieldPath,
         change.value
       );
 
+    if (this.initiatedBy() === 'buyer') updatedTerms = pinIowaReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
   }
@@ -379,6 +388,7 @@ export class OfferWizardComponent {
       {
         mode: 'submit',
         currentDateTime: new Date(),
+        offer: this.offerContext(),
       }
     );
 

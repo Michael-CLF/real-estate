@@ -1,9 +1,12 @@
+import { iowaLateReceiptsCover } from '../../../../../core/domains/offers/state-contracts/iowa/iowa-disclosure-policy';
 import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import type { IowaOfferTerms } from '../../../../../core/domains/offers/state-contracts/iowa/models/iowa-offer-terms.model';
 import type { StateOfferDisplayAdapter } from '../../../engine/display/state-offer-display.adapter';
 export const iowaOfferDisplayAdapter: StateOfferDisplayAdapter<IowaOfferTerms> = {
   stateCode: 'IA',
-  display(terms) {
+  display(terms,context) {
+    const buyers = (context?.version as {buyers?:readonly unknown[]}|undefined)?.buyers ?? [];
+    const laterReceipt = iowaLateReceiptsCover(context?.offer,buyers,terms);
     return {
       agreementTitle: 'NavStreet Iowa Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet Iowa agreement PDF',
@@ -15,7 +18,7 @@ export const iowaOfferDisplayAdapter: StateOfferDisplayAdapter<IowaOfferTerms> =
       importantDeadline: { label: 'inspection period', value: `${terms.deadlines.inspectionPeriodDays} calendar days after acceptance` },
       closingDate: { label: 'Settlement deadline', value: terms.deadlines.settlementDate },
       possessionLabel: 'Vacant at closing',
-      sellerSigningBlockReason: (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received')) ? "Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery." : undefined,
+      sellerSigningBlockReason: !laterReceipt && (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus) || (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received')) ? "This saved Iowa version records required disclosure receipt as pending. Its signed answers cannot be rewritten. The seller must upload the disclosure, then a buyer must record actual receipt in the Iowa disclosure receipt panel below. The original signed offer remains unchanged." : undefined,
       signingBlockReason:         
         (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) || (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'

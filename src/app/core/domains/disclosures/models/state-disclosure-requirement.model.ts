@@ -114,6 +114,8 @@ export interface StateDisclosureRequirement {
   /** Where to obtain a property-specific document without a blank form. */
   readonly sourceInstructions?: string;
   readonly appliesToListing?: (listing:{propertyType:string;sellerStatements?:{contractFacts?:{isCondominium?:boolean|null};leasesExist?:boolean}}) => boolean;
+  /** Explicit platform upload timing; does not redefine the statutory deadline. */
+  readonly requiredBeforeOffers?: boolean;
   readonly requiredBeforeClosing?: boolean;
   readonly requiredBeforeClosingLabel?: string;
   readonly required: boolean;

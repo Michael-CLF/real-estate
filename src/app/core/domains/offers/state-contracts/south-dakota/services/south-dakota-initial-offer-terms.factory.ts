@@ -1,3 +1,4 @@
+import { isSouthDakotaContractCompatible } from '../south-dakota-contract-selection';
 import { resolveSouthDakotaPropertyTimeZone } from '../south-dakota-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -13,13 +14,15 @@ export interface CreateSouthDakotaInitialOfferTermsInput {
 export function createSouthDakotaInitialOfferTerms(
   input: CreateSouthDakotaInitialOfferTermsInput
 ): SouthDakotaOfferTerms {
-  if (input.contractType !== 'navstreet_south_dakota_residential_sale_2026') {
+  if (!['navstreet_south_dakota_residential_sale_2026','navstreet_south_dakota_condominium_resale_2026'].includes(String(input.contractType))) {
     throw new Error('Unsupported SouthDakota agreement.');
   }
-  if (input.property.state !== 'SD' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+  if (input.property.state !== 'SD' || !isSouthDakotaContractCompatible(String(input.contractType),input.property.propertyType,input.property.contractFacts)) {
     throw new Error('A qualifying SouthDakota residential resale listing is required.');
   }
   return {
+    documentVersions: {},
+
     stateCode: 'SD', contractType: input.contractType,
     property: { ...input.property, state: 'SD' },
     legalDescription: input.property.legalDescription ?? '',

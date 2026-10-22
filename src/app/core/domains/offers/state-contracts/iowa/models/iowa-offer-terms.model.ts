@@ -69,6 +69,9 @@ export interface IowaOfferTerms {
     readonly sellerReportsExistingLeases: boolean | null;
     readonly leaseStatementAcknowledged: boolean | null;
   };
+  readonly disclosurePolicyRevision?: string;
+  readonly radonFactSheetVersion?: string;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly additionalTerms: string;
   readonly delivery: {
     readonly expiresAt: OfferDateTime;

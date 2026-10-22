@@ -1,3 +1,4 @@
+import { isNewMexicoContractCompatible } from '../../../../../core/domains/offers/state-contracts/new-mexico/new-mexico-contract-selection';
 import { resolveNewMexicoPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/new-mexico/new-mexico-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +10,9 @@ export class NewMexicoOfferValidator implements StateOfferValidator<NewMexicoOff
   validate(terms: NewMexicoOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'NM' || terms.contractType !== 'navstreet_new_mexico_residential_sale_2026') error('form', 'Select the NavStreet New Mexico residential agreement.');
+    if (terms.stateCode !== 'NM' || !['navstreet_new_mexico_residential_sale_2026','navstreet_new_mexico_condominium_resale_2026'].includes(terms.contractType)) error('form', 'Select the NavStreet New Mexico residential agreement.');
     if (terms.property.state !== 'NM') error('property.state', 'The listing must be in New Mexico.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (!isNewMexicoContractCompatible(terms.contractType,terms.property.propertyType,terms.property.contractFacts)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {
@@ -77,6 +78,9 @@ export class NewMexicoOfferValidator implements StateOfferValidator<NewMexicoOff
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'other_period' && (!Number.isSafeInteger(terms.disclosures.leadInspectionDays) || terms.disclosures.leadInspectionDays < 1 || terms.disclosures.leadInspectionDays > 60)) error('disclosures.leadInspectionDays', 'Set an agreed inspection period from 1 through 60 days.');
     if (terms.disclosures.sellerReportsExistingLeases === null) error('disclosures.sellerReportsExistingLeases', 'The seller must answer the leases question on the listing.');
     if (context.mode !== 'draft') {
+      if (terms.disclosures.statutoryPacketStatus !== 'received') error('disclosures.statutoryPacketStatus','Review the assessor estimate or documented unavailability before submitting.');
+      if (terms.disclosures.taxEstimateUnavailable && terms.disclosures.taxEstimateWaived !== true) error('disclosures.taxEstimateWaived','Sign the statutory tax estimate waiver before making the offer.');
+
       if (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received') error('disclosures.statutoryPacketStatus',"Review the applicable required property notice before submitting or signing.");
       if (!['received','pending'].includes(terms.disclosures.statutoryPacketStatus)) error('disclosures.statutoryPacketStatus', 'Review the uploaded property-specific statutory disclosure packet before submitting.');
       if (terms.disclosures.leadPaintStatus === 'pending') error('disclosures.leadPaintStatus', 'Review the lead disclosure or confirm an applicable exemption before submitting.');

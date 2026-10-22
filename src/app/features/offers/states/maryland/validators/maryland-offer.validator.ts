@@ -1,3 +1,4 @@
+import { isMarylandContractCompatible } from '../../../../../core/domains/offers/state-contracts/maryland/maryland-contract-selection';
 import { resolveMarylandPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/maryland/maryland-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +10,9 @@ export class MarylandOfferValidator implements StateOfferValidator<MarylandOffer
   validate(terms: MarylandOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'MD' || terms.contractType !== 'navstreet_maryland_residential_sale_2026') error('form', 'Select the NavStreet Maryland residential agreement.');
+    if (terms.stateCode !== 'MD' || !['navstreet_maryland_residential_sale_2026','navstreet_maryland_condominium_resale_2026'].includes(terms.contractType)) error('form', 'Select the NavStreet Maryland residential agreement.');
     if (terms.property.state !== 'MD') error('property.state', 'The listing must be in Maryland.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (!isMarylandContractCompatible(terms.contractType,terms.property.propertyType,terms.property.contractFacts)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {
@@ -77,6 +78,9 @@ export class MarylandOfferValidator implements StateOfferValidator<MarylandOffer
     if (terms.disclosures.leadPaintStatus === 'received' && terms.disclosures.leadInspectionSelection === 'other_period' && (!Number.isSafeInteger(terms.disclosures.leadInspectionDays) || terms.disclosures.leadInspectionDays < 1 || terms.disclosures.leadInspectionDays > 60)) error('disclosures.leadInspectionDays', 'Set an agreed inspection period from 1 through 60 days.');
     if (terms.disclosures.sellerReportsExistingLeases === null) error('disclosures.sellerReportsExistingLeases', 'The seller must answer the leases question on the listing.');
     if (context.mode !== 'draft') {
+      if (!['received','exempt'].includes(terms.disclosures.propertyConditionStatus)) error('disclosures.propertyConditionStatus','Review the uploaded condition disclosure, disclaimer or supported exception before submitting.');
+      if (terms.contractType === 'navstreet_maryland_condominium_resale_2026' && typeof terms.condominium?.fewerThanSevenUnits !== 'boolean') error('form','The seller must confirm condominium size in Edit listing.');
+
       if (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) error('disclosures.statutoryPacketStatus',"A disclosure exception must match supported seller evidence.");
       if (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received') error('disclosures.statutoryPacketStatus',"Review the applicable required property notice before submitting or signing.");
       if (!['received','pending'].includes(terms.disclosures.statutoryPacketStatus)) error('disclosures.statutoryPacketStatus', 'Review the uploaded property-specific statutory disclosure packet before submitting.');

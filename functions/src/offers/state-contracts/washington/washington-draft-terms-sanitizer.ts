@@ -26,6 +26,7 @@ export function sanitizeWashingtonDraftTerms(
 
   const sanitized: WashingtonOfferTermsDocument = {
     ...input.currentTerms,
+    ...(input.currentTerms.documentVersions ? {documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value]) => ['washington-seller-disclosure','washington-statutory-packet','washington-association-documents','lead-based-paint'].includes(key) && typeof value === 'string' && value.length > 0 && value.length <= 200 && !value.includes('/')).map(([key,value]) => [key, String(value)]))} : {}),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,

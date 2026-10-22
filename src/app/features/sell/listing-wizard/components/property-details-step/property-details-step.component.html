@@ -627,6 +627,10 @@
         @if (requiresOwnersAssociation()) {
         <div class="field">
           <label for="ownersAssociationApplies">Owners association</label>
+          @if ((form.controls.hoa.controls.hasHoa.value === true || form.controls.hoa.controls.hasHoa.value === false) && form.controls.hoa.controls.hasHoa.value === form.controls.sellerStatements.controls.ownersAssociationApplies.value) {
+          <input id="ownersAssociationApplies" type="text" class="seller-association-statement" disabled
+            [value]="form.controls.hoa.controls.hasHoa.value ? 'Seller reports an owners association applies.' : 'Seller reports no owners association.'" />
+          } @else {
           <select id="ownersAssociationApplies" formControlName="ownersAssociationApplies">
             <option [ngValue]="null">Select an answer</option>
             <option [ngValue]="true">Membership in an owners association applies</option>
@@ -635,6 +639,7 @@
           @if (form.controls.sellerStatements.controls.ownersAssociationApplies.touched &&
           form.controls.sellerStatements.controls.ownersAssociationApplies.hasError('required')) {
           <p class="field-error">Select whether the property belongs to an owners association.</p>
+          }
           }
         </div>
         }

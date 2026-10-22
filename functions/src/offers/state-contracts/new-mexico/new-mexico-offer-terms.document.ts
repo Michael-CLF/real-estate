@@ -5,7 +5,7 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type NewMexicoContractType = 'navstreet_new_mexico_residential_sale_2026';
+export type NewMexicoContractType = 'navstreet_new_mexico_residential_sale_2026' | 'navstreet_new_mexico_condominium_resale_2026';
 export type NewMexicoFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type NewMexicoDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -14,6 +14,7 @@ export interface NewMexicoOfferTermsDocument {
   readonly stateCode: 'NM';
   readonly contractType: NewMexicoContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;
@@ -60,6 +61,8 @@ export interface NewMexicoOfferTermsDocument {
     readonly titleEvidenceDaysBeforeClosing: number;
   };
   readonly disclosures: {
+    readonly taxEstimateUnavailable?: boolean;
+    readonly taxEstimateWaived?: boolean | null;
     readonly propertyConditionStatus: NewMexicoDisclosureStatus;
     readonly leadPaintStatus: 'unselected' | 'received' | 'pending' | 'built_1978_or_later' | 'exempt';
     readonly leadInspectionSelection: 'unselected' | 'ten_days' | 'waived' | 'other_period';

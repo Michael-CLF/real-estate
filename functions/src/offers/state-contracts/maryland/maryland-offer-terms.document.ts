@@ -5,7 +5,7 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type MarylandContractType = 'navstreet_maryland_residential_sale_2026';
+export type MarylandContractType = 'navstreet_maryland_residential_sale_2026' | 'navstreet_maryland_condominium_resale_2026';
 export type MarylandFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type MarylandDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -14,6 +14,8 @@ export interface MarylandOfferTermsDocument {
   readonly stateCode: 'MD';
   readonly contractType: MarylandContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
+  readonly condominium?: { readonly fewerThanSevenUnits: boolean | null };
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;

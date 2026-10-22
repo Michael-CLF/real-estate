@@ -1,3 +1,4 @@
+import { isSouthDakotaContractCompatible } from './south-dakota-contract-selection';
 import { resolveSouthDakotaPropertyTimeZone } from './south-dakota-property-time-zone';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -7,8 +8,9 @@ export function validateSouthDakotaSubmission(input: ValidateStateSubmissionInpu
   const { offer, version } = input; const t = version.terms; const p = t.purchase; const d = t.deadlines;
   requireValue(offer.stateCode === 'SD' && version.stateCode === 'SD' && t.stateCode === 'SD', 'The offer must belong to South Dakota.');
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
-  requireValue(t.contractType === 'navstreet_south_dakota_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'SD', 'The contract or property snapshot is invalid.');
-  requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate South Dakota agreement.');
+  requireValue(['navstreet_south_dakota_residential_sale_2026','navstreet_south_dakota_condominium_resale_2026'].includes(t.contractType) && t.property.listingUid === offer.listingUid && t.property.state === 'SD', 'The contract or property snapshot is invalid.');
+  requireValue(isSouthDakotaContractCompatible(t.contractType,t.property.propertyType,t.property.contractFacts), 'Condominium, vacant land and other property types need a separate South Dakota agreement.');
+  requireValue(t.contractType !== 'navstreet_south_dakota_condominium_resale_2026' || t.disclosures.hoaDocumentsStatus === 'received', 'Review the required condominium association packet before the written offer.');
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');

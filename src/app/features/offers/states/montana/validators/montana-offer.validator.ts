@@ -1,3 +1,4 @@
+import { isMontanaContractCompatible } from '../../../../../core/domains/offers/state-contracts/montana/montana-contract-selection';
 import { resolveMontanaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/montana/montana-property-time-zone';
 import type { OfferParty } from '../../../../../core/domains/offers/models/offer-party.model';
 import type { OfferValidationContext, OfferValidationIssue, OfferValidationResult } from '../../../../../core/domains/offers/models/offer-validation.model';
@@ -9,9 +10,9 @@ export class MontanaOfferValidator implements StateOfferValidator<MontanaOfferTe
   validate(terms: MontanaOfferTerms, buyers: OfferParty[], sellers: OfferParty[], context: OfferValidationContext): OfferValidationResult {
     const errors: OfferValidationIssue[] = [];
     const error = (fieldPath: string, message: string) => errors.push({ fieldPath, message, severity: 'error' });
-    if (terms.stateCode !== 'MT' || terms.contractType !== 'navstreet_montana_residential_sale_2026') error('form', 'Select the NavStreet Montana residential agreement.');
+    if (terms.stateCode !== 'MT' || !isMontanaContractCompatible(terms.contractType, terms.property.propertyType, terms.property.contractFacts)) error('form', 'Select the NavStreet Montana residential agreement.');
     if (terms.property.state !== 'MT') error('property.state', 'The listing must be in Montana.');
-    if (!['single_family', 'townhome', 'pud'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
+    if (!['single_family', 'townhome', 'pud', 'condo'].includes(terms.property.propertyType)) error('property.propertyType', 'Condominium, land and other property types need a separate agreement.');
     for (const [side, parties] of [['buyers', buyers], ['sellers', sellers]] as const) {
       if (!parties.length) error(side, `At least one ${side === 'buyers' ? 'buyer' : 'seller'} is required.`);
       parties.forEach((party, index) => {
@@ -21,6 +22,7 @@ export class MontanaOfferValidator implements StateOfferValidator<MontanaOfferTe
       });
     }
     if (!terms.legalDescription.trim()) error('legalDescription', 'The seller must provide the recorded legal description on the listing.');
+    if (terms.contractType === 'navstreet_montana_condominium_resale_2026' && (terms.disclosures.hoaDocumentsStatus !== 'received' || !terms.documentVersions?.['montana-association-documents'])) error('disclosures.hoaDocumentsStatus', 'Review the uploaded Montana condominium packet before sending this offer.');
     const p = terms.purchase;
     if (!money(p.purchasePriceInCents, true)) error('purchase.purchasePriceInCents', 'Enter a price above $0.');
     if (typeof p.hasEarnestMoney !== 'boolean') error('purchase.hasEarnestMoney', 'Choose whether to offer an initial deposit.');

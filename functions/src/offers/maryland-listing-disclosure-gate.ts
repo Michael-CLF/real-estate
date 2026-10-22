@@ -5,12 +5,14 @@ import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function marylandRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
   const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
   const stateFacts = statements?.['maryland'] as Record<string,unknown> | undefined;
-  return [...(['deferredWaterSewerCharges','superfundNearby','otherPropertyNoticeApplies','rentalLeadObligationApplies'].some(key => stateFacts?.[key] !== false) ? ['maryland-statutory-packet'] : []),...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
+  return ['maryland-seller-disclosure',...(['deferredWaterSewerCharges','superfundNearby','otherPropertyNoticeApplies','rentalLeadObligationApplies'].some(key => stateFacts?.[key] !== false) ? ['maryland-statutory-packet'] : []),...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertMarylandListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {
-  const missing = await readMissingListingDisclosures(transaction, reference, marylandRequiredDisclosureTypes(listing), doc =>
-    !doc || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'MD' ||
+  const statements = listing['sellerStatements'] as Record<string,any> | undefined;
+  if ((listing['propertyType'] === 'condo' || statements?.['contractFacts']?.isCondominium === true) && typeof statements?.['maryland']?.condominiumFewerThanSevenUnits !== 'boolean') throw new HttpsError('failed-precondition','The seller must answer the condominium size question in Edit listing.');
+  const missing = await readMissingListingDisclosures(transaction, reference, marylandRequiredDisclosureTypes(listing), (doc, documentType) =>
+    !doc || doc['documentType'] !== documentType || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'MD' ||
     typeof doc['storagePath'] !== 'string' || !doc['storagePath'] || typeof doc['versionId'] !== 'string' || !doc['versionId']);
   if (missing.length) throw new HttpsError('failed-precondition', `The seller must upload the applicable Maryland documents or signed evidence of a lawful exception before an offer can be created: ${missing.join(', ')}.`);
 }

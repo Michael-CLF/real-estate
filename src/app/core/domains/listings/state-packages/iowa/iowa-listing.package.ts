@@ -17,7 +17,7 @@ export const iowaListingPackage: StateListingPackage = {
         "id": "ia-disclosureExemptionClaimed",
         "fieldPath": "sellerStatements.iowa.disclosureExemptionClaimed",
         "label": "Does this transfer qualify for a specific Chapter 558A exception?",
-        "description": "Identify the specific 558A.1 exception in signed supporting evidence. An as-is sale alone is not an exception.",
+        "description": "Identify the specific 558A.1 exception in signed supporting evidence. An as-is sale alone is not an exception. Before buyers can make online offers, upload the completed signed seller condition disclosure or supported exception evidence under Property Disclosures. The form must include required known radon information and the current lead water-service-line questions. NavStreet supplies the official radon fact sheet automatically; upload no duplicate pamphlet. You may create and advertise the listing while gathering documents.",
         "required": true,
         "requiredMessage": "Select an answer."
       },

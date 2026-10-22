@@ -1,3 +1,4 @@
+import { selectMontanaContract } from '../../../../../core/domains/offers/state-contracts/montana/montana-contract-selection';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveMontanaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/montana/montana-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -299,7 +300,7 @@ export class MontanaOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
+      if (!['single_family', 'townhome', 'pud', 'condo'].includes(String(listing.propertyType))) {
         throw new Error('This Montana agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
       }
 
@@ -345,7 +346,7 @@ export class MontanaOfferEntryComponent
         await this.loadOfferSession(
           this.requestedOfferUid,
           this.requestedOfferVersionUid,
-          'navstreet_montana_residential_sale_2026'
+          selectMontanaContract(String(this.listing()!.propertyType), this.listing()!.sellerStatements?.contractFacts)
         );
       } else {
         await this.resumeExistingDraft();
@@ -380,7 +381,7 @@ export class MontanaOfferEntryComponent
     try {
       await this.workflow.createAndLoadDraft(
         this.listingUid,
-        'navstreet_montana_residential_sale_2026',
+        selectMontanaContract(String(this.listing()!.propertyType), this.listing()!.sellerStatements?.contractFacts),
         (offerUid, versionUid, contractType) =>
           this.loadOfferSession(offerUid, versionUid, contractType),
       );

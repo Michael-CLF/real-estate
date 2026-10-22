@@ -1,3 +1,4 @@
+import { IOWA_DISCLOSURE_REVISION, IOWA_RADON_VERSION } from './iowa-disclosure-policy';
 import { resolveIowaPropertyTimeZone } from './iowa-property-time-zone';
 import { sellerLeases, sellerHoa } from '../initial-listing-facts';
 
@@ -19,7 +20,8 @@ export function createIowaInitialOfferTerms(input: CreateInitialOfferTermsInput)
     conditions: { dueDiligence: true, appraisal: null, financing: null, saleOfBuyersProperty: false, additionalEarnestMoney: null },
     propertyItems: { included: '', excluded: '', fixturesIncluded: true, leasedItemsDescription: '' },
     settlement: { possession: 'at_recording', possessionDelay: 0, specialAssessmentPayer: 'unselected', hoaTransferFeePayer: 'unselected', titleEvidenceSelection: 'unselected', titlePolicyPayer: 'unselected', closingAgentName: '', titleEvidenceDaysBeforeClosing: 15 },
-    disclosures: { propertyConditionStatus: 'unselected', disclosureExemptionClaimed: (input.listingData['sellerStatements'] as Record<string, any> | undefined)?.['iowa']?.['disclosureExemptionClaimed'] === true, requiredKnownFacts: (input.listingData['sellerStatements'] as Record<string, any> | undefined)?.['iowa']?.['disclosureExemptionClaimed'] !== true, statutoryPacketStatus: 'unselected', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: sellerHoa(input.listingData), leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10, hoaDocumentsStatus: 'unselected', sellerReportsExistingLeases: sellerLeases(input.listingData), leaseStatementAcknowledged: null },
+    disclosures: { propertyConditionStatus: 'unselected', disclosureExemptionClaimed: (input.listingData['sellerStatements'] as Record<string, any> | undefined)?.['iowa']?.['disclosureExemptionClaimed'] === true, requiredKnownFacts: false, statutoryPacketStatus: 'pending', taxNoticeAcknowledged: null, radonNoticeAcknowledged: null, sellerReportsHoa: sellerHoa(input.listingData), leadPaintStatus: 'unselected', leadInspectionSelection: 'unselected', leadInspectionDays: 10, hoaDocumentsStatus: 'unselected', sellerReportsExistingLeases: sellerLeases(input.listingData), leaseStatementAcknowledged: null },
+    disclosurePolicyRevision:IOWA_DISCLOSURE_REVISION, radonFactSheetVersion:IOWA_RADON_VERSION, documentVersions:{},
     additionalTerms: '', delivery: { expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), timeZone: resolveIowaPropertyTimeZone(input.property.county), electronicDeliveryAuthorized: null },
   };
 }

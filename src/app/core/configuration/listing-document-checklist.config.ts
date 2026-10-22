@@ -1,3 +1,9 @@
+import { getWyomingListingDocumentChecklist } from '../domains/listings/state-packages/wyoming/wyoming-document-checklist';
+import { getSouthDakotaListingDocumentChecklist } from '../domains/listings/state-packages/south-dakota/south-dakota-document-checklist';
+import { getNewMexicoListingDocumentChecklist } from '../domains/listings/state-packages/new-mexico/new-mexico-document-checklist';
+import { getMarylandListingDocumentChecklist } from '../domains/listings/state-packages/maryland/maryland-document-checklist';
+import { applyMontanaChecklist } from '../domains/listings/state-packages/montana/montana-document-checklist';
+import { getIowaListingDocumentChecklist } from '../domains/listings/state-packages/iowa/iowa-document-checklist';
 import { isFederalLeadExcluded } from '../domains/offers/federal-lead-policy';
 import { getListingUploadGateDocumentTypes, type ListingDisclosureGateFacts } from './listing-disclosure-gates';
 import { californiaDisclosureOutstanding, type CaliforniaListingFacts } from '../domains/listings/state-packages/california/california-listing-facts.model';
@@ -8,7 +14,7 @@ import type { DisclosureDocumentType } from '../domains/disclosures/models/state
 export interface ListingChecklistItem {
   readonly id: string;
   readonly title: string;
-  readonly category: 'Required when applicable' | 'Contract requirement' | 'Information booklet' | 'Recommended';
+  readonly category: 'Required when applicable' | 'Contract requirement' | 'Information booklet' | 'Recommended' | 'Required before offers' | 'Supporting records' | 'Provided automatically' | 'Not applicable';
   readonly applicability: string;
   readonly timing: string;
   readonly instructions: string;
@@ -30,7 +36,6 @@ const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
   ...Object.fromEntries(getStateDisclosureRequirements('OH').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('DE').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('WA').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
-  ...Object.fromEntries(getStateDisclosureRequirements('IA').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('MT').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('MD').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
   ...Object.fromEntries(getStateDisclosureRequirements('NM').filter(r=>r.documentType!=='lead-based-paint').map(r=>[r.documentType,{category:'Required when applicable' as const,applicability:'Read the property-specific applicability instructions.',timing:'Follow the stated statutory deadline; optional records do not universally block an offer.',instructions:r.description,suppliedBy:'Seller or applicable agency/association'}])),
@@ -184,9 +189,15 @@ const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
   },
 };
 
-export function getListingDocumentChecklist(state: string): readonly ListingChecklistItem[] {
+export function getListingDocumentChecklist(state: string, facts: ListingChecklistFacts = {}): readonly ListingChecklistItem[] {
   const code = normalizeDisclosureStateCode(state);
+  if (code === 'WY') return getWyomingListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'SD') return getSouthDakotaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'NM') return getNewMexicoListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'MD') return getMarylandListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (!LISTING_CHECKLIST_STATES.some(candidate => candidate.abbreviation === code)) return [];
+
+  if (code === 'IA') return getIowaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
 
   const items: ListingChecklistItem[] = getStateDisclosureRequirements(code)
     .slice().sort((a, b) => a.sortOrder - b.sortOrder)
@@ -236,7 +247,7 @@ export function getListingDocumentChecklist(state: string): readonly ListingChec
     instructions: 'Deed or legal description, survey, existing leases, warranties, permits, repair records and existing inspection reports can help you answer listing questions. This checklist does not require ordering new reports or uploading every record.',
     links: [],
   });
-  return items;
+  return code === 'MT' ? applyMontanaChecklist(items, facts) : items;
 }
 
 export interface ListingChecklistFacts extends ListingDisclosureGateFacts {

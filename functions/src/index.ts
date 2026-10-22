@@ -1,3 +1,4 @@
+export { reconcileOfferStatus } from './offers/reconcile-offer-status';
 import {
   setGlobalOptions
 } from 'firebase-functions/v2';
@@ -75,3 +76,7 @@ export { discardOfferDraft } from './offers/discard-offer-draft';
 export { deleteInactiveOfferDrafts } from './offers/delete-inactive-offer-drafts';
 
 export { deleteWithdrawnOffers } from './offers/delete-withdrawn-offers';
+
+export { recordIowaDisclosureReceipt, getIowaDisclosureReceiptPdf } from './offers/state-contracts/iowa/iowa-disclosure-receipt';
+
+export {activateReviewedAgreements} from './offers/activate-reviewed-agreements';

@@ -1,3 +1,4 @@
+import { isWyomingContractCompatible } from '../wyoming-contract-selection';
 import { resolveWyomingPropertyTimeZone } from '../wyoming-property-time-zone';
 
 import type { OfferPropertySnapshot } from '../../../models/offer-terms.model';
@@ -13,13 +14,15 @@ export interface CreateWyomingInitialOfferTermsInput {
 export function createWyomingInitialOfferTerms(
   input: CreateWyomingInitialOfferTermsInput
 ): WyomingOfferTerms {
-  if (input.contractType !== 'navstreet_wyoming_residential_sale_2026') {
+  if (!['navstreet_wyoming_residential_sale_2026','navstreet_wyoming_condominium_resale_2026'].includes(String(input.contractType))) {
     throw new Error('Unsupported Wyoming agreement.');
   }
-  if (input.property.state !== 'WY' || !['single_family', 'townhome', 'pud'].includes(input.property.propertyType)) {
+  if (input.property.state !== 'WY' || !isWyomingContractCompatible(String(input.contractType),input.property.propertyType,input.property.contractFacts)) {
     throw new Error('A qualifying Wyoming residential resale listing is required.');
   }
   return {
+    documentVersions: {},
+
     stateCode: 'WY', contractType: input.contractType,
     property: { ...input.property, state: 'WY' },
     legalDescription: input.property.legalDescription ?? '',

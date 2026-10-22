@@ -1,7 +1,7 @@
 
 import type { MoneyInCents, OfferDate, OfferDateTime, OfferPropertySnapshot } from '../../../models/offer-terms.model';
 
-export type WashingtonContractType = 'navstreet_washington_residential_sale_2026';
+export type WashingtonContractType = 'navstreet_washington_residential_sale_2026' | 'navstreet_washington_condominium_resale_2026';
 export type WashingtonFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type WashingtonDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -68,6 +68,7 @@ export interface WashingtonOfferTerms {
     readonly sellerReportsExistingLeases: boolean | null;
     readonly leaseStatementAcknowledged: boolean | null;
   };
+  readonly documentVersions?: Readonly<Record<string, string>>;
   readonly additionalTerms: string;
   readonly delivery: {
     readonly expiresAt: OfferDateTime;
@@ -83,4 +84,12 @@ export const WASHINGTON_RESIDENTIAL_CONTRACT_DEFINITION = {
   effectiveDate: '2026-10-10',
   revisionDate: '2026-10-10',
   description: 'NavStreet-written agreement for a Washington residential resale between the parties.',
+} as const;
+
+export const WASHINGTON_CONDOMINIUM_CONTRACT_DEFINITION = {
+  contractType: 'navstreet_washington_condominium_resale_2026',
+  formId: 'NAVSTREET-WA-CONDOMINIUM-2026',
+  formName: 'NavStreet Washington Condominium Resale Purchase and Sale Agreement',
+  effectiveDate: '2026-10-21', revisionDate: '2026-10-21',
+  description: 'Existing fee-simple condominium resale; statutory delivery and cancellation protections are preserved.',
 } as const;

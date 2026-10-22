@@ -1,3 +1,4 @@
+import { isWyomingContractCompatible } from './wyoming-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -13,14 +14,16 @@ import { validateWyomingSubmission } from './wyoming-submission-validator';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createWyomingContractMilestones } from './wyoming-contract-milestones';
 export const wyomingStateContractPackage: StateContractPackage<WyomingOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
-  assertListingContractCompatible: listing => assertListingContractScope(wyomingStateContractPackage, listing),
-  listingDisclosurePolicy: { assertReady: assertWyomingListingDisclosures },
+  assertListingContractCompatible: (listing,version) => { assertListingContractScope(wyomingStateContractPackage,listing); if (!isWyomingContractCompatible(version.terms.contractType,String(listing['propertyType']),(listing['sellerStatements'] as Record<string,any> | undefined)?.['contractFacts'])) throw new HttpsError('failed-precondition','The ownership facts require a different agreement. Start a new unsigned offer using the current listing.'); },
+  listingDisclosurePolicy: { assertReady: assertWyomingListingDisclosures, assertCounterofferReady: assertWyomingListingDisclosures, reviewedVersions: ({version}) => version.terms.documentVersions },
   stateCode: 'WY', offerCreationEnabled: true,
   requireOwnershipFacts:true,
-  supportedPropertyTypes: ['single_family', 'townhome', 'pud'],
-  contractTypes: ['navstreet_wyoming_residential_sale_2026'], contractTypeRequired: true,
+  supportedPropertyTypes: ['single_family', 'townhome', 'pud', 'condo'],
+  contractTypes: ['navstreet_wyoming_residential_sale_2026','navstreet_wyoming_condominium_resale_2026'], contractTypeRequired: true,
   defaultTimeZone: 'America/Denver',
   agreementTemplate: { stateCode: 'WY', templateUid: WYOMING_DOCUMENT_RULES.templateUid, templateName: 'NavStreet Wyoming Residential Purchase and Sale Agreement', templateVersion: WYOMING_DOCUMENT_RULES.version },
+  agreementTemplates: [{stateCode:'WY',templateUid:WYOMING_DOCUMENT_RULES.templateUid,templateName:'NavStreet Wyoming Residential Purchase and Sale Agreement',templateVersion:WYOMING_DOCUMENT_RULES.version},{stateCode:'WY',templateUid:'navstreet-wy-condominium-2026',templateName:'NavStreet Wyoming Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-22'},{stateCode:'WY',templateUid:'navstreet-wy-residential-2026',templateName:'NavStreet Wyoming Residential Purchase and Sale Agreement',templateVersion:'2026-10-22'}],
+  getAgreementTemplate: terms => terms.contractType === 'navstreet_wyoming_condominium_resale_2026' ? {stateCode:'WY',templateUid:'navstreet-wy-condominium-2026',templateName:'NavStreet Wyoming Condominium Resale Purchase and Sale Agreement',templateVersion:'2026-10-22'} : terms.documentVersions !== undefined ? {...wyomingStateContractPackage.agreementTemplate,templateVersion:'2026-10-22'} : wyomingStateContractPackage.agreementTemplate,
   createInitialOfferTerms: input => createWyomingInitialOfferTerms(input),
   sanitizeDraftTerms: input => sanitizeWyomingDraftTerms(input),
   validateSubmission: input => validateWyomingSubmission(input),

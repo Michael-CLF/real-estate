@@ -57,7 +57,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const yearBuilt of [undefined,null,1900,1977,1978,2026])for(const leadBasedPaintApplies of [null,false,true])for(const known of [null,false,true])for(const exempt of [false,true]){
    const stateFacts={...facts(code)[slug],disclosureExemptionClaimed:exempt,radonTestsKnown:known,drugContaminationKnown:known,appurtenantWaterRightsKnown:known};
    const f={yearBuilt,leadBasedPaintApplies,[slug]:stateFacts};
-   const expected=[...(code!=='WA'&&code!=='IA'?[slug+'-seller-disclosure']:[]),...(code==='DE'&&!exempt||code==='MT'&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
+   const expected=[...(code!=='WA'?[slug+'-seller-disclosure']:[]),...(code==='DE'&&!exempt||code==='MT'&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
    assert.deepEqual(normalize(gates.getListingUploadGateDocumentTypes(code,f,Date.now())),expected);
    assert.deepEqual(requiredTypes({yearBuilt,sellerStatements:{leadBasedPaintApplies,[slug]:stateFacts}}),expected);parity++;
   }
@@ -73,6 +73,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   Object.assign(terms.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});Object.assign(terms.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});
   terms.deadlines.settlementDate='2099-12-01';if(code==='IA')terms.settlement.titleEvidenceSelection='abstract_opinion';Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName:'Test Title',specialAssessmentPayer:'seller'});
   Object.assign(terms.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',hoaDocumentsStatus:'not_applicable',leadPaintStatus:'built_1978_or_later',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});
+  if(code==='IA')terms.documentVersions={'iowa-seller-disclosure':'condition-v1'};
   terms.delivery.expiresAt='2099-10-01T12:00:00Z';terms.delivery.electronicDeliveryAuthorized=true;
   const version={Uid:'version',offerUid:'offer',stateCode:code,status:'draft',immutable:false,expiresAt:terms.delivery.expiresAt,terms,buyers:[party('buyer')],sellers:[party('seller')],initiatedBy:'buyer',initiatedByUid:'buyer'},offer={Uid:'offer',stateCode:code,listingUid:'sample',currentVersionUid:'version'};
   const validator=new (load(path.join(project,'src/app/features/offers/states',slug,'validators',slug+'-offer.validator.ts')))[name+'OfferValidator']();
@@ -90,13 +91,14 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const key of ['propertyConditionStatus','statutoryPacketStatus']){
    const v=structuredClone(version);v.terms.disclosures[key]='pending';
    if(code==='IA') {
-    pkg.validateSubmission({offer,version:v});pkg.validateBeforeSigning({offer,version:v,signerRole:'buyer'});
-    assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,true);
-    assert.throws(()=>pkg.validateBeforeSigning({offer,version:v,signerRole:'seller'}));
-    assert.throws(()=>pkg.validateSubmission({offer,version:{...v,initiatedBy:'seller'}}));
-    assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'counteroffer'}).valid,false);
-    const adapter=load(path.join(project,'src/app/features/offers/states/iowa/display/iowa-offer-display.adapter.ts')).iowaOfferDisplayAdapter;
-    assert.equal(adapter.display(v.terms).signingBlockReason,undefined);assert(adapter.display(v.terms).sellerSigningBlockReason);
+    if(key==='propertyConditionStatus') {
+     assert.throws(()=>pkg.validateSubmission({offer,version:v}));
+     assert.throws(()=>pkg.validateBeforeSigning({offer,version:v,signerRole:'buyer'}));
+     assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);
+    } else {
+     validate(v); // No mandatory duplicate radon/supporting-record upload.
+     pkg.validateBeforeSigning({offer,version:v,signerRole:'seller'});
+    }
    } else if(code!=='WA'&&key==='propertyConditionStatus'||code==='DE'&&key==='statutoryPacketStatus')reject(t=>t.disclosures[key]='pending');else validate(v);
   }
   reject(t=>t.disclosures.propertyConditionStatus='exempt');
@@ -110,7 +112,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   const receipt=structuredClone(version);receipt.terms.disclosures.propertyConditionStatus='received';assert(pkg.requiredListingDisclosures({offer,version:receipt}).includes(slug+'-seller-disclosure'));
   const hostile=structuredClone(terms);hostile.stateCode='XX';hostile.property.state='XX';hostile.legalDescription='Tampered';hostile.delivery.timeZone='UTC';hostile.disclosures.sellerReportsHoa=true;hostile.disclosures.requiredKnownFacts=true;hostile.disclosures.disclosureExemptionClaimed=true;
   const sanitized=pkg.sanitizeDraftTerms({requestedTerms:hostile,currentTerms:terms,initiatedBy:'buyer'});assert.equal(sanitized.stateCode,code);assert.equal(sanitized.property.state,code);assert.equal(sanitized.legalDescription,terms.legalDescription);assert.equal(sanitized.delivery.timeZone,tz);assert.equal(sanitized.disclosures.sellerReportsHoa,false);
-  assert.equal(sanitized.disclosures.requiredKnownFacts,code==='DE'||code==='IA');assert.equal(sanitized.disclosures.disclosureExemptionClaimed,false);
+  assert.equal(sanitized.disclosures.requiredKnownFacts,code==='DE');assert.equal(sanitized.disclosures.disclosureExemptionClaimed,false);
   const seller=structuredClone(terms);seller.disclosures.propertyConditionStatus='pending';seller.disclosures.statutoryPacketStatus='pending';seller.delivery.electronicDeliveryAuthorized=false;
   const counter=pkg.sanitizeDraftTerms({requestedTerms:seller,currentTerms:terms,initiatedBy:'seller'});assert.deepEqual(counter.disclosures,terms.disclosures);assert.equal(counter.delivery.electronicDeliveryAuthorized,false);
   const pdfInput={offer:{...offer,referenceNumber:'TEST-'+code},version:{...version,versionNumber:1,createdAt:{toDate:()=>new Date('2026-10-10T12:00Z')}},documentTitle:'Fictional test agreement',generatedAt:new Date('2026-10-10T12:00Z'),documentStatus:'prototype'};

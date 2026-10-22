@@ -26,6 +26,7 @@ export function sanitizeNewMexicoDraftTerms(
 
   const sanitized: NewMexicoOfferTermsDocument = {
     ...input.currentTerms,
+    documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value]) => ['new-mexico-seller-disclosure','new-mexico-statutory-packet','new-mexico-association-documents','lead-based-paint'].includes(key) && typeof value === 'string' && /^[A-Za-z0-9_-]{1,200}$/.test(value)).map(([key,value]) => [key,String(value)])),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,
@@ -120,6 +121,8 @@ export function sanitizeNewMexicoDraftTerms(
     },
 
     disclosures: {
+      taxEstimateUnavailable: input.currentTerms.disclosures.taxEstimateUnavailable,
+      taxEstimateWaived: bool(disclosures['taxEstimateWaived']),
       requiredKnownFacts: input.currentTerms.disclosures.requiredKnownFacts,
       disclosureExemptionClaimed: input.currentTerms.disclosures.disclosureExemptionClaimed,
       sellerReportsExistingLeases:

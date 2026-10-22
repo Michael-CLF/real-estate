@@ -10,6 +10,7 @@ export type OfferStatus =
   | 'submitted'
   | 'viewed'
   | 'countered'
+  | 'accepted_pending_review'
   | 'declined'
   | 'withdrawn'
   | 'expired'
@@ -62,6 +63,7 @@ export type OfferResponseAction =
  */
 export type ContractStatus =
   | 'awaiting_signatures'
+  | 'pending_review'
   | 'effective'
   | 'terminated'
   | 'closed';
@@ -141,6 +143,7 @@ export const OFFER_STATUS_LABELS:
     submitted: 'Submitted',
     viewed: 'Viewed by seller',
     countered: 'Counteroffer received',
+    accepted_pending_review: 'Accepted — review period pending',
     declined: 'Declined',
     withdrawn: 'Withdrawn',
     expired: 'Expired',
@@ -169,6 +172,7 @@ export const OFFER_VERSION_STATUS_LABELS:
 export const CONTRACT_STATUS_LABELS:
   Readonly<Record<ContractStatus, string>> = {
     awaiting_signatures: 'Awaiting signatures',
+    pending_review: 'Accepted — review period pending',
     effective: 'Contract effective',
     terminated: 'Contract terminated',
     closed: 'Closed'

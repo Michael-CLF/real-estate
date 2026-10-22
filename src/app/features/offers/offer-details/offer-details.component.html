@@ -309,6 +309,9 @@
       </div>
 
       <aside class="offer-page__sidebar">
+        @if (supplementalDisclosureComponent(); as component) {
+          <ng-container *ngComponentOutlet="component; inputs: {offer: offer, version: version}" />
+        }
         <section class="card action-card">
           <p class="section-kicker">Available actions</p>
           <h2>{{ actionHeading() }}</h2>

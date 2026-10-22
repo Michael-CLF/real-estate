@@ -157,10 +157,6 @@ export const withdrawOffer = onCall<
           };
         }
 
-        verifyOfferCanBeWithdrawn(
-          offer
-        );
-
         const versionReference =
           offerReference
             .collection('versions')
@@ -201,12 +197,20 @@ export const withdrawOffer = onCall<
           );
         }
 
-        const actorRole =
-          verifyInitiatingPartyAccess(
-            offer,
-            version,
-            userUid
-          );
+        const reviewEnd = stateContractPackage.agreementEffectiveNotBefore?.({offer, version});
+        const buyerReviewWithdrawal = getBuyerUids(offer).includes(userUid) &&
+          !!reviewEnd && reviewEnd.getTime() > Date.now() &&
+          ['submitted', 'viewed', 'countered', 'accepted_pending_review'].includes(offer.status);
+        if (offer.status === 'accepted_pending_review' && !buyerReviewWithdrawal) {
+          throw new HttpsError('failed-precondition', 'Only the buyer may withdraw during the document review period, before it ends.');
+        }
+        if (!buyerReviewWithdrawal) verifyOfferCanBeWithdrawn(offer);
+        const actorRole = buyerReviewWithdrawal ? 'buyer' : verifyInitiatingPartyAccess(offer, version, userUid);
+        const acceptedDuringReview = offer.status === 'accepted_pending_review';
+        const pendingContractReference = acceptedDuringReview && offer.contract
+          ? firestore.collection('contracts').doc(offer.contract.contractUid) : undefined;
+        if (pendingContractReference) await transaction.get(pendingContractReference);
+
 
         const isPrivateInitialDraft =
           version.versionNumber === 1 &&
@@ -246,7 +250,7 @@ export const withdrawOffer = onCall<
 
         let nextPendingOfferCount = 0;
 
-        if (shouldRemovePendingOffer) {
+        if (shouldRemovePendingOffer || acceptedDuringReview) {
           listingReference =
             firestore
               .collection('listings')
@@ -281,6 +285,13 @@ export const withdrawOffer = onCall<
             );
         }
 
+        if (acceptedDuringReview && listingReference) {
+          // Read before any write. Never clear another agreement's reservation.
+          const reservedListing = await transaction.get(listingReference);
+          if (reservedListing.get('pendingAgreementOfferUid') !== offerUid) {
+            throw new HttpsError('failed-precondition', 'The accepted agreement reservation changed. Refresh and try again.');
+          }
+        }
         const eventReference =
           offerReference
             .collection('events')
@@ -290,6 +301,7 @@ export const withdrawOffer = onCall<
           offerReference,
           {
             status: 'withdrawn',
+            ...(acceptedDuringReview ? {'contract.status': 'terminated', 'contract.transactionPhase': 'terminated', 'contract.terminatedAt': FieldValue.serverTimestamp()} : {}),
             withdrawnByUid: userUid,
             withdrawnAt:
               FieldValue.serverTimestamp(),
@@ -305,20 +317,24 @@ export const withdrawOffer = onCall<
         );
 
         if (
-          shouldRemovePendingOffer &&
+          (shouldRemovePendingOffer || acceptedDuringReview) &&
           listingReference
         ) {
           transaction.update(
             listingReference,
             {
-              pendingOfferCount:
-                nextPendingOfferCount,
+              ...(shouldRemovePendingOffer ? {pendingOfferCount: nextPendingOfferCount} : {}),
+              ...(acceptedDuringReview ? {pendingAgreementOfferUid: FieldValue.delete()} : {}),
               updatedAt:
                 FieldValue.serverTimestamp()
             }
           );
         }
 
+        if (pendingContractReference) transaction.update(pendingContractReference, {
+          status: 'terminated', transactionPhase: 'terminated', terminatedAt: FieldValue.serverTimestamp(),
+          terminationReason: 'buyer_withdrew_during_document_review', updatedAt: FieldValue.serverTimestamp(),
+        });
         transaction.update(
           versionReference,
           {

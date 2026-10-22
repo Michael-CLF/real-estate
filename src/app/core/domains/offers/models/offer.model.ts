@@ -74,6 +74,7 @@ export interface OfferContractReference {
   transactionPhase: TransactionPhase;
 
   effectiveAt?: Date;
+  reviewEndsAt?: Date;
   dueDiligenceEndsAt?: string;
   anticipatedClosingDate?: string;
 

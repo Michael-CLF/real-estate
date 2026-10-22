@@ -150,7 +150,7 @@ export class OfferWizardComponent {
     const terms = this.terms();
     if (!terms) return null;
 
-    return terms.disclosures.leadPaintStatus === 'pending' ? 'Applicable federal lead records must be uploaded and reviewed before signing.' : "Review the state notices. You may send an offer with the condition statement pending; delivery and receipt are required before seller acceptance.";
+    return terms.disclosures.leadPaintStatus === 'pending' ? 'Review the applicable uploaded federal lead packet before submitting.' : 'Required pre-contract documents must be uploaded by the seller and reviewed before submitting. Later condominium delivery deadlines remain in the agreement.';
   });
 
   protected readonly busy = computed(
@@ -216,7 +216,10 @@ export class OfferWizardComponent {
         [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'maryland-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
         [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'maryland-association-documents', 'seller-provided association resale packet'],
       ] as const) {
-        if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
+        if (status === 'received' || status === 'exempt') {
+          if (!attached.has(documentType)) missing.push({ fieldPath:path,severity:'error',message:`The seller must upload the ${label} before it can be marked received.` });
+          else if (terms.documentVersions !== undefined && !terms.documentVersions[documentType]) missing.push({fieldPath:path,severity:'error',message:'Review the uploaded document and select its receipt status again to record the exact version.'});
+        }
       }
       return [...result.errors, ...missing, ...result.warnings];
     }
@@ -266,7 +269,15 @@ export class OfferWizardComponent {
         change.value
       );
 
-    this.terms.set(updatedTerms);
+    const receiptTypes: Record<string,string> = {'disclosures.propertyConditionStatus':'maryland-seller-disclosure','disclosures.statutoryPacketStatus':'maryland-statutory-packet','disclosures.hoaDocumentsStatus':'maryland-association-documents','disclosures.leadPaintStatus':'lead-based-paint'};
+    const documentType = receiptTypes[change.fieldPath];
+    if (documentType && this.initiatedBy() === 'buyer') {
+      const pins = {...currentTerms.documentVersions};
+      const document = this.listingDisclosures().find(row => row.documentType === documentType);
+      if ((change.value === 'received' || change.value === 'exempt') && document?.versionId) pins[documentType] = document.versionId;
+      else delete pins[documentType];
+      this.terms.set({...updatedTerms,documentVersions:pins});
+    } else { this.terms.set(updatedTerms); }
     this.submissionAttempted.set(false);
   }
 

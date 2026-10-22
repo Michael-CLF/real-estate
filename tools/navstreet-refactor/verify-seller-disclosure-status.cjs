@@ -12,9 +12,9 @@ const required=(state,facts)=>Array.from(requirements(state)).filter(r=>config.i
 assert.deepEqual(required('DE',listing('DE')).map(r=>r.documentType),['delaware-seller-disclosure','delaware-statutory-packet']);
 assert.deepEqual(required('MT',listing('MT')).map(r=>r.documentType),['montana-seller-disclosure']);
 assert.deepEqual(required('MT',listing('MT',{montana:{radonTestsKnown:true,drugContaminationKnown:false,appurtenantWaterRightsKnown:false}})).map(r=>r.documentType),['montana-seller-disclosure','montana-statutory-packet']);
-assert.deepEqual(required('IA',listing('IA')).map(r=>r.documentType),['iowa-seller-disclosure','iowa-statutory-packet']);
+assert.deepEqual(required('IA',listing('IA')).map(r=>r.documentType),['iowa-seller-disclosure']);
 assert.deepEqual(required('IA',listing('IA',{iowa:{disclosureExemptionClaimed:true}})).map(r=>r.documentType),['iowa-seller-disclosure']);
-for(const r of required('IA',listing('IA')))assert(config.isDisclosureRequiredBeforeAcceptanceForListing('IA',r,{iowa:{disclosureExemptionClaimed:false}}));
+for(const r of required('IA',listing('IA')))assert.equal(config.isDisclosureRequiredBeforeAcceptanceForListing('IA',r,{iowa:{disclosureExemptionClaimed:false}}),false); // Required at the earlier pre-offer gate.
 const file=path.join(project,'src/app/features/dashboard/listing-management/listing-management.component.ts'),moduleStub={exports:{}};
 vm.runInNewContext(compile(fs.readFileSync(file,'utf8')),{module:moduleStub,exports:moduleStub.exports,require:n=>n==='@angular/core'?{Component:()=>()=>{},ChangeDetectionStrategy:{OnPush:0}}:n.endsWith('state-disclosures.config')?config:{},console,Set});
 const method=moduleStub.exports.ListingManagementComponent.prototype.loadDisclosureStatus;
@@ -27,10 +27,11 @@ async function check(state,records,expected){
 (async()=>{
  await check('DE',[],{total:2,uploaded:0});
  await check('MT',[],{total:1,uploaded:0});
- await check('IA',[],{total:2,uploaded:0});
+ await check('IA',[],{total:1,uploaded:0});
+ await check('IA',[document('IA','iowa-seller-disclosure')],{total:1,uploaded:1});
  await check('DE',[document('DE','delaware-seller-disclosure')],{total:2,uploaded:1});
  await check('DE',[document('DE','delaware-seller-disclosure'),document('DE','delaware-statutory-packet')],{total:2,uploaded:2});
  for(const override of [{listingUid:'wrong'},{stateAbbreviation:'XX'},{storagePath:''},{versionId:''}])await check('MT',[document('MT','montana-seller-disclosure',override)],{total:1,uploaded:0});
  await check('WY',[],{total:0,uploaded:0});
- console.log('PASS: seller required labels, covered/exempt Iowa acceptance timing, Delaware/Montana counts, missing names, optional uploads and rejection of wrong-listing/wrong-state/incomplete document identities.');
+ console.log('PASS: seller required labels, covered/exempt Iowa pre-offer upload counts, Delaware/Montana counts, missing names, optional uploads and rejection of wrong-listing/wrong-state/incomplete document identities.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

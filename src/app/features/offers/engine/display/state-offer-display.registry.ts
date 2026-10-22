@@ -25,6 +25,7 @@ import type {
 } from '../../../../core/domains/offers/models/offer-terms.model';
 
 import type {
+  OfferDisplayContext,
   OfferDisplayFields,
   StateOfferDisplayAdapter,
 } from './state-offer-display.adapter';
@@ -55,7 +56,7 @@ import {
 import { louisianaOfferDisplayAdapter } from '../../states/louisiana/display/louisiana-offer-display.adapter';
 import { coloradoOfferDisplayAdapter } from '../../states/colorado/display/colorado-offer-display.adapter';
 
-type DisplayTerms = (terms: StateOfferTerms) => OfferDisplayFields;
+type DisplayTerms = (terms: StateOfferTerms, context?:OfferDisplayContext) => OfferDisplayFields;
 const DISPLAY_ADAPTERS = new Map<string, DisplayTerms>();
 
 /** Keep the narrowing at the registration boundary; shared callers inspect no term paths. */
@@ -63,11 +64,11 @@ function registerDisplayAdapter<TTerms extends StateOfferTerms>(adapter: StateOf
   if (DISPLAY_ADAPTERS.has(adapter.stateCode)) {
     throw new Error(`More than one offer display adapter is registered for ${adapter.stateCode}.`);
   }
-  DISPLAY_ADAPTERS.set(adapter.stateCode, terms => {
+  DISPLAY_ADAPTERS.set(adapter.stateCode, (terms,context) => {
     if (terms.stateCode !== adapter.stateCode) {
       throw new Error('Offer version and contract terms have different states.');
     }
-    return adapter.display(terms as TTerms);
+    return adapter.display(terms as TTerms,context);
   });
 }
 
@@ -110,7 +111,8 @@ export function displayOfferTerms(
   version: {
     readonly stateCode: string;
     readonly terms: StateOfferTerms;
-  }
+  },
+  context?:OfferDisplayContext
 ): OfferDisplayFields {
   const state = version.stateCode.trim().toUpperCase();
 
@@ -124,5 +126,5 @@ export function displayOfferTerms(
   if (!display) {
     throw new Error(`No offer display adapter is registered for ${state}.`);
   }
-  return display(version.terms);
+  return display(version.terms,context);
 }

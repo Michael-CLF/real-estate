@@ -1,3 +1,4 @@
+import { iowaPreofferReceiptProblem, iowaLateReceiptsCover } from './iowa-disclosure-policy';
 import { resolveIowaPropertyTimeZone } from './iowa-property-time-zone';
 import { validateSubmissionParties } from '../submission-parties';
 import { requireValue, money, days } from '../submission-values';
@@ -9,7 +10,12 @@ export function validateIowaSubmission(input: ValidateStateSubmissionInput<IowaO
   requireValue(offer.currentVersionUid === version.Uid && version.offerUid === offer.Uid && version.status === 'draft' && version.immutable === false, 'Only the current mutable version can be submitted.');
   requireValue(t.contractType === 'navstreet_iowa_residential_sale_2026' && t.property.listingUid === offer.listingUid && t.property.state === 'IA', 'The contract or property snapshot is invalid.');
   requireValue(['single_family', 'townhome', 'pud'].includes(t.property.propertyType), 'Condominium, vacant land and other property types need a separate Iowa agreement.');
-  if (version.initiatedBy === 'seller') requireValue(!(!['received','exempt'].includes(t.disclosures.propertyConditionStatus) || (t.disclosures.requiredKnownFacts && t.disclosures.statutoryPacketStatus !== 'received')), "Before the seller makes or accepts an Iowa offer, deliver the condition disclosure or supported exception and the applicable radon fact sheet. This immutable version records receipt as pending; ask the buyer to withdraw and create a replacement offer acknowledging receipt after delivery.");
+  const laterReceipt = version.initiatedBy === 'seller' && iowaLateReceiptsCover(offer,version.buyers,t);
+  if (version.initiatedBy === 'seller' && !laterReceipt) requireValue(!(!['received','exempt'].includes(t.disclosures.propertyConditionStatus) || (t.disclosures.requiredKnownFacts && t.disclosures.statutoryPacketStatus !== 'received')), "This saved Iowa version records required disclosure receipt as pending. Its signed answers cannot be rewritten. Actual later delivery and written buyer acknowledgement must be documented separately before seller acceptance or a seller counteroffer.");
+  requireValue(version.initiatedBy === 'seller' || !!t.disclosurePolicyRevision, 'Reopen and save this unsigned draft to review the current Iowa disclosure package before submitting.');
+  const problem = iowaPreofferReceiptProblem(t);
+  requireValue(!problem, problem ?? 'Review Iowa disclosures.');
+  requireValue(laterReceipt || ['received','exempt'].includes(t.disclosures.propertyConditionStatus), 'Review the Iowa condition disclosure or supported exception before submitting.');
   validateSubmissionParties(version);
   requireValue(t.legalDescription.trim(), 'The seller must provide the recorded legal description on the listing.');
   requireValue(money(p.purchasePriceInCents, true) && typeof p.hasEarnestMoney === 'boolean', 'Select a valid price and whether a deposit is offered.');

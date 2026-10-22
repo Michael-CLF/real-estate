@@ -5,7 +5,7 @@ type OfferDate = string;
 type OfferDateTime = string;
 type OfferPropertySnapshot = OfferPropertySnapshotDocument;
 
-export type SouthDakotaContractType = 'navstreet_south_dakota_residential_sale_2026';
+export type SouthDakotaContractType = 'navstreet_south_dakota_residential_sale_2026' | 'navstreet_south_dakota_condominium_resale_2026';
 export type SouthDakotaFinancingType = 'cash' | 'conventional' | 'fha' | 'va' | 'usda';
 export type SouthDakotaDisclosureStatus = 'unselected' | 'received' | 'pending' | 'exempt';
 
@@ -14,6 +14,7 @@ export interface SouthDakotaOfferTermsDocument {
   readonly stateCode: 'SD';
   readonly contractType: SouthDakotaContractType;
   readonly property: OfferPropertySnapshot;
+  readonly documentVersions?: Readonly<Record<string,string>>;
   readonly legalDescription: string;
   readonly purchase: {
     readonly purchasePriceInCents: MoneyInCents;

@@ -4,6 +4,11 @@ const { spawnSync } = require('node:child_process');
 
 const project = path.resolve(process.argv[2] || '.');
 const checks = [
+  'verify-montana-review-effectiveness.cjs',
+  'verify-four-state-resale-coverage.cjs',
+  'verify-delivered-offer-status.cjs',
+  'verify-washington-condominium.cjs',
+  'verify-montana-condominium.cjs',
   'verify-hoa-applicability.cjs',
   'verify-federal-lead-applicability.cjs',
   'verify-federal-lead-listing.cjs',
@@ -60,6 +65,8 @@ const checks = [
   'verify-contract-summaries.cjs',
   'verify-architecture-boundaries.cjs',
   'verify-shared-term-updates.cjs',
+  'verify-iowa-preoffer-disclosures.cjs',
+  'verify-iowa-listing-consistency.cjs',
 ];
 
 function run(args, label) {

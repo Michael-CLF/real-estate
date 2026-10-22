@@ -15,7 +15,7 @@
     </div>
     } @else if (showDocumentChecklist()) {
       <app-document-checklist [initialLocation]="checklistLocation()" [allowLocationChange]="!listingUid()"
-        [facts]="{ yearBuilt: propertyDetailsData()?.yearBuilt, propertyType: propertyDetailsData()?.propertyType,
+        [facts]="{ iowa: propertyDetailsData()?.sellerStatements?.iowa, contractFacts: propertyDetailsData()?.sellerStatements?.contractFacts, yearBuilt: propertyDetailsData()?.yearBuilt, propertyType: propertyDetailsData()?.propertyType,
           leadBasedPaintApplies: propertyDetailsData()?.sellerStatements?.leadBasedPaintApplies,
           ownersAssociationApplies: propertyDetailsData()?.sellerStatements?.ownersAssociationApplies,
           methamphetamineContaminationKnown: propertyDetailsData()?.sellerStatements?.methamphetamineContaminationKnown }" [busy]="isSaving()"

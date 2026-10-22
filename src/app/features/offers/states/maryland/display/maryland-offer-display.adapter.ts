@@ -5,7 +5,7 @@ export const marylandOfferDisplayAdapter: StateOfferDisplayAdapter<MarylandOffer
   stateCode: 'MD',
   display(terms) {
     return {
-      agreementTitle: 'NavStreet Maryland Residential Purchase and Sale Agreement',
+      agreementTitle: terms.contractType === 'navstreet_maryland_condominium_resale_2026' ? 'NavStreet Maryland Condominium Resale Purchase and Sale Agreement' : 'NavStreet Maryland Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet Maryland agreement PDF',
       purchasePriceInCents: terms.purchase.purchasePriceInCents,
       fundingLabel: terms.purchase.financingType === 'cash' ? 'Cash' : `${terms.purchase.financingType.toUpperCase()} loan`,
@@ -15,7 +15,7 @@ export const marylandOfferDisplayAdapter: StateOfferDisplayAdapter<MarylandOffer
       importantDeadline: { label: 'inspection period', value: `${terms.deadlines.inspectionPeriodDays} calendar days after acceptance` },
       closingDate: { label: 'Settlement deadline', value: terms.deadlines.settlementDate },
       possessionLabel: 'Vacant at closing',
-      sellerSigningBlockReason: !['received','exempt'].includes(terms.disclosures.propertyConditionStatus) ? "Maryland condition disclosure/disclaimer or supported exemption is required before seller acceptance. If this immutable offer records Pending, deliver the document and have the buyer create a replacement offer acknowledging receipt." : undefined,
+      sellerSigningBlockReason: !['received','exempt'].includes(terms.disclosures.propertyConditionStatus) ? "Maryland condition disclosure/disclaimer or supported exemption is required before seller acceptance. Required receipt is pending; review seller disclosures before submitting." : undefined,
       signingBlockReason: Date.now() >= Date.parse('2027-07-01T04:00:00Z') ? 'Maryland requires the July 2027 flood-form package update before signing.' :         
         (terms.disclosures.requiredKnownFacts && terms.disclosures.statutoryPacketStatus !== 'received') || (terms.disclosures.propertyConditionStatus === 'exempt' && !terms.disclosures.disclosureExemptionClaimed) || (terms.disclosures.leadPaintStatus === 'pending' && !isFederalLeadExcluded(terms.property))
         ? 'This offer records a required disclosure as not received. The buyer must withdraw this offer and create a new one after the seller uploads the missing document. An immutable submitted offer cannot be changed.'

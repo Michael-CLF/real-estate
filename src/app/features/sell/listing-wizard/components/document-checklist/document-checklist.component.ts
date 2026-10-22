@@ -94,7 +94,7 @@ export class DocumentChecklistComponent {
   );
 
   protected readonly items = computed(() =>
-    getListingDocumentChecklist(this.selectedState()),
+    getListingDocumentChecklist(this.selectedState(), this.facts()),
   );
 
   protected readonly restrictions = computed(() =>

@@ -7,6 +7,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
   limit,
   orderBy,
@@ -19,6 +20,7 @@ import {
 } from 'firebase/functions';
 
 import {
+  auth,
   firestore,
   functions
 } from '../../../infrastructure/firebase/firebase';
@@ -231,10 +233,10 @@ export class FirestoreOfferRepository
       return null;
     }
 
-    return this.mapDocumentData<Offer>(
+    return this.reconcileDeliveredOffer(this.mapDocumentData<Offer>(
       snapshot.id,
       snapshot.data()
-    );
+    ));
   }
 
 
@@ -282,7 +284,8 @@ export class FirestoreOfferRepository
       'draft',
       'submitted',
       'viewed',
-      'countered'
+      'countered',
+      'accepted_pending_review'
     ];
 
     const offersReference =
@@ -370,21 +373,6 @@ export class FirestoreOfferRepository
         )
     );
 
-    if (
-      filters.statuses &&
-      filters.statuses.length > 0
-    ) {
-      const allowedStatuses =
-        new Set(filters.statuses);
-
-      offers = offers.filter(
-        offer =>
-          allowedStatuses.has(
-            offer.status
-          )
-      );
-    }
-
     if (filters.listingUid) {
       offers = offers.filter(
         offer =>
@@ -393,10 +381,9 @@ export class FirestoreOfferRepository
       );
     }
 
-    return this.createOfferSummaries(
-      offers,
-      userUid
-    );
+    const summaries = await this.createOfferSummaries(offers, userUid);
+    const allowedStatuses = filters.statuses?.length ? new Set(filters.statuses) : null;
+    return allowedStatuses ? summaries.filter(offer => allowedStatuses.has(offer.status)) : summaries;
   }
 
 
@@ -680,6 +667,13 @@ export class FirestoreOfferRepository
       }
     }
 
+    const loadedCurrentVersionUid = offer.currentVersionUid;
+    offer = await this.reconcileDeliveredOffer(offer, version);
+    if (loadedCurrentVersionUid !== offer.currentVersionUid) {
+      // A concurrent counteroffer must pass the existing visibility checks on a fresh load.
+      return this.createOfferSummary(offer, userUid);
+    }
+
     const primaryBuyer =
       version.buyers[0];
 
@@ -797,6 +791,21 @@ export class FirestoreOfferRepository
         );
   }
 
+
+  private readonly reconcileOfferStatusFunction = httpsCallable<{offerUid:string}, {repaired:boolean}>(functions, 'reconcileOfferStatus');
+
+  private async reconcileDeliveredOffer(offer: Offer, suppliedVersion?: OfferVersion): Promise<Offer> {
+    const userUid = auth.currentUser?.uid;
+    if (offer.status !== 'draft' || !userUid ||
+        (!offer.buyerUids.includes(userUid) && !offer.sellerUids.includes(userUid))) return offer;
+    const version = suppliedVersion ?? await this.getOfferVersionByUid(offer.Uid, offer.currentVersionUid);
+    if (!version || version.Uid !== offer.currentVersionUid || version.status !== 'delivered' || !version.immutable) return offer;
+    await this.reconcileOfferStatusFunction({offerUid:offer.Uid});
+    // Display the server's repaired or concurrently changed status, never a client-invented status.
+    const snapshot = await getDocFromServer(doc(firestore, 'offers', offer.Uid));
+    if (!snapshot.exists()) throw new Error('The offer could not be reloaded after refreshing its status.');
+    return this.mapDocumentData<Offer>(snapshot.id, snapshot.data());
+  }
 
   private mapDocumentData<T>(
     documentUid: string,

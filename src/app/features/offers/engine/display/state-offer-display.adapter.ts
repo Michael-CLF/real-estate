@@ -27,7 +27,11 @@ export interface OfferDisplayFields {
   readonly signingBlockReason?: string;
   /** Acceptance prerequisites that do not block buyer signatures. */
   readonly sellerSigningBlockReason?: string;
+  readonly buyerSigningBlockReason?: string;
+  readonly buyerWithdrawalEndsAt?: string;
 }
+
+export interface OfferDisplayContext { readonly offer?: unknown; readonly version?: unknown; }
 
 export interface StateOfferDisplayAdapter<
   TTerms extends StateOfferTerms = StateOfferTerms
@@ -35,6 +39,7 @@ export interface StateOfferDisplayAdapter<
   readonly stateCode: TTerms['stateCode'];
 
   display(
-    terms: TTerms
+    terms: TTerms,
+    context?: OfferDisplayContext
   ): OfferDisplayFields;
 }

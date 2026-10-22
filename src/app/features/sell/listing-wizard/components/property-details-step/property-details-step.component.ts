@@ -58,9 +58,9 @@ export type PropertyDetailsFuelTankOwnership =
 export interface PropertyDetailsSellerStatementsFormValue {
   contractFacts?: ListingContractFacts;
   wyoming?: { privateWastewaterApplies: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
-  southDakota?: { usesMountainTime: boolean | null; disclosureExemptionClaimed: boolean | null; privateTransferFeeKnown: boolean | null; };
-  newMexico?: { privateWastewaterApplies: boolean | null; drugLabContaminationKnown: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
-  maryland?: { disclosureExemptionClaimed: boolean | null; usesDisclaimer: boolean | null; privateWellApplies: boolean | null; onsiteSewageApplies: boolean | null; deferredWaterSewerCharges: boolean | null; superfundNearby: boolean | null; otherPropertyNoticeApplies: boolean | null; rentalLeadObligationApplies: boolean | null; groundRentApplies: boolean | null; };
+  southDakota?: { condominiumReportIssued: boolean | null; usesMountainTime: boolean | null; disclosureExemptionClaimed: boolean | null; privateTransferFeeKnown: boolean | null; };
+  newMexico?: { taxEstimateUnavailable: boolean | null; privateWastewaterApplies: boolean | null; drugLabContaminationKnown: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
+  maryland?: { condominiumFewerThanSevenUnits: boolean | null; disclosureExemptionClaimed: boolean | null; usesDisclaimer: boolean | null; privateWellApplies: boolean | null; onsiteSewageApplies: boolean | null; deferredWaterSewerCharges: boolean | null; superfundNearby: boolean | null; otherPropertyNoticeApplies: boolean | null; rentalLeadObligationApplies: boolean | null; groundRentApplies: boolean | null; };
   montana?: { disclosureExemptionClaimed: boolean | null; radonTestsKnown: boolean | null; drugContaminationKnown: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
   iowa?: { disclosureExemptionClaimed: boolean | null; privateSewageApplies: boolean | null; leadServiceLineKnown: boolean | null; };
   washington?: { disclosureExemptionClaimed: boolean | null; oilTankHeating: boolean | null; };
@@ -556,6 +556,11 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements.controls.newMexico.patchValue(getStateListingFormRestorer('sellerStatements.newMexico')(initialValue?.sellerStatements?.newMexico), {emitEvent: false});
       this.form.controls.sellerStatements.controls.southDakota.patchValue(getStateListingFormRestorer('sellerStatements.southDakota')(initialValue?.sellerStatements?.southDakota), {emitEvent: false});
       this.form.controls.sellerStatements.controls.wyoming.patchValue(getStateListingFormRestorer('sellerStatements.wyoming')(initialValue?.sellerStatements?.wyoming), {emitEvent: false});
+      // Restore a previously explicit answer without inferring membership from fees.
+      const association = this.form.controls.sellerStatements.controls.ownersAssociationApplies;
+      const hoa = this.form.controls.hoa.controls.hasHoa;
+      if (typeof hoa.value === 'boolean' && association.value === null) association.setValue(hoa.value,{emitEvent:false});
+      else if (typeof association.value === 'boolean' && hoa.value === null) hoa.setValue(association.value,{emitEvent:false});
       this.configureStateQuestionValidators();
       this.form.controls.sellerStatements.controls.california.patchValue(
         getStateListingFormRestorer('sellerStatements.california')(initialValue?.sellerStatements?.california),
@@ -593,14 +598,10 @@ export class PropertyDetailsStepComponent
           hasHoa,
           true,
         );
-        if (hasHoa !== null) {
-          this.form.controls.sellerStatements.controls.ownersAssociationApplies.setValue(
-            hasHoa,
-            {
-              emitEvent: false,
-            },
-          );
-        }
+        this.form.controls.sellerStatements.controls.ownersAssociationApplies.setValue(
+          hasHoa,
+          {emitEvent:false},
+        );
         this.emitFormState();
       },
     );

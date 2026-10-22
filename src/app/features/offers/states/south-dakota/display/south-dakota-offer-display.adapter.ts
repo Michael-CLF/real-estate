@@ -5,7 +5,7 @@ export const southDakotaOfferDisplayAdapter: StateOfferDisplayAdapter<SouthDakot
   stateCode: 'SD',
   display(terms) {
     return {
-      agreementTitle: 'NavStreet South Dakota Residential Purchase and Sale Agreement',
+      agreementTitle: terms.contractType === 'navstreet_south_dakota_condominium_resale_2026' ? 'NavStreet South Dakota Condominium Resale Purchase and Sale Agreement' : 'NavStreet South Dakota Residential Purchase and Sale Agreement',
       documentLabel: 'NavStreet South Dakota agreement PDF',
       purchasePriceInCents: terms.purchase.purchasePriceInCents,
       fundingLabel: terms.purchase.financingType === 'cash' ? 'Cash' : `${terms.purchase.financingType.toUpperCase()} loan`,

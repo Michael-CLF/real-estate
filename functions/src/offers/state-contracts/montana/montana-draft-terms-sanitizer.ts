@@ -26,6 +26,7 @@ export function sanitizeMontanaDraftTerms(
 
   const sanitized: MontanaOfferTermsDocument = {
     ...input.currentTerms,
+    ...(input.currentTerms.documentVersions ? {documentVersions: Object.fromEntries(Object.entries(record(request['documentVersions'])).filter(([key,value]) => ['montana-seller-disclosure','montana-statutory-packet','montana-association-documents','lead-based-paint'].includes(key) && typeof value === 'string' && value.length > 0 && value.length <= 200 && !value.includes('/')).map(([key,value]) => [key, String(value)]))} : {}),
 
     // Property and legal description come from the seller's listing snapshot.
     legalDescription: input.currentTerms.legalDescription,
@@ -211,5 +212,14 @@ export function sanitizeMontanaDraftTerms(
     };
   }
 
+  if (sanitized.contractType === 'navstreet_montana_condominium_resale_2026') {
+    const pin = sanitized.documentVersions?.['montana-association-documents'];
+    const oldPin = input.currentTerms.documentVersions?.['montana-association-documents'];
+    const received = sanitized.disclosures.hoaDocumentsStatus === 'received' && Boolean(pin);
+    const {condominiumReceiptAt: ignored, ...rest} = sanitized;
+    return {...rest, ...(input.currentTerms.condominiumAcceptancePolicy ? {condominiumAcceptancePolicy: input.currentTerms.condominiumAcceptancePolicy} : {}), ...(received ? {condominiumReceiptAt:
+      input.currentTerms.disclosures.hoaDocumentsStatus === 'received' && oldPin === pin && input.currentTerms.disclosures.propertyConditionStatus === sanitized.disclosures.propertyConditionStatus && input.currentTerms.documentVersions?.['montana-seller-disclosure'] === sanitized.documentVersions?.['montana-seller-disclosure'] && input.currentTerms.condominiumReceiptAt
+      ? input.currentTerms.condominiumReceiptAt : new Date().toISOString()} : {})};
+  }
   return sanitized;
 }
