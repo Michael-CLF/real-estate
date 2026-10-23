@@ -12,6 +12,190 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  ME: [
+  {
+    "documentType": "maine-seller-disclosure",
+    "title": "Maine seller condition disclosure",
+    "shortTitle": "Maine seller condition disclosure",
+    "description": "For nonexempt residential transfers, 33 M.R.S. 173-174 requires the seller condition statement no later than the buyer makes an offer. Include water supply and known tests/PFAS problems, heating and service history, waste disposal/shoreland septic information, known hazards and defects, access and road maintenance, flood-zone information and the relevant FEMA map panel, flood/insurance/aid history, and shoreland enforcement matters. A true section 172 exception removes this statutory statement duty; it does not excuse misrepresentation. Late delivery preserves the statutory 72-hour withdrawal/termination remedy before settlement or occupancy as applicable, with prompt deposit return.",
+    "sourceInstructions": "For nonexempt residential transfers, 33 M.R.S. 173-174 requires the seller condition statement no later than the buyer makes an offer. Include water supply and known tests/PFAS problems, heating and service history, waste disposal/shoreland septic information, known hazards and defects, access and road maintenance, flood-zone information and the relevant FEMA map panel, flood/insurance/aid history, and shoreland enforcement matters. A true section 172 exception removes this statutory statement duty; it does not excuse misrepresentation. Late delivery preserves the statutory 72-hour withdrawal/termination remedy before settlement or occupancy as applicable, with prompt deposit return.",
+    "officialFormUrl": "https://legislature.maine.gov/statutes/33/title33sec174.html",
+    "required": false,
+    "formCode": "ME-SELLER-DISCLOSURE",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "maine-statutory-packet",
+    "title": "Maine property-specific supporting records",
+    "shortTitle": "Maine property-specific supporting records",
+    "description": "Seller shall provide available supporting records and correct known inaccuracies. No new universal water, radon or septic test is imposed merely by this agreement. Investigate title, access, systems and insurance during the negotiated inspection period. Property-specific shoreland septic inspection/transfer duties under 30-A M.R.S. 4216 remain applicable and are not replaced by a checkbox.",
+    "sourceInstructions": "Seller shall provide available supporting records and correct known inaccuracies. No new universal water, radon or septic test is imposed merely by this agreement. Investigate title, access, systems and insurance during the negotiated inspection period. Property-specific shoreland septic inspection/transfer duties under 30-A M.R.S. 4216 remain applicable and are not replaced by a checkbox.",
+    "officialFormUrl": "https://legislature.maine.gov/statutes/33/title33sec174.html",
+    "required": false,
+    "formCode": "ME-STATUTORY-PACKET",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "maine-association-documents",
+    "title": "Maine association resale records",
+    "shortTitle": "Maine association resale records",
+    "description": "For an ordinary condominium resale subject to 33 M.R.S. 1604-108, seller shall furnish the declaration (excluding plats/plans), bylaws, rules and reasonably current resale certificate before contract execution, or otherwise before conveyance. The certificate addresses transfer restraints, assessments/fees, anticipated capital expenses, reserves, financials/budget, litigation, insurance and known violations. The purchase contract is voidable until certificate delivery and for five days thereafter or until conveyance, whichever occurs first. This right is not waived by a pending receipt answer or signature. Section 1601-102 extends the resale provision to older condominiums; section 1604-101(b) exceptions and developer public-offering rules remain distinct. No universal initial-offer packet gate is imposed.",
+    "sourceInstructions": "For an ordinary condominium resale subject to 33 M.R.S. 1604-108, seller shall furnish the declaration (excluding plats/plans), bylaws, rules and reasonably current resale certificate before contract execution, or otherwise before conveyance. The certificate addresses transfer restraints, assessments/fees, anticipated capital expenses, reserves, financials/budget, litigation, insurance and known violations. The purchase contract is voidable until certificate delivery and for five days thereafter or until conveyance, whichever occurs first. This right is not waived by a pending receipt answer or signature. Section 1601-102 extends the resale provision to older condominiums; section 1604-101(b) exceptions and developer public-offering rules remain distinct. No universal initial-offer packet gate is imposed.",
+    "officialFormUrl": "https://legislature.maine.gov/statutes/33/title33sec1604-108.html",
+    "required": false,
+    "formCode": "ME-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "ME-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
+  MS: [
+  {
+    "documentType": "mississippi-seller-disclosure",
+    "title": "Mississippi seller condition disclosure",
+    "shortTitle": "Mississippi seller condition disclosure",
+    "description": "This NavStreet agreement supports a private for-sale-by-owner resale without real estate brokers or salespersons. No universal Mississippi seller condition-form upload is required for this supported transaction. Any voluntarily provided condition statement may be reviewed and pinned to its exact uploaded version. Seller must not conceal or misrepresent known material conditions; optional records do not block an offer.",
+    "sourceInstructions": "This NavStreet agreement supports a private for-sale-by-owner resale without real estate brokers or salespersons. No universal Mississippi seller condition-form upload is required for this supported transaction. Any voluntarily provided condition statement may be reviewed and pinned to its exact uploaded version. Seller must not conceal or misrepresent known material conditions; optional records do not block an offer.",
+    "officialFormUrl": "https://www.mrec.ms.gov/wp-content/uploads/2025/08/MREC_LICENSE_LAW_2025_REVISED-8-15-2025.pdf",
+    "required": false,
+    "formCode": "MS-SELLER-DISCLOSURE",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "mississippi-statutory-packet",
+    "title": "Mississippi property-specific supporting records",
+    "shortTitle": "Mississippi property-specific supporting records",
+    "description": "Seller shall disclose applicable known material conditions and answer inquiries truthfully; lack of a mandated form does not authorize deceit. Buyer may independently investigate flooding and coastal insurance, title and access, systems and property condition under the negotiated inspection period. No universal radon, water, termite or septic inspection/upload requirement is invented for this ordinary resale.",
+    "sourceInstructions": "Seller shall disclose applicable known material conditions and answer inquiries truthfully; lack of a mandated form does not authorize deceit. Buyer may independently investigate flooding and coastal insurance, title and access, systems and property condition under the negotiated inspection period. No universal radon, water, termite or septic inspection/upload requirement is invented for this ordinary resale.",
+    "officialFormUrl": "https://www.mrec.ms.gov/wp-content/uploads/2025/08/MREC_LICENSE_LAW_2025_REVISED-8-15-2025.pdf",
+    "required": false,
+    "formCode": "MS-STATUTORY-PACKET",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "mississippi-association-documents",
+    "title": "Mississippi association resale records",
+    "shortTitle": "Mississippi association resale records",
+    "description": "The recorded declaration and restrictions under Miss. Code 89-9 govern the condominium unit, common interests, assessments and use. Seller shall supply available governing, dues, insurance and assessment records on request for buyer investigation and clear seller liens as agreed. This ordinary existing-unit resale package does not invent a universal statutory condominium resale-certificate upload or cooling-off period. Any negotiated inspection/document condition remains enforceable. Developer offerings, new construction and leasehold sales require different agreements.",
+    "sourceInstructions": "The recorded declaration and restrictions under Miss. Code 89-9 govern the condominium unit, common interests, assessments and use. Seller shall supply available governing, dues, insurance and assessment records on request for buyer investigation and clear seller liens as agreed. This ordinary existing-unit resale package does not invent a universal statutory condominium resale-certificate upload or cooling-off period. Any negotiated inspection/document condition remains enforceable. Developer offerings, new construction and leasehold sales require different agreements.",
+    "officialFormUrl": "https://www.legislature.ms.gov/legislation/mississippi-code/",
+    "required": false,
+    "formCode": "MS-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MS-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
+  AR: [
+  {
+    "documentType": "arkansas-seller-disclosure",
+    "title": "Arkansas seller condition disclosure",
+    "shortTitle": "Arkansas seller condition disclosure",
+    "description": "Arkansas does not impose a universal seller property-condition disclosure form on an ordinary FSBO resale. Seller must not conceal or misrepresent material conditions and shall answer inquiries truthfully. Any voluntarily supplied statement is separate from this agreement and is not an independent inspection or warranty. Broker/licensee disclosure and agency duties apply when such professionals participate; this platform agreement does not substitute for them. Optional condition records cannot prevent the parties from making an offer.",
+    "sourceInstructions": "Arkansas does not impose a universal seller property-condition disclosure form on an ordinary FSBO resale. Seller must not conceal or misrepresent material conditions and shall answer inquiries truthfully. Any voluntarily supplied statement is separate from this agreement and is not an independent inspection or warranty. Broker/licensee disclosure and agency duties apply when such professionals participate; this platform agreement does not substitute for them. Optional condition records cannot prevent the parties from making an offer.",
+    "officialFormUrl": "https://arec.arkansas.gov/news_post/is-property-condition-disclosure-required-by-law/",
+    "required": false,
+    "formCode": "AR-SELLER-DISCLOSURE",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "arkansas-statutory-packet",
+    "title": "Arkansas property-specific supporting records",
+    "shortTitle": "Arkansas property-specific supporting records",
+    "description": "Buyer may investigate structure, title, access, flood and insurance risk, utilities, private well/septic systems, permits and known hazards during the negotiated inspection period. Seller shall provide available requested records. This agreement imposes no universal new inspection, tax-estimate, radon certificate or septic upload. Required federal lead disclosures apply separately to covered pre-1978 housing.",
+    "sourceInstructions": "Buyer may investigate structure, title, access, flood and insurance risk, utilities, private well/septic systems, permits and known hazards during the negotiated inspection period. Seller shall provide available requested records. This agreement imposes no universal new inspection, tax-estimate, radon certificate or septic upload. Required federal lead disclosures apply separately to covered pre-1978 housing.",
+    "officialFormUrl": "https://arec.arkansas.gov/news_post/is-property-condition-disclosure-required-by-law/",
+    "required": false,
+    "formCode": "AR-STATUTORY-PACKET",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "arkansas-association-documents",
+    "title": "Arkansas association resale records",
+    "shortTitle": "Arkansas association resale records",
+    "description": "Under the Arkansas Horizontal Property Act, Ark. Code 18-13, the unit and its appurtenant common interests convey under the recorded master deed and bylaws. Review restrictions, insurance, budgets, reserves, assessments, litigation and parking/storage allocations during the agreed inspection period. Seller shall cooperate in obtaining an association account statement and clear assessments chargeable to seller. Section 18-13-116 addresses unpaid assessments at sale; the contract does not authorize avoiding those charges by transfer. This ordinary nondeveloper resale creates no universal statutory initial-offer condo packet or cooling-off period. Developer construction/deposit arrangements are excluded.",
+    "sourceInstructions": "Under the Arkansas Horizontal Property Act, Ark. Code 18-13, the unit and its appurtenant common interests convey under the recorded master deed and bylaws. Review restrictions, insurance, budgets, reserves, assessments, litigation and parking/storage allocations during the agreed inspection period. Seller shall cooperate in obtaining an association account statement and clear assessments chargeable to seller. Section 18-13-116 addresses unpaid assessments at sale; the contract does not authorize avoiding those charges by transfer. This ordinary nondeveloper resale creates no universal statutory initial-offer condo packet or cooling-off period. Developer construction/deposit arrangements are excluded.",
+    "officialFormUrl": "https://www.arkleg.state.ar.us/Acts/CodeSection?ddBienniumSession=2025/2025R&section=18",
+    "required": false,
+    "formCode": "AR-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "AR-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
+  IL: [
+  {
+    "documentType": "illinois-seller-disclosure",
+    "title": "Illinois seller condition disclosure",
+    "shortTitle": "Illinois seller condition disclosure",
+    "description": "765 ILCS 77 requires the seller Residential Real Property Disclosure Report before the signing of a contract, unless a specific seller/transfer exclusion applies. It covers condominium units and their allocated limited common elements as specified by the Act. Seller must complete the statutory report and supplement a known error or omission before closing. The buyer acknowledges only actual receipt of the identified version; a receipt does not warrant condition or waive remedies. The Act preserves specified five-business-day termination rights for qualifying late material-defect reports/supplements and other statutory remedies. Federal lead and the independent Illinois radon duty are not waived by a condition-report exception.",
+    "sourceInstructions": "765 ILCS 77 requires the seller Residential Real Property Disclosure Report before the signing of a contract, unless a specific seller/transfer exclusion applies. It covers condominium units and their allocated limited common elements as specified by the Act. Seller must complete the statutory report and supplement a known error or omission before closing. The buyer acknowledges only actual receipt of the identified version; a receipt does not warrant condition or waive remedies. The Act preserves specified five-business-day termination rights for qualifying late material-defect reports/supplements and other statutory remedies. Federal lead and the independent Illinois radon duty are not waived by a condition-report exception.",
+    "officialFormUrl": "https://www.ilga.gov/legislation/ILCS/details?ActID=2152",
+    "required": false,
+    "formCode": "IL-SELLER-DISCLOSURE",
+    "sortOrder": 1
+  },
+  {
+    "documentType": "illinois-statutory-packet",
+    "title": "Illinois radon disclosure packet",
+    "shortTitle": "Illinois radon disclosure packet",
+    "description": "Unless excluded by 420 ILCS 46/20, seller shall give the Illinois Disclosure of Information on Radon Hazards, known hazard records and the approved IEMA-OHS Radon Testing Guidelines for Real Estate Transactions pamphlet before buyer is obligated. Section 10(c) permits disclosure after an offer, but requires completion before seller acceptance and an opportunity for buyer review and possible amendment. NavStreet collects this required pre-acceptance disclosure earlier: seller uploads the applicable packet before Make Offer opens, and buyer reviews it and the supplied pamphlet before submitting. No radon test or mitigation is universally required merely to make an offer.",
+    "sourceInstructions": "Unless excluded by 420 ILCS 46/20, seller shall give the Illinois Disclosure of Information on Radon Hazards, known hazard records and the approved IEMA-OHS Radon Testing Guidelines for Real Estate Transactions pamphlet before buyer is obligated. Section 10(c) permits disclosure after an offer, but requires completion before seller acceptance and an opportunity for buyer review and possible amendment. NavStreet collects this required pre-acceptance disclosure earlier: seller uploads the applicable packet before Make Offer opens, and buyer reviews it and the supplied pamphlet before submitting. No radon test or mitigation is universally required merely to make an offer.",
+    "officialFormUrl": "https://iemaohs.illinois.gov/nrs/radon/availpub.html",
+    "required": false,
+    "formCode": "IL-STATUTORY-PACKET",
+    "sortOrder": 2
+  },
+  {
+    "documentType": "illinois-association-documents",
+    "title": "Illinois association resale records",
+    "shortTitle": "Illinois association resale records",
+    "description": "For condominium resale by a nondeveloper, 765 ILCS 605/22.1 requires seller to obtain and make available upon demand the declaration/bylaws/rules, assessment/lien statement, anticipated capital expenses, reserves, financials, litigation, insurance, alteration-compliance information and designated notice contact. Common-interest community resales have separate duties under 765 ILCS 160/1-35. Request records promptly; these are not universal initial-offer upload or statutory cooling-off gates. The agreed inspection/document condition protects buyer review without inventing a mandatory waiting period. From January 1, 2027, comply also with the collection-policy addition of P.A. 104-0734. Developer/new-construction and leasehold sales are excluded.",
+    "sourceInstructions": "For condominium resale by a nondeveloper, 765 ILCS 605/22.1 requires seller to obtain and make available upon demand the declaration/bylaws/rules, assessment/lien statement, anticipated capital expenses, reserves, financials, litigation, insurance, alteration-compliance information and designated notice contact. Common-interest community resales have separate duties under 765 ILCS 160/1-35. Request records promptly; these are not universal initial-offer upload or statutory cooling-off gates. The agreed inspection/document condition protects buyer review without inventing a mandatory waiting period. From January 1, 2027, comply also with the collection-policy addition of P.A. 104-0734. Developer/new-construction and leasehold sales are excluded.",
+    "officialFormUrl": "https://www.ilga.gov/legislation/ilcs/fulltext?DocName=076506050K22.1",
+    "required": false,
+    "formCode": "IL-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3
+  },
+  {
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "IL-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
   AL: [
   {
     "documentType": "alabama-seller-disclosure",
@@ -318,7 +502,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "documentType": "iowa-association-documents",
     "title": "Iowa association records",
     "shortTitle": "Iowa association records",
-    "description": "For a Montana condominium resale, upload a complete packet containing the Unit Ownership Act, association bylaws and administrative regulations. Include the seller or other person’s majority-control notice under MCA 70-23-613(1) whenever any person or entity constitutes a majority of the unit owners. Deliver requested documents before any buy-sell signing. The agreement preserves the 72-hour review and penalty-free withdrawal period. These condominium documents are not a universal upload requirement for non-condominium properties. Dues, assessments and other helpful records may accompany the packet; unknown information is not assigned to the buyer.",
+    "description": "For an Iowa property with an owners association, obtain applicable governing documents, dues, assessments, restrictions and transfer information. These do not create a universal Iowa pre-offer upload requirement.",
     "sourceInstructions": "Obtain available governing documents, dues, assessments, restrictions and transfer information when an owners association actually applies. For an ordinary non-condominium home where the seller reports no owners association, no association document upload is required. Zero fees alone do not establish that no association exists.",
     "officialFormUrl": "https://www.legis.iowa.gov/docs/ico/chapter/558A.pdf",
     "required": false,
@@ -1333,7 +1517,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
   ],
   OK: [
     {
-      description: 'For a covered sale, complete and sign the Oklahoma residential property condition disclosure statement when applicable.',
+      description: 'Before offers are available, upload ONE lawful route: a completed seller-signed condition disclosure, a legally eligible disclaimer, or signed evidence of a statutory exemption. Do not upload all three. The statutory deadline is before seller acceptance; NavStreet collects it earlier.',
       documentType: 'oklahoma-property-condition-disclosure',
       formCode: 'OREC Appendix A (2026)',
       officialFormUrl: 'https://oklahoma.gov/content/dam/ok/en/orec/documents/contracts-and-forms-page/2026-contract-forms/2026%20Appendix%20A%20Residential%20Property%20Condition.pdf',
@@ -1516,7 +1700,7 @@ export function isDisclosureRequiredForListing(
     (stateCode === 'FL' && requirement.documentType === 'florida-hoa-disclosure-summary' && listing.ownersAssociationApplies === true);
 }
 
-/** Acceptance-stage documents remain required without blocking a buyer's initial offer. */
+/** Legal timing metadata; applicable pre-acceptance uploads are collected earlier by the offer gate. */
 export function isDisclosureRequiredBeforeAcceptanceForListing(
   state: string, requirement: StateDisclosureRequirement, listing: ListingDisclosureGateFacts,
 ): boolean {

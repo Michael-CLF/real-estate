@@ -1,3 +1,7 @@
+import { maineListingPackage } from './maine/maine-listing.package';
+import { mississippiListingPackage } from './mississippi/mississippi-listing.package';
+import { arkansasListingPackage } from './arkansas/arkansas-listing.package';
+import { illinoisListingPackage } from './illinois/illinois-listing.package';
 import { wyomingListingPackage } from './wyoming/wyoming-listing.package';
 import { southDakotaListingPackage } from './south-dakota/south-dakota-listing.package';
 import { newMexicoListingPackage } from './new-mexico/new-mexico-listing.package';
@@ -63,6 +67,10 @@ const PACKAGES =
     ['MI', michiganListingPackage],
 ['ID', idahoListingPackage],
 ['WY', wyomingListingPackage],
+['ME', maineListingPackage],
+['MS', mississippiListingPackage],
+['AR', arkansasListingPackage],
+['IL', illinoisListingPackage],
 ['SD', southDakotaListingPackage],
 ['NM', newMexicoListingPackage],
 ['MD', marylandListingPackage],

@@ -3,8 +3,15 @@ import type { DisclosureDocumentType } from '../domains/disclosures/models/state
 
 /** Existing upload-gate facts. State codes are normalized by the callers. */
 export interface ListingDisclosureGateFacts {
+ readonly uploadedDocumentTypes?: readonly string[];
+ readonly southCarolina?: { readonly beachfrontApplies?: boolean | null; readonly futureVacationBookingsExist?: boolean | null; };
+ readonly methamphetamineContaminationKnown?: boolean | null;
  readonly contractFacts?: {readonly isCondominium?:boolean|null};
  readonly wyoming?: { readonly privateWastewaterApplies?: boolean | null; readonly appurtenantWaterRightsKnown?: boolean | null; };
+ readonly maine?: { disclosureExemptionClaimed?: boolean | null; };
+ readonly mississippi?: {};
+ readonly arkansas?: { };
+ readonly illinois?: { disclosureExemptionClaimed?: boolean | null; radonExemptionClaimed?: boolean | null; };
  readonly southDakota?: { readonly usesMountainTime?: boolean | null; readonly disclosureExemptionClaimed?: boolean | null; readonly privateTransferFeeKnown?: boolean | null; };
  readonly newMexico?: { readonly privateWastewaterApplies?: boolean | null; readonly drugLabContaminationKnown?: boolean | null; readonly appurtenantWaterRightsKnown?: boolean | null; };
  readonly maryland?: { readonly disclosureExemptionClaimed?: boolean | null; readonly usesDisclaimer?: boolean | null; readonly privateWellApplies?: boolean | null; readonly onsiteSewageApplies?: boolean | null; readonly deferredWaterSewerCharges?: boolean | null; readonly superfundNearby?: boolean | null; readonly otherPropertyNoticeApplies?: boolean | null; readonly rentalLeadObligationApplies?: boolean | null; readonly groundRentApplies?: boolean | null; };
@@ -25,33 +32,37 @@ export interface ListingDisclosureGateFacts {
 
 /** Federal cutoff overrides stale flags; preserve existing older-housing upload policies. */
 export function isListingLeadUploadRequired(code: string, facts: ListingDisclosureGateFacts): boolean {
-  if (isFederalLeadExcluded(facts)) return false;
-  if (code === 'MO' && facts.propertyType === 'land') return false;
-  if (code === 'CO' || code === 'LA' || code === 'MN' || code === 'MI' || code === 'AZ' || code === 'ID' || code === 'OR' || code === 'MO' || code === 'NE' || code === 'NH' || code === 'AL' || code === 'IN' || code === 'KS' || code === 'OH' || code === 'DE' || code === 'WA' || code === 'IA' || code === 'MT' || code === 'MD' || code === 'NM' || code === 'SD' || code === 'WY')
-    return facts.leadBasedPaintApplies === true || facts.yearBuilt == null || facts.yearBuilt < 1978;
-  if (code === 'FL')
-    return facts.leadBasedPaintApplies === true ||
-      (typeof facts.yearBuilt === 'number' && facts.yearBuilt < 1978 && facts.leadBasedPaintApplies !== false);
-  return false;
+  return !isFederalLeadExcluded(facts);
 }
 
 export function getListingUploadGateDocumentTypes(
   code: string, facts: ListingDisclosureGateFacts, now: number,
 ): readonly DisclosureDocumentType[] {
-  if (code === 'AZ') return ['arizona-seller-disclosure', 'arizona-statutory-packet',
-    ...((facts.ownersAssociationApplies === true || facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['arizona-association-documents' as const] : []),
-    ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'NC') return [...(['residential-property-owners-association', 'mineral-oil-gas-rights'] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'TX') return [...(['texas-seller-disclosure-notice'] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'UT') return [...((facts.methamphetamineContaminationKnown === true ? ['utah-methamphetamine-contamination'] : []) as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'WI') return [...([] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'SC') return [...(['south-carolina-property-condition', ...(facts.southCarolina?.beachfrontApplies === true ? ['south-carolina-coastal-disclosure'] : []), ...(facts.southCarolina?.futureVacationBookingsExist === true ? ['south-carolina-vacation-rentals'] : [])] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'OK') {
+    const alternatives = ['oklahoma-property-condition-disclosure', 'oklahoma-property-condition-disclaimer', 'oklahoma-property-condition-exemption'] as const;
+    return [alternatives.find(type => facts.uploadedDocumentTypes?.includes(type)) ?? alternatives[0], ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  }
+  if (['ME','MS','AR','IL'].includes(code)) {
+    const condition = code==='ME' ? facts.maine?.disclosureExemptionClaimed !== true : code==='IL' ? facts.illinois?.disclosureExemptionClaimed !== true : false;
+    const slug=({ME:'maine',MS:'mississippi',AR:'arkansas',IL:'illinois'} as Record<string,string>)[code];
+    return [...(condition ? [slug+'-seller-disclosure' as DisclosureDocumentType] : []),...(code==='IL' && facts.illinois?.radonExemptionClaimed!==true ? ['illinois-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  }
   if (code === 'AZ') return ['arizona-seller-disclosure', 'arizona-statutory-packet',
     ...((facts.ownersAssociationApplies === true || facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['arizona-association-documents' as const] : []),
     ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'AL') return [...(facts.alabama?.hiddenHealthSafetyKnown !== false ? ['alabama-statutory-packet' as const] : []), ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'IN') return ['indiana-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'KS') return [...(facts.kansas?.elevatedRadonKnown !== false ? ['kansas-statutory-packet' as const] : []), ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
-  if (code === 'OH') return [...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'OH') return ['ohio-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'DE') return ['delaware-seller-disclosure',...(facts.delaware?.disclosureExemptionClaimed !== true ? ['delaware-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'WA') return [...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'IA') return ['iowa-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
-  if (code === 'MT') return ['montana-seller-disclosure',...(facts.montana?.radonTestsKnown !== false || facts.montana?.drugContaminationKnown !== false || facts.montana?.appurtenantWaterRightsKnown !== false ? ['montana-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'MT') return ['montana-seller-disclosure', ...((facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['montana-association-documents' as const] : []),...(facts.montana?.radonTestsKnown !== false || facts.montana?.drugContaminationKnown !== false || facts.montana?.appurtenantWaterRightsKnown !== false ? ['montana-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'MD') return ['maryland-seller-disclosure',...(['deferredWaterSewerCharges','superfundNearby','otherPropertyNoticeApplies','rentalLeadObligationApplies'].some(key => facts.maryland?.[key as keyof NonNullable<ListingDisclosureGateFacts['maryland']>] !== false) ? ['maryland-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'NM') return ['new-mexico-statutory-packet',...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'SD') return ['south-dakota-seller-disclosure',...(facts.southDakota?.disclosureExemptionClaimed === true && facts.southDakota?.privateTransferFeeKnown !== false ? ['south-dakota-statutory-packet' as const] : []),...((facts.ownersAssociationApplies === true || facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['south-dakota-association-documents' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];

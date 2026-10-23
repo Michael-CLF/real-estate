@@ -81,6 +81,10 @@ export interface MarketplaceListing {
     newMexico?: { privateWastewaterApplies?: boolean | null; drugLabContaminationKnown?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
     southDakota?: { usesMountainTime?: boolean | null; disclosureExemptionClaimed?: boolean | null; privateTransferFeeKnown?: boolean | null; };
     wyoming?: { privateWastewaterApplies?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
+    maine?: { disclosureExemptionClaimed?: boolean | null; };
+    mississippi?: {};
+    arkansas?: { };
+    illinois?: { disclosureExemptionClaimed?: boolean | null; radonExemptionClaimed?: boolean | null; };
     missouri?: { methProductionKnown?: boolean | null; drugConvictionKnown?: boolean | null };
     nebraska?: { usesMountainTime?: boolean | null };
     newHampshire?: { methProductionKnown?: boolean | null; utilityTariffChargesKnown?: boolean | null };
@@ -90,7 +94,7 @@ export interface MarketplaceListing {
   annualPropertyTax?: number;
   annualHomeownersInsurance?: number;
   hoa?: ListingHoa;
-  
+
   enhancements?: ListingEnhancements;
   schools?: ListingSchools;
 

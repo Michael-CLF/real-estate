@@ -15,6 +15,7 @@ import { CALIFORNIA_DOCUMENT_RULES } from './california-document-rules';
 export const californiaStateContractPackage: StateContractPackage<CaliforniaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
   assertListingContractCompatible: listing => assertListingContractScope(californiaStateContractPackage, listing),
   listingDisclosurePolicy: {
+    assertReady: assertCaliforniaListingDisclosures,
     readVersions: readCaliforniaListingDisclosures,
     initialListingData: async (transaction, reference, listing) => ({ californiaReadiness: await readCaliforniaListingDisclosures(transaction, reference, listing) }),
     reviewedVersions: ({ version }) => version.terms.documentVersions,
@@ -71,4 +72,13 @@ export async function readCaliforniaListingDisclosures(
     documentVersions[type] = file!['versionId'] as string;
   }
   return { requiredDisclosureTypes, documentVersions, applicability };
+}
+export async function assertCaliforniaListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {
+  const readiness = await readCaliforniaListingDisclosures(transaction, reference, listing);
+  const missing = CALIFORNIA_DISCLOSURE_TYPES.filter(type => {
+    if (type === 'lead-based-paint' && isFederalLeadExcluded(listing)) return false;
+    const decision = readiness.applicability[type];
+    return (!validCaliforniaDisclosureDecision(decision) || decision.status === 'required') && !readiness.documentVersions[type];
+  });
+  if (missing.length) throw new HttpsError('failed-precondition', `The seller must complete applicable California disclosure uploads before offers are available: ${missing.join(', ')}.`);
 }

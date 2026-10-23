@@ -4,6 +4,10 @@ const { spawnSync } = require('node:child_process');
 
 const project = path.resolve(process.argv[2] || '.');
 const checks = [
+  'verify-all-state-disclosure-entry.cjs',
+  'verify-condominium-offer-entry.cjs',
+  'verify-maine-mississippi-arkansas-illinois.cjs',
+  'verify-four-state-preoffer-policy.cjs',
   'verify-montana-review-effectiveness.cjs',
   'verify-four-state-resale-coverage.cjs',
   'verify-delivered-offer-status.cjs',

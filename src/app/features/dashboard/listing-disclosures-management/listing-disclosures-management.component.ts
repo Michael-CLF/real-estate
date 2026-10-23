@@ -120,14 +120,14 @@ export class ListingDisclosuresManagementComponent
       return listing.sellerStatements?.california?.disclosureApplicability?.[requirement.documentType as CaliforniaDisclosureType]?.status === 'required';
     }
     return listing !== null && isDisclosureRequiredForListing(listing.state, requirement, {
-      ...listing.sellerStatements,
+      ...listing.sellerStatements, uploadedDocumentTypes: Object.values(this.disclosures()).filter(document => document?.listingUid === this.listingUid && document.stateAbbreviation === normalizeDisclosureStateCode(listing.state) && !!document.storagePath && !!document.versionId).map(document => document!.documentType),
       yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
     });
   }
   protected isRequiredBeforeAcceptance(requirement: StateDisclosureRequirement): boolean {
     const listing = this.listing();
     return !!listing && isDisclosureRequiredBeforeAcceptanceForListing(listing.state, requirement, {
-      ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
+      ...listing.sellerStatements, uploadedDocumentTypes: Object.values(this.disclosures()).filter(document => document?.listingUid === this.listingUid && document.stateAbbreviation === normalizeDisclosureStateCode(listing.state) && !!document.storagePath && !!document.versionId).map(document => document!.documentType), yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
     });
   }
   protected readonly requirements =
@@ -170,7 +170,7 @@ export class ListingDisclosuresManagementComponent
     const listing = this.listing();
     if (!listing || this.isLoading() || this.loadError()) return [];
     const state = normalizeDisclosureStateCode(listing.state);
-    return getOfferBlockingDocumentTypes(state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+    return getOfferBlockingDocumentTypes(state, { ...listing.sellerStatements, uploadedDocumentTypes: Object.values(this.disclosures()).filter(document => document?.listingUid === this.listingUid && document.stateAbbreviation === normalizeDisclosureStateCode(listing.state) && !!document.storagePath && !!document.versionId).map(document => document!.documentType), yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
       .filter(type => {
         const document = this.disclosures()[type];
         return !(document?.listingUid === this.listingUid && document.stateAbbreviation === state && document.storagePath && document.versionId);
@@ -179,7 +179,7 @@ export class ListingDisclosuresManagementComponent
   protected readonly offerDisclosureMessages = computed(() => {
     const listing = this.listing();
     if (!listing || this.isLoading() || this.loadError()) return [];
-    return getChecklistRestrictionMessages(listing.state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+    return getChecklistRestrictionMessages(listing.state, { ...listing.sellerStatements, uploadedDocumentTypes: Object.values(this.disclosures()).filter(document => document?.listingUid === this.listingUid && document.stateAbbreviation === normalizeDisclosureStateCode(listing.state) && !!document.storagePath && !!document.versionId).map(document => document!.documentType), yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
       .filter(message => !message.startsWith('NavStreet currently prevents'));
   });
   protected readonly listingUid =
@@ -239,7 +239,7 @@ export class ListingDisclosuresManagementComponent
         ),
       });
       this.requirements.set(
-        requirements.filter(requirement => isDisclosureVisibleForListing(requirement,{...listing.sellerStatements,yearBuilt:listing.yearBuilt,propertyType:listing.propertyType}) && (!requirement.appliesToListing || requirement.appliesToListing(listing))).sort(
+        requirements.filter(requirement => isDisclosureVisibleForListing(requirement,{...listing.sellerStatements, uploadedDocumentTypes: Object.values(this.disclosures()).filter(document => document?.listingUid === this.listingUid && document.stateAbbreviation === normalizeDisclosureStateCode(listing.state) && !!document.storagePath && !!document.versionId).map(document => document!.documentType),yearBuilt:listing.yearBuilt,propertyType:listing.propertyType}) && (!requirement.appliesToListing || requirement.appliesToListing(listing))).sort(
           (
             firstRequirement,
             secondRequirement

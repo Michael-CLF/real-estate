@@ -1,3 +1,4 @@
+import { assertSouthCarolinaListingDisclosures } from '../../south-carolina-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -13,7 +14,7 @@ import { createSouthCarolinaContractMilestones } from './south-carolina-contract
 import { SOUTH_CAROLINA_DOCUMENT_RULES } from './south-carolina-document-rules';
 export const southCarolinaStateContractPackage: StateContractPackage<SouthCarolinaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
   assertListingContractCompatible: listing => assertListingContractScope(southCarolinaStateContractPackage, listing),
-  listingDisclosurePolicy: {
+  listingDisclosurePolicy: { assertReady: assertSouthCarolinaListingDisclosures,
     readVersions: readSouthCarolinaListingDisclosures,
     initialListingData: async (transaction, reference, listing) => ({ southCarolinaDocuments: await readSouthCarolinaListingDisclosures(transaction, reference, listing) }),
     reviewedVersions: ({ version }) => version.terms.documentVersions,

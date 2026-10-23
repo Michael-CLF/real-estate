@@ -10,13 +10,13 @@ const frontPath=path.join(project,'src/app/features/offers/engine/state-offer-re
 const frontSource=fs.readFileSync(frontPath,'utf8');
 const frontend=load(frontSource);
 const backend=require(path.join(project,'functions/lib/offers/state-contracts/state-contract-registry.js'));
-const states={NC:'north-carolina',TX:'texas',OK:'oklahoma',UT:'utah',WI:'wisconsin',FL:'florida',LA:'louisiana',CO:'colorado',CA:'california',SC:'south-carolina',MI:'michigan',MN:'minnesota',AZ:'arizona',ID:'idaho',OR:'oregon',MO:'missouri',NE:'nebraska',NH:'new-hampshire',AL:'alabama',IN:'indiana',KS:'kansas',OH:'ohio',DE:'delaware',WA:'washington',IA:'iowa',MT:'montana',MD:'maryland',NM:'new-mexico',SD:'south-dakota',WY:'wyoming'};
+const states={NC:'north-carolina',TX:'texas',OK:'oklahoma',UT:'utah',WI:'wisconsin',FL:'florida',LA:'louisiana',CO:'colorado',CA:'california',SC:'south-carolina',MI:'michigan',MN:'minnesota',AZ:'arizona',ID:'idaho',OR:'oregon',MO:'missouri',NE:'nebraska',NH:'new-hampshire',AL:'alabama',IN:'indiana',KS:'kansas',OH:'ohio',DE:'delaware',WA:'washington',IA:'iowa',MT:'montana',MD:'maryland',NM:'new-mexico',SD:'south-dakota',WY:'wyoming',ME:'maine',MS:'mississippi',AR:'arkansas',IL:'illinois'};
 function stringsForProperty(source,property) {
  const values=[];const tree=ts.createSourceFile('file.ts',source,ts.ScriptTarget.Latest,true);
  function visit(node){if(ts.isPropertyAssignment(node)&&node.name.getText(tree).replace(/['"]/g,'')===property&&ts.isStringLiteral(node.initializer))values.push(node.initializer.text);ts.forEachChild(node,visit);}visit(tree);return values;
 }
 const tree=ts.createSourceFile(frontPath,frontSource,ts.ScriptTarget.Latest,true);let loaders=0;
-function checkImports(node){if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){const target=node.arguments[0];assert(ts.isStringLiteral(target));assert(fs.existsSync(path.resolve(path.dirname(frontPath),target.text+'.ts')),`Missing offer component ${target.text}`);loaders++;}ts.forEachChild(node,checkImports);}checkImports(tree);assert.equal(loaders,31); // Thirty entry loaders and the Iowa later-delivery evidence panel.
+function checkImports(node){if(ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword){const target=node.arguments[0];assert(ts.isStringLiteral(target));assert(fs.existsSync(path.resolve(path.dirname(frontPath),target.text+'.ts')),`Missing offer component ${target.text}`);loaders++;}ts.forEachChild(node,checkImports);}checkImports(tree);assert.equal(loaders,35); // Thirty entry loaders and the Iowa later-delivery evidence panel.
 const templateIds=new Set();
 for(const [code,folder] of Object.entries(states)) {
  const front=frontend.getEnabledStateOfferRegistration(' '+code.toLowerCase()+' ');

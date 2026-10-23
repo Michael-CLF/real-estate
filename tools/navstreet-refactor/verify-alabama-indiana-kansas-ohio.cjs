@@ -66,7 +66,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const yearBuilt of [undefined,null,1900,1977,1978,2026])for(const leadBasedPaintApplies of [null,false,true])for(const known of [null,false,true]){
    const stateFacts={...facts(code)[slug],hiddenHealthSafetyKnown:known,elevatedRadonKnown:known};
    const f={yearBuilt,leadBasedPaintApplies,[slug]:stateFacts};
-   const expected=[...(code==='IN'?['indiana-seller-disclosure']:[]),...((code==='AL'||code==='KS')&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
+   const expected=[...(code==='IN'?['indiana-seller-disclosure']:code==='OH'?['ohio-seller-disclosure']:[]),...((code==='AL'||code==='KS')&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
    assert.deepEqual(normalize(gates.getListingUploadGateDocumentTypes(code,f,Date.now())),expected);
    assert.deepEqual(requiredTypes({yearBuilt,sellerStatements:{leadBasedPaintApplies,[slug]:stateFacts}}),expected);parity++;
   }
@@ -127,7 +127,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   const longInput={...pdfInput,version:{...pdfInput.version,versionNumber:2,terms:{...terms,additionalTerms:('Overflow marker preserved. ').repeat(500)}}};const long=await pkg.generateAgreement(longInput);assert(long.pageCount>pdf.pageCount);fs.writeFileSync(path.join(output,code+'-overflow.pdf'),long.buffer);
   const legalInput={...pdfInput,version:{...pdfInput.version,versionNumber:3,terms:{...terms,legalDescription:'LONGLEGAL '+('LegalDescriptionToken ').repeat(220)}}};const legal=await pkg.generateAgreement(legalInput);assert(legal.pageCount>pdf.pageCount);fs.writeFileSync(path.join(output,code+'-long-legal.pdf'),legal.buffer);
   const source=fs.readFileSync(path.join(project,'functions/src/offers/state-contracts',slug,slug+'-offer-pdf.service.ts'),'utf8');assert(!source.includes('55-2509'));assert(!source.includes('Idaho'));assert(!source.includes('55-25'));
-  if(code==='KS'){assert(source.includes('Every buyer of residential real property is notified'));assert(source.includes('Kansas law requires persons who are convicted'));} 
+  if(code==='KS'){assert(source.includes('Every buyer of residential real property is notified'));assert(source.includes('Kansas law requires persons who are convicted'));}
   console.log('PASS:',code,'launch, listing gates, trusted facts, property time zone, submission, counteroffers and pending/signed/overflow PDF generation.');
  }
  console.log('PASS:',parity,'four-state frontend/backend disclosure gate parity cases.');

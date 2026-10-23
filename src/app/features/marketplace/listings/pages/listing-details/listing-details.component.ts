@@ -307,18 +307,10 @@ export class ListingDetailsComponent
     const state = listing.address.stateAbbreviation;
     const required = new Set(getOfferBlockingDocumentTypes(state, {
       ...listing.sellerStatements,
+      uploadedDocumentTypes: this.disclosures().filter(document => document.listingUid === listing.uid && document.stateAbbreviation === state && !!document.storagePath && !!document.versionId).map(document => document.documentType),
       yearBuilt: listing.yearBuilt,
       propertyType: listing.propertyType
     }));
-    // Show documents needed before signing before the buyer enters the wizard.
-    // California uses the seller's recorded applicability and exemption decisions.
-    if (state !== 'CA' && listing.propertyType !== 'land' &&
-        (listing.sellerStatements?.leadBasedPaintApplies === true ||
-         (listing.sellerStatements?.leadBasedPaintApplies !== false &&
-          (listing.yearBuilt == null || listing.yearBuilt < 1978)))) {
-      required.add('lead-based-paint');
-    }
-    if (isFederalLeadExcluded(listing)) required.delete('lead-based-paint');
     return [...required];
   }
 

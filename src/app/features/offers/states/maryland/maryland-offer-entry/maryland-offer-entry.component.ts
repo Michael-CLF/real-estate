@@ -300,9 +300,13 @@ export class MarylandOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This Maryland agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
+      const legacySavedResidential = Boolean(this.requestedOfferUid && this.requestedOfferVersionUid)
+        && !listing.sellerStatements?.contractFacts
+        && ['single_family', 'townhome', 'pud'].includes(String(listing.propertyType));
+      if (!legacySavedResidential) {
+        selectMarylandContract(String(listing.propertyType), listing.sellerStatements?.contractFacts);
       }
+
 
       resolveMarylandPropertyTimeZone(createPropertySnapshot(listing).county);
       if (listing.sellerStatements?.maryland?.groundRentApplies === true) throw new Error('Maryland ground-rent/leasehold properties require a separate agreement.');

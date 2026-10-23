@@ -1,3 +1,4 @@
+import { assertNorthCarolinaListingDisclosures } from '../../north-carolina-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
@@ -31,6 +32,7 @@ const NORTH_CAROLINA_DEFAULT_TIME_ZONE =
 
 export const northCarolinaStateContractPackage:
   StateContractPackage = withHoaContractPolicy(withFederalLeadContractPolicy({
+  listingDisclosurePolicy: { assertReady: assertNorthCarolinaListingDisclosures },
     stateCode:
       NORTH_CAROLINA_STATE_CODE,
 

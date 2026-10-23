@@ -1,3 +1,7 @@
+import type { MaineOfferTerms } from '../state-contracts/maine/models/maine-offer-terms.model';
+import type { MississippiOfferTerms } from '../state-contracts/mississippi/models/mississippi-offer-terms.model';
+import type { ArkansasOfferTerms } from '../state-contracts/arkansas/models/arkansas-offer-terms.model';
+import type { IllinoisOfferTerms } from '../state-contracts/illinois/models/illinois-offer-terms.model';
 import type { WyomingOfferTerms } from '../state-contracts/wyoming/models/wyoming-offer-terms.model';
 import type { SouthDakotaOfferTerms } from '../state-contracts/south-dakota/models/south-dakota-offer-terms.model';
 import type { NewMexicoOfferTerms } from '../state-contracts/new-mexico/models/new-mexico-offer-terms.model';
@@ -123,6 +127,10 @@ export type StateOfferTerms =
   | MichiganOfferTerms
   | IdahoOfferTerms
   | WyomingOfferTerms
+  | MaineOfferTerms
+  | MississippiOfferTerms
+  | ArkansasOfferTerms
+  | IllinoisOfferTerms
   | SouthDakotaOfferTerms
   | NewMexicoOfferTerms
   | MarylandOfferTerms

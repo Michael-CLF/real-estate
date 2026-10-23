@@ -324,7 +324,7 @@ export class ListingManagementComponent implements OnInit {
   protected readonly missingOfferDocumentTitles = computed(() => {
     const listing = this.listing();
     if (!listing || this.disclosureStatusIsLoading() || this.disclosureStatusError()) return [];
-    return getOfferBlockingDocumentTypes(listing.state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+    return getOfferBlockingDocumentTypes(listing.state, { ...listing.sellerStatements, uploadedDocumentTypes: this.verifiedDisclosureTypes(), yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
       .filter(type => !this.verifiedDisclosureTypes().includes(type))
       .map(type => checklistDocumentTitle(listing.state, type));
   });
@@ -332,7 +332,7 @@ export class ListingManagementComponent implements OnInit {
   protected readonly requiredOfferDocumentTypes = computed(() => {
     const listing = this.listing();
     return listing ? getOfferBlockingDocumentTypes(listing.state, {
-      ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
+      ...listing.sellerStatements, uploadedDocumentTypes: this.verifiedDisclosureTypes(), yearBuilt: listing.yearBuilt, propertyType: listing.propertyType,
     }) : [];
   });
   protected readonly uploadedOfferDisclosureCount = computed(() =>
@@ -341,7 +341,7 @@ export class ListingManagementComponent implements OnInit {
   protected readonly offerDisclosureMessages = computed(() => {
     const listing = this.listing();
     if (!listing) return [];
-    return getChecklistRestrictionMessages(listing.state, { ...listing.sellerStatements, yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
+    return getChecklistRestrictionMessages(listing.state, { ...listing.sellerStatements, uploadedDocumentTypes: this.verifiedDisclosureTypes(), yearBuilt: listing.yearBuilt, propertyType: listing.propertyType })
       .filter(message => !message.startsWith('NavStreet currently prevents'));
   });
 
@@ -360,19 +360,6 @@ export class ListingManagementComponent implements OnInit {
           stateAbbreviation
         );
 
-      const requiredRequirements =
-        requirements.filter(
-          requirement =>
-            isDisclosureRequiredForListing(
-              stateAbbreviation,
-              requirement,
-              {
-                ...this.listing()?.sellerStatements,
-                yearBuilt: this.listing()?.yearBuilt, propertyType: this.listing()?.propertyType,
-              }
-            )
-        );
-
       const summaries =
         await this.disclosureService
           .getListingDisclosures(
@@ -383,6 +370,19 @@ export class ListingManagementComponent implements OnInit {
         const document = summary.currentDocument;
         return document.listingUid === this.listingUid && document.stateAbbreviation === stateAbbreviation && !!document.storagePath && !!document.versionId;
       }).map(summary => summary.documentType));
+
+      const requiredRequirements =
+        requirements.filter(
+          requirement =>
+            isDisclosureRequiredForListing(
+              stateAbbreviation,
+              requirement,
+              {
+                ...this.listing()?.sellerStatements, uploadedDocumentTypes: this.verifiedDisclosureTypes(),
+                yearBuilt: this.listing()?.yearBuilt, propertyType: this.listing()?.propertyType,
+              }
+            )
+        );
 
       const uploadedDocumentTypes = new Set(this.verifiedDisclosureTypes());
 

@@ -1,3 +1,7 @@
+import {getMaineListingDocumentChecklist} from '../domains/listings/state-packages/maine/maine-document-checklist';
+import {getMississippiListingDocumentChecklist} from '../domains/listings/state-packages/mississippi/mississippi-document-checklist';
+import {getArkansasListingDocumentChecklist} from '../domains/listings/state-packages/arkansas/arkansas-document-checklist';
+import {getIllinoisListingDocumentChecklist} from '../domains/listings/state-packages/illinois/illinois-document-checklist';
 import { getWyomingListingDocumentChecklist } from '../domains/listings/state-packages/wyoming/wyoming-document-checklist';
 import { getSouthDakotaListingDocumentChecklist } from '../domains/listings/state-packages/south-dakota/south-dakota-document-checklist';
 import { getNewMexicoListingDocumentChecklist } from '../domains/listings/state-packages/new-mexico/new-mexico-document-checklist';
@@ -192,6 +196,10 @@ const GUIDANCE: Partial<Record<DisclosureDocumentType, ChecklistGuidance>> = {
 export function getListingDocumentChecklist(state: string, facts: ListingChecklistFacts = {}): readonly ListingChecklistItem[] {
   const code = normalizeDisclosureStateCode(state);
   if (code === 'WY') return getWyomingListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'ME') return getMaineListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'MS') return getMississippiListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'AR') return getArkansasListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'IL') return getIllinoisListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'SD') return getSouthDakotaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'NM') return getNewMexicoListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'MD') return getMarylandListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
@@ -291,7 +299,7 @@ export function getChecklistRestrictionMessages(state: string, facts: ListingChe
   if (code === 'CA') return ['You may create and publish your listing while gathering disclosures. Buyers can start an offer after applicable required documents are uploaded. Save any exemption or non-applicability explanation on the existing Property Disclosures page.'];
   const blocking = getOfferBlockingDocumentTypes(code, facts);
   const messages: string[] = [];
-  if (code === 'IN') messages.push('Buyers may start and send an offer while the Indiana seller condition disclosure is pending. Deliver the signed condition form or supported statutory exemption before seller acceptance. Applicable lead disclosures are required before buyer signing.');
+  if (code === 'IN') messages.push('Upload the signed Indiana condition disclosure or supported exception before buyers can start an offer.');
   if (blocking.length) messages.push('NavStreet currently prevents buyers from starting or submitting an offer while these uploads are missing: ' +
     blocking.map(type => checklistDocumentTitle(code, type)).join('; ') + '.');
   if (code === 'FL' && facts.ownersAssociationApplies == null) messages.push('If mandatory HOA membership applies, the HOA disclosure summary upload is also required before buyers can start an offer.');
@@ -301,7 +309,7 @@ export function getChecklistRestrictionMessages(state: string, facts: ListingChe
   if (['UT', 'WI'].includes(code)) messages.push('If a buyer marks a disclosure as received, its uploaded document version must be available before the offer can be submitted. A pending document remains subject to its legal and agreed contract deadline.');
   if (['NC', 'LA'].includes(code) && facts.propertyType !== 'land') messages.push('Provide the applicable seller disclosure statements no later than the buyer makes an offer. Confirm any statutory exemption before relying on it.');
   if (code === 'TX') messages.push('Provide the applicable Seller’s Disclosure Notice by the contract effective date. Late delivery can give the buyer termination rights.');
-  if (code === 'OK') messages.push('Provide the applicable disclosure or legally eligible disclaimer before accepting an offer. If delivered after an offer, obtain the buyer’s required acknowledgment and confirmation before acceptance.');
+  if (code === 'OK') messages.push('Upload ONE complete Oklahoma condition disclosure, legally eligible disclaimer, or supported statutory exemption before buyers can start an offer.');
   if (!isFederalLeadExcluded(facts)) messages.push('For most housing built before 1978, the lead disclosure, available records and EPA pamphlet must be delivered before the buyer signs the purchase contract. Confirm any federal exemption.');
   return messages;
 }

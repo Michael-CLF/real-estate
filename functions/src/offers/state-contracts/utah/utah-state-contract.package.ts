@@ -1,3 +1,4 @@
+import { assertUtahListingDisclosures } from '../../utah-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -11,6 +12,7 @@ import { sanitizeUtahDraftTerms } from './utah-draft-terms-sanitizer';
 import { validateUtahSubmission } from './utah-submission-validator';
 import { createUtahContractMilestones } from './utah-contract-milestones';
 export const utahStateContractPackage: StateContractPackage<UtahOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  listingDisclosurePolicy: { assertReady: assertUtahListingDisclosures },
   assertListingContractCompatible: listing => assertListingContractScope(utahStateContractPackage, listing),
   stateCode: 'UT', offerCreationEnabled: true,
   requireOwnershipFacts:true,

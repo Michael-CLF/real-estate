@@ -1,3 +1,4 @@
+import { assertOklahomaListingDisclosures } from '../../oklahoma-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -11,6 +12,7 @@ import { validateOklahomaSubmission } from './oklahoma-submission-validator';
 import { OREC_RESIDENTIAL_SALE_TEMPLATE } from './contracts/residential-sale/orec-residential-sale-template';
 
 export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  listingDisclosurePolicy: { assertReady: assertOklahomaListingDisclosures },
   assertListingContractCompatible: listing => assertListingContractScope(oklahomaStateContractPackage, listing),
   stateCode: 'OK',
   // Keep new public offers gated until selected OREC supplements and the

@@ -439,6 +439,10 @@ export type ListingFuelTankOwnership = 'owned' | 'leased';
 export interface ListingSellerStatements {
   contractFacts?: ListingContractFacts;
   wyoming?: { privateWastewaterApplies?: boolean; appurtenantWaterRightsKnown?: boolean; };
+  maine?: { disclosureExemptionClaimed?: boolean; };
+  mississippi?: {};
+  arkansas?: { };
+  illinois?: { disclosureExemptionClaimed?: boolean; radonExemptionClaimed?: boolean; };
   southDakota?: { condominiumReportIssued?: boolean; usesMountainTime?: boolean; disclosureExemptionClaimed?: boolean; privateTransferFeeKnown?: boolean; };
   newMexico?: {taxEstimateUnavailable?: boolean; privateWastewaterApplies?: boolean; drugLabContaminationKnown?: boolean; appurtenantWaterRightsKnown?: boolean; };
   maryland?: {condominiumFewerThanSevenUnits?: boolean; disclosureExemptionClaimed?: boolean; usesDisclaimer?: boolean; privateWellApplies?: boolean; onsiteSewageApplies?: boolean; deferredWaterSewerCharges?: boolean; superfundNearby?: boolean; otherPropertyNoticeApplies?: boolean; rentalLeadObligationApplies?: boolean; groundRentApplies?: boolean; };

@@ -1,3 +1,7 @@
+import { maineListingPackage } from './maine-listing.package';
+import { mississippiListingPackage } from './mississippi-listing.package';
+import { arkansasListingPackage } from './arkansas-listing.package';
+import { illinoisListingPackage } from './illinois-listing.package';
 import { isFederalLeadExcluded } from '../../offers/state-contracts/federal-lead-policy';
 import { wyomingListingPackage } from './wyoming-listing.package';
 import { southDakotaListingPackage } from './south-dakota-listing.package';
@@ -43,6 +47,10 @@ const PACKAGES = new Map<string, StateListingPackage>([
   ['MI', michiganListingPackage],
 ['ID', idahoListingPackage],
 ['WY', wyomingListingPackage],
+['ME', maineListingPackage],
+['MS', mississippiListingPackage],
+['AR', arkansasListingPackage],
+['IL', illinoisListingPackage],
 ['SD', southDakotaListingPackage],
 ['NM', newMexicoListingPackage],
 ['MD', marylandListingPackage],

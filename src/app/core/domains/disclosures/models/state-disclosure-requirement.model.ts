@@ -1,4 +1,17 @@
 export type DisclosureDocumentType =
+  | 'maine-seller-disclosure'
+  | 'maine-statutory-packet'
+  | 'maine-association-documents'
+  | 'mississippi-seller-disclosure'
+  | 'mississippi-statutory-packet'
+  | 'mississippi-association-documents'
+  | 'arkansas-seller-disclosure'
+  | 'arkansas-statutory-packet'
+  | 'arkansas-association-documents'
+  | 'illinois-seller-disclosure'
+  | 'illinois-statutory-packet'
+  | 'illinois-association-documents'
+
   | 'wyoming-seller-disclosure'
   | 'wyoming-statutory-packet'
   | 'wyoming-association-documents'

@@ -300,9 +300,13 @@ export class NewMexicoOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This New Mexico agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
+      const legacySavedResidential = Boolean(this.requestedOfferUid && this.requestedOfferVersionUid)
+        && !listing.sellerStatements?.contractFacts
+        && ['single_family', 'townhome', 'pud'].includes(String(listing.propertyType));
+      if (!legacySavedResidential) {
+        selectNewMexicoContract(String(listing.propertyType), listing.sellerStatements?.contractFacts);
       }
+
 
       resolveNewMexicoPropertyTimeZone(createPropertySnapshot(listing).county);
       this.listing.set(listing);

@@ -1,0 +1,14 @@
+import { isFederalLeadExcluded } from './state-contracts/federal-lead-policy';
+import { readMissingListingDisclosures } from './listing-disclosure-gate-reader';
+import { HttpsError } from 'firebase-functions/v2/https';
+import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
+/** Collect applicable seller records before offers, without changing their statutory deadlines. */
+export function utahRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
+  const facts = (listing['sellerStatements'] ?? {}) as Record<string, unknown>;
+  return [...(facts['methamphetamineContaminationKnown'] === true ? ['utah-methamphetamine-contamination'] : []), ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
+}
+export async function assertUtahListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {
+  const invalid = (doc: Record<string, unknown> | undefined, type: string): boolean => !doc || doc['documentType'] !== type || doc['listingUid'] !== reference.id || doc['stateAbbreviation'] !== 'UT' || typeof doc['storagePath'] !== 'string' || !doc['storagePath'] || typeof doc['versionId'] !== 'string' || !doc['versionId'];
+  const missing = await readMissingListingDisclosures(transaction, reference, utahRequiredDisclosureTypes(listing), invalid);
+  if (missing.length) throw new HttpsError('failed-precondition', `The seller must upload the applicable Utah disclosure or supported lawful exception before offers are available: ${missing.join(', ')}.`);
+}

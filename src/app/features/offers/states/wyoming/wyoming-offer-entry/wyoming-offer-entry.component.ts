@@ -300,9 +300,13 @@ export class WyomingOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This Wyoming agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
+      const legacySavedResidential = Boolean(this.requestedOfferUid && this.requestedOfferVersionUid)
+        && !listing.sellerStatements?.contractFacts
+        && ['single_family', 'townhome', 'pud'].includes(String(listing.propertyType));
+      if (!legacySavedResidential) {
+        selectWyomingContract(String(listing.propertyType), listing.sellerStatements?.contractFacts);
       }
+
 
       resolveWyomingPropertyTimeZone(createPropertySnapshot(listing).county);
       this.listing.set(listing);

@@ -4,7 +4,8 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function ohioRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
   return [
-    
+    'ohio-seller-disclosure',
+
     ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */

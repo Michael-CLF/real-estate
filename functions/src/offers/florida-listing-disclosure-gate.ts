@@ -7,13 +7,11 @@ export function floridaRequiredDisclosureTypes(
   listing: Record<string, unknown>,
 ): string[] {
   const statements = listing['sellerStatements'] as Record<string, unknown> | undefined;
-  const yearBuilt = listing['yearBuilt'];
   return [
     'florida-flood-disclosure',
     ...(statements?.['ownersAssociationApplies'] === true
       ? ['florida-hoa-disclosure-summary'] : []),
-    ...(!isFederalLeadExcluded(listing) && (statements?.['leadBasedPaintApplies'] === true ||
-      (typeof yearBuilt === 'number' && yearBuilt < 1978 && statements?.['leadBasedPaintApplies'] !== false))
+    ...(!isFederalLeadExcluded(listing)
       ? ['lead-based-paint'] : []),
   ];
 }

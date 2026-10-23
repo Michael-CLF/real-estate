@@ -300,9 +300,13 @@ export class SouthDakotaOfferEntryComponent
         );
       }
 
-      if (!['single_family', 'townhome', 'pud'].includes(String(listing.propertyType))) {
-        throw new Error('This South Dakota agreement supports residential resales. Condominiums, vacant land, and other property types need their own agreement.');
+      const legacySavedResidential = Boolean(this.requestedOfferUid && this.requestedOfferVersionUid)
+        && !listing.sellerStatements?.contractFacts
+        && ['single_family', 'townhome', 'pud'].includes(String(listing.propertyType));
+      if (!legacySavedResidential) {
+        selectSouthDakotaContract(String(listing.propertyType), listing.sellerStatements?.contractFacts);
       }
+
 
       resolveSouthDakotaPropertyTimeZone(createPropertySnapshot(listing).county, listing.sellerStatements?.southDakota?.usesMountainTime);
       this.listing.set(listing);

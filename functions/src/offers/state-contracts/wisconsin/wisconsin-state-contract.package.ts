@@ -1,3 +1,4 @@
+import { assertWisconsinListingDisclosures } from '../../wisconsin-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -11,6 +12,7 @@ import { sanitizeWisconsinDraftTerms } from './wisconsin-draft-terms-sanitizer';
 import { validateWisconsinSubmission } from './wisconsin-submission-validator';
 import { createWisconsinContractMilestones } from './wisconsin-contract-milestones';
 export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
+  listingDisclosurePolicy: { assertReady: assertWisconsinListingDisclosures },
   assertListingContractCompatible: listing => assertListingContractScope(wisconsinStateContractPackage, listing),
   stateCode: 'WI', offerCreationEnabled: true,
   requireOwnershipFacts:true,

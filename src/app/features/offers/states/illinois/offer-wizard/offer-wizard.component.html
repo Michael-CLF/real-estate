@@ -1,0 +1,47 @@
+
+@if (terms(); as currentTerms) {
+  <section class="illinois-offer-wizard">
+    @if (contractDefinition(); as contract) {
+      <aside class="illinois-offer-wizard__contract">
+        <span>Selected Illinois contract</span>
+        <strong>{{ contract.formName }}</strong>
+        <small>
+          NavStreet agreement · Version effective {{ contract.effectiveDate }}
+        </small>
+      </aside>
+    }
+
+    @if (pendingDisclosureNotice(); as notice) {
+      <p class="illinois-offer-wizard__pending-disclosures" role="status">{{ notice }}</p>
+    }
+
+    @if(currentTerms.disclosures.requiredKnownFacts){<aside class="illinois-offer-wizard__contract"><strong>Illinois radon pamphlet</strong><a [href]="radonFactSheetUrl" target="_blank" rel="noopener noreferrer">Read the approved IEMA radon pamphlet (PDF)</a><small>Provided automatically. Review with the seller's hazard disclosure before acknowledging receipt.</small></aside>}
+    <app-offer-wizard-shell
+      stateName="Illinois"
+      title="Illinois purchase offer"
+      description="Complete the questions for the selected Illinois contract. Your draft will be saved through NavStreet's offer service."
+      [sections]="sections()"
+      [terms]="currentTerms"
+      [buyers]="draftBuyers()"
+      [allowBuyerEdits]="initiatedBy() === 'buyer'"
+      [sellers]="sellers()"
+      [listingDisclosures]="listingDisclosures()"
+      [validationIssues]="validationIssues()"
+      [saving]="saving()"
+      [allowEditingWhileSaving]="true"
+      [submitting]="submitting()"
+      submitLabel="Review and submit offer"
+      (fieldValueChange)="onFieldValueChange($event)"
+      (coBuyerChange)="onCoBuyerChanged($event)"
+      (sectionChanged)="onSectionChanged()"
+      (documentSelected)="documentSelected.emit($event)"
+      (submitRequested)="onSubmitRequested()"
+      (returnToListingRequested)="returnToListingRequested.emit()"
+      (listingDisclosureRequested)="listingDisclosureRequested.emit($event)"
+    />
+  </section>
+} @else {
+  <section class="illinois-offer-wizard__loading" aria-live="polite">
+    Preparing the Illinois residential sale contract from the property listing…
+  </section>
+}

@@ -1,3 +1,7 @@
+import { maineOfferDisplayAdapter } from '../../states/maine/display/maine-offer-display.adapter';
+import { mississippiOfferDisplayAdapter } from '../../states/mississippi/display/mississippi-offer-display.adapter';
+import { arkansasOfferDisplayAdapter } from '../../states/arkansas/display/arkansas-offer-display.adapter';
+import { illinoisOfferDisplayAdapter } from '../../states/illinois/display/illinois-offer-display.adapter';
 import { wyomingOfferDisplayAdapter } from '../../states/wyoming/display/wyoming-offer-display.adapter';
 import { southDakotaOfferDisplayAdapter } from '../../states/south-dakota/display/south-dakota-offer-display.adapter';
 import { newMexicoOfferDisplayAdapter } from '../../states/new-mexico/display/new-mexico-offer-display.adapter';
@@ -81,6 +85,10 @@ registerDisplayAdapter(floridaOfferDisplayAdapter);
 registerDisplayAdapter(michiganOfferDisplayAdapter);
 registerDisplayAdapter(idahoOfferDisplayAdapter);
 registerDisplayAdapter(wyomingOfferDisplayAdapter);
+registerDisplayAdapter(maineOfferDisplayAdapter);
+registerDisplayAdapter(mississippiOfferDisplayAdapter);
+registerDisplayAdapter(arkansasOfferDisplayAdapter);
+registerDisplayAdapter(illinoisOfferDisplayAdapter);
 registerDisplayAdapter(southDakotaOfferDisplayAdapter);
 registerDisplayAdapter(newMexicoOfferDisplayAdapter);
 registerDisplayAdapter(marylandOfferDisplayAdapter);

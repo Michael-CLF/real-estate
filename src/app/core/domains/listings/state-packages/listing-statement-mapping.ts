@@ -1,5 +1,9 @@
 import type { ListingContractFacts } from '../models/listing.model';
 import type { WyomingListingAnswers } from './wyoming/wyoming-listing-form';
+import type { MaineListingAnswers } from './maine/maine-listing-form';
+import type { MississippiListingAnswers } from './mississippi/mississippi-listing-form';
+import type { ArkansasListingAnswers } from './arkansas/arkansas-listing-form';
+import type { IllinoisListingAnswers } from './illinois/illinois-listing-form';
 import type { SouthDakotaListingAnswers } from './south-dakota/south-dakota-listing-form';
 import type { NewMexicoListingAnswers } from './new-mexico/new-mexico-listing-form';
 import type { MarylandListingAnswers } from './maryland/maryland-listing-form';
@@ -43,6 +47,10 @@ export interface ListingStatementMappingAnswers extends Omit<ListingStatementSav
   newMexico?: NewMexicoListingAnswers;
   southDakota?: SouthDakotaListingAnswers;
   wyoming?: WyomingListingAnswers;
+  maine?: MaineListingAnswers;
+  mississippi?: MississippiListingAnswers;
+  arkansas?: ArkansasListingAnswers;
+  illinois?: IllinoisListingAnswers;
   southCarolina?: SouthCarolinaListingAnswers;
   california?: CaliforniaListingFacts;
   additionalSellerIncluded: boolean;

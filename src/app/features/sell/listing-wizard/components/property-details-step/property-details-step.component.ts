@@ -58,6 +58,10 @@ export type PropertyDetailsFuelTankOwnership =
 export interface PropertyDetailsSellerStatementsFormValue {
   contractFacts?: ListingContractFacts;
   wyoming?: { privateWastewaterApplies: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
+  maine?: { disclosureExemptionClaimed: boolean | null; };
+  mississippi?: {};
+  arkansas?: { };
+  illinois?: { disclosureExemptionClaimed: boolean | null; radonExemptionClaimed: boolean | null; };
   southDakota?: { condominiumReportIssued: boolean | null; usesMountainTime: boolean | null; disclosureExemptionClaimed: boolean | null; privateTransferFeeKnown: boolean | null; };
   newMexico?: { taxEstimateUnavailable: boolean | null; privateWastewaterApplies: boolean | null; drugLabContaminationKnown: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
   maryland?: { condominiumFewerThanSevenUnits: boolean | null; disclosureExemptionClaimed: boolean | null; usesDisclaimer: boolean | null; privateWellApplies: boolean | null; onsiteSewageApplies: boolean | null; deferredWaterSewerCharges: boolean | null; superfundNearby: boolean | null; otherPropertyNoticeApplies: boolean | null; rentalLeadObligationApplies: boolean | null; groundRentApplies: boolean | null; };
@@ -445,6 +449,10 @@ export class PropertyDetailsStepComponent
         newMexico: getStateListingFormFactory('sellerStatements.newMexico')(this.fb),
         southDakota: getStateListingFormFactory('sellerStatements.southDakota')(this.fb),
         wyoming: getStateListingFormFactory('sellerStatements.wyoming')(this.fb),
+        maine: getStateListingFormFactory('sellerStatements.maine')(this.fb),
+        mississippi: getStateListingFormFactory('sellerStatements.mississippi')(this.fb),
+        arkansas: getStateListingFormFactory('sellerStatements.arkansas')(this.fb),
+        illinois: getStateListingFormFactory('sellerStatements.illinois')(this.fb),
         southCarolina: getStateListingFormFactory('sellerStatements.southCarolina')(this.fb),
         california: getStateListingFormFactory('sellerStatements.california')(this.fb),
         ownershipStatus: [
@@ -556,6 +564,10 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements.controls.newMexico.patchValue(getStateListingFormRestorer('sellerStatements.newMexico')(initialValue?.sellerStatements?.newMexico), {emitEvent: false});
       this.form.controls.sellerStatements.controls.southDakota.patchValue(getStateListingFormRestorer('sellerStatements.southDakota')(initialValue?.sellerStatements?.southDakota), {emitEvent: false});
       this.form.controls.sellerStatements.controls.wyoming.patchValue(getStateListingFormRestorer('sellerStatements.wyoming')(initialValue?.sellerStatements?.wyoming), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.maine.patchValue(getStateListingFormRestorer('sellerStatements.maine')(initialValue?.sellerStatements?.maine), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.mississippi.patchValue(getStateListingFormRestorer('sellerStatements.mississippi')(initialValue?.sellerStatements?.mississippi), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.arkansas.patchValue(getStateListingFormRestorer('sellerStatements.arkansas')(initialValue?.sellerStatements?.arkansas), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.illinois.patchValue(getStateListingFormRestorer('sellerStatements.illinois')(initialValue?.sellerStatements?.illinois), {emitEvent: false});
       // Restore a previously explicit answer without inferring membership from fees.
       const association = this.form.controls.sellerStatements.controls.ownersAssociationApplies;
       const hoa = this.form.controls.hoa.controls.hasHoa;

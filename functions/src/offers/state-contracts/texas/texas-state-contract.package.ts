@@ -1,3 +1,4 @@
+import { assertTexasListingDisclosures } from '../../texas-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -46,6 +47,7 @@ export const texasStateContractPackage:
   StateContractPackage<
     TexasOneToFourFamilyResaleOfferTermsDocument
   > = withHoaContractPolicy(withFederalLeadContractPolicy({
+  listingDisclosurePolicy: { assertReady: assertTexasListingDisclosures },
   assertListingContractCompatible: listing => assertListingContractScope(texasStateContractPackage, listing),
   stateCode: TEXAS_STATE_CODE,
 
