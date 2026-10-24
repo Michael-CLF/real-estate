@@ -65,7 +65,7 @@ export class IowaOfferValidator implements StateOfferValidator<IowaOfferTerms> {
     if (terms.settlement.possession !== 'at_recording') error('settlement.possession', 'Vacant possession is due at closing; other arrangements require a separate agreement.');
     if (!['abstract_opinion','iowa_title_guaranty'].includes(terms.settlement.titleEvidenceSelection)) error('settlement.titleEvidenceSelection','Select the Iowa abstract/opinion or Title Guaranty route.');
     if (!['buyer', 'seller'].includes(terms.settlement.titlePolicyPayer)) error('settlement.titlePolicyPayer', 'Select who pays the Iowa title evidence.');
-    if (!terms.settlement.closingAgentName.trim()) error('settlement.closingAgentName', 'Name the closing agent.');
+
     if (!wholeDays(terms.settlement.titleEvidenceDaysBeforeClosing, 1, 45)) error('settlement.titleEvidenceDaysBeforeClosing', 'Enter 1 to 45 days.');
     if (terms.settlement.specialAssessmentPayer === 'unselected') error('settlement.specialAssessmentPayer', 'Select who pays special assessments.');
     if (terms.disclosures.sellerReportsHoa === true && terms.settlement.hoaTransferFeePayer === 'unselected') error('settlement.hoaTransferFeePayer', 'Select who pays association transfer fees.');
@@ -74,7 +74,7 @@ export class IowaOfferValidator implements StateOfferValidator<IowaOfferTerms> {
     if (terms.disclosures.sellerReportsHoa === null) error('disclosures.sellerReportsHoa', 'The seller must answer the association question on the listing.');
     if (terms.disclosures.sellerReportsHoa === true && !['received', 'pending'].includes(terms.disclosures.hoaDocumentsStatus)) error('disclosures.hoaDocumentsStatus', 'Select whether you received the association resale packet.');
     if (terms.disclosures.sellerReportsHoa === false && terms.disclosures.hoaDocumentsStatus !== 'not_applicable') error('disclosures.hoaDocumentsStatus', 'Select that no HOA applies to match the seller’s listing.');
-    if (terms.disclosures.taxNoticeAcknowledged !== true) error('disclosures.taxNoticeAcknowledged', 'Read and acknowledge the Iowa property tax notice.');
+
     if (!terms.disclosurePolicyRevision && terms.disclosures.radonNoticeAcknowledged !== true) error('disclosures.radonNoticeAcknowledged', 'Read and acknowledge the Iowa radon notice.');
     if (terms.disclosures.leadPaintStatus === 'unselected' || (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && !['received', 'exempt', 'pending'].includes(terms.disclosures.leadPaintStatus))) error('disclosures.leadPaintStatus', 'For a pre-1978 home, select whether the signed lead packet has been received or is pending, or confirm a federal exemption.');
     if (terms.property.yearBuilt != null && terms.property.yearBuilt < 1978 && terms.disclosures.leadPaintStatus === 'built_1978_or_later') error('disclosures.leadPaintStatus', 'The listing year indicates this home was built before 1978.');

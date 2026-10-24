@@ -26,7 +26,7 @@ export const idahoStateContractPackage: StateContractPackage<IdahoOfferTermsDocu
   validateSubmission: input => validateIdahoSubmission(input),
   validateBeforeSigning: ({ version }) => {
     const { disclosures } = version.terms;
-    if (disclosures.statutoryPacketStatus !== 'received' ||
+    if (
         
         disclosures.leadPaintStatus === 'pending') {
       throw new HttpsError('failed-precondition',

@@ -9,6 +9,10 @@ export interface ListingDisclosureGateFacts {
  readonly contractFacts?: {readonly isCondominium?:boolean|null};
  readonly wyoming?: { readonly privateWastewaterApplies?: boolean | null; readonly appurtenantWaterRightsKnown?: boolean | null; };
  readonly maine?: { disclosureExemptionClaimed?: boolean | null; };
+ readonly georgia?: {};
+ readonly nevada?: {usesMountainTime?:boolean|null;openRangeAdjacent?:boolean|null;};
+ readonly northDakota?: {usesMountainTime?:boolean|null;disclosureExemptionClaimed?:boolean|null;radonTestsKnown?:boolean|null;};
+ readonly pennsylvania?: {disclosureExemptionClaimed?:boolean|null;};
  readonly mississippi?: {};
  readonly arkansas?: { };
  readonly illinois?: { disclosureExemptionClaimed?: boolean | null; radonExemptionClaimed?: boolean | null; };
@@ -38,10 +42,14 @@ export function isListingLeadUploadRequired(code: string, facts: ListingDisclosu
 export function getListingUploadGateDocumentTypes(
   code: string, facts: ListingDisclosureGateFacts, now: number,
 ): readonly DisclosureDocumentType[] {
+  if(code==='GA')return [...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
+  if(code==='NV')return [...(facts.nevada?.openRangeAdjacent===true?['nevada-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
+  if(code==='ND')return ['north-dakota-statutory-packet',...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
+  if(code==='PA')return [...(facts.pennsylvania?.disclosureExemptionClaimed!==true?['pennsylvania-seller-disclosure' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
   if (code === 'NC') return [...(['residential-property-owners-association', 'mineral-oil-gas-rights'] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'TX') return [...(['texas-seller-disclosure-notice'] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'UT') return [...((facts.methamphetamineContaminationKnown === true ? ['utah-methamphetamine-contamination'] : []) as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
-  if (code === 'WI') return [...([] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'WI') return [...(['wisconsin-real-estate-condition-report'] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'SC') return [...(['south-carolina-property-condition', ...(facts.southCarolina?.beachfrontApplies === true ? ['south-carolina-coastal-disclosure'] : []), ...(facts.southCarolina?.futureVacationBookingsExist === true ? ['south-carolina-vacation-rentals'] : [])] as DisclosureDocumentType[]), ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'OK') {
     const alternatives = ['oklahoma-property-condition-disclosure', 'oklahoma-property-condition-disclaimer', 'oklahoma-property-condition-exemption'] as const;
@@ -60,18 +68,18 @@ export function getListingUploadGateDocumentTypes(
   if (code === 'KS') return [...(facts.kansas?.elevatedRadonKnown !== false ? ['kansas-statutory-packet' as const] : []), ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'OH') return ['ohio-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'DE') return ['delaware-seller-disclosure',...(facts.delaware?.disclosureExemptionClaimed !== true ? ['delaware-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
-  if (code === 'WA') return [...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'WA') return ['washington-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'IA') return ['iowa-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'MT') return ['montana-seller-disclosure', ...((facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['montana-association-documents' as const] : []),...(facts.montana?.radonTestsKnown !== false || facts.montana?.drugContaminationKnown !== false || facts.montana?.appurtenantWaterRightsKnown !== false ? ['montana-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'MD') return ['maryland-seller-disclosure',...(['deferredWaterSewerCharges','superfundNearby','otherPropertyNoticeApplies','rentalLeadObligationApplies'].some(key => facts.maryland?.[key as keyof NonNullable<ListingDisclosureGateFacts['maryland']>] !== false) ? ['maryland-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'NM') return ['new-mexico-statutory-packet',...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'SD') return ['south-dakota-seller-disclosure',...(facts.southDakota?.disclosureExemptionClaimed === true && facts.southDakota?.privateTransferFeeKnown !== false ? ['south-dakota-statutory-packet' as const] : []),...((facts.ownersAssociationApplies === true || facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['south-dakota-association-documents' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'WY') return [...(false ? ['wyoming-statutory-packet' as const] : []),...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
-  if (code === 'OR') return [...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
+  if (code === 'OR') return ['oregon-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'MO') return [...(facts.missouri?.methProductionKnown !== false || facts.missouri?.drugConvictionKnown !== false ? ['missouri-statutory-packet' as const] : []), ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'NE') return ['nebraska-seller-disclosure', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'NH') return ['new-hampshire-seller-disclosure','new-hampshire-statutory-packet', ...(isListingLeadUploadRequired(code,facts) ? ['lead-based-paint' as const] : [])];
-  if (code === 'ID') return ['idaho-statutory-packet',
+  if (code === 'ID') return ['idaho-seller-disclosure',
     ...(isListingLeadUploadRequired(code, facts) ? ['lead-based-paint' as const] : [])];
   if (code === 'MN') return ['minnesota-seller-disclosure', 'minnesota-statutory-packet',
     ...((facts.ownersAssociationApplies === true || facts.contractFacts?.isCondominium === true || facts.propertyType === 'condo') ? ['minnesota-association-documents' as const] : []),

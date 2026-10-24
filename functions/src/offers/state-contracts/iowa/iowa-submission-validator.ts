@@ -40,14 +40,14 @@ export function validateIowaSubmission(input: ValidateStateSubmissionInput<IowaO
   requireValue(days(d.inspectionPeriodDays, 1, 60), 'Choose an inspection period of 1 to 60 days.');
   requireValue(t.settlement.possession === 'at_recording' && t.settlement.specialAssessmentPayer !== 'unselected', 'Complete possession and special assessment allocation.');
   requireValue(['abstract_opinion','iowa_title_guaranty'].includes(t.settlement.titleEvidenceSelection), 'Select the Iowa abstract/opinion or Title Guaranty route.');
-  requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && t.settlement.closingAgentName.trim() && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete Iowa title evidence, closing agent and title evidence period.');
+  requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete Iowa title evidence, closing agent and title evidence period.');
   requireValue(t.disclosures.sellerReportsHoa !== true || t.settlement.hoaTransferFeePayer !== 'unselected', 'Allocate association transfer fees.');
   requireValue(['received','pending','exempt'].includes(t.disclosures.propertyConditionStatus), 'Select whether you received the seller condition statement.');
   requireValue(['received','pending'].includes(t.disclosures.statutoryPacketStatus), 'Review the seller-signed Iowa property-specific statutory disclosure packet before submitting. Ask the seller to upload it if it is missing.');
   requireValue(!(t.disclosures.propertyConditionStatus === 'exempt' && !t.disclosures.disclosureExemptionClaimed), "A seller disclosure exception must match the supported listing exception.");
   requireValue(typeof t.disclosures.sellerReportsHoa === 'boolean', 'The listing must state whether an HOA applies.');
   requireValue(t.disclosures.sellerReportsHoa ? ['received','pending'].includes(t.disclosures.hoaDocumentsStatus) : t.disclosures.hoaDocumentsStatus === 'not_applicable', 'Review the association resale packet before submitting when an association applies.');
-  requireValue(t.disclosures.taxNoticeAcknowledged === true && t.disclosures.radonNoticeAcknowledged === true, 'Read and acknowledge the Iowa tax and radon notices.');
+  requireValue(t.disclosures.radonNoticeAcknowledged === true, 'Read and acknowledge the Iowa tax and radon notices.');
   requireValue(t.disclosures.leadPaintStatus !== 'unselected', 'Select lead paint status.');
   requireValue(t.property.yearBuilt == null || t.property.yearBuilt >= 1978 || ['received','exempt','pending'].includes(t.disclosures.leadPaintStatus), 'Choose whether the pre-1978 lead packet is received, pending, or exempt.');
   requireValue(t.disclosures.leadPaintStatus !== 'pending', 'Review the applicable lead disclosure before submitting, or document a valid exemption.');

@@ -9,7 +9,11 @@ export function withHoaOfferPolicy<T extends {readonly stateCode:string},C exten
     validate:(terms,buyers,sellers,context)=>statePackage.validate(projectHoaValidationTerms(prepare(terms),policy),buyers,sellers,context),
     getSections:terms=>{
       const prepared=prepare(terms);
-      const lockSellerFact=(rows:readonly OfferQuestionDefinition[])=>rows.map(q=>q.fieldPath && q.fieldPath===policy.sellerFactPath ? {...q,readOnly:true} : q);
+      const lockSellerFact=(rows:readonly OfferQuestionDefinition[])=>rows.map(q=>{
+        if(q.fieldPath && q.fieldPath===policy.sellerFactPath)return {...q,readOnly:true};
+        if(q.fieldPath===policy.documentStatusPath && q.type==='single_choice' && !sellerReportsNoHoa(prepared,policy))return {...q,options:q.options.filter(option=>!/^seller reports no (?:homeowners? |owners? )?association\.?$/i.test(option.label.trim()))};
+        return q;
+      });
       const sections=statePackage.getSections(prepared).map(section=>({...section,questions:lockSellerFact(section.questions),...(section.questionGroups ? {questionGroups:section.questionGroups.map(group=>({...group,questions:lockSellerFact(group.questions)}))} : {})}));
       if(!sellerReportsNoHoa(prepared,policy))return sections;
       let statementShown=false;
@@ -17,7 +21,7 @@ export function withHoaOfferPolicy<T extends {readonly stateCode:string},C exten
         if(question.fieldPath && (question.fieldPath===policy.sellerFactPath || question.fieldPath===policy.documentStatusPath)) {
           if(statementShown)return [];
           statementShown=true;
-          return [{id:question.id,type:'information' as const,label:NO_HOA_SELLER_STATEMENT}];
+          return [{id:question.id,type:'information' as const,label:NO_HOA_SELLER_STATEMENT,readOnly:true}];
         }
         return [question];
       });

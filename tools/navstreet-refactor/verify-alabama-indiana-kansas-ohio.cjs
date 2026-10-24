@@ -80,7 +80,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   assert(!required.includes(slug+'-association-documents'),'Optional association reports must not universally block offers');
   const terms=structuredClone(initial);
   Object.assign(terms.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});Object.assign(terms.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});
-  terms.deadlines.settlementDate='2099-12-01';Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName:'Test Title',specialAssessmentPayer:'seller'});
+  terms.deadlines.settlementDate='2099-12-01';Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName: '',specialAssessmentPayer:'seller'});
   Object.assign(terms.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',hoaDocumentsStatus:'not_applicable',leadPaintStatus:'built_1978_or_later',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});
   if(code==='IN') terms.documentVersions={'indiana-seller-disclosure':'v1','indiana-statutory-packet':'v1'};
   terms.delivery.expiresAt='2099-10-01T12:00:00Z';terms.delivery.electronicDeliveryAuthorized=true;

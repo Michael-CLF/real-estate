@@ -37,7 +37,7 @@ export function validateOklahomaSubmission(
   assertCondition(!terms.timePeriods.referenceDate || validDate(terms.timePeriods.referenceDate), 'The Time Reference Date is invalid.');
   assertCondition(terms.disclosures.propertyConditionStatus !== 'unselected', 'The property-condition disclosure status is required.');
   assertCondition(terms.disclosures.leadBasedPaintStatus !== 'unselected', 'The lead-based paint disclosure status is required.');
-  assertCondition(terms.disclosures.costEstimateReceived && terms.disclosures.contractGuideAvailable, 'The required disclosure acknowledgments are incomplete.');
+
   assertCondition(terms.title.evidenceSelection !== 'unselected', 'The title-evidence selection is required.');
   assertCondition(terms.title.surveySelection !== 'unselected', 'The survey selection is required.');
   assertCondition(terms.title.surveySelection === 'none_unless_required' || terms.title.surveyExpensePayer !== 'unselected', 'The survey expense payer is required.');

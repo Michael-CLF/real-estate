@@ -24,7 +24,7 @@ const party=role=>({partyUid:role,userUid:role,role,legalName:'Fictional '+role,
   const terms=structuredClone(initial);
   Object.assign(terms.condominium,{projectName:'Fictional Condominium',unitDesignation:'Unit 101',commonElements:'Recorded 1/10 undivided interest; patio limited common element',parkingStorage:'Parking P1 and storage S1 as stated in declaration',rightsAcknowledged:true});
   Object.assign(terms.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});Object.assign(terms.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});terms.deadlines.settlementDate='2099-12-01';
-  Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName:'Fictional Title',specialAssessmentPayer:'seller',hoaTransferFeePayer:'seller'});
+  Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName: '',specialAssessmentPayer:'seller',hoaTransferFeePayer:'seller'});
   Object.assign(terms.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',hoaDocumentsStatus:'received',leadPaintStatus:'built_1978_or_later',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});
   const today=new Intl.DateTimeFormat('en-CA',{timeZone:initial.delivery.timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   if(code==='MN')Object.assign(terms.disclosures,{associationCertificateDate:today,associationPacketReceivedDate:today});
@@ -38,7 +38,8 @@ const party=role=>({partyUid:role,userUid:role,role,legalName:'Fictional '+role,
   const offer={Uid:'offer',referenceNumber:'FICTIONAL-'+code,stateCode:code,listingUid:'sample',currentVersionUid:'version'};
   pkg.validateSubmission({offer,version});pkg.validateBeforeSigning({offer,version});pkg.assertListingContractCompatible(listingData,version);
   const Validator=load(path.join(feature,'validators',s+'-offer.validator.ts'))[C+'OfferValidator'];assert.equal(new Validator().validate(pinned,version.buyers,version.sellers,{mode:'submit'}).valid,true);
-  for(const mutate of [t=>t.condominium.rightsAcknowledged=false,t=>t.condominium.unitDesignation='',t=>t.disclosures.hoaDocumentsStatus='pending',t=>t.documentVersions={},t=>t.contractType=house]){const v=structuredClone(version);mutate(v.terms);assert.throws(()=>pkg.validateSubmission({offer,version:v}));}
+  for(const mutate of [t=>t.condominium.rightsAcknowledged=false,t=>t.disclosures.hoaDocumentsStatus='pending',t=>t.documentVersions={},t=>t.contractType=house]){const v=structuredClone(version);mutate(v.terms);assert.throws(()=>pkg.validateSubmission({offer,version:v}));}
+  const withoutExtraRecords=structuredClone(version);for(const field of ['projectName','unitDesignation','commonElements','parkingStorage'])withoutExtraRecords.terms.condominium[field]='';pkg.validateSubmission({offer,version:withoutExtraRecords});
   assert.throws(()=>pkg.assertListingContractCompatible({...listingData,sellerStatements:{...listingData.sellerStatements,contractFacts:{...facts,isCondominium:false}}},version));
   const hostile=structuredClone(pinned);hostile.condominium.unitDesignation='changed';hostile.disclosures.hoaDocumentsStatus='pending';hostile.documentVersions[s+'-association-documents']='tampered';
   const counter=pkg.sanitizeDraftTerms({requestedTerms:hostile,currentTerms:pinned,initiatedBy:'seller'});assert.deepEqual(counter.condominium,pinned.condominium);assert.deepEqual(counter.documentVersions,pinned.documentVersions);assert.equal(counter.disclosures.hoaDocumentsStatus,'received');
@@ -48,7 +49,7 @@ const party=role=>({partyUid:role,userUid:role,role,legalName:'Fictional '+role,
   assert.equal(pkg.getAgreementTemplate(pinned).templateUid,'navstreet-'+code.toLowerCase()+'-condominium-2026');assert.notEqual(pkg.getAgreementTemplate(pinned).templateUid,pkg.agreementTemplate.templateUid);
   assert.equal(pkg.listingDisclosurePolicy.reviewedVersions({version})[s+'-association-documents'],'reviewed-v1');
   const entry=fs.readFileSync(path.join(feature,s+'-offer-entry',s+'-offer-entry.component.ts'),'utf8');assert.equal((entry.match(/this\.pendingDraftChange = this\.prepareDraftChange\(change\)/g)||[]).length,2);
-  const sections=load(path.join(feature,'questions',s+'-condominium.sections.ts'))['get'+C+'CondominiumSections'](pinned,[{id:'disclosures',questions:[]}]);assert.equal(sections[0].questions.length,5);
+  const sections=load(path.join(feature,'questions',s+'-condominium.sections.ts'))['get'+C+'CondominiumSections'](pinned,[{id:'disclosures',questions:[]}]);assert.equal(sections[0].questions.length,1);
   for(const kind of ['pending','signed','overflow']){
    const v=structuredClone(version);if(kind==='pending')v.terms=initial;if(kind==='signed')for(const p of [...v.buyers,...v.sellers])p.signature={status:'signed',signedAt:{toDate:()=>new Date()},typedName:p.legalName};if(kind==='overflow'){v.terms.additionalTerms='Fictional overflow text remains visible. '.repeat(125);v.terms.condominium.commonElements='Common interest investigation text. '.repeat(85)+'END_COMMON_ELEMENTS';v.terms.condominium.parkingStorage='Parking and storage investigation text. '.repeat(72)+'END_PARKING_STORAGE';}
    const result=await pkg.generateAgreement({offer,version:v,documentTitle:pkg.getAgreementTemplate(v.terms).templateName,generatedAt:new Date()});const file=path.join(out,code+'-'+kind+'.pdf');fs.writeFileSync(file,result.buffer);

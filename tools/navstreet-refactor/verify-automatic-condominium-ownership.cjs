@@ -36,7 +36,7 @@ function run(source, bindings = {}) {
  const source = fs.readFileSync(path.join(project,'src/app/features/sell/listing-wizard/components/property-details-step/property-details-step.component.ts'),'utf8');
  const method = source.slice(source.indexOf('  ngOnInit(): void {'),source.indexOf('  private configureColoradoFactValidators()'));
  const Wizard = run('class Wizard {'+method+'} module.exports=Wizard;', {synchronizeListingCondominiumOwnership:sync,configureListingPropertyTypeControls:controls.configureListingPropertyTypeControls});
- const wizard = new Wizard();wizard.configureStateStatementValidators=()=>{};wizard.currentYear=2026;wizard.isTexasListing=() => false;
+ const wizard = new Wizard();wizard.configureStateStatementValidators=()=>{};wizard.configureOwnershipValidators=()=>{};wizard.currentYear=2026;wizard.isTexasListing=() => false;
  wizard.form=fb.group({propertyType:['single_family'],bedrooms:[3],bathrooms:[2],squareFeet:[1500],yearBuilt:[2006],sellerStatements:fb.group({contractFacts:make(fb)})});
  wizard.form.controls.sellerStatements.controls.contractFacts.patchValue({isDeveloperSale:false,isLeasehold:false});
  wizard.ngOnInit();

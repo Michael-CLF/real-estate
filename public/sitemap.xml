@@ -1,70 +1,163 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Main website pages -->
   <url>
     <loc>https://navstreet.com/</loc>
   </url>
-
   <url>
     <loc>https://navstreet.com/how-navstreet-works</loc>
   </url>
-
-  <url>
-  <loc>https://navstreet.com/calculators</loc>
-</url>
-
-<url>
-  <loc>https://navstreet.com/calculators/mortgage-payment</loc>
-</url>
-
-<url>
-  <loc>https://navstreet.com/calculators/affordability</loc>
-</url>
-
-<url>
-  <loc>https://navstreet.com/calculators/interest-only</loc>
-</url>
-
-<url>
-  <loc>https://navstreet.com/calculators/balloon-payment</loc>
-</url>
-
-<url>
-  <loc>https://navstreet.com/calculators/loan-to-value</loc>
-</url>
-
-<url>
-  <loc>https://navstreet.com/calculators/extra-payment</loc>
-</url>
-
   <url>
     <loc>https://navstreet.com/pricing</loc>
   </url>
-
   <url>
     <loc>https://navstreet.com/homes</loc>
   </url>
-
   <url>
-    <loc>https://navstreet.com/states/north-carolina</loc>
+    <loc>https://navstreet.com/faq</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/contact</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/terms</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/privacy</loc>
   </url>
 
+  <!-- Calculators -->
+  <url>
+    <loc>https://navstreet.com/calculators</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/calculators/mortgage-payment</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/calculators/affordability</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/calculators/interest-only</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/calculators/balloon-payment</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/calculators/loan-to-value</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/calculators/extra-payment</loc>
+  </url>
+
+  <!-- Professional registration -->
   <url>
     <loc>https://navstreet.com/professionals/register/north-carolina</loc>
   </url>
 
+  <!-- Active state landing pages: 34 states -->
   <url>
-    <loc>https://navstreet.com/faq</loc>
+    <loc>https://navstreet.com/states/alabama</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/arizona</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/arkansas</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/california</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/colorado</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/delaware</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/florida</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/idaho</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/illinois</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/indiana</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/iowa</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/kansas</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/louisiana</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/maine</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/maryland</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/michigan</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/minnesota</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/mississippi</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/missouri</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/montana</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/nebraska</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/new-hampshire</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/new-mexico</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/north-carolina</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/ohio</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/oklahoma</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/oregon</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/south-carolina</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/south-dakota</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/texas</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/utah</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/washington</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/wisconsin</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/wyoming</loc>
   </url>
 
-  <url>
-    <loc>https://navstreet.com/contact</loc>
-  </url>
-
-  <url>
-    <loc>https://navstreet.com/terms</loc>
-  </url>
-
-  <url>
-    <loc>https://navstreet.com/privacy</loc>
-  </url>
 </urlset>

@@ -1,0 +1,3 @@
+import {HttpsError} from 'firebase-functions/v2/https';
+import type {StateListingPackage} from './state-listing-package';
+export const northDakotaListingPackage:StateListingPackage={stateCode:'ND',requiredSellerStatementFields:['leadBasedPaintApplies','ownersAssociationApplies','generalLeasesExist'],validateAdditionalSellerStatements(_uid,s){const facts=s['northDakota'] as Record<string,unknown>|undefined;for(const key of ["usesMountainTime", "disclosureExemptionClaimed", "radonTestsKnown"])if(typeof facts?.[key]!=='boolean')throw new HttpsError('failed-precondition','Complete the NorthDakota seller disclosure applicability and deadline facts.');}};

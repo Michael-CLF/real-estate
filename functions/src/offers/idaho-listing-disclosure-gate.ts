@@ -3,7 +3,7 @@ import { readMissingListingDisclosures } from './listing-disclosure-gate-reader'
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function idahoRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
-  return ['idaho-statutory-packet',
+  return ['idaho-seller-disclosure',
     
     ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }

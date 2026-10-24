@@ -38,7 +38,7 @@ export const washingtonStateContractPackage: StateContractPackage<WashingtonOffe
   validateSubmission: input => validateWashingtonSubmission(input),
   validateBeforeSigning: ({ version }) => {
     const { disclosures } = version.terms;
-    if (disclosures.radonNoticeAcknowledged !== true) throw new HttpsError('failed-precondition','Read and acknowledge the Washington notices before signing.');
+
     if (disclosures.requiredKnownFacts && disclosures.statutoryPacketStatus !== 'received') throw new HttpsError('failed-precondition',"Review the required property records before submitting or signing.");
     if (disclosures.propertyConditionStatus === 'exempt' && !disclosures.disclosureExemptionClaimed) throw new HttpsError('failed-precondition',"A seller disclosure exception must match the supported listing exception.");
     if (

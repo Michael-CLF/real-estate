@@ -224,6 +224,9 @@
   }
 
   @case ('information') {
+  @if (question().readOnly) {
+  <div [id]="controlId()" class="offer-question__locked-answer">{{ question().label }}</div>
+  } @else {
   <aside class="offer-question__information" [attr.data-tone]="informationTone()">
     <strong>{{ question().label }}</strong>
 
@@ -231,6 +234,7 @@
     <p>{{ question().description }}</p>
     }
   </aside>
+  }
   }
   }
 

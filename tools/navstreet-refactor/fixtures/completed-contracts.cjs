@@ -29,7 +29,7 @@ function createCompletedContractFixture(project,code,now=new Date(),funding='cas
   Object.assign(terms.conditions,{dueDiligence:true,appraisal:false,financing:false,saleOfBuyersProperty:false,additionalEarnestMoney:false});
   Object.assign(terms.deadlines,{sellerDisclosureDate:day(5),settlementDate:day(30),dueDiligenceDate:day(14)});
   Object.assign(terms.settlement||{}, {possession:'at_recording',specialAssessmentPayer:'seller',hoaTransferFeePayer:'seller',
-   titlePolicyPayer:'seller',closingAgentName:'Sample Closing Company',titleEvidenceDaysBeforeClosing:5});
+   titlePolicyPayer:'seller',closingAgentName: '',titleEvidenceDaysBeforeClosing:5});
   Object.assign(terms.disclosures,{leadPaintStatus:'built_1978_or_later',hoaDocumentsStatus:'not_applicable',
    sellerReportsExistingLeases:false,leaseStatementAcknowledged:true});
   if(terms.propertyItems && 'fixturesIncluded' in terms.propertyItems)terms.propertyItems.fixturesIncluded=true;
@@ -54,7 +54,7 @@ function createCompletedContractFixture(project,code,now=new Date(),funding='cas
  if(code==='OK') {
   Object.assign(terms.purchase,{earnestMoneyInCents:100000,trustAccountHolder:'Sample Escrow Company'});
   Object.assign(terms.closing,{closingDate:day(30),possessionTerms:'Upon closing'});
-  Object.assign(terms.disclosures,{propertyConditionStatus:'received',leadBasedPaintStatus:'not_applicable',costEstimateReceived:true,contractGuideAvailable:true});
+  Object.assign(terms.disclosures,{propertyConditionStatus:'received',leadBasedPaintStatus:'not_applicable',costEstimateReceived:false,contractGuideAvailable:false});
   Object.assign(terms.title,{evidenceSelection:'title_insurance_commitment',surveySelection:'none_unless_required'});
   terms.serviceAgreement.selection='none';terms.buyerAffidavitComplianceConfirmed=true;
  }

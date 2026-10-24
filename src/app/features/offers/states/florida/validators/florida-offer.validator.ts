@@ -56,7 +56,7 @@ export class FloridaOfferValidator implements StateOfferValidator<FloridaOfferTe
     if (date(d.settlementDate) && date(d.sellerDisclosureDate) && d.sellerDisclosureDate > d.settlementDate) error('deadlines.sellerDisclosureDate', 'Disclosure must be due no later than settlement.');
     if (terms.settlement.possession !== 'at_recording') error('settlement.possession', 'Vacant possession is due at closing; other arrangements require a separate agreement.');
     if (!['buyer', 'seller'].includes(terms.settlement.titlePolicyPayer)) error('settlement.titlePolicyPayer', 'Select who pays the owner’s title policy.');
-    if (!terms.settlement.closingAgentName.trim()) error('settlement.closingAgentName', 'Name the closing agent.');
+
     if (!wholeDays(terms.settlement.titleEvidenceDaysBeforeClosing, 1, 45)) error('settlement.titleEvidenceDaysBeforeClosing', 'Enter 1 to 45 days.');
     if (terms.settlement.specialAssessmentPayer === 'unselected') error('settlement.specialAssessmentPayer', 'Select who pays special assessments.');
     if (terms.disclosures.sellerReportsHoa === true && terms.settlement.hoaTransferFeePayer === 'unselected') error('settlement.hoaTransferFeePayer', 'Select who pays association transfer fees.');

@@ -3,7 +3,7 @@ import { readMissingListingDisclosures } from './listing-disclosure-gate-reader'
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function washingtonRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
-  return [...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
+  return ['washington-seller-disclosure', ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }
 /** NavStreet requires the applicable packet before draft creation; statutory exceptions need signed supporting evidence. */
 export async function assertWashingtonListingDisclosures(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void> {

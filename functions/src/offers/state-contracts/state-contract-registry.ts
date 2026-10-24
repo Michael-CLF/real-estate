@@ -1,4 +1,8 @@
 import { maineStateContractPackage } from './maine/maine-state-contract.package';
+import { georgiaStateContractPackage } from './georgia/georgia-state-contract.package';
+import { nevadaStateContractPackage } from './nevada/nevada-state-contract.package';
+import { northDakotaStateContractPackage } from './north-dakota/north-dakota-state-contract.package';
+import { pennsylvaniaStateContractPackage } from './pennsylvania/pennsylvania-state-contract.package';
 import { mississippiStateContractPackage } from './mississippi/mississippi-state-contract.package';
 import { arkansasStateContractPackage } from './arkansas/arkansas-state-contract.package';
 import { illinoisStateContractPackage } from './illinois/illinois-state-contract.package';
@@ -106,6 +110,10 @@ const EXECUTABLE_STATE_CONTRACT_PACKAGES =
 [idahoStateContractPackage.stateCode, idahoStateContractPackage],
 [wyomingStateContractPackage.stateCode, wyomingStateContractPackage],
 [maineStateContractPackage.stateCode, maineStateContractPackage],
+[georgiaStateContractPackage.stateCode, georgiaStateContractPackage],
+[nevadaStateContractPackage.stateCode, nevadaStateContractPackage],
+[northDakotaStateContractPackage.stateCode, northDakotaStateContractPackage],
+[pennsylvaniaStateContractPackage.stateCode, pennsylvaniaStateContractPackage],
 [mississippiStateContractPackage.stateCode, mississippiStateContractPackage],
 [arkansasStateContractPackage.stateCode, arkansasStateContractPackage],
 [illinoisStateContractPackage.stateCode, illinoisStateContractPackage],

@@ -128,10 +128,6 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
     shortTitle: 'Disclosures',
     questions: [
       {
-        id: 'in-house-brokerage', type: 'yes_no', label: 'Is one broker providing brokerage services to both parties?',
-        fieldPath: 'disclosures.inHouseBrokerageServices',
-      },
-      {
         id: 'property-disclosure', type: 'single_choice', label: 'Residential property condition disclosure status',
         fieldPath: 'disclosures.propertyConditionStatus',
         validation: required('Select the applicable property-condition disclosure status.'),
@@ -155,12 +151,12 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'cost-estimate', type: 'acknowledgement', label: 'Buyer acknowledges receipt of the estimate of transaction costs.',
         fieldPath: 'disclosures.costEstimateReceived',
-        validation: required('Acknowledgment of the transaction-cost estimate is required.'),
+        helpText: 'Optional. Record actual receipt if an estimate is available; estimates can be supplied later by the lender or closing professional.',
       },
       {
         id: 'contract-guide', type: 'acknowledgement', label: 'Buyer acknowledges that the OREC Contract Guide has been made available.',
         fieldPath: 'disclosures.contractGuideAvailable',
-        validation: required('Acknowledgment of the OREC Contract Guide is required.'),
+        helpText: 'Optional guidance is available from the Oklahoma Real Estate Commission contract forms page.',
       },
     ],
   },

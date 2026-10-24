@@ -18,6 +18,19 @@ export function createListingContractFactsForm(fb: FormBuilder) {
   return fb.group({isCondominium:new FormControl<boolean|null>(null),isDeveloperSale:new FormControl<boolean|null>(null),
     isLeasehold:new FormControl<boolean|null>(null),dwellingUnitCount:new FormControl<number|null>(null,[Validators.min(2),Validators.max(999),Validators.pattern(/^[0-9]+$/)])});
 }
+/** Mirror the existing required template answers in the reactive form, including before rendering. */
+export function configureListingContractFactsValidators(group: FormGroup, requireAnswers: boolean, requireUnitCount: boolean): void {
+  for (const key of ['isDeveloperSale', 'isLeasehold']) {
+    const control = group.get(key);
+    control?.setValidators(requireAnswers ? [Validators.required] : []);
+    control?.updateValueAndValidity({emitEvent: false});
+  }
+  const units = group.get('dwellingUnitCount');
+  // Counts beyond the supported agreement range may still be advertised.
+  units?.setValidators([...(requireUnitCount ? [Validators.required] : []),
+    Validators.min(2), Validators.max(999), Validators.pattern(/^[0-9]+$/)]);
+  units?.updateValueAndValidity({emitEvent: false});
+}
 @Component({selector:'app-listing-contract-facts',standalone:true,imports:[ReactiveFormsModule],
  styleUrl:'./listing-contract-facts.component.scss',changeDetection:ChangeDetectionStrategy.OnPush,template:`
  <section class="seller-statements" [formGroup]="group()">

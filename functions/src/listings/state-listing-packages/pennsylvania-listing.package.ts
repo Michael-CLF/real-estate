@@ -1,0 +1,3 @@
+import {HttpsError} from 'firebase-functions/v2/https';
+import type {StateListingPackage} from './state-listing-package';
+export const pennsylvaniaListingPackage:StateListingPackage={stateCode:'PA',requiredSellerStatementFields:['leadBasedPaintApplies','ownersAssociationApplies','generalLeasesExist'],validateAdditionalSellerStatements(_uid,s){const facts=s['pennsylvania'] as Record<string,unknown>|undefined;for(const key of ["disclosureExemptionClaimed"])if(typeof facts?.[key]!=='boolean')throw new HttpsError('failed-precondition','Complete the Pennsylvania seller disclosure applicability and deadline facts.');}};

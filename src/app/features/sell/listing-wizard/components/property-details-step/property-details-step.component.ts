@@ -1,6 +1,6 @@
 import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import { configureListingPropertyTypeControls } from '../../../../../core/domains/listings/state-packages/listing-property-type-validation';
-import { ListingContractFactsComponent, createListingContractFactsForm, restoreListingContractFacts, synchronizeListingCondominiumOwnership } from '../../../../../shared/components/listings/listing-contract-facts/listing-contract-facts.component';
+import { ListingContractFactsComponent, configureListingContractFactsValidators, createListingContractFactsForm, restoreListingContractFacts, synchronizeListingCondominiumOwnership } from '../../../../../shared/components/listings/listing-contract-facts/listing-contract-facts.component';
 import type { ListingContractFacts } from '../../../../../core/domains/listings/models/listing.model';
 import { getListingContractCoverageMessage, getEnabledStateOfferRegistration } from '../../../../offers/engine/state-offer-registry';
 import { getStateListingFormRestorer } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
@@ -59,6 +59,10 @@ export interface PropertyDetailsSellerStatementsFormValue {
   contractFacts?: ListingContractFacts;
   wyoming?: { privateWastewaterApplies: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
   maine?: { disclosureExemptionClaimed: boolean | null; };
+  georgia?: {};
+  nevada?: {usesMountainTime:boolean|null;openRangeAdjacent:boolean|null;};
+  northDakota?: {usesMountainTime:boolean|null;disclosureExemptionClaimed:boolean|null;radonTestsKnown:boolean|null;};
+  pennsylvania?: {disclosureExemptionClaimed:boolean|null;};
   mississippi?: {};
   arkansas?: { };
   illinois?: { disclosureExemptionClaimed: boolean | null; radonExemptionClaimed: boolean | null; };
@@ -154,7 +158,7 @@ export class PropertyDetailsStepComponent
   requiresUnitCount(): boolean {return Boolean(getEnabledStateOfferRegistration(this.stateCode())?.maximumDwellingUnits);}
   contractCoverageMessage(): string | null {
     const propertyType = this.form.controls.propertyType.value;
-    return propertyType ? getListingContractCoverageMessage(this.stateCode(), propertyType, this.form.controls.sellerStatements.controls.contractFacts.getRawValue()) : null;
+    return propertyType ? getListingContractCoverageMessage(this.stateCode(), propertyType, this.form.controls.sellerStatements.controls.contractFacts.getRawValue(), 'listing-wizard') : null;
   }
   readonly stateListingPackage = computed(
     () =>
@@ -169,8 +173,8 @@ export class PropertyDetailsStepComponent
         'ownershipStatus',
       ),
   );
-  readonly requiresLeadBasedPaint = () => !isFederalLeadExcluded(this.form.getRawValue()) && requiresStateListingField(this.stateListingPackage(),'leadBasedPaintApplies');
-  private federalLeadWasExcluded = false;
+  readonly requiresLeadBasedPaint = () =>
+    this.form.controls.sellerStatements.controls.leadBasedPaintApplies.value === true;
   readonly showsListingLegalDescription = computed(
     () =>
       showsStateListingPropertyField(this.stateCode(), 'legalDescription'),
@@ -450,6 +454,10 @@ export class PropertyDetailsStepComponent
         southDakota: getStateListingFormFactory('sellerStatements.southDakota')(this.fb),
         wyoming: getStateListingFormFactory('sellerStatements.wyoming')(this.fb),
         maine: getStateListingFormFactory('sellerStatements.maine')(this.fb),
+        georgia: getStateListingFormFactory('sellerStatements.georgia')(this.fb),
+        nevada: getStateListingFormFactory('sellerStatements.nevada')(this.fb),
+        northDakota: getStateListingFormFactory('sellerStatements.northDakota')(this.fb),
+        pennsylvania: getStateListingFormFactory('sellerStatements.pennsylvania')(this.fb),
         mississippi: getStateListingFormFactory('sellerStatements.mississippi')(this.fb),
         arkansas: getStateListingFormFactory('sellerStatements.arkansas')(this.fb),
         illinois: getStateListingFormFactory('sellerStatements.illinois')(this.fb),
@@ -565,6 +573,10 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements.controls.southDakota.patchValue(getStateListingFormRestorer('sellerStatements.southDakota')(initialValue?.sellerStatements?.southDakota), {emitEvent: false});
       this.form.controls.sellerStatements.controls.wyoming.patchValue(getStateListingFormRestorer('sellerStatements.wyoming')(initialValue?.sellerStatements?.wyoming), {emitEvent: false});
       this.form.controls.sellerStatements.controls.maine.patchValue(getStateListingFormRestorer('sellerStatements.maine')(initialValue?.sellerStatements?.maine), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.georgia.patchValue(getStateListingFormRestorer('sellerStatements.georgia')(initialValue?.sellerStatements?.georgia), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.nevada.patchValue(getStateListingFormRestorer('sellerStatements.nevada')(initialValue?.sellerStatements?.nevada), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.northDakota.patchValue(getStateListingFormRestorer('sellerStatements.northDakota')(initialValue?.sellerStatements?.northDakota), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.pennsylvania.patchValue(getStateListingFormRestorer('sellerStatements.pennsylvania')(initialValue?.sellerStatements?.pennsylvania), {emitEvent: false});
       this.form.controls.sellerStatements.controls.mississippi.patchValue(getStateListingFormRestorer('sellerStatements.mississippi')(initialValue?.sellerStatements?.mississippi), {emitEvent: false});
       this.form.controls.sellerStatements.controls.arkansas.patchValue(getStateListingFormRestorer('sellerStatements.arkansas')(initialValue?.sellerStatements?.arkansas), {emitEvent: false});
       this.form.controls.sellerStatements.controls.illinois.patchValue(getStateListingFormRestorer('sellerStatements.illinois')(initialValue?.sellerStatements?.illinois), {emitEvent: false});
@@ -574,6 +586,7 @@ export class PropertyDetailsStepComponent
       if (typeof hoa.value === 'boolean' && association.value === null) association.setValue(hoa.value,{emitEvent:false});
       else if (typeof association.value === 'boolean' && hoa.value === null) hoa.setValue(association.value,{emitEvent:false});
       this.configureStateQuestionValidators();
+      this.configureOwnershipValidators();
       this.form.controls.sellerStatements.controls.california.patchValue(
         getStateListingFormRestorer('sellerStatements.california')(initialValue?.sellerStatements?.california),
         { emitEvent: false },
@@ -603,6 +616,12 @@ export class PropertyDetailsStepComponent
       this.validityChange.emit(
         this.form.valid,
       );
+      const derivedLead = this.form.controls.sellerStatements.controls.leadBasedPaintApplies.value;
+      if (initialValue && typeof derivedLead === 'boolean' &&
+          initialValue.sellerStatements?.leadBasedPaintApplies !== derivedLead) {
+        // Persist a stale/missing draft answer once, including when the user only resumes it.
+        this.emitFormState();
+      }
     });
     this.form.controls.hoa.controls.hasHoa.valueChanges.subscribe(
       hasHoa => {
@@ -656,6 +675,7 @@ export class PropertyDetailsStepComponent
       },
     );
     this.form.valueChanges.subscribe(() => {
+      this.configureOwnershipValidators();
       this.configureStateStatementValidators();
       this.configureColoradoFactValidators();
       this.emitFormState();
@@ -666,6 +686,7 @@ export class PropertyDetailsStepComponent
     });
   }
   ngOnInit(): void {
+    this.configureOwnershipValidators();
     this.form.controls.propertyType.valueChanges.subscribe(type => {
       synchronizeListingCondominiumOwnership(this.form.controls.sellerStatements.controls.contractFacts, type);
       configureListingPropertyTypeControls(this.form.controls, type, this.currentYear);
@@ -998,16 +1019,25 @@ export class PropertyDetailsStepComponent
     );
   }
   private configureStateStatementValidators(): void {
-    const excluded = isFederalLeadExcluded(this.form.getRawValue());
+    const property = this.form.getRawValue();
+    const yearControl = this.form.controls.yearBuilt;
     const control = this.form.controls.sellerStatements.controls.leadBasedPaintApplies;
-    if (excluded) control.setValue(false,{emitEvent:false});
-    else if (this.federalLeadWasExcluded) control.setValue(null,{emitEvent:false});
-    this.federalLeadWasExcluded = excluded;
+    // Federal applicability is a derived property fact, never a seller-selectable exemption.
+    // This rule is independent of the state package and also applies to future states.
+    const applies = property.propertyType === 'land'
+      ? false
+      : typeof property.yearBuilt === 'number' && Number.isInteger(property.yearBuilt) &&
+          property.yearBuilt >= 1600 && property.yearBuilt <= this.currentYear + 1 && yearControl.valid
+        ? !isFederalLeadExcluded(property)
+        : null;
+    control.setValue(applies, {emitEvent: false});
     configureListingStatementValidators(
       this.form.controls.sellerStatements.controls,
       this.stateListingPackage(),
     );
-    if (excluded) { control.clearValidators(); control.updateValueAndValidity({emitEvent:false}); }
+    // The required year-built control handles incomplete/invalid years; no second answer is needed.
+    control.clearValidators();
+    control.updateValueAndValidity({emitEvent: false});
   }
   private configureAdditionalSellerValidators(
     included: boolean,
@@ -1073,6 +1103,14 @@ export class PropertyDetailsStepComponent
       throw new Error(`The state listing question control is missing: ${fieldPath}`);
     }
     return control as FormControl<boolean | null>;
+  }
+
+  private configureOwnershipValidators(): void {
+    configureListingContractFactsValidators(
+      this.form.controls.sellerStatements.controls.contractFacts,
+      this.requiresOwnershipFacts(),
+      this.form.controls.propertyType.value === 'multi_family' && this.requiresUnitCount(),
+    );
   }
 
   private configureStateQuestionValidators(): void {

@@ -54,13 +54,13 @@ const property = (code,county) => ({listingUid:'sample',addressLine1:'100 Test S
   const valid=type=>({currentDocument:{listingUid:'sample',stateAbbreviation:code,storagePath:'files/'+type,versionId:'v1'}});
   const transaction=bad=>({get:async ref=>({data:()=>ref.type===bad?undefined:valid(ref.type)})});
   await gate['assert'+name+'ListingDisclosures'](transaction(),reference,{yearBuilt:2000,sellerStatements:{ownersAssociationApplies:false}});
-  await assert.rejects(gate['assert'+name+'ListingDisclosures'](transaction(slug+'-statutory-packet'),reference,{yearBuilt:2000}),/seller must upload/);
+  await assert.rejects(gate['assert'+name+'ListingDisclosures'](transaction(slug+(code==='ID'?'-seller-disclosure':'-statutory-packet')),reference,{yearBuilt:2000}),/seller must upload/);
   await assert.rejects(gate['assert'+name+'ListingDisclosures']({get:async()=>({data:()=>({currentDocument:{...valid('x').currentDocument,stateAbbreviation:'XX'}})})},reference,{yearBuilt:2000}),/seller must upload/);
   const terms=structuredClone(initial);
   Object.assign(terms.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});
   Object.assign(terms.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});
   terms.deadlines.settlementDate='2099-12-01';
-  Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName:'Test Title',specialAssessmentPayer:'seller'});
+  Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName: '',specialAssessmentPayer:'seller'});
   Object.assign(terms.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',hoaDocumentsStatus:'not_applicable',leadPaintStatus:'built_1978_or_later',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});
   terms.delivery.expiresAt='2099-10-01T12:00:00Z';terms.delivery.electronicDeliveryAuthorized=true;
   const version={Uid:'version',offerUid:'offer',stateCode:code,status:'draft',immutable:false,expiresAt:terms.delivery.expiresAt,terms,buyers:[party('buyer')],sellers:[party('seller')],initiatedBy:'buyer',initiatedByUid:'buyer'};
@@ -68,7 +68,7 @@ const property = (code,county) => ({listingUid:'sample',addressLine1:'100 Test S
   pkg.validateSubmission({offer,version});pkg.validateBeforeSigning({offer,version});
   assert.equal(validator.validate(terms,version.buyers,version.sellers,{mode:'submit'}).valid,true);
   const mutate=fn=>{const v=structuredClone(version);fn(v.terms);assert.throws(()=>pkg.validateSubmission({offer,version:v}));};
-  if(code==='AZ') mutate(t=>t.disclosures.propertyConditionStatus='pending'); else {const v=structuredClone(version);v.terms.disclosures.propertyConditionStatus='pending';pkg.validateSubmission({offer,version:v});pkg.validateBeforeSigning({offer,version:v});assert(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid);}mutate(t=>t.disclosures.statutoryPacketStatus='pending');mutate(t=>t.delivery.electronicDeliveryAuthorized=false);mutate(t=>t.purchase.financingType='fha');
+  if(code==='AZ') mutate(t=>t.disclosures.propertyConditionStatus='pending'); else {const v=structuredClone(version);v.terms.disclosures.propertyConditionStatus='pending';pkg.validateSubmission({offer,version:v});pkg.validateBeforeSigning({offer,version:v});assert(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid);}if(code==='AZ') mutate(t=>t.disclosures.statutoryPacketStatus='pending'); else {const optional=structuredClone(version);optional.terms.disclosures.statutoryPacketStatus='pending';pkg.validateSubmission({offer,version:optional});pkg.validateBeforeSigning({offer,version:optional});assert(validator.validate(optional.terms,optional.buyers,optional.sellers,{mode:'submit'}).valid);}mutate(t=>t.delivery.electronicDeliveryAuthorized=false);mutate(t=>t.purchase.financingType='fha');
   mutate(t=>{t.purchase.hasEarnestMoney=true;t.purchase.earnestMoneyInCents=999999999;t.purchase.earnestMoneyHolder='Test';});
   mutate(t=>t.deadlines.settlementDate='2099-02-31');
   const hostile=structuredClone(terms);hostile.stateCode='XX';hostile.property.state='XX';hostile.legalDescription='Tampered';hostile.delivery.timeZone='UTC';hostile.disclosures.sellerReportsHoa=true;

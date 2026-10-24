@@ -82,7 +82,11 @@ export interface MarketplaceListing {
     southDakota?: { usesMountainTime?: boolean | null; disclosureExemptionClaimed?: boolean | null; privateTransferFeeKnown?: boolean | null; };
     wyoming?: { privateWastewaterApplies?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
     maine?: { disclosureExemptionClaimed?: boolean | null; };
-    mississippi?: {};
+    georgia?: {};
+  nevada?: {usesMountainTime?:boolean|null;openRangeAdjacent?:boolean|null;};
+  northDakota?: {usesMountainTime?:boolean|null;disclosureExemptionClaimed?:boolean|null;radonTestsKnown?:boolean|null;};
+  pennsylvania?: {disclosureExemptionClaimed?:boolean|null;};
+  mississippi?: {};
     arkansas?: { };
     illinois?: { disclosureExemptionClaimed?: boolean | null; radonExemptionClaimed?: boolean | null; };
     missouri?: { methProductionKnown?: boolean | null; drugConvictionKnown?: boolean | null };

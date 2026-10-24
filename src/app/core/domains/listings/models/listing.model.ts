@@ -440,6 +440,10 @@ export interface ListingSellerStatements {
   contractFacts?: ListingContractFacts;
   wyoming?: { privateWastewaterApplies?: boolean; appurtenantWaterRightsKnown?: boolean; };
   maine?: { disclosureExemptionClaimed?: boolean; };
+  georgia?: {};
+  nevada?: {usesMountainTime?:boolean|null;openRangeAdjacent?:boolean|null;};
+  northDakota?: {usesMountainTime?:boolean|null;disclosureExemptionClaimed?:boolean|null;radonTestsKnown?:boolean|null;};
+  pennsylvania?: {disclosureExemptionClaimed?:boolean|null;};
   mississippi?: {};
   arkansas?: { };
   illinois?: { disclosureExemptionClaimed?: boolean; radonExemptionClaimed?: boolean; };

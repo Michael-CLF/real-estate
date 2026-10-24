@@ -51,8 +51,8 @@ export class OklahomaOfferValidator implements StateOfferValidator<OklahomaOffer
 
     if (terms.disclosures.propertyConditionStatus === 'unselected') error('disclosures.propertyConditionStatus', 'Select the property-condition disclosure status.');
     if (terms.disclosures.leadBasedPaintStatus === 'unselected') error('disclosures.leadBasedPaintStatus', 'Select the lead-based paint disclosure status.');
-    if (!terms.disclosures.costEstimateReceived) error('disclosures.costEstimateReceived', 'Acknowledgment of the transaction-cost estimate is required.');
-    if (!terms.disclosures.contractGuideAvailable) error('disclosures.contractGuideAvailable', 'Acknowledgment of the OREC Contract Guide is required.');
+
+
 
     if (terms.title.evidenceSelection === 'unselected') error('title.evidenceSelection', 'Select the title-evidence option.');
     if (terms.title.surveySelection === 'unselected') error('title.surveySelection', 'Select the survey or inspection-report option.');

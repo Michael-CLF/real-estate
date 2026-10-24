@@ -421,7 +421,7 @@ export const NEW_HAMPSHIRE_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefin
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        validation: required('Identify the closing agent or title company.'),
+        helpText: 'Optional at the offer stage. The parties may select a qualified closing professional later.',
       },
       {
         id: 'title-evidence',
@@ -480,7 +480,7 @@ export const NEW_HAMPSHIRE_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefin
     { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure." },
     {id:'lead-inspection',type:'single_choice',label:'Lead inspection opportunity',fieldPath:'disclosures.leadInspectionSelection',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadPaintStatus',operator:'equals',value:'received'}]},validation:required('Select the inspection opportunity.'),options:[{value:'ten_days',label:'10 days'},{value:'waived',label:'Inspection opportunity waived in writing'},{value:'other_period',label:'Different period agreed in writing'}]},
     {id:'lead-days',type:'number',label:'Agreed lead inspection days',fieldPath:'disclosures.leadInspectionDays',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadInspectionSelection',operator:'equals',value:'other_period'}]},validation:{required:true,minimum:1,maximum:60,message:'Enter 1 to 60 days.'}},
-    {id:'tax-warning',type:'acknowledgement',label:'I read the property tax information.',fieldPath:'disclosures.taxNoticeAcknowledged',helpText:"Review the county assessor\u2019s current property tax, exemption and special assessment information. Seller\u2019s current tax bill does not guarantee the buyer\u2019s tax bill.",validation:required('Read and acknowledge the tax information.')},
+    {id:'tax-warning',helpText:"Review the county assessor\u2019s current property tax, exemption and special assessment information. Seller\u2019s current tax bill does not guarantee the buyer\u2019s tax bill.",type:'information',label:'Property tax information'},
     {id:'radon-warning',type:'acknowledgement',label:'I read the radon information.',fieldPath:'disclosures.radonNoticeAcknowledged',helpText:"Radon and other known environmental hazards must be addressed in the applicable Seller Disclosure Statement. Consider independent testing. This agreement does not represent that New Hampshire requires every seller to obtain a new radon test.",validation:required('Read and acknowledge the radon information.')},
     {id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true,validation:required('The seller must answer the leases question.')},
     {id:'lease-review',type:'acknowledgement',label:'I reviewed the seller’s lease statement and any attached leases.',fieldPath:'disclosures.leaseStatementAcknowledged',validation:required('Acknowledge the lease statement.')},

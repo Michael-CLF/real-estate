@@ -422,7 +422,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        validation: required('Identify the closing agent or title company.'),
+        helpText: 'Optional at the offer stage. The parties may select a qualified closing professional later.',
       },
       {
         id: 'title-evidence',

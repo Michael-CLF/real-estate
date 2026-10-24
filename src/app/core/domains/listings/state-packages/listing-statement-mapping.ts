@@ -1,3 +1,7 @@
+import type { PennsylvaniaListingAnswers } from './pennsylvania/pennsylvania-listing-form';
+import type { NorthDakotaListingAnswers } from './north-dakota/north-dakota-listing-form';
+import type { NevadaListingAnswers } from './nevada/nevada-listing-form';
+import type { GeorgiaListingAnswers } from './georgia/georgia-listing-form';
 import type { ListingContractFacts } from '../models/listing.model';
 import type { WyomingListingAnswers } from './wyoming/wyoming-listing-form';
 import type { MaineListingAnswers } from './maine/maine-listing-form';
@@ -48,6 +52,10 @@ export interface ListingStatementMappingAnswers extends Omit<ListingStatementSav
   southDakota?: SouthDakotaListingAnswers;
   wyoming?: WyomingListingAnswers;
   maine?: MaineListingAnswers;
+  georgia?: GeorgiaListingAnswers;
+  nevada?: NevadaListingAnswers;
+  northDakota?: NorthDakotaListingAnswers;
+  pennsylvania?: PennsylvaniaListingAnswers;
   mississippi?: MississippiListingAnswers;
   arkansas?: ArkansasListingAnswers;
   illinois?: IllinoisListingAnswers;

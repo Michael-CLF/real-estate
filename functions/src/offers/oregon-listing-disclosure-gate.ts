@@ -3,7 +3,7 @@ import { readMissingListingDisclosures } from './listing-disclosure-gate-reader'
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export function oregonRequiredDisclosureTypes(listing: Record<string, unknown>): string[] {
-  return [
+  return ['oregon-seller-disclosure',
     
     ...(!isFederalLeadExcluded(listing) ? ['lead-based-paint'] : [])];
 }

@@ -29,7 +29,7 @@ export function validateFloridaSubmission(input: ValidateStateSubmissionInput<Fl
   requireValue(date(d.settlementDate) && (!d.sellerDisclosureDate || (date(d.sellerDisclosureDate) && d.sellerDisclosureDate <= d.settlementDate)), 'Optional document and settlement deadlines must be valid and ordered.');
   requireValue(days(d.inspectionPeriodDays, 1, 60), 'Choose an AS IS inspection period of 1 to 60 days.');
   requireValue(t.settlement.possession === 'at_recording' && t.settlement.specialAssessmentPayer !== 'unselected', 'Complete possession and special assessment allocation.');
-  requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && t.settlement.closingAgentName.trim() && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete title insurance, closing agent and title evidence period.');
+  requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete title insurance, closing agent and title evidence period.');
   requireValue(t.disclosures.sellerReportsHoa !== true || t.settlement.hoaTransferFeePayer !== 'unselected', 'Allocate association transfer fees.');
   requireValue(['received', 'pending'].includes(t.disclosures.propertyConditionStatus), 'Select whether you received the seller condition statement.');
   requireValue(t.disclosures.floodStatus === 'received', 'Review the seller-signed Florida flood disclosure before submitting. Ask the seller to upload it if it is missing.');

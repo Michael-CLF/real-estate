@@ -604,24 +604,8 @@
           <label for="leadBasedPaintApplies">
             Lead-Based Paint Disclosure
           </label>
-          <select id="leadBasedPaintApplies" formControlName="leadBasedPaintApplies" [attr.aria-invalid]="
-                form.controls.sellerStatements.controls.leadBasedPaintApplies.touched &&
-                form.controls.sellerStatements.controls.leadBasedPaintApplies.hasError('required')
-                  ? 'true'
-                  : null
-              ">
-            <option [ngValue]="null">Select an option</option>
-            <option [ngValue]="true">Applies to this property</option>
-            <option [ngValue]="false">Does not apply</option>
-          </select>
-          @if (
-          form.controls.sellerStatements.controls.leadBasedPaintApplies.touched &&
-          form.controls.sellerStatements.controls.leadBasedPaintApplies.hasError('required')
-          ) {
-          <p class="field-error">
-            Select whether the lead-based paint disclosure applies.
-          </p>
-          }
+          <input id="leadBasedPaintApplies" type="text" class="seller-association-statement" disabled
+            value="Required — property built before 1978." />
         </div>
         }
         @if (requiresOwnersAssociation()) {

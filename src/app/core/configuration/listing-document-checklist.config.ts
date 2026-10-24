@@ -1,3 +1,7 @@
+import {getPennsylvaniaListingDocumentChecklist} from '../domains/listings/state-packages/pennsylvania/pennsylvania-document-checklist';
+import {getNorthDakotaListingDocumentChecklist} from '../domains/listings/state-packages/north-dakota/north-dakota-document-checklist';
+import {getNevadaListingDocumentChecklist} from '../domains/listings/state-packages/nevada/nevada-document-checklist';
+import {getGeorgiaListingDocumentChecklist} from '../domains/listings/state-packages/georgia/georgia-document-checklist';
 import {getMaineListingDocumentChecklist} from '../domains/listings/state-packages/maine/maine-document-checklist';
 import {getMississippiListingDocumentChecklist} from '../domains/listings/state-packages/mississippi/mississippi-document-checklist';
 import {getArkansasListingDocumentChecklist} from '../domains/listings/state-packages/arkansas/arkansas-document-checklist';
@@ -197,6 +201,10 @@ export function getListingDocumentChecklist(state: string, facts: ListingCheckli
   const code = normalizeDisclosureStateCode(state);
   if (code === 'WY') return getWyomingListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'ME') return getMaineListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'GA') return getGeorgiaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'NV') return getNevadaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'ND') return getNorthDakotaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'PA') return getPennsylvaniaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'MS') return getMississippiListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'AR') return getArkansasListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'IL') return getIllinoisListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
@@ -299,6 +307,7 @@ export function getChecklistRestrictionMessages(state: string, facts: ListingChe
   if (code === 'CA') return ['You may create and publish your listing while gathering disclosures. Buyers can start an offer after applicable required documents are uploaded. Save any exemption or non-applicability explanation on the existing Property Disclosures page.'];
   const blocking = getOfferBlockingDocumentTypes(code, facts);
   const messages: string[] = [];
+  if (['ID','OR','WA','WI'].includes(code)) messages.push('Upload the applicable seller condition disclosure or accurate supported exemption/waiver evidence before buyers start an offer. NavStreet collects it earlier than any statutory post-offer or post-acceptance deadline; protected delivery, amendment and cancellation rights remain.');
   if (code === 'IN') messages.push('Upload the signed Indiana condition disclosure or supported exception before buyers can start an offer.');
   if (blocking.length) messages.push('NavStreet currently prevents buyers from starting or submitting an offer while these uploads are missing: ' +
     blocking.map(type => checklistDocumentTitle(code, type)).join('; ') + '.');

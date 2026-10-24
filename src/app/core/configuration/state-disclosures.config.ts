@@ -12,6 +12,200 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  GA: [
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "georgia-seller-disclosure",
+    "title": "Georgia seller condition disclosure",
+    "shortTitle": "Georgia seller condition disclosure",
+    "description": "For this ordinary private owner resale, no universal Georgia seller condition form or general radon testing upload is required. Seller must disclose known hidden material defects and answer inquiries truthfully; an as-is clause does not authorize fraud or concealment. Any voluntary condition statement is separate evidence, not a warranty.",
+    "required": false,
+    "officialFormUrl": "https://www.legis.ga.gov/georgia-code",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. For this ordinary private owner resale, no universal Georgia seller condition form or general radon testing upload is required. Seller must disclose known hidden material defects and answer inquiries truthfully; an as-is clause does not authorize fraud or concealment. Any voluntary condition statement is separate evidence, not a warranty."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "georgia-statutory-packet",
+    "title": "Georgia property-specific statutory notices",
+    "shortTitle": "Georgia property-specific statutory notices",
+    "description": "Buyer may investigate structure, flood and insurance history, access, utilities, private well/septic systems, permits and title under the negotiated inspection period. Seller shall cooperate in providing available records. Use a Georgia attorney for legal closing work as required; choosing a closing professional is optional at the offer stage. No broker/license questionnaire is imposed.",
+    "required": false,
+    "officialFormUrl": "https://www.legis.ga.gov/georgia-code",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. Buyer may investigate structure, flood and insurance history, access, utilities, private well/septic systems, permits and title under the negotiated inspection period. Seller shall cooperate in providing available records. Use a Georgia attorney for legal closing work as required; choosing a closing professional is optional at the offer stage. No broker/license questionnaire is imposed."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "georgia-association-documents",
+    "title": "Georgia association resale documents",
+    "shortTitle": "Georgia association resale documents",
+    "description": "This agreement is for a subsequent bona fide residential condominium resale, with the unit and its appurtenant common interests governed by the recorded declaration and bylaws. Review restrictions, assessments, insurance, litigation, reserves and parking/storage rights during the agreed inspection/document period. Seller shall request an association account statement and applicable consents or waivers of rights of first refusal and clear seller liens as agreed. O.C.G.A. 44-3-111 first-bona-fide-sale disclosure and voidability provisions are distinct and are not represented as a universal subsequent-resale certificate or seven-day offer gate. First residential-occupancy sales, developer offerings, new construction and leasehold transfers require a different agreement.",
+    "required": false,
+    "officialFormUrl": "https://www.legis.ga.gov/georgia-code",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. This agreement is for a subsequent bona fide residential condominium resale, with the unit and its appurtenant common interests governed by the recorded declaration and bylaws. Review restrictions, assessments, insurance, litigation, reserves and parking/storage rights during the agreed inspection/document period. Seller shall request an association account statement and applicable consents or waivers of rights of first refusal and clear seller liens as agreed. O.C.G.A. 44-3-111 first-bona-fide-sale disclosure and voidability provisions are distinct and are not represented as a universal subsequent-resale certificate or seven-day offer gate. First residential-occupancy sales, developer offerings, new construction and leasehold transfers require a different agreement."
+  }
+,
+{
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MS-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
+  NV: [
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "nevada-seller-disclosure",
+    "title": "Nevada seller condition disclosure",
+    "shortTitle": "Nevada seller condition disclosure",
+    "description": "For a covered one-to-four-unit residential transfer, seller shall complete and serve the Nevada condition disclosure at least ten days before conveyance under NRS 113.130. Specific statutory exceptions apply; the required subsection (1) duty cannot be waived by a generic as-is or receipt answer. Promptly disclose a newly discovered or worsening defect in writing before conveyance. Preserve purchaser remedies under NRS 113.150. The ordinary resale condition form is not universally due before an initial offer.",
+    "required": false,
+    "officialFormUrl": "https://www.leg.state.nv.us/NRS/NRS-113.html",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. For a covered one-to-four-unit residential transfer, seller shall complete and serve the Nevada condition disclosure at least ten days before conveyance under NRS 113.130. Specific statutory exceptions apply; the required subsection (1) duty cannot be waived by a generic as-is or receipt answer. Promptly disclose a newly discovered or worsening defect in writing before conveyance. Preserve purchaser remedies under NRS 113.150. The ordinary resale condition form is not universally due before an initial offer."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "nevada-statutory-packet",
+    "formDownloadUrl": "https://red.nv.gov/uploadedFiles/rednvgov/Content/Forms/551.pdf",
+    "formDownloadLabel": "Download Nevada Form 551 open-range disclosure",
+    "title": "Nevada property-specific statutory notices",
+    "shortTitle": "Nevada property-specific statutory notices",
+    "description": "If adjacent to open range, NRS 113.065 requires a separate grazing and rights-of-way disclosure before the purchaser signs a sales agreement, with the purchaser dated acknowledgement, seller retention/copy delivery and county recording duties. Upload that complete notice before offers. First-sale subdivision, zoning, utility-rate, gaming-district and soil-report rules have separate scope outside this ordinary existing-resale agreement. Applicable private-transfer-fee written disclosure under NRS 113.085, including a description and statutory warning, remains required without inventing a universal initial-offer fee packet.",
+    "required": false,
+    "officialFormUrl": "https://www.leg.state.nv.us/NRS/NRS-113.html",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. If adjacent to open range, NRS 113.065 requires a separate grazing and rights-of-way disclosure before the purchaser signs a sales agreement, with the purchaser dated acknowledgement, seller retention/copy delivery and county recording duties. Upload that complete notice before offers. First-sale subdivision, zoning, utility-rate, gaming-district and soil-report rules have separate scope outside this ordinary existing-resale agreement. Applicable private-transfer-fee written disclosure under NRS 113.085, including a description and statutory warning, remains required without inventing a universal initial-offer fee packet."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "nevada-association-documents",
+    "title": "Nevada association resale documents",
+    "shortTitle": "Nevada association resale documents",
+    "description": "Where NRS chapter 116 applies to this condominium or planned-community resale, seller shall provide the NRS 116.4109 resale package, including declaration, bylaws/rules, 116.41095 information statement, budget, assessment/fee and capital-expenditure information, and required insurance evidence. The package remains effective for ninety calendar days as prescribed. Purchaser may cancel by written notice until midnight of the fifth calendar day following receipt of the complete resale package. Hand delivery, prepaid United States mail or electronic transmission to seller or authorized agent are the statutory methods. Cancellation is without penalty and payments are promptly refunded. Acceptance of conveyance ends this statutory cancellation entitlement and the specified nondelivery-only relief. No signature or negotiated inspection deadline waives these protections. The contract permits acceptance while the packet is pending; no universal pre-offer packet upload or waiting period is imposed. Developer/public-offering, cooperative and condominium-hotel transactions require separate scope review.",
+    "required": false,
+    "officialFormUrl": "https://www.leg.state.nv.us/NRS/NRS-113.html",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. Where NRS chapter 116 applies to this condominium or planned-community resale, seller shall provide the NRS 116.4109 resale package, including declaration, bylaws/rules, 116.41095 information statement, budget, assessment/fee and capital-expenditure information, and required insurance evidence. The package remains effective for ninety calendar days as prescribed. Purchaser may cancel by written notice until midnight of the fifth calendar day following receipt of the complete resale package. Hand delivery, prepaid United States mail or electronic transmission to seller or authorized agent are the statutory methods. Cancellation is without penalty and payments are promptly refunded. Acceptance of conveyance ends this statutory cancellation entitlement and the specified nondelivery-only relief. No signature or negotiated inspection deadline waives these protections. The contract permits acceptance while the packet is pending; no universal pre-offer packet upload or waiting period is imposed. Developer/public-offering, cooperative and condominium-hotel transactions require separate scope review."
+  }
+,
+{
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MS-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
+  ND: [
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "north-dakota-seller-disclosure",
+    "title": "Optional separate North Dakota condition records",
+    "shortTitle": "Optional separate condition records",
+    "description": "For covered private owner sales of residential dwellings with no more than four units, N.D.C.C. 47-10-02.1(6) requires written disclosure of known material adverse facts before final acceptance unless the purchase agreement expressly provides otherwise. A commission condition form is permitted, not universally mandated for a private no-broker seller. Use only the listed subsection (7) transfer exceptions. This agreement uses delivery before the buyer signs; provide the written statement before offers to avoid a later acceptance interruption. No broker/licensing questions are required for the supported private sale.",
+    "required": false,
+    "officialFormUrl": "https://ndlegis.gov/cencode/t47c10.pdf",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. For covered private owner sales of residential dwellings with no more than four units, N.D.C.C. 47-10-02.1(6) requires written disclosure of known material adverse facts before final acceptance unless the purchase agreement expressly provides otherwise. A commission condition form is permitted, not universally mandated for a private no-broker seller. Use only the listed subsection (7) transfer exceptions. This agreement uses delivery before the buyer signs; provide the written statement before offers to avoid a later acceptance interruption. No broker/licensing questions are required for the supported private sale."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "north-dakota-statutory-packet",
+    "formDownloadUrl": "https://realestatend.org/image/cache/Seller_s_Property_Disclosure_Form-Revised_08-2025.pdf",
+    "formDownloadLabel": "Download the official combined condition-and-radon form",
+    "title": "North Dakota combined seller disclosure and radon notice",
+    "shortTitle": "North Dakota combined seller disclosure and radon notice",
+    "description": "Upload one combined PDF containing the applicable written known material facts unless exempt, plus the exact statutory radon statement and available known test/mitigation records. A separate condition upload is optional if already included. N.D.C.C. 47-10-02.2 independently requires written known radon information and the statutory warning, with the buyer signed receipt, before executing an agreement except a lawful expressly agreed alternative. Furnish reasonably available known prior test results and mitigation evidence before execution. No new radon test or mitigation is universally required. This packet is independent of condition-disclosure exceptions and records actual receipt of its immutable version. The dated buyer signature acknowledges receipt of the separate statutory notice; it does not certify test accuracy, mitigation effectiveness or create a statutory testing contingency.",
+    "required": false,
+    "officialFormUrl": "https://ndlegis.gov/cencode/t47c10.pdf",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. Upload one combined PDF containing the applicable written known material facts unless exempt, plus the exact statutory radon statement and available known test/mitigation records. A separate condition upload is optional if already included. N.D.C.C. 47-10-02.2 independently requires written known radon information and the statutory warning, with the buyer signed receipt, before executing an agreement except a lawful expressly agreed alternative. Furnish reasonably available known prior test results and mitigation evidence before execution. No new radon test or mitigation is universally required. This packet is independent of condition-disclosure exceptions and records actual receipt of its immutable version. The dated buyer signature acknowledges receipt of the separate statutory notice; it does not certify test accuracy, mitigation effectiveness or create a statutory testing contingency."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "north-dakota-association-documents",
+    "title": "North Dakota association resale documents",
+    "shortTitle": "North Dakota association resale documents",
+    "description": "Under N.D.C.C. 47-10-02.3, seller shall disclose the HOA/condominium assessments, approved special assessments, declaration/bylaws/rules, last two meeting minutes, reserves, budgets/financials, insurance, litigation, violations, transfer charges, remedies, collection policy, leasing restrictions, amenities and contact information by the mutually agreed date or within ten days after executing the agreement. Required information must cover at least the preceding ninety days. Association document-retrieval fees must be disclosed before final acceptance. The purchase contract remains voidable by buyer until the documents are provided and for five days thereafter or until conveyance, whichever first occurs. Known material changes before closing or possession must be disclosed in a written amendment. A pending packet does not prevent an offer or acceptance, or eliminate this protected cancellation right. No universal condominium review waiting period is imposed before accepting the offer.",
+    "required": false,
+    "officialFormUrl": "https://ndlegis.gov/cencode/t47c10.pdf",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. Under N.D.C.C. 47-10-02.3, seller shall disclose the HOA/condominium assessments, approved special assessments, declaration/bylaws/rules, last two meeting minutes, reserves, budgets/financials, insurance, litigation, violations, transfer charges, remedies, collection policy, leasing restrictions, amenities and contact information by the mutually agreed date or within ten days after executing the agreement. Required information must cover at least the preceding ninety days. Association document-retrieval fees must be disclosed before final acceptance. The purchase contract remains voidable by buyer until the documents are provided and for five days thereafter or until conveyance, whichever first occurs. Known material changes before closing or possession must be disclosed in a written amendment. A pending packet does not prevent an offer or acceptance, or eliminate this protected cancellation right. No universal condominium review waiting period is imposed before accepting the offer."
+  }
+,
+{
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MS-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
+  PA: [
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "pennsylvania-seller-disclosure",
+    "formDownloadUrl": "https://www.pa.gov/content/dam/copapwp-pagov/en/dos/department-and-offices/bpoa/real-estate/Sellers%20Property%20Disclosure%20Statement.pdf",
+    "formDownloadLabel": "Download the state-published seller disclosure form",
+    "title": "Pennsylvania seller condition disclosure",
+    "shortTitle": "Pennsylvania seller condition disclosure",
+    "description": "For a covered residential transfer, 68 Pa.C.S. 7303 requires a signed and dated disclosure of known material defects before seller and buyer sign an agreement of transfer. Use the statutory statement or a compliant form covering the required subjects; assess chapter 71 scope and 7302 exceptions accurately. Condominium sellers disclose their own unit under this chapter, not common elements; association resale duties apply separately. No new independent investigation is universally required to complete the condition statement. Upload the applicable signed statement before offers.",
+    "required": false,
+    "officialFormUrl": "https://www.palegis.us/statutes/consolidated/view-statute?chpt=73&div=0&iFrame=true&ttl=68&txtType=HTM",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. For a covered residential transfer, 68 Pa.C.S. 7303 requires a signed and dated disclosure of known material defects before seller and buyer sign an agreement of transfer. Use the statutory statement or a compliant form covering the required subjects; assess chapter 71 scope and 7302 exceptions accurately. Condominium sellers disclose their own unit under this chapter, not common elements; association resale duties apply separately. No new independent investigation is universally required to complete the condition statement. Upload the applicable signed statement before offers."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "pennsylvania-statutory-packet",
+    "title": "Pennsylvania property-specific statutory notices",
+    "shortTitle": "Pennsylvania property-specific statutory notices",
+    "description": "Known radon, water intrusion, environmental, structural, utility and other material defects belong in the condition disclosure and available records; no universal independent radon, termite, septic or inspection certificate upload is imposed merely to make an offer. Qualified inspections and local point-of-sale requirements remain property-specific. Seller shall provide applicable updates; a receipt does not warrant condition or waive fraud, disclosure remedies or protected cancellation rights.",
+    "required": false,
+    "officialFormUrl": "https://www.palegis.us/statutes/consolidated/view-statute?chpt=73&div=0&iFrame=true&ttl=68&txtType=HTM",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. Known radon, water intrusion, environmental, structural, utility and other material defects belong in the condition disclosure and available records; no universal independent radon, termite, septic or inspection certificate upload is imposed merely to make an offer. Qualified inspections and local point-of-sale requirements remain property-specific. Seller shall provide applicable updates; a receipt does not warrant condition or waive fraud, disclosure remedies or protected cancellation rights."
+  },
+  {
+    "formCode": "State statute / seller-supplied record",
+    "sortOrder": 1,
+    "documentType": "pennsylvania-association-documents",
+    "title": "Pennsylvania association resale documents",
+    "shortTitle": "Pennsylvania association resale documents",
+    "description": "For an applicable nondeclarant condominium resale under 68 Pa.C.S. 3407 or planned-community resale under 5407, seller shall furnish the governing declaration, bylaws/rules and the association resale certificate before conveyance, subject to statutory scope and exceptions. The certificate addresses assessments/fees, capital expenses, reserves/budgets, litigation, insurance and other required matters. Buyer is not liable for undisclosed assessments/fees beyond statutory limits. The purchase contract is voidable until the certificate is provided and for five days thereafter or until conveyance, whichever occurs first. A negotiated inspection deadline or signature does not shorten the statutory right. Pending association records do not universally block making or accepting an offer. Public-offering/declarant, cooperative, new-construction and leasehold transactions require separate agreements.",
+    "required": false,
+    "officialFormUrl": "https://www.palegis.us/statutes/consolidated/view-statute?chpt=73&div=0&iFrame=true&ttl=68&txtType=HTM",
+    "sourceInstructions": "Use the actual applicable state disclosure or supported lawful exception; a generic placeholder is not a legal disclosure. For an applicable nondeclarant condominium resale under 68 Pa.C.S. 3407 or planned-community resale under 5407, seller shall furnish the governing declaration, bylaws/rules and the association resale certificate before conveyance, subject to statutory scope and exceptions. The certificate addresses assessments/fees, capital expenses, reserves/budgets, litigation, insurance and other required matters. Buyer is not liable for undisclosed assessments/fees beyond statutory limits. The purchase contract is voidable until the certificate is provided and for five days thereafter or until conveyance, whichever occurs first. A negotiated inspection deadline or signature does not shorten the statutory right. Pending association records do not universally block making or accepting an offer. Public-offering/declarant, cooperative, new-construction and leasehold transactions require separate agreements."
+  }
+,
+{
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "sourceInstructions": "For covered pre-1978 housing, provide the signed statement, available reports and EPA pamphlet before buyer is bound. Do not request this for known 1978-or-later construction.",
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards",
+    "required": false,
+    "formCode": "MS-LEAD-BASED-PAINT",
+    "sortOrder": 4
+  }
+],
   ME: [
   {
     "documentType": "maine-seller-disclosure",
@@ -1101,10 +1295,10 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "documentType": "idaho-statutory-packet",
     "title": "Idaho property-specific records and scope review",
     "shortTitle": "Idaho property-specific records and scope review",
-    "description": "Provide a seller-signed scope and property-record review covering water/well and irrigation rights, septic permits and known problems, annexation/city-service notices, environmental hazards, access, existing leases and local transfer requirements. Identify applicable records or signed nonapplicability explanations. This is a NavStreet preparation packet, not a state-mandated omnibus form. The separate statutory seller disclosure may remain pending until its Idaho Code 55-2509 deadline. New construction, subdivisions/developer sales, tribal trust/leasehold interests and assignment/wholesale transactions are outside this agreement.",
+    "description": "Provide a seller-signed scope and property-record review covering water/well and irrigation rights, septic permits and known problems, annexation/city-service notices, environmental hazards, access, existing leases and local transfer requirements. Identify applicable records or signed nonapplicability explanations. This is a NavStreet preparation packet, not a state-mandated omnibus form. NavStreet collects the applicable statutory condition disclosure or supported exemption before offers; the legal delivery deadline under Idaho Code 55-2509 is unchanged. New construction, subdivisions/developer sales, tribal trust/leasehold interests and assignment/wholesale transactions are outside this agreement.",
     "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
     "officialFormUrl": "https://dopl.idaho.gov/rec/rec-enforcement/",
-    "required": true,
+    "required": false,
     "formCode": "ID-RECORDS",
     "sortOrder": 1
   },
@@ -1112,7 +1306,7 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
     "documentType": "idaho-association-documents",
     "title": "Idaho association records",
     "shortTitle": "Idaho association records",
-    "description": "Provide a seller-signed scope and property-record review covering water/well and irrigation rights, septic permits and known problems, annexation/city-service notices, environmental hazards, access, existing leases and local transfer requirements. Identify applicable records or signed nonapplicability explanations. This is a NavStreet preparation packet, not a state-mandated omnibus form. The separate statutory seller disclosure may remain pending until its Idaho Code 55-2509 deadline. New construction, subdivisions/developer sales, tribal trust/leasehold interests and assignment/wholesale transactions are outside this agreement. Association governing documents, dues, transfer fees, special assessments and restrictions shall be provided by the negotiated document date or sufficiently before closing for review. No statewide association rescission period is created here. Condominium/developer sales require a separate workflow.",
+    "description": "Provide a seller-signed scope and property-record review covering water/well and irrigation rights, septic permits and known problems, annexation/city-service notices, environmental hazards, access, existing leases and local transfer requirements. Identify applicable records or signed nonapplicability explanations. This is a NavStreet preparation packet, not a state-mandated omnibus form. NavStreet collects the applicable statutory condition disclosure or supported exemption before offers; the legal delivery deadline under Idaho Code 55-2509 is unchanged. New construction, subdivisions/developer sales, tribal trust/leasehold interests and assignment/wholesale transactions are outside this agreement. Association governing documents, dues, transfer fees, special assessments and restrictions shall be provided by the negotiated document date or sufficiently before closing for review. No statewide association rescission period is created here. Condominium/developer sales require a separate workflow.",
     "sourceInstructions": "Use the current official requirements; upload the applicable signed records or documented exception/nonapplicability evidence.",
     "officialFormUrl": "https://dopl.idaho.gov/rec/",
     "required": false,

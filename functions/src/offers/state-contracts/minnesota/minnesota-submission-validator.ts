@@ -12,7 +12,7 @@ export function validateMinnesotaSubmission(input: ValidateStateSubmissionInput<
   requireValue(isMinnesotaContractCompatible(t.contractType,t.property.propertyType,t.property.contractFacts), 'Condominium, vacant land and other property types need a separate Minnesota agreement.');
   if(t.contractType === 'navstreet_minnesota_condominium_resale_2026') {
     const c=t.condominium;
-    requireValue(c && c.projectName.trim() && c.unitDesignation.trim() && c.commonElements.trim() && c.parkingStorage.trim() && c.rightsAcknowledged===true,'Complete the condominium identification, rights and acknowledgement.');
+    requireValue(c && c.rightsAcknowledged===true,'Complete the condominium identification, rights and acknowledgement.');
     requireValue(t.disclosures.sellerReportsHoa===true && t.disclosures.hoaDocumentsStatus==='received','Review the complete condominium resale packet before submitting.');
     requireValue(Boolean(t.documentVersions?.['minnesota-association-documents']),'Open and acknowledge the uploaded condominium packet version.');
   }
@@ -39,13 +39,13 @@ export function validateMinnesotaSubmission(input: ValidateStateSubmissionInput<
   requireValue(date(d.settlementDate) && (!d.sellerDisclosureDate || (date(d.sellerDisclosureDate) && d.sellerDisclosureDate <= d.settlementDate)), 'Optional document and settlement deadlines must be valid and ordered.');
   requireValue(days(d.inspectionPeriodDays, 1, 60), 'Choose an inspection period of 1 to 60 days.');
   requireValue(t.settlement.possession === 'at_recording' && t.settlement.specialAssessmentPayer !== 'unselected', 'Complete possession and special assessment allocation.');
-  requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && t.settlement.closingAgentName.trim() && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete title insurance, closing agent and title evidence period.');
+  requireValue(['buyer', 'seller'].includes(t.settlement.titlePolicyPayer) && days(t.settlement.titleEvidenceDaysBeforeClosing, 1, 45), 'Complete title insurance, closing agent and title evidence period.');
   requireValue(t.disclosures.sellerReportsHoa !== true || t.settlement.hoaTransferFeePayer !== 'unselected', 'Allocate association transfer fees.');
   requireValue(t.disclosures.propertyConditionStatus === 'received', 'Select whether you received the seller condition statement.');
   requireValue(t.disclosures.statutoryPacketStatus === 'received', 'Review the seller-signed Minnesota property-specific statutory disclosure packet before submitting. Ask the seller to upload it if it is missing.');
   requireValue(typeof t.disclosures.sellerReportsHoa === 'boolean', 'The listing must state whether an HOA applies.');
   requireValue(t.disclosures.sellerReportsHoa ? t.disclosures.hoaDocumentsStatus === 'received' : t.disclosures.hoaDocumentsStatus === 'not_applicable', 'Review the association resale packet before submitting when an association applies.');
-  requireValue(t.disclosures.taxNoticeAcknowledged === true && t.disclosures.radonNoticeAcknowledged === true, 'Read and acknowledge the Minnesota tax and radon notices.');
+  requireValue(t.disclosures.radonNoticeAcknowledged === true, 'Read and acknowledge the Minnesota tax and radon notices.');
   requireValue(t.disclosures.leadPaintStatus !== 'unselected', 'Select lead paint status.');
   requireValue(t.property.yearBuilt == null || t.property.yearBuilt >= 1978 || ['received','exempt','pending'].includes(t.disclosures.leadPaintStatus), 'Choose whether the pre-1978 lead packet is received, pending, or exempt.');
   requireValue(t.disclosures.leadPaintStatus !== 'pending', 'Review the applicable lead disclosure before submitting, or document a valid exemption.');

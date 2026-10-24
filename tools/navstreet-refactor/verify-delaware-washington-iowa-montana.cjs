@@ -57,7 +57,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   for(const yearBuilt of [undefined,null,1900,1977,1978,2026])for(const leadBasedPaintApplies of [null,false,true])for(const known of [null,false,true])for(const exempt of [false,true]){
    const stateFacts={...facts(code)[slug],disclosureExemptionClaimed:exempt,radonTestsKnown:known,drugContaminationKnown:known,appurtenantWaterRightsKnown:known};
    const f={yearBuilt,leadBasedPaintApplies,[slug]:stateFacts};
-   const expected=[...(code!=='WA'?[slug+'-seller-disclosure']:[]),...(code==='DE'&&!exempt||code==='MT'&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
+   const expected=[...[slug+'-seller-disclosure'],...(code==='DE'&&!exempt||code==='MT'&&known!==false?[slug+'-statutory-packet']:[]),...(yearBuilt==null||yearBuilt<1978?['lead-based-paint']:[])];
    assert.deepEqual(normalize(gates.getListingUploadGateDocumentTypes(code,f,Date.now())),expected);
    assert.deepEqual(requiredTypes({yearBuilt,sellerStatements:{leadBasedPaintApplies,[slug]:stateFacts}}),expected);parity++;
   }
@@ -71,7 +71,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
   assert(!required.includes(slug+'-association-documents'),'Optional association reports must not universally block offers');
   const terms=structuredClone(initial);
   Object.assign(terms.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});Object.assign(terms.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});
-  terms.deadlines.settlementDate='2099-12-01';if(code==='IA')terms.settlement.titleEvidenceSelection='abstract_opinion';Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName:'Test Title',specialAssessmentPayer:'seller'});
+  terms.deadlines.settlementDate='2099-12-01';if(code==='IA')terms.settlement.titleEvidenceSelection='abstract_opinion';Object.assign(terms.settlement,{titlePolicyPayer:'seller',closingAgentName: '',specialAssessmentPayer:'seller'});
   Object.assign(terms.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',hoaDocumentsStatus:'not_applicable',leadPaintStatus:'built_1978_or_later',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});
   if(code==='IA')terms.documentVersions={'iowa-seller-disclosure':'condition-v1'};
   terms.delivery.expiresAt='2099-10-01T12:00:00Z';terms.delivery.electronicDeliveryAuthorized=true;
@@ -108,7 +108,7 @@ const property=(code,county)=>({listingUid:'sample',addressLine1:'100 Test St',c
    assert(requiredTypes(listing).includes(slug+'-statutory-packet'));assert.equal(make(listing).disclosures.requiredKnownFacts,true);
    const v=structuredClone(version);v.terms.disclosures.requiredKnownFacts=true;v.terms.disclosures.statutoryPacketStatus='pending';assert.throws(()=>pkg.validateSubmission({offer,version:v}));assert.throws(()=>pkg.validateBeforeSigning({offer,version:v}));assert.equal(validator.validate(v.terms,v.buyers,v.sellers,{mode:'submit'}).valid,false);
   }
-  const noAck=structuredClone(version);noAck.terms.disclosures.radonNoticeAcknowledged=false;assert.throws(()=>pkg.validateBeforeSigning({offer,version:noAck}));reject(t=>t.disclosures.radonNoticeAcknowledged=false);
+  const noAck=structuredClone(version);noAck.terms.disclosures.radonNoticeAcknowledged=false;if(code==='WA'){pkg.validateBeforeSigning({offer,version:noAck});validate(noAck);}else{assert.throws(()=>pkg.validateBeforeSigning({offer,version:noAck}));reject(t=>t.disclosures.radonNoticeAcknowledged=false);}
   const receipt=structuredClone(version);receipt.terms.disclosures.propertyConditionStatus='received';assert(pkg.requiredListingDisclosures({offer,version:receipt}).includes(slug+'-seller-disclosure'));
   const hostile=structuredClone(terms);hostile.stateCode='XX';hostile.property.state='XX';hostile.legalDescription='Tampered';hostile.delivery.timeZone='UTC';hostile.disclosures.sellerReportsHoa=true;hostile.disclosures.requiredKnownFacts=true;hostile.disclosures.disclosureExemptionClaimed=true;
   const sanitized=pkg.sanitizeDraftTerms({requestedTerms:hostile,currentTerms:terms,initiatedBy:'buyer'});assert.equal(sanitized.stateCode,code);assert.equal(sanitized.property.state,code);assert.equal(sanitized.legalDescription,terms.legalDescription);assert.equal(sanitized.delivery.timeZone,tz);assert.equal(sanitized.disclosures.sellerReportsHoa,false);
