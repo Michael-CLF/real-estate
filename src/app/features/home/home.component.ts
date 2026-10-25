@@ -106,7 +106,7 @@ export class HomeComponent {
 
   constructor() {
     this.pageSeo.set(
-      'For Sale by Owner Homes & Selling Tools | NavStreet',
+      'For Sale by Owner Properties & Selling Tools | NavStreet',
       'List your home for sale by owner, connect with buyers and explore guided selling tools on NavStreet.'
     );
   }

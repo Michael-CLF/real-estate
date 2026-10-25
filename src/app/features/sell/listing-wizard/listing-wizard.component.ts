@@ -3,6 +3,7 @@ import { validateListingStatementAnswers } from '../../../core/domains/listings/
 import { validateStateListingQuestionAnswers } from '../../../core/domains/listings/state-packages/listing-question-validation';
 import { getStateListingFormRestorer, getStateListingFormSerializer, restoreStateListingSellerStatements } from '../../../core/domains/listings/state-packages/state-listing.registry';
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   OnInit,
@@ -134,6 +135,21 @@ export class ListingWizardComponent implements OnInit {
       label: 'Review',
     },
   ];
+  constructor() {
+    afterRenderEffect({
+      write: () => {
+        if (
+          !this.isInitializing() &&
+          !this.showDocumentChecklist() &&
+          this.listingContentComplete()
+        ) {
+          // This card replaces the wizard in-place, so router scroll restoration
+          // does not run. Reset after the card has rendered, without animation.
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
+      },
+    });
+  }
   async ngOnInit(): Promise<void> {
     await this.initializeDraft();
   }

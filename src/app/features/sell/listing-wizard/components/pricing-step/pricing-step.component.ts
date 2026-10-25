@@ -7,6 +7,7 @@ import {
   output
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CurrencyInputDirective } from '../../../../offers/directives/currency-input.directive';
 
 export interface PricingFormValue {
   listPrice: number | null;
@@ -15,7 +16,7 @@ export interface PricingFormValue {
 @Component({
   selector: 'app-pricing-step',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CurrencyInputDirective],
   templateUrl: './pricing-step.component.html',
   styleUrl: './pricing-step.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -44,7 +45,13 @@ export class PricingStepComponent {
     effect(() => {
       const initialValue = this.initialValue();
 
-      if (initialValue) {
+      // The parent echoes each valueChange back through initialValue. Do not
+      // rewrite an equal value: currency writeValue would format the input and
+      // move its caret while the user is still typing.
+      if (
+        initialValue &&
+        initialValue.listPrice !== this.form.controls.listPrice.value
+      ) {
         this.form.setValue(initialValue, {
           emitEvent: false
         });

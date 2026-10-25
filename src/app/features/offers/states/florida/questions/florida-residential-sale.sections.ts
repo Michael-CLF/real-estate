@@ -368,7 +368,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. Eastern Time. Seller flood, condition and applicable HOA summaries must be provided before contract execution.',
+    description: 'Stated calendar dates end at 11:59 p.m. Eastern Time. Seller flood, condition and applicable HOA summaries must be provided before contract execution. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
     questions: [
       {
         id: 'seller-date',
@@ -376,16 +376,6 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
         helpText: 'Required flood, condition and applicable HOA disclosures are due before contract execution regardless of this optional date.',
-      },
-      {
-        id: 'inspection-date-note',
-        type: 'information',
-        label: 'The inspection deadline is calculated from the effective date using the inspection period selected in Section 4.',
-      },
-      {
-        id: 'financing-date-note',
-        type: 'information',
-        label: 'The financing deadline is calculated from the effective date using the loan approval period selected in Section 4.',
       },
       {
         id: 'settlement-date',

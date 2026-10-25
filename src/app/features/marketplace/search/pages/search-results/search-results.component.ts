@@ -260,8 +260,8 @@ export class SearchResultsComponent {
       .join(', ');
 
     return location
-      ? `For Sale by Owner Homes in ${location}`
-      : 'For Sale by Owner Homes';
+      ? `For Sale by Owner Properties in ${location}`
+      : 'For Sale by Owner Properties';
   }
 
   private stateNameFromSlug(stateSlug: string): string {

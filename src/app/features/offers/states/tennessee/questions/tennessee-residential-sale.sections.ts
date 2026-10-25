@@ -360,7 +360,7 @@ export const TENNESSEE_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline.',
+    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
     questions: [
       {
         id: 'seller-date',
@@ -368,16 +368,6 @@ export const TENNESSEE_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
         helpText: 'This optional date does not postpone any mandatory pre-agreement disclosure obligation.',
-      },
-      {
-        id: 'inspection-date-note',
-        type: 'information',
-        label: 'The inspection deadline is calculated from the effective date using the inspection period selected in Section 4.',
-      },
-      {
-        id: 'financing-date-note',
-        type: 'information',
-        label: 'The financing deadline is calculated from the effective date using the loan approval period selected in Section 4.',
       },
       {
         id: 'settlement-date',

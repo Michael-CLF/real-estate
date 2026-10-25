@@ -16,7 +16,10 @@
       </p>
     </div>
 
-    <button type="button" class="skip-button" (click)="doThisLater()">
+    <button type="button" class="skip-button"
+      [class.skip-button--selected]="mode() === 'skip'"
+      [attr.aria-pressed]="mode() === 'skip'"
+      (click)="doThisLater()">
       Do This Later
     </button>
   </header>

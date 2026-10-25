@@ -70,7 +70,7 @@ export class StatePageComponent {
 
       this.pageSeo.set(
         state?.isActive
-          ? `For Sale by Owner Homes in ${state.name} | NavStreet`
+          ? `For Sale by Owner Properties in ${state.name} | NavStreet`
           : 'State marketplace coming soon | NavStreet',
         state?.isActive
           ? `Explore for-sale-by-owner homes and selling tools in ${state.name}.`
