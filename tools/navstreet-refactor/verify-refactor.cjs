@@ -10,6 +10,7 @@ const checks = [
   'verify-reviewed-notice-copies.cjs',
   'verify-georgia-nevada-north-dakota-pennsylvania.cjs',
   'verify-kentucky-rhode-island-tennessee-west-virginia.cjs',
+  'verify-alaska-connecticut-vermont-virginia.cjs',
   'verify-state-question-review.cjs',
   'verify-all-state-disclosure-entry.cjs',
   'verify-condominium-offer-entry.cjs',

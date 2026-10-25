@@ -7,12 +7,14 @@ export interface StateConfiguration {
 
 export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'AL', isActive: true, name: 'Alabama', slug: 'alabama' },
-  { abbreviation: 'AK', isActive: false, name: 'Alaska', slug: 'alaska' },
+  // Package implemented 2026-10-25; activate after controlled acceptance.
+  { abbreviation: 'AK', isActive: true, name: 'Alaska', slug: 'alaska' },
   { abbreviation: 'AZ', isActive: true, name: 'Arizona', slug: 'arizona' },
   { abbreviation: 'AR', isActive: true, name: 'Arkansas', slug: 'arkansas' },
   { abbreviation: 'CA', isActive: true, name: 'California', slug: 'california' },
   { abbreviation: 'CO', isActive: true, name: 'Colorado', slug: 'colorado' },
-  { abbreviation: 'CT', isActive: false, name: 'Connecticut', slug: 'connecticut' },
+  // Package implemented 2026-10-25; activate after controlled acceptance.
+  { abbreviation: 'CT', isActive: true, name: 'Connecticut', slug: 'connecticut' },
   { abbreviation: 'DE', isActive: true, name: 'Delaware', slug: 'delaware' },
   { abbreviation: 'FL', isActive: true, name: 'Florida', slug: 'florida' },
   { abbreviation: 'GA', isActive: true, name: 'Georgia', slug: 'georgia' },
@@ -52,8 +54,10 @@ export const STATES: readonly StateConfiguration[] = [
   { abbreviation: 'TN', isActive: true, name: 'Tennessee', slug: 'tennessee' },
   { abbreviation: 'TX', isActive: true, name: 'Texas', slug: 'texas' },
   { abbreviation: 'UT', isActive: true, name: 'Utah', slug: 'utah' },
-  { abbreviation: 'VT', isActive: false, name: 'Vermont', slug: 'vermont' },
-  { abbreviation: 'VA', isActive: false, name: 'Virginia', slug: 'virginia' },
+  // Package implemented 2026-10-25; activate after controlled acceptance.
+  { abbreviation: 'VT', isActive: true, name: 'Vermont', slug: 'vermont' },
+  // Package implemented 2026-10-25; activate after controlled acceptance.
+  { abbreviation: 'VA', isActive: true, name: 'Virginia', slug: 'virginia' },
   { abbreviation: 'WA', isActive: true, name: 'Washington', slug: 'washington' },
   { abbreviation: 'WV', isActive: true, name: 'West Virginia', slug: 'west-virginia' },
   { abbreviation: 'WI', isActive: true, name: 'Wisconsin', slug: 'wisconsin' },

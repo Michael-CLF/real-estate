@@ -36,3 +36,7 @@ Create its actual package and terms model first. Add its own manifest with schem
 Only declaration ownership changes. Shared policy algorithms, legal text, field schemas, signed contracts, template/version identities, disclosure timing and document-review pins are untouched. Backend module imports are different and must be built/deployed through the existing Functions workflow when adopting this patch. Commit/push also publishes the frontend through the existing IONOS process. No Firebase rules, indexes, secrets or backfill are introduced.
 
 The path audit's explicit dormant-Texas and exact legacy delete-only boundaries still apply. Typed `satisfies` checks validate policy object shape; the compiler-backed path audit validates actual state field paths. Existing behavior/PDF and live acceptance checks remain necessary.
+
+## October 25 state expansion
+
+The implemented inventory is now 46 manifests / 91 generated modules (45 frontend/backend pairs and North Carolina backend-only). Alaska, Connecticut, Vermont and Virginia each own their canonical manifest. Existing historical mapping snapshots are unchanged.

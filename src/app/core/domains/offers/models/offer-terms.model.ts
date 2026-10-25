@@ -6,6 +6,10 @@ import type { KentuckyOfferTerms } from '../state-contracts/kentucky/models/kent
 import type { RhodeIslandOfferTerms } from '../state-contracts/rhode-island/models/rhode-island-offer-terms.model';
 import type { TennesseeOfferTerms } from '../state-contracts/tennessee/models/tennessee-offer-terms.model';
 import type { WestVirginiaOfferTerms } from '../state-contracts/west-virginia/models/west-virginia-offer-terms.model';
+import type { AlaskaOfferTerms } from '../state-contracts/alaska/models/alaska-offer-terms.model';
+import type { ConnecticutOfferTerms } from '../state-contracts/connecticut/models/connecticut-offer-terms.model';
+import type { VermontOfferTerms } from '../state-contracts/vermont/models/vermont-offer-terms.model';
+import type { VirginiaOfferTerms } from '../state-contracts/virginia/models/virginia-offer-terms.model';
 import type { MaineOfferTerms } from '../state-contracts/maine/models/maine-offer-terms.model';
 import type { MississippiOfferTerms } from '../state-contracts/mississippi/models/mississippi-offer-terms.model';
 import type { ArkansasOfferTerms } from '../state-contracts/arkansas/models/arkansas-offer-terms.model';
@@ -141,6 +145,10 @@ export type StateOfferTerms =
   | RhodeIslandOfferTerms
   | TennesseeOfferTerms
   | WestVirginiaOfferTerms
+  | AlaskaOfferTerms
+  | ConnecticutOfferTerms
+  | VermontOfferTerms
+  | VirginiaOfferTerms
   | NevadaOfferTerms
   | NorthDakotaOfferTerms
   | PennsylvaniaOfferTerms

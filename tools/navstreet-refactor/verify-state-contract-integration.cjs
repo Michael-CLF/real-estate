@@ -10,7 +10,7 @@ const frontPath=path.join(project,'src/app/features/offers/engine/state-offer-re
 const frontSource=fs.readFileSync(frontPath,'utf8');
 const frontend=load(frontSource);
 const backend=require(path.join(project,'functions/lib/offers/state-contracts/state-contract-registry.js'));
-const states={KY:'kentucky',RI:'rhode-island',TN:'tennessee',WV:'west-virginia',GA:'georgia',NV:'nevada',ND:'north-dakota',PA:'pennsylvania',NC:'north-carolina',TX:'texas',OK:'oklahoma',UT:'utah',WI:'wisconsin',FL:'florida',LA:'louisiana',CO:'colorado',CA:'california',SC:'south-carolina',MI:'michigan',MN:'minnesota',AZ:'arizona',ID:'idaho',OR:'oregon',MO:'missouri',NE:'nebraska',NH:'new-hampshire',AL:'alabama',IN:'indiana',KS:'kansas',OH:'ohio',DE:'delaware',WA:'washington',IA:'iowa',MT:'montana',MD:'maryland',NM:'new-mexico',SD:'south-dakota',WY:'wyoming',ME:'maine',MS:'mississippi',AR:'arkansas',IL:'illinois'};
+const states={AK:'alaska',CT:'connecticut',VT:'vermont',VA:'virginia',KY:'kentucky',RI:'rhode-island',TN:'tennessee',WV:'west-virginia',GA:'georgia',NV:'nevada',ND:'north-dakota',PA:'pennsylvania',NC:'north-carolina',TX:'texas',OK:'oklahoma',UT:'utah',WI:'wisconsin',FL:'florida',LA:'louisiana',CO:'colorado',CA:'california',SC:'south-carolina',MI:'michigan',MN:'minnesota',AZ:'arizona',ID:'idaho',OR:'oregon',MO:'missouri',NE:'nebraska',NH:'new-hampshire',AL:'alabama',IN:'indiana',KS:'kansas',OH:'ohio',DE:'delaware',WA:'washington',IA:'iowa',MT:'montana',MD:'maryland',NM:'new-mexico',SD:'south-dakota',WY:'wyoming',ME:'maine',MS:'mississippi',AR:'arkansas',IL:'illinois'};
 function stringsForProperty(source,property) {
  const values=[];const tree=ts.createSourceFile('file.ts',source,ts.ScriptTarget.Latest,true);
  function visit(node){if(ts.isPropertyAssignment(node)&&node.name.getText(tree).replace(/['"]/g,'')===property&&ts.isStringLiteral(node.initializer))values.push(node.initializer.text);ts.forEachChild(node,visit);}visit(tree);return values;
@@ -45,4 +45,4 @@ for(const [code,folder] of Object.entries(states)) {
 }
 assert.equal(frontend.getEnabledStateOfferRegistration('XX'),null);
 assert.throws(()=>backend.requireEnabledStateContractPackage('XX'),/not yet available/);
-console.log('PASS: 42-package contract integration; launch registration, contract selection, unique template identities, backend hooks, lazy PDF wiring and unknown-state rejection.');
+console.log('PASS: 46-package contract integration; launch registration, contract selection, unique template identities, backend hooks, lazy PDF wiring and unknown-state rejection.');

@@ -90,6 +90,10 @@ export interface MarketplaceListing {
     rhodeIsland?: {};
     tennessee?: {usesCentralTime?:boolean|null;propertyNoticesApply?:boolean|null;};
     westVirginia?: {};
+    alaska?: {usesAleutianTime?:boolean|null;};
+    connecticut?: {};
+    vermont?: {};
+    virginia?: {affirmativeNoticesApply?:boolean|null;};
   nevada?: {usesMountainTime?:boolean|null;openRangeAdjacent?:boolean|null;};
   northDakota?: {usesMountainTime?:boolean|null;disclosureExemptionClaimed?:boolean|null;radonTestsKnown?:boolean|null;};
   pennsylvania?: {disclosureExemptionClaimed?:boolean|null;};

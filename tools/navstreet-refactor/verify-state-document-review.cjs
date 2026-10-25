@@ -7,7 +7,7 @@ function load(file){if(cache.has(file))return cache.get(file);const module={expo
 const baseline=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/document-review-before.json'),'utf8'));
 const normalize=x=>JSON.parse(JSON.stringify(x));let comparisons=0;
 const states=path.join(root,'src/app/features/offers/states');
-assert.equal(baseline.length,41);
+assert.equal(baseline.length,45);
 for(const row of baseline){
  const dir=path.join(states,row.state),pkg=load(path.join(dir,row.state+'-offer-package.ts'))[row.package];
  const hook=pkg.documentReview;assert(hook,'Package must expose its hook: '+row.state);
@@ -48,4 +48,4 @@ const t={disclosures:{leadPaintStatus:'received',propertyConditionStatus:'pendin
 assert.throws(()=>assert.deepEqual(normalize(ky.validate(t,[])),[]));
 const out=ky.applyChange(t,t,{fieldPath:'disclosures.leadPaintStatus',value:'received'},[{documentType:'lead-based-paint',versionId:'exact-v1'}],'buyer');
 assert.throws(()=>assert.equal(out.documentVersions['lead-based-paint'],'replacement-v2'));
-console.log(`PASS: ${comparisons} historical document-review comparisons across 41 package hooks; missing uploads, receipt statuses, existing/absent pins, buyer/seller changes, input immutability, entry boundaries and 2 negative controls.`);
+console.log(`PASS: ${comparisons} historical document-review comparisons across 45 package hooks; missing uploads, receipt statuses, existing/absent pins, buyer/seller changes, input immutability, entry boundaries and 2 negative controls.`);

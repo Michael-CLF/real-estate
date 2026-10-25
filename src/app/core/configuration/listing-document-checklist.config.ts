@@ -6,6 +6,10 @@ import {getKentuckyListingDocumentChecklist} from '../domains/listings/state-pac
 import {getRhodeIslandListingDocumentChecklist} from '../domains/listings/state-packages/rhode-island/rhode-island-document-checklist';
 import {getTennesseeListingDocumentChecklist} from '../domains/listings/state-packages/tennessee/tennessee-document-checklist';
 import {getWestVirginiaListingDocumentChecklist} from '../domains/listings/state-packages/west-virginia/west-virginia-document-checklist';
+import {getAlaskaListingDocumentChecklist} from '../domains/listings/state-packages/alaska/alaska-document-checklist';
+import {getConnecticutListingDocumentChecklist} from '../domains/listings/state-packages/connecticut/connecticut-document-checklist';
+import {getVermontListingDocumentChecklist} from '../domains/listings/state-packages/vermont/vermont-document-checklist';
+import {getVirginiaListingDocumentChecklist} from '../domains/listings/state-packages/virginia/virginia-document-checklist';
 import {getMaineListingDocumentChecklist} from '../domains/listings/state-packages/maine/maine-document-checklist';
 import {getMississippiListingDocumentChecklist} from '../domains/listings/state-packages/mississippi/mississippi-document-checklist';
 import {getArkansasListingDocumentChecklist} from '../domains/listings/state-packages/arkansas/arkansas-document-checklist';
@@ -210,6 +214,10 @@ export function getListingDocumentChecklist(state: string, facts: ListingCheckli
   if (code === 'RI') return getRhodeIslandListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'TN') return getTennesseeListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'WV') return getWestVirginiaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'AK') return getAlaskaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'CT') return getConnecticutListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'VT') return getVermontListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
+  if (code === 'VA') return getVirginiaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'NV') return getNevadaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'ND') return getNorthDakotaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);
   if (code === 'PA') return getPennsylvaniaListingDocumentChecklist(getStateDisclosureRequirements(code),facts);

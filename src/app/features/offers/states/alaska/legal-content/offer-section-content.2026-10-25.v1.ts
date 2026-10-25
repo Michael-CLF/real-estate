@@ -1,0 +1,29 @@
+/** Immutable UI wording baseline, extracted without legal or contract revision.
+ * Preserve this version. Future wording belongs in a new version with explicit
+ * state-owned template/revision routing; never repoint historical consumers. */
+export const SECTION_LEGAL_CONTENT_REVISION_20261025_V1 = "2026-10-25.ui-baseline.v1" as const;
+
+export const SECTION_LEGAL_CONTENT_20261025_V1 = Object.freeze({
+  "condominium_condominium_information_helpText": "For a covered common-interest resale, AS 34.08.590 requires governing documents and an association resale certificate. The association responds within ten days of written request and the applicable fee. The buyer may void until delivery and for five days thereafter or conveyance, whichever first occurs. Actual statutory scope and transfer exceptions, including any qualifying affidavit route, require documented support. NavStreet collects the applicable packet or supported exception before offers as an early-collection policy; it preserves statutory rights.",
+  "condominium_helpText": "Condominium ownership determines applicability even when dues are zero or the listing reports no separate HOA.",
+  "residential_sale_legal_description_helpText": "Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.",
+  "residential_sale_included_by_default_label": "The property includes existing improvements and installed fixtures, plus seller-owned appliances expressly identified in this agreement, except items expressly excluded below.",
+  "residential_sale_excluded_helpText": "List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.",
+  "residential_sale_leased_items_helpText": "Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.",
+  "residential_sale_holder_helpText": "Optional at offer stage. If blank, the parties will jointly select a qualified independent escrow holder.",
+  "residential_sale_funding_helpText": "This resale agreement currently supports cash and conventional loans. Government loan programs require separate program-specific addenda.",
+  "residential_sale_conditions_description": "The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.",
+  "residential_sale_inspection_period_helpText": "The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.",
+  "residential_sale_funding_condition_label": "A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.",
+  "residential_sale_sale_property_terms_helpText": "Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.",
+  "residential_sale_deadlines_description": "Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.",
+  "residential_sale_seller_date_helpText": "This optional date does not postpone any mandatory pre-agreement disclosure obligation.",
+  "residential_sale_possession_note_label": "Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.",
+  "residential_sale_closing_agent_helpText": "Optional at offer stage; the parties may designate the closing agent by written agreement.",
+  "residential_sale_condition_helpText": "Before the buyer makes a written offer, AS 34.70 requires the seller to deliver the completed current Alaska residential transfer disclosure unless a specific exemption or genuinely executed lawful waiver applies. Upload the disclosure or supported exemption evidence. A seller cannot waive disclosure for a buyer. Later material amendments retain applicable statutory termination rights; receipt here does not waive them.",
+  "residential_sale_records_helpText": "Investigate access, title and mineral interests, seismic and flood risks, water, sewage, heating and environmental conditions. Disclosure is not a warranty or substitute for inspections. This ordinary resale agreement excludes developer/new-construction, cooperative, leasehold and installment land transactions.",
+  "residential_sale_leadPaintStatus_helpText": "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure.",
+  "residential_sale_state_rights_helpText": "Before the buyer makes a written offer, AS 34.70 requires the seller to deliver the completed current Alaska residential transfer disclosure unless a specific exemption or genuinely executed lawful waiver applies. Upload the disclosure or supported exemption evidence. A seller cannot waive disclosure for a buyer. Later material amendments retain applicable statutory termination rights; receipt here does not waive them. Investigate access, title and mineral interests, seismic and flood risks, water, sewage, heating and environmental conditions. Disclosure is not a warranty or substitute for inspections. This ordinary resale agreement excludes developer/new-construction, cooperative, leasehold and installment land transactions.",
+  "residential_sale_additional_terms_helpText": "Leave blank if there are no other terms. Ask a Alaska attorney to review any new legal language.",
+  "residential_sale_sale_terms_location_label": "Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here."
+} as const);

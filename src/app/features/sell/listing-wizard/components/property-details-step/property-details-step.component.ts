@@ -64,6 +64,10 @@ export interface PropertyDetailsSellerStatementsFormValue {
   rhodeIsland?: {};
   tennessee?: {usesCentralTime:boolean|null;propertyNoticesApply:boolean|null;};
   westVirginia?: {};
+  alaska?: {usesAleutianTime:boolean|null;};
+  connecticut?: {};
+  vermont?: {};
+  virginia?: {affirmativeNoticesApply:boolean|null;};
   nevada?: {usesMountainTime:boolean|null;openRangeAdjacent:boolean|null;};
   northDakota?: {usesMountainTime:boolean|null;disclosureExemptionClaimed:boolean|null;radonTestsKnown:boolean|null;};
   pennsylvania?: {disclosureExemptionClaimed:boolean|null;};
@@ -463,6 +467,10 @@ export class PropertyDetailsStepComponent
         rhodeIsland: getStateListingFormFactory('sellerStatements.rhodeIsland')(this.fb),
         tennessee: getStateListingFormFactory('sellerStatements.tennessee')(this.fb),
         westVirginia: getStateListingFormFactory('sellerStatements.westVirginia')(this.fb),
+        alaska: getStateListingFormFactory('sellerStatements.alaska')(this.fb),
+        connecticut: getStateListingFormFactory('sellerStatements.connecticut')(this.fb),
+        vermont: getStateListingFormFactory('sellerStatements.vermont')(this.fb),
+        virginia: getStateListingFormFactory('sellerStatements.virginia')(this.fb),
         nevada: getStateListingFormFactory('sellerStatements.nevada')(this.fb),
         northDakota: getStateListingFormFactory('sellerStatements.northDakota')(this.fb),
         pennsylvania: getStateListingFormFactory('sellerStatements.pennsylvania')(this.fb),
@@ -586,6 +594,10 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements.controls.rhodeIsland.patchValue(getStateListingFormRestorer('sellerStatements.rhodeIsland')(initialValue?.sellerStatements?.rhodeIsland), {emitEvent: false});
       this.form.controls.sellerStatements.controls.tennessee.patchValue(getStateListingFormRestorer('sellerStatements.tennessee')(initialValue?.sellerStatements?.tennessee), {emitEvent: false});
       this.form.controls.sellerStatements.controls.westVirginia.patchValue(getStateListingFormRestorer('sellerStatements.westVirginia')(initialValue?.sellerStatements?.westVirginia), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.alaska.patchValue(getStateListingFormRestorer('sellerStatements.alaska')(initialValue?.sellerStatements?.alaska), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.connecticut.patchValue(getStateListingFormRestorer('sellerStatements.connecticut')(initialValue?.sellerStatements?.connecticut), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.vermont.patchValue(getStateListingFormRestorer('sellerStatements.vermont')(initialValue?.sellerStatements?.vermont), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.virginia.patchValue(getStateListingFormRestorer('sellerStatements.virginia')(initialValue?.sellerStatements?.virginia), {emitEvent: false});
       this.form.controls.sellerStatements.controls.nevada.patchValue(getStateListingFormRestorer('sellerStatements.nevada')(initialValue?.sellerStatements?.nevada), {emitEvent: false});
       this.form.controls.sellerStatements.controls.northDakota.patchValue(getStateListingFormRestorer('sellerStatements.northDakota')(initialValue?.sellerStatements?.northDakota), {emitEvent: false});
       this.form.controls.sellerStatements.controls.pennsylvania.patchValue(getStateListingFormRestorer('sellerStatements.pennsylvania')(initialValue?.sellerStatements?.pennsylvania), {emitEvent: false});

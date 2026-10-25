@@ -12,6 +12,186 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  AK: [
+  {
+    "formCode": "AK-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "alaska-seller-disclosure",
+    "title": "Alaska seller disclosure / supported exception",
+    "shortTitle": "Alaska seller disclosure / supported exception",
+    "description": "Before the buyer makes a written offer, AS 34.70 requires the seller to deliver the completed current Alaska residential transfer disclosure unless a specific exemption or genuinely executed lawful waiver applies. Upload the disclosure or supported exemption evidence. A seller cannot waive disclosure for a buyer. Later material amendments retain applicable statutory termination rights; receipt here does not waive them.",
+    "sourceInstructions": "Before the buyer makes a written offer, AS 34.70 requires the seller to deliver the completed current Alaska residential transfer disclosure unless a specific exemption or genuinely executed lawful waiver applies. Upload the disclosure or supported exemption evidence. A seller cannot waive disclosure for a buyer. Later material amendments retain applicable statutory termination rights; receipt here does not waive them.",
+    "required": false,
+    "officialFormUrl": "https://www.commerce.alaska.gov/web/cbpl/ProfessionalLicensing/RealEstateCommission/ConsumerInformation/Forms"
+  },
+  {
+    "formCode": "AK-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "alaska-statutory-packet",
+    "title": "Alaska applicable property-specific notices",
+    "shortTitle": "Alaska applicable property-specific notices",
+    "description": "Investigate access, title and mineral interests, seismic and flood risks, water, sewage, heating and environmental conditions. Disclosure is not a warranty or substitute for inspections. This ordinary resale agreement excludes developer/new-construction, cooperative, leasehold and installment land transactions.",
+    "sourceInstructions": "Investigate access, title and mineral interests, seismic and flood risks, water, sewage, heating and environmental conditions. Disclosure is not a warranty or substitute for inspections. This ordinary resale agreement excludes developer/new-construction, cooperative, leasehold and installment land transactions.",
+    "required": false,
+    "officialFormUrl": "https://www.commerce.alaska.gov/web/cbpl/ProfessionalLicensing/RealEstateCommission/ConsumerInformation/Forms"
+  },
+  {
+    "formCode": "AK-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "alaska-association-documents",
+    "title": "Alaska association resale records / supported exception",
+    "shortTitle": "Alaska association resale records / supported exception",
+    "description": "For a covered common-interest resale, AS 34.08.590 requires governing documents and an association resale certificate. The association responds within ten days of written request and the applicable fee. The buyer may void until delivery and for five days thereafter or conveyance, whichever first occurs. Actual statutory scope and transfer exceptions, including any qualifying affidavit route, require documented support. NavStreet collects the applicable packet or supported exception before offers as an early-collection policy; it preserves statutory rights.",
+    "sourceInstructions": "For a covered common-interest resale, AS 34.08.590 requires governing documents and an association resale certificate. The association responds within ten days of written request and the applicable fee. The buyer may void until delivery and for five days thereafter or conveyance, whichever first occurs. Actual statutory scope and transfer exceptions, including any qualifying affidavit route, require documented support. NavStreet collects the applicable packet or supported exception before offers as an early-collection policy; it preserves statutory rights.",
+    "required": false,
+    "officialFormUrl": "https://www.commerce.alaska.gov/web/cbpl/ProfessionalLicensing/RealEstateCommission/ConsumerInformation/Forms"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing requires the federal disclosure, known records and EPA pamphlet before the buyer is bound. Year built controls applicability.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
+  CT: [
+  {
+    "formCode": "CT-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "connecticut-seller-disclosure",
+    "title": "Connecticut seller disclosure / supported exception",
+    "shortTitle": "Connecticut seller disclosure / supported exception",
+    "description": "Connecticut section 20-327b requires the applicable residential condition report before the purchaser executes a binder, purchase contract, option or purchase-option lease, subject to its actual exemptions. Provide the current report and required supporting records, or a statement identifying the supported exception; an applicable foreclosure foundation report remains separate from a general exemption. Section 20-327c requires a $500 closing credit if a required report was not furnished, subject to its exception. This agreement preserves that credit and other nonwaivable remedies.",
+    "sourceInstructions": "Connecticut section 20-327b requires the applicable residential condition report before the purchaser executes a binder, purchase contract, option or purchase-option lease, subject to its actual exemptions. Provide the current report and required supporting records, or a statement identifying the supported exception; an applicable foreclosure foundation report remains separate from a general exemption. Section 20-327c requires a $500 closing credit if a required report was not furnished, subject to its exception. This agreement preserves that credit and other nonwaivable remedies.",
+    "required": false,
+    "officialFormUrl": "https://prdext3.cga.ct.gov/current/pub/chap_392.htm#sec_20-327b"
+  },
+  {
+    "formCode": "CT-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "connecticut-statutory-packet",
+    "title": "Connecticut applicable property-specific notices",
+    "shortTitle": "Connecticut applicable property-specific notices",
+    "description": "Review foundation and pyrrhotite information, prior tests, radon, water and sewage, underground tanks, flood conditions, permits and applicable notices in the current disclosure. Comply with applicable smoke/carbon-monoxide affidavit requirements at transfer. The report reflects actual seller knowledge and is not a warranty; buyer inspections remain available under the negotiated period.",
+    "sourceInstructions": "Review foundation and pyrrhotite information, prior tests, radon, water and sewage, underground tanks, flood conditions, permits and applicable notices in the current disclosure. Comply with applicable smoke/carbon-monoxide affidavit requirements at transfer. The report reflects actual seller knowledge and is not a warranty; buyer inspections remain available under the negotiated period.",
+    "required": false,
+    "officialFormUrl": "https://prdext3.cga.ct.gov/current/pub/chap_392.htm#sec_20-327b"
+  },
+  {
+    "formCode": "CT-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "connecticut-association-documents",
+    "title": "Connecticut association resale records / supported exception",
+    "shortTitle": "Connecticut association resale records / supported exception",
+    "description": "For a covered resale under section 47-270, provide governing documents and the current association certificate, including required assessments, budget, insurance, litigation and other particulars. The association generally has ten business days after written request and the prescribed fee. The buyer may cancel until the applicable period expires: five days after delivery, or seven days after registered, certified or certificate-evidenced mailing, excluding Saturdays, Sundays and legal holidays, or conveyance, whichever occurs first. Apply the actual community and transfer exceptions, including qualifying small-community provisions. The October 1, 2026 condition-report notice also advises requesting a reserve-fund report for communities over twelve units; where a qualifying smaller community has no certificate, seek independent professional and resident information. NavStreet collects the packet or supported scope/exception evidence before offers; this early collection does not shorten statutory rights.",
+    "sourceInstructions": "For a covered resale under section 47-270, provide governing documents and the current association certificate, including required assessments, budget, insurance, litigation and other particulars. The association generally has ten business days after written request and the prescribed fee. The buyer may cancel until the applicable period expires: five days after delivery, or seven days after registered, certified or certificate-evidenced mailing, excluding Saturdays, Sundays and legal holidays, or conveyance, whichever occurs first. Apply the actual community and transfer exceptions, including qualifying small-community provisions. The October 1, 2026 condition-report notice also advises requesting a reserve-fund report for communities over twelve units; where a qualifying smaller community has no certificate, seek independent professional and resident information. NavStreet collects the packet or supported scope/exception evidence before offers; this early collection does not shorten statutory rights.",
+    "required": false,
+    "officialFormUrl": "https://prdext3.cga.ct.gov/current/pub/chap_392.htm#sec_20-327b"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing requires the federal disclosure, known records and EPA pamphlet before the buyer is bound. Year built controls applicability.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
+  VT: [
+  {
+    "formCode": "VT-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "vermont-seller-disclosure",
+    "title": "Vermont seller disclosure / supported exception",
+    "shortTitle": "Vermont seller disclosure / supported exception",
+    "description": "This private-owner Vermont resale workflow does not impose a universal seller condition form. Disclose known material defects truthfully, provide existing records and do not conceal defects. Buyer should investigate condition, permits, access, wastewater, potable water, land-use restrictions and title during the negotiated inspection period.",
+    "sourceInstructions": "This private-owner Vermont resale workflow does not impose a universal seller condition form. Disclose known material defects truthfully, provide existing records and do not conceal defects. Buyer should investigate condition, permits, access, wastewater, potable water, land-use restrictions and title during the negotiated inspection period.",
+    "required": false,
+    "officialFormUrl": "https://legislature.vermont.gov/statutes/section/27a/004/00109"
+  },
+  {
+    "formCode": "VT-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "vermont-statutory-packet",
+    "title": "Vermont applicable property-specific notices",
+    "shortTitle": "Vermont applicable property-specific notices",
+    "description": "For pre-1978 housing, provide Vermont-approved lead educational materials and known lead records in addition to the federal packet. Covered rental housing or child-care facilities also require current IRC compliance records and the Vermont Lead Law Disclosure and IRC Verification Form completed and sent to the Health Department before the purchase agreement is executed. Upload the applicable complete Vermont packet. Seller must satisfy applicable smoke/carbon-monoxide installation and transfer certification requirements by closing and resolve required fire-safety approvals; these later duties are not automatic pre-offer upload gates.",
+    "sourceInstructions": "For pre-1978 housing, provide Vermont-approved lead educational materials and known lead records in addition to the federal packet. Covered rental housing or child-care facilities also require current IRC compliance records and the Vermont Lead Law Disclosure and IRC Verification Form completed and sent to the Health Department before the purchase agreement is executed. Upload the applicable complete Vermont packet. Seller must satisfy applicable smoke/carbon-monoxide installation and transfer certification requirements by closing and resolve required fire-safety approvals; these later duties are not automatic pre-offer upload gates.",
+    "required": false,
+    "officialFormUrl": "https://legislature.vermont.gov/statutes/section/27a/004/00109"
+  },
+  {
+    "formCode": "VT-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "vermont-association-documents",
+    "title": "Vermont association resale records / supported exception",
+    "shortTitle": "Vermont association resale records / supported exception",
+    "description": "For a covered common-interest resale, 27A V.S.A. 4-109 requires governing documents and a resale certificate. The association has ten days after request to supply the certificate. The purchaser may void the purchase contract until delivery and for five days thereafter. Applicable regime and transfer exceptions must be established, not inferred from zero dues or the physical property label. NavStreet collects the packet or documented scope/exception evidence before offers as an early-collection policy without reducing statutory rights.",
+    "sourceInstructions": "For a covered common-interest resale, 27A V.S.A. 4-109 requires governing documents and a resale certificate. The association has ten days after request to supply the certificate. The purchaser may void the purchase contract until delivery and for five days thereafter. Applicable regime and transfer exceptions must be established, not inferred from zero dues or the physical property label. NavStreet collects the packet or documented scope/exception evidence before offers as an early-collection policy without reducing statutory rights.",
+    "required": false,
+    "officialFormUrl": "https://legislature.vermont.gov/statutes/section/27a/004/00109"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing requires the federal disclosure, known records and EPA pamphlet before the buyer is bound. Year built controls applicability.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
+  VA: [
+  {
+    "formCode": "VA-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "virginia-seller-disclosure",
+    "title": "Virginia seller disclosure / supported exception",
+    "shortTitle": "Virginia seller disclosure / supported exception",
+    "description": "For a covered Virginia transfer, furnish the current Real Estate Board residential property disclosure statement before ratification under sections 55.1-703 and 55.1-709, or identify and document an actual section 55.1-702 exception. This is a buyer-beware notice, not a seller condition warranty. Required affirmative notices remain independent. Delayed delivery can carry statutory termination rights; no waiver is created here. Use the official version effective on delivery, including the January 1, 2027 revision when applicable; section 55.1-709 preserves correctly delivered earlier notices for an existing ratified transaction.",
+    "sourceInstructions": "For a covered Virginia transfer, furnish the current Real Estate Board residential property disclosure statement before ratification under sections 55.1-703 and 55.1-709, or identify and document an actual section 55.1-702 exception. This is a buyer-beware notice, not a seller condition warranty. Required affirmative notices remain independent. Delayed delivery can carry statutory termination rights; no waiver is created here. Use the official version effective on delivery, including the January 1, 2027 revision when applicable; section 55.1-709 preserves correctly delivered earlier notices for an existing ratified transaction.",
+    "required": false,
+    "officialFormUrl": "https://law.lis.virginia.gov/vacode/title55.1/chapter7/"
+  },
+  {
+    "formCode": "VA-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "virginia-statutory-packet",
+    "title": "Virginia applicable property-specific notices",
+    "shortTitle": "Virginia applicable property-specific notices",
+    "description": "Provide applicable affirmative notices for military-air-installation zones, pending building/zoning violations, lis pendens, unremediated methamphetamine manufacture, stormwater-management facilities and repetitive flood loss, including any duties surviving a general transfer exception. Select the seller applicability question accurately and upload the complete notice packet when applicable. Buyer should investigate flood, drainage, water/sewage, zoning, access and other buyer-beware matters; this does not waive nonwaivable remedies.",
+    "sourceInstructions": "Provide applicable affirmative notices for military-air-installation zones, pending building/zoning violations, lis pendens, unremediated methamphetamine manufacture, stormwater-management facilities and repetitive flood loss, including any duties surviving a general transfer exception. Select the seller applicability question accurately and upload the complete notice packet when applicable. Buyer should investigate flood, drainage, water/sewage, zoning, access and other buyer-beware matters; this does not waive nonwaivable remedies.",
+    "required": false,
+    "officialFormUrl": "https://law.lis.virginia.gov/vacode/title55.1/chapter7/"
+  },
+  {
+    "formCode": "VA-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "virginia-association-documents",
+    "title": "Virginia association resale records / supported exception",
+    "shortTitle": "Virginia association resale records / supported exception",
+    "description": "Virginia Resale Disclosure Act sections 55.1-2309 through 55.1-2312 require covered association resale certificates, subject to section 55.1-2317. Obtain all applicable association records. This agreement uses the statutory default three-day cancellation period: from ratification when delivered earlier, or from receipt when delivered later; if no certificate or unavailability notice is delivered, cancellation remains available before settlement. Multiple associations run from the last delivery. Preserve written notice, deposit-return and other statutory rights. NavStreet collects the certificate, lawful unavailability notice or supported exception evidence before offers without changing the legal delivery/cancellation rules.",
+    "sourceInstructions": "Virginia Resale Disclosure Act sections 55.1-2309 through 55.1-2312 require covered association resale certificates, subject to section 55.1-2317. Obtain all applicable association records. This agreement uses the statutory default three-day cancellation period: from ratification when delivered earlier, or from receipt when delivered later; if no certificate or unavailability notice is delivered, cancellation remains available before settlement. Multiple associations run from the last delivery. Preserve written notice, deposit-return and other statutory rights. NavStreet collects the certificate, lawful unavailability notice or supported exception evidence before offers without changing the legal delivery/cancellation rules.",
+    "required": false,
+    "officialFormUrl": "https://law.lis.virginia.gov/vacode/title55.1/chapter7/"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing requires the federal disclosure, known records and EPA pamphlet before the buyer is bound. Year built controls applicability.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
   KY: [
   {
     "formCode": "KY-SELLER-DISCLOSURE",

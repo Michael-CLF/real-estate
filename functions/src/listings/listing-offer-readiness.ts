@@ -1,7 +1,7 @@
 /** Readiness is a display hint only. Offer creation/submission always rechecks current records.
  * Bump POLICY_REVISION whenever an upload gate changes, including future state additions.
  */
-export const OFFER_READINESS_POLICY_REVISION = '2026-10-25.v1';
+export const OFFER_READINESS_POLICY_REVISION = '2026-10-25.v2';
 export const OFFER_READINESS_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 export interface ListingOfferReadiness {
   schemaVersion: 1;

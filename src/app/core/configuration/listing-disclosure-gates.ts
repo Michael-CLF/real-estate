@@ -14,6 +14,11 @@ export interface ListingDisclosureGateFacts {
  readonly rhodeIsland?: {};
  readonly tennessee?: {usesCentralTime?:boolean|null;propertyNoticesApply?:boolean|null;}
  readonly westVirginia?: {};
+ readonly alaska?: {usesAleutianTime?:boolean|null;};
+ readonly connecticut?: {};
+ readonly vermont?: {};
+ readonly virginia?: {affirmativeNoticesApply?:boolean|null;};
+
 
  readonly nevada?: {usesMountainTime?:boolean|null;openRangeAdjacent?:boolean|null;};
  readonly northDakota?: {usesMountainTime?:boolean|null;disclosureExemptionClaimed?:boolean|null;radonTestsKnown?:boolean|null;};
@@ -47,6 +52,10 @@ export function isListingLeadUploadRequired(code: string, facts: ListingDisclosu
 export function getListingUploadGateDocumentTypes(
   code: string, facts: ListingDisclosureGateFacts, now: number,
 ): readonly DisclosureDocumentType[] {
+  if(code==='AK')return [...(true?['alaska-seller-disclosure' as const]:[]),...((facts.ownersAssociationApplies===true||facts.contractFacts?.isCondominium===true||facts.propertyType==='condo')?['alaska-association-documents' as const]:[]),...(false?['alaska-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
+  if(code==='CT')return [...(true?['connecticut-seller-disclosure' as const]:[]),...((facts.ownersAssociationApplies===true||facts.contractFacts?.isCondominium===true||facts.propertyType==='condo')?['connecticut-association-documents' as const]:[]),...(false?['connecticut-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
+  if(code==='VT')return [...(false?['vermont-seller-disclosure' as const]:[]),...((facts.ownersAssociationApplies===true||facts.contractFacts?.isCondominium===true||facts.propertyType==='condo')?['vermont-association-documents' as const]:[]),...(!isFederalLeadExcluded(facts)?['vermont-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
+  if(code==='VA')return [...(true?['virginia-seller-disclosure' as const]:[]),...((facts.ownersAssociationApplies===true||facts.contractFacts?.isCondominium===true||facts.propertyType==='condo')?['virginia-association-documents' as const]:[]),...(facts.virginia?.affirmativeNoticesApply===true?['virginia-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
   if(code==='KY')return [...(false?['kentucky-seller-disclosure' as const]:[]),...((facts.contractFacts?.isCondominium===true||facts.propertyType==='condo')?['kentucky-association-documents' as const]:[]),...(false?['kentucky-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
   if(code==='RI')return [...(true?['rhode-island-seller-disclosure' as const]:[]),...((facts.contractFacts?.isCondominium===true||facts.propertyType==='condo')?['rhode-island-association-documents' as const]:[]),...(false?['rhode-island-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];
   if(code==='TN')return [...(true?['tennessee-seller-disclosure' as const]:[]),...(false?['tennessee-association-documents' as const]:[]),...((facts.tennessee?.propertyNoticesApply===true||facts.propertyType==='pud')?['tennessee-statutory-packet' as const]:[]),...(isListingLeadUploadRequired(code,facts)?['lead-based-paint' as const]:[])];

@@ -28,3 +28,7 @@ The contents are not generated from a mutable shared legal-text source at runtim
 The full CI command runs this audit before mapping/path/build/behavior checks. Existing package tests use actual imported text. One four-state check formerly searched raw source for Montana radon wording; it now checks assembled sections, keeping the same wording assertion. No behavior assertion is dropped.
 
 Adoption is frontend-only for this patch: apply, run the full checkpoint, commit all new catalog/test files and publish using existing IONOS hosting. No Functions deployment, Firebase rule/index change or readiness backfill is needed. Number3 document-review hooks remain separate work.
+
+## October 25 state expansion
+
+Alaska, Connecticut, Vermont and Virginia add four independent versioned catalogs and eight reviewed section assemblies. The original 41-state content/version records remain unchanged. Review state-specific statutes and official forms before authorizing new text; never copy another state’s legal rules merely to match its structure.

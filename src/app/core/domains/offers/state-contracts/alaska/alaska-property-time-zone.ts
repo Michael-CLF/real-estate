@@ -1,0 +1,2 @@
+export type AlaskaPropertyTimeZone='America/Anchorage'|'America/Adak';
+export function resolveAlaskaPropertyTimeZone(county:string|null|undefined,confirmed?:boolean|string|null):AlaskaPropertyTimeZone{if(!county?.trim())throw new Error('The property borough or census area is required.');if(confirmed===true||confirmed==='America/Adak')return 'America/Adak';if(confirmed===false||confirmed==='America/Anchorage')return 'America/Anchorage';throw new Error('Confirm Alaska or Hawaii-Aleutian time in the seller listing.');}
