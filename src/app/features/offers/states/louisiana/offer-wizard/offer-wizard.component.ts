@@ -204,14 +204,7 @@ protected readonly pendingDisclosureNotice = computed(() => {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      if (terms.disclosures.propertyDisclosureStatus === 'received' && !attached.has('louisiana-property-disclosure')) {
-        missing.push({ fieldPath: 'disclosures.propertyDisclosureStatus', severity: 'error', message: 'The seller must upload the signed Louisiana disclosure to this listing.' });
-      }
-      if (terms.disclosures.leadPaintStatus === 'received' && !attached.has('lead-based-paint')) {
-        missing.push({ fieldPath: 'disclosures.leadPaintStatus', severity: 'error', message: 'The seller must upload the signed lead disclosure packet.' });
-      }
+      const missing = LOUISIANA_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -260,7 +253,7 @@ protected readonly pendingDisclosureNotice = computed(() => {
         change.value
       );
 
-    this.terms.set(updatedTerms);
+    this.terms.set(LOUISIANA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './illinois-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/illinois/illinois-policy-mappings.generated';
 import {illinoisConditionRequired} from '../../../../core/domains/offers/state-contracts/illinois/illinois-disclosure-policy';
 import { getIllinoisCondominiumSections } from './questions/illinois-condominium.sections';
@@ -10,10 +12,10 @@ import { createIllinoisInitialOfferTerms } from '../../../../core/domains/offers
 import { ILLINOIS_RESIDENTIAL_SALE_SECTIONS } from './questions/illinois-residential-sale.sections';
 import { IllinoisOfferValidator } from './validators/illinois-offer.validator';
 const validator = new IllinoisOfferValidator();
-export const ILLINOIS_OFFER_PACKAGE: StateOfferPackage<IllinoisOfferTerms, IllinoisContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const ILLINOIS_OFFER_PACKAGE: StateOfferPackage<IllinoisOfferTerms, IllinoisContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'IL', stateName: 'Illinois',
   contracts: { navstreet_illinois_residential_sale_2026: ILLINOIS_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_illinois_condominium_resale_2026: ILLINOIS_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createIllinoisInitialOfferTerms(input),
   getSections: terms => getIllinoisCondominiumSections(terms,ILLINOIS_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||illinoisConditionRequired(terms)) && (!['disclosures.statutoryPacketStatus','disclosures.radonNoticeAcknowledged'].includes(q.fieldPath??'') || terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

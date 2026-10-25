@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './wisconsin-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/wisconsin/wisconsin-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createWisconsinInitialOfferTerms } from '../../../../core/domains/offer
 import { WISCONSIN_RESIDENTIAL_SALE_SECTIONS } from './questions/wisconsin-residential-sale.sections';
 import { WisconsinOfferValidator } from './validators/wisconsin-offer.validator';
 const validator = new WisconsinOfferValidator();
-export const WISCONSIN_OFFER_PACKAGE: StateOfferPackage<WisconsinOfferTerms, WisconsinContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const WISCONSIN_OFFER_PACKAGE: StateOfferPackage<WisconsinOfferTerms, WisconsinContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'WI', stateName: 'Wisconsin',
   contracts: { navstreet_wisconsin_residential_sale_2026: WISCONSIN_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createWisconsinInitialOfferTerms(input),
   getSections: () => WISCONSIN_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

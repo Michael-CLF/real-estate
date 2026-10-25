@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './tennessee-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/tennessee/tennessee-policy-mappings.generated';
 import {tennesseeConditionRequired} from '../../../../core/domains/offers/state-contracts/tennessee/tennessee-disclosure-policy';
 import { getTennesseeCondominiumSections } from './questions/tennessee-condominium.sections';
@@ -10,10 +12,10 @@ import { createTennesseeInitialOfferTerms } from '../../../../core/domains/offer
 import { TENNESSEE_RESIDENTIAL_SALE_SECTIONS } from './questions/tennessee-residential-sale.sections';
 import { TennesseeOfferValidator } from './validators/tennessee-offer.validator';
 const validator = new TennesseeOfferValidator();
-export const TENNESSEE_OFFER_PACKAGE: StateOfferPackage<TennesseeOfferTerms, TennesseeContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const TENNESSEE_OFFER_PACKAGE: StateOfferPackage<TennesseeOfferTerms, TennesseeContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'TN', stateName: 'Tennessee',
   contracts: { navstreet_tennessee_residential_sale_2026: TENNESSEE_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_tennessee_condominium_resale_2026: TENNESSEE_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createTennesseeInitialOfferTerms(input),
   getSections: terms => getTennesseeCondominiumSections(terms,TENNESSEE_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||tennesseeConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts)).map(q=> q.fieldPath && ((q.fieldPath==='disclosures.propertyConditionStatus'&&terms.disclosures.conditionDisclosureRequired)||(q.fieldPath==='disclosures.statutoryPacketStatus'&&terms.disclosures.requiredKnownFacts)||(q.fieldPath==='disclosures.hoaDocumentsStatus'&&terms.disclosures.associationPacketRequired)) ? {...q,validation:{required:true,message:'Review the uploaded seller document and select its actual receipt status.'}}:q)}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

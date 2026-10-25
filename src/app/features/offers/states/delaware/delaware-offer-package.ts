@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './delaware-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/delaware/delaware-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createDelawareInitialOfferTerms } from '../../../../core/domains/offers
 import { DELAWARE_RESIDENTIAL_SALE_SECTIONS } from './questions/delaware-residential-sale.sections';
 import { DelawareOfferValidator } from './validators/delaware-offer.validator';
 const validator = new DelawareOfferValidator();
-export const DELAWARE_OFFER_PACKAGE: StateOfferPackage<DelawareOfferTerms, DelawareContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const DELAWARE_OFFER_PACKAGE: StateOfferPackage<DelawareOfferTerms, DelawareContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'DE', stateName: 'Delaware',
   contracts: { navstreet_delaware_residential_sale_2026: DELAWARE_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createDelawareInitialOfferTerms(input),
   getSections: () => DELAWARE_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

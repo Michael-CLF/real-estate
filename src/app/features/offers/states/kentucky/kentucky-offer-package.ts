@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './kentucky-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/kentucky/kentucky-policy-mappings.generated';
 import {kentuckyConditionRequired} from '../../../../core/domains/offers/state-contracts/kentucky/kentucky-disclosure-policy';
 import { getKentuckyCondominiumSections } from './questions/kentucky-condominium.sections';
@@ -10,10 +12,10 @@ import { createKentuckyInitialOfferTerms } from '../../../../core/domains/offers
 import { KENTUCKY_RESIDENTIAL_SALE_SECTIONS } from './questions/kentucky-residential-sale.sections';
 import { KentuckyOfferValidator } from './validators/kentucky-offer.validator';
 const validator = new KentuckyOfferValidator();
-export const KENTUCKY_OFFER_PACKAGE: StateOfferPackage<KentuckyOfferTerms, KentuckyContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const KENTUCKY_OFFER_PACKAGE: StateOfferPackage<KentuckyOfferTerms, KentuckyContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'KY', stateName: 'Kentucky',
   contracts: { navstreet_kentucky_residential_sale_2026: KENTUCKY_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_kentucky_condominium_resale_2026: KENTUCKY_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createKentuckyInitialOfferTerms(input),
   getSections: terms => getKentuckyCondominiumSections(terms,KENTUCKY_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||kentuckyConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts)).map(q=> q.fieldPath && ((q.fieldPath==='disclosures.propertyConditionStatus'&&terms.disclosures.conditionDisclosureRequired)||(q.fieldPath==='disclosures.statutoryPacketStatus'&&terms.disclosures.requiredKnownFacts)||(q.fieldPath==='disclosures.hoaDocumentsStatus'&&terms.disclosures.associationPacketRequired)) ? {...q,validation:{required:true,message:'Review the uploaded seller document and select its actual receipt status.'}}:q)}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

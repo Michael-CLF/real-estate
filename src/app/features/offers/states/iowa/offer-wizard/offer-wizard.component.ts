@@ -1,5 +1,4 @@
 import { IOWA_DISCLOSURE_REVISION, IOWA_RADON_VERSION, IOWA_RADON_ASSET, iowaLateReceiptsCover } from '../../../../../core/domains/offers/state-contracts/iowa/iowa-disclosure-policy';
-import { pinIowaReviewedDocumentVersions } from '../services/iowa-reviewed-document-versions';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -216,16 +215,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'iowa-seller-disclosure', 'seller-signed Iowa property condition statement'],
-        [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'iowa-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'iowa-association-documents', 'seller-provided association resale packet'],
-      ] as const) {
-        if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = IOWA_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -277,7 +267,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    if (this.initiatedBy() === 'buyer') updatedTerms = pinIowaReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
+    updatedTerms = IOWA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, {fieldPath:change.fieldPath, value:change.value}, this.listingDisclosures(), this.initiatedBy());
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
   }

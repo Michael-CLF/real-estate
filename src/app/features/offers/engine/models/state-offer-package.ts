@@ -1,3 +1,4 @@
+import type { StateDocumentReview } from './state-document-review';
 import type {
   OfferParty,
 } from '../../../../core/domains/offers/models/offer-party.model';
@@ -66,6 +67,8 @@ export interface StateOfferPackage<
     >;
 
   readonly hoaPolicyIntegrated?: true;
+
+  readonly documentReview?: StateDocumentReview<TTerms>;
 
   prepareTerms?(terms:TTerms):TTerms;
 

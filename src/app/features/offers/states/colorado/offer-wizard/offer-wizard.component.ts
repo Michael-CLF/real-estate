@@ -244,48 +244,7 @@ export class OfferWizardComponent {
         },
       );
 
-      const attached = new Set(
-        this.listingDisclosures().map(document => document.documentType),
-      );
-
-      const missing: OfferValidationIssue[] = [];
-
-      if (
-        terms.disclosures.sellerPropertyStatus === 'received' &&
-        !attached.has('colorado-property-disclosure')
-      ) {
-        missing.push({
-          fieldPath: 'disclosures.sellerPropertyStatus',
-          severity: 'error',
-          message:
-            'The seller must upload the signed Colorado disclosure to this listing.',
-        });
-      }
-
-      if (
-        terms.disclosures.radonBrochureAcknowledged === true &&
-        !attached.has('colorado-radon-brochure')
-      ) {
-        missing.push({
-          fieldPath: 'disclosures.radonBrochureAcknowledged',
-          severity: 'error',
-          message:
-            'The seller must upload the Colorado radon brochure to this listing.',
-        });
-      }
-
-      if (
-        terms.disclosures.leadPaintStatus === 'received' &&
-        !attached.has('lead-based-paint')
-      ) {
-        missing.push({
-          fieldPath: 'disclosures.leadPaintStatus',
-          severity: 'error',
-          message:
-            'The seller must upload the signed lead disclosure packet.',
-        });
-      }
-
+      const missing = COLORADO_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [
         ...collectValidationIssues(result),
         ...missing,
@@ -334,7 +293,7 @@ export class OfferWizardComponent {
       change.value,
     );
 
-    this.terms.set(updatedTerms);
+    this.terms.set(COLORADO_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

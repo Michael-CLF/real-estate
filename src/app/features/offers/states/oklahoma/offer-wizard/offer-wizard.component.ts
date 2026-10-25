@@ -173,6 +173,7 @@ export class OfferWizardComponent {
 
       return [
         ...result.errors,
+        ...OKLAHOMA_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures()),
         ...result.warnings,
       ];
     }
@@ -218,7 +219,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    this.terms.set(updatedTerms);
+    this.terms.set(OKLAHOMA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), undefined));
     this.submissionAttempted.set(false);
   }
 

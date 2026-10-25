@@ -1,4 +1,4 @@
-import { pinMissouriReviewedDocumentVersions } from '../services/missouri-reviewed-document-versions';
+import { MISSOURI_OFFER_PACKAGE } from '../missouri-offer-package';
 import { selectMissouriContract } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-contract-selection';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveMissouriPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/missouri/missouri-property-time-zone';
@@ -396,7 +396,7 @@ export class MissouriOfferEntryComponent
 
   private lastReviewedTerms: MissouriOfferTerms | null = null;
   private prepareDraftChange(change: MissouriOfferDraftChange): MissouriOfferDraftChange {
-    const terms = pinMissouriReviewedDocumentVersions(this.lastReviewedTerms ?? this.currentVersion()!.terms, change.terms, this.listingDisclosures());
+    const terms = MISSOURI_OFFER_PACKAGE.documentReview!.prepareDraft!(this.lastReviewedTerms ?? this.currentVersion()!.terms, change.terms, this.listingDisclosures());
     this.lastReviewedTerms = terms;
     return {...change,terms};
   }

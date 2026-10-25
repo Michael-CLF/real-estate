@@ -1,5 +1,5 @@
 import {selectMinnesotaContract} from '../../../../../core/domains/offers/state-contracts/minnesota/minnesota-contract-selection';
-import {pinMinnesotaReviewedDocumentVersions} from '../services/minnesota-reviewed-document-versions';
+import { MINNESOTA_OFFER_PACKAGE } from '../minnesota-offer-package';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
 import { offerExpirationAfterHours } from '../../../engine/offer-expiration';
@@ -396,7 +396,7 @@ export class MinnesotaOfferEntryComponent
   private prepareDraftChange(change:MinnesotaOfferDraftChange):MinnesotaOfferDraftChange {
     const current=this.lastReviewedTerms ?? this.currentVersion()?.terms;
     if(!current)return change;
-    const terms=pinMinnesotaReviewedDocumentVersions(current,change.terms,this.listingDisclosures());
+    const terms=MINNESOTA_OFFER_PACKAGE.documentReview!.prepareDraft!(current,change.terms,this.listingDisclosures());
     this.lastReviewedTerms=terms;
     return {...change,terms};
   }

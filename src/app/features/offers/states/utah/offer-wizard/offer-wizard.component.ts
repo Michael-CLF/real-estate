@@ -173,15 +173,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'utah-seller-property-condition', 'seller property condition statement'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'utah-hoa-governing-documents', 'association documents'],
-      ] as const) {
-        if (status === 'received' && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = UTAH_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -226,7 +218,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    this.terms.set(updatedTerms);
+    this.terms.set(UTAH_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

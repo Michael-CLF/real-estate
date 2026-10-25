@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './louisiana-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/louisiana/louisiana-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createLouisianaInitialOfferTerms } from '../../../../core/domains/offer
 import { LOUISIANA_RESIDENTIAL_SALE_SECTIONS } from './questions/louisiana-residential-sale.sections';
 import { LouisianaOfferValidator } from './validators/louisiana-offer.validator';
 const validator = new LouisianaOfferValidator();
-export const LOUISIANA_OFFER_PACKAGE: StateOfferPackage<LouisianaOfferTerms, LouisianaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const LOUISIANA_OFFER_PACKAGE: StateOfferPackage<LouisianaOfferTerms, LouisianaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'LA', stateName: 'Louisiana',
   contracts: { lrec_louisiana_residential_agreement_2026: LOUISIANA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createLouisianaInitialOfferTerms(input),
   getSections: () => LOUISIANA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

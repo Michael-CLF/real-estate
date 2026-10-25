@@ -1,4 +1,3 @@
-import { pinWashingtonReviewedDocumentVersions } from '../services/washington-reviewed-document-versions';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -212,16 +211,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'washington-seller-disclosure', 'seller-signed Washington property condition statement'],
-        [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'washington-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'washington-association-documents', 'seller-provided association resale packet'],
-      ] as const) {
-        if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = WASHINGTON_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -270,7 +260,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    if (this.initiatedBy() === 'buyer') updatedTerms = pinWashingtonReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
+    updatedTerms = WASHINGTON_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, {fieldPath:change.fieldPath, value:change.value}, this.listingDisclosures(), this.initiatedBy());
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
   }

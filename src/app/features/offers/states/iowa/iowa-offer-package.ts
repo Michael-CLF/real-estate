@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './iowa-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/iowa/iowa-policy-mappings.generated';
 import { getIowaPreofferSections } from './questions/iowa-preoffer.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -9,10 +11,10 @@ import { createIowaInitialOfferTerms } from '../../../../core/domains/offers/sta
 import { IOWA_RESIDENTIAL_SALE_SECTIONS } from './questions/iowa-residential-sale.sections';
 import { IowaOfferValidator } from './validators/iowa-offer.validator';
 const validator = new IowaOfferValidator();
-export const IOWA_OFFER_PACKAGE: StateOfferPackage<IowaOfferTerms, IowaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const IOWA_OFFER_PACKAGE: StateOfferPackage<IowaOfferTerms, IowaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'IA', stateName: 'Iowa',
   contracts: { navstreet_iowa_residential_sale_2026: IOWA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createIowaInitialOfferTerms(input),
   getSections: terms => getIowaPreofferSections(terms, IOWA_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

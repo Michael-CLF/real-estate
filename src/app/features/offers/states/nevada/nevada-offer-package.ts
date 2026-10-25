@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './nevada-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/nevada/nevada-policy-mappings.generated';
 import {nevadaConditionRequired} from '../../../../core/domains/offers/state-contracts/nevada/nevada-disclosure-policy';
 import { getNevadaCondominiumSections } from './questions/nevada-condominium.sections';
@@ -10,10 +12,10 @@ import { createNevadaInitialOfferTerms } from '../../../../core/domains/offers/s
 import { NEVADA_RESIDENTIAL_SALE_SECTIONS } from './questions/nevada-residential-sale.sections';
 import { NevadaOfferValidator } from './validators/nevada-offer.validator';
 const validator = new NevadaOfferValidator();
-export const NEVADA_OFFER_PACKAGE: StateOfferPackage<NevadaOfferTerms, NevadaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const NEVADA_OFFER_PACKAGE: StateOfferPackage<NevadaOfferTerms, NevadaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'NV', stateName: 'Nevada',
   contracts: { navstreet_nevada_residential_sale_2026: NEVADA_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_nevada_condominium_resale_2026: NEVADA_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createNevadaInitialOfferTerms(input),
   getSections: terms => getNevadaCondominiumSections(terms,NEVADA_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||nevadaConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

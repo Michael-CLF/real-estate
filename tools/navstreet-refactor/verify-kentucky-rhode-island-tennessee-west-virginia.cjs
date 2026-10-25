@@ -54,7 +54,7 @@ const cf={isCondominium:false,isDeveloperSale:false,isLeasehold:false};const par
 
  if(type==='condo'){
   const updater=front('features/offers/states/'+slug+'/services/'+slug+'-offer-terms-updater')['update'+name+'OfferTerms'];
-  const Wizard=methods(path.join(project,'src/app/features/offers/states',slug,'offer-wizard/offer-wizard.component.ts'),['onFieldValueChange'],{['update'+name+'OfferTerms']:updater});
+  const Wizard=methods(path.join(project,'src/app/features/offers/states',slug,'offer-wizard/offer-wizard.component.ts'),['onFieldValueChange'],{['update'+name+'OfferTerms']:updater, [slug.replaceAll('-','_').toUpperCase()+'_OFFER_PACKAGE']:ui});
   const wizard=Object.create(Wizard.prototype);wizard.terms=signal(structuredClone(terms));wizard.busy=()=>false;wizard.initiatedBy=()=> 'buyer';wizard.submissionAttempted=signal(false);wizard.listingDisclosures=()=>[{documentType:slug+'-association-documents',versionId:'ACTUAL-REVIEWED-VERSION'}];
   wizard.onFieldValueChange({fieldPath:'disclosures.hoaDocumentsStatus',value:'received'});check(wizard.terms().documentVersions[slug+'-association-documents']==='ACTUAL-REVIEWED-VERSION');
   wizard.initiatedBy=()=> 'seller';const before=JSON.stringify(wizard.terms());wizard.onFieldValueChange({fieldPath:'disclosures.hoaDocumentsStatus',value:'pending'});check(JSON.stringify(wizard.terms())===before,'Seller UI must not edit buyer receipt');

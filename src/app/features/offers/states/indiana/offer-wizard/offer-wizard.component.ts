@@ -213,16 +213,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'indiana-seller-disclosure', 'seller-signed Indiana property condition statement'],
-        [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'indiana-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'indiana-association-documents', 'seller-provided association resale packet'],
-      ] as const) {
-        if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = INDIANA_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -271,7 +262,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    this.terms.set(updatedTerms);
+    this.terms.set(INDIANA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

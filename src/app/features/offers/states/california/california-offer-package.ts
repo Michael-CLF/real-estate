@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './california-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/california/california-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createCaliforniaInitialOfferTerms } from '../../../../core/domains/offe
 import { CALIFORNIA_RESIDENTIAL_SALE_SECTIONS } from './questions/california-residential-sale.sections';
 import { CaliforniaOfferValidator } from './validators/california-offer.validator';
 const validator = new CaliforniaOfferValidator();
-export const CALIFORNIA_OFFER_PACKAGE: StateOfferPackage<CaliforniaOfferTerms, CaliforniaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const CALIFORNIA_OFFER_PACKAGE: StateOfferPackage<CaliforniaOfferTerms, CaliforniaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'CA', stateName: 'California',
   contracts: { navstreet_california_residential_sale_2026: CALIFORNIA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createCaliforniaInitialOfferTerms(input),
   getSections: () => CALIFORNIA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

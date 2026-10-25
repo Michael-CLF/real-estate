@@ -17,7 +17,7 @@ for(const wrong of [{...docs[0],listingUid:'other'},{...docs[0],stateAbbreviatio
 const entrySource=fs.readFileSync(path.join(project,'src/app/features/offers/states/indiana/indiana-offer-entry/indiana-offer-entry.component.ts'),'utf8');
 const pinMethods=entrySource.slice(entrySource.indexOf('  private lastReviewedTerms:'),entrySource.indexOf('  protected onDraftChanged('));
 const entryModule={exports:{}};
-vm.runInNewContext(ts.transpileModule('class Entry {'+pinMethods+'} module.exports=Entry;',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:entryModule,exports:entryModule.exports,pinIndianaReviewedDocumentVersions:pin});
+vm.runInNewContext(ts.transpileModule('class Entry {'+pinMethods+'} module.exports=Entry;',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:entryModule,exports:entryModule.exports,INDIANA_OFFER_PACKAGE:{documentReview:{prepareDraft:pin}}});
 const entry=new entryModule.exports();let activeVersion={Uid:'one',initiatedBy:'buyer',terms:current},activeDocs=docs;
 entry.currentVersion=()=>activeVersion;entry.listingDisclosures=()=>activeDocs;
 const first=entry.prepareDraftChange({terms:reviewed});assert.equal(first.terms.documentVersions['indiana-seller-disclosure'],'reviewed-v1');

@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './minnesota-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/minnesota/minnesota-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -9,10 +11,10 @@ import { createMinnesotaInitialOfferTerms } from '../../../../core/domains/offer
 import { MINNESOTA_RESIDENTIAL_SALE_SECTIONS } from './questions/minnesota-residential-sale.sections';
 import { MinnesotaOfferValidator } from './validators/minnesota-offer.validator';
 const validator = new MinnesotaOfferValidator();
-export const MINNESOTA_OFFER_PACKAGE: StateOfferPackage<MinnesotaOfferTerms, MinnesotaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const MINNESOTA_OFFER_PACKAGE: StateOfferPackage<MinnesotaOfferTerms, MinnesotaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'MN', stateName: 'Minnesota',
   contracts: { navstreet_minnesota_residential_sale_2026: MINNESOTA_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_minnesota_condominium_resale_2026: MINNESOTA_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createMinnesotaInitialOfferTerms(input),
   getSections: terms => getMinnesotaCondominiumSections(terms,MINNESOTA_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

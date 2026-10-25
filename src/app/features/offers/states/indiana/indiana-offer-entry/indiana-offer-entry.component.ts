@@ -1,4 +1,4 @@
-import { pinIndianaReviewedDocumentVersions } from '../services/indiana-reviewed-document-versions';
+import { INDIANA_OFFER_PACKAGE } from '../indiana-offer-package';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveIndianaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/indiana/indiana-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -406,7 +406,7 @@ export class IndianaOfferEntryComponent
       this.lastReviewedVersionUid = version.Uid;
     }
     const current = this.lastReviewedTerms ?? version.terms;
-    const terms = pinIndianaReviewedDocumentVersions(current, change.terms, this.listingDisclosures());
+    const terms = INDIANA_OFFER_PACKAGE.documentReview!.prepareDraft!(current, change.terms, this.listingDisclosures());
     this.lastReviewedTerms = terms;
     return { ...change, terms };
   }

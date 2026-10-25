@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './missouri-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/missouri/missouri-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -10,10 +12,10 @@ import { createMissouriInitialOfferTerms } from '../../../../core/domains/offers
 import { MISSOURI_RESIDENTIAL_SALE_SECTIONS } from './questions/missouri-residential-sale.sections';
 import { MissouriOfferValidator } from './validators/missouri-offer.validator';
 const validator = new MissouriOfferValidator();
-export const MISSOURI_OFFER_PACKAGE: StateOfferPackage<MissouriOfferTerms, MissouriContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const MISSOURI_OFFER_PACKAGE: StateOfferPackage<MissouriOfferTerms, MissouriContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'MO', stateName: 'Missouri',
   contracts: {navstreet_missouri_residential_sale_2026:MISSOURI_RESIDENTIAL_CONTRACT_DEFINITION,navstreet_missouri_condominium_resale_2026:MISSOURI_CONDOMINIUM_RESALE_CONTRACT_DEFINITION,navstreet_missouri_land_sale_2026:MISSOURI_LAND_SALE_CONTRACT_DEFINITION,navstreet_missouri_small_multifamily_resale_2026:MISSOURI_SMALL_MULTIFAMILY_RESALE_CONTRACT_DEFINITION},
   createInitialTerms: input => createMissouriInitialOfferTerms(input),
   getSections: terms => getMissouriSections(terms, MISSOURI_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './texas-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/texas/texas-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -45,7 +47,7 @@ export const TEXAS_OFFER_PACKAGE:
   StateOfferPackage<
     TexasOfferTerms,
     TexasContractType
-  > = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+  > = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
     stateCode: 'TX',
     stateName: 'Texas',
 
@@ -78,4 +80,4 @@ export const TEXAS_OFFER_PACKAGE:
         [...sellers],
         context
       ),
-  }, FEDERAL_LEAD_POLICY), HOA_POLICY);
+  }, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

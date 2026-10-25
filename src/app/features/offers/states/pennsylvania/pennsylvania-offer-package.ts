@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './pennsylvania-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/pennsylvania/pennsylvania-policy-mappings.generated';
 import {pennsylvaniaConditionRequired} from '../../../../core/domains/offers/state-contracts/pennsylvania/pennsylvania-disclosure-policy';
 import { getPennsylvaniaCondominiumSections } from './questions/pennsylvania-condominium.sections';
@@ -10,10 +12,10 @@ import { createPennsylvaniaInitialOfferTerms } from '../../../../core/domains/of
 import { PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS } from './questions/pennsylvania-residential-sale.sections';
 import { PennsylvaniaOfferValidator } from './validators/pennsylvania-offer.validator';
 const validator = new PennsylvaniaOfferValidator();
-export const PENNSYLVANIA_OFFER_PACKAGE: StateOfferPackage<PennsylvaniaOfferTerms, PennsylvaniaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const PENNSYLVANIA_OFFER_PACKAGE: StateOfferPackage<PennsylvaniaOfferTerms, PennsylvaniaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'PA', stateName: 'Pennsylvania',
   contracts: { navstreet_pennsylvania_residential_sale_2026: PENNSYLVANIA_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_pennsylvania_condominium_resale_2026: PENNSYLVANIA_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createPennsylvaniaInitialOfferTerms(input),
   getSections: terms => getPennsylvaniaCondominiumSections(terms,PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||pennsylvaniaConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

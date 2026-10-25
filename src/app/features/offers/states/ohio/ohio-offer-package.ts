@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './ohio-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/ohio/ohio-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createOhioInitialOfferTerms } from '../../../../core/domains/offers/sta
 import { OHIO_RESIDENTIAL_SALE_SECTIONS } from './questions/ohio-residential-sale.sections';
 import { OhioOfferValidator } from './validators/ohio-offer.validator';
 const validator = new OhioOfferValidator();
-export const OHIO_OFFER_PACKAGE: StateOfferPackage<OhioOfferTerms, OhioContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const OHIO_OFFER_PACKAGE: StateOfferPackage<OhioOfferTerms, OhioContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'OH', stateName: 'Ohio',
   contracts: { navstreet_ohio_residential_sale_2026: OHIO_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createOhioInitialOfferTerms(input),
   getSections: () => OHIO_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

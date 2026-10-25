@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './oklahoma-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/oklahoma/oklahoma-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -10,11 +12,11 @@ import { OklahomaOfferValidator } from './validators/oklahoma-offer.validator';
 
 const validator = new OklahomaOfferValidator();
 
-export const OKLAHOMA_OFFER_PACKAGE: StateOfferPackage<OklahomaOfferTerms, OklahomaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const OKLAHOMA_OFFER_PACKAGE: StateOfferPackage<OklahomaOfferTerms, OklahomaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'OK',
   stateName: 'Oklahoma',
   contracts: { residential_sale_2026: OKLAHOMA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createOklahomaInitialOfferTerms(input),
   getSections: () => OKLAHOMA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

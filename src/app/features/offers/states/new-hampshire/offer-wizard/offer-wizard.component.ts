@@ -231,16 +231,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'new-hampshire-seller-disclosure', 'seller-signed New Hampshire property condition statement'],
-        [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'new-hampshire-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'new-hampshire-association-documents', 'seller-provided association resale packet'],
-      ] as const) {
-        if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = NEW_HAMPSHIRE_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -289,7 +280,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    this.terms.set(updatedTerms);
+    this.terms.set(NEW_HAMPSHIRE_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

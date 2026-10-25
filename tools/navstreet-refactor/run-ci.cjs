@@ -16,6 +16,7 @@ const angular = require.resolve('@angular/cli/bin/ng.js', { paths: [root] });
 for (const file of ['functions/assets/navstreet-transparent.svg', 'functions/assets/navstreet-logo.png']) {
   if (!fs.existsSync(path.join(root, file))) throw new Error('Missing tracked PDF asset: ' + file + '. Restore functions/assets before running checks.');
 }
+run([path.join(__dirname, 'verify-state-document-review.cjs'), root], 'State-owned document review and historical behavior checks');
 run([path.join(__dirname, 'verify-section-legal-content.cjs'), root], 'Versioned state section content and historical assembly checks');
 run([path.join(__dirname, 'verify-state-policy-mappings.cjs'), root], 'Generated state mappings and parity checks');
 run([path.join(__dirname, 'verify-field-paths.cjs'), root], 'State field-path audit');

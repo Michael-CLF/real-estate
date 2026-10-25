@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './indiana-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/indiana/indiana-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createIndianaInitialOfferTerms } from '../../../../core/domains/offers/
 import { INDIANA_RESIDENTIAL_SALE_SECTIONS } from './questions/indiana-residential-sale.sections';
 import { IndianaOfferValidator } from './validators/indiana-offer.validator';
 const validator = new IndianaOfferValidator();
-export const INDIANA_OFFER_PACKAGE: StateOfferPackage<IndianaOfferTerms, IndianaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const INDIANA_OFFER_PACKAGE: StateOfferPackage<IndianaOfferTerms, IndianaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'IN', stateName: 'Indiana',
   contracts: { navstreet_indiana_residential_sale_2026: INDIANA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createIndianaInitialOfferTerms(input),
   getSections: () => INDIANA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

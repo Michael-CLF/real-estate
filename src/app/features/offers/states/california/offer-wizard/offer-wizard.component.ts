@@ -198,20 +198,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'california-transfer-disclosure', 'TDS'],
-        [terms.disclosures.naturalHazardStatus, 'disclosures.naturalHazardStatus', 'california-natural-hazard-disclosure', 'NHD'],
-        [terms.disclosures.fireHardeningStatus, 'disclosures.fireHardeningStatus', 'california-fire-hardening', 'fire-hardening disclosure'],
-        [terms.disclosures.defensibleSpaceStatus, 'disclosures.defensibleSpaceStatus', 'california-defensible-space', 'defensible-space documentation'],
-        [terms.disclosures.renovationStatus, 'disclosures.renovationStatus', 'california-recent-renovations', 'recent-renovation records'],
-        [terms.disclosures.waterTankStatus, 'disclosures.waterTankStatus', 'california-assisted-water-tank', 'assisted water tank statement'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'california-association-documents', 'association resale package'],
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'federal lead packet'],
-      ] as const) {
-        if (status === 'received' && (!attached.has(documentType) || !terms.documentVersions[documentType])) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = CALIFORNIA_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -260,20 +247,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    const receiptTypes: Record<string,string> = {
-      propertyConditionStatus:'california-transfer-disclosure',naturalHazardStatus:'california-natural-hazard-disclosure',
-      fireHardeningStatus:'california-fire-hardening',defensibleSpaceStatus:'california-defensible-space',
-      renovationStatus:'california-recent-renovations',waterTankStatus:'california-assisted-water-tank',
-      hoaDocumentsStatus:'california-association-documents',leadPaintStatus:'lead-based-paint',
-    };
-    const type=receiptTypes[change.fieldPath.replace('disclosures.','')];
-    const versions={...updatedTerms.documentVersions};
-    if(type) {
-      const document=this.listingDisclosures().find(d=>d.documentType===type);
-      if(change.value==='received' && document) versions[type]=document.versionId;
-      else delete versions[type];
-    }
-    this.terms.set({...updatedTerms,documentVersions:versions});
+    this.terms.set(CALIFORNIA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

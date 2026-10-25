@@ -1,5 +1,5 @@
 import {selectArizonaContract} from '../../../../../core/domains/offers/state-contracts/arizona/arizona-contract-selection';
-import {pinArizonaReviewedDocumentVersions} from '../services/arizona-reviewed-document-versions';
+import { ARIZONA_OFFER_PACKAGE } from '../arizona-offer-package';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
 import { resolveArizonaPropertyTimeZone } from '../../../../../core/domains/offers/state-contracts/arizona/arizona-property-time-zone';
 import { resolveOfferAttachmentType } from '../../../engine/offer-attachment-type';
@@ -398,7 +398,7 @@ export class ArizonaOfferEntryComponent
   private prepareDraftChange(change:ArizonaOfferDraftChange):ArizonaOfferDraftChange {
     const current=this.lastReviewedTerms ?? this.currentVersion()?.terms;
     if(!current)return change;
-    const terms=pinArizonaReviewedDocumentVersions(current,change.terms,this.listingDisclosures());
+    const terms=ARIZONA_OFFER_PACKAGE.documentReview!.prepareDraft!(current,change.terms,this.listingDisclosures());
     this.lastReviewedTerms=terms;
     return {...change,terms};
   }

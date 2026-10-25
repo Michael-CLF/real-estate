@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './mississippi-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/mississippi/mississippi-policy-mappings.generated';
 import {mississippiConditionRequired} from '../../../../core/domains/offers/state-contracts/mississippi/mississippi-disclosure-policy';
 import { getMississippiCondominiumSections } from './questions/mississippi-condominium.sections';
@@ -10,10 +12,10 @@ import { createMississippiInitialOfferTerms } from '../../../../core/domains/off
 import { MISSISSIPPI_RESIDENTIAL_SALE_SECTIONS } from './questions/mississippi-residential-sale.sections';
 import { MississippiOfferValidator } from './validators/mississippi-offer.validator';
 const validator = new MississippiOfferValidator();
-export const MISSISSIPPI_OFFER_PACKAGE: StateOfferPackage<MississippiOfferTerms, MississippiContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const MISSISSIPPI_OFFER_PACKAGE: StateOfferPackage<MississippiOfferTerms, MississippiContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'MS', stateName: 'Mississippi',
   contracts: { navstreet_mississippi_residential_sale_2026: MISSISSIPPI_RESIDENTIAL_CONTRACT_DEFINITION, navstreet_mississippi_condominium_resale_2026: MISSISSIPPI_CONDOMINIUM_CONTRACT_DEFINITION },
   createInitialTerms: input => createMississippiInitialOfferTerms(input),
   getSections: terms => getMississippiCondominiumSections(terms,MISSISSIPPI_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>q.fieldPath!=='disclosures.propertyConditionStatus'||mississippiConditionRequired(terms))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

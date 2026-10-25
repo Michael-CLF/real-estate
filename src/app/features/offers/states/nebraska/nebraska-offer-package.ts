@@ -1,3 +1,5 @@
+import { STATE_DOCUMENT_REVIEW } from './nebraska-document-review';
+import { withStateDocumentReview } from '../../engine/models/state-document-review';
 import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/nebraska/nebraska-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -8,10 +10,10 @@ import { createNebraskaInitialOfferTerms } from '../../../../core/domains/offers
 import { NEBRASKA_RESIDENTIAL_SALE_SECTIONS } from './questions/nebraska-residential-sale.sections';
 import { NebraskaOfferValidator } from './validators/nebraska-offer.validator';
 const validator = new NebraskaOfferValidator();
-export const NEBRASKA_OFFER_PACKAGE: StateOfferPackage<NebraskaOfferTerms, NebraskaContractType> = withHoaOfferPolicy(withFederalLeadOfferPolicy({
+export const NEBRASKA_OFFER_PACKAGE: StateOfferPackage<NebraskaOfferTerms, NebraskaContractType> = withStateDocumentReview(withHoaOfferPolicy(withFederalLeadOfferPolicy({
   stateCode: 'NE', stateName: 'Nebraska',
   contracts: { navstreet_nebraska_residential_sale_2026: NEBRASKA_RESIDENTIAL_CONTRACT_DEFINITION },
   createInitialTerms: input => createNebraskaInitialOfferTerms(input),
   getSections: () => NEBRASKA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, FEDERAL_LEAD_POLICY), HOA_POLICY);
+}, FEDERAL_LEAD_POLICY), HOA_POLICY), STATE_DOCUMENT_REVIEW);

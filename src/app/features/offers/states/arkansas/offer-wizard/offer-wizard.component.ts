@@ -209,19 +209,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'arkansas-seller-disclosure', 'seller-signed Arkansas property condition statement'],
-        [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'arkansas-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'arkansas-association-documents', 'seller-provided association resale packet'],
-      ] as const) {
-        if (status === 'received' || status === 'exempt') {
-          if (!attached.has(documentType)) missing.push({ fieldPath:path,severity:'error',message:`The seller must upload the ${label} before it can be marked received.` });
-          else if (terms.documentVersions !== undefined && !terms.documentVersions[documentType]) missing.push({fieldPath:path,severity:'error',message:'Review the uploaded document and select its receipt status again to record the exact version.'});
-        }
-      }
+      const missing = ARKANSAS_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -270,15 +258,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    const receiptTypes: Record<string,string> = {'disclosures.propertyConditionStatus':'arkansas-seller-disclosure','disclosures.statutoryPacketStatus':'arkansas-statutory-packet','disclosures.hoaDocumentsStatus':'arkansas-association-documents','disclosures.leadPaintStatus':'lead-based-paint'};
-    const documentType = receiptTypes[change.fieldPath];
-    if (documentType && this.initiatedBy() === 'buyer') {
-      const pins = {...currentTerms.documentVersions};
-      const document = this.listingDisclosures().find(row => row.documentType === documentType);
-      if ((change.value === 'received' || change.value === 'exempt') && document?.versionId) pins[documentType] = document.versionId;
-      else delete pins[documentType];
-      this.terms.set({...updatedTerms,documentVersions:pins});
-    } else { this.terms.set(updatedTerms); }
+    this.terms.set(ARKANSAS_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), this.initiatedBy()));
     this.submissionAttempted.set(false);
   }
 

@@ -173,6 +173,7 @@ export class OfferWizardComponent {
 
       return [
         ...result.errors,
+        ...TEXAS_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures()),
         ...result.warnings,
       ];
     }
@@ -264,7 +265,7 @@ export class OfferWizardComponent {
 
     updatedTerms = syncRequiredAddenda(updatedTerms);
 
-    this.terms.set(updatedTerms);
+    this.terms.set(TEXAS_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, change, this.listingDisclosures(), undefined));
     this.submissionAttempted.set(false);
   }
 

@@ -1,4 +1,3 @@
-import { pinMontanaReviewedDocumentVersions } from '../services/montana-reviewed-document-versions';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -213,16 +212,7 @@ export class OfferWizardComponent {
         }
       );
 
-      const attached = new Set(this.listingDisclosures().map(document => document.documentType));
-      const missing: OfferValidationIssue[] = [];
-      for (const [status, path, documentType, label] of [
-        [terms.disclosures.leadPaintStatus, 'disclosures.leadPaintStatus', 'lead-based-paint', 'signed lead disclosure packet'],
-        [terms.disclosures.propertyConditionStatus, 'disclosures.propertyConditionStatus', 'montana-seller-disclosure', 'seller-signed Montana property condition statement'],
-        [terms.disclosures.statutoryPacketStatus, 'disclosures.statutoryPacketStatus', 'montana-statutory-packet', 'seller-signed statutory property-specific statutory disclosure packet'],
-        [terms.disclosures.hoaDocumentsStatus, 'disclosures.hoaDocumentsStatus', 'montana-association-documents', 'seller-provided association resale packet'],
-      ] as const) {
-        if ((status === 'received' || status === 'exempt') && !attached.has(documentType)) missing.push({ fieldPath: path, severity: 'error', message: `The seller must upload the ${label} to the listing before it can be marked received.` });
-      }
+      const missing = MONTANA_OFFER_PACKAGE.documentReview!.validate(terms, this.listingDisclosures());
       return [...result.errors, ...missing, ...result.warnings];
     }
   );
@@ -271,7 +261,7 @@ export class OfferWizardComponent {
         change.value
       );
 
-    if (this.initiatedBy() === 'buyer') updatedTerms = pinMontanaReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
+    updatedTerms = MONTANA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, {fieldPath:change.fieldPath, value:change.value}, this.listingDisclosures(), this.initiatedBy());
     this.terms.set(updatedTerms);
     this.submissionAttempted.set(false);
   }
@@ -362,7 +352,7 @@ export class OfferWizardComponent {
         documentUid
       );
 
-    if (this.initiatedBy() === 'buyer') updatedTerms = pinMontanaReviewedDocumentVersions(currentTerms, updatedTerms, this.listingDisclosures());
+    updatedTerms = MONTANA_OFFER_PACKAGE.documentReview!.applyChange(currentTerms, updatedTerms, {fieldPath, value:documentUid}, this.listingDisclosures(), this.initiatedBy());
     this.terms.set(updatedTerms);
   }
 
