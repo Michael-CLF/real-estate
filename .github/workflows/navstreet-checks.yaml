@@ -1,0 +1,47 @@
+name: NavStreet checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: navstreet-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Build and verify NavStreet
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Install Functions dependencies
+        run: npm ci --prefix functions
+      - name: Build both roots and run behavior, field-path and PDF checks
+        run: npm run verify:ci
+      - name: Preserve generated sample PDFs and field-path report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: navstreet-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            tmp/navstreet-*/**/*.pdf
+            tmp/navstreet-field-paths/audit.json
+          if-no-files-found: ignore
+          retention-days: 7
