@@ -1,3 +1,4 @@
+import {readListingOfferReadiness} from '../../listings/listing-offer-readiness';
 import type { CaliforniaListingFacts } from '../../listings/state-packages/california/california-listing-facts.model';
 import { Injectable } from '@angular/core';
 import {
@@ -515,6 +516,7 @@ export class FirestoreMarketplaceListingRepository
                 : 'acres';
 
         return {
+            offerReadiness: readListingOfferReadiness(data['offerReadiness'],documentId,data),
             uid:
                 this.readString(data['Uid']) ||
                 documentId,
@@ -611,6 +613,10 @@ export class FirestoreMarketplaceListingRepository
                         wyoming: (data['sellerStatements'] as Record<string, unknown>)['wyoming'] as NonNullable<MarketplaceListing['sellerStatements']>['wyoming'],
                         maine: (data['sellerStatements'] as Record<string, unknown>)['maine'] as NonNullable<MarketplaceListing['sellerStatements']>['maine'],
                         georgia: (data['sellerStatements'] as Record<string, unknown>)['georgia'] as NonNullable<MarketplaceListing['sellerStatements']>['georgia'],
+                        kentucky: (data['sellerStatements'] as Record<string, unknown>)['kentucky'] as NonNullable<MarketplaceListing['sellerStatements']>['kentucky'],
+                        rhodeIsland: (data['sellerStatements'] as Record<string, unknown>)['rhodeIsland'] as NonNullable<MarketplaceListing['sellerStatements']>['rhodeIsland'],
+                        tennessee: (data['sellerStatements'] as Record<string, unknown>)['tennessee'] as NonNullable<MarketplaceListing['sellerStatements']>['tennessee'],
+                        westVirginia: (data['sellerStatements'] as Record<string, unknown>)['westVirginia'] as NonNullable<MarketplaceListing['sellerStatements']>['westVirginia'],
                         nevada: (data['sellerStatements'] as Record<string, unknown>)['nevada'] as NonNullable<MarketplaceListing['sellerStatements']>['nevada'],
                         northDakota: (data['sellerStatements'] as Record<string, unknown>)['northDakota'] as NonNullable<MarketplaceListing['sellerStatements']>['northDakota'],
                         pennsylvania: (data['sellerStatements'] as Record<string, unknown>)['pennsylvania'] as NonNullable<MarketplaceListing['sellerStatements']>['pennsylvania'],

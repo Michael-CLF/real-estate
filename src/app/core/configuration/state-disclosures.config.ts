@@ -12,6 +12,190 @@ export const STATE_DISCLOSURE_REQUIREMENTS:
       readonly StateDisclosureRequirement[]
     >
   > = {
+  KY: [
+  {
+    "formCode": "KY-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "kentucky-seller-disclosure",
+    "title": "Kentucky seller condition disclosure / supported exception",
+    "shortTitle": "Kentucky seller condition disclosure / supported exception",
+    "description": "KRS 324.360 applies where a licensee receives compensation; it is not a universal private-owner FSBO condition-form requirement. Disclose known latent material defects truthfully and provide available records. A voluntary seller statement is not a warranty. This owner-direct workflow does not supply brokerage services.",
+    "sourceInstructions": "KRS 324.360 applies where a licensee receives compensation; it is not a universal private-owner FSBO condition-form requirement. Disclose known latent material defects truthfully and provide available records. A voluntary seller statement is not a warranty. This owner-direct workflow does not supply brokerage services.",
+    "required": false,
+    "officialFormUrl": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40017"
+  },
+  {
+    "formCode": "KY-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "kentucky-statutory-packet",
+    "title": "Kentucky applicable property-specific notices",
+    "shortTitle": "Kentucky applicable property-specific notices",
+    "description": "Investigate radon, flood and mine-subsidence risks, private water and sewage, permits, access and title during the negotiated inspection period. Seller must not conceal known material defects. No universal radon test or generic statutory packet is imposed on this ordinary private-owner resale.",
+    "sourceInstructions": "Investigate radon, flood and mine-subsidence risks, private water and sewage, permits, access and title during the negotiated inspection period. Seller must not conceal known material defects. No universal radon test or generic statutory packet is imposed on this ordinary private-owner resale.",
+    "required": false,
+    "officialFormUrl": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40017"
+  },
+  {
+    "formCode": "KY-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "kentucky-association-documents",
+    "title": "Kentucky association resale records / supported exception",
+    "shortTitle": "Kentucky association resale records / supported exception",
+    "description": "For a condominium subject to KRS 381.9203, seller must provide the declaration, bylaws/rules and current association-signed resale certificate with assessments, fees, finances, reserves, insurance, litigation and other required particulars. The association has ten days after written request. The purchaser may void the contract until certificate delivery and for five days thereafter or conveyance, whichever first occurs. Applicability and KRS 381.9201 exceptions must be established from the actual regime/transfer; upload supported exception evidence in place of an inapplicable certificate. NavStreet collects the applicable packet or evidence before offers without changing the statutory rights. An ordinary noncondominium HOA is not automatically governed by this condominium statute.",
+    "sourceInstructions": "For a condominium subject to KRS 381.9203, seller must provide the declaration, bylaws/rules and current association-signed resale certificate with assessments, fees, finances, reserves, insurance, litigation and other required particulars. The association has ten days after written request. The purchaser may void the contract until certificate delivery and for five days thereafter or conveyance, whichever first occurs. Applicability and KRS 381.9201 exceptions must be established from the actual regime/transfer; upload supported exception evidence in place of an inapplicable certificate. NavStreet collects the applicable packet or evidence before offers without changing the statutory rights. An ordinary noncondominium HOA is not automatically governed by this condominium statute.",
+    "required": false,
+    "officialFormUrl": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=40017"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing: provide the signed federal statement, known reports and EPA pamphlet before buyer is bound. Year built controls applicability; no seller override.",
+    "sourceInstructions": "Upload the completed applicable federal disclosure packet. Buyer actual review and inspection election remain separate.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
+  RI: [
+  {
+    "formCode": "RI-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "rhode-island-seller-disclosure",
+    "title": "Rhode Island seller condition disclosure / supported exception",
+    "shortTitle": "Rhode Island seller condition disclosure / supported exception",
+    "description": "R.I. Gen. Laws 5-20.8-2 requires the seller disclosure before the buyer signs an agreement, unless a specific 5-20.8-3 transfer exception applies. Upload the completed current disclosure and available required supporting records, or a written statement identifying the actual statutory exception. The form addresses systems, radon, lead records, water/sewage, surveys, easements, wetlands and shoreline/public-access records; do not substitute a generic placeholder. Exception evidence does not itself waive independent federal lead duties.",
+    "sourceInstructions": "R.I. Gen. Laws 5-20.8-2 requires the seller disclosure before the buyer signs an agreement, unless a specific 5-20.8-3 transfer exception applies. Upload the completed current disclosure and available required supporting records, or a written statement identifying the actual statutory exception. The form addresses systems, radon, lead records, water/sewage, surveys, easements, wetlands and shoreline/public-access records; do not substitute a generic placeholder. Exception evidence does not itself waive independent federal lead duties.",
+    "required": false,
+    "officialFormUrl": "https://webserver.rilegislature.gov/Statutes/TITLE5/5-20.8/5-20.8-2.htm"
+  },
+  {
+    "formCode": "RI-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "rhode-island-statutory-packet",
+    "title": "Rhode Island applicable property-specific notices",
+    "shortTitle": "Rhode Island applicable property-specific notices",
+    "description": "If the property is or may be served by a private cesspool, 5-20.8-13 provides a ten-day sewage-system inspection opportunity before the purchaser becomes obligated, unless the parties mutually agree on a different period. This agreement preserves ten days independently of the negotiated general inspection period. Seller must provide available required prior results and private-well, survey, restriction and coastal permit/access records with the disclosure. No acknowledgement certifies that an unknown condition is absent.",
+    "sourceInstructions": "If the property is or may be served by a private cesspool, 5-20.8-13 provides a ten-day sewage-system inspection opportunity before the purchaser becomes obligated, unless the parties mutually agree on a different period. This agreement preserves ten days independently of the negotiated general inspection period. Seller must provide available required prior results and private-well, survey, restriction and coastal permit/access records with the disclosure. No acknowledgement certifies that an unknown condition is absent.",
+    "required": false,
+    "officialFormUrl": "https://webserver.rilegislature.gov/Statutes/TITLE5/5-20.8/5-20.8-2.htm"
+  },
+  {
+    "formCode": "RI-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "rhode-island-association-documents",
+    "title": "Rhode Island association resale records / supported exception",
+    "shortTitle": "Rhode Island association resale records / supported exception",
+    "description": "For covered condominium resales, 34-36.1-4.09 requires the declaration, bylaws/rules and association certificate with the prescribed assessment, financial, insurance, litigation, code-violation and leasehold information. The association must furnish it within ten days of request. The purchase contract remains voidable until delivery and for five days thereafter or conveyance, whichever occurs first; the purchaser is protected against undisclosed excess assessments/fees. Scope and 4.01 transfer exceptions require actual support. Upload the complete applicable packet or documented exception before offers under NavStreet's collection policy; no automatic waiver or statutory waiting-period replacement results.",
+    "sourceInstructions": "For covered condominium resales, 34-36.1-4.09 requires the declaration, bylaws/rules and association certificate with the prescribed assessment, financial, insurance, litigation, code-violation and leasehold information. The association must furnish it within ten days of request. The purchase contract remains voidable until delivery and for five days thereafter or conveyance, whichever occurs first; the purchaser is protected against undisclosed excess assessments/fees. Scope and 4.01 transfer exceptions require actual support. Upload the complete applicable packet or documented exception before offers under NavStreet's collection policy; no automatic waiver or statutory waiting-period replacement results.",
+    "required": false,
+    "officialFormUrl": "https://webserver.rilegislature.gov/Statutes/TITLE5/5-20.8/5-20.8-2.htm"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing: provide the signed federal statement, known reports and EPA pamphlet before buyer is bound. Year built controls applicability; no seller override.",
+    "sourceInstructions": "Upload the completed applicable federal disclosure packet. Buyer actual review and inspection election remain separate.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
+  TN: [
+  {
+    "formCode": "TN-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "tennessee-seller-disclosure",
+    "title": "Tennessee seller condition disclosure / supported exception",
+    "shortTitle": "Tennessee seller condition disclosure / supported exception",
+    "description": "For a covered residential transfer, Tenn. Code Ann. 66-5-202 and 66-5-203 require the condition disclosure before contract acceptance. Upload that disclosure, or evidence of a specific 66-5-209 exception. A disclaimer is allowed only with the purchaser's genuine waiver; the seller cannot choose that waiver for a buyer. This workflow uses the disclosure route unless an independent buyer waiver has already been executed and included in the uploaded packet. NavStreet gathers the applicable document before offers. Material changes must be disclosed or condition recertified at closing.",
+    "sourceInstructions": "For a covered residential transfer, Tenn. Code Ann. 66-5-202 and 66-5-203 require the condition disclosure before contract acceptance. Upload that disclosure, or evidence of a specific 66-5-209 exception. A disclaimer is allowed only with the purchaser's genuine waiver; the seller cannot choose that waiver for a buyer. This workflow uses the disclosure route unless an independent buyer waiver has already been executed and included in the uploaded packet. NavStreet gathers the applicable document before offers. Material changes must be disclosed or condition recertified at closing.",
+    "required": false,
+    "officialFormUrl": "https://www.tn.gov/commerce/regboards/trec/rules-and-laws/laws.html"
+  },
+  {
+    "formCode": "TN-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "tennessee-statutory-packet",
+    "title": "Tennessee applicable property-specific notices",
+    "shortTitle": "Tennessee applicable property-specific notices",
+    "description": "Separately disclose applicable known exterior injection wells and percolation/soil-absorption tests, a moved foundation and known sinkholes under 66-5-212; a sinkhole requires written disclosure and acknowledgement before contract. Other applicable written notices include 66-5-211 impact fees/adequate-facilities taxes 66-5-213 planned-unit-development obligations, and applicable 68-221-409 future public-sewer connection obligations. A condition-form exception does not erase an independent notice duty. Upload one complete property-notice packet when these facts apply, without duplicating records already in the condition packet. Statutory condominium association information is available on request under 66-27-502 and 503; it is not a universal initial-offer upload requirement.",
+    "sourceInstructions": "Separately disclose applicable known exterior injection wells and percolation/soil-absorption tests, a moved foundation and known sinkholes under 66-5-212; a sinkhole requires written disclosure and acknowledgement before contract. Other applicable written notices include 66-5-211 impact fees/adequate-facilities taxes 66-5-213 planned-unit-development obligations, and applicable 68-221-409 future public-sewer connection obligations. A condition-form exception does not erase an independent notice duty. Upload one complete property-notice packet when these facts apply, without duplicating records already in the condition packet. Statutory condominium association information is available on request under 66-27-502 and 503; it is not a universal initial-offer upload requirement.",
+    "required": false,
+    "officialFormUrl": "https://www.tn.gov/commerce/regboards/trec/rules-and-laws/laws.html"
+  },
+  {
+    "formCode": "TN-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "tennessee-association-documents",
+    "title": "Tennessee association resale records / supported exception",
+    "shortTitle": "Tennessee association resale records / supported exception",
+    "description": "For residential condominium ownership, buyer is entitled on request to association information under 66-27-502 and 503, including administration, governing documents, assessments, budget, insurance, litigation and other prescribed records. The association generally responds within ten business days. Seller must explain how to contact it when requested. This ordinary resale agreement does not invent a universal five-day condominium cancellation rule or make request-based records an unconditional offer gate. Review records under the negotiated inspection period; statutory duties and remedies remain. PUD disclosures under 66-5-213 are separate from condominium classification.",
+    "sourceInstructions": "For residential condominium ownership, buyer is entitled on request to association information under 66-27-502 and 503, including administration, governing documents, assessments, budget, insurance, litigation and other prescribed records. The association generally responds within ten business days. Seller must explain how to contact it when requested. This ordinary resale agreement does not invent a universal five-day condominium cancellation rule or make request-based records an unconditional offer gate. Review records under the negotiated inspection period; statutory duties and remedies remain. PUD disclosures under 66-5-213 are separate from condominium classification.",
+    "required": false,
+    "officialFormUrl": "https://www.tn.gov/commerce/regboards/trec/rules-and-laws/laws.html"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing: provide the signed federal statement, known reports and EPA pamphlet before buyer is bound. Year built controls applicability; no seller override.",
+    "sourceInstructions": "Upload the completed applicable federal disclosure packet. Buyer actual review and inspection election remain separate.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
+  WV: [
+  {
+    "formCode": "WV-SELLER-DISCLOSURE",
+    "sortOrder": 1,
+    "documentType": "west-virginia-seller-disclosure",
+    "title": "West Virginia seller condition disclosure / supported exception",
+    "shortTitle": "West Virginia seller condition disclosure / supported exception",
+    "description": "No universal West Virginia private-owner residential condition form is imposed by this package. Seller must truthfully disclose known latent material defects and avoid concealment or misrepresentation. Buyer should investigate structural, flood, environmental, radon, mining/subsidence, mineral/title, water and sewage risks; inspection rights do not excuse fraud.",
+    "sourceInstructions": "No universal West Virginia private-owner residential condition form is imposed by this package. Seller must truthfully disclose known latent material defects and avoid concealment or misrepresentation. Buyer should investigate structural, flood, environmental, radon, mining/subsidence, mineral/title, water and sewage risks; inspection rights do not excuse fraud.",
+    "required": false,
+    "officialFormUrl": "https://code.wvlegislature.gov/36B-4-109/"
+  },
+  {
+    "formCode": "WV-STATUTORY-PACKET",
+    "sortOrder": 2,
+    "documentType": "west-virginia-statutory-packet",
+    "title": "West Virginia applicable property-specific notices",
+    "shortTitle": "West Virginia applicable property-specific notices",
+    "description": "Review severed mineral interests, support rights, access, private water/sewage, flood and title records as applicable. Known material defects must not be concealed. This ordinary existing-resale agreement does not cover developer offerings, cooperatives, leasehold or installment land contracts. No universal radon testing packet is imposed.",
+    "sourceInstructions": "Review severed mineral interests, support rights, access, private water/sewage, flood and title records as applicable. Known material defects must not be concealed. This ordinary existing-resale agreement does not cover developer offerings, cooperatives, leasehold or installment land contracts. No universal radon testing packet is imposed.",
+    "required": false,
+    "officialFormUrl": "https://code.wvlegislature.gov/36B-4-109/"
+  },
+  {
+    "formCode": "WV-ASSOCIATION-DOCUMENTS",
+    "sortOrder": 3,
+    "documentType": "west-virginia-association-documents",
+    "title": "West Virginia association resale records / supported exception",
+    "shortTitle": "West Virginia association resale records / supported exception",
+    "description": "For a common-interest community within chapter 36B's applicable scope, 36B-4-109 requires governing documents and a resale certificate with assessments, fees, finances, reserves, insurance, litigation, violations and other prescribed information. The association generally has ten days after request. The contract is voidable until certificate delivery and for five days thereafter or conveyance, whichever first occurs; undisclosed excess fees/assessments are protected. Apply 36B-1-203 through 205 and 4-101 scope/transfer exceptions to the actual community. NavStreet collects the applicable packet or specific supported scope/exception evidence before offers. A PUD or single-family lot may be in a covered community; a physical condo label is not the only trigger. This does not remove cancellation rights.",
+    "sourceInstructions": "For a common-interest community within chapter 36B's applicable scope, 36B-4-109 requires governing documents and a resale certificate with assessments, fees, finances, reserves, insurance, litigation, violations and other prescribed information. The association generally has ten days after request. The contract is voidable until certificate delivery and for five days thereafter or conveyance, whichever first occurs; undisclosed excess fees/assessments are protected. Apply 36B-1-203 through 205 and 4-101 scope/transfer exceptions to the actual community. NavStreet collects the applicable packet or specific supported scope/exception evidence before offers. A PUD or single-family lot may be in a covered community; a physical condo label is not the only trigger. This does not remove cancellation rights.",
+    "required": false,
+    "officialFormUrl": "https://code.wvlegislature.gov/36B-4-109/"
+  },
+  {
+    "formCode": "FEDERAL-LEAD",
+    "sortOrder": 4,
+    "documentType": "lead-based-paint",
+    "title": "Federal lead disclosure packet",
+    "shortTitle": "Federal lead disclosure packet",
+    "description": "Covered pre-1978 housing: provide the signed federal statement, known reports and EPA pamphlet before buyer is bound. Year built controls applicability; no seller override.",
+    "sourceInstructions": "Upload the completed applicable federal disclosure packet. Buyer actual review and inspection election remain separate.",
+    "required": false,
+    "officialFormUrl": "https://www.epa.gov/lead/real-estate-disclosures-about-potential-lead-hazards"
+  }
+],
   GA: [
   {
     "formCode": "State statute / seller-supplied record",

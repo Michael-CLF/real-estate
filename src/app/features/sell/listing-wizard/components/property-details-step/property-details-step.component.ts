@@ -60,6 +60,10 @@ export interface PropertyDetailsSellerStatementsFormValue {
   wyoming?: { privateWastewaterApplies: boolean | null; appurtenantWaterRightsKnown: boolean | null; };
   maine?: { disclosureExemptionClaimed: boolean | null; };
   georgia?: {};
+  kentucky?: {usesCentralTime:boolean|null;};
+  rhodeIsland?: {};
+  tennessee?: {usesCentralTime:boolean|null;propertyNoticesApply:boolean|null;};
+  westVirginia?: {};
   nevada?: {usesMountainTime:boolean|null;openRangeAdjacent:boolean|null;};
   northDakota?: {usesMountainTime:boolean|null;disclosureExemptionClaimed:boolean|null;radonTestsKnown:boolean|null;};
   pennsylvania?: {disclosureExemptionClaimed:boolean|null;};
@@ -455,6 +459,10 @@ export class PropertyDetailsStepComponent
         wyoming: getStateListingFormFactory('sellerStatements.wyoming')(this.fb),
         maine: getStateListingFormFactory('sellerStatements.maine')(this.fb),
         georgia: getStateListingFormFactory('sellerStatements.georgia')(this.fb),
+        kentucky: getStateListingFormFactory('sellerStatements.kentucky')(this.fb),
+        rhodeIsland: getStateListingFormFactory('sellerStatements.rhodeIsland')(this.fb),
+        tennessee: getStateListingFormFactory('sellerStatements.tennessee')(this.fb),
+        westVirginia: getStateListingFormFactory('sellerStatements.westVirginia')(this.fb),
         nevada: getStateListingFormFactory('sellerStatements.nevada')(this.fb),
         northDakota: getStateListingFormFactory('sellerStatements.northDakota')(this.fb),
         pennsylvania: getStateListingFormFactory('sellerStatements.pennsylvania')(this.fb),
@@ -574,6 +582,10 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements.controls.wyoming.patchValue(getStateListingFormRestorer('sellerStatements.wyoming')(initialValue?.sellerStatements?.wyoming), {emitEvent: false});
       this.form.controls.sellerStatements.controls.maine.patchValue(getStateListingFormRestorer('sellerStatements.maine')(initialValue?.sellerStatements?.maine), {emitEvent: false});
       this.form.controls.sellerStatements.controls.georgia.patchValue(getStateListingFormRestorer('sellerStatements.georgia')(initialValue?.sellerStatements?.georgia), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.kentucky.patchValue(getStateListingFormRestorer('sellerStatements.kentucky')(initialValue?.sellerStatements?.kentucky), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.rhodeIsland.patchValue(getStateListingFormRestorer('sellerStatements.rhodeIsland')(initialValue?.sellerStatements?.rhodeIsland), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.tennessee.patchValue(getStateListingFormRestorer('sellerStatements.tennessee')(initialValue?.sellerStatements?.tennessee), {emitEvent: false});
+      this.form.controls.sellerStatements.controls.westVirginia.patchValue(getStateListingFormRestorer('sellerStatements.westVirginia')(initialValue?.sellerStatements?.westVirginia), {emitEvent: false});
       this.form.controls.sellerStatements.controls.nevada.patchValue(getStateListingFormRestorer('sellerStatements.nevada')(initialValue?.sellerStatements?.nevada), {emitEvent: false});
       this.form.controls.sellerStatements.controls.northDakota.patchValue(getStateListingFormRestorer('sellerStatements.northDakota')(initialValue?.sellerStatements?.northDakota), {emitEvent: false});
       this.form.controls.sellerStatements.controls.pennsylvania.patchValue(getStateListingFormRestorer('sellerStatements.pennsylvania')(initialValue?.sellerStatements?.pennsylvania), {emitEvent: false});

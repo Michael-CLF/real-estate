@@ -10,6 +10,7 @@ const moduleOut={exports:{}};
 vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,experimentalDecorators:true}}).outputText,{module:moduleOut,exports:moduleOut.exports,Date,require:name=>{
  if(name==='@angular/core')return {Injectable:()=>cls=>cls};if(name==='firebase/firestore')return firestore;if(name==='rxjs')return rx;
  if(name.includes('infrastructure/firebase'))return {firestore:{}};
+ if(name==='../../listings/listing-offer-readiness')return require(path.join(project,'functions/lib/listings/listing-offer-readiness.js'));
  if(name==='./marketplace-listing.repository')return {MarketplaceListingRepository:class{}};
  throw new Error('Unexpected dependency '+name);
 }});

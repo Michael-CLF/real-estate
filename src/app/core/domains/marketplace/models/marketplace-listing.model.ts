@@ -1,3 +1,4 @@
+import type {ListingOfferReadiness} from '../../listings/listing-offer-readiness';
 import type { ListingContractFacts } from '../../listings/models/listing.model';
 import type { CaliforniaListingFacts } from '../../listings/state-packages/california/california-listing-facts.model';
 import { ListingPhoto } from '../../listings/models/listing-photo.model';
@@ -31,6 +32,8 @@ export interface ListingLocation {
 }
 
 export interface MarketplaceListing {
+  /** Server-maintained display hint, never an authorization or buyer receipt. */
+  offerReadiness?: ListingOfferReadiness;
   uid: string;
   sellerUid: string;
   firestoreDocumentId?: string;
@@ -83,6 +86,10 @@ export interface MarketplaceListing {
     wyoming?: { privateWastewaterApplies?: boolean | null; appurtenantWaterRightsKnown?: boolean | null; };
     maine?: { disclosureExemptionClaimed?: boolean | null; };
     georgia?: {};
+    kentucky?: {usesCentralTime?:boolean|null;};
+    rhodeIsland?: {};
+    tennessee?: {usesCentralTime?:boolean|null;propertyNoticesApply?:boolean|null;};
+    westVirginia?: {};
   nevada?: {usesMountainTime?:boolean|null;openRangeAdjacent?:boolean|null;};
   northDakota?: {usesMountainTime?:boolean|null;disclosureExemptionClaimed?:boolean|null;radonTestsKnown?:boolean|null;};
   pennsylvania?: {disclosureExemptionClaimed?:boolean|null;};

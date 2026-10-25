@@ -22,6 +22,7 @@ function config(file){const source=ts.createSourceFile(file,fs.readFileSync(file
   const policy=config(file),code=pkg.stateCode;count++;assert.equal(pkg.hoaPolicyIntegrated,true);assert.equal(registry.requireStateContractPackage(code),pkg);
   const property={listingUid:'sample',addressLine1:'100 Sample St',city:'Sample City',state:code,zipCode:'27587',county:({CO:'Denver',MN:'Hennepin',MI:'Wayne',AZ:'Maricopa',ID:'Ada',MO:'Jackson',OR:'Multnomah',NH:'Hillsborough'}[code]||'Sample County'),propertyType:'single_family',yearBuilt:1980,listPriceInCents:35000000,legalDescription:'FICTIONAL TEST LOT 1'};
   const input={contractType:pkg.contractTypes[0],property,buyer:person('buyer'),seller:person('seller'),listingData:{propertyType:'single_family',yearBuilt:1980,sellerStatements:{...statements},coloradoPropertyFacts:{metroDistrict:'not_applicable',waterSource:'Municipal water'}}};
+  if(['KY','RI','TN','WV'].includes(code)){input.property.contractFacts={isCondominium:false,isDeveloperSale:false,isLeasehold:false};input.listingData.sellerStatements.contractFacts={...input.property.contractFacts};}
   const terms=pkg.createInitialOfferTerms(input);
   if(policy.sellerFactPath){
    assert.equal(read(terms,policy.sellerFactPath),false,code+' trusted seller answer');
@@ -65,12 +66,12 @@ function config(file){const source=ts.createSourceFile(file,fs.readFileSync(file
   // Generate native agreements without changing their templates or historic generators.
   let fixture;
   if(['NC','TX','OK','UT','WI','FL','LA','CO','CA','SC'].includes(code))fixture=createCompletedContractFixture(project,code);else{const t=structuredClone(terms);Object.assign(t.purchase,{hasEarnestMoney:false,financingType:'cash',loanAmountInCents:0});Object.assign(t.conditions,{financing:false,appraisal:false,additionalEarnestMoney:false});Object.assign(t.deadlines,{settlementDate:'2099-12-01',sellerDisclosureDate:'',inspectionPeriodDays:15});Object.assign(t.settlement,{titlePolicyPayer:'seller',closingAgentName: '',specialAssessmentPayer:'seller',hoaTransferFeePayer:'seller'});Object.assign(t.disclosures,{propertyConditionStatus:'received',statutoryPacketStatus:'received',taxNoticeAcknowledged:true,radonNoticeAcknowledged:true,leaseStatementAcknowledged:true});if(code==='IA'){t.settlement.titleEvidenceSelection='abstract_opinion';t.documentVersions={'iowa-seller-disclosure':'condition-v1'};}t.delivery.expiresAt='2099-10-01T12:00:00Z';t.delivery.electronicDeliveryAuthorized=true;fixture={offer:{Uid:'o',stateCode:code,referenceNumber:'NS-HOA-'+code,currentVersionUid:'v',listingUid:'sample'},version:{...version,terms:t,expiresAt:t.delivery.expiresAt}};}
-  if(['ME','MS','AR','IL','GA','NV','ND','PA'].includes(code)){const t=fixture.version.terms;t.disclosures.buyerUsesBroker=false;t.documentVersions={...(t.documentVersions||{}),[slug+'-seller-disclosure']:'condition-v1',[slug+'-statutory-packet']:'packet-v1'};}
+  if(['KY','RI','TN','WV','ME','MS','AR','IL','GA','NV','ND','PA'].includes(code)){const t=fixture.version.terms;t.disclosures.buyerUsesBroker=false;t.documentVersions={...(t.documentVersions||{}),[slug+'-seller-disclosure']:'condition-v1',[slug+'-statutory-packet']:'packet-v1'};}
   pkg.validateSubmission(fixture);pkg.validateBeforeSigning?.(fixture);
   if(policy.documentStatusPath){const receipt=set(fixture.version.terms,policy.documentStatusPath,'received');const saved=JSON.stringify(receipt);pkg.validateSubmission({...fixture,version:{...fixture.version,terms:receipt}});assert.equal(JSON.stringify(receipt),saved,code+' optional actual receipt is not rewritten or blocked');}
   if(['NV','ND'].includes(code))await require('./fixtures/reviewed-notice-pdfs.cjs').stubReviewedNotice(project,code);
   const result=await pkg.generateAgreement({...fixture,documentTitle:pkg.agreementTemplate.templateName,documentStatus:'prototype',generatedAt:new Date()});
   fs.writeFileSync(path.join(output,code+'.pdf'),result.bytes||result.buffer||result.pdfBytes||result);pdfs++;
  }
- assert.equal(count,38);assert.equal(pdfs,38);console.log('PASS: all 38 state HOA policies; strict seller facts, no duplicate questions, condominium conflicts, restored drafts, signed/counter preservation, forged-answer rejection and 38 native PDFs.');
+ assert.equal(count,42);assert.equal(pdfs,42);console.log('PASS: all 42 package HOA policies; strict seller facts, no duplicate questions, condominium conflicts, restored drafts, signed/counter preservation, forged-answer rejection and 42 native PDFs.');
 })().catch(e=>{console.error(e);process.exitCode=1});

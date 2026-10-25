@@ -2,6 +2,10 @@ import type {createPennsylvaniaListingAnswersForm,restorePennsylvaniaListingAnsw
 import type {createNorthDakotaListingAnswersForm,restoreNorthDakotaListingAnswers} from './north-dakota/north-dakota-listing-form';
 import type {createNevadaListingAnswersForm,restoreNevadaListingAnswers} from './nevada/nevada-listing-form';
 import type {createGeorgiaListingAnswersForm,restoreGeorgiaListingAnswers} from './georgia/georgia-listing-form';
+import type {createKentuckyListingAnswersForm,restoreKentuckyListingAnswers} from './kentucky/kentucky-listing-form';
+import type {createRhodeIslandListingAnswersForm,restoreRhodeIslandListingAnswers} from './rhode-island/rhode-island-listing-form';
+import type {createTennesseeListingAnswersForm,restoreTennesseeListingAnswers} from './tennessee/tennessee-listing-form';
+import type {createWestVirginiaListingAnswersForm,restoreWestVirginiaListingAnswers} from './west-virginia/west-virginia-listing-form';
 import type { createWyomingListingAnswersForm, restoreWyomingListingAnswers } from './wyoming/wyoming-listing-form';
 import type { createMaineListingAnswersForm, restoreMaineListingAnswers } from './maine/maine-listing-form';
 import type { createMississippiListingAnswersForm, restoreMississippiListingAnswers } from './mississippi/mississippi-listing-form';
@@ -39,6 +43,10 @@ export interface StateListingFormFactories {
  readonly 'sellerStatements.wyoming': typeof createWyomingListingAnswersForm;
  readonly 'sellerStatements.maine': typeof createMaineListingAnswersForm;
  readonly 'sellerStatements.georgia': typeof createGeorgiaListingAnswersForm;
+ readonly 'sellerStatements.kentucky': typeof createKentuckyListingAnswersForm;
+ readonly 'sellerStatements.rhodeIsland': typeof createRhodeIslandListingAnswersForm;
+ readonly 'sellerStatements.tennessee': typeof createTennesseeListingAnswersForm;
+ readonly 'sellerStatements.westVirginia': typeof createWestVirginiaListingAnswersForm;
  readonly 'sellerStatements.nevada': typeof createNevadaListingAnswersForm;
  readonly 'sellerStatements.northDakota': typeof createNorthDakotaListingAnswersForm;
  readonly 'sellerStatements.pennsylvania': typeof createPennsylvaniaListingAnswersForm;
@@ -101,6 +109,10 @@ export interface StateListingFormRestorers {
  readonly 'sellerStatements.wyoming': typeof restoreWyomingListingAnswers;
  readonly 'sellerStatements.maine': typeof restoreMaineListingAnswers;
  readonly 'sellerStatements.georgia': typeof restoreGeorgiaListingAnswers;
+ readonly 'sellerStatements.kentucky': typeof restoreKentuckyListingAnswers;
+ readonly 'sellerStatements.rhodeIsland': typeof restoreRhodeIslandListingAnswers;
+ readonly 'sellerStatements.tennessee': typeof restoreTennesseeListingAnswers;
+ readonly 'sellerStatements.westVirginia': typeof restoreWestVirginiaListingAnswers;
  readonly 'sellerStatements.nevada': typeof restoreNevadaListingAnswers;
  readonly 'sellerStatements.northDakota': typeof restoreNorthDakotaListingAnswers;
  readonly 'sellerStatements.pennsylvania': typeof restorePennsylvaniaListingAnswers;
@@ -133,7 +145,7 @@ export interface StateListingFormSerializers {
 }
 
 export type StateListingStatementDraftExtensions = Partial<Pick<ListingStatementMappingAnswers,
-  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'alabama' | 'indiana' | 'kansas' | 'ohio' | 'delaware' | 'washington' | 'iowa' | 'montana' | 'maryland' | 'newMexico' | 'southDakota' | 'wyoming' | 'georgia' | 'nevada' | 'northDakota' | 'pennsylvania' | 'maine' | 'mississippi' | 'arkansas' | 'illinois' | 'southCarolina'>>;
+  'california' | 'oregon' | 'missouri' | 'nebraska' | 'newHampshire' | 'alabama' | 'indiana' | 'kansas' | 'ohio' | 'delaware' | 'washington' | 'iowa' | 'montana' | 'maryland' | 'newMexico' | 'southDakota' | 'wyoming' | 'kentucky' | 'rhodeIsland' | 'tennessee' | 'westVirginia' | 'georgia' | 'nevada' | 'northDakota' | 'pennsylvania' | 'maine' | 'mississippi' | 'arkansas' | 'illinois' | 'southCarolina'>>;
 
 export type StateListingPropertyField = 'legalDescription';
 

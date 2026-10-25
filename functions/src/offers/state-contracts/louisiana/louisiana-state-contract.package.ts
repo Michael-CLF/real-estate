@@ -1,7 +1,7 @@
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
-import { assertLouisianaListingDisclosures } from '../../louisiana-listing-disclosure-gate';
+import { assertLouisianaListingDisclosures, louisianaReadinessValidUntil } from '../../louisiana-listing-disclosure-gate';
 import { selectReceivedListingDisclosures } from '../received-listing-disclosures';
 import { summaryFunding, summaryMoney, summaryText } from '../navstreet-pdf-layout';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -15,7 +15,7 @@ import { createLouisianaContractMilestones } from './louisiana-contract-mileston
 
 export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferTermsDocument> = withHoaContractPolicy(withFederalLeadContractPolicy({
   assertListingContractCompatible: listing => assertListingContractScope(louisianaStateContractPackage, listing),
-  listingDisclosurePolicy: { assertReady: assertLouisianaListingDisclosures, assertCounterofferReady: assertLouisianaListingDisclosures, counterofferMissingListingMessage: 'The Louisiana listing could not be found.' },
+  listingDisclosurePolicy: { readinessValidUntil: louisianaReadinessValidUntil, assertReady: assertLouisianaListingDisclosures, assertCounterofferReady: assertLouisianaListingDisclosures, counterofferMissingListingMessage: 'The Louisiana listing could not be found.' },
   stateCode: 'LA', offerCreationEnabled: true,
   requireOwnershipFacts:true,
   supportedPropertyTypes: ['single_family', 'townhome', 'pud'],

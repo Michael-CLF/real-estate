@@ -4,6 +4,10 @@ import { pennsylvaniaListingPackage } from './pennsylvania-listing.package';
 import { northDakotaListingPackage } from './north-dakota-listing.package';
 import { nevadaListingPackage } from './nevada-listing.package';
 import { georgiaListingPackage } from './georgia-listing.package';
+import { kentuckyListingPackage } from './kentucky-listing.package';
+import { rhodeIslandListingPackage } from './rhode-island-listing.package';
+import { tennesseeListingPackage } from './tennessee-listing.package';
+import { westVirginiaListingPackage } from './west-virginia-listing.package';
 import { arkansasListingPackage } from './arkansas-listing.package';
 import { illinoisListingPackage } from './illinois-listing.package';
 import { isFederalLeadExcluded } from '../../offers/state-contracts/federal-lead-policy';
@@ -57,6 +61,10 @@ const PACKAGES = new Map<string, StateListingPackage>([
 ['ND', northDakotaListingPackage],
 ['NV', nevadaListingPackage],
 ['GA', georgiaListingPackage],
+['KY', kentuckyListingPackage],
+['RI', rhodeIslandListingPackage],
+['TN', tennesseeListingPackage],
+['WV', westVirginiaListingPackage],
 ['AR', arkansasListingPackage],
 ['IL', illinoisListingPackage],
 ['SD', southDakotaListingPackage],

@@ -52,3 +52,7 @@ export async function assertLouisianaListingDisclosures(
     );
   }
 }
+/** Keep cached display readiness from crossing the existing statutory start date. */
+export function louisianaReadinessValidUntil(listing: Record<string,unknown>,nowMillis:number):number|undefined {
+  return listing['propertyType']==='land' && nowMillis<LOUISIANA_VACANT_DISCLOSURE_EFFECTIVE_AT ? LOUISIANA_VACANT_DISCLOSURE_EFFECTIVE_AT : undefined;
+}

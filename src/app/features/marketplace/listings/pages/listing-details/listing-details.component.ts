@@ -1,3 +1,4 @@
+import {OFFER_READINESS_POLICY_REVISION} from '../../../../../core/domains/listings/listing-offer-readiness';
 import { isFederalLeadExcluded } from '../../../../../core/domains/offers/federal-lead-policy';
 import { getListingContractCoverageMessage } from '../../../../offers/engine/state-offer-registry';
 import { getOfferBlockingDocumentTypes, checklistDocumentTitle } from '../../../../../core/configuration/listing-document-checklist.config';
@@ -9,6 +10,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  DestroyRef,
   inject,
   signal
 } from '@angular/core';
@@ -286,6 +288,35 @@ export class ListingDetailsComponent
   readonly displayedViewCount =
     signal(0);
 
+  private disclosureRequestId = 0;
+  private readonly destroyRef = inject(DestroyRef);
+  constructor() {this.destroyRef.onDestroy(()=>{this.disclosureRequestId++;});}
+
+  private async preloadDisclosures(listingUid:string):Promise<void> {
+    const requestId=++this.disclosureRequestId;
+    this.disclosures.set([]);
+    this.disclosureLoadError.set('');
+    this.disclosuresAreLoading.set(true);
+    try {
+      await firstValueFrom(this.authenticationReady$);
+      if(requestId!==this.disclosureRequestId)return;
+      if(!listingUid || !this.authState.uid()) {this.disclosuresAreLoading.set(false);return;}
+      await this.loadDisclosures(listingUid,requestId);
+    } catch {
+      if(requestId!==this.disclosureRequestId)return;
+      this.disclosureLoadError.set('Property disclosures could not be loaded. Please try again.');
+      this.disclosuresAreLoading.set(false);
+    }
+  }
+
+  cachedDisclosuresAreReady(listing:MarketplaceListing):boolean {
+    const summary=listing.offerReadiness;
+    return !!summary && summary.schemaVersion===1 && summary.policyRevision===OFFER_READINESS_POLICY_REVISION
+      && summary.listingUid===(listing.firestoreDocumentId??this.route?.snapshot.paramMap.get('listingId')??listing.uid) && summary.stateCode===listing.address.stateAbbreviation
+      && summary.ready && summary.expiresAtMillis>Date.now()
+      && !this.authenticationIsLoading() && this.isAuthenticated() && !this.disclosureLoadError();
+  }
+
   readonly disclosures =
     signal<
       readonly ListingDisclosureDocument[]
@@ -332,6 +363,7 @@ export class ListingDetailsComponent
 
   offerDisclosuresAreReady(listing: MarketplaceListing): boolean {
     if (this.contractCoverageMessage(listing)) return false;
+    if (this.disclosuresAreLoading() && this.cachedDisclosuresAreReady?.(listing)) return true;
     if (this.requiredOfferDocumentTypes(listing).length === 0) return true;
     return !this.authenticationIsLoading() && this.isAuthenticated()
       && !this.disclosuresAreLoading() && !this.disclosureLoadError()
@@ -355,6 +387,8 @@ export class ListingDetailsComponent
         params =>
           params.get('listingId') ?? ''
       ),
+
+      tap(listingId=>{void this.preloadDisclosures(listingId);}),
 
       switchMap(
         listingId =>
@@ -456,26 +490,7 @@ export class ListingDetailsComponent
      * View recording is independent of saved-listing
      * state and also supports anonymous visitors.
      */
-    try {
-      const viewResult =
-        await this.listingViewService
-          .recordListingView(
-            viewModel.listing.uid
-          );
-
-      this.displayedViewCount.set(
-        viewResult.viewCount
-      );
-    } catch (error: unknown) {
-      /*
-       * Metrics must never prevent the public listing
-       * from loading or displaying normally.
-       */
-      console.error(
-        'Unable to record listing view:',
-        error
-      );
-    }
+    void this.loadViewCount(viewModel.listing.uid);
 
     /*
   * Wait until Firebase has determined whether the browser
@@ -494,9 +509,6 @@ export class ListingDetailsComponent
       return;
     }
 
-    await this.loadDisclosures(
-      viewModel.listing.uid
-    );
     try {
       const saved =
         await this.savedListingService
@@ -705,8 +717,33 @@ export class ListingDetailsComponent
     }
   }
 
+  private async loadViewCount(listingUid:string):Promise<void> {
+    try {
+      const viewResult =
+        await this.listingViewService
+          .recordListingView(
+            listingUid
+          );
+
+      this.displayedViewCount.set(
+        viewResult.viewCount
+      );
+    } catch (error: unknown) {
+      /*
+       * Metrics must never prevent the public listing
+       * from loading or displaying normally.
+       */
+      console.error(
+        'Unable to record listing view:',
+        error
+      );
+    }
+
+  }
+
   private async loadDisclosures(
-    listingUid: string
+    listingUid: string,
+    requestId = this.disclosureRequestId
   ): Promise<void> {
     this.disclosuresAreLoading.set(true);
     this.disclosureLoadError.set('');
@@ -718,6 +755,7 @@ export class ListingDetailsComponent
             listingUid
           );
 
+      if(requestId!==this.disclosureRequestId)return;
       this.disclosures.set(
         summaries.map(
           summary =>
@@ -725,6 +763,7 @@ export class ListingDetailsComponent
         )
       );
     } catch (error: unknown) {
+      if(requestId!==this.disclosureRequestId)return;
       console.error(
         'Unable to load property disclosures:',
         error
@@ -736,7 +775,7 @@ export class ListingDetailsComponent
         'Property disclosures could not be loaded. Please try again.'
       );
     } finally {
-      this.disclosuresAreLoading.set(false);
+      if(requestId===this.disclosureRequestId)this.disclosuresAreLoading.set(false);
     }
   }
 

@@ -4,6 +4,10 @@ import { pennsylvaniaListingPackage } from './pennsylvania/pennsylvania-listing.
 import { northDakotaListingPackage } from './north-dakota/north-dakota-listing.package';
 import { nevadaListingPackage } from './nevada/nevada-listing.package';
 import { georgiaListingPackage } from './georgia/georgia-listing.package';
+import { kentuckyListingPackage } from './kentucky/kentucky-listing.package';
+import { rhodeIslandListingPackage } from './rhode-island/rhode-island-listing.package';
+import { tennesseeListingPackage } from './tennessee/tennessee-listing.package';
+import { westVirginiaListingPackage } from './west-virginia/west-virginia-listing.package';
 import { arkansasListingPackage } from './arkansas/arkansas-listing.package';
 import { illinoisListingPackage } from './illinois/illinois-listing.package';
 import { wyomingListingPackage } from './wyoming/wyoming-listing.package';
@@ -77,6 +81,10 @@ const PACKAGES =
 ['ND', northDakotaListingPackage],
 ['NV', nevadaListingPackage],
 ['GA', georgiaListingPackage],
+['KY', kentuckyListingPackage],
+['RI', rhodeIslandListingPackage],
+['TN', tennesseeListingPackage],
+['WV', westVirginiaListingPackage],
 ['AR', arkansasListingPackage],
 ['IL', illinoisListingPackage],
 ['SD', southDakotaListingPackage],

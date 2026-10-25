@@ -2,6 +2,10 @@ import type { PennsylvaniaListingAnswers } from './pennsylvania/pennsylvania-lis
 import type { NorthDakotaListingAnswers } from './north-dakota/north-dakota-listing-form';
 import type { NevadaListingAnswers } from './nevada/nevada-listing-form';
 import type { GeorgiaListingAnswers } from './georgia/georgia-listing-form';
+import type { KentuckyListingAnswers } from './kentucky/kentucky-listing-form';
+import type { RhodeIslandListingAnswers } from './rhode-island/rhode-island-listing-form';
+import type { TennesseeListingAnswers } from './tennessee/tennessee-listing-form';
+import type { WestVirginiaListingAnswers } from './west-virginia/west-virginia-listing-form';
 import type { ListingContractFacts } from '../models/listing.model';
 import type { WyomingListingAnswers } from './wyoming/wyoming-listing-form';
 import type { MaineListingAnswers } from './maine/maine-listing-form';
@@ -53,6 +57,10 @@ export interface ListingStatementMappingAnswers extends Omit<ListingStatementSav
   wyoming?: WyomingListingAnswers;
   maine?: MaineListingAnswers;
   georgia?: GeorgiaListingAnswers;
+  kentucky?: KentuckyListingAnswers;
+  rhodeIsland?: RhodeIslandListingAnswers;
+  tennessee?: TennesseeListingAnswers;
+  westVirginia?: WestVirginiaListingAnswers;
   nevada?: NevadaListingAnswers;
   northDakota?: NorthDakotaListingAnswers;
   pennsylvania?: PennsylvaniaListingAnswers;

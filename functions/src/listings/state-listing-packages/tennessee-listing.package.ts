@@ -1,0 +1,3 @@
+import type {StateListingPackage} from './state-listing-package';
+import {HttpsError} from 'firebase-functions/v2/https';
+export const tennesseeListingPackage:StateListingPackage={stateCode:'TN',requiredSellerStatementFields:['leadBasedPaintApplies','ownersAssociationApplies','generalLeasesExist'],validateAdditionalSellerStatements(_uid,s){if(typeof (s['tennessee'] as Record<string,unknown>|undefined)?.['usesCentralTime']!=='boolean')throw new HttpsError('failed-precondition',"Does this property use Central time?");if(typeof (s['tennessee'] as Record<string,unknown>|undefined)?.['propertyNoticesApply']!=='boolean')throw new HttpsError('failed-precondition',"Do any Tennessee property-specific written notices apply?");}};

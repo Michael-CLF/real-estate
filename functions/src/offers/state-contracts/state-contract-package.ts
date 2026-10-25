@@ -236,6 +236,8 @@ export interface StateContractPackage<
   ): StateContractMilestones;
 }
 export interface StateListingOfferPolicy<TTerms extends StateContractTerms = StateContractTerms> {
+  /** Earliest future time at which upload requirements can change without a listing edit. */
+  readinessValidUntil?(listing: Record<string, unknown>, nowMillis: number): number | undefined;
   assertReady?(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void>;
   assertCounterofferReady?(transaction: Transaction, reference: DocumentReference, listing: Record<string, unknown>): Promise<void>;
   readonly counterofferMissingListingMessage?: string;
