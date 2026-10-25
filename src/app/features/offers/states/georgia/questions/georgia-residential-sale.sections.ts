@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -29,12 +30,12 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         fieldPath: 'legalDescription',
         readOnly: true,
         validation: required('The seller must provide the recorded legal description on the listing.'),
-        helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
       },
       {
         id: 'included-by-default',
         type: 'information',
-        label: 'The property includes existing improvements and installed fixtures, plus seller-owned appliances expressly identified in this agreement, except items expressly excluded below.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_included_by_default_label"],
       },
       {
         id: 'included',
@@ -48,14 +49,14 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         type: 'textarea',
         label: 'Specific items excluded from the purchase',
         fieldPath: 'propertyItems.excluded',
-        helpText: 'List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_excluded_helpText"],
       },
       {
         id: 'leased-items',
         type: 'textarea',
         label: 'Leased equipment and transfer arrangements',
         fieldPath: 'propertyItems.leasedItemsDescription',
-        helpText: 'Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leased_items_helpText"],
       },
     ],
   },
@@ -101,7 +102,7 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
           conditions: [
             { fieldPath: 'purchase.hasEarnestMoney', operator: 'is_true' },
           ],
-        },helpText:'Optional at offer stage. If blank, the parties will jointly select a qualified independent escrow holder.'},
+        },helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_holder_helpText"]},
       {
         id: 'due-days',
         type: 'number',
@@ -124,7 +125,7 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         id: 'funding',
         type: 'single_choice',
         label: 'How will the purchase be funded?',
-        helpText: 'This resale agreement currently supports cash and conventional loans. Government loan programs require separate program-specific addenda.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_helpText"],
         fieldPath: 'purchase.financingType',
         validation: required('Select cash or a loan type.'),
         options: [
@@ -227,7 +228,7 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
   {
     id: 'conditions',
     title: 'Inspection and financing conditions',
-    description: 'The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_description"],
     questions: [
       {
         id: 'inspection-period',
@@ -240,12 +241,12 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
           maximum: 60,
           message: 'Choose 1 to 60 calendar days.',
         },
-        helpText: 'The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_inspection_period_helpText"],
       },
       {
         id: 'funding-condition',
         type: 'information',
-        label: 'A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_condition_label"],
       },
       {
         ...yn(
@@ -340,7 +341,7 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         validation: required(
           'Describe the property-sale condition before continuing.'
         ),
-        helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_property_terms_helpText"],
       },
       {
         ...yn(
@@ -360,14 +361,14 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"],
     questions: [
       {
         id: 'seller-date',
         type: 'date',
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
-        helpText: 'This optional date does not postpone any mandatory pre-agreement disclosure obligation.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_date_helpText"],
       },
       {
         id: 'settlement-date',
@@ -386,7 +387,7 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
       {
         id: 'possession-note',
         type: 'information',
-        label: 'Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_note_label"],
       },
       {
         id: 'title-payer',
@@ -404,7 +405,7 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        helpText: 'Optional at offer stage; the parties may designate the closing agent by written agreement.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_agent_helpText"],
       },
       {
         id: 'title-evidence',
@@ -457,8 +458,8 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
   },
   {id:'disclosures',title:'Seller disclosures and property records',questions:[
 
-  {"id":"condition","type":"single_choice","fieldPath":"disclosures.propertyConditionStatus","label":"Georgia seller disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":"For this ordinary private owner resale, no universal Georgia seller condition form or general radon testing upload is required. Seller must disclose known hidden material defects and answer inquiries truthfully; an as-is clause does not authorize fraud or concealment. Any voluntary condition statement is separate evidence, not a warranty."},
-  {"id":"records","type":"single_choice","fieldPath":"disclosures.statutoryPacketStatus","label":"Applicable Nevada open-range disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":"Buyer may investigate structure, flood and insurance history, access, utilities, private well/septic systems, permits and title under the negotiated inspection period. Seller shall cooperate in providing available records. Use a Georgia attorney for legal closing work as required; choosing a closing professional is optional at the offer stage."},
+  {"id":"condition","type":"single_choice","fieldPath":"disclosures.propertyConditionStatus","label":"Georgia seller disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_condition_helpText"]},
+  {"id":"records","type":"single_choice","fieldPath":"disclosures.statutoryPacketStatus","label":"Applicable Nevada open-range disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_records_helpText"]},
   {
     "id": "hoa-seller",
     "type": "yes_no",
@@ -485,12 +486,12 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         "label": "Seller reports no association"
       }
     ],
-    "helpText": "When the seller reports an association, review the applicable governing documents, fees and assessment records. No universal initial-offer association upload or waiting period is imposed for an ordinary subsequent resale."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_association_helpText"]
   }
-,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure." },
+,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leadPaintStatus_helpText"] },
     {id:'lead-inspection',type:'single_choice',label:'Lead inspection opportunity',fieldPath:'disclosures.leadInspectionSelection',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadPaintStatus',operator:'equals',value:'received'}]},validation:required('Select the inspection opportunity.'),options:[{value:'ten_days',label:'10 days'},{value:'waived',label:'Inspection opportunity waived in writing'},{value:'other_period',label:'Different period agreed in writing'}]},
     {id:'lead-days',type:'number',label:'Agreed lead inspection days',fieldPath:'disclosures.leadInspectionDays',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadInspectionSelection',operator:'equals',value:'other_period'}]},validation:{required:true,minimum:1,maximum:60,message:'Enter 1 to 60 days.'}},
-{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{"id":"legal-rights","type":"information","label":"State disclosure and transaction information","helpText":"For this ordinary private owner resale, no universal Georgia seller condition form or general radon testing upload is required. Seller must disclose known hidden material defects and answer inquiries truthfully; an as-is clause does not authorize fraud or concealment. Any voluntary condition statement is separate evidence, not a warranty. Buyer may investigate structure, flood and insurance history, access, utilities, private well/septic systems, permits and title under the negotiated inspection period. Seller shall cooperate in providing available records. Use a Georgia attorney for legal closing work as required; choosing a closing professional is optional at the offer stage."}]},
+{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{"id":"legal-rights","type":"information","label":"State disclosure and transaction information","helpText":SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_rights_helpText"]}]},
   {
     id: 'additional',
     title: 'Additional terms',
@@ -509,12 +510,12 @@ export const GEORGIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
             },
           ],
         },
-        helpText: 'Leave blank if there are no other terms. Ask a Georgia attorney to review any new legal language.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"],
       },
       {
         id: 'sale-terms-location',
         type: 'information',
-        label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_terms_location_label"],
         visibleWhen: {
           match: 'all',
           conditions: [

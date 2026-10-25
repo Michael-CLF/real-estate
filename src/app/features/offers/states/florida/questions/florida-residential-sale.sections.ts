@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -29,12 +30,12 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         fieldPath: 'legalDescription',
         readOnly: true,
         validation: required('The seller must provide the recorded legal description on the listing.'),
-        helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
       },
       {
         id: 'included-by-default',
         type: 'information',
-        label: 'The property includes existing improvements and installed fixtures, plus seller-owned appliances and other items listed in the Florida agreement, except items expressly excluded below.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_included_by_default_label"],
       },
       {
         id: 'included',
@@ -48,14 +49,14 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         type: 'textarea',
         label: 'Specific items excluded from the purchase',
         fieldPath: 'propertyItems.excluded',
-        helpText: 'List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_excluded_helpText"],
       },
       {
         id: 'leased-items',
         type: 'textarea',
         label: 'Leased equipment and transfer arrangements',
         fieldPath: 'propertyItems.leasedItemsDescription',
-        helpText: 'Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leased_items_helpText"],
       },
     ],
   },
@@ -236,7 +237,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
   {
     id: 'conditions',
     title: 'Inspection and financing conditions',
-    description: 'The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_description"],
     questions: [
       {
         id: 'inspection-period',
@@ -249,12 +250,12 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
           maximum: 60,
           message: 'Choose 1 to 60 calendar days.',
         },
-        helpText: 'The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_inspection_period_helpText"],
       },
       {
         id: 'funding-condition',
         type: 'information',
-        label: 'A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_condition_label"],
       },
       {
         ...yn(
@@ -348,7 +349,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         validation: required(
           'Describe the property-sale condition before continuing.'
         ),
-        helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_property_terms_helpText"],
       },
       {
         ...yn(
@@ -368,14 +369,14 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. Eastern Time. Seller flood, condition and applicable HOA summaries must be provided before contract execution. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"],
     questions: [
       {
         id: 'seller-date',
         type: 'date',
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
-        helpText: 'Required flood, condition and applicable HOA disclosures are due before contract execution regardless of this optional date.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_date_helpText"],
       },
       {
         id: 'settlement-date',
@@ -394,7 +395,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
       {
         id: 'possession-note',
         type: 'information',
-        label: 'Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_note_label"],
       },
       {
         id: 'title-payer',
@@ -412,7 +413,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        helpText: 'Optional at the offer stage. The parties may select a qualified closing professional later.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_agent_helpText"],
       },
       {
         id: 'title-evidence',
@@ -485,7 +486,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
             label: 'I have not received the seller-signed flood disclosure yet',
           },
         ],
-        helpText: 'Answer truthfully. If this disclosure is pending, ask the seller to upload it and review it before submitting an offer.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_flood_status_helpText"],
       },
       {
         id: 'condition-status',
@@ -505,7 +506,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
             label: 'I have not received the seller-signed statement yet',
           },
         ],
-        helpText: 'The seller’s statement should include known material defects and known sanitary sewer lateral defects.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_condition_status_helpText"],
       },
       {
         id: 'hoa-seller',
@@ -539,7 +540,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
             label: 'Seller states that no mandatory HOA applies',
           },
         ],
-        helpText: 'If an HOA applies and its summary is pending, ask the seller to upload it and review it before submitting an offer.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_hoa_status_helpText"],
       },
       {
         id: 'lead-status',
@@ -615,9 +616,9 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
       {
         id: 'tax-notice',
         type: 'acknowledgement',
-        label: 'I read the Florida property tax reassessment notice provided with this agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_tax_notice_label"],
         fieldPath: 'disclosures.taxNoticeAcknowledged',
-        helpText: 'BUYER SHOULD NOT RELY ON THE SELLER’S CURRENT PROPERTY TAXES AS THE AMOUNT OF PROPERTY TAXES THAT THE BUYER MAY BE OBLIGATED TO PAY IN THE YEAR SUBSEQUENT TO PURCHASE. A CHANGE OF OWNERSHIP OR PROPERTY IMPROVEMENTS TRIGGERS REASSESSMENTS OF THE PROPERTY THAT COULD RESULT IN HIGHER PROPERTY TAXES. IF YOU HAVE ANY QUESTIONS CONCERNING VALUATION, CONTACT THE COUNTY PROPERTY APPRAISER’S OFFICE FOR INFORMATION.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_tax_notice_helpText"],
         validation: required('Acknowledge the tax notice.'),
       },
       {
@@ -625,7 +626,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
         type: 'acknowledgement',
         label: 'I read the Florida radon gas notice provided with this agreement.',
         fieldPath: 'disclosures.radonNoticeAcknowledged',
-        helpText: 'RADON GAS: Radon is a naturally occurring radioactive gas that, when it has accumulated in a building in sufficient quantities, may present health risks to persons who are exposed to it over time. Levels of radon that exceed federal and state guidelines have been found in buildings in Florida. Additional information regarding radon and radon testing may be obtained from your county health department.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_radon_notice_helpText"],
         validation: required('Acknowledge the radon notice.'),
       },
       {
@@ -641,7 +642,7 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
       {
         id: 'lease-acknowledgement',
         type: 'acknowledgement',
-        label: 'I have reviewed the seller’s existing-leases statement, including any identified leases.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_lease_acknowledgement_label"],
         fieldPath: 'disclosures.leaseStatementAcknowledged',
         validation: required('Acknowledge the lease statement.'),
       },
@@ -665,12 +666,12 @@ export const FLORIDA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[
             },
           ],
         },
-        helpText: 'Leave blank if there are no other terms. Ask a Florida attorney to review any new legal language.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"],
       },
       {
         id: 'sale-terms-location',
         type: 'information',
-        label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_terms_location_label"],
         visibleWhen: {
           match: 'all',
           conditions: [

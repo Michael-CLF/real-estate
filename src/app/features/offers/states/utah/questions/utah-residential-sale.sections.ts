@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -7,7 +8,7 @@ const yn = (path: string, label: string, message: string) => ({ id: path, type: 
 export const UTAH_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] = [
   { id: 'parties', title: 'Buyers and sellers', description: 'Review the parties copied from the listing and account.', questions: [] },
   { id: 'property', title: 'Property and water', questions: [
-    { id: 'legal-description', type: 'textarea', label: 'Recorded legal description supplied by the seller', fieldPath: 'legalDescription', readOnly: true, helpText: 'Copied from the seller’s listing when available. The buyer does not need to supply it; confirm the deed description with the title company before closing.', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'legalDescription', operator: 'is_not_empty' }] } },
+    { id: 'legal-description', type: 'textarea', label: 'Recorded legal description supplied by the seller', fieldPath: 'legalDescription', readOnly: true, helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"], visibleWhen: { match: 'all', conditions: [{ fieldPath: 'legalDescription', operator: 'is_not_empty' }] } },
     { id: 'included', type: 'textarea', label: 'Additional items included', fieldPath: 'propertyItems.included', placeholder: 'Appliances or other items included by agreement' },
     { id: 'excluded', type: 'textarea', label: 'Items excluded', fieldPath: 'propertyItems.excluded' },
     yn('propertyItems.waterRightsIncluded', 'Are any water rights or shares included?', 'Select whether any water rights or shares are included.'),
@@ -31,16 +32,16 @@ export const UTAH_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] =
     yn('conditions.financing', 'Conditioned on financing?', 'Select the financing condition.'),
     {
       ...yn('conditions.saleOfBuyersProperty', 'Does this purchase depend on selling another property you own?', 'Select whether this purchase depends on selling another property you own.'),
-      helpText: 'This refers to a property you already own, not the seller’s property you are offering to buy. Select No if this purchase does not depend on that sale.',
+      helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_helpText"],
     },
     {
       id: 'buyer-property-sale-note', type: 'information', label: 'Your other property must sell',
-      description: 'Because you selected Yes, describe this sale condition in Additional terms and arrange the applicable subject-to-sale addendum. If this purchase does not depend on selling another property you own, select No.',
+      description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_buyer_property_sale_note_description"],
       visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.saleOfBuyersProperty', operator: 'is_true' }] },
     },
     yn('conditions.additionalEarnestMoney', 'Will an additional earnest money deposit be due?', 'Select an additional-deposit option.'),
   ] },
-  { id: 'deadlines', title: 'Contract deadlines', description: 'Unless the parties agree otherwise, times are 5:00 p.m. Mountain Time on each date.', questions: [
+  { id: 'deadlines', title: 'Contract deadlines', description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"], questions: [
     { id: 'seller-date', type: 'date', label: 'Seller disclosure deadline', fieldPath: 'deadlines.sellerDisclosureDate', validation: required('Set the seller disclosure deadline.') },
     { id: 'inspection-date', type: 'date', label: 'Due diligence deadline', fieldPath: 'deadlines.dueDiligenceDate', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.dueDiligence', operator: 'is_true' }] }, validation: required('Set the due diligence deadline.') },
     { id: 'financing-date', type: 'date', label: 'Financing and appraisal deadline', fieldPath: 'deadlines.financingAppraisalDate', visibleWhen: { match: 'any', conditions: [{ fieldPath: 'conditions.financing', operator: 'is_true' }, { fieldPath: 'conditions.appraisal', operator: 'is_true' }] }, validation: required('Set the financing and appraisal deadline.') },
@@ -73,10 +74,10 @@ export const UTAH_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[] =
     { id: 'hoa-status', type: 'single_choice', label: 'Association documents', fieldPath: 'disclosures.hoaDocumentsStatus', validation: required('Select the association document status.'), options: [
       { value: 'received', label: 'Received' }, { value: 'pending', label: 'To be provided before closing' }, { value: 'not_applicable', label: 'No association' },
     ] },
-    { id: 'meth-acknowledgement', type: 'acknowledgement', label: 'I have reviewed the seller’s statement about known current methamphetamine contamination.', fieldPath: 'disclosures.methamphetamineContaminationAcknowledged', validation: required('Review and acknowledge the seller statement.') },
+    { id: 'meth-acknowledgement', type: 'acknowledgement', label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_meth_acknowledgement_label"], fieldPath: 'disclosures.methamphetamineContaminationAcknowledged', validation: required('Review and acknowledge the seller statement.') },
   ] },
   { id: 'additional', title: 'Additional terms', questions: [
-    { id: 'additional-terms', type: 'textarea', label: 'Party-provided additional terms', fieldPath: 'additionalTerms', helpText: 'Optional unless this purchase depends on selling another property you own. If it does, describe that condition and arrange the applicable addendum. Ask a Utah attorney to review any new legal language.' },
+    { id: 'additional-terms', type: 'textarea', label: 'Party-provided additional terms', fieldPath: 'additionalTerms', helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"] },
   ] },
   { id: 'delivery', title: 'Offer delivery and review', questions: [
     { id: 'expiration', type: 'date_time', label: 'Offer expires', fieldPath: 'delivery.expiresAt', validation: required('Set a future expiration date and time.') },

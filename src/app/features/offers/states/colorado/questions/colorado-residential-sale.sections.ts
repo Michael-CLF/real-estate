@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 import type {
   OfferQuestionDefinition,
@@ -216,7 +217,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
             ['tenants_in_common', 'TENANTS IN COMMON'],
             ['other', 'OTHER'],
           ],
-          'Joint tenancy generally includes survivorship; tenancy in common generally permits separately transferable shares. Confirm the proposed ownership with the closing company.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_parties_notice"],
         ),
         shown(
           txt(
@@ -244,7 +245,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
         },
         info(
           'standard-inclusions',
-          'The agreement includes existing seller-owned attached fixtures and standard inclusions. Additional items below supplement that list. Seller facts are shown separately from your proposed terms.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_property_notice"],
         ),
         fact('landArea', 'Seller-provided land area'),
         fact(
@@ -328,7 +329,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
           'propertyItems.waterRights',
           'Which identified water rights do you propose to receive? (Optional)',
           false,
-          'Describe the rights and conveyance instrument. This proposal is not a statement that the seller owns rights.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_property_notice_2"],
         ),
         yn(
           'elections.waterRightsExamination',
@@ -706,7 +707,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
           ...cash(
             'purchase.cashAtClosingInCents',
             'Remaining purchase-price cash at closing',
-            'Calculated: price minus earnest money minus new loan or approximate assumption balance. Excludes closing costs, prepaids, prorations and other adjustments.',
+            SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_price_notice"],
           ),
           readOnly: true,
         },
@@ -734,7 +735,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
         yn(
           'conditions.inspection',
           'Do you want inspection termination and objection rights?',
-          'YES permits evaluation at your expense under the contract deadlines. NO omits these negotiated inspection rights but does not waive separate statutory rights.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_contingencies_notice"],
         ),
         ...[
           [
@@ -814,7 +815,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
         ),
         yn(
           'elections.dueDiligenceReview',
-          'Do you want to review leases, equipment debt or leases, solar plans, permits and other due-diligence records before proceeding?',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_contingencies_notice_2"],
         ),
         shown(
           txt(
@@ -886,7 +887,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
             ],
             ['abstract', 'CERTIFIED ABSTRACT OF TITLE'],
           ],
-          'A commitment describes the proposed policy and exceptions; an abstract summarizes recorded history. An abstract is not an insurance policy.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_title_notice"],
         ),
         yn(
           'elections.extendedCoverage',
@@ -1047,7 +1048,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
             ['bargain_sale', 'BARGAIN AND SALE DEED'],
             ['quitclaim', 'QUITCLAIM DEED'],
           ],
-          'These deeds provide different title assurances. Special warranty covers claims arising through the seller; quitclaim does not provide title warranties.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_notice"],
         ),
         payer(
           'conditions.closingFeePayer',
@@ -1155,7 +1156,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
           'elections.postClosingOccupancyDocument',
           'Identify the signed post-closing occupancy agreement if possession is after closing.',
           false,
-          'Required for delayed possession. Identify the actual attachment; a later date alone does not create an occupancy agreement.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_notice_2"],
         ),
       ],
     },
@@ -1207,7 +1208,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
                 'WAIVE THE LEAD INSPECTION OPPORTUNITY',
               ],
             ],
-            'Federal law provides a 10-day opportunity unless the parties agree in writing to a different period. Your chosen date becomes the proposed agreed deadline when both parties sign.',
+            SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_disclosures_notice"],
           ),
           'disclosures.leadPaintStatus',
           'received',
@@ -1216,7 +1217,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
           ...date(
             'leadTermination',
             'By what date may you terminate after a lead risk assessment or inspection?',
-            'Choose a calendar date. The inspection waiver removes this deadline, but never the disclosure requirements.',
+            SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_disclosures_notice_2"],
           ),
           visibleWhen: leadVisible,
         },
@@ -1297,7 +1298,7 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
               'SPECIFIC PERFORMANCE AND DAMAGES',
             ],
           ],
-          'Liquidated damages generally limits the seller to the earnest money, with specified surviving obligations and attorney-fee exceptions. The other choice permits seeking a court order enforcing the purchase or damages. A valid termination is not a default.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_notice"],
         ),
         txt(
           'elections.incorporatedAttachments',
@@ -1344,9 +1345,9 @@ export const COLORADO_RESIDENTIAL_SALE_SECTIONS:
           fieldPath: 'delivery.electronicDeliveryAuthorized',
           type: 'acknowledgement',
           label:
-            'I authorize electronic delivery and signatures under my NavStreet electronic transaction consent.',
+            SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_electronic_label"],
           helpText:
-            'You must be able to access, download and retain the agreement and disclosure attachments. The account consent explains paper-copy and withdrawal procedures.',
+            SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_electronic_helpText"],
           validation: required,
         },
       ],

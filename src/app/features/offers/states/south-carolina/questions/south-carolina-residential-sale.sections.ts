@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 import type { OfferQuestionDefinition, OfferQuestionVisibilityRule } from '../../../engine/models/offer-question-definition';
 import { SOUTH_CAROLINA_STATUTORY_NOTICES as notices } from './south-carolina-statutory-notices';
@@ -21,7 +22,7 @@ export const SOUTH_CAROLINA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefin
   money('purchase.purchasePriceInCents','Purchase price'),
   q('purchase.hasEarnestMoney','Does this offer include an initial escrow deposit?','yes_no'),
   money('purchase.earnestMoneyInCents','Initial deposit',true,visible('purchase.hasEarnestMoney')),
-  {...q('purchase.earnestMoneyHolder','Escrow holder, if already selected','text',false),visibleWhen:visible('purchase.hasEarnestMoney'),helpText:'If blank, the parties will jointly select a qualified escrow holder. NavStreet does not hold funds.'},
+  {...q('purchase.earnestMoneyHolder','Escrow holder, if already selected','text',false),visibleWhen:visible('purchase.hasEarnestMoney'),helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_purchase_helpText"]},
   number('purchase.earnestMoneyDueDays','Calendar days after acceptance to deliver the deposit',1,30,visible('purchase.hasEarnestMoney')),
   {...q('conditions.additionalEarnestMoney','Will an additional deposit be due?','yes_no'),visibleWhen:visible('purchase.hasEarnestMoney')},
   money('purchase.additionalEarnestMoneyInCents','Additional deposit',true,visible('conditions.additionalEarnestMoney')),
@@ -29,12 +30,12 @@ export const SOUTH_CAROLINA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefin
   choice('purchase.financingType','Funding method',[{value:'cash',label:'Cash'},{value:'conventional',label:'Conventional loan'},{value:'fha',label:'FHA loan'},{value:'va',label:'VA loan'},{value:'usda',label:'USDA loan'}]),
   {...money('purchase.loanAmountInCents','Proposed loan amount'),visibleWhen:{match:'all',conditions:[{fieldPath:'purchase.financingType',operator:'not_equals',value:'cash'}]}},
   {...number('purchase.loanTermYears','Loan term in years',1,40),visibleWhen:{match:'all',conditions:[{fieldPath:'purchase.financingType',operator:'not_equals',value:'cash'}]}},
-  {id:'fha-protection',type:'information',label:'FHA financing includes the HUD amendatory clause in this agreement. A low appraisal does not require forfeiture of the deposit; the buyer may elect to proceed. The lender may require additional signed certifications.',visibleWhen:visible('purchase.financingType','fha')},
-  {id:'va-protection',type:'information',label:'VA financing includes the VA escape clause in this agreement. If the price exceeds VA reasonable value, the buyer may decline to proceed without a forfeiture penalty, or elect to proceed.',visibleWhen:visible('purchase.financingType','va')},
+  {id:'fha-protection',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_fha_protection_label"],visibleWhen:visible('purchase.financingType','fha')},
+  {id:'va-protection',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_va_protection_label"],visibleWhen:visible('purchase.financingType','va')},
   money('purchase.sellerConcessionsInCents','Seller concessions',false),
  ]},
  {id:'conditions',title:'Inspection, appraisal and financing contingencies',questions:[
-  {...number('deadlines.inspectionPeriodDays','Inspection contingency review period — calendar days after acceptance',1,60),helpText:'This is a negotiated deadline, not a statutory default. The signed agreement states the cancellation deadline and written-notice requirements.'},
+  {...number('deadlines.inspectionPeriodDays','Inspection contingency review period — calendar days after acceptance',1,60),helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_helpText"]},
   q('conditions.appraisal','Is purchase contingent on an appraisal at least equal to the price?','yes_no'),
   number('deadlines.appraisalPeriodDays','Appraisal review period — calendar days after acceptance',1,90,visible('conditions.appraisal')),
   {...q('conditions.financing','Is obtaining the proposed loan a contingency?','yes_no'),visibleWhen:{match:'all',conditions:[{fieldPath:'purchase.financingType',operator:'not_equals',value:'cash'}]}},
@@ -42,20 +43,20 @@ export const SOUTH_CAROLINA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefin
   number('purchase.loanApprovalDays','Loan approval review period — days after acceptance',1,90,visible('conditions.financing')),
   q('conditions.saleOfBuyersProperty','Must the buyer sell another property?','yes_no'),
   {...q('additionalTerms','Other property, sale deadline and cancellation terms','textarea'),visibleWhen:visible('conditions.saleOfBuyersProperty')},
-  {id:'contingency-deadlines',type:'information',label:'Exercise a contractual cancellation right by written notice before its agreed deadline. Additional repairs, credits or extensions require mutual written agreement. Nonwaivable statutory rights remain separate.'},
+  {id:'contingency-deadlines',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_contingency_deadlines_label"]},
  ]},
  {id:'deadlines',title:'Disclosures and closing',questions:[
-  {...q('deadlines.sellerDisclosureDate','Agreed delivery date when the condition statement is pending','date',false),helpText:'If the condition statement is pending, this date becomes the contractually agreed delivery deadline under S.C. Code 27-50-50(A). It does not postpone applicable federal lead or beachfront requirements.'},
+  {...q('deadlines.sellerDisclosureDate','Agreed delivery date when the condition statement is pending','date',false),helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_helpText"]},
   q('deadlines.settlementDate','Closing date','date'),
-  {id:'pacific-time',type:'information',label:'Contract calendar deadlines end at 11:59 p.m. Eastern time. Day counts begin the day after acceptance. Offer expiration uses the exact date and time selected later.'},
+  {id:'pacific-time',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_pacific_time_label"]},
  ]},
  {id:'settlement',title:'Title, closing, costs and possession',questions:[
-  {...q('settlement.closingAgentName','South Carolina closing attorney, if selected','text',false),helpText:'If blank, the parties will select a licensed South Carolina closing attorney before closing. NavStreet does not conduct closings.'},
+  {...q('settlement.closingAgentName','South Carolina closing attorney, if selected','text',false),helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_settlement_helpText"]},
   choice('settlement.titlePolicyPayer','Who pays the owner’s title policy?',[{value:'seller',label:'Seller'},{value:'buyer',label:'Buyer'}]),
   number('settlement.titleEvidenceDaysBeforeClosing','Days before closing to deliver the preliminary title report',1,45),
   choice('settlement.specialAssessmentPayer','Who pays assessments levied before closing?',allocation),
   {...choice('settlement.hoaTransferFeePayer','Who pays applicable association transfer fees?',allocation),visibleWhen:visible('disclosures.sellerReportsHoa')},
-  {id:'possession',type:'information',label:'Possession is due at completed closing and recording, subject to disclosed vacation rentals and expressly agreed lawful continuing occupancy. Seller occupancy after closing requires separately signed terms.'},
+  {id:'possession',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_label"]},
  ]},
  {id:'disclosures',title:'Disclosures and property-specific terms',questions:[
   {...choice('disclosures.propertyConditionStatus','Residential Property Condition Disclosure Statement',[
@@ -85,7 +86,7 @@ export const SOUTH_CAROLINA_RESIDENTIAL_SALE_SECTIONS:readonly OfferSectionDefin
  ]},
  {id:'additional',title:'Additional terms',questions:[
   {...q('additionalTerms','Other agreed terms','textarea',false),visibleWhen:visible('conditions.saleOfBuyersProperty',false)},
-  {id:'legal-advice',type:'information',label:'Obtain independent review for special terms, continuing tenancies, tax consequences, brokerage representation and local point-of-sale requirements. NavStreet is an advertising platform and does not act as an agent or escrow holder.'},
+  {id:'legal-advice',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_advice_label"]},
  ]},
  {id:'delivery',title:'Expiration, delivery and review',questions:[
   {id:'expiration',type:'date_time',fieldPath:'delivery.expiresAt',label:'Offer expires — Eastern time',timeZone:'America/New_York',validation:required},

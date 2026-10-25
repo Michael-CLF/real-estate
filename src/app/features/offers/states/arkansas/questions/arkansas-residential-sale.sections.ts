@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -29,12 +30,12 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         fieldPath: 'legalDescription',
         readOnly: true,
         validation: required('The seller must provide the recorded legal description on the listing.'),
-        helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
       },
       {
         id: 'included-by-default',
         type: 'information',
-        label: 'The property includes existing improvements and installed fixtures, plus seller-owned appliances expressly identified in this agreement, except items expressly excluded below.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_included_by_default_label"],
       },
       {
         id: 'included',
@@ -48,14 +49,14 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         type: 'textarea',
         label: 'Specific items excluded from the purchase',
         fieldPath: 'propertyItems.excluded',
-        helpText: 'List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_excluded_helpText"],
       },
       {
         id: 'leased-items',
         type: 'textarea',
         label: 'Leased equipment and transfer arrangements',
         fieldPath: 'propertyItems.leasedItemsDescription',
-        helpText: 'Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leased_items_helpText"],
       },
     ],
   },
@@ -131,7 +132,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         id: 'funding',
         type: 'single_choice',
         label: 'How will the purchase be funded?',
-        helpText: 'This resale agreement currently supports cash and conventional loans. Government loan programs require separate program-specific addenda.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_helpText"],
         fieldPath: 'purchase.financingType',
         validation: required('Select cash or a loan type.'),
         options: [
@@ -234,7 +235,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
   {
     id: 'conditions',
     title: 'Inspection and financing conditions',
-    description: 'The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_description"],
     questions: [
       {
         id: 'inspection-period',
@@ -247,12 +248,12 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
           maximum: 60,
           message: 'Choose 1 to 60 calendar days.',
         },
-        helpText: 'The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_inspection_period_helpText"],
       },
       {
         id: 'funding-condition',
         type: 'information',
-        label: 'A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_condition_label"],
       },
       {
         ...yn(
@@ -347,7 +348,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         validation: required(
           'Describe the property-sale condition before continuing.'
         ),
-        helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_property_terms_helpText"],
       },
       {
         ...yn(
@@ -367,14 +368,14 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"],
     questions: [
       {
         id: 'seller-date',
         type: 'date',
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
-        helpText: 'This optional date does not postpone any mandatory pre-agreement disclosure obligation.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_date_helpText"],
       },
       {
         id: 'settlement-date',
@@ -393,7 +394,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'possession-note',
         type: 'information',
-        label: 'Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_note_label"],
       },
       {
         id: 'title-payer',
@@ -411,7 +412,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        helpText: 'Optional at offer stage; the parties may designate the closing agent by written agreement.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_agent_helpText"],
       },
       {
         id: 'title-evidence',
@@ -478,7 +479,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         "label": "Not yet received"
       }
     ],
-    "helpText": "Arkansas does not impose a universal seller property-condition disclosure form on an ordinary FSBO resale. Seller must not conceal or misrepresent material conditions and shall answer inquiries truthfully. Any voluntarily supplied statement is separate from this agreement and is not an independent inspection or warranty. Broker/licensee disclosure and agency duties apply when such professionals participate; this platform agreement does not substitute for them. Optional condition records cannot prevent the parties from making an offer."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_condition_helpText"]
   },
   {
     "id": "records",
@@ -495,7 +496,7 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         "label": "Not yet received"
       }
     ],
-    "helpText": "Buyer may investigate structure, title, access, flood and insurance risk, utilities, private well/septic systems, permits and known hazards during the negotiated inspection period. Seller shall provide available requested records. This agreement imposes no universal new inspection, tax-estimate, radon certificate or septic upload. Required federal lead disclosures apply separately to covered pre-1978 housing."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_records_helpText"]
   },
   {
     "id": "hoa-seller",
@@ -523,12 +524,12 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         "label": "Seller reports no association"
       }
     ],
-    "helpText": "For an association reported by the seller, review the applicable governing documents and available dues, insurance and assessment records. Select only your actual receipt status."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_association_helpText"]
   }
-,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure." },
+,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leadPaintStatus_helpText"] },
     {id:'lead-inspection',type:'single_choice',label:'Lead inspection opportunity',fieldPath:'disclosures.leadInspectionSelection',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadPaintStatus',operator:'equals',value:'received'}]},validation:required('Select the inspection opportunity.'),options:[{value:'ten_days',label:'10 days'},{value:'waived',label:'Inspection opportunity waived in writing'},{value:'other_period',label:'Different period agreed in writing'}]},
     {id:'lead-days',type:'number',label:'Agreed lead inspection days',fieldPath:'disclosures.leadInspectionDays',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadInspectionSelection',operator:'equals',value:'other_period'}]},validation:{required:true,minimum:1,maximum:60,message:'Enter 1 to 60 days.'}},
-{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{id:'legal-rights',type:'information',label:"Arkansas does not impose a universal seller property-condition disclosure form on an ordinary FSBO resale. Seller must not conceal or misrepresent material conditions and shall answer inquiries truthfully. Any voluntarily supplied statement is separate from this agreement and is not an independent inspection or warranty. Broker/licensee disclosure and agency duties apply when such professionals participate; this platform agreement does not substitute for them. Optional condition records cannot prevent the parties from making an offer. Buyer may investigate structure, title, access, flood and insurance risk, utilities, private well/septic systems, permits and known hazards during the negotiated inspection period. Seller shall provide available requested records. This agreement imposes no universal new inspection, tax-estimate, radon certificate or septic upload. Required federal lead disclosures apply separately to covered pre-1978 housing."}]},
+{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{id:'legal-rights',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_rights_label"]}]},
   {
     id: 'additional',
     title: 'Additional terms',
@@ -547,12 +548,12 @@ export const ARKANSAS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
             },
           ],
         },
-        helpText: 'Leave blank if there are no other terms. Ask a Arkansas attorney to review any new legal language.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"],
       },
       {
         id: 'sale-terms-location',
         type: 'information',
-        label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_terms_location_label"],
         visibleWhen: {
           match: 'all',
           conditions: [

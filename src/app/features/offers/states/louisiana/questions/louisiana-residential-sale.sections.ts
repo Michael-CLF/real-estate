@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -18,9 +19,9 @@ export const LOUISIANA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
         label: 'Land and grounds from the seller listing',
         fieldPath: 'propertyItems.groundsDescription',
         readOnly: true,
-        helpText: 'Provided by the seller. If no verified size and unit are available, the contract uses the description in record title.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_grounds_helpText"],
       },
-      { id: 'movable', type: 'textarea', label: 'Movable items the seller will leave with the property', fieldPath: 'propertyItems.included', helpText: 'The official agreement lists many installed items by default. Identify additional movable items here.' },
+      { id: 'movable', type: 'textarea', label: 'Movable items the seller will leave with the property', fieldPath: 'propertyItems.included', helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_movable_helpText"] },
       { id: 'excluded', type: 'textarea', label: 'Items specifically excluded from the sale', fieldPath: 'propertyItems.excluded' },
       yn('propertyItems.mineralRightsReserved', 'Will the seller reserve any mineral rights they own?', 'Choose whether mineral rights are reserved.'),
       { id: 'minerals-percent', type: 'number', label: 'Percentage of seller-owned mineral rights reserved', fieldPath: 'propertyItems.mineralRightsPercent', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'propertyItems.mineralRightsReserved', operator: 'is_true' }] }, validation: { required: true, minimum: 1, maximum: 100, message: 'Enter a percentage between 1 and 100.' } },
@@ -52,7 +53,7 @@ export const LOUISIANA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
       { id: 'water', type: 'number', label: 'Private water systems servicing the main home (0 if none)', fieldPath: 'conditions.privateWaterSystems', validation: { required: true, minimum: 0, maximum: 20, message: 'Enter 0 to 20 private water systems.' } },
       { id: 'septic', type: 'number', label: 'Private septic or treatment systems servicing the main home (0 if none)', fieldPath: 'conditions.privateSepticSystems', validation: { required: true, minimum: 0, maximum: 20, message: 'Enter 0 to 20 private septic systems.' } },
       yn('conditions.appraisal', 'Is this sale conditioned on an appraisal at least equal to the sale price?', 'Select the appraisal condition.'),
-      { id: 'appraisal-copy-days', type: 'number', label: 'Days after receipt of a low appraisal for buyer to give seller the appraisal and request', fieldPath: 'deadlines.appraisalCopyDays', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.appraisal', operator: 'is_true' }] }, validation: { required: true, minimum: 1, maximum: 30, message: 'Enter 1 to 30 days.' } },
+      { id: 'appraisal-copy-days', type: 'number', label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_appraisal_copy_days_label"], fieldPath: 'deadlines.appraisalCopyDays', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.appraisal', operator: 'is_true' }] }, validation: { required: true, minimum: 1, maximum: 30, message: 'Enter 1 to 30 days.' } },
       { id: 'appraisal-response-days', type: 'number', label: 'Days after seller receives a low appraisal for buyer to elect to pay or void', fieldPath: 'deadlines.appraisalResponseDays', visibleWhen: { match: 'all', conditions: [{ fieldPath: 'conditions.appraisal', operator: 'is_true' }] }, validation: { required: true, minimum: 1, maximum: 30, message: 'Enter 1 to 30 days.' } },
       { id: 'warranties', type: 'single_choice', label: 'Warranty election for the sale', fieldPath: 'conditions.warranty', validation: required('Choose a warranty election. Review the official form language before choosing.'), options: [{ value: 'with_warranties', label: 'Sale with seller warranties' }, { value: 'as_is', label: 'Sale as is, with waiver of redhibition' }, { value: 'new_home_warranty', label: 'New construction subject to New Home Warranty Act' }] },
       { id: 'home-warranty', type: 'single_choice', label: 'Will a home service warranty be bought at closing?', fieldPath: 'conditions.homeServiceWarranty', validation: required('Choose a home service warranty option.'), options: [{ value: 'will', label: 'Yes' }, { value: 'will_not', label: 'No' }] },
@@ -66,12 +67,12 @@ export const LOUISIANA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
       { id: 'act-of-sale', type: 'date', label: 'Act of Sale date', fieldPath: 'deadlines.settlementDate', validation: required('Enter the date for the Act of Sale.') },
       { id: 'title-cure', type: 'number', label: 'Maximum calendar days to extend the Act of Sale for title curative work', fieldPath: 'deadlines.titleCureDays', validation: { required: true, minimum: 1, maximum: 180, message: 'Enter 1 to 180 days.' } },
       { id: 'broker-comp', type: 'currency', label: 'Seller contribution to buyer broker compensation (optional; $0 if blank)', fieldPath: 'purchase.buyerBrokerCompensationInCents' },
-      { id: 'possession', type: 'information', label: 'Unless separately agreed in writing, keys and possession pass at the Act of Sale. The buyer chooses the settlement agent or notary.' },
+      { id: 'possession', type: 'information', label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_label"] },
     ]
   },
   {
     id: 'disclosures', questionLayout: 'cards', title: 'Seller documents and buyer receipt', questions: [
-      { id: 'seller-form', type: 'single_choice', label: 'Seller-signed Louisiana Property Disclosure Document', fieldPath: 'disclosures.propertyDisclosureStatus', validation: required('Select whether you received the signed Louisiana disclosure.'), options: [{ value: 'received', label: 'I opened and received the signed seller disclosure before this offer' }, { value: 'pending', label: 'I have not received it yet' }], helpText: 'You may save your draft while this is pending. The offer cannot be submitted until the signed disclosure has been uploaded and received.' },
+      { id: 'seller-form', type: 'single_choice', label: 'Seller-signed Louisiana Property Disclosure Document', fieldPath: 'disclosures.propertyDisclosureStatus', validation: required('Select whether you received the signed Louisiana disclosure.'), options: [{ value: 'received', label: 'I opened and received the signed seller disclosure before this offer' }, { value: 'pending', label: 'I have not received it yet' }], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_form_helpText"] },
       {
         id: 'lead-form',
         type: 'single_choice',
@@ -93,7 +94,7 @@ export const LOUISIANA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
           },
         ],
         helpText:
-          'You may send an offer before receiving the lead packet. The seller cannot accept that offer. After the packet is uploaded, review it and make a new offer.',
+          SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_lead_form_helpText"],
       },
 
       { id: 'lead-inspection', type: 'single_choice', label: 'Buyer lead inspection opportunity', fieldPath: 'disclosures.leadInspectionSelection', visibleWhen: visible('disclosures.leadPaintStatus', 'received'), validation: required('Choose the lead inspection option.'), options: [{ value: 'ten_days', label: '10-day opportunity' }, { value: 'waived', label: 'Buyer waives the opportunity' }, { value: 'other_period', label: 'Another period agreed in writing' }] },
@@ -102,7 +103,7 @@ export const LOUISIANA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinitio
   },
   {
     id: 'additional', questionLayout: 'cards', title: 'Other agreed terms', questions: [
-      { id: 'additional-terms', type: 'textarea', label: 'Additional terms (optional)', fieldPath: 'additionalTerms', helpText: 'Additional terms will appear on a separate NavStreet addendum; they do not change the printed LREC form.' },
+      { id: 'additional-terms', type: 'textarea', label: 'Additional terms (optional)', fieldPath: 'additionalTerms', helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"] },
     ]
   },
   {

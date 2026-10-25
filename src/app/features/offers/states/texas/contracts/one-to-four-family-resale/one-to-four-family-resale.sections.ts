@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../../legal-content/offer-section-content.2026-10-25.v1';
 import type {
   OfferSectionDefinition,
 } from '../../../../engine/models/offer-section-definition';
@@ -22,7 +23,7 @@ const PROPERTY_SECTION: OfferSectionDefinition = {
   id: 'property',
   title: 'Property and owners association',
   shortTitle: 'Property',
-  description: 'Review the property address and complete the contract questions concerning exclusions, reservations, and the property owners association.',
+  description: SECTION_LEGAL_CONTENT_20261025_V1["one_to_four_family_resale_property_description"],
   questions: [
     ...TEXAS_PROPERTY_TERMS_SECTION.questions,
     ...TEXAS_ASSOCIATION_SECTION.questions,
@@ -55,7 +56,7 @@ const PRICE_AND_PROPERTY_TERMS_SECTION: OfferSectionDefinition = {
     {
       id: 'price-calculation',
       title: 'Sales price calculation',
-      description: 'Enter the total sales price and financing portion. NavStreet calculates the cash portion automatically.',
+      description: SECTION_LEGAL_CONTENT_20261025_V1["one_to_four_family_resale_price_calculation_description"],
       columns: 3,
       questions: questionsById(
         sharedSection('price-financing'),
@@ -99,7 +100,7 @@ const EXPENSES_AND_PRORATIONS_SECTION: OfferSectionDefinition = {
   id: 'expenses-and-prorations',
   title: 'Expenses and prorations',
   shortTitle: 'Expenses',
-  description: 'Enter negotiated expense contributions. Standard prorations remain governed by the contract.',
+  description: SECTION_LEGAL_CONTENT_20261025_V1["one_to_four_family_resale_expenses_and_prorations_description"],
   questionGroups: [
     {
       id: 'buyer-expenses',
@@ -133,7 +134,7 @@ const EXPENSES_AND_PRORATIONS_SECTION: OfferSectionDefinition = {
     {
       id: 'standard-prorations',
       title: 'Standard prorations',
-      description: 'Taxes, rents, and other standard prorations remain controlled by the Texas contract and are calculated through the closing date.',
+      description: SECTION_LEGAL_CONTENT_20261025_V1["one_to_four_family_resale_standard_prorations_description"],
       questions: [],
     },
   ],

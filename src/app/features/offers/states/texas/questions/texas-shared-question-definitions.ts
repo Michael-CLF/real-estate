@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type {
   OfferQuestionDefinition,
   OfferQuestionOption,
@@ -216,7 +217,7 @@ export const TEXAS_LEASES_SECTION:
         type: 'information',
         label: 'Seller-provided lease information',
         description:
-          'Lease facts and seller documents come from the listing. The buyer confirms the contract choices here and does not upload the seller’s documents again.',
+          SECTION_LEGAL_CONTENT_20261025_V1["shared_question_definitions_seller_lease_source_note_description"],
       },
     ],
   };
@@ -341,7 +342,7 @@ export const TEXAS_DISCLOSURES_SECTION:
         type: 'information',
         label: 'Seller-provided documents',
         description:
-          'Choose Received, Not received, or Not required for each disclosure. If Not received is selected, the delivery-days blank states how many days after the Effective Date the buyer will allow the seller to deliver it. Seller documents come from the listing; the buyer does not upload them again.',
+          SECTION_LEGAL_CONTENT_20261025_V1["shared_question_definitions_seller_disclosure_source_note_description"],
       },
     ],
   };
@@ -496,7 +497,7 @@ const TEXAS_DEPOSIT_DELIVERY_QUESTIONS:
       type: 'information',
       label: 'Delivery deadline',
       description:
-        'Earnest money and any termination option fee are due within 3 days after the Effective Date. The termination option period entered below determines how long the buyer has the unrestricted right to terminate the contract.',
+        SECTION_LEGAL_CONTENT_20261025_V1["shared_question_definitions_deposit_effective_date_note_description"],
       tone: 'important',
     },
   ];
@@ -509,7 +510,7 @@ const TEXAS_ESCROW_AGENT_QUESTIONS:
       type: 'information',
       label: 'Escrow company not selected yet?',
       description:
-        'You can leave these fields blank while completing your offer draft. The escrow recipient and delivery address should be resolved before the contract becomes effective. Earnest money and any option fee are due within 3 days after the Effective Date.',
+        SECTION_LEGAL_CONTENT_20261025_V1["shared_question_definitions_escrow_agent_selection_note_description"],
       tone: 'important',
     },
     textQuestion(
@@ -875,7 +876,7 @@ export const TEXAS_SHARED_TRANSACTION_SECTIONS:
           type: 'information',
           label: 'Contract language',
           description:
-            'NavStreet does not draft legal provisions. Special provisions and repair language must be supplied by a party or attorney.',
+            SECTION_LEGAL_CONTENT_20261025_V1["shared_question_definitions_legal_language_notice_description"],
           tone: 'important',
         },
       ],
@@ -911,7 +912,7 @@ function createTexasAddendaSection():
           'lead-based-paint',
         ],
         description:
-          'Required addenda selected by your earlier answers are included automatically. Select any additional addenda that apply.',
+          SECTION_LEGAL_CONTENT_20261025_V1["shared_question_definitions_selected_addenda_description"],
       },
     ],
   };

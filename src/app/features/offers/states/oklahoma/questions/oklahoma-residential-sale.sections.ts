@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -13,18 +14,18 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
     id: 'property-contract-documents',
     title: 'Property and contract documents',
     shortTitle: 'Property',
-    description: 'Confirm the legal description and select every official supplement that will be attached.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_property_contract_documents_description"],
     questions: [
       {
         id: 'legal-description', type: 'textarea', label: 'Legal description',
         fieldPath: 'legalDescription',
-        helpText: 'Use the recorded legal description. The street address alone is not a legal description.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
         validation: required('The property legal description is required.'),
       },
       {
         id: 'contract-documents', type: 'multiple_choice', label: 'Contract documents and supplements',
         fieldPath: 'contractDocuments',
-        description: 'Select every document incorporated into this offer. Leave all financing choices blank only for a cash transaction.',
+        description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_contract_documents_description"],
         options: [
           { value: 'conventional_loan', label: 'Conventional Loan' },
           { value: 'fha_loan', label: 'FHA Loan' },
@@ -57,7 +58,7 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'earnest-money', type: 'currency', label: 'Earnest money',
         fieldPath: 'purchase.earnestMoneyInCents',
-        helpText: 'The OREC contract requires delivery within three days after the contract is fully executed.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_earnest_money_helpText"],
         validation: { required: true, minimum: 1, message: 'Earnest money must be greater than $0.00.' },
       },
       {
@@ -103,7 +104,7 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'reference-date', type: 'date', label: 'Time Reference Date',
         fieldPath: 'timePeriods.referenceDate',
-        helpText: 'If left blank, the OREC contract makes this the third day after the last party signs.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_reference_date_helpText"],
       },
       {
         id: 'inspection-days', type: 'number', label: 'Investigation and inspection period',
@@ -151,12 +152,12 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'cost-estimate', type: 'acknowledgement', label: 'Buyer acknowledges receipt of the estimate of transaction costs.',
         fieldPath: 'disclosures.costEstimateReceived',
-        helpText: 'Optional. Record actual receipt if an estimate is available; estimates can be supplied later by the lender or closing professional.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_cost_estimate_helpText"],
       },
       {
         id: 'contract-guide', type: 'acknowledgement', label: 'Buyer acknowledges that the OREC Contract Guide has been made available.',
         fieldPath: 'disclosures.contractGuideAvailable',
-        helpText: 'Optional guidance is available from the Oklahoma Real Estate Commission contract forms page.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_contract_guide_helpText"],
       },
     ],
   },
@@ -239,7 +240,7 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'additional-provisions-text', type: 'textarea', label: 'Party- or attorney-provided additional provisions',
         fieldPath: 'additionalProvisions.partyProvidedText',
-        description: 'NavStreet does not draft or recommend legal provisions. Enter only language supplied by a party or attorney.',
+        description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_provisions_text_description"],
         visibleWhen: { match: 'all', conditions: [{ fieldPath: 'additionalProvisions.included', operator: 'is_true' }] },
         validation: required('Enter the party- or attorney-provided provisions.'),
       },
@@ -252,7 +253,7 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
     questions: [
       {
         id: 'buyer-affidavit', type: 'acknowledgement',
-        label: 'Buyer confirms eligibility to execute Oklahoma’s required Affidavit of Land or Mineral Ownership under 60 O.S. Sections 121-122.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_buyer_affidavit_label"],
         fieldPath: 'buyerAffidavitComplianceConfirmed',
         validation: required('Buyer affidavit-compliance confirmation is required.'),
       },
@@ -262,7 +263,7 @@ export const OKLAHOMA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       },
       {
         id: 'electronic-delivery', type: 'acknowledgement',
-        label: 'Authorize electronic delivery of this offer and related documents through NavStreet.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_electronic_delivery_label"],
         fieldPath: 'delivery.electronicDeliveryAuthorized',
         validation: required('Electronic-delivery authorization is required.'),
       },

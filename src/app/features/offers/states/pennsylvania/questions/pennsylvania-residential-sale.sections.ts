@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -29,12 +30,12 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
         fieldPath: 'legalDescription',
         readOnly: true,
         validation: required('The seller must provide the recorded legal description on the listing.'),
-        helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
       },
       {
         id: 'included-by-default',
         type: 'information',
-        label: 'The property includes existing improvements and installed fixtures, plus seller-owned appliances expressly identified in this agreement, except items expressly excluded below.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_included_by_default_label"],
       },
       {
         id: 'included',
@@ -48,14 +49,14 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
         type: 'textarea',
         label: 'Specific items excluded from the purchase',
         fieldPath: 'propertyItems.excluded',
-        helpText: 'List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_excluded_helpText"],
       },
       {
         id: 'leased-items',
         type: 'textarea',
         label: 'Leased equipment and transfer arrangements',
         fieldPath: 'propertyItems.leasedItemsDescription',
-        helpText: 'Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leased_items_helpText"],
       },
     ],
   },
@@ -101,7 +102,7 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
           conditions: [
             { fieldPath: 'purchase.hasEarnestMoney', operator: 'is_true' },
           ],
-        },helpText:'Optional at offer stage. If blank, the parties will jointly select a qualified independent escrow holder.'},
+        },helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_holder_helpText"]},
       {
         id: 'due-days',
         type: 'number',
@@ -124,7 +125,7 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
         id: 'funding',
         type: 'single_choice',
         label: 'How will the purchase be funded?',
-        helpText: 'This resale agreement currently supports cash and conventional loans. Government loan programs require separate program-specific addenda.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_helpText"],
         fieldPath: 'purchase.financingType',
         validation: required('Select cash or a loan type.'),
         options: [
@@ -227,7 +228,7 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
   {
     id: 'conditions',
     title: 'Inspection and financing conditions',
-    description: 'The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_description"],
     questions: [
       {
         id: 'inspection-period',
@@ -240,12 +241,12 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
           maximum: 60,
           message: 'Choose 1 to 60 calendar days.',
         },
-        helpText: 'The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_inspection_period_helpText"],
       },
       {
         id: 'funding-condition',
         type: 'information',
-        label: 'A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_condition_label"],
       },
       {
         ...yn(
@@ -340,7 +341,7 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
         validation: required(
           'Describe the property-sale condition before continuing.'
         ),
-        helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_property_terms_helpText"],
       },
       {
         ...yn(
@@ -360,14 +361,14 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"],
     questions: [
       {
         id: 'seller-date',
         type: 'date',
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
-        helpText: 'This optional date does not postpone any mandatory pre-agreement disclosure obligation.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_date_helpText"],
       },
       {
         id: 'settlement-date',
@@ -386,7 +387,7 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
       {
         id: 'possession-note',
         type: 'information',
-        label: 'Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_note_label"],
       },
       {
         id: 'title-payer',
@@ -404,7 +405,7 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        helpText: 'Optional at offer stage; the parties may designate the closing agent by written agreement.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_agent_helpText"],
       },
       {
         id: 'title-evidence',
@@ -457,8 +458,8 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
   },
   {id:'disclosures',title:'Seller disclosures and property records',questions:[
 
-  {"id":"condition","type":"single_choice","fieldPath":"disclosures.propertyConditionStatus","label":"Pennsylvania seller disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":"For a covered residential transfer, 68 Pa.C.S. 7303 requires a signed and dated disclosure of known material defects before seller and buyer sign an agreement of transfer. Use the statutory statement or a compliant form covering the required subjects; assess chapter 71 scope and 7302 exceptions accurately. Condominium sellers disclose their own unit under this chapter, not common elements; association resale duties apply separately. No new independent investigation is universally required to complete the condition statement. Upload the applicable signed statement before offers.","validation":{"required":true,"message":"Select your actual receipt status."}},
-  {"id":"records","type":"single_choice","fieldPath":"disclosures.statutoryPacketStatus","label":"Applicable Nevada open-range disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":"Known radon, water intrusion, environmental, structural, utility and other material defects belong in the condition disclosure and available records; no universal independent radon, termite, septic or inspection certificate upload is imposed merely to make an offer. Qualified inspections and local point-of-sale requirements remain property-specific. Seller shall provide applicable updates; a receipt does not warrant condition or waive fraud, disclosure remedies or protected cancellation rights.","validation":{"required":true,"message":"Select your actual receipt status."}},
+  {"id":"condition","type":"single_choice","fieldPath":"disclosures.propertyConditionStatus","label":"Pennsylvania seller disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_condition_helpText"],"validation":{"required":true,"message":"Select your actual receipt status."}},
+  {"id":"records","type":"single_choice","fieldPath":"disclosures.statutoryPacketStatus","label":"Applicable Nevada open-range disclosure","options":[{"value":"received","label":"Actually received and reviewed the uploaded version"},{"value":"pending","label":"Not yet received or reviewed"}],"helpText":SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_records_helpText"],"validation":{"required":true,"message":"Select your actual receipt status."}},
   {
     "id": "hoa-seller",
     "type": "yes_no",
@@ -485,12 +486,12 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
         "label": "Seller reports no association"
       }
     ],
-    "helpText": "When the seller reports an association, review the applicable governing documents, fees and assessment records. For an applicable nondeclarant condominium resale under 68 Pa.C.S. 3407 or planned-community resale under 5407, seller shall furnish the governing declaration, bylaws/rules and the association resale certificate before conveyance, subject to statutory scope and exceptions. The certificate addresses assessments/fees, capital expenses, reserves/budgets, litigation, insurance and other required matters. Buyer is not liable for undisclosed assessments/fees beyond statutory limits. The purchase contract is voidable until the certificate is provided and for five days thereafter or until conveyance, whichever occurs first. A negotiated inspection deadline or signature does not shorten the statutory right. Pending association records do not universally block making or accepting an offer. Public-offering/declarant, cooperative, new-construction and leasehold transactions require separate agreements."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_association_helpText"]
   }
-,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure." },
+,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leadPaintStatus_helpText"] },
     {id:'lead-inspection',type:'single_choice',label:'Lead inspection opportunity',fieldPath:'disclosures.leadInspectionSelection',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadPaintStatus',operator:'equals',value:'received'}]},validation:required('Select the inspection opportunity.'),options:[{value:'ten_days',label:'10 days'},{value:'waived',label:'Inspection opportunity waived in writing'},{value:'other_period',label:'Different period agreed in writing'}]},
     {id:'lead-days',type:'number',label:'Agreed lead inspection days',fieldPath:'disclosures.leadInspectionDays',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadInspectionSelection',operator:'equals',value:'other_period'}]},validation:{required:true,minimum:1,maximum:60,message:'Enter 1 to 60 days.'}},
-{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{"id":"legal-rights","type":"information","label":"State disclosure and transaction information","helpText":"For a covered residential transfer, 68 Pa.C.S. 7303 requires a signed and dated disclosure of known material defects before seller and buyer sign an agreement of transfer. Use the statutory statement or a compliant form covering the required subjects; assess chapter 71 scope and 7302 exceptions accurately. Condominium sellers disclose their own unit under this chapter, not common elements; association resale duties apply separately. No new independent investigation is universally required to complete the condition statement. Upload the applicable signed statement before offers. Known radon, water intrusion, environmental, structural, utility and other material defects belong in the condition disclosure and available records; no universal independent radon, termite, septic or inspection certificate upload is imposed merely to make an offer. Qualified inspections and local point-of-sale requirements remain property-specific. Seller shall provide applicable updates; a receipt does not warrant condition or waive fraud, disclosure remedies or protected cancellation rights."}]},
+{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{"id":"legal-rights","type":"information","label":"State disclosure and transaction information","helpText":SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_rights_helpText"]}]},
   {
     id: 'additional',
     title: 'Additional terms',
@@ -509,12 +510,12 @@ export const PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefini
             },
           ],
         },
-        helpText: 'Leave blank if there are no other terms. Ask a Pennsylvania attorney to review any new legal language.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"],
       },
       {
         id: 'sale-terms-location',
         type: 'information',
-        label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_terms_location_label"],
         visibleWhen: {
           match: 'all',
           conditions: [

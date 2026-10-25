@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -29,12 +30,12 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         fieldPath: 'legalDescription',
         readOnly: true,
         validation: required('The seller must provide the recorded legal description on the listing.'),
-        helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
       },
       {
         id: 'included-by-default',
         type: 'information',
-        label: 'The property includes existing improvements and installed fixtures, plus seller-owned appliances expressly identified in this agreement, except items expressly excluded below.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_included_by_default_label"],
       },
       {
         id: 'included',
@@ -48,14 +49,14 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         type: 'textarea',
         label: 'Specific items excluded from the purchase',
         fieldPath: 'propertyItems.excluded',
-        helpText: 'List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_excluded_helpText"],
       },
       {
         id: 'leased-items',
         type: 'textarea',
         label: 'Leased equipment and transfer arrangements',
         fieldPath: 'propertyItems.leasedItemsDescription',
-        helpText: 'Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leased_items_helpText"],
       },
     ],
   },
@@ -131,7 +132,7 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         id: 'funding',
         type: 'single_choice',
         label: 'How will the purchase be funded?',
-        helpText: 'This resale agreement currently supports cash and conventional loans. Government loan programs require separate program-specific addenda.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_helpText"],
         fieldPath: 'purchase.financingType',
         validation: required('Select cash or a loan type.'),
         options: [
@@ -234,7 +235,7 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
   {
     id: 'conditions',
     title: 'Inspection and financing conditions',
-    description: 'The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_description"],
     questions: [
       {
         id: 'inspection-period',
@@ -247,12 +248,12 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
           maximum: 60,
           message: 'Choose 1 to 60 calendar days.',
         },
-        helpText: 'The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_inspection_period_helpText"],
       },
       {
         id: 'funding-condition',
         type: 'information',
-        label: 'A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_condition_label"],
       },
       {
         ...yn(
@@ -347,7 +348,7 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         validation: required(
           'Describe the property-sale condition before continuing.'
         ),
-        helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_property_terms_helpText"],
       },
       {
         ...yn(
@@ -367,14 +368,14 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"],
     questions: [
       {
         id: 'seller-date',
         type: 'date',
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
-        helpText: 'This optional date does not postpone any mandatory pre-agreement disclosure obligation.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_date_helpText"],
       },
       {
         id: 'settlement-date',
@@ -393,7 +394,7 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
       {
         id: 'possession-note',
         type: 'information',
-        label: 'Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_note_label"],
       },
       {
         id: 'title-payer',
@@ -411,7 +412,7 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        helpText: 'Optional at offer stage; the parties may designate the closing agent by written agreement.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_agent_helpText"],
       },
       {
         id: 'title-evidence',
@@ -478,7 +479,7 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         "label": "Not yet received"
       }
     ],
-    "helpText": "765 ILCS 77 requires the seller Residential Real Property Disclosure Report before the signing of a contract, unless a specific seller/transfer exclusion applies. It covers condominium units and their allocated limited common elements as specified by the Act. Seller must complete the statutory report and supplement a known error or omission before closing. The buyer acknowledges only actual receipt of the identified version; a receipt does not warrant condition or waive remedies. The Act preserves specified five-business-day termination rights for qualifying late material-defect reports/supplements and other statutory remedies. Federal lead and the independent Illinois radon duty are not waived by a condition-report exception."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_condition_helpText"]
   },
   {
     "id": "records",
@@ -491,9 +492,9 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         "label": "Received and reviewed the uploaded packet"
       }
     ],
-    "helpText": "Unless excluded by 420 ILCS 46/20, seller shall give the Illinois Disclosure of Information on Radon Hazards, known hazard records and the approved IEMA-OHS Radon Testing Guidelines for Real Estate Transactions pamphlet before buyer is obligated. Section 10(c) permits disclosure after an offer, but requires completion before seller acceptance and an opportunity for buyer review and possible amendment. NavStreet collects this required pre-acceptance disclosure earlier: seller uploads the applicable packet before Make Offer opens, and buyer reviews it and the supplied pamphlet before submitting. No radon test or mitigation is universally required merely to make an offer."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_records_helpText"]
   },
-  {id:'radon-receipt',type:'acknowledgement',fieldPath:'disclosures.radonNoticeAcknowledged',label:'I actually received and reviewed the seller radon hazard disclosure, available records and the approved IEMA pamphlet.',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.requiredKnownFacts',operator:'is_true'},{fieldPath:'disclosures.statutoryPacketStatus',operator:'equals',value:'received'}]}},{
+  {id:'radon-receipt',type:'acknowledgement',fieldPath:'disclosures.radonNoticeAcknowledged',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_radon_receipt_label"],visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.requiredKnownFacts',operator:'is_true'},{fieldPath:'disclosures.statutoryPacketStatus',operator:'equals',value:'received'}]}},{
     "id": "hoa-seller",
     "type": "yes_no",
     "label": "Seller reports an owners association",
@@ -519,12 +520,12 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
         "label": "Seller reports no association"
       }
     ],
-    "helpText": "For an association reported by the seller, review the applicable governing documents and available dues, insurance and assessment records. Select only your actual receipt status."
+    "helpText": SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_association_helpText"]
   }
-,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure." },
+,    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leadPaintStatus_helpText"] },
     {id:'lead-inspection',type:'single_choice',label:'Lead inspection opportunity',fieldPath:'disclosures.leadInspectionSelection',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadPaintStatus',operator:'equals',value:'received'}]},validation:required('Select the inspection opportunity.'),options:[{value:'ten_days',label:'10 days'},{value:'waived',label:'Inspection opportunity waived in writing'},{value:'other_period',label:'Different period agreed in writing'}]},
     {id:'lead-days',type:'number',label:'Agreed lead inspection days',fieldPath:'disclosures.leadInspectionDays',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadInspectionSelection',operator:'equals',value:'other_period'}]},validation:{required:true,minimum:1,maximum:60,message:'Enter 1 to 60 days.'}},
-{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{id:'legal-rights',type:'information',label:"765 ILCS 77 requires the seller Residential Real Property Disclosure Report before the signing of a contract, unless a specific seller/transfer exclusion applies. It covers condominium units and their allocated limited common elements as specified by the Act. Seller must complete the statutory report and supplement a known error or omission before closing. The buyer acknowledges only actual receipt of the identified version; a receipt does not warrant condition or waive remedies. The Act preserves specified five-business-day termination rights for qualifying late material-defect reports/supplements and other statutory remedies. Federal lead and the independent Illinois radon duty are not waived by a condition-report exception. Unless excluded by 420 ILCS 46/20, seller shall give the Illinois Disclosure of Information on Radon Hazards, known hazard records and the approved IEMA-OHS Radon Testing Guidelines for Real Estate Transactions pamphlet before buyer is obligated. Section 10(c) permits disclosure after an offer, but requires completion before seller acceptance and an opportunity for buyer review and possible amendment. NavStreet collects this required pre-acceptance disclosure earlier: seller uploads the applicable packet before Make Offer opens, and buyer reviews it and the supplied pamphlet before submitting. No radon test or mitigation is universally required merely to make an offer. Applicable common-interest community resale duties remain under 765 ILCS 160/1-35 when the seller reports that ownership."}]},
+{id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true},{id:'legal-rights',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_rights_label"]}]},
   {
     id: 'additional',
     title: 'Additional terms',
@@ -543,12 +544,12 @@ export const ILLINOIS_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition
             },
           ],
         },
-        helpText: 'Leave blank if there are no other terms. Ask a Illinois attorney to review any new legal language.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"],
       },
       {
         id: 'sale-terms-location',
         type: 'information',
-        label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_terms_location_label"],
         visibleWhen: {
           match: 'all',
           conditions: [

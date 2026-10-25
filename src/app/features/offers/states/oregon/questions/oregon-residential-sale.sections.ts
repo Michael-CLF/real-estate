@@ -1,3 +1,4 @@
+import { SECTION_LEGAL_CONTENT_20261025_V1 } from '../legal-content/offer-section-content.2026-10-25.v1';
 import type { OfferSectionDefinition } from '../../../engine/models/offer-section-definition';
 
 const required = (message: string) => ({ required: true, message });
@@ -29,12 +30,12 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
         fieldPath: 'legalDescription',
         readOnly: true,
         validation: required('The seller must provide the recorded legal description on the listing.'),
-        helpText: 'Copied from the seller’s listing. Ask the seller to correct the listing if this description is missing.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_legal_description_helpText"],
       },
       {
         id: 'included-by-default',
         type: 'information',
-        label: 'The property includes existing improvements and installed fixtures, plus seller-owned appliances expressly identified in this agreement, except items expressly excluded below.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_included_by_default_label"],
       },
       {
         id: 'included',
@@ -48,14 +49,14 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
         type: 'textarea',
         label: 'Specific items excluded from the purchase',
         fieldPath: 'propertyItems.excluded',
-        helpText: 'List each fixture or personal-property item the seller will keep. An unlisted installed fixture remains included.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_excluded_helpText"],
       },
       {
         id: 'leased-items',
         type: 'textarea',
         label: 'Leased equipment and transfer arrangements',
         fieldPath: 'propertyItems.leasedItemsDescription',
-        helpText: 'Identify leased appliances, tanks, solar equipment or other items and whether buyer will assume a lease.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leased_items_helpText"],
       },
     ],
   },
@@ -131,7 +132,7 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
         id: 'funding',
         type: 'single_choice',
         label: 'How will the purchase be funded?',
-        helpText: 'This resale agreement currently supports cash and conventional loans. Government loan programs require separate program-specific addenda.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_helpText"],
         fieldPath: 'purchase.financingType',
         validation: required('Select cash or a loan type.'),
         options: [
@@ -234,7 +235,7 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
   {
     id: 'conditions',
     title: 'Inspection and financing conditions',
-    description: 'The inspection period and any loan approval contingency affect the buyer’s cancellation and deposit rights.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_conditions_description"],
     questions: [
       {
         id: 'inspection-period',
@@ -247,12 +248,12 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
           maximum: 60,
           message: 'Choose 1 to 60 calendar days.',
         },
-        helpText: 'The buyer may give written cancellation notice during this period if the property is unacceptable. The period starts after the agreement takes effect.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_inspection_period_helpText"],
       },
       {
         id: 'funding-condition',
         type: 'information',
-        label: 'A cash offer has no loan contingency. For a financed purchase, state whether loan approval is a condition of the agreement.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_funding_condition_label"],
       },
       {
         ...yn(
@@ -347,7 +348,7 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
         validation: required(
           'Describe the property-sale condition before continuing.'
         ),
-        helpText: 'Identify the property to be sold, the deadline, and what happens if that sale does not close. You may include other negotiated terms here.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_property_terms_helpText"],
       },
       {
         ...yn(
@@ -367,14 +368,14 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
   {
     id: 'deadlines',
     title: 'Contract deadlines',
-    description: 'Stated calendar dates end at 11:59 p.m. in the property time zone shown in this offer. Required documents must be delivered before the applicable statutory deadline. Inspection and loan approval deadlines use the periods you selected in Section 4 and begin when the contract becomes effective.',
+    description: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_deadlines_description"],
     questions: [
       {
         id: 'seller-date',
         type: 'date',
         label: 'Deadline for optional additional seller documents (if agreed)',
         fieldPath: 'deadlines.sellerDisclosureDate',
-        helpText: 'This optional date does not postpone any mandatory pre-agreement disclosure obligation.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_seller_date_helpText"],
       },
       {
         id: 'settlement-date',
@@ -393,7 +394,7 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
       {
         id: 'possession-note',
         type: 'information',
-        label: 'Seller delivers vacant possession and keys at closing. Any tenancy or occupancy continuing after closing requires separately agreed written terms.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_possession_note_label"],
       },
       {
         id: 'title-payer',
@@ -411,7 +412,7 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
         type: 'text',
         label: 'Closing agent or title company',
         fieldPath: 'settlement.closingAgentName',
-        helpText: 'Optional at the offer stage. The parties may select a qualified closing professional later.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_closing_agent_helpText"],
       },
       {
         id: 'title-evidence',
@@ -463,18 +464,18 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
     ],
   },
   { id: 'disclosures', title: 'Seller disclosures and property records', questions: [
-    { id: 'propertyConditionStatus', type: 'single_choice', label: "Oregon seller disclosure or documented lawful exception", fieldPath: 'disclosures.propertyConditionStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'exempt',label:'Signed statutory exemption evidence reviewed'}], helpText: "For a transaction covered by ORS 105.465, seller shall complete, sign and deliver the disclosure substantially in the ORS 105.464 statutory form to each buyer making a written offer. Document any ORS 105.470 exclusion; an as-is clause does not create an exclusion. Under ORS 105.475, absent a separate written waiver, buyer has five business days after delivery to deliver a separate signed written revocation disapproving the disclosure. Failure or refusal to provide the required disclosure preserves revocation until closing. Timely revocation voids the offer and requires immediate return of deposits and other consideration as provided by law. Closing terminates this statutory revocation right. The seller disclosure is incorporated into offer and acceptance by statute. Review/receipt selections and signing this agreement do not waive this right. No waiver is generated by NavStreet." },
-    { id: 'statutoryPacketStatus', type: 'single_choice', label: "Property-specific statutory and local records", fieldPath: 'disclosures.statutoryPacketStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'}], helpText: "If the property includes a domestic groundwater well covered by ORS 448.271 and OAR 333-061-0305 through 0335, seller shall arrange accredited-laboratory arsenic, nitrate and total-coliform testing upon accepting the offer and provide the results to buyer and required RET report/results to Oregon Health Authority within the applicable ninety-day reporting periods. Test results associated with a sale are valid for one year. Verify exemptions and any location-specific additional testing. This agreement does not falsely require completed well testing before an offer can be made; buyer may negotiate inspection and closing conditions. Unless a statutory/rule exemption applies, seller shall remove, destroy and dispose of uncertified solid-fuel devices and notify Oregon DEQ before closing. Any agreement transferring that duty to buyer must be separately explicit and signed by both parties; buyer then completes the duty within thirty days after closing. No such transfer is implied by this agreement, included-fixtures wording or an as-is clause. Seller shall comply with applicable smoke-alarm installation rules and required functioning carbon-monoxide alarms for a dwelling with a CO source before transfer. Verify local energy-assessment and other transfer requirements with the applicable city; this statewide agreement does not establish local compliance. Title shall confirm legal description, necessary owners and signature authority, liens, easements, water/access rights and appropriate deed/recording. This initial agreement is for ordinary existing fee-simple single-family, townhome and PUD resales with cash or conventional funding. Condominium, manufactured-home, new-construction, land, leasehold, subdivision/developer and residential wholesale transactions require separately reviewed agreements. Oregon wholesaling registration/disclosure/cancellation duties under ORS 696.653 to 696.665 are not implemented here; no assignment/wholesale workflow is authorized. Seller must disclose actual material facts and provide updated applicable information; seller tax bills do not guarantee buyer taxes." },
+    { id: 'propertyConditionStatus', type: 'single_choice', label: "Oregon seller disclosure or documented lawful exception", fieldPath: 'disclosures.propertyConditionStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'exempt',label:'Signed statutory exemption evidence reviewed'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_propertyConditionStatus_helpText"] },
+    { id: 'statutoryPacketStatus', type: 'single_choice', label: "Property-specific statutory and local records", fieldPath: 'disclosures.statutoryPacketStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_statutoryPacketStatus_helpText"] },
     {id:'hoa-seller',type:'yes_no',label:'Seller reports an owners association',fieldPath:'disclosures.sellerReportsHoa',readOnly:true,validation:required('The seller must answer the association question.')},
-    { id: 'hoaDocumentsStatus', type: 'single_choice', label: "Association resale documents", fieldPath: 'disclosures.hoaDocumentsStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'not_applicable',label:'Seller reports no association'}], helpText: "Provide property-specific governing documents, fees and assessments. Developer condominium sales are outside this resale workflow." },
-    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: "For covered housing, receive the signed statement, available records and EPA pamphlet before being bound. An inspection waiver does not waive disclosure." },
+    { id: 'hoaDocumentsStatus', type: 'single_choice', label: "Association resale documents", fieldPath: 'disclosures.hoaDocumentsStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'not_applicable',label:'Seller reports no association'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_hoaDocumentsStatus_helpText"] },
+    { id: 'leadPaintStatus', type: 'single_choice', label: "Federal lead-based paint packet", fieldPath: 'disclosures.leadPaintStatus', validation: required('Select the actual receipt status.'), options: [{value:'received',label:'Received and reviewed the uploaded document'},{value:'pending',label:'Not yet received or reviewed'},{value:'built_1978_or_later',label:'Listing confirms construction after 1977'},{value:'exempt',label:'Documented federal exemption received'}], helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_leadPaintStatus_helpText"] },
     {id:'lead-inspection',type:'single_choice',label:'Lead inspection opportunity',fieldPath:'disclosures.leadInspectionSelection',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadPaintStatus',operator:'equals',value:'received'}]},validation:required('Select the inspection opportunity.'),options:[{value:'ten_days',label:'10 days'},{value:'waived',label:'Inspection opportunity waived in writing'},{value:'other_period',label:'Different period agreed in writing'}]},
     {id:'lead-days',type:'number',label:'Agreed lead inspection days',fieldPath:'disclosures.leadInspectionDays',visibleWhen:{match:'all',conditions:[{fieldPath:'disclosures.leadInspectionSelection',operator:'equals',value:'other_period'}]},validation:{required:true,minimum:1,maximum:60,message:'Enter 1 to 60 days.'}},
-    {id:'tax-warning',helpText:"Review the county assessor\u2019s current property tax, exemption and special assessment information. Seller\u2019s current tax bill does not guarantee the buyer\u2019s tax bill.",type:'information',label:'Property tax information'},
-    {id:'radon-warning',helpText:"Radon and other known environmental hazards must be addressed in the applicable Seller Disclosure Statement. Consider independent testing. This agreement does not represent that Oregon requires every seller to obtain a new radon test.",type:'information',label:'Radon information'},
+    {id:'tax-warning',helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_tax_warning_helpText"],type:'information',label:'Property tax information'},
+    {id:'radon-warning',helpText:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_radon_warning_helpText"],type:'information',label:'Radon information'},
     {id:'leases',type:'yes_no',label:'Seller reports existing leases',fieldPath:'disclosures.sellerReportsExistingLeases',readOnly:true,validation:required('The seller must answer the leases question.')},
     {id:'lease-review',type:'acknowledgement',label:'I reviewed the seller’s lease statement and any attached leases.',fieldPath:'disclosures.leaseStatementAcknowledged',validation:required('Acknowledge the lease statement.')},
-    {id:'state-rights',type:'information',label:"For a transaction covered by ORS 105.465, seller shall complete, sign and deliver the disclosure substantially in the ORS 105.464 statutory form to each buyer making a written offer. Document any ORS 105.470 exclusion; an as-is clause does not create an exclusion. Under ORS 105.475, absent a separate written waiver, buyer has five business days after delivery to deliver a separate signed written revocation disapproving the disclosure. Failure or refusal to provide the required disclosure preserves revocation until closing. Timely revocation voids the offer and requires immediate return of deposits and other consideration as provided by law. Closing terminates this statutory revocation right. The seller disclosure is incorporated into offer and acceptance by statute. Review/receipt selections and signing this agreement do not waive this right. No waiver is generated by NavStreet. If the property includes a domestic groundwater well covered by ORS 448.271 and OAR 333-061-0305 through 0335, seller shall arrange accredited-laboratory arsenic, nitrate and total-coliform testing upon accepting the offer and provide the results to buyer and required RET report/results to Oregon Health Authority within the applicable ninety-day reporting periods. Test results associated with a sale are valid for one year. Verify exemptions and any location-specific additional testing. This agreement does not falsely require completed well testing before an offer can be made; buyer may negotiate inspection and closing conditions."}
+    {id:'state-rights',type:'information',label:SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_state_rights_label"]}
   ] },
   {
     id: 'additional',
@@ -494,12 +495,12 @@ export const OREGON_RESIDENTIAL_SALE_SECTIONS: readonly OfferSectionDefinition[]
             },
           ],
         },
-        helpText: 'Leave blank if there are no other terms. Ask an Oregon attorney to review any new legal language.',
+        helpText: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_additional_terms_helpText"],
       },
       {
         id: 'sale-terms-location',
         type: 'information',
-        label: 'Your sale-of-property terms were entered in Purchase conditions. Return to section 4 to revise them; no further terms are required here.',
+        label: SECTION_LEGAL_CONTENT_20261025_V1["residential_sale_sale_terms_location_label"],
         visibleWhen: {
           match: 'all',
           conditions: [
