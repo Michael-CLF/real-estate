@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './oregon-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -50,4 +51,4 @@ export const oregonStateContractPackage: StateContractPackage<OregonOfferTermsDo
     const { generateOregonOfferPdf } = require('./oregon-offer-pdf.service') as typeof import('./oregon-offer-pdf.service');
     return generateOregonOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["oregon-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './georgia-policy-mappings.generated';
 import {georgiaSubmissionReceiptProblem} from './georgia-disclosure-policy';
 import { isGeorgiaContractCompatible } from './georgia-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const georgiaStateContractPackage: StateContractPackage<GeorgiaOfferTerms
     const { generateGeorgiaOfferPdf } = require('./georgia-offer-pdf.service') as typeof import('./georgia-offer-pdf.service');
     return generateGeorgiaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["georgia-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

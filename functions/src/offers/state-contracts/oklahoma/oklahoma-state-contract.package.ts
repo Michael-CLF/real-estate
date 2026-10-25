@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './oklahoma-policy-mappings.generated';
 import { assertOklahomaListingDisclosures } from '../../oklahoma-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -44,4 +45,4 @@ export const oklahomaStateContractPackage: StateContractPackage<OklahomaOfferTer
   validateSubmission: input => validateOklahomaSubmission(input),
   sanitizeDraftTerms: input => sanitizeOklahomaDraftTerms(input),
   createContractMilestones: input => createOklahomaContractMilestones(input),
-}, {values:{'disclosures.leadBasedPaintStatus':'built_1978_or_later'},nonHousingValues:{'disclosures.leadBasedPaintStatus':'not_residential'},hiddenFields:['disclosures.leadBasedPaintStatus']}), {"documentTypes":[],"auditedNoReceiptQuestion":true});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

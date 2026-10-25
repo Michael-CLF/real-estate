@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "stateSlug": "wisconsin",
+  "targets": [
+    "frontend",
+    "backend"
+  ],
+  "policies": {
+    "hoa": {
+      "sellerFactPath": "disclosures.sellerReportsHoa",
+      "documentStatusPath": "disclosures.hoaDocumentsStatus",
+      "documentTypes": [
+        "wisconsin-association-documents"
+      ],
+      "snapshotSellerFact": true
+    },
+    "federalLead": {
+      "values": {
+        "disclosures.leadPaintStatus": "built_1978_or_later",
+        "disclosures.leadInspectionSelection": "unselected",
+        "disclosures.leadInspectionDays": 10,
+        "documentVersions.lead-based-paint": {
+          "$unset": true
+        }
+      },
+      "hiddenFields": [
+        "disclosures.leadPaintStatus",
+        "disclosures.leadInspectionSelection",
+        "disclosures.leadInspectionDays"
+      ]
+    }
+  }
+}

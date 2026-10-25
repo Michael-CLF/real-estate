@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './louisiana-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -57,4 +58,4 @@ export const louisianaStateContractPackage: StateContractPackage<LouisianaOfferT
     const { generateLouisianaOfferPdf } = require('./louisiana-offer-pdf.service') as typeof import('./louisiana-offer-pdf.service');
     return generateLouisianaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"documentTypes":[],"auditedNoReceiptQuestion":true});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

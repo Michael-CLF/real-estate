@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './illinois-policy-mappings.generated';
 import {illinoisSubmissionReceiptProblem} from './illinois-disclosure-policy';
 import { isIllinoisContractCompatible } from './illinois-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const illinoisStateContractPackage: StateContractPackage<IllinoisOfferTer
     const { generateIllinoisOfferPdf } = require('./illinois-offer-pdf.service') as typeof import('./illinois-offer-pdf.service');
     return generateIllinoisOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["illinois-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

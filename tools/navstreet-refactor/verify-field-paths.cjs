@@ -56,6 +56,19 @@ function audit(project, overrides = new Map()) {
   const location = node => { const sf = node.getSourceFile(), pos = sf.getLineAndCharacterOfPosition(node.getStart()); return path.relative(project, sf.fileName).replaceAll('\\', '/') + ':' + (pos.line + 1); };
   const fail = (node, message) => errors.push(location(node) + ' ' + message);
   const unbox = n => ts.isParenthesizedExpression(n) || ts.isAsExpression(n) || ts.isSatisfiesExpression(n) || ts.isNonNullExpression(n) ? unbox(n.expression) : n;
+  function policyObject(expression, seen = new Set()) {
+    const node = unbox(expression);
+    if (ts.isObjectLiteralExpression(node)) return node;
+    if (seen.has(node)) throw new Error('Cyclic policy declaration');
+    seen.add(node);
+    if (ts.isIdentifier(node)) {
+      let symbol = checker.getSymbolAtLocation(node);
+      if (symbol?.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
+      const declaration = symbol?.valueDeclaration;
+      if (declaration && ts.isVariableDeclaration(declaration) && declaration.initializer) return policyObject(declaration.initializer,seen);
+    }
+    throw new Error('Policy must resolve to a statically auditable declaration: '+node.getText());
+  }
   function literals(node, stack = new Set()) {
     node = unbox(node);
     if (stack.has(node)) throw new Error('cyclic path expression');
@@ -174,7 +187,8 @@ function audit(project, overrides = new Map()) {
         } catch (e) { fail(node,e.message); }
       }
       if (!ts.isCallExpression(node) || !/^with(?:Hoa|FederalLead)(?:Offer|Contract)Policy$/.test(node.expression.getText())) return;
-      const policy = unbox(node.arguments[1]);
+      let policy;
+      try { policy = policyObject(node.arguments[1]); } catch (e) { fail(node.arguments[1],e.message); return; }
       if (!ts.isObjectLiteralExpression(policy)) { fail(policy, 'Policy must be statically auditable'); return; }
       for (const prop of policy.properties) {
         if (!ts.isPropertyAssignment(prop)) { fail(prop, 'Unsupported policy spread or shorthand'); continue; }

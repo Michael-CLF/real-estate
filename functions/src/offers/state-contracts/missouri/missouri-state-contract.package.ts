@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './missouri-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { MISSOURI_CONTRACT_NAMES, selectMissouriContract } from './missouri-contract-selection';
@@ -66,4 +67,4 @@ export const missouriStateContractPackage: StateContractPackage<MissouriOfferTer
     const { generateMissouriOfferPdf } = require('./missouri-offer-pdf.service') as typeof import('./missouri-offer-pdf.service');
     return generateMissouriOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},nonHousingValues:{'disclosures.leadPaintStatus':'not_applicable'},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["missouri-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

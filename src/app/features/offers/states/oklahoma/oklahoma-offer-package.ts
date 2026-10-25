@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/oklahoma/oklahoma-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type { StateOfferPackage } from '../../engine/models/state-offer-package';
@@ -16,4 +17,4 @@ export const OKLAHOMA_OFFER_PACKAGE: StateOfferPackage<OklahomaOfferTerms, Oklah
   createInitialTerms: input => createOklahomaInitialOfferTerms(input),
   getSections: () => OKLAHOMA_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadBasedPaintStatus':'built_1978_or_later'},nonHousingValues:{'disclosures.leadBasedPaintStatus':'not_residential'},hiddenFields:['disclosures.leadBasedPaintStatus']}), {"documentTypes":[],"auditedNoReceiptQuestion":true});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

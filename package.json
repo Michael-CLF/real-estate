@@ -7,6 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "generate:state-mappings": "node tools/navstreet-refactor/generate-state-policy-mappings.cjs . --write",
+    "verify:state-mappings": "node tools/navstreet-refactor/verify-state-policy-mappings.cjs .",
     "verify:field-paths": "node tools/navstreet-refactor/verify-field-paths.cjs .",
     "verify:ci": "node tools/navstreet-refactor/run-ci.cjs"
   },

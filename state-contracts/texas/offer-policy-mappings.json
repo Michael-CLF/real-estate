@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "stateSlug": "texas",
+  "targets": [
+    "frontend",
+    "backend"
+  ],
+  "policies": {
+    "hoa": {
+      "sellerFactPath": "propertyAssociation.mandatoryMembership",
+      "documentTypes": [],
+      "evidencePaths": [
+        "propertyAssociation.associationAddendumDocumentUid"
+      ]
+    },
+    "federalLead": {
+      "listingStatementRequired": true,
+      "values": {
+        "disclosures.leadBasedPaintApplies": false,
+        "disclosures.leadBasedPaintAddendumDocumentUid": {
+          "$unset": true
+        }
+      },
+      "hiddenFields": [
+        "disclosures.leadBasedPaintApplies"
+      ],
+      "addendum": {
+        "path": "addenda",
+        "idKey": "formId",
+        "id": "lead-based-paint",
+        "selectedKey": "included"
+      }
+    }
+  }
+}

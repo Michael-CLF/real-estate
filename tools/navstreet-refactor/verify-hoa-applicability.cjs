@@ -13,7 +13,12 @@ const read=helper.readHoaPath,set=helper.setHoaPath;
 const statements={ownershipStatus:'owned_at_least_one_year',fuelTankPresent:false,leadBasedPaintApplies:false,ownersAssociationApplies:false,leasesExist:false,generalLeasesExist:false,utahMethamphetamineContamination:false,residentialLeasesExist:false,fixtureLeasesExist:false,naturalResourceLeasesExist:false,contractFacts:{isCondominium:false,isDeveloperSale:false,isLeasehold:false,dwellingUnitCount:null}};
 for(const state of ['oregon','missouri','nebraska','newHampshire','alabama','indiana','kansas','ohio','delaware','washington','iowa','montana','maryland','newMexico','southDakota','wyoming','southCarolina','maine','mississippi','arkansas','illinois'])statements[state]={usesMountainTime:false,usesEasternTime:false,usesCentralTime:false,hiddenHealthSafetyKnown:false,elevatedRadonKnown:false,beachfrontApplies:false,futureVacationBookingsExist:false};
 const person=role=>({partyUid:role,userUid:role,role,legalName:'Sample '+role,firstName:'Sample',lastName:role,email:role+'@example.com',phone:'9195550100',mailingAddress:{addressLine1:'100 Sample St',city:'Sample City',state:'NC',zipCode:'27587',country:'US'},sequence:1,primaryParty:true,requiredSigner:true,identityVerification:{status:'verified'},signature:{status:'not_started'},electronicTransactionsConsentAccepted:true});
-function config(file){const source=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true);let result;function walk(n){if(ts.isCallExpression(n)&&n.expression.getText(source)==='withHoaContractPolicy')result=JSON.parse(n.arguments[1].getText(source));ts.forEachChild(n,walk)}walk(source);return result;}
+// Read the exact compiled declaration consumed by the package. Canonical/binding
+// verification separately ensures this is the state's own generated module.
+function config(file){
+  const slug=path.basename(path.dirname(file));
+  return require(path.join(project,'functions/lib/offers/state-contracts',slug,slug+'-policy-mappings.generated.js')).HOA_POLICY;
+}
 (async()=>{
  let count=0,pdfs=0;
  for(const slug of directories){

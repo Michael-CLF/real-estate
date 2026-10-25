@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './california-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { isFederalLeadExcluded } from '../federal-lead-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -46,7 +47,7 @@ export const californiaStateContractPackage: StateContractPackage<CaliforniaOffe
     const { generateCaliforniaOfferPdf } = require('./california-offer-pdf.service') as typeof import('./california-offer-pdf.service');
     return generateCaliforniaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'disclosures.leadExemptionBasis':'','documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays','disclosures.leadExemptionBasis']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["california-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 import { CALIFORNIA_DISCLOSURE_TYPES, validCaliforniaDisclosureDecision, type CaliforniaDisclosureApplicability } from '../../../listings/state-listing-packages/california-listing-facts';
 export async function readCaliforniaListingDisclosures(

@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/nevada/nevada-policy-mappings.generated';
 import {nevadaConditionRequired} from '../../../../core/domains/offers/state-contracts/nevada/nevada-disclosure-policy';
 import { getNevadaCondominiumSections } from './questions/nevada-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const NEVADA_OFFER_PACKAGE: StateOfferPackage<NevadaOfferTerms, NevadaCon
   createInitialTerms: input => createNevadaInitialOfferTerms(input),
   getSections: terms => getNevadaCondominiumSections(terms,NEVADA_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||nevadaConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["nevada-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

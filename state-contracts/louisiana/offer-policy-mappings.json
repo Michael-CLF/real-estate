@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "stateSlug": "louisiana",
+  "targets": [
+    "frontend",
+    "backend"
+  ],
+  "policies": {
+    "hoa": {
+      "documentTypes": [],
+      "auditedNoReceiptQuestion": true
+    },
+    "federalLead": {
+      "values": {
+        "disclosures.leadPaintStatus": "built_1978_or_later",
+        "disclosures.leadInspectionSelection": "unselected",
+        "disclosures.leadInspectionDays": 10,
+        "documentVersions.lead-based-paint": {
+          "$unset": true
+        }
+      },
+      "hiddenFields": [
+        "disclosures.leadPaintStatus",
+        "disclosures.leadInspectionSelection",
+        "disclosures.leadInspectionDays"
+      ]
+    }
+  }
+}

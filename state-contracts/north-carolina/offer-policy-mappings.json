@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "stateSlug": "north-carolina",
+  "targets": [
+    "backend"
+  ],
+  "policies": {
+    "hoa": {
+      "sellerFactPath": "sellerStatements.ownersAssociationApplies",
+      "documentTypes": [],
+      "auditedNoReceiptQuestion": true
+    },
+    "federalLead": {
+      "listingStatementRequired": true,
+      "values": {
+        "sellerStatements.leadBasedPaintApplies": false,
+        "sellerStatements.leadBasedPaintDisclosureDocumentUid": {
+          "$unset": true
+        }
+      },
+      "hiddenFields": []
+    }
+  }
+}

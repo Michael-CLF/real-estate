@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './north-carolina-policy-mappings.generated';
 import { assertNorthCarolinaListingDisclosures } from '../../north-carolina-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -124,4 +125,4 @@ export const northCarolinaStateContractPackage:
         createNorthCarolinaContractMilestones(
           input
         ),
-  }, {listingStatementRequired:true,values:{'sellerStatements.leadBasedPaintApplies':false,'sellerStatements.leadBasedPaintDisclosureDocumentUid':undefined},hiddenFields:[]}), {"sellerFactPath":"sellerStatements.ownersAssociationApplies","documentTypes":[],"auditedNoReceiptQuestion":true});
+  }, FEDERAL_LEAD_POLICY), HOA_POLICY);

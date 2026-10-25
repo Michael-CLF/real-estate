@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/wyoming/wyoming-policy-mappings.generated';
 import { getWyomingCondominiumSections } from './questions/wyoming-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -14,4 +15,4 @@ export const WYOMING_OFFER_PACKAGE: StateOfferPackage<WyomingOfferTerms, Wyoming
   createInitialTerms: input => createWyomingInitialOfferTerms(input),
   getSections: terms => getWyomingCondominiumSections(terms,WYOMING_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["wyoming-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

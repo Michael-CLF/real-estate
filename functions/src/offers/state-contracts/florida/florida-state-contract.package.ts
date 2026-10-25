@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './florida-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -50,4 +51,4 @@ export const floridaStateContractPackage: StateContractPackage<FloridaOfferTerms
     const { generateFloridaOfferPdf } = require('./florida-offer-pdf.service') as typeof import('./florida-offer-pdf.service');
     return generateFloridaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["florida-hoa-disclosure-summary"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

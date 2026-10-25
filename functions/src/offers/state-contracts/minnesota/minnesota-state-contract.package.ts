@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './minnesota-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { isMinnesotaContractCompatible, type MinnesotaOwnershipFacts } from './minnesota-contract-selection';
@@ -63,4 +64,4 @@ export const minnesotaStateContractPackage: StateContractPackage<MinnesotaOfferT
     const { generateMinnesotaOfferPdf } = require('./minnesota-offer-pdf.service') as typeof import('./minnesota-offer-pdf.service');
     return generateMinnesotaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["minnesota-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

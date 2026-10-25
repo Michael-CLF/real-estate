@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './west-virginia-policy-mappings.generated';
 import {westVirginiaSubmissionReceiptProblem} from './west-virginia-disclosure-policy';
 import { isWestVirginiaContractCompatible } from './west-virginia-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const westVirginiaStateContractPackage: StateContractPackage<WestVirginia
     const { generateWestVirginiaOfferPdf } = require('./west-virginia-offer-pdf.service') as typeof import('./west-virginia-offer-pdf.service');
     return generateWestVirginiaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["west-virginia-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/maine/maine-policy-mappings.generated';
 import {maineConditionRequired} from '../../../../core/domains/offers/state-contracts/maine/maine-disclosure-policy';
 import { getMaineCondominiumSections } from './questions/maine-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const MAINE_OFFER_PACKAGE: StateOfferPackage<MaineOfferTerms, MaineContra
   createInitialTerms: input => createMaineInitialOfferTerms(input),
   getSections: terms => getMaineCondominiumSections(terms,MAINE_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>q.fieldPath!=='disclosures.propertyConditionStatus'||maineConditionRequired(terms))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["maine-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

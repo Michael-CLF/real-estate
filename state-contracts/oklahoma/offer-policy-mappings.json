@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "stateSlug": "oklahoma",
+  "targets": [
+    "frontend",
+    "backend"
+  ],
+  "policies": {
+    "hoa": {
+      "documentTypes": [],
+      "auditedNoReceiptQuestion": true
+    },
+    "federalLead": {
+      "values": {
+        "disclosures.leadBasedPaintStatus": "built_1978_or_later"
+      },
+      "nonHousingValues": {
+        "disclosures.leadBasedPaintStatus": "not_residential"
+      },
+      "hiddenFields": [
+        "disclosures.leadBasedPaintStatus"
+      ]
+    }
+  }
+}

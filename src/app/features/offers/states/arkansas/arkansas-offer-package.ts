@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/arkansas/arkansas-policy-mappings.generated';
 import {arkansasConditionRequired} from '../../../../core/domains/offers/state-contracts/arkansas/arkansas-disclosure-policy';
 import { getArkansasCondominiumSections } from './questions/arkansas-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const ARKANSAS_OFFER_PACKAGE: StateOfferPackage<ArkansasOfferTerms, Arkan
   createInitialTerms: input => createArkansasInitialOfferTerms(input),
   getSections: terms => getArkansasCondominiumSections(terms,ARKANSAS_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>q.fieldPath!=='disclosures.propertyConditionStatus'||arkansasConditionRequired(terms))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["arkansas-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

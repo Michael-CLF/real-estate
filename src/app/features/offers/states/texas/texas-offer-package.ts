@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/texas/texas-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type {
@@ -77,4 +78,4 @@ export const TEXAS_OFFER_PACKAGE:
         [...sellers],
         context
       ),
-  }, {listingStatementRequired:true,values:{'disclosures.leadBasedPaintApplies':false,'disclosures.leadBasedPaintAddendumDocumentUid':undefined},hiddenFields:['disclosures.leadBasedPaintApplies'],addendum:{path:'addenda',idKey:'formId',id:'lead-based-paint',selectedKey:'included'}}), {"sellerFactPath":"propertyAssociation.mandatoryMembership","documentTypes":[],"evidencePaths":["propertyAssociation.associationAddendumDocumentUid"]});
+  }, FEDERAL_LEAD_POLICY), HOA_POLICY);

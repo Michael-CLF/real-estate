@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './south-carolina-policy-mappings.generated';
 import { assertSouthCarolinaListingDisclosures } from '../../south-carolina-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -40,7 +41,7 @@ export const southCarolinaStateContractPackage: StateContractPackage<SouthCaroli
     const { generateSouthCarolinaOfferPdf } = require('./south-carolina-offer-pdf.service') as typeof import('./south-carolina-offer-pdf.service');
     return generateSouthCarolinaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'disclosures.leadExemptionBasis':'','documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays','disclosures.leadExemptionBasis']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["south-carolina-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);
 import type { DocumentReference, Transaction } from 'firebase-admin/firestore';
 export async function readSouthCarolinaListingDisclosures(transaction: Transaction, listingReference: DocumentReference, listing: Record<string,unknown>): Promise<{documentVersions: Record<string,string>}> {
   const types=['south-carolina-property-condition','south-carolina-association-documents','south-carolina-coastal-disclosure','south-carolina-vacation-rentals','lead-based-paint'];

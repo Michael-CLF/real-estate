@@ -27,3 +27,7 @@ The JSON coverage report is written to `tmp/navstreet-field-paths/audit.json`, w
 5. Continue the existing live buyer/seller Firebase and legal/PDF visual acceptance process. CI checks structural/behavioral properties; it does not establish legal sufficiency or live deployment success.
 
 `verify-field-paths-self-test.cjs` supplies 13 deliberate negative controls in an in-memory compiler host. These cover direct and visibility paths, helper paths, computed Colorado paths, frontend/backend policy errors, Texas object-selection keys, actual schema renames, unresolved expressions and dormant-template guardrails. It does not edit source files.
+
+## Generated state-owned policy declarations (2026-10-25)
+
+Policy arguments now resolve through each state's imported generated constants. The audit follows the imported symbol to its literal initializer, reports that declaration's source/line, and validates it against the consuming state/build-root model. The 3,377 references and thirteen negative controls remain covered. Edit canonical state manifests and regenerate, rather than editing the generated copies. See STATE_POLICY_MAPPINGS.md.

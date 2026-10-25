@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './montana-policy-mappings.generated';
 import { isMontanaContractCompatible, type MontanaOwnershipFacts } from './montana-contract-selection';
 import { montanaCondominiumReceiptProblem, montanaCondominiumAcceptanceProblem } from './montana-condominium-policy';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -73,4 +74,4 @@ export const montanaStateContractPackage: StateContractPackage<MontanaOfferTerms
     const { generateMontanaOfferPdf } = require('./montana-offer-pdf.service') as typeof import('./montana-offer-pdf.service');
     return generateMontanaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["montana-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "stateSlug": "colorado",
+  "targets": [
+    "frontend",
+    "backend"
+  ],
+  "policies": {
+    "hoa": {
+      "sellerFactPath": "disclosures.sellerReportsHoa",
+      "documentStatusPath": "disclosures.associationStatus",
+      "documentTypes": [
+        "colorado-association-documents"
+      ]
+    },
+    "federalLead": {
+      "values": {
+        "disclosures.leadPaintStatus": "not_applicable",
+        "disclosures.leadInspectionChoice": "unselected",
+        "disclosures.leadInspectionDays": 10,
+        "documentVersions.lead-based-paint": {
+          "$unset": true
+        }
+      },
+      "hiddenFields": [
+        "disclosures.leadPaintStatus",
+        "disclosures.leadInspectionChoice",
+        "disclosures.leadInspectionDays",
+        "deadlines.leadDisclosure",
+        "deadlines.leadTermination"
+      ]
+    }
+  }
+}

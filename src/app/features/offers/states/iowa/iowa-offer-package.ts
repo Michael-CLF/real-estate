@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/iowa/iowa-policy-mappings.generated';
 import { getIowaPreofferSections } from './questions/iowa-preoffer.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -14,4 +15,4 @@ export const IOWA_OFFER_PACKAGE: StateOfferPackage<IowaOfferTerms, IowaContractT
   createInitialTerms: input => createIowaInitialOfferTerms(input),
   getSections: terms => getIowaPreofferSections(terms, IOWA_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["iowa-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

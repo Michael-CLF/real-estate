@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/missouri/missouri-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import { MISSOURI_CONDOMINIUM_RESALE_CONTRACT_DEFINITION, MISSOURI_LAND_SALE_CONTRACT_DEFINITION, MISSOURI_SMALL_MULTIFAMILY_RESALE_CONTRACT_DEFINITION } from '../../../../core/domains/offers/state-contracts/missouri/models/missouri-offer-terms.model';
@@ -15,4 +16,4 @@ export const MISSOURI_OFFER_PACKAGE: StateOfferPackage<MissouriOfferTerms, Misso
   createInitialTerms: input => createMissouriInitialOfferTerms(input),
   getSections: terms => getMissouriSections(terms, MISSOURI_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},nonHousingValues:{'disclosures.leadPaintStatus':'not_applicable'},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["missouri-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

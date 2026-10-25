@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './delaware-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -54,4 +55,4 @@ export const delawareStateContractPackage: StateContractPackage<DelawareOfferTer
     const { generateDelawareOfferPdf } = require('./delaware-offer-pdf.service') as typeof import('./delaware-offer-pdf.service');
     return generateDelawareOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["delaware-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

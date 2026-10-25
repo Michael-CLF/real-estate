@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './new-mexico-policy-mappings.generated';
 import { isNewMexicoContractCompatible } from './new-mexico-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -57,4 +58,4 @@ export const newMexicoStateContractPackage: StateContractPackage<NewMexicoOfferT
     const { generateNewMexicoOfferPdf } = require('./new-mexico-offer-pdf.service') as typeof import('./new-mexico-offer-pdf.service');
     return generateNewMexicoOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["new-mexico-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

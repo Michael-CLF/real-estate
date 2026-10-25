@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/north-dakota/north-dakota-policy-mappings.generated';
 import { getNorthDakotaCondominiumSections } from './questions/north-dakota-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -14,4 +15,4 @@ export const NORTH_DAKOTA_OFFER_PACKAGE: StateOfferPackage<NorthDakotaOfferTerms
   createInitialTerms: input => createNorthDakotaInitialOfferTerms(input),
   getSections: terms => getNorthDakotaCondominiumSections(terms,NORTH_DAKOTA_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>q.fieldPath!=='disclosures.propertyConditionStatus'&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["north-dakota-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

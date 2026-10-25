@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/kansas/kansas-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type { StateOfferPackage } from '../../engine/models/state-offer-package';
@@ -13,4 +14,4 @@ export const KANSAS_OFFER_PACKAGE: StateOfferPackage<KansasOfferTerms, KansasCon
   createInitialTerms: input => createKansasInitialOfferTerms(input),
   getSections: () => KANSAS_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["kansas-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

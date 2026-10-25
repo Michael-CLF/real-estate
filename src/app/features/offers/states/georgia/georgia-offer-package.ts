@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/georgia/georgia-policy-mappings.generated';
 import {georgiaConditionRequired} from '../../../../core/domains/offers/state-contracts/georgia/georgia-disclosure-policy';
 import { getGeorgiaCondominiumSections } from './questions/georgia-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const GEORGIA_OFFER_PACKAGE: StateOfferPackage<GeorgiaOfferTerms, Georgia
   createInitialTerms: input => createGeorgiaInitialOfferTerms(input),
   getSections: terms => getGeorgiaCondominiumSections(terms,GEORGIA_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||georgiaConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["georgia-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/pennsylvania/pennsylvania-policy-mappings.generated';
 import {pennsylvaniaConditionRequired} from '../../../../core/domains/offers/state-contracts/pennsylvania/pennsylvania-disclosure-policy';
 import { getPennsylvaniaCondominiumSections } from './questions/pennsylvania-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const PENNSYLVANIA_OFFER_PACKAGE: StateOfferPackage<PennsylvaniaOfferTerm
   createInitialTerms: input => createPennsylvaniaInitialOfferTerms(input),
   getSections: terms => getPennsylvaniaCondominiumSections(terms,PENNSYLVANIA_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||pennsylvaniaConditionRequired(terms))&&(q.fieldPath!=='disclosures.statutoryPacketStatus'||terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["pennsylvania-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

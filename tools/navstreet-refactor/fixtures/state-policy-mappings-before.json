@@ -1,0 +1,2079 @@
+{
+  "alabama": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "alabama-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "alabama-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "arizona": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "arizona-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "arizona-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "arkansas": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "arkansas-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "arkansas-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "california": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "california-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "disclosures.leadExemptionBasis": "",
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays",
+          "disclosures.leadExemptionBasis"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "california-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "disclosures.leadExemptionBasis": "",
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays",
+          "disclosures.leadExemptionBasis"
+        ]
+      }
+    }
+  },
+  "colorado": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.associationStatus",
+        "documentTypes": [
+          "colorado-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "not_applicable",
+          "disclosures.leadInspectionChoice": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionChoice",
+          "disclosures.leadInspectionDays",
+          "deadlines.leadDisclosure",
+          "deadlines.leadTermination"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.associationStatus",
+        "documentTypes": [
+          "colorado-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "not_applicable",
+          "disclosures.leadInspectionChoice": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionChoice",
+          "disclosures.leadInspectionDays",
+          "deadlines.leadDisclosure",
+          "deadlines.leadTermination"
+        ]
+      }
+    }
+  },
+  "delaware": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "delaware-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "delaware-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "florida": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "florida-hoa-disclosure-summary"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "florida-hoa-disclosure-summary"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "georgia": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "georgia-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "georgia-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "idaho": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "idaho-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "idaho-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "illinois": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "illinois-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "illinois-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "indiana": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "indiana-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "indiana-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "iowa": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "iowa-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "iowa-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "kansas": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "kansas-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "kansas-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "kentucky": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "kentucky-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "kentucky-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "louisiana": {
+    "frontend": {
+      "hoa": {
+        "documentTypes": [],
+        "auditedNoReceiptQuestion": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "documentTypes": [],
+        "auditedNoReceiptQuestion": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "maine": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "maine-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "maine-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "maryland": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "maryland-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "maryland-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "michigan": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "michigan-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "michigan-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "minnesota": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "minnesota-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "minnesota-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "mississippi": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "mississippi-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "mississippi-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "missouri": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "missouri-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "nonHousingValues": {
+          "disclosures.leadPaintStatus": "not_applicable"
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "missouri-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "nonHousingValues": {
+          "disclosures.leadPaintStatus": "not_applicable"
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "montana": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "montana-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "montana-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "nebraska": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "nebraska-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "nebraska-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "nevada": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "nevada-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "nevada-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "new-hampshire": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "new-hampshire-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "new-hampshire-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "new-mexico": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "new-mexico-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "new-mexico-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "north-carolina": {
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "sellerStatements.ownersAssociationApplies",
+        "documentTypes": [],
+        "auditedNoReceiptQuestion": true
+      },
+      "federalLead": {
+        "listingStatementRequired": true,
+        "values": {
+          "sellerStatements.leadBasedPaintApplies": false,
+          "sellerStatements.leadBasedPaintDisclosureDocumentUid": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": []
+      }
+    }
+  },
+  "north-dakota": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "north-dakota-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "north-dakota-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "ohio": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "ohio-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "ohio-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "oklahoma": {
+    "frontend": {
+      "hoa": {
+        "documentTypes": [],
+        "auditedNoReceiptQuestion": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadBasedPaintStatus": "built_1978_or_later"
+        },
+        "nonHousingValues": {
+          "disclosures.leadBasedPaintStatus": "not_residential"
+        },
+        "hiddenFields": [
+          "disclosures.leadBasedPaintStatus"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "documentTypes": [],
+        "auditedNoReceiptQuestion": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadBasedPaintStatus": "built_1978_or_later"
+        },
+        "nonHousingValues": {
+          "disclosures.leadBasedPaintStatus": "not_residential"
+        },
+        "hiddenFields": [
+          "disclosures.leadBasedPaintStatus"
+        ]
+      }
+    }
+  },
+  "oregon": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "oregon-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "oregon-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "pennsylvania": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "pennsylvania-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "pennsylvania-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "rhode-island": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "rhode-island-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "rhode-island-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "south-carolina": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "south-carolina-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "disclosures.leadExemptionBasis": "",
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays",
+          "disclosures.leadExemptionBasis"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "south-carolina-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "disclosures.leadExemptionBasis": "",
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays",
+          "disclosures.leadExemptionBasis"
+        ]
+      }
+    }
+  },
+  "south-dakota": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "south-dakota-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "south-dakota-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "tennessee": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "tennessee-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "tennessee-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "texas": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "propertyAssociation.mandatoryMembership",
+        "documentTypes": [],
+        "evidencePaths": [
+          "propertyAssociation.associationAddendumDocumentUid"
+        ]
+      },
+      "federalLead": {
+        "listingStatementRequired": true,
+        "values": {
+          "disclosures.leadBasedPaintApplies": false,
+          "disclosures.leadBasedPaintAddendumDocumentUid": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadBasedPaintApplies"
+        ],
+        "addendum": {
+          "path": "addenda",
+          "idKey": "formId",
+          "id": "lead-based-paint",
+          "selectedKey": "included"
+        }
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "propertyAssociation.mandatoryMembership",
+        "documentTypes": [],
+        "evidencePaths": [
+          "propertyAssociation.associationAddendumDocumentUid"
+        ]
+      },
+      "federalLead": {
+        "listingStatementRequired": true,
+        "values": {
+          "disclosures.leadBasedPaintApplies": false,
+          "disclosures.leadBasedPaintAddendumDocumentUid": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadBasedPaintApplies"
+        ],
+        "addendum": {
+          "path": "addenda",
+          "idKey": "formId",
+          "id": "lead-based-paint",
+          "selectedKey": "included"
+        }
+      }
+    }
+  },
+  "utah": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "utah-hoa-governing-documents"
+        ],
+        "snapshotSellerFact": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "utah-hoa-governing-documents"
+        ],
+        "snapshotSellerFact": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "washington": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "washington-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "washington-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "west-virginia": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "west-virginia-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "west-virginia-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "wisconsin": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "wisconsin-association-documents"
+        ],
+        "snapshotSellerFact": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "wisconsin-association-documents"
+        ],
+        "snapshotSellerFact": true
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  },
+  "wyoming": {
+    "frontend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "wyoming-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    },
+    "backend": {
+      "hoa": {
+        "sellerFactPath": "disclosures.sellerReportsHoa",
+        "documentStatusPath": "disclosures.hoaDocumentsStatus",
+        "documentTypes": [
+          "wyoming-association-documents"
+        ]
+      },
+      "federalLead": {
+        "values": {
+          "disclosures.leadPaintStatus": "built_1978_or_later",
+          "disclosures.leadInspectionSelection": "unselected",
+          "disclosures.leadInspectionDays": 10,
+          "documentVersions.lead-based-paint": {
+            "$unset": true
+          }
+        },
+        "hiddenFields": [
+          "disclosures.leadPaintStatus",
+          "disclosures.leadInspectionSelection",
+          "disclosures.leadInspectionDays"
+        ]
+      }
+    }
+  }
+}

@@ -17,13 +17,13 @@ mutate(ky, "{ fieldPath: 'purchase.hasEarnestMoney', operator: 'is_true' }", "{ 
 const tx = 'src/app/features/offers/states/texas/questions/texas-shared-question-definitions.ts';
 mutate(tx, 'salesPrice.salesPriceInCents', 'salesPrice.renamedSalesPriceInCents');
 mutate(tx, "selectedKey: 'included'", "selectedKey: 'missingIncluded'");
-const nc = 'functions/src/offers/state-contracts/north-carolina/north-carolina-state-contract.package.ts';
+const nc = 'functions/src/offers/state-contracts/north-carolina/north-carolina-policy-mappings.generated.ts';
 mutate(nc, 'sellerStatements.ownersAssociationApplies', 'sellerStatements.renamedOwnersAssociationApplies');
 const co = 'src/app/features/offers/states/colorado/questions/colorado-residential-sale.sections.ts';
 mutate(co, 'fieldPath: `sellerLoan.${key}`', 'fieldPath: `missingSellerLoan.${key}`');
-const kyp = 'functions/src/offers/state-contracts/kentucky/kentucky-state-contract.package.ts';
+const kyp = 'functions/src/offers/state-contracts/kentucky/kentucky-policy-mappings.generated.ts';
 mutate(kyp, 'disclosures.sellerReportsHoa', 'disclosures.renamedSellerReportsHoa');
-const alm = 'src/app/features/offers/states/alabama/alabama-offer-package.ts';
+const alm = 'src/app/core/domains/offers/state-contracts/alabama/alabama-policy-mappings.generated.ts';
 mutate(alm, 'documentVersions.lead-based-paint', 'documentVersionTypo.lead-based-paint');
 const ri = 'src/app/features/offers/states/rhode-island/questions/rhode-island-residential-sale.sections.ts';
 mutate(ri, "fieldPath: 'legalDescription'", 'fieldPath: String(Date.now())');

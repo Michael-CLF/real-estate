@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './north-dakota-policy-mappings.generated';
 import {northDakotaSubmissionReceiptProblem} from './north-dakota-disclosure-policy';
 import { isNorthDakotaContractCompatible } from './north-dakota-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const northDakotaStateContractPackage: StateContractPackage<NorthDakotaOf
     const { generateNorthDakotaOfferPdf } = require('./north-dakota-offer-pdf.service') as typeof import('./north-dakota-offer-pdf.service');
     return generateNorthDakotaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["north-dakota-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

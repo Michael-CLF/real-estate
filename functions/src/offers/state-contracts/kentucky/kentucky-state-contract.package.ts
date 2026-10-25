@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './kentucky-policy-mappings.generated';
 import {kentuckySubmissionReceiptProblem} from './kentucky-disclosure-policy';
 import { isKentuckyContractCompatible } from './kentucky-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const kentuckyStateContractPackage: StateContractPackage<KentuckyOfferTer
     const { generateKentuckyOfferPdf } = require('./kentucky-offer-pdf.service') as typeof import('./kentucky-offer-pdf.service');
     return generateKentuckyOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["kentucky-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

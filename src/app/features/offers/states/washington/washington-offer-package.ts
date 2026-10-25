@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/washington/washington-policy-mappings.generated';
 import { getWashingtonCondominiumSections } from './questions/washington-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
@@ -14,4 +15,4 @@ export const WASHINGTON_OFFER_PACKAGE: StateOfferPackage<WashingtonOfferTerms, W
   createInitialTerms: input => createWashingtonInitialOfferTerms(input),
   getSections: terms => getWashingtonCondominiumSections(terms, WASHINGTON_RESIDENTIAL_SALE_SECTIONS),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["washington-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

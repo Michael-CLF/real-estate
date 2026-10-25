@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/illinois/illinois-policy-mappings.generated';
 import {illinoisConditionRequired} from '../../../../core/domains/offers/state-contracts/illinois/illinois-disclosure-policy';
 import { getIllinoisCondominiumSections } from './questions/illinois-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const ILLINOIS_OFFER_PACKAGE: StateOfferPackage<IllinoisOfferTerms, Illin
   createInitialTerms: input => createIllinoisInitialOfferTerms(input),
   getSections: terms => getIllinoisCondominiumSections(terms,ILLINOIS_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>(q.fieldPath!=='disclosures.propertyConditionStatus'||illinoisConditionRequired(terms)) && (!['disclosures.statutoryPacketStatus','disclosures.radonNoticeAcknowledged'].includes(q.fieldPath??'') || terms.disclosures.requiredKnownFacts))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["illinois-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

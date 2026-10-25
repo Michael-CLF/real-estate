@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './south-dakota-policy-mappings.generated';
 import { isSouthDakotaContractCompatible } from './south-dakota-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -58,4 +59,4 @@ export const southDakotaStateContractPackage: StateContractPackage<SouthDakotaOf
     const { generateSouthDakotaOfferPdf } = require('./south-dakota-offer-pdf.service') as typeof import('./south-dakota-offer-pdf.service');
     return generateSouthDakotaOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["south-dakota-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

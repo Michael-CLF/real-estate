@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './arkansas-policy-mappings.generated';
 import {arkansasSubmissionReceiptProblem} from './arkansas-disclosure-policy';
 import { isArkansasContractCompatible } from './arkansas-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const arkansasStateContractPackage: StateContractPackage<ArkansasOfferTer
     const { generateArkansasOfferPdf } = require('./arkansas-offer-pdf.service') as typeof import('./arkansas-offer-pdf.service');
     return generateArkansasOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["arkansas-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

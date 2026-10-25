@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/mississippi/mississippi-policy-mappings.generated';
 import {mississippiConditionRequired} from '../../../../core/domains/offers/state-contracts/mississippi/mississippi-disclosure-policy';
 import { getMississippiCondominiumSections } from './questions/mississippi-condominium.sections';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
@@ -15,4 +16,4 @@ export const MISSISSIPPI_OFFER_PACKAGE: StateOfferPackage<MississippiOfferTerms,
   createInitialTerms: input => createMississippiInitialOfferTerms(input),
   getSections: terms => getMississippiCondominiumSections(terms,MISSISSIPPI_RESIDENTIAL_SALE_SECTIONS).map(section=>section.id!=='disclosures'?section:{...section,questions:section.questions.filter(q=>q.fieldPath!=='disclosures.propertyConditionStatus'||mississippiConditionRequired(terms))}),
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["mississippi-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './tennessee-policy-mappings.generated';
 import {tennesseeSubmissionReceiptProblem} from './tennessee-disclosure-policy';
 import { isTennesseeContractCompatible } from './tennessee-contract-selection';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
@@ -46,4 +47,4 @@ export const tennesseeStateContractPackage: StateContractPackage<TennesseeOfferT
     const { generateTennesseeOfferPdf } = require('./tennessee-offer-pdf.service') as typeof import('./tennessee-offer-pdf.service');
     return generateTennesseeOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["tennessee-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

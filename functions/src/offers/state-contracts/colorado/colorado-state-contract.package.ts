@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './colorado-policy-mappings.generated';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
 import { assertListingContractScope } from '../listing-contract-scope';
@@ -57,4 +58,4 @@ export const coloradoStateContractPackage: StateContractPackage<ColoradoOfferTer
     const { generateColoradoOfferPdf } = require('./colorado-offer-pdf.service') as typeof import('./colorado-offer-pdf.service');
     return generateColoradoOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'not_applicable','disclosures.leadInspectionChoice':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionChoice','disclosures.leadInspectionDays','deadlines.leadDisclosure','deadlines.leadTermination']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.associationStatus","documentTypes":["colorado-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from './wisconsin-policy-mappings.generated';
 import { assertWisconsinListingDisclosures } from '../../wisconsin-listing-disclosure-gate';
 import { withHoaContractPolicy } from '../hoa-contract-policy';
 import { withFederalLeadContractPolicy } from '../federal-lead-contract-policy';
@@ -39,4 +40,4 @@ export const wisconsinStateContractPackage: StateContractPackage<WisconsinOfferT
     const { generateWisconsinOfferPdf } = require('./wisconsin-offer-pdf.service') as typeof import('./wisconsin-offer-pdf.service');
     return generateWisconsinOfferPdf(input);
   },
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["wisconsin-association-documents"],"snapshotSellerFact":true});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);

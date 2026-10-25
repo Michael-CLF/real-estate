@@ -1,3 +1,4 @@
+import { HOA_POLICY, FEDERAL_LEAD_POLICY } from '../../../../core/domains/offers/state-contracts/delaware/delaware-policy-mappings.generated';
 import { withHoaOfferPolicy } from '../../engine/hoa-offer-policy';
 import { withFederalLeadOfferPolicy } from '../../engine/federal-lead-offer-policy';
 import type { StateOfferPackage } from '../../engine/models/state-offer-package';
@@ -13,4 +14,4 @@ export const DELAWARE_OFFER_PACKAGE: StateOfferPackage<DelawareOfferTerms, Delaw
   createInitialTerms: input => createDelawareInitialOfferTerms(input),
   getSections: () => DELAWARE_RESIDENTIAL_SALE_SECTIONS,
   validate: (terms, buyers, sellers, context) => validator.validate(terms, [...buyers], [...sellers], context),
-}, {values:{'disclosures.leadPaintStatus':'built_1978_or_later','disclosures.leadInspectionSelection':'unselected','disclosures.leadInspectionDays':10,'documentVersions.lead-based-paint':undefined},hiddenFields:['disclosures.leadPaintStatus','disclosures.leadInspectionSelection','disclosures.leadInspectionDays']}), {"sellerFactPath":"disclosures.sellerReportsHoa","documentStatusPath":"disclosures.hoaDocumentsStatus","documentTypes":["delaware-association-documents"]});
+}, FEDERAL_LEAD_POLICY), HOA_POLICY);
