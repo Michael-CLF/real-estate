@@ -21,6 +21,10 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 interface MortgageCalculationResult {
   loanAmount: number;
   principalAndInterest: number;
@@ -57,6 +61,16 @@ interface MortgageCalculationResult {
 })
 export class MortgagePaymentCalculatorComponent
   implements OnInit {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Mortgage Payment Calculator | NavStreet',
+      'Estimate your monthly mortgage payment, including principal, interest, property taxes, homeowners insurance, HOA dues, and mortgage insurance.'
+    );
+  }
 
   private readonly formBuilder =
     inject(FormBuilder);

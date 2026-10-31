@@ -20,6 +20,10 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 interface BalloonCalculationResult {
   loanAmount: number;
   principalAndInterestPayment: number;
@@ -58,6 +62,16 @@ interface BalloonCalculationResult {
 })
 export class BalloonPaymentCalculatorComponent
   implements OnInit {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Balloon Payment Calculator | NavStreet',
+      'Estimate monthly loan payments, remaining principal, and the balloon payment due at the end of a balloon loan term.'
+    );
+  }
 
   private readonly formBuilder =
     inject(FormBuilder);

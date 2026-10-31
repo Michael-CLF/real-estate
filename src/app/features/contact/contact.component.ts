@@ -33,6 +33,10 @@ import {
   ContactInquiryService
 } from '../../core/domains/contact/services/contact-inquiry.service';
 
+import {
+  PageSeoService
+} from '../../core/seo/page-seo.service';
+
 interface ContactInterest {
   label: string;
   value: string;
@@ -67,6 +71,9 @@ export class ContactComponent {
 
   private readonly contactInquiryService =
     inject(ContactInquiryService);
+
+  private readonly pageSeo =
+    inject(PageSeoService);
 
   private readonly hasTrackedFormStart =
     signal(false);
@@ -233,6 +240,11 @@ export class ContactComponent {
     signal(false);
 
   constructor() {
+    this.pageSeo.set(
+      'Contact NavStreet | Questions About Buying or Selling a Home',
+      'Contact NavStreet with questions about selling your home, buying property, listing fees, or our for sale by owner real estate platform.'
+    );
+
     effect(() => {
       const state =
         this.selectedState()
@@ -394,7 +406,7 @@ export class ContactComponent {
           ''
       });
     } catch (
-      error: unknown
+    error: unknown
     ) {
       console.error(
         'Unable to submit contact inquiry:',
@@ -487,7 +499,7 @@ export class ContactComponent {
       typeof error === 'object' &&
       'message' in error &&
       typeof error.message ===
-        'string'
+      'string'
     ) {
       const message =
         error.message.trim();

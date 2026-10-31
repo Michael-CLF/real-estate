@@ -20,6 +20,10 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 interface AmortizationResult {
   months: number;
   totalInterest: number;
@@ -63,6 +67,16 @@ interface ExtraPaymentResult {
 })
 export class ExtraPaymentCalculatorComponent
   implements OnInit {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Extra Mortgage Payment Calculator | NavStreet',
+      'See how extra monthly or annual mortgage principal payments can reduce total interest and shorten your loan payoff time.'
+    );
+  }
 
   private readonly formBuilder =
     inject(FormBuilder);

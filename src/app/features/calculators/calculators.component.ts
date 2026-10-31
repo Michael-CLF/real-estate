@@ -1,11 +1,16 @@
 import {
   ChangeDetectionStrategy,
-  Component
+  Component,
+  inject
 } from '@angular/core';
 
 import {
   RouterLink
 } from '@angular/router';
+
+import {
+  PageSeoService
+} from '../../core/seo/page-seo.service';
 
 interface CalculatorOption {
   title: string;
@@ -35,6 +40,16 @@ interface CalculatorOption {
     ChangeDetectionStrategy.OnPush
 })
 export class CalculatorsComponent {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Free Mortgage & Real Estate Calculators | NavStreet',
+      'Use NavStreet free mortgage and real estate calculators to estimate monthly payments, home affordability, loan-to-value ratios, and more.'
+    );
+  }
 
   protected readonly calculators:
     readonly CalculatorOption[] = [

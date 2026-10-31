@@ -21,6 +21,10 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 interface LoanToValueResult {
   purchasePrice: number;
   appraisedValue: number;
@@ -59,6 +63,16 @@ interface LoanToValueResult {
 
 export class LoanToValueCalculatorComponent
   implements OnInit {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Loan-to-Value (LTV) Calculator | NavStreet',
+      'Calculate mortgage loan-to-value and combined loan-to-value ratios using purchase price, appraised value, and financing amounts.'
+    );
+  }
 
   private readonly formBuilder =
     inject(FormBuilder);

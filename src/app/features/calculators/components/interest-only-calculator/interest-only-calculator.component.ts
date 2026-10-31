@@ -20,6 +20,10 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 interface InterestOnlyCalculationResult {
   loanAmount: number;
   interestOnlyPayment: number;
@@ -58,6 +62,16 @@ interface InterestOnlyCalculationResult {
 })
 export class InterestOnlyCalculatorComponent
   implements OnInit {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Interest-Only Mortgage Calculator | NavStreet',
+      'Calculate interest-only mortgage payments and estimate payments after the interest-only period ends, including taxes and insurance.'
+    );
+  }
 
   private readonly formBuilder =
     inject(FormBuilder);

@@ -21,6 +21,10 @@ import {
   RouterLink
 } from '@angular/router';
 
+import {
+  PageSeoService
+} from '../../../../core/seo/page-seo.service';
+
 interface AffordabilityResult {
   estimatedHomePrice: number;
   estimatedLoanAmount: number;
@@ -60,6 +64,16 @@ interface AffordabilityResult {
 })
 export class AffordabilityCalculatorComponent
   implements OnInit {
+
+  private readonly pageSeo =
+    inject(PageSeoService);
+
+  constructor() {
+    this.pageSeo.set(
+      'Home Affordability Calculator | NavStreet',
+      'Estimate how much home you may be able to afford using income, debts, down payment, interest rate, property taxes, and insurance.'
+    );
+  }
 
   private readonly formBuilder =
     inject(FormBuilder);
