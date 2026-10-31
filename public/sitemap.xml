@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
@@ -56,9 +55,12 @@
     <loc>https://navstreet.com/professionals/register/north-carolina</loc>
   </url>
 
-  <!-- Active state landing pages: 34 states -->
+  <!-- Active state landing pages: 46 states -->
   <url>
     <loc>https://navstreet.com/states/alabama</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/alaska</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/arizona</loc>
@@ -73,10 +75,16 @@
     <loc>https://navstreet.com/states/colorado</loc>
   </url>
   <url>
+    <loc>https://navstreet.com/states/connecticut</loc>
+  </url>
+  <url>
     <loc>https://navstreet.com/states/delaware</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/florida</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/georgia</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/idaho</loc>
@@ -92,6 +100,9 @@
   </url>
   <url>
     <loc>https://navstreet.com/states/kansas</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/kentucky</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/louisiana</loc>
@@ -121,6 +132,9 @@
     <loc>https://navstreet.com/states/nebraska</loc>
   </url>
   <url>
+    <loc>https://navstreet.com/states/nevada</loc>
+  </url>
+  <url>
     <loc>https://navstreet.com/states/new-hampshire</loc>
   </url>
   <url>
@@ -128,6 +142,9 @@
   </url>
   <url>
     <loc>https://navstreet.com/states/north-carolina</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/north-dakota</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/ohio</loc>
@@ -139,10 +156,19 @@
     <loc>https://navstreet.com/states/oregon</loc>
   </url>
   <url>
+    <loc>https://navstreet.com/states/pennsylvania</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/rhode-island</loc>
+  </url>
+  <url>
     <loc>https://navstreet.com/states/south-carolina</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/south-dakota</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/tennessee</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/texas</loc>
@@ -151,7 +177,16 @@
     <loc>https://navstreet.com/states/utah</loc>
   </url>
   <url>
+    <loc>https://navstreet.com/states/vermont</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/virginia</loc>
+  </url>
+  <url>
     <loc>https://navstreet.com/states/washington</loc>
+  </url>
+  <url>
+    <loc>https://navstreet.com/states/west-virginia</loc>
   </url>
   <url>
     <loc>https://navstreet.com/states/wisconsin</loc>
