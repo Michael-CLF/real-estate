@@ -17,10 +17,15 @@ env:
   DEPLOYMENT_FOLDER: dist/template/browser
 
 jobs:
-# Please do not rename this job
+  # Please do not rename this job
   build-project:
     name: build real-estate
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: checkout
         uses: actions/checkout@v5
@@ -41,9 +46,19 @@ jobs:
           npm run build
           cp .deploy-now/real-estate/.htaccess.template dist/template/browser/.htaccess
 
-          
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/875026004917/locations/global/workloadIdentityPools/navstreet-github/providers/navstreet-github-actions
+          service_account: navstreet-seo-generator@real-estate-dev-c4a6d.iam.gserviceaccount.com
+          project_id: real-estate-dev-c4a6d
+          create_credentials_file: true
+          export_environment_variables: true
 
-# Please do not touch the following action
+      - name: Generate property SEO pages
+        run: node scripts/generate-property-pages.mjs
+
+      # Please do not touch the following action
       - name: Store deployment content
         uses: ionos-deploy-now/artifact-action@v1
         with:
