@@ -15,8 +15,6 @@ permissions:
   id-token: write
 
 jobs:
-
-jobs:
   retrieve-project:
     name: check readiness
     runs-on: ubuntu-latest
