@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject
+  inject,
+  PLATFORM_ID
 } from '@angular/core';
 
 import {
-  AsyncPipe
+  AsyncPipe,
+  isPlatformBrowser
 } from '@angular/common';
 
 import {
@@ -101,31 +103,35 @@ export class HomeComponent {
   private readonly listingRepository =
     inject(MarketplaceListingRepository);
 
+  private readonly isBrowser = isPlatformBrowser(
+    inject(PLATFORM_ID)
+  );
+
   private readonly pageSeo =
     injectSeo(PageSeoService);
 
   constructor() {
     this.pageSeo.set(
-      'For Sale by Owner Properties & Selling Tools | NavStreet',
-      'List your home for sale by owner, connect with buyers and explore guided selling tools on NavStreet.'
+      'Sell Your Home for $49 | For Sale By Owner | NavStreet',
+      'Sell your home for just $49 with NavStreet. Create your for-sale-by-owner listing, access marketing tools, and connect directly with buyers without paying a listing agent commission.'
     );
   }
 
-  protected readonly featuredListings$:
-    Observable<MarketplaceListingSummary[]> =
-    this.listingRepository
-      .getFeaturedListings(3)
-      .pipe(
-        catchError(() =>
-          of(
-            [] as MarketplaceListingSummary[]
+protected readonly featuredListings$:
+  Observable<MarketplaceListingSummary[]> =
+    this.isBrowser
+      ? this.listingRepository
+          .getFeaturedListings(3)
+          .pipe(
+            catchError(() =>
+              of([] as MarketplaceListingSummary[])
+            ),
+            shareReplay({
+              bufferSize: 1,
+              refCount: true
+            })
           )
-        ),
-        shareReplay({
-          bufferSize: 1,
-          refCount: true
-        })
-      );
+      : of([] as MarketplaceListingSummary[]);
 
   protected readonly audiencePaths:
     readonly AudiencePath[] = [

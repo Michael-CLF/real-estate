@@ -6,9 +6,18 @@
     RewriteEngine On
     RewriteBase /
 
+    # Preserve direct requests for existing files.
     RewriteRule ^index\.html$ - [L]
 
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . /index.html [L]
+    # Serve prerendered Angular pages from their directories.
+    RewriteCond %{REQUEST_FILENAME}/index.html -f
+    RewriteRule ^(.+?)/?$ $1/index.html [L]
+
+    # Preserve existing static assets and directories.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # All other routes use Angular client-side routing.
+    RewriteRule ^ /index.html [L]
 </IfModule>

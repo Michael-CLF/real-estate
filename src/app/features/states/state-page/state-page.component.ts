@@ -68,14 +68,18 @@ export class StatePageComponent {
     effect(() => {
       const state = this.state();
 
+      if (!state?.isActive) {
+        this.pageSeo.set(
+          'State Marketplace Coming Soon | NavStreet',
+          'NavStreet is expanding into additional states.',
+          true
+        );
+        return;
+      }
+
       this.pageSeo.set(
-        state?.isActive
-          ? `For Sale by Owner Properties in ${state.name} | NavStreet`
-          : 'State marketplace coming soon | NavStreet',
-        state?.isActive
-          ? `Explore for-sale-by-owner homes and selling tools in ${state.name}.`
-          : 'NavStreet is expanding into additional states.',
-        !state?.isActive
+        `${state.name} For Sale By Owner (FSBO) | NavStreet`,
+        `Sell your ${state.name} home for just $49 with NavStreet. List your property, access marketing tools, and connect directly with buyers without a listing agent.`
       );
     });
   }

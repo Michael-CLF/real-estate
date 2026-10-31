@@ -176,12 +176,43 @@ export class SearchResultsComponent {
         )
       ),
 
-      tap(viewModel => {
-        this.pageSeo.set(
-          `${viewModel.heading} | NavStreet`,
-          'Browse for-sale-by-owner homes, photos and property details on NavStreet.'
-        );
-      }),
+     tap(viewModel => {
+  const filters = viewModel.filters;
+
+  const hasAdditionalFilters = Boolean(
+    filters.searchTerm ||
+    filters.city ||
+    filters.postalCode ||
+    filters.propertyTypes?.length ||
+    filters.minimumPrice != null ||
+    filters.maximumPrice != null ||
+    filters.minimumBedrooms != null ||
+    filters.minimumBathrooms != null
+  );
+
+  if (filters.stateSlug && !hasAdditionalFilters) {
+    const stateName = this.stateNameFromSlug(
+      filters.stateSlug
+    );
+
+    this.pageSeo.set(
+      `${stateName} FSBO Homes for Sale | NavStreet`,
+      `Browse ${stateName} for-sale-by-owner homes on NavStreet. Explore property photos, prices, and details, and connect directly with sellers.`
+    );
+
+  } else if (!filters.stateSlug && !hasAdditionalFilters) {
+    this.pageSeo.set(
+      'For Sale By Owner Homes for Sale | NavStreet',
+      'Explore for-sale-by-owner homes across the United States. Browse property photos, prices, and details on NavStreet.'
+    );
+
+  } else {
+    this.pageSeo.set(
+      `${viewModel.heading} | NavStreet`,
+      'Browse for-sale-by-owner homes, photos, prices, and property details on NavStreet.'
+    );
+  }
+}),
 
       shareReplay({
         bufferSize: 1,
