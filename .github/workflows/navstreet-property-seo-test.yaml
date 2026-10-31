@@ -1,0 +1,89 @@
+name: NavStreet Property SEO Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test-property-seo:
+    name: Test Property SEO Generation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular
+        run: npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/875026004917/locations/global/workloadIdentityPools/navstreet-github/providers/navstreet-github-actions
+          service_account: navstreet-seo-generator@real-estate-dev-c4a6d.iam.gserviceaccount.com
+          project_id: real-estate-dev-c4a6d
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Generate property pages
+        run: node scripts/generate-property-pages.mjs
+
+      - name: Verify generated pages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ROOT="dist/template/browser/listings"
+
+          if [ ! -d "$ROOT" ]; then
+            echo "FAIL: No property pages directory was generated."
+            exit 1
+          fi
+
+          COUNT=$(find "$ROOT" -name index.html -type f | wc -l)
+          echo "Generated property pages: $COUNT"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "FAIL: No property pages were generated."
+            exit 1
+          fi
+
+          FIRST=$(find "$ROOT" -name index.html -type f | head -n 1)
+
+          if ! grep -qi '<app-root' "$FIRST"; then
+            echo "FAIL: Angular root missing."
+            exit 1
+          fi
+
+          if ! grep -qi 'application/ld+json' "$FIRST"; then
+            echo "FAIL: Structured data missing."
+            exit 1
+          fi
+
+          if ! grep -qi '<h1' "$FIRST"; then
+            echo "FAIL: Property heading missing."
+            exit 1
+          fi
+
+          echo "PASS: Property pages generated with HTML content and structured data."
+
+      - name: Upload generated HTML for inspection
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navstreet-property-seo-test
+          path: |
+            dist/template/browser/listings/
+            dist/template/browser/sitemap.xml
+          retention-days: 3
