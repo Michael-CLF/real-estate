@@ -1,0 +1,60 @@
+name: NavStreet SEO - Firestore Authentication Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test-firestore:
+    name: Test read-only Firestore access
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/875026004917/locations/global/workloadIdentityPools/navstreet-github/providers/navstreet-github-actions
+          service_account: navstreet-seo-generator@real-estate-dev-c4a6d.iam.gserviceaccount.com
+          project_id: real-estate-dev-c4a6d
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Verify Firestore read access
+        run: |
+          node --input-type=module <<'EOF'
+          import { initializeApp, applicationDefault } from 'firebase-admin/app';
+          import { getFirestore } from 'firebase-admin/firestore';
+
+          initializeApp({
+            credential: applicationDefault(),
+            projectId: 'real-estate-dev-c4a6d'
+          });
+
+          const db = getFirestore();
+
+          const snapshot = await db
+            .collection('listings')
+            .limit(1)
+            .get();
+
+          console.log('Firestore authentication successful.');
+          console.log('Documents retrieved:', snapshot.size);
+
+          if (!snapshot.empty) {
+            console.log('Listing document ID:', snapshot.docs[0].id);
+          }
+          EOF
