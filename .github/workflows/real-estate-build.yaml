@@ -55,10 +55,9 @@ jobs:
           create_credentials_file: true
           export_environment_variables: true
 
-      # Property SEO generation temporarily disabled pending validation.
-      # - name: Generate property SEO pages
-      #   run: node scripts/generate-property-pages.mjs
-      # Please do not touch the following action
+      - name: Generate property SEO pages
+        run: node scripts/generate-property-pages.mjs
+
       - name: Store deployment content
         uses: ionos-deploy-now/artifact-action@v1
         with:
