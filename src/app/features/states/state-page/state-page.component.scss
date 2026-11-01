@@ -59,9 +59,10 @@
   }
 
   &__description {
-    color: #475569;
+    color: #154360;
     font-family: variables.$font-body;
-    font-size: 1.0625rem;
+    font-size: 1.2rem;
+    font-weight: 500;
     line-height: 1.75;
     margin: 1.5rem 0 0;
     max-width: 42rem;
@@ -200,6 +201,155 @@
     &__construction {
       max-width: 32rem;
     }
+  }
+}
+
+
+
+// Additional content is shown only on active state landing pages.
+.state-page--active {
+  padding-bottom: 5rem;
+
+  .state-page__sections {
+    margin: 5rem auto 0;
+    max-width: 1280px;
+  }
+
+  .state-page__section {
+    padding: 3rem 0;
+    border-top: 1px solid #dbe4ed;
+
+    &--tinted {
+      background: rgb(255 255 255 / 68%);
+      border-radius: 1.25rem;
+      border: 1px solid #e2e8f0;
+      margin: 1rem 0;
+      padding: 2.5rem;
+      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+  }
+
+  .state-page__section-heading {
+    max-width: 52rem;
+    margin-bottom: 1.75rem;
+
+    h2 {
+      color: #154360;
+      font-family: variables.$font-heading;
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      line-height: 1.2;
+      margin: 0.65rem 0 1rem;
+    }
+
+    p {
+      color: #154360;
+      font-family: variables.$font-body;
+      font-weight: 500;
+      line-height: 1.75;
+      margin: 0;
+    }
+  }
+
+  .state-page__eyebrow {
+    color: #087c80;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .state-page__feature {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dbe4ed;
+    border-radius: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: space-between;
+    padding: 2rem;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+
+    h3 { color: #154360; margin: 0 0 0.6rem; }
+    p { color: #475569; line-height: 1.65; margin: 0; max-width: 38rem; }
+  }
+
+  .state-page__cards {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .state-page__card {
+    background: #ffffff;
+    border: 1px solid #dbe4ed;
+    border-radius: 0.9rem;
+    padding: 1.5rem;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+
+    h3 { color: #0f172a; margin: 0 0 0.65rem; }
+    p { color: #475569; line-height: 1.65; margin: 0; }
+  }
+
+  .state-page__section-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .state-page__text-link {
+    color: #154360;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+  }
+
+  .state-page__steps {
+    color: #334155;
+    display: grid;
+    gap: 0.9rem;
+    line-height: 1.7;
+    margin: 0 0 1rem;
+    max-width: 55rem;
+    padding-left: 1.5rem;
+  }
+
+  .state-page__disclaimer {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .state-page__faqs {
+    max-width: 55rem;
+    
+
+    details {
+      background: #ffffff;
+      border: 1px solid #dbe4ed;
+      border-radius: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding: 1.1rem 1.25rem;
+      box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    }
+
+    summary {
+      color: #0f172a;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    p { color: #475569; line-height: 1.7; margin-bottom: 0; }
+  }
+}
+
+@media (max-width: 800px) {
+  .state-page--active {
+    .state-page__cards { grid-template-columns: 1fr; }
+    .state-page__section--tinted { padding: 1.5rem; }
+    .state-page__sections { margin-top: 3rem; }
   }
 }
 
