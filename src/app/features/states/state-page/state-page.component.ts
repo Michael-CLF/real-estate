@@ -28,6 +28,8 @@ import {
   PageSeoService
 } from '../../../core/seo/page-seo.service';
 
+import { getStateDisclosureRequirements } from '../../../core/configuration/state-disclosures.config';
+
 @Component({
   changeDetection:
     ChangeDetectionStrategy.OnPush,
@@ -64,6 +66,14 @@ export class StatePageComponent {
       )
     );
 
+  protected readonly disclosureTopics = computed(() => {
+    const selectedState = this.state();
+    if (!selectedState?.isActive) return [];
+    return getStateDisclosureRequirements(selectedState.abbreviation)
+      .filter(item => item.documentType !== 'lead-based-paint')
+      .slice(0, 5);
+  });
+
   constructor() {
     effect(() => {
       const state = this.state();
@@ -78,8 +88,8 @@ export class StatePageComponent {
       }
 
       this.pageSeo.set(
-        `${state.name} For Sale By Owner (FSBO) | NavStreet`,
-        `Sell your ${state.name} home for just $49 with NavStreet. List your property, access marketing tools, and connect directly with buyers without a listing agent.`
+        `Homes for Sale by Owner in ${state.name} | NavStreet`,
+        `Browse homes for sale by owner in ${state.name}, connect directly with homeowners, or list your property on NavStreet for just $49.`
       );
     });
   }

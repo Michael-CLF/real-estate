@@ -8,12 +8,12 @@
       </span>
 
       <h1 class="state-page__title">
-        For-Sale-by-Owner Homes in {{ selectedState.name }}
+        Homes For Sale by Owner in {{ selectedState.name }}
       </h1>
       <p class="state-page__description">
-        Search homes, explore local markets, and access tools for
-        buying, selling, and financing real estate in
-        {{ selectedState.name }}.
+        Explore homes for sale by owner in {{ selectedState.name }}, connect
+        directly with homeowners, or advertise your own property on
+        NavStreet for just $49.
       </p>
 
       <div class="state-page__actions">
@@ -28,6 +28,133 @@
         </a>
       </div>
     </div>
+  </div>
+
+  <div class="state-page__sections">
+    <section class="state-page__section" aria-labelledby="state-browse-heading">
+      <div class="state-page__section-heading">
+        <span class="state-page__eyebrow">Explore homes</span>
+        <h2 id="state-browse-heading">Browse homes for sale by owner in {{ selectedState.name }}</h2> 
+        <p>Find homes advertised by owners in {{ selectedState.name }}. Browse current listings, view property photographs and details, and contact sellers through NavStreet.</p>
+      </div>
+      <div class="state-page__feature state-page__feature--browse">
+        <div>
+          <h3>Find your next home directly from the owner</h3>
+          <p>See available properties in {{ selectedState.name }} as homeowners publish them. Search results reflect the listings currently available on NavStreet.</p>
+        </div>
+        <a class="state-page__button state-page__button--primary" routerLink="/homes" [queryParams]="{ state: selectedState.slug }">
+          View {{ selectedState.name }} homes
+        </a>
+      </div>
+    </section>
+
+    <section class="state-page__section state-page__section--tinted" aria-labelledby="state-sell-heading">
+      <div class="state-page__section-heading">
+        <span class="state-page__eyebrow">For homeowners</span>
+        <h2 id="state-sell-heading">Sell your {{ selectedState.name }} home for $49</h2>
+        <p>Advertise your property, share photographs and details, and connect directly with interested buyers without paying a traditional listing commission to advertise on NavStreet.</p>
+      </div>
+      <div class="state-page__cards">
+        <article class="state-page__card">
+          <h3>Build your listing</h3>
+          <p>Add property details, photographs, and your asking price.</p>
+        </article>
+        <article class="state-page__card">
+          <h3>Use your marketing toolkit</h3>
+          <p>Access tools to help promote your home to prospective buyers.</p>
+        </article>
+        <article class="state-page__card">
+          <h3>Connect with buyers</h3>
+          <p>Receive inquiries and communicate with interested buyers directly.</p>
+        </article>
+      </div>
+      <div class="state-page__section-actions">
+        <a class="state-page__button state-page__button--primary" routerLink="/sell">List your {{ selectedState.name }} home</a>
+        <a class="state-page__text-link" routerLink="/pricing">See pricing details</a>
+      </div>
+    </section>
+
+    <section class="state-page__section" aria-labelledby="state-markets-heading">
+      <div class="state-page__section-heading">
+        <span class="state-page__eyebrow">Local markets</span>
+        <h2 id="state-markets-heading">Explore real estate markets across {{ selectedState.name }}</h2>
+        <p>Search by city, ZIP code, property type, or price to explore the areas that interest you. Availability depends on current homeowner listings.</p>
+      </div>
+      <div class="state-page__cards">
+        <article class="state-page__card">
+          <h3>Search by location</h3>
+          <p>Explore available listings by city, ZIP code, and other location filters.</p>
+        </article>
+        <article class="state-page__card">
+          <h3>Compare properties</h3>
+          <p>Review property types, asking prices, photographs, and listing details.</p>
+        </article>
+        <article class="state-page__card">
+          <h3>Connect with Sellers</h3>
+          <p>Contact sellers directly to ask questions or request a showing.</p>
+        </article>
+      </div>
+      <div class="state-page__section-actions">
+        <a class="state-page__button state-page__button--secondary" routerLink="/homes" [queryParams]="{ state: selectedState.slug }">
+          Explore {{ selectedState.name }} markets
+        </a>
+      </div>
+    </section>
+
+    <section class="state-page__section state-page__section--tinted" aria-labelledby="state-guide-heading">
+      <div class="state-page__section-heading">
+        <span class="state-page__eyebrow">Seller resources</span>
+        <h2 id="state-guide-heading">How to sell a home by owner in {{ selectedState.name }}</h2>
+        <p>Selling without a listing agent involves preparation, marketing, buyer communication, and understanding the documents needed for your transaction.</p>
+      </div>
+      <ol class="state-page__steps">
+        <li><strong>Prepare your home.</strong> Gather accurate property information and take clear photographs.</li>
+        <li><strong>Understand disclosures.</strong> Check which seller disclosures and other requirements apply to your property in {{ selectedState.name }}.</li>
+        <li><strong>Choose your asking price.</strong> Research comparable homes and consider your local market.</li>
+        <li><strong>Advertise and respond.</strong> Publish your listing and communicate with prospective buyers.</li>
+        <li><strong>Review offers and closing steps.</strong> Consider qualified professional guidance when evaluating contracts and completing the sale.</li>
+      </ol>
+      <div class="state-page__section-heading">
+        <h3>Selling a home in {{ selectedState.name }}: disclosures and documents</h3>
+        <p>These are topics addressed in NavStreet's state disclosure reference. Whether a document is required depends on the property, transaction, and applicable exemptions.</p>
+      </div>
+      @if (disclosureTopics().length > 0) {
+        <ul class="state-page__steps">
+          @for (topic of disclosureTopics(); track topic.documentType) {
+            <li><strong>{{ topic.shortTitle || topic.title }}.</strong> {{ topic.description }}</li>
+          }
+        </ul>
+      } @else {
+        <p>Review applicable seller disclosures and property-specific transaction documents.</p>
+      }
+      <p class="state-page__disclaimer">Federal lead-based paint disclosure rules may apply to housing built before 1978. This information is educational, not legal advice; requirements vary by property and transaction.</p>
+      <a class="state-page__text-link" routerLink="/how-navstreet-works">Learn how NavStreet works</a>
+    </section>
+
+    <section class="state-page__section" aria-labelledby="state-faq-heading">
+      <div class="state-page__section-heading">
+        <span class="state-page__eyebrow">Common questions</span>
+        <h2 id="state-faq-heading">{{ selectedState.name }} for sale by owner FAQs</h2>
+      </div>
+      <div class="state-page__faqs">
+        <details>
+          <summary>Can I sell my home without a listing agent in {{ selectedState.name }}?</summary>
+          <p>Homeowners can generally sell their own property, subject to applicable laws, disclosures, and transaction requirements. Professional assistance may still be helpful.</p>
+        </details>
+        <details>
+          <summary>How much does it cost to advertise my home on NavStreet?</summary>
+          <p>NavStreet's standard property listing costs $49. Review the pricing page for details and optional services.</p>
+        </details>
+        <details>
+          <summary>Can buyers contact sellers directly?</summary>
+          <p>Yes. NavStreet helps interested buyers connect with the homeowners advertising their properties.</p>
+        </details>
+        <details>
+          <summary>Where can I find homes for sale by owner in {{ selectedState.name }}?</summary>
+          <p>Use NavStreet's home search and select {{ selectedState.name }} to browse currently available listings.</p>
+        </details>
+      </div>
+    </section>
   </div>
 </section>
 } @else {

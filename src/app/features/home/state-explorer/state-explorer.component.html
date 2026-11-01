@@ -23,13 +23,9 @@
         <a
           class="state-card"
           [class.state-card--active]="state.isActive"
-          [attr.aria-label]="
-            state.isActive
-              ? 'Browse listings in ' + state.name
-              : 'Learn more about our plans for ' + state.name
-          "
-          [routerLink]="state.isActive ? ['/homes'] : ['/states', state.slug]"
-          [queryParams]="state.isActive ? { state: state.slug } : null"
+          [attr.aria-label]="'Explore real estate in ' + state.name"
+          
+         [routerLink]="['/states', state.slug]"
         >
           <span class="state-card__abbreviation">
             {{ state.abbreviation }}
