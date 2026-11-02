@@ -474,7 +474,7 @@ function getEligiblePriceId(
         case 'business_profile':
             priceId =
                 process.env[
-                    'STRIPE_PROFESSIONAL_PROFILE_PRICE_ID'
+                    'STRIPE_PROFESSIONAL_PROFILE_ONETIME_PRICE_ID'
                 ] ?? '';
             break;
 

@@ -1,5 +1,8 @@
 import {
   ProfessionalListingStatus,
+  ProfessionalStateCoverage,
+  ProfessionalPublicationStatus,
+  ProfessionalPaymentModel,
   ProfessionalPlacement,
   ProfessionalServiceAreaType,
   ProfessionalSubscriptionStatus,
@@ -33,6 +36,11 @@ export interface InitialProfessionalUser {
 
   phone: string;
   email: string;
+
+  serviceStates?: ProfessionalStateCoverage[];
+  serviceStateSlugs?: string[];
+  publicationStatus?: ProfessionalPublicationStatus;
+  paymentModel?: ProfessionalPaymentModel;
 
   subscriptionStatus:
     ProfessionalSubscriptionStatus;

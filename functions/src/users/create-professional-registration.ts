@@ -1,3 +1,5 @@
+import { validateCoverage, validateEnhanced, Coverage } from './save-professional-upgrade-draft';
+
 import {
   FieldValue
 } from 'firebase-admin/firestore';
@@ -39,6 +41,11 @@ interface CreateProfessionalRegistrationRequest {
   email: string;
 
   submissionCertified: boolean;
+  plan?: 'free' | 'profile';
+  serviceStates?: Coverage[];
+  website?: string;
+  description?: string;
+  logoUrl?: string;
 }
 
 interface CreateProfessionalRegistrationResult {
@@ -204,6 +211,18 @@ export const createProfessionalRegistration =
         );
       }
 
+      const paid = request.data?.plan === 'profile';
+      if (request.data?.plan && request.data.plan !== 'free' && !paid) {
+        throw new HttpsError('invalid-argument','Invalid plan.');
+      }
+      const serviceStates = paid
+        ? validateCoverage(request.data.serviceStates, 5)
+        : [{ stateName, stateAbbreviation, stateSlug, serviceAreaType, counties, cities }];
+      if (paid && serviceStates[0].stateSlug !== stateSlug) {
+        throw new HttpsError('invalid-argument','Primary state does not match.');
+      }
+      const enhanced = paid ? validateEnhanced(request.data) : null;
+
       /*
        * Support professional records created before
        * owner claims were introduced.
@@ -323,6 +342,10 @@ export const createProfessionalRegistration =
 
               subscriptionStatus:
                 'free',
+              publicationStatus: paid ? 'pending_payment' : 'published',
+              serviceStates: paid ? serviceStates : [serviceStates[0]],
+              serviceStateSlugs: serviceStates.map(item => item.stateSlug),
+              ...(enhanced ? { pendingUpgrade: { serviceStates, ...enhanced } } : {}),
 
               placement:
                 'standard',

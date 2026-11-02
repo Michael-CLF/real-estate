@@ -1,3 +1,6 @@
+import { httpsCallable } from 'firebase/functions';
+import { functions } from './firebase';
+
 import {
   Injectable
 } from '@angular/core';
@@ -80,33 +83,9 @@ export class FirebaseProfessionalRepository
   async getActiveDirectoryProfessionals(
     stateSlug = ''
   ): Promise<ProfessionalUser[]> {
-    const constraints = [
-      where('status', '==', 'active')
-    ];
-
-    if (stateSlug) {
-      constraints.push(
-        where(
-          'stateSlug',
-          '==',
-          stateSlug.trim().toLowerCase()
-        )
-      );
-    }
-
-    const snapshot = await getDocs(
-      query(
-        collection(
-          firestore,
-          this.collectionName
-        ),
-        ...constraints
-      )
-    );
-
-    return snapshot.docs.map(document =>
-      this.mapProfessionalSnapshot(document)
-    );
+    const professionals = await this.loadPublishedDirectory();
+    return professionals.filter(professional =>
+      !stateSlug || this.coversState(professional, stateSlug));
   }
 
   async getProfessionalByOwnerUid(
@@ -176,12 +155,6 @@ export class FirebaseProfessionalRepository
         ),
 
         where(
-          'stateSlug',
-          '==',
-          normalizedStateSlug
-        ),
-
-        where(
           'profileSlug',
           '==',
           normalizedProfileSlug
@@ -206,16 +179,14 @@ export class FirebaseProfessionalRepository
     const snapshot =
       await getDocs(profileQuery);
 
-    const professionalSnapshot =
-      snapshot.docs[0];
+    const professional = snapshot.docs
+      .map(document => this.mapProfessionalSnapshot(document))
+      .find(value =>
+        this.isPublished(value) &&
+        this.coversState(value, normalizedStateSlug)
+      );
 
-    if (!professionalSnapshot) {
-      return null;
-    }
-
-    return this.mapProfessionalSnapshot(
-      professionalSnapshot
-    );
+    return professional ?? null;
   }
 
   async getActiveProfessionalsByState(
@@ -230,37 +201,8 @@ export class FirebaseProfessionalRepository
       return [];
     }
 
-    const stateProfessionalsQuery =
-      query(
-        collection(
-          firestore,
-          this.collectionName
-        ),
-
-        where(
-          'stateSlug',
-          '==',
-          normalizedStateSlug
-        ),
-
-        where(
-          'status',
-          '==',
-          'active'
-        )
-      );
-
-    const snapshot =
-      await getDocs(
-        stateProfessionalsQuery
-      );
-
-    return snapshot.docs
-      .map(documentSnapshot =>
-        this.mapProfessionalSnapshot(
-          documentSnapshot
-        )
-      )
+    return (await this.loadPublishedDirectory())
+      .filter(professional => this.coversState(professional, normalizedStateSlug))
       .sort(
         (
           firstProfessional,
@@ -295,6 +237,32 @@ export class FirebaseProfessionalRepository
             );
         }
       );
+  }
+
+  private async loadPublishedDirectory(): Promise<ProfessionalUser[]> {
+    const callable = httpsCallable<void, Array<Record<string, unknown>>>(
+      functions, 'listPublishedProfessionals');
+    const response = await callable();
+    return response.data.map(data => ({
+      ...data,
+      specialties: this.toStringArray(data['specialties']),
+      counties: this.toStringArray(data['counties']),
+      cities: this.toStringArray(data['cities']),
+      createdAt: data['createdAt'] ? new Date(String(data['createdAt'])) : new Date(),
+      updatedAt: data['updatedAt'] ? new Date(String(data['updatedAt'])) : new Date()
+    } as ProfessionalUser));
+  }
+
+  private isPublished(professional: ProfessionalUser): boolean {
+    return professional.publicationStatus === undefined ||
+      professional.publicationStatus === 'published';
+  }
+
+  private coversState(professional: ProfessionalUser, stateSlug: string): boolean {
+    const slug = stateSlug.trim().toLowerCase();
+    return professional.stateSlug === slug ||
+      (professional.serviceStateSlugs ?? []).includes(slug) ||
+      (professional.serviceStates ?? []).some(state => state.stateSlug === slug);
   }
 
   async updateProfessional(

@@ -35,7 +35,7 @@ const stripeSecretKey =
 
 const professionalProfilePriceId =
     defineString(
-        'STRIPE_PROFESSIONAL_PROFILE_PRICE_ID'
+        'STRIPE_PROFESSIONAL_PROFILE_ONETIME_PRICE_ID'
     );
 
 const navStreetAppUrl =
@@ -62,6 +62,7 @@ interface ProfessionalProfileDocument {
     stateSlug?: string;
 
     subscriptionStatus?: string;
+    pendingUpgrade?: { serviceStates?: unknown[]; website?: string; description?: string; logoUrl?: string };
 
     status?: string;
 
@@ -179,6 +180,17 @@ export const createProfessionalProfileCheckoutSession =
                 );
             }
 
+            if (!professional.pendingUpgrade ||
+                !Array.isArray(professional.pendingUpgrade.serviceStates) ||
+                professional.pendingUpgrade.serviceStates.length < 1 ||
+                professional.pendingUpgrade.serviceStates.length > 5 ||
+                !professional.pendingUpgrade.website ||
+                !professional.pendingUpgrade.description ||
+                !professional.pendingUpgrade.logoUrl) {
+                throw new HttpsError('failed-precondition',
+                    'Complete your enhanced profile and state coverage before checkout.');
+            }
+
             const priceId =
                 professionalProfilePriceId
                     .value()
@@ -187,7 +199,7 @@ export const createProfessionalProfileCheckoutSession =
             if (!priceId) {
                 throw new HttpsError(
                     'failed-precondition',
-                    'The professional subscription price has not been configured.'
+                    'The one-time professional profile price has not been configured.'
                 );
             }
 
@@ -195,6 +207,14 @@ export const createProfessionalProfileCheckoutSession =
                 new Stripe(
                     stripeSecretKey.value()
                 );
+
+            // Never charge a recurring price for a one-time entitlement.
+            const configuredPrice = await stripe.prices.retrieve(priceId);
+            if (!configuredPrice.active || configuredPrice.type !== 'one_time' ||
+                configuredPrice.currency !== 'usd' || configuredPrice.unit_amount !== 4900) {
+                throw new HttpsError('failed-precondition',
+                    'Professional profile price must be an active $49 USD one-time price.');
+            }
 
             const existingCheckoutSessionId =
                 professional.stripe
@@ -211,26 +231,31 @@ export const createProfessionalProfileCheckoutSession =
                             );
 
                     if (
-                        existingSession.status ===
-                        'open' &&
+                        existingSession.mode === 'payment' &&
+                        existingSession.status === 'open' &&
                         existingSession.url
                     ) {
-                        return {
-                            checkoutSessionId:
-                                existingSession.id,
-
-                            checkoutUrl:
-                                existingSession.url
-                        };
+                        if (existingSession.allow_promotion_codes === true) {
+                            return {
+                                checkoutSessionId: existingSession.id,
+                                checkoutUrl: existingSession.url
+                            };
+                        }
+                        await stripe.checkout.sessions.expire(existingSession.id);
+                        console.info('Expired outdated professional Checkout session.', {
+                            professionalUid,
+                            checkoutSessionId: existingSession.id
+                        });
                     }
 
                     if (
+                        existingSession.mode === 'payment' &&
                         existingSession.status ===
                         'complete'
                     ) {
                         throw new HttpsError(
                             'already-exists',
-                            'The professional subscription Checkout session has already been completed.'
+                            'The professional one-time Checkout session has already been completed.'
                         );
                     }
                 } catch (error) {
@@ -280,7 +305,9 @@ export const createProfessionalProfileCheckoutSession =
                         .sessions
                         .create({
                             mode:
-                                'subscription',
+                                'payment',
+
+                            allow_promotion_codes: true,
 
                             client_reference_id:
                                 professionalUid,
@@ -301,26 +328,13 @@ export const createProfessionalProfileCheckoutSession =
 
                             metadata: {
                                 purchaseType:
-                                    'professional_profile',
+                                    'professional_profile_one_time',
 
                                 professionalUid,
 
                                 ownerUid,
 
                                 stateSlug
-                            },
-
-                            subscription_data: {
-                                metadata: {
-                                    purchaseType:
-                                        'professional_profile',
-
-                                    professionalUid,
-
-                                    ownerUid,
-
-                                    stateSlug
-                                }
                             },
 
                             success_url:
@@ -331,8 +345,7 @@ export const createProfessionalProfileCheckoutSession =
 
                             cancel_url:
                                 `${applicationUrl}` +
-                                `/professionals/${stateSlug}` +
-                                `/register` +
+                                `/professionals/register/${stateSlug}` +
                                 `?payment=cancelled`
                         });
 
@@ -345,13 +358,8 @@ export const createProfessionalProfileCheckoutSession =
                 await professionalSnapshot
                     .ref
                     .update({
-                        stripe: {
-                            checkoutSessionId:
-                                checkoutSession.id,
-
-                            subscriptionStatus:
-                                'checkout_pending'
-                        },
+                        'stripe.checkoutSessionId': checkoutSession.id,
+                        'stripe.paymentStatus': 'payment_pending',
 
                         updatedAt:
                             FieldValue.serverTimestamp()
@@ -382,7 +390,7 @@ export const createProfessionalProfileCheckoutSession =
 
                 throw new HttpsError(
                     'internal',
-                    'The secure subscription payment page could not be opened. Please try again.'
+                    'The secure one-time payment page could not be opened. Please try again.'
                 );
             }
         }

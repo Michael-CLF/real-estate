@@ -69,11 +69,6 @@ import {
 } from '../../core/infrastructure/firebase/firebase';
 
 
-interface ProfessionalProfileCheckoutResult {
-  checkoutSessionId: string;
-  checkoutUrl: string;
-}
-
 
 interface ProfessionalBillingPortalResult {
   portalUrl: string;
@@ -420,58 +415,26 @@ export class DashboardComponent
 
   protected async upgradeBusinessProfile():
     Promise<void> {
-    if (
-      this.isStartingUpgrade() ||
-      !this.professional()
-    ) {
+    const professional = this.professional();
+    if (this.isStartingUpgrade() || !professional) {
       return;
     }
 
     this.isStartingUpgrade.set(true);
     this.professionalUpgradeError.set('');
-
     try {
-      const createCheckoutSession =
-        httpsCallable<
-          void,
-          ProfessionalProfileCheckoutResult
-        >(
-          functions,
-          'createProfessionalProfileCheckoutSession'
-        );
-
-      const result =
-        await createCheckoutSession();
-
-      const checkoutUrl =
-        result.data.checkoutUrl?.trim();
-
-      if (!checkoutUrl) {
-        throw new Error(
-          'Stripe did not return a checkout address.'
-        );
-      }
-
-      window.location.assign(
-        checkoutUrl
+      await this.router.navigate(
+        ['/professionals', 'register', professional.stateSlug],
+        { queryParams: { upgrade: '1' } }
       );
     } catch (error: unknown) {
-      console.error(
-        'Unable to begin the business profile upgrade:',
-        error
-      );
-
       this.professionalUpgradeError.set(
-        this.getErrorMessage(
-          error,
-          'We could not open the subscription checkout. Please try again.'
-        )
+        this.getErrorMessage(error, 'We could not open the profile upgrade form.')
       );
-
+    } finally {
       this.isStartingUpgrade.set(false);
     }
   }
-
 
   protected async openBusinessBillingPortal():
     Promise<void> {

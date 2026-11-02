@@ -19,14 +19,14 @@ export interface PromotionCode {
     code: string;
 
     discountType:
-        PromotionDiscountType;
+    PromotionDiscountType;
 
     percentOff?: number;
     amountOffCents?: number;
     currency?: string;
 
     eligibleProduct:
-        PromotionEligibleProduct;
+    PromotionEligibleProduct;
 
     eligiblePriceId: string;
     stripeProductId: string;
@@ -35,21 +35,21 @@ export interface PromotionCode {
     stripePromotionCodeId: string;
 
     status:
-        PromotionCodeStatus;
+    PromotionCodeStatus;
 
     active: boolean;
 
     firstTimeTransactionOnly:
-        boolean;
+    boolean;
 
     maxRedemptions:
-        number | null;
+    number | null;
 
     timesRedeemed:
-        number;
+    number;
 
     expiresAt:
-        string | null;
+    string | null;
 
     createdByUid: string;
     createdAt: string;
@@ -61,21 +61,21 @@ export interface CreatePromotionCodeInput {
     code: string;
 
     discountType:
-        PromotionDiscountType;
+    PromotionDiscountType;
 
     percentOff?: number;
     amountOffCents?: number;
     currency?: string;
 
     eligibleProduct:
-        PromotionEligibleProduct;
+    PromotionEligibleProduct;
 
     expiresAt?: string | null;
 
     maxRedemptions?: number | null;
 
     firstTimeTransactionOnly:
-        boolean;
+    boolean;
 }
 
 export interface UpdatePromotionCodeInput {
@@ -85,22 +85,22 @@ export interface UpdatePromotionCodeInput {
 
 export interface CreatePromotionCodeResult {
     promotionCode:
-        PromotionCode;
+    PromotionCode;
 }
 
 export interface UpdatePromotionCodeResult {
     promotionCode:
-        PromotionCode;
+    PromotionCode;
 }
 
 export interface ListPromotionCodesResult {
     promotionCodes:
-        PromotionCode[];
+    PromotionCode[];
 }
 
 export interface PromotionProductOption {
     value:
-        PromotionEligibleProduct;
+    PromotionEligibleProduct;
 
     label: string;
     description: string;
@@ -145,9 +145,9 @@ export const PROMOTION_PRODUCT_OPTIONS:
                 'Full Business Profile',
 
             description:
-                'The recurring NavStreet professional-profile subscription.',
+                'The one-time NavStreet Full Business Profile fee.',
 
             priceLabel:
-                '$49 per month'
+                '$49 one-time'
         }
     ];

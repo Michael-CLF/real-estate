@@ -1,4 +1,4 @@
-import { Router, NavigationStart } from '@angular/router';
+import { Router, NavigationStart, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
@@ -22,6 +22,10 @@ export class PageSeoService {
             'NavStreet',
             'Home listings, education and real estate services on NavStreet.'
           );
+        }
+        if (event instanceof NavigationEnd) {
+          // The final URL is available only after routing completes.
+          this.updateCanonicalUrl();
         }
       });
   }
@@ -56,6 +60,23 @@ export class PageSeoService {
 
     if (canonicalPath !== '/') {
       canonicalPath = canonicalPath.replace(/\/+$/, '');
+
+      const requiresTrailingSlash =
+        canonicalPath.startsWith('/states/') ||
+        canonicalPath === '/calculators' ||
+        canonicalPath.startsWith('/calculators/') ||
+        [
+          '/contact',
+          '/faq',
+          '/how-navstreet-works',
+          '/pricing',
+          '/privacy',
+          '/terms'
+        ].includes(canonicalPath);
+
+      if (requiresTrailingSlash) {
+        canonicalPath += '/';
+      }
     }
 
     if (canonicalPath === '/homes' && queryString) {

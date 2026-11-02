@@ -317,10 +317,12 @@ export class ProfessionalsComponent {
       .professionals
       .filter(professional =>
         professional.status === 'active' &&
-        (
-          !this.stateSlug() ||
-          professional.stateSlug === this.stateSlug()
-        )
+        (professional.publicationStatus === undefined ||
+          professional.publicationStatus === 'published') &&
+        (!this.stateSlug() ||
+          professional.stateSlug === this.stateSlug() ||
+          (professional.serviceStateSlugs ?? []).includes(this.stateSlug()) ||
+          (professional.serviceStates ?? []).some(state => state.stateSlug === this.stateSlug()))
       )
   );
 
@@ -354,16 +356,21 @@ export class ProfessionalsComponent {
           return false;
         }
 
+        const coverage = (professional.serviceStates ?? []).find(
+          state => state.stateSlug === (filters.state || this.stateSlug())
+        );
+        const serviceAreaType = coverage?.serviceAreaType ?? professional.serviceAreaType;
+        const serviceCities = coverage?.cities ?? professional.cities;
+        const serviceCounties = coverage?.counties ?? professional.counties;
+
         if (
           city &&
-          professional.serviceAreaType !== 'statewide' &&
-          !professional.cities.some(value =>
+          serviceAreaType !== 'statewide' &&
+          !serviceCities.some(value =>
             this.normalizeSearchValue(value) === city
           ) &&
-          !professional.counties.some(value =>
-            counties.includes(
-              this.normalizeCounty(value)
-            )
+          !serviceCounties.some(value =>
+            counties.includes(this.normalizeCounty(value))
           )
         ) {
           return false;
@@ -377,7 +384,11 @@ export class ProfessionalsComponent {
               professional.category,
               ...professional.specialties,
               ...professional.cities,
-              ...professional.counties
+              ...professional.counties,
+              ...(professional.serviceStates ?? []).flatMap(state => [
+                ...state.cities,
+                ...state.counties
+              ])
             ].join(' ')
           );
 

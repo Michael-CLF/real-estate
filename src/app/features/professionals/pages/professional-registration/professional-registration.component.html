@@ -12,7 +12,7 @@
             <p>
                 Choose your service state in the form below.
                 Create a useful free directory listing or
-                select a full-profile subscription.
+                select a $49 one-time enhanced profile.
                 You will verify your email before
                 registration is completed.
             </p>
@@ -473,7 +473,7 @@
                       .subscriptionStatus.value ===
                     'free'
                   ">
-                                <input type="radio" formControlName="subscriptionStatus" value="free" />
+                                <input type="radio" formControlName="subscriptionStatus" value="free" (change)="onPlanChange()" />
 
                                 <span class="registration-plan__heading">
                                     <strong>
@@ -496,14 +496,14 @@
                       .subscriptionStatus.value ===
                     'profile'
                   ">
-                                <input type="radio" formControlName="subscriptionStatus" value="profile" />
+                                <input type="radio" formControlName="subscriptionStatus" value="profile" (change)="onPlanChange()" />
 
                                 <span class="registration-plan__heading">
                                     <strong>
                                         Full business profile
                                     </strong>
 
-                                    <span>Subscription</span>
+                                    <span>$49 one-time</span>
                                 </span>
 
                                 <ul>
@@ -516,6 +516,129 @@
                         </fieldset>
                     </div>
                 </section>
+
+                @if (registrationForm.controls.subscriptionStatus.value === 'profile') {
+                <section class="registration-card">
+                  <header class="registration-card__header"><h2>Enhanced profile — complete before checkout</h2></header>
+                  <div class="registration-card__body">
+                    <p>Up to five states total. Choose an independent service area for each additional state.</p>
+                    <div class="registration-extra-states">
+                    <div class="registration-field">
+                      <label for="extra-state-1">Additional state 1 (optional)</label>
+                      <select id="extra-state-1" formControlName="extraState1">
+                        <option value="">No additional state</option>
+                        @for (state of states; track state.slug) {
+                          <option [value]="state.slug">{{ state.name }}</option>
+                        }
+                      </select>
+                      @if (registrationForm.controls.extraState1.value) {
+                        <label for="extra-type-1">Service area type</label>
+                        <select id="extra-type-1" formControlName="extraType1">
+                          <option value="statewide">Statewide</option>
+                          <option value="counties">Counties</option>
+                          <option value="cities">Cities</option>
+                        </select>
+                        @if (registrationForm.controls.extraType1.value !== 'statewide') {
+                          <label for="extra-areas-1">Counties or cities (comma-separated)</label>
+                          <input id="extra-areas-1" formControlName="extraAreas1" type="text" />
+                        }
+                      }
+                    </div>
+                    <div class="registration-field">
+                      <label for="extra-state-2">Additional state 2 (optional)</label>
+                      <select id="extra-state-2" formControlName="extraState2">
+                        <option value="">No additional state</option>
+                        @for (state of states; track state.slug) {
+                          <option [value]="state.slug">{{ state.name }}</option>
+                        }
+                      </select>
+                      @if (registrationForm.controls.extraState2.value) {
+                        <label for="extra-type-2">Service area type</label>
+                        <select id="extra-type-2" formControlName="extraType2">
+                          <option value="statewide">Statewide</option>
+                          <option value="counties">Counties</option>
+                          <option value="cities">Cities</option>
+                        </select>
+                        @if (registrationForm.controls.extraType2.value !== 'statewide') {
+                          <label for="extra-areas-2">Counties or cities (comma-separated)</label>
+                          <input id="extra-areas-2" formControlName="extraAreas2" type="text" />
+                        }
+                      }
+                    </div>
+                    <div class="registration-field">
+                      <label for="extra-state-3">Additional state 3 (optional)</label>
+                      <select id="extra-state-3" formControlName="extraState3">
+                        <option value="">No additional state</option>
+                        @for (state of states; track state.slug) {
+                          <option [value]="state.slug">{{ state.name }}</option>
+                        }
+                      </select>
+                      @if (registrationForm.controls.extraState3.value) {
+                        <label for="extra-type-3">Service area type</label>
+                        <select id="extra-type-3" formControlName="extraType3">
+                          <option value="statewide">Statewide</option>
+                          <option value="counties">Counties</option>
+                          <option value="cities">Cities</option>
+                        </select>
+                        @if (registrationForm.controls.extraType3.value !== 'statewide') {
+                          <label for="extra-areas-3">Counties or cities (comma-separated)</label>
+                          <input id="extra-areas-3" formControlName="extraAreas3" type="text" />
+                        }
+                      }
+                    </div>
+                    <div class="registration-field">
+                      <label for="extra-state-4">Additional state 4 (optional)</label>
+                      <select id="extra-state-4" formControlName="extraState4">
+                        <option value="">No additional state</option>
+                        @for (state of states; track state.slug) {
+                          <option [value]="state.slug">{{ state.name }}</option>
+                        }
+                      </select>
+                      @if (registrationForm.controls.extraState4.value) {
+                        <label for="extra-type-4">Service area type</label>
+                        <select id="extra-type-4" formControlName="extraType4">
+                          <option value="statewide">Statewide</option>
+                          <option value="counties">Counties</option>
+                          <option value="cities">Cities</option>
+                        </select>
+                        @if (registrationForm.controls.extraType4.value !== 'statewide') {
+                          <label for="extra-areas-4">Counties or cities (comma-separated)</label>
+                          <input id="extra-areas-4" formControlName="extraAreas4" type="text" />
+                        }
+                      }
+                    </div>
+                    </div>
+                    <div class="registration-field">
+                      <label for="professional-website">Business website</label>
+                      <input id="professional-website" type="url" formControlName="website" />
+                       @if (registrationForm.controls.website.touched && registrationForm.controls.website.invalid) {
+                         <p class="registration-error">Enter a valid HTTPS website URL.</p>
+                       }
+                    </div>
+                    <div class="registration-field">
+                      <label for="professional-description">Business description (40–2000 characters)</label>
+                      <textarea id="professional-description" formControlName="description" rows="6"></textarea>
+                       @if (registrationForm.controls.description.touched && registrationForm.controls.description.invalid) {
+                         <p class="registration-error">Enter a business description between 40 and 2000 characters.</p>
+                       }
+                    </div>
+                    <div class="registration-field">
+                      <label for="professional-logo">Business logo (PNG, JPEG or WebP; 2 MB maximum)</label>
+                      <input id="professional-logo" type="file" accept="image/png,image/jpeg,image/webp"
+                        (change)="onLogoSelected($event)" />
+                      @if (hasSelectedLogo() && !uploadedLogoUrl()) {
+                        <button type="button" class="registration-button registration-button--secondary registration-logo-upload"
+                          [disabled]="logoUploading()" (click)="uploadLogo()">
+                          {{ logoUploading() ? 'Uploading logo...' : 'Upload Logo' }}
+                        </button>
+                      }
+                      @if (uploadedLogoUrl()) {
+                        <p class="registration-logo-success" role="status">Logo uploaded successfully.</p>
+                      }
+                    </div>
+                  </div>
+                </section>
+                }
 
                 <section class="registration-certification">
                     <label>
@@ -545,6 +668,9 @@
                     }
                 </section>
 
+                @if (errorMessage()) {
+                  <div class="registration-message registration-message--error" role="alert">{{ errorMessage() }}</div>
+                }
                 <div class="registration-actions">
                     <a class="registration-button registration-button--secondary" [routerLink]="[
                 '/find-a-pro',
@@ -553,22 +679,9 @@
                         Cancel
                     </a>
 
-                    <button type="submit" class="
-    registration-button
-    registration-button--primary
-  " [disabled]="
-    registrationForm.invalid ||
-    registrationForm.pending ||
-    !registrationForm.controls
-      .submissionCertified.value ||
-    isOtpLoading()
-  " [attr.aria-disabled]="
-    registrationForm.invalid ||
-    registrationForm.pending ||
-    !registrationForm.controls
-      .submissionCertified.value ||
-    isOtpLoading()
-  ">
+                    <button type="submit" class="registration-button registration-button--primary"
+                      [disabled]="!canContinueRegistration()"
+                      [attr.aria-disabled]="!canContinueRegistration()">
                         @if (isOtpLoading()) {
                         Sending verification code...
                         } @else {

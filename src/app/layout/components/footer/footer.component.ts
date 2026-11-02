@@ -87,14 +87,7 @@ export class FooterComponent {
             route:
               '/contact'
           },
-          {
-            analyticsName:
-              'company_careers',
-            label:
-              'Careers',
-            route:
-              '/careers'
-          }
+         
         ],
         title:
           'Company'

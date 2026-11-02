@@ -1,6 +1,7 @@
-/*stripe-payment-webhook.ts*/
+/* stripe-payment-webhook.ts */
 
 import { validateDraftForPublication } from '../listings/validate-listing-publication';
+
 import Stripe from 'stripe';
 
 import { getApps, initializeApp } from 'firebase-admin/app';
@@ -16,10 +17,13 @@ import { SENDGRID_API_KEY } from '../authentication/otp/otp-config';
 import { sendListingPublishedEmailIfNeeded } from '../listings/listing-publication-email.service';
 
 import {
+
 } from '../listings/state-listing-packages/state-listing.registry';
 
 if (getApps().length === 0) {
+
   initializeApp();
+
 }
 
 const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
@@ -27,39 +31,67 @@ const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
 const stripeWebhookSecret = defineSecret('STRIPE_WEBHOOK_SECRET');
 
 interface ListingDraftDocument {
+
   sellerUid?: string;
 
   address?: {
+
     addressLine1?: string;
+
     addressLine2?: string;
+
     city?: string;
+
     state?: string;
+
     zipCode?: string;
+
     county?: string;
+
   };
 
   propertyDetails?: {
+
     propertyType?: string;
+
     bedrooms?: number;
+
     fullBathrooms?: number;
+
     halfBathrooms?: number;
+
     squareFeet?: number;
+
     lotSize?: number;
+
     lotSizeUnit?: 'acres' | 'square_feet';
+
     lotNumber?: string;
+
     blockNumber?: string;
+
     subdivisionName?: string;
+
     legalDescription?: string;
+
     yearBuilt?: number;
+
     description?: string;
+
     coloradoPropertyFacts?: Record<string, unknown>;
+
     coloradoAssumableLoan?: Record<string, unknown>;
 
     hoa?: {
+
       hasHoa?: boolean;
+
       feeAmount?: number;
+
       feeFrequency?: string;
+
     };
+
   };
 
   features?: Record<string, boolean>;
@@ -69,17 +101,27 @@ interface ListingDraftDocument {
   schools?: Record<string, unknown>;
 
   parcelAndTaxes?: {
+
     parcelNumber?: string;
+
     legalDescription?: string;
+
     subdivisionName?: string;
+
     lotNumber?: string;
+
     blockNumber?: string;
+
   };
 
   hoa?: {
+
     hasHoa?: boolean;
+
     feeAmount?: number;
+
     feeFrequency?: string;
+
   };
 
   includedItems?: string[];
@@ -87,67 +129,101 @@ interface ListingDraftDocument {
   photos?: Array<Record<string, unknown>>;
 
   primaryPhotoUrl?: string;
+
   photoUrls?: string[];
 
   pricing?: {
+
     listPrice?: number;
+
   };
 
   featuredListing?: boolean;
 
   sellerStatements?: {
+
     stateCode?: string;
+
     schemaVersion?: number;
 
     ownershipStatus?: string;
+
     leadBasedPaintApplies?: boolean;
+
     leadBasedPaintDisclosureDocumentUid?: string;
 
     ownersAssociationApplies?: boolean;
+
     ownersAssociationName?: string;
+
     ownersAssociationDuesInCents?: number;
+
     ownersAssociationDuesFrequency?: string;
+
     ownersAssociationContact?: string;
 
     fuelTankPresent?: boolean;
+
     fuelTankOwnership?: string;
 
     leasesExist?: boolean;
+
     leaseAddendumDocumentUid?: string;
+
     residentialLeasesExist?: boolean;
+
     fixtureLeasesExist?: boolean;
+
     naturalResourceLeasesExist?: boolean;
 
     additionalSeller?: {
+
       legalName?: string;
+
       email?: string;
+
       phone?: string;
+
     };
+
   };
 
   promotion?: Record<string, unknown>;
 
   certification?: {
+
     accepted?: boolean;
+
     acceptedAt?: unknown;
+
   };
 
   progress?: {
+
     contentStatus?: string;
+
   };
 
   publication?: {
+
     status?: string;
+
     identityStatus?: string;
+
     paymentStatus?: string;
+
     stripeCheckoutSessionId?: string;
+
     publishedListingUid?: string;
+
   };
 
   createdAt?: unknown;
+
 }
 
 interface ProfessionalProfileDocument {
+
   ownerUid?: string;
 
   businessName?: string;
@@ -158,36 +234,56 @@ interface ProfessionalProfileDocument {
 
   subscriptionStatus?: string;
 
+  paymentModel?: string;
+
+  pendingUpgrade?: { serviceStates: Array<{ stateSlug: string }>; website: string; description: string; logoUrl?: string };
+
+  publicationStatus?: string;
+
   placement?: string;
 
   profileSlug?: string;
 
   stripe?: {
+
     checkoutSessionId?: string;
+
     customerId?: string;
+
     subscriptionId?: string;
+
     subscriptionStatus?: string;
+
   };
+
 }
 
 export const stripePaymentWebhook = onRequest(
+
   {
+
     secrets: [stripeSecretKey, stripeWebhookSecret, SENDGRID_API_KEY],
+
   },
 
   async (request, response) => {
+
     if (request.method !== 'POST') {
+
       response.status(405).send('Method Not Allowed');
 
       return;
+
     }
 
     const signature = request.headers['stripe-signature'];
 
     if (!signature) {
+
       response.status(400).send('Missing Stripe signature.');
 
       return;
+
     }
 
     const stripe = new Stripe(stripeSecretKey.value());
@@ -195,106 +291,173 @@ export const stripePaymentWebhook = onRequest(
     let event: Stripe.Event;
 
     try {
+
       event = stripe.webhooks.constructEvent(
+
         request.rawBody,
+
         signature,
+
         stripeWebhookSecret.value(),
+
       );
+
     } catch (error) {
+
       console.error('Stripe webhook signature verification failed.', error);
 
       response.status(400).send('Invalid Stripe signature.');
 
       return;
+
     }
 
     try {
+
       switch (event.type) {
+
         case 'checkout.session.completed':
+
         case 'checkout.session.async_payment_succeeded': {
+
           const checkoutSession = event.data.object as Stripe.Checkout.Session;
 
-          if (isProfessionalProfileCheckout(checkoutSession)) {
+          if (isOneTimeProfessionalCheckout(checkoutSession)) {
+
+            await activateOneTimeProfessionalProfile(stripe, checkoutSession);
+
+          } else if (isProfessionalProfileCheckout(checkoutSession)) {
+
             await activateProfessionalProfile(stripe, checkoutSession);
+
           } else {
+
             await publishPaidListing(checkoutSession);
+
           }
 
           break;
+
         }
 
         case 'checkout.session.async_payment_failed': {
+
           const checkoutSession = event.data.object as Stripe.Checkout.Session;
 
-          if (isProfessionalProfileCheckout(checkoutSession)) {
+          if (isOneTimeProfessionalCheckout(checkoutSession)) {
+
+            await markOneTimeProfessionalCheckoutFailed(checkoutSession);
+
+          } else if (isProfessionalProfileCheckout(checkoutSession)) {
+
             await markProfessionalCheckoutFailed(checkoutSession);
+
           } else {
+
             await markPaymentFailed(checkoutSession);
+
           }
 
           break;
+
         }
 
         case 'customer.subscription.updated':
+
         case 'customer.subscription.deleted': {
+
           const subscription = event.data.object as Stripe.Subscription;
 
           await synchronizeProfessionalSubscription(subscription);
 
           break;
+
         }
 
         default:
+
           console.log('Stripe webhook event did not require processing.', {
+
             eventId: event.id,
+
             eventType: event.type,
+
           });
+
       }
 
       response.status(200).json({
+
         received: true,
+
       });
+
     } catch (error) {
+
       console.error('Stripe webhook processing failed.', {
+
         eventId: event.id,
+
         eventType: event.type,
+
         error,
+
       });
 
       response.status(500).send('Webhook processing failed.');
+
     }
+
   },
+
 );
 
 function readCheckoutAmount(
+
   checkoutSession: Stripe.Checkout.Session,
+
   metadataKey: string,
+
 ): number {
+
   const rawValue = checkoutSession.metadata?.[metadataKey];
 
   if (!rawValue) {
+
     return 0;
+
   }
 
   const amount = Number(rawValue);
 
   return Number.isFinite(amount) && amount >= 0 ? Math.round(amount) : 0;
+
 }
 
 async function publishPaidListing(
+
   checkoutSession: Stripe.Checkout.Session,
+
 ): Promise<void> {
+
   if (
+
     checkoutSession.payment_status !== 'paid' &&
+
     checkoutSession.payment_status !== 'no_payment_required'
+
   ) {
+
     console.log('Checkout completed without paid status.', {
+
       checkoutSessionId: checkoutSession.id,
 
       paymentStatus: checkoutSession.payment_status,
+
     });
 
     return;
+
   }
 
   const listingUid = checkoutSession.metadata?.listingUid?.trim();
@@ -302,9 +465,13 @@ async function publishPaidListing(
   const sellerUid = checkoutSession.metadata?.sellerUid?.trim();
 
   if (!listingUid || !sellerUid) {
+
     throw new Error(
+
       'Stripe Checkout metadata is missing the listing or seller UID.',
+
     );
+
   }
 
   const firestore = getFirestore();
@@ -314,36 +481,55 @@ async function publishPaidListing(
   const listingReference = firestore.collection('listings').doc(listingUid);
 
   await firestore.runTransaction(async (transaction) => {
+
     const draftSnapshot = await transaction.get(draftReference);
 
     if (!draftSnapshot.exists) {
+
       throw new Error(`Listing draft ${listingUid} was not found.`);
+
     }
 
     const draft = draftSnapshot.data() as ListingDraftDocument;
 
     if (draft.sellerUid !== sellerUid) {
+
       throw new Error(
+
         'Stripe seller metadata does not match the listing owner.',
+
       );
+
     }
 
     const storedCheckoutSessionId = draft.publication?.stripeCheckoutSessionId;
 
     if (
+
       storedCheckoutSessionId &&
+
       storedCheckoutSessionId !== checkoutSession.id
+
     ) {
+
       throw new Error(
+
         'Stripe Checkout Session does not match the listing draft.',
+
       );
+
     }
 
     if (
+
       draft.publication?.status === 'published' &&
+
       draft.publication?.publishedListingUid === listingUid
+
     ) {
+
       return;
+
     }
 
     validateDraftForPublication(draft, listingUid);
@@ -351,14 +537,19 @@ async function publishPaidListing(
     const now = FieldValue.serverTimestamp();
 
     const paymentIntentId =
+
       typeof checkoutSession.payment_intent === 'string'
+
         ? checkoutSession.payment_intent
+
         : checkoutSession.payment_intent?.id;
 
     const stripePromotionCodeId =
+
       checkoutSession.metadata?.stripePromotionCodeId?.trim() ?? '';
 
     const promotionCodeUid =
+
       checkoutSession.metadata?.promotionCodeUid?.trim() ?? '';
 
     const promotionCode = checkoutSession.metadata?.promotionCode?.trim() ?? '';
@@ -366,26 +557,39 @@ async function publishPaidListing(
     const listingFee = readCheckoutAmount(checkoutSession, 'listingFeeCents');
 
     const featuredListingFee = readCheckoutAmount(
+
       checkoutSession,
+
       'featuredListingFeeCents',
+
     );
 
     const subtotalAmount = readCheckoutAmount(
+
       checkoutSession,
+
       'subtotalAmountCents',
+
     );
 
     const discountAmount = readCheckoutAmount(
+
       checkoutSession,
+
       'discountAmountCents',
+
     );
 
     const totalAmount =
+
       checkoutSession.amount_total ??
+
       readCheckoutAmount(checkoutSession, 'finalAmountCents');
 
     const listingDocument: Record<string, unknown> = {
+
       Uid: listingUid,
+
       sellerUid,
 
       addressLine1: draft.address!.addressLine1!,
@@ -405,7 +609,9 @@ async function publishPaidListing(
       bedrooms: draft.propertyDetails!.bedrooms!,
 
       bathrooms:
+
         draft.propertyDetails!.fullBathrooms! +
+
         draft.propertyDetails!.halfBathrooms! * 0.5,
 
       squareFeet: draft.propertyDetails!.squareFeet!,
@@ -425,111 +631,183 @@ async function publishPaidListing(
       sellerStatements: draft.sellerStatements!,
 
       workflow: {
+
         identityVerified: true,
+
         paymentCompleted: true,
+
         published: true,
+
       },
 
       status: 'active',
+
       completionPercent: 100,
+
       daysOnMarket: 0,
+
       views: 0,
+
       favorites: 0,
 
       publishedAt: now,
+
       createdAt: draft.createdAt ?? now,
+
       updatedAt: now,
+
     };
 
     const hoa = draft.hoa ?? draft.propertyDetails?.hoa;
 
     if (hoa) {
+
       listingDocument['hoa'] = {
+
         ...hoa,
+
         includedItems: draft.includedItems ?? [],
+
       };
+
     }
 
     addOptionalField(listingDocument, 'schools', draft.schools);
+
     addOptionalField(listingDocument, 'coloradoPropertyFacts', draft.propertyDetails?.coloradoPropertyFacts);
+
     addOptionalField(listingDocument, 'coloradoAssumableLoan', draft.propertyDetails?.coloradoAssumableLoan);
 
     if (draft.propertyDetails?.lotSize != null) {
+
       addOptionalField(
+
         listingDocument,
+
         'lotSizeUnit',
+
         draft.propertyDetails.lotSizeUnit,
+
       );
+
     }
 
     addOptionalField(
+
       listingDocument,
+
       'parcelAndTaxes',
+
       draft.parcelAndTaxes,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'parcelIdentificationNumber',
+
       draft.parcelAndTaxes?.parcelNumber,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'legalDescription',
+
       draft.parcelAndTaxes?.legalDescription,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'subdivisionName',
+
       draft.parcelAndTaxes?.subdivisionName,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'lot',
+
       draft.propertyDetails?.lotNumber ??
+
       draft.parcelAndTaxes?.lotNumber,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'block',
+
       draft.propertyDetails?.blockNumber ??
+
       draft.parcelAndTaxes?.blockNumber,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'subdivisionName',
+
       draft.propertyDetails?.subdivisionName ??
+
       draft.parcelAndTaxes?.subdivisionName,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'legalDescription',
+
       draft.propertyDetails?.legalDescription ??
+
       draft.parcelAndTaxes?.legalDescription,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'lotSize',
+
       draft.propertyDetails?.lotSize,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'yearBuilt',
+
       draft.propertyDetails?.yearBuilt,
+
     );
 
     addOptionalField(
+
       listingDocument,
+
       'description',
+
       draft.propertyDetails?.description,
+
     );
 
     addOptionalField(listingDocument, 'hoa', draft.propertyDetails?.hoa);
@@ -539,7 +817,9 @@ async function publishPaidListing(
     addOptionalField(listingDocument, 'promotion', draft.promotion);
 
     if (stripePromotionCodeId) {
+
       listingDocument['promotion'] = {
+
         code: promotionCode,
 
         promotionCodeUid: promotionCodeUid || null,
@@ -549,12 +829,15 @@ async function publishPaidListing(
         discountAmount: discountAmount / 100,
 
         appliedAt: now,
+
       };
+
     }
 
     transaction.set(listingReference, listingDocument);
 
     const draftUpdates: Record<string, unknown> = {
+
       'publication.status': 'published',
 
       'publication.paymentStatus': 'paid',
@@ -564,6 +847,7 @@ async function publishPaidListing(
       'publication.paymentAmount': totalAmount / 100,
 
       'publication.paymentBreakdown': {
+
         listingFee: listingFee / 100,
 
         featuredListingFee: featuredListingFee / 100,
@@ -579,6 +863,7 @@ async function publishPaidListing(
         promotionCodeUid: promotionCodeUid || null,
 
         stripePromotionCodeId: stripePromotionCodeId || null,
+
       },
 
       'publication.stripePaymentStatus': checkoutSession.payment_status,
@@ -592,66 +877,103 @@ async function publishPaidListing(
       updatedAt: now,
 
       lastSavedAt: now,
+
     };
 
     if (paymentIntentId) {
+
       draftUpdates['publication.stripePaymentIntentId'] = paymentIntentId;
+
     }
 
     transaction.update(draftReference, draftUpdates);
+
   });
 
   const publishedListingSnapshot = await listingReference.get();
 
   if (!publishedListingSnapshot.exists) {
+
     throw new Error(
+
       `Published listing ${listingUid} could not be loaded for its publication email.`,
+
     );
+
   }
 
   const publishedListing = publishedListingSnapshot.data();
 
   const propertyAddress = [
+
     publishedListing?.['addressLine1'],
+
     publishedListing?.['city'],
+
     publishedListing?.['state'],
+
     publishedListing?.['zipCode'],
+
   ]
+
     .filter(
+
       (value): value is string =>
+
         typeof value === 'string' && value.trim().length > 0,
+
     )
+
     .map((value) => value.trim())
+
     .join(', ');
 
   const primaryPhotoUrl =
+
     typeof publishedListing?.['primaryPhotoUrl'] === 'string'
+
       ? publishedListing['primaryPhotoUrl'].trim() || null
+
       : null;
 
   await sendListingPublishedEmailIfNeeded({
+
     listingUid,
+
     sellerUid,
+
     propertyAddress,
+
     primaryPhotoUrl,
+
   });
 
   console.log('Listing Checkout published successfully.', {
+
     listingUid,
+
     sellerUid,
+
     checkoutSessionId: checkoutSession.id,
+
   });
+
 }
 
 async function markPaymentFailed(
+
   checkoutSession: Stripe.Checkout.Session,
+
 ): Promise<void> {
+
   const listingUid = checkoutSession.metadata?.listingUid?.trim();
 
   const sellerUid = checkoutSession.metadata?.sellerUid?.trim();
 
   if (!listingUid || !sellerUid) {
+
     return;
+
   }
 
   const firestore = getFirestore();
@@ -661,27 +983,39 @@ async function markPaymentFailed(
   const draftSnapshot = await draftReference.get();
 
   if (!draftSnapshot.exists) {
+
     return;
+
   }
 
   const draft = draftSnapshot.data() as ListingDraftDocument;
 
   if (draft.sellerUid !== sellerUid) {
+
     throw new Error('Stripe seller metadata does not match the listing owner.');
+
   }
 
   if (
+
     draft.publication?.status === 'published' ||
+
     draft.publication?.paymentStatus === 'paid'
+
   ) {
+
     return;
+
   }
 
   if (draft.publication?.stripeCheckoutSessionId !== checkoutSession.id) {
+
     return;
+
   }
 
   await draftReference.update({
+
     'publication.status': 'payment_failed',
 
     'publication.paymentStatus': 'failed',
@@ -689,44 +1023,251 @@ async function markPaymentFailed(
     updatedAt: FieldValue.serverTimestamp(),
 
     lastSavedAt: FieldValue.serverTimestamp(),
+
   });
+
 }
 
-
 function addOptionalField(
+
   target: Record<string, unknown>,
+
   fieldName: string,
+
   value: unknown,
+
 ): void {
+
   if (value !== undefined && value !== null && value !== '') {
+
     target[fieldName] = value;
+
   }
+
+}
+
+function isOneTimeProfessionalCheckout(session: Stripe.Checkout.Session): boolean {
+
+  return session.metadata?.purchaseType === 'professional_profile_one_time';
+
+}
+
+async function activateOneTimeProfessionalProfile(
+
+  stripe: Stripe,
+
+  checkoutSession: Stripe.Checkout.Session,
+
+): Promise<void> {
+
+  const professionalUid = checkoutSession.metadata?.professionalUid?.trim();
+
+  const ownerUid = checkoutSession.metadata?.ownerUid?.trim();
+
+  if (!professionalUid || !ownerUid || checkoutSession.mode !== 'payment') {
+
+    throw new Error('Invalid one-time professional Checkout metadata or mode.');
+
+  }
+
+  // Never grant an entitlement based solely on a redirect or unpaid session.
+
+  const verified = await stripe.checkout.sessions.retrieve(checkoutSession.id);
+
+  if (
+    verified.status !== 'complete' ||
+    (verified.payment_status !== 'paid' &&
+      verified.payment_status !== 'no_payment_required') ||
+    verified.mode !== 'payment' ||
+    verified.metadata?.professionalUid !== professionalUid ||
+    verified.metadata?.ownerUid !== ownerUid ||
+    verified.metadata?.purchaseType !== 'professional_profile_one_time'
+  ) {
+    return;
+  }
+
+  // Verify the purchased price and quantity against the approved product.
+  // This also works for a 100% discount: the line item retains its price ID.
+  const expectedPriceId =
+    process.env.STRIPE_PROFESSIONAL_PROFILE_ONETIME_PRICE_ID?.trim();
+
+  if (!expectedPriceId) {
+    throw new Error('Professional profile one-time Price ID is not configured.');
+  }
+
+  const lineItems = await stripe.checkout.sessions.listLineItems(verified.id, {
+    limit: 100,
+  });
+
+  if (
+    lineItems.has_more ||
+    lineItems.data.length !== 1 ||
+    lineItems.data[0].price?.id !== expectedPriceId ||
+    lineItems.data[0].quantity !== 1
+  ) {
+    throw new Error(
+      'Stripe Checkout does not match the approved one-time professional profile price.',
+    );
+  }
+
+  const reference = getFirestore().collection('professionalProfiles').doc(professionalUid);
+
+  await getFirestore().runTransaction(async transaction => {
+
+    const snapshot = await transaction.get(reference);
+
+    if (!snapshot.exists) throw new Error('Professional profile not found.');
+
+    const professional = snapshot.data() as ProfessionalProfileDocument;
+
+    if (professional.ownerUid !== ownerUid) throw new Error('Professional owner mismatch.');
+
+    if (professional.stripe?.checkoutSessionId !== verified.id) {
+
+      // Ignore stale webhooks from superseded sessions, including retries.
+
+      return;
+
+    }
+
+    if (professional.paymentModel === 'one_time' && professional.subscriptionStatus === 'profile') return;
+
+    const pending = professional.pendingUpgrade;
+
+    if (!pending || !Array.isArray(pending.serviceStates) ||
+
+        pending.serviceStates.length < 1 || pending.serviceStates.length > 5 ||
+
+        !pending.website || !pending.description || !pending.logoUrl) {
+
+      throw new Error('Paid professional profile has no complete pending upgrade.');
+
+    }
+
+    const now = FieldValue.serverTimestamp();
+
+    const updates: Record<string, unknown> = {
+
+      subscriptionStatus: 'profile',
+
+      serviceStates: pending.serviceStates,
+
+      serviceStateSlugs: pending.serviceStates.map(state => state.stateSlug),
+
+      website: pending.website,
+
+      description: pending.description,
+
+      logoUrl: pending.logoUrl,
+
+      pendingUpgrade: FieldValue.delete(),
+
+      paymentModel: 'one_time',
+
+      publicationStatus: 'published',
+
+      profileSlug: professional.profileSlug || createProfessionalProfileSlug(
+
+        professional.businessName || 'professional', professionalUid),
+
+      'stripe.checkoutSessionId': verified.id,
+
+      'stripe.paymentStatus': verified.payment_status,
+
+      'stripe.activatedAt': now,
+
+      updatedAt: now,
+
+    };
+
+    const customerId = getStripeResourceId(verified.customer);
+
+    if (customerId) updates['stripe.customerId'] = customerId;
+
+    transaction.update(reference, updates);
+
+  });
+
+}
+
+async function markOneTimeProfessionalCheckoutFailed(
+
+  checkoutSession: Stripe.Checkout.Session,
+
+): Promise<void> {
+
+  const professionalUid = checkoutSession.metadata?.professionalUid?.trim();
+
+  const ownerUid = checkoutSession.metadata?.ownerUid?.trim();
+
+  if (!professionalUid || !ownerUid) return;
+
+  const reference = getFirestore().collection('professionalProfiles').doc(professionalUid);
+
+  await getFirestore().runTransaction(async transaction => {
+
+    const snapshot = await transaction.get(reference);
+
+    if (!snapshot.exists) return;
+
+    const professional = snapshot.data() as ProfessionalProfileDocument;
+
+    if (professional.ownerUid !== ownerUid ||
+
+        professional.stripe?.checkoutSessionId !== checkoutSession.id ||
+
+        professional.subscriptionStatus === 'profile') return;
+
+    transaction.update(reference, {
+
+      'stripe.paymentStatus': 'failed',
+
+      updatedAt: FieldValue.serverTimestamp(),
+
+    });
+
+  });
+
 }
 
 function isProfessionalProfileCheckout(
+
   checkoutSession: Stripe.Checkout.Session,
+
 ): boolean {
+
   return checkoutSession.metadata?.purchaseType === 'professional_profile';
+
 }
 
 async function activateProfessionalProfile(
+
   stripe: Stripe,
+
   checkoutSession: Stripe.Checkout.Session,
+
 ): Promise<void> {
+
   const professionalUid = checkoutSession.metadata?.professionalUid?.trim();
 
   const ownerUid = checkoutSession.metadata?.ownerUid?.trim();
 
   if (!professionalUid || !ownerUid) {
+
     throw new Error(
+
       'Professional Checkout metadata is missing the professional or owner UID.',
+
     );
+
   }
 
   const subscriptionId = getStripeResourceId(checkoutSession.subscription);
 
   if (!subscriptionId) {
+
     throw new Error('Stripe did not return a professional subscription ID.');
+
   }
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -734,79 +1275,121 @@ async function activateProfessionalProfile(
   const subscriptionOwnerUid = subscription.metadata?.ownerUid?.trim();
 
   const subscriptionProfessionalUid =
+
     subscription.metadata?.professionalUid?.trim();
 
   if (
+
     subscriptionOwnerUid !== ownerUid ||
+
     subscriptionProfessionalUid !== professionalUid
+
   ) {
+
     throw new Error(
+
       'Stripe subscription metadata does not match the professional Checkout session.',
+
     );
+
   }
 
   if (!hasProfessionalProfileAccess(subscription.status)) {
+
     console.log(
+
       'Professional Checkout completed without an active subscription.',
+
       {
+
         professionalUid,
+
         ownerUid,
+
         subscriptionId,
+
         subscriptionStatus: subscription.status,
+
       },
+
     );
 
     return;
+
   }
 
   const firestore = getFirestore();
 
   const professionalReference = firestore
+
     .collection('professionalProfiles')
+
     .doc(professionalUid);
 
   await firestore.runTransaction(async (transaction) => {
+
     const professionalSnapshot = await transaction.get(professionalReference);
 
     if (!professionalSnapshot.exists) {
+
       throw new Error(`Professional profile ${professionalUid} was not found.`);
+
     }
 
     const professional =
+
       professionalSnapshot.data() as ProfessionalProfileDocument;
 
     if (professional.ownerUid !== ownerUid) {
+
       throw new Error(
+
         'Stripe owner metadata does not match the professional listing owner.',
+
       );
+
     }
 
     const storedCheckoutSessionId = professional.stripe?.checkoutSessionId;
 
     if (
+
       storedCheckoutSessionId &&
+
       storedCheckoutSessionId !== checkoutSession.id
+
     ) {
+
       throw new Error(
+
         'Stripe Checkout Session does not match the professional listing.',
+
       );
+
     }
 
     const profileSlug =
+
       professional.profileSlug ||
+
       createProfessionalProfileSlug(
+
         professional.businessName || 'professional',
 
         professionalUid,
+
       );
 
     const customerId =
+
       getStripeResourceId(checkoutSession.customer) ||
+
       getStripeResourceId(subscription.customer);
 
     const now = FieldValue.serverTimestamp();
 
     const updates: Record<string, unknown> = {
+
       subscriptionStatus: 'profile',
 
       profileSlug,
@@ -822,29 +1405,45 @@ async function activateProfessionalProfile(
       'stripe.activatedAt': now,
 
       updatedAt: now,
+
     };
 
     if (customerId) {
+
       updates['stripe.customerId'] = customerId;
+
     }
 
     transaction.update(professionalReference, updates);
+
   });
 
   console.log('Professional Full Business Profile activated.', {
+
     professionalUid,
+
     ownerUid,
+
     checkoutSessionId: checkoutSession.id,
+
     subscriptionId,
+
     subscriptionStatus: subscription.status,
+
   });
+
 }
 
 async function synchronizeProfessionalSubscription(
+
   subscription: Stripe.Subscription,
+
 ): Promise<void> {
+
   if (subscription.metadata?.purchaseType !== 'professional_profile') {
+
     return;
+
   }
 
   const professionalUid = subscription.metadata?.professionalUid?.trim();
@@ -852,35 +1451,51 @@ async function synchronizeProfessionalSubscription(
   const ownerUid = subscription.metadata?.ownerUid?.trim();
 
   if (!professionalUid || !ownerUid) {
+
     throw new Error('Professional subscription metadata is incomplete.');
+
   }
 
   const firestore = getFirestore();
 
   const professionalReference = firestore
+
     .collection('professionalProfiles')
+
     .doc(professionalUid);
 
   const professionalSnapshot = await professionalReference.get();
 
   if (!professionalSnapshot.exists) {
+
     throw new Error(`Professional profile ${professionalUid} was not found.`);
+
   }
 
   const professional =
+
     professionalSnapshot.data() as ProfessionalProfileDocument;
 
   if (professional.ownerUid !== ownerUid) {
+
     throw new Error(
+
       'Stripe subscription owner does not match the professional listing owner.',
+
     );
+
   }
+
+  // A one-time purchase must never be downgraded by legacy subscription events.
+
+  if (professional.paymentModel === 'one_time') return;
 
   const hasProfileAccess = hasProfessionalProfileAccess(subscription.status);
 
   const customerId = getStripeResourceId(subscription.customer);
 
   const updates: Record<string, unknown> = {
+
     subscriptionStatus: hasProfileAccess ? 'profile' : 'free',
 
     'stripe.subscriptionId': subscription.id,
@@ -890,125 +1505,199 @@ async function synchronizeProfessionalSubscription(
     'stripe.cancelAtPeriodEnd': subscription.cancel_at_period_end,
 
     updatedAt: FieldValue.serverTimestamp(),
+
   };
 
   if (customerId) {
+
     updates['stripe.customerId'] = customerId;
+
   }
 
   /*
+
    * Sponsored placement is separate from a paid
+
    * Full Business Profile. Losing the subscription
+
    * must not accidentally leave a paid-profile badge
+
    * or clickable profile enabled.
+
    */
+
   if (!hasProfileAccess) {
+
     updates['placement'] =
+
       professional.placement === 'sponsored' ? 'sponsored' : 'standard';
+
   }
 
   await professionalReference.update(updates);
 
   console.log('Professional subscription synchronized.', {
+
     professionalUid,
+
     ownerUid,
+
     subscriptionId: subscription.id,
+
     subscriptionStatus: subscription.status,
+
     hasProfileAccess,
+
   });
+
 }
 
 async function markProfessionalCheckoutFailed(
+
   checkoutSession: Stripe.Checkout.Session,
+
 ): Promise<void> {
+
   const professionalUid = checkoutSession.metadata?.professionalUid?.trim();
 
   const ownerUid = checkoutSession.metadata?.ownerUid?.trim();
 
   if (!professionalUid || !ownerUid) {
+
     return;
+
   }
 
   const firestore = getFirestore();
 
   const professionalReference = firestore
+
     .collection('professionalProfiles')
+
     .doc(professionalUid);
 
   const professionalSnapshot = await professionalReference.get();
 
   if (!professionalSnapshot.exists) {
+
     return;
+
   }
 
   const professional =
+
     professionalSnapshot.data() as ProfessionalProfileDocument;
 
   if (professional.ownerUid !== ownerUid) {
+
     throw new Error(
+
       'Stripe owner metadata does not match the professional listing owner.',
+
     );
+
   }
 
   if (professional.stripe?.checkoutSessionId !== checkoutSession.id) {
+
     return;
+
   }
 
   await professionalReference.update({
+
     subscriptionStatus: 'free',
 
     'stripe.subscriptionStatus': 'checkout_failed',
 
     updatedAt: FieldValue.serverTimestamp(),
+
   });
+
 }
 
 function hasProfessionalProfileAccess(
+
   subscriptionStatus: Stripe.Subscription.Status,
+
 ): boolean {
+
   switch (subscriptionStatus) {
+
     case 'active':
+
     case 'trialing':
+
     case 'past_due':
+
       return true;
 
     case 'canceled':
+
     case 'incomplete':
+
     case 'incomplete_expired':
+
     case 'paused':
+
     case 'unpaid':
+
     default:
+
       return false;
+
   }
+
 }
 
 function getStripeResourceId(
+
   resource:
+
     | string
+
     | {
+
       id: string;
+
     }
+
     | null
+
     | undefined,
+
 ): string {
+
   if (typeof resource === 'string') {
+
     return resource;
+
   }
 
   return resource?.id ?? '';
+
 }
 
 function createProfessionalProfileSlug(
+
   businessName: string,
+
   professionalUid: string,
+
 ): string {
+
   const businessSlug = businessName
+
     .trim()
+
     .toLowerCase()
+
     .replace(/[^a-z0-9]+/g, '-')
+
     .replace(/^[-]+|[-]+$/g, '');
 
   const uniqueSuffix = professionalUid.slice(0, 8).toLowerCase();
 
   return [businessSlug || 'professional', uniqueSuffix].join('-');
+
 }

@@ -421,91 +421,88 @@ export class ProfessionalProfileSetupComponent
   private async loadProfessionalProfile(
     activationAttempt: number
   ): Promise<void> {
-    const firebaseUser =
-      this.authService.currentUser;
+    const scheduleRetry = (): boolean => {
+      if (activationAttempt >= this.maximumActivationAttempts) {
+        return false;
+      }
+
+      this.isLoading.set(true);
+      this.errorMessage.set('');
+
+      this.activationTimer = setTimeout(() => {
+        void this.loadProfessionalProfile(activationAttempt + 1);
+      }, 1500);
+
+      return true;
+    };
+
+    const firebaseUser = this.authService.currentUser;
 
     if (!firebaseUser) {
-      this.isLoading.set(false);
+      if (scheduleRetry()) {
+        return;
+      }
 
+      this.isLoading.set(false);
+      this.successMessage.set('');
       this.errorMessage.set(
         'You must be signed in to complete your business profile.'
       );
-
       return;
     }
 
     try {
-      const professional =
-        await this.professionalRepository
-          .getProfessionalByOwnerUid(
-            firebaseUser.uid
-          );
+      const professional = await this.professionalRepository
+        .getProfessionalByOwnerUid(firebaseUser.uid);
 
       if (!professional) {
-        this.isLoading.set(false);
+        if (scheduleRetry()) {
+          this.successMessage.set(
+            'We are locating your business profile. Please wait.'
+          );
+          return;
+        }
 
+        this.isLoading.set(false);
+        this.successMessage.set('');
         this.errorMessage.set(
           'A professional directory listing could not be found for your account.'
         );
-
         return;
       }
 
-      if (
-        professional.subscriptionStatus !==
-        'profile' &&
-        activationAttempt <
-        this.maximumActivationAttempts
-      ) {
-        this.successMessage.set(
-          'Stripe confirmed your return. We are activating your Full Business Profile.'
-        );
-
-        this.activationTimer =
-          setTimeout(
-            () => {
-              void this.loadProfessionalProfile(
-                activationAttempt + 1
-              );
-            },
-            1500
+      if (professional.subscriptionStatus !== 'profile') {
+        if (scheduleRetry()) {
+          this.successMessage.set(
+            'We are confirming your payment and activating your Full Business Profile.'
           );
+          return;
+        }
 
-        return;
-      }
-
-      if (
-        professional.subscriptionStatus !==
-        'profile'
-      ) {
         this.isLoading.set(false);
-
         this.successMessage.set('');
-
         this.errorMessage.set(
           'Your payment is still being confirmed. Refresh this page in a moment. You will not need to register again.'
         );
-
         return;
       }
 
-      this.professional.set(
-        professional
-      );
+      this.professional.set(professional);
 
       this.profileForm.patchValue({
-        website:
-          professional.website ?? '',
-
-        description:
-          professional.description ?? ''
+        website: professional.website ?? '',
+        description: professional.description ?? ''
       });
 
       this.profileForm.markAsPristine();
       this.profileForm.markAsUntouched();
 
-      this.successMessage.set('');
       this.errorMessage.set('');
+      this.successMessage.set(
+        activationAttempt > 0
+          ? 'Your Full Business Profile is now active.'
+          : ''
+      );
       this.isLoading.set(false);
     } catch (error) {
       console.error(
@@ -514,7 +511,7 @@ export class ProfessionalProfileSetupComponent
       );
 
       this.isLoading.set(false);
-
+      this.successMessage.set('');
       this.errorMessage.set(
         this.getErrorMessage(
           error,

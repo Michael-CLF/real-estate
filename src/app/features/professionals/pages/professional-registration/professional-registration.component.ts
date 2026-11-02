@@ -52,6 +52,7 @@ import {
 
 import {
   ProfessionalServiceAreaType,
+  ProfessionalStateCoverage,
   ProfessionalSubscriptionStatus,
   ProfessionalUser
 } from '../../../../core/domains/users/models/professional-user.model';
@@ -104,6 +105,10 @@ interface PendingProfessionalRegistration {
 
   subscriptionStatus:
   ProfessionalSubscriptionStatus;
+  serviceStates: ProfessionalStateCoverage[];
+  website: string;
+  description: string;
+  logoUrl: string;
 
   submissionCertified: true;
 }
@@ -145,6 +150,11 @@ interface CreateProfessionalRegistrationRequest {
   email: string;
 
   submissionCertified: boolean;
+  plan?: ProfessionalSubscriptionStatus;
+  serviceStates?: ProfessionalStateCoverage[];
+  website?: string;
+  description?: string;
+  logoUrl?: string;
 }
 
 interface CreateProfessionalRegistrationResult {
@@ -381,6 +391,77 @@ export class ProfessionalRegistrationComponent
     signal<ProfessionalCategory | null>(
       null
     );
+  private selectedLogoFile: File | null = null;
+  protected readonly logoUploading = signal(false);
+  protected readonly uploadedLogoUrl = signal('');
+
+  protected onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.selectedLogoFile = null;
+    this.uploadedLogoUrl.set('');
+    this.registrationForm.controls.logoUrl.setValue('');
+    this.errorMessage.set('');
+    if (file && (file.size > 2 * 1024 * 1024 ||
+      !['image/png', 'image/jpeg', 'image/webp'].includes(file.type))) {
+      this.errorMessage.set('Logo must be PNG, JPEG, or WebP and no larger than 2 MB.');
+      input.value = '';
+      return;
+    }
+    this.selectedLogoFile = file;
+  }
+
+  protected hasSelectedLogo(): boolean {
+    return this.selectedLogoFile !== null;
+  }
+
+  protected async uploadLogo(): Promise<void> {
+    if (!this.selectedLogoFile || this.logoUploading()) return;
+    this.logoUploading.set(true);
+    this.errorMessage.set('');
+    try {
+      const logoUrl = await this.uploadSelectedLogo();
+      this.uploadedLogoUrl.set(logoUrl);
+      this.registrationForm.controls.logoUrl.setValue(logoUrl);
+      this.successMessage.set('Business logo uploaded successfully.');
+    } catch (error) {
+      this.errorMessage.set(this.getErrorMessage(error, 'Logo upload failed. Please try again.'));
+    } finally {
+      this.logoUploading.set(false);
+    }
+  }
+
+  private async uploadSelectedLogo(): Promise<string> {
+    const file = this.selectedLogoFile;
+    if (!file) throw new Error('Select a logo image before uploading.');
+    const content = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+      reader.onerror = () => reject(new Error('Could not read logo.'));
+      reader.readAsDataURL(file);
+    });
+    const upload = httpsCallable<{ content: string; contentType: string }, { logoUrl: string }>(
+      functions, 'uploadProfessionalDraftLogo');
+    const result = await upload({ content, contentType: file.type });
+    return result.data.logoUrl;
+  }
+
+  protected isUpgradeMode(): boolean {
+    return this.route.snapshot.queryParamMap.get('upgrade') === '1';
+  }
+
+  protected canContinueRegistration(): boolean {
+    if (this.registrationForm.pending || this.isOtpLoading() ||
+      this.isCheckingExistingProfessional() || this.logoUploading()) return false;
+    if (!this.registrationForm.controls.submissionCertified.value) return false;
+    if (this.registrationForm.controls.subscriptionStatus.value === 'profile' &&
+      !this.uploadedLogoUrl()) return false;
+    if (!this.isUpgradeMode()) return this.registrationForm.valid;
+    // Contact names are collected during initial registration, not during upgrades.
+    return Object.entries(this.registrationForm.controls).every(([name, control]) =>
+      name === 'firstName' || name === 'lastName' || control.valid);
+  }
+
   protected readonly otpStep =
     signal(false);
 
@@ -554,6 +635,21 @@ export class ProfessionalRegistrationComponent
         ]
       ],
 
+      website: [''],
+      description: [''],
+      logoUrl: [''],
+      extraState1: [''],
+      extraType1: this.formBuilder.nonNullable.control<ProfessionalServiceAreaType>('statewide'),
+      extraAreas1: [''],
+      extraState2: [''],
+      extraType2: this.formBuilder.nonNullable.control<ProfessionalServiceAreaType>('statewide'),
+      extraAreas2: [''],
+      extraState3: [''],
+      extraType3: this.formBuilder.nonNullable.control<ProfessionalServiceAreaType>('statewide'),
+      extraAreas3: [''],
+      extraState4: [''],
+      extraType4: this.formBuilder.nonNullable.control<ProfessionalServiceAreaType>('statewide'),
+      extraAreas4: [''],
       subscriptionStatus:
         this.formBuilder.nonNullable.control<
           ProfessionalSubscriptionStatus
@@ -595,6 +691,46 @@ export class ProfessionalRegistrationComponent
 
   protected onStateChange(): void {
     this.registrationForm.controls.serviceAreas.reset('');
+  }
+
+  private buildServiceStates(): ProfessionalStateCoverage[] {
+    const values = this.registrationForm.getRawValue();
+    const primary = this.selectedState();
+    if (!primary) throw new Error('Select a service state.');
+    const parseAreas = (value: string) => value.split(',').map(v => v.trim()).filter(Boolean);
+    const coverage: ProfessionalStateCoverage[] = [{
+      stateName: primary.name, stateAbbreviation: primary.abbreviation,
+      stateSlug: primary.slug, serviceAreaType: values.serviceAreaType,
+      counties: values.serviceAreaType === 'counties' ? parseAreas(values.serviceAreas) : [],
+      cities: values.serviceAreaType === 'cities' ? parseAreas(values.serviceAreas) : []
+    }];
+    if (values.subscriptionStatus === 'profile') {
+      const extras = [
+        [values.extraState1, values.extraType1, values.extraAreas1],
+        [values.extraState2, values.extraType2, values.extraAreas2],
+        [values.extraState3, values.extraType3, values.extraAreas3],
+        [values.extraState4, values.extraType4, values.extraAreas4]
+      ] as Array<[string, ProfessionalServiceAreaType, string]>;
+      for (const [slug, type, areas] of extras) {
+        if (!slug) continue;
+        const state = STATES.find(item => item.slug === slug);
+        if (!state) throw new Error('Select a valid additional state.');
+        coverage.push({
+          stateName: state.name, stateAbbreviation: state.abbreviation,
+          stateSlug: slug, serviceAreaType: type,
+          counties: type === 'counties' ? parseAreas(areas) : [],
+          cities: type === 'cities' ? parseAreas(areas) : []
+        });
+      }
+    }
+    if (new Set(coverage.map(c => c.stateSlug)).size !== coverage.length) {
+      throw new Error('Each service state must be unique.');
+    }
+    if (coverage.some(c => c.serviceAreaType === 'counties' && !c.counties.length ||
+      c.serviceAreaType === 'cities' && !c.cities.length)) {
+      throw new Error('Enter counties or cities for every selected service area.');
+    }
+    return coverage;
   }
 
   protected readonly otpForm =
@@ -700,6 +836,24 @@ export class ProfessionalRegistrationComponent
       .includes(specialty);
   }
 
+  protected onPlanChange(): void {
+    const paid = this.registrationForm.controls.subscriptionStatus.value === 'profile';
+    const website = this.registrationForm.controls.website;
+    const description = this.registrationForm.controls.description;
+
+    website.setValidators(paid ? [
+      Validators.required,
+      Validators.pattern(/^https:\/\/[^\s/]+\.[^\s/]+(?:\/[^\s]*)?$/i)
+    ] : []);
+    description.setValidators(paid ? [
+      Validators.required,
+      Validators.minLength(40),
+      Validators.maxLength(2000)
+    ] : []);
+    website.updateValueAndValidity();
+    description.updateValueAndValidity();
+  }
+
   protected onServiceAreaChange(): void {
     const serviceAreaType =
       this.registrationForm.controls
@@ -748,6 +902,17 @@ export class ProfessionalRegistrationComponent
         return;
       }
 
+      const existingUser = await this.userRepository.getById(ownerUid);
+
+      if (existingUser) {
+        this.registrationForm.patchValue({
+          firstName: existingUser.firstName ?? '',
+          lastName: existingUser.lastName ?? '',
+          email: existingUser.email ?? '',
+          phone: this.formatExistingPhone(existingUser.phone ?? '')
+        });
+      }
+
       const existingProfessional =
         await this.professionalRepository
           .getProfessionalByOwnerUid(
@@ -755,6 +920,38 @@ export class ProfessionalRegistrationComponent
           );
 
       if (!existingProfessional) {
+        return;
+      }
+
+      if (this.route.snapshot.queryParamMap.get('upgrade') === '1' &&
+        existingProfessional.subscriptionStatus !== 'profile') {
+        const coverage = existingProfessional.serviceStates?.length
+          ? existingProfessional.serviceStates
+          : [{
+            stateSlug: existingProfessional.stateSlug,
+            serviceAreaType: existingProfessional.serviceAreaType,
+            counties: existingProfessional.counties,
+            cities: existingProfessional.cities
+          }];
+        const primary = coverage[0];
+        this.registrationForm.patchValue({
+          stateSlug: existingProfessional.stateSlug,
+          businessName: existingProfessional.businessName,
+          email: existingProfessional.email,
+          phone: this.formatExistingPhone(existingProfessional.phone),
+          category: existingProfessional.category,
+          professionalType: existingProfessional.professionalType,
+          specialties: existingProfessional.specialties,
+          serviceAreaType: primary.serviceAreaType,
+          serviceAreas: (primary.serviceAreaType === 'counties'
+            ? primary.counties : primary.serviceAreaType === 'cities'
+              ? primary.cities : []).join(', '),
+          subscriptionStatus: 'profile',
+          website: existingProfessional.website ?? '',
+          description: existingProfessional.description ?? ''
+        });
+        this.selectedCategory.set(existingProfessional.category);
+        this.onPlanChange();
         return;
       }
 
@@ -779,7 +976,7 @@ export class ProfessionalRegistrationComponent
   protected async prepareRegistration():
     Promise<void> {
     if (
-      this.registrationForm.invalid ||
+      !this.canContinueRegistration() ||
       this.isOtpLoading() ||
       this.isCheckingExistingProfessional()
     ) {
@@ -806,10 +1003,23 @@ export class ProfessionalRegistrationComponent
             );
 
         if (existingProfessional) {
-          await this.redirectExistingProfessional(
-            existingProfessional
-          );
-
+          if (this.registrationForm.controls.subscriptionStatus.value === 'profile' &&
+            existingProfessional.subscriptionStatus !== 'profile') {
+            const values = this.registrationForm.getRawValue();
+            if (!values.website.trim() || values.description.trim().length < 40 ||
+              !this.uploadedLogoUrl()) {
+              throw new Error('Complete your website, description (40+ characters), and upload your logo before payment.');
+            }
+            const saveDraft = httpsCallable(functions, 'saveProfessionalUpgradeDraft');
+            await saveDraft({
+              serviceStates: this.buildServiceStates(),
+              website: values.website.trim(), description: values.description.trim(),
+              logoUrl: this.uploadedLogoUrl()
+            });
+            await this.openProfessionalProfileCheckout();
+          } else {
+            await this.redirectExistingProfessional(existingProfessional);
+          }
           return;
         }
       }
@@ -826,8 +1036,18 @@ export class ProfessionalRegistrationComponent
         );
       }
 
+      if (values.subscriptionStatus === 'profile' &&
+        (!values.website.trim() || values.description.trim().length < 40 ||
+          !this.uploadedLogoUrl())) {
+        throw new Error('Complete website, description (40+ characters), and upload your logo before payment.');
+      }
+      const serviceStates = this.buildServiceStates();
       const pendingRegistration:
         PendingProfessionalRegistration = {
+        serviceStates,
+        website: values.website.trim(),
+        description: values.description.trim(),
+        logoUrl: this.uploadedLogoUrl(),
         firstName:
           values.firstName.trim(),
 
@@ -926,6 +1146,13 @@ export class ProfessionalRegistrationComponent
         )
       );
     }
+  }
+
+  private formatExistingPhone(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(-10);
+    return digits.length === 10
+      ? `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+      : value;
   }
 
   protected formatPhoneNumber(
@@ -1103,6 +1330,10 @@ export class ProfessionalRegistrationComponent
           ? pendingRegistration.serviceAreas
           : [];
 
+      if (pendingRegistration.subscriptionStatus === 'profile') {
+        pendingRegistration.logoUrl = this.uploadedLogoUrl();
+      }
+
       const createProfessionalRegistration =
         httpsCallable<
           CreateProfessionalRegistrationRequest,
@@ -1147,7 +1378,12 @@ export class ProfessionalRegistrationComponent
           email:
             pendingRegistration.email,
 
-          submissionCertified: true
+          submissionCertified: true,
+          plan: pendingRegistration.subscriptionStatus,
+          serviceStates: pendingRegistration.serviceStates,
+          website: pendingRegistration.website,
+          description: pendingRegistration.description,
+          logoUrl: pendingRegistration.logoUrl
         });
 
       if (
