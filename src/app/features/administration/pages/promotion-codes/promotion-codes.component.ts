@@ -114,6 +114,9 @@ export class PromotionCodesComponent
             null
         );
 
+    protected readonly editingCodeUid = signal<string | null>(null);
+    protected readonly visibleCodes = computed(() => this.promotionCodes().filter(code => !code.archived));
+
     protected readonly activeCodeCount =
         computed(
             () =>
@@ -276,7 +279,7 @@ export class PromotionCodesComponent
         await this.loadPromotionCodes();
     }
 
-    protected async createPromotionCode():
+    protected async savePromotionCode():
         Promise<void> {
         this.saveError.set('');
         this.successMessage.set('');
@@ -356,17 +359,12 @@ export class PromotionCodesComponent
                     'usd';
             }
 
-            const promotionCode =
-                await this
-                    .promotionCodeService
-                    .createPromotionCode(
-                        input
-                    );
-
-            this.successMessage.set(
-                `Promotion code ${promotionCode.code} was created successfully.`
-            );
-
+            const editingUid = this.editingCodeUid();
+            const promotionCode = editingUid
+                ? await this.promotionCodeService.replacePromotionCode(editingUid, input)
+                : await this.promotionCodeService.createPromotionCode(input);
+            this.successMessage.set(`Promotion code ${promotionCode.code} was ${editingUid ? 'updated' : 'created'} successfully.`);
+            this.editingCodeUid.set(null);
             this.resetForm();
         } catch (error: unknown) {
             this.saveError.set(
@@ -380,48 +378,43 @@ export class PromotionCodesComponent
         }
     }
 
-    protected async togglePromotionCode(
-        promotionCode:
-            PromotionCode
-    ): Promise<void> {
-        if (
-            this.updatingCodeUid()
-        ) {
-            return;
-        }
-
+    protected startEditing(code: PromotionCode): void {
+        this.editingCodeUid.set(code.uid);
         this.saveError.set('');
         this.successMessage.set('');
+        this.form.reset({
+            name: code.name,
+            code: code.code,
+            eligibleProduct: code.eligibleProduct,
+            discountType: code.discountType,
+            percentOff: code.percentOff ?? 100,
+            amountOffDollars: code.amountOffCents != null ? code.amountOffCents / 100 : null,
+            expiresAt: code.expiresAt ? code.expiresAt.slice(0, 10) : '',
+            maxRedemptions: code.maxRedemptions,
+            firstTimeTransactionOnly: code.firstTimeTransactionOnly
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-        this.updatingCodeUid.set(
-            promotionCode.uid
-        );
+    protected cancelEditing(): void {
+        this.editingCodeUid.set(null);
+        this.resetForm();
+        this.saveError.set('');
+    }
 
+    protected async deleteCode(code: PromotionCode): Promise<void> {
+        if (this.updatingCodeUid() || !window.confirm(`Delete ${code.code}? It will no longer be redeemable.`)) return;
+        this.updatingCodeUid.set(code.uid);
+        this.saveError.set('');
+        this.successMessage.set('');
         try {
-            const updatedPromotionCode =
-                await this
-                    .promotionCodeService
-                    .setPromotionCodeActive(
-                        promotionCode.uid,
-                        !promotionCode.active
-                    );
-
-            this.successMessage.set(
-                updatedPromotionCode.active
-                    ? `Promotion code ${updatedPromotionCode.code} is now active.`
-                    : `Promotion code ${updatedPromotionCode.code} has been deactivated.`
-            );
+            await this.promotionCodeService.deletePromotionCode(code.uid);
+            if (this.editingCodeUid() === code.uid) this.cancelEditing();
+            this.successMessage.set(`Promotion code ${code.code} was deleted.`);
         } catch (error: unknown) {
-            this.saveError.set(
-                this.getErrorMessage(
-                    error,
-                    'The promotion code could not be updated.'
-                )
-            );
+            this.saveError.set(this.getErrorMessage(error, 'The code could not be deleted.'));
         } finally {
-            this.updatingCodeUid.set(
-                null
-            );
+            this.updatingCodeUid.set(null);
         }
     }
 

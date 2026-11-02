@@ -38,6 +38,7 @@ export interface PromotionCode {
     PromotionCodeStatus;
 
     active: boolean;
+    archived?: boolean;
 
     firstTimeTransactionOnly:
     boolean;
@@ -80,7 +81,10 @@ export interface CreatePromotionCodeInput {
 
 export interface UpdatePromotionCodeInput {
     promotionCodeUid: string;
-    active: boolean;
+    active?: boolean;
+    name?: string;
+    archived?: boolean;
+    replacement?: CreatePromotionCodeInput;
 }
 
 export interface CreatePromotionCodeResult {

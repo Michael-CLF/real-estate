@@ -49,7 +49,10 @@ export interface UpdatePromotionCodeRequest {
      * be activated or deactivated. Changes to its
      * actual discount require creating a replacement.
      */
-    active: boolean;
+    active?: boolean;
+    name?: string;
+    archived?: boolean;
+    replacement?: CreatePromotionCodeRequest;
 }
 
 export interface ListPromotionCodesRequest {
@@ -82,6 +85,7 @@ export interface PromotionCodeRecord {
         PromotionCodeStatus;
 
     active: boolean;
+    archived?: boolean;
 
     firstTimeTransactionOnly:
         boolean;

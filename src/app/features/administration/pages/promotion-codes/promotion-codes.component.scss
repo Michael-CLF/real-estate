@@ -123,7 +123,7 @@
   background: #ffffff;
   box-shadow: 0 10px 25px rgba(15, 50, 73, 0.06);
 
-  > div {
+  >div {
     display: grid;
     gap: 4px;
   }
@@ -222,7 +222,7 @@
     font-size: 1.25rem;
   }
 
-  > div > p:last-child {
+  >div>p:last-child {
     margin: 0;
     color: var(--muted);
     font-family: 'Barlow', sans-serif;
@@ -247,12 +247,12 @@
     font-size: 0.76rem;
     font-weight: 750;
 
-    > span {
+    >span {
       color: var(--danger);
     }
   }
 
-  label > span:not([aria-hidden='true']) {
+  label>span:not([aria-hidden='true']) {
     margin-left: 5px;
     color: var(--muted);
     font-size: 0.65rem;
@@ -495,7 +495,7 @@
     pointer-events: none;
   }
 
-  > span:last-child {
+  >span:last-child {
     display: grid;
     gap: 3px;
   }
@@ -512,8 +512,7 @@
     line-height: 1.45;
   }
 
-  input:checked +
-    .promotion-codes__checkbox-control {
+  input:checked+.promotion-codes__checkbox-control {
     border-color: var(--teal);
     color: #ffffff;
     background: var(--teal);
@@ -543,7 +542,7 @@
   color: #145f5b;
   background: var(--teal-soft);
 
-  > i {
+  >i {
     margin-top: 3px;
   }
 
@@ -580,7 +579,7 @@
   gap: 9px;
   text-align: center;
 
-  > span {
+  >span {
     display: grid;
     width: 58px;
     height: 58px;
@@ -632,7 +631,7 @@
   border-radius: 11px;
   background: #ffffff;
 
-  > header {
+  >header {
     display: flex;
     padding: 16px;
     border-bottom: 1px solid #e0e8ed;
@@ -647,7 +646,7 @@
     }
   }
 
-  > footer {
+  >footer {
     display: flex;
     min-height: 58px;
     padding: 11px 16px;
@@ -663,7 +662,7 @@
   align-items: center;
   gap: 7px;
 
-  > strong {
+  >strong {
     color: var(--navy);
     font-family: monospace;
     font-size: 0.95rem;
@@ -752,6 +751,19 @@
   }
 }
 
+.code-btn {
+  padding: 10px 8px;
+  border-radius: 6px;
+  margin: 5px;
+  border: 1px solid #154360;
+  background-color: #154360;
+  color: #ffffff;
+
+  &:hover {
+    background-color: #008080;
+  }
+}
+
 .promotion-codes__expired-message {
   display: inline-flex;
   align-items: center;
@@ -765,32 +777,25 @@
 @media (min-width: 680px) {
   .promotion-codes {
     padding:
-      38px 28px
-      76px;
+      38px 28px 76px;
   }
 
   .promotion-codes__metrics {
     grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+      repeat(3,
+        minmax(0, 1fr));
   }
 
   .promotion-codes__field-grid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2,
+        minmax(0, 1fr));
   }
 
   .promotion-codes__code-details {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2,
+        minmax(0, 1fr));
 
     div:nth-child(odd) {
       border-right:
@@ -802,8 +807,7 @@
 @media (min-width: 1100px) {
   .promotion-codes__layout {
     grid-template-columns:
-      minmax(0, 0.95fr)
-      minmax(420px, 1.05fr);
+      minmax(0, 0.95fr) minmax(420px, 1.05fr);
   }
 
   .promotion-codes__panel {
@@ -835,7 +839,7 @@
   }
 
   .promotion-codes__code-card {
-    > header {
+    >header {
       flex-direction: column;
     }
   }
@@ -852,6 +856,7 @@
     width: 65%;
   }
 }
+
 /*
  * Align the expiration and maximum-redemptions fields.
  */
@@ -909,6 +914,7 @@ input[formControlName='maxRedemptions']:focus {
 }
 
 @media (max-width: 680px) {
+
   input[type='datetime-local'],
   input[formControlName='maxRedemptions'] {
     height: 48px;

@@ -148,6 +148,19 @@ export class PromotionCodeService {
         }
     }
 
+    async replacePromotionCode(promotionCodeUid: string, replacement: CreatePromotionCodeInput): Promise<PromotionCode> {
+        const callable = httpsCallable<UpdatePromotionCodeInput, UpdatePromotionCodeResult>(functions, 'updatePromotionCode');
+        const result = await callable(this.removeUndefinedValues({ promotionCodeUid, replacement }));
+        await this.loadPromotionCodes(true);
+        return result.data.promotionCode;
+    }
+
+    async deletePromotionCode(promotionCodeUid: string): Promise<void> {
+        const callable = httpsCallable<UpdatePromotionCodeInput, UpdatePromotionCodeResult>(functions, 'updatePromotionCode');
+        await callable({ promotionCodeUid, archived: true });
+        await this.loadPromotionCodes(true);
+    }
+
     async setPromotionCodeActive(
         promotionCodeUid: string,
         active: boolean
@@ -202,6 +215,24 @@ export class PromotionCodeService {
             throw new Error(
                 message
             );
+        } finally {
+            this.isLoading.set(false);
+        }
+    }
+
+    async updatePromotionCode(input: UpdatePromotionCodeInput): Promise<PromotionCode> {
+        this.isLoading.set(true);
+        this.errorMessage.set('');
+        try {
+            const callable = httpsCallable<UpdatePromotionCodeInput, UpdatePromotionCodeResult>(functions, 'updatePromotionCode');
+            const result = await callable(input);
+            const updated = result.data.promotionCode;
+            this.promotionCodes.update(codes => codes.map(code => code.uid === updated.uid ? updated : code));
+            return updated;
+        } catch (error: unknown) {
+            const message = this.getErrorMessage(error, 'The promotion code could not be updated.');
+            this.errorMessage.set(message);
+            throw new Error(message);
         } finally {
             this.isLoading.set(false);
         }

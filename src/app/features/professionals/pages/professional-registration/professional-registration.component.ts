@@ -451,7 +451,7 @@ export class ProfessionalRegistrationComponent
   }
 
   protected canContinueRegistration(): boolean {
-    if (this.registrationForm.pending || this.isOtpLoading() ||
+    if (this.isPreparingRegistration() || this.registrationForm.pending || this.isOtpLoading() ||
       this.isCheckingExistingProfessional() || this.logoUploading()) return false;
     if (!this.registrationForm.controls.submissionCertified.value) return false;
     if (this.registrationForm.controls.subscriptionStatus.value === 'profile' &&
@@ -461,6 +461,9 @@ export class ProfessionalRegistrationComponent
     return Object.entries(this.registrationForm.controls).every(([name, control]) =>
       name === 'firstName' || name === 'lastName' || control.valid);
   }
+
+  protected readonly isPreparingRegistration = signal(false);
+  protected readonly isCompletingVerification = signal(false);
 
   protected readonly otpStep =
     signal(false);
@@ -990,6 +993,7 @@ export class ProfessionalRegistrationComponent
 
     this.errorMessage.set('');
     this.successMessage.set('');
+    this.isPreparingRegistration.set(true);
 
     try {
       const authenticatedUser =
@@ -1145,6 +1149,8 @@ export class ProfessionalRegistrationComponent
           'We could not send the verification code.'
         )
       );
+    } finally {
+      this.isPreparingRegistration.set(false);
     }
   }
 
@@ -1222,6 +1228,7 @@ export class ProfessionalRegistrationComponent
     if (
       this.otpForm.invalid ||
       this.isOtpLoading() ||
+      this.isCompletingVerification() ||
       !pendingRegistration
     ) {
       this.otpForm.markAllAsTouched();
@@ -1230,6 +1237,7 @@ export class ProfessionalRegistrationComponent
 
     this.errorMessage.set('');
     this.successMessage.set('');
+    this.isCompletingVerification.set(true);
 
     try {
       const code =
@@ -1452,6 +1460,8 @@ export class ProfessionalRegistrationComponent
           'We could not verify the code.'
         )
       );
+    } finally {
+      this.isCompletingVerification.set(false);
     }
   }
 

@@ -682,10 +682,11 @@
                     <button type="submit" class="registration-button registration-button--primary"
                       [disabled]="!canContinueRegistration()"
                       [attr.aria-disabled]="!canContinueRegistration()">
-                        @if (isOtpLoading()) {
-                        Sending verification code...
+                        @if (isPreparingRegistration()) {
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        {{ isUpgradeMode() ? 'Connecting to secure checkout...' : 'Processing registration...' }}
                         } @else {
-                        Continue to email verification
+                        {{ isUpgradeMode() ? 'Proceed to secure checkout' : 'Continue to email verification' }}
 
                         <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                         }
@@ -769,11 +770,14 @@
                         <button type="submit" class="registration-button registration-button--primary" [disabled]="
           otpForm.invalid ||
           isOtpLoading() ||
+          isCompletingVerification() ||
           isExpired() ||
           attemptsRemaining() <= 0
         ">
                             {{
-                            isOtpLoading()
+                            isCompletingVerification()
+                            ? 'Processing your business listing...'
+                            : isOtpLoading()
                             ? 'Verifying...'
                             : 'Verify and continue'
                             }}

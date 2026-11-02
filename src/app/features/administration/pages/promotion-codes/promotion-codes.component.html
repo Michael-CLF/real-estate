@@ -167,7 +167,7 @@
       <form
         class="promotion-codes__form"
         [formGroup]="form"
-        (ngSubmit)="createPromotionCode()"
+        (ngSubmit)="savePromotionCode()"
       >
         <div class="promotion-codes__field">
           <label for="promotion-name">
@@ -538,16 +538,20 @@
               aria-hidden="true"
             ></i>
 
-            Creating promotion…
+            Saving…
           } @else {
             <i
               class="fa-solid fa-plus"
               aria-hidden="true"
             ></i>
 
-            Create promotion code
+            {{ editingCodeUid() ? 'Save Changes' : 'Add Code' }}
           }
         </button>
+        @if (editingCodeUid()) {
+          <p class="promotion-codes__field-error">Stripe requires a new customer-facing code when replacing discount settings. Change the code before saving.</p>
+          <button type="button" (click)="cancelEditing()">Cancel Edit</button>
+        }
       </form>
     </section>
 
@@ -566,6 +570,7 @@
           </p>
 
           <h2>Existing codes</h2>
+
 
           <p>
             Redemption totals and current status are
@@ -587,7 +592,7 @@
           <p>Loading promotion codes…</p>
         </div>
       } @else if (
-        promotionCodes().length === 0
+        visibleCodes().length === 0
       ) {
         <div class="promotion-codes__empty">
           <span>
@@ -607,7 +612,7 @@
       } @else {
         <div class="promotion-codes__list">
           @for (
-            promotionCode of promotionCodes();
+            promotionCode of visibleCodes();
             track promotionCode.uid
           ) {
             <article class="promotion-codes__code-card">
@@ -706,63 +711,10 @@
               </dl>
 
               <footer>
-                @if (
-                  isExpired(promotionCode)
-                ) {
-                  <span class="promotion-codes__expired-message">
-                    <i
-                      class="fa-solid fa-clock"
-                      aria-hidden="true"
-                    ></i>
-
-                    This code has expired and cannot be
-                    reactivated.
-                  </span>
-                } @else {
-                  <button
-                    class="promotion-codes__toggle"
-                    [class.promotion-codes__toggle--deactivate]="
-                      promotionCode.active
-                    "
-                    type="button"
-                    [disabled]="
-                      updatingCodeUid() !== null
-                    "
-                    (click)="
-                      togglePromotionCode(
-                        promotionCode
-                      )
-                    "
-                  >
-                    @if (
-                      updatingCodeUid() ===
-                      promotionCode.uid
-                    ) {
-                      <i
-                        class="fa-solid fa-spinner fa-spin"
-                        aria-hidden="true"
-                      ></i>
-
-                      Updating…
-                    } @else if (
-                      promotionCode.active
-                    ) {
-                      <i
-                        class="fa-solid fa-ban"
-                        aria-hidden="true"
-                      ></i>
-
-                      Deactivate code
-                    } @else {
-                      <i
-                        class="fa-solid fa-circle-check"
-                        aria-hidden="true"
-                      ></i>
-
-                      Activate code
-                    }
-                  </button>
-                }
+                <button class="code-btn" type="button" [disabled]="isSaving() || updatingCodeUid() !== null" (click)="startEditing(promotionCode)">Edit Code</button>
+                <button class="code-btn" type="button" [disabled]="isSaving() || updatingCodeUid() !== null" (click)="deleteCode(promotionCode)">
+                  {{ updatingCodeUid() === promotionCode.uid ? 'Deleting…' : 'Delete Code' }}
+                </button>
               </footer>
             </article>
           }

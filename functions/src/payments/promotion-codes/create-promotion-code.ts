@@ -46,21 +46,28 @@ export const createPromotionCode =
             ]
         },
 
-        async request => {
+        async request => createPromotionCodeForAdministrator(request.auth, request.data)
+    );
+
+// Shared server-side creation path. Do not invoke the public callable from another function.
+export async function createPromotionCodeForAdministrator(
+    auth: { uid: string; token: Record<string, unknown> } | undefined,
+    data: CreatePromotionCodeRequest
+): Promise<CreatePromotionCodeResponse> {
             requireAdministrator(
-                request.auth
+                auth
             );
 
             const administratorUid =
-                request.auth!.uid;
+                auth!.uid;
 
             const normalizedName =
-                request.data.name
+                data.name
                     ?.trim();
 
             const normalizedCode =
                 normalizePromotionCode(
-                    request.data.code ?? ''
+                    data.code ?? ''
                 );
 
             if (!normalizedName) {
@@ -75,7 +82,7 @@ export const createPromotionCode =
             );
 
             validateDiscount(
-                request.data
+                data
             );
 
             const existingPromotionCode =
@@ -95,7 +102,7 @@ export const createPromotionCode =
 
             const eligiblePriceId =
                 getEligiblePriceId(
-                    request.data
+                    data
                         .eligibleProduct
                 );
 
@@ -137,25 +144,25 @@ export const createPromotionCode =
                         promotionCodeUid,
 
                     navStreetEligibleProduct:
-                        request.data
+                        data
                             .eligibleProduct
                 }
             };
 
             if (
-                request.data.discountType ===
+                data.discountType ===
                     'percentage'
             ) {
                 couponParameters.percent_off =
-                    request.data.percentOff;
+                    data.percentOff;
             } else {
                 couponParameters.amount_off =
-                    request.data
+                    data
                         .amountOffCents;
 
                 couponParameters.currency =
                     normalizeCurrency(
-                        request.data.currency
+                        data.currency
                     );
             }
 
@@ -192,19 +199,19 @@ export const createPromotionCode =
 
                             expires_at:
                                 parseOptionalExpiration(
-                                    request.data
+                                    data
                                         .expiresAt
                                 ),
 
                             max_redemptions:
                                 parseOptionalMaximumRedemptions(
-                                    request.data
+                                    data
                                         .maxRedemptions
                                 ),
 
                             restrictions: {
                                 first_time_transaction:
-                                    request.data
+                                    data
                                         .firstTimeTransactionOnly
                             },
 
@@ -213,7 +220,7 @@ export const createPromotionCode =
                                     promotionCodeUid,
 
                                 navStreetEligibleProduct:
-                                    request.data
+                                    data
                                         .eligibleProduct
                             }
                         });
@@ -233,11 +240,11 @@ export const createPromotionCode =
                         normalizedCode,
 
                     discountType:
-                        request.data
+                        data
                             .discountType,
 
                     eligibleProduct:
-                        request.data
+                        data
                             .eligibleProduct,
 
                     eligiblePriceId,
@@ -257,11 +264,11 @@ export const createPromotionCode =
                         true,
 
                     firstTimeTransactionOnly:
-                        request.data
+                        data
                             .firstTimeTransactionOnly,
 
                     maxRedemptions:
-                        request.data
+                        data
                             .maxRedemptions ??
                         null,
 
@@ -270,7 +277,7 @@ export const createPromotionCode =
                             .times_redeemed,
 
                     expiresAt:
-                        request.data
+                        data
                             .expiresAt ??
                         null,
 
@@ -285,19 +292,19 @@ export const createPromotionCode =
                 };
 
                 if (
-                    request.data.discountType ===
+                    data.discountType ===
                         'percentage'
                 ) {
                     promotionCodeRecord.percentOff =
-                        request.data.percentOff;
+                        data.percentOff;
                 } else {
                     promotionCodeRecord.amountOffCents =
-                        request.data
+                        data
                             .amountOffCents;
 
                     promotionCodeRecord.currency =
                         normalizeCurrency(
-                            request.data.currency
+                            data.currency
                         );
                 }
 
@@ -342,8 +349,7 @@ export const createPromotionCode =
                     'The promotion code could not be created.'
                 );
             }
-        }
-    );
+}
 
 function requireAdministrator(
     authentication:

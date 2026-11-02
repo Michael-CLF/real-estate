@@ -18,6 +18,8 @@ import {
     updatePromotionCodeRecord
 } from './promotion-code-repository';
 
+import { createPromotionCodeForAdministrator } from './create-promotion-code';
+
 import type {
     UpdatePromotionCodeRequest,
     UpdatePromotionCodeResponse
@@ -56,14 +58,56 @@ export const updatePromotionCode =
                 );
             }
 
-            if (
-                typeof request.data.active !==
-                    'boolean'
-            ) {
-                throw new HttpsError(
-                    'invalid-argument',
-                    'Select whether the promotion code should be active.'
-                );
+            if (request.data.replacement) {
+                const oldCode = await getPromotionCodeByUid(promotionCodeUid);
+                if (!oldCode || oldCode.archived) {
+                    throw new HttpsError('not-found', 'The promotion code could not be found.');
+                }
+                const replacement = request.data.replacement;
+                if (replacement.code.trim().toUpperCase() === oldCode.code) {
+                    throw new HttpsError('invalid-argument',
+                        'To change discount settings, enter a different customer-facing code. Stripe cannot safely replace an active code with the same code.');
+                }
+                // The new promotion must exist before retiring the old one.
+                const created = await createPromotionCodeForAdministrator(request.auth, replacement);
+                const stripeForReplacement = new Stripe(stripeSecretKey.value());
+                try {
+                    await stripeForReplacement.promotionCodes.update(oldCode.stripePromotionCodeId, { active: false });
+                    await updatePromotionCodeRecord(promotionCodeUid, { active: false, archived: true, status: 'inactive' });
+                } catch (retirementError) {
+                    // Never leave an untracked replacement redeemable after a failed edit.
+                    try {
+                        await stripeForReplacement.promotionCodes.update(created.promotionCode.stripePromotionCodeId, { active: false });
+                        await updatePromotionCodeRecord(created.promotionCode.uid, { active: false, archived: true, status: 'inactive' });
+                    } catch (cleanupError) {
+                        console.error('Replacement rollback failed:', cleanupError);
+                    }
+                    console.error('Could not retire old promotion:', retirementError);
+                    throw new HttpsError('internal', 'The replacement was created but the previous code could not be retired. Check Stripe before retrying.');
+                }
+                return created;
+            }
+
+            const requestedActive = request.data.active;
+            const requestedName = request.data.name;
+            const requestedArchived = request.data.archived;
+            if (requestedActive === undefined && requestedName === undefined && requestedArchived === undefined) {
+                throw new HttpsError('invalid-argument', 'No changes were supplied.');
+            }
+            if (requestedActive !== undefined && typeof requestedActive !== 'boolean') {
+                throw new HttpsError('invalid-argument', 'Invalid active setting.');
+            }
+            if (requestedArchived !== undefined && typeof requestedArchived !== 'boolean') {
+                throw new HttpsError('invalid-argument', 'Invalid archive setting.');
+            }
+            if (requestedName !== undefined && (typeof requestedName !== 'string' || !requestedName.trim() || requestedName.trim().length > 80)) {
+                throw new HttpsError('invalid-argument', 'The promotion name must contain 1 to 80 characters.');
+            }
+            if (requestedArchived === false) {
+                throw new HttpsError('failed-precondition', 'Archived codes cannot be restored. Create a replacement.');
+            }
+            if (requestedArchived === true && requestedActive === true) {
+                throw new HttpsError('invalid-argument', 'An archived code cannot be active.');
             }
 
             const existingPromotionCode =
@@ -79,7 +123,7 @@ export const updatePromotionCode =
             }
 
             if (
-                request.data.active &&
+                requestedActive === true &&
                 isExpired(
                     existingPromotionCode
                         .expiresAt
@@ -91,14 +135,13 @@ export const updatePromotionCode =
                 );
             }
 
-            if (
-                existingPromotionCode.active ===
-                    request.data.active
-            ) {
-                return {
-                    promotionCode:
-                        existingPromotionCode
-                };
+            if (existingPromotionCode.archived) {
+                throw new HttpsError('failed-precondition', 'Archived codes cannot be edited or reactivated.');
+            }
+            const targetActive = requestedArchived === true ? false : (requestedActive ?? existingPromotionCode.active);
+            const targetName = requestedName?.trim() ?? existingPromotionCode.name;
+            if (existingPromotionCode.active === targetActive && existingPromotionCode.name === targetName && requestedArchived !== true) {
+                return { promotionCode: existingPromotionCode };
             }
 
             const stripe =
@@ -107,25 +150,20 @@ export const updatePromotionCode =
                 );
 
             try {
-                const stripePromotionCode =
-                    await stripe
-                        .promotionCodes
-                        .update(
-                            existingPromotionCode
-                                .stripePromotionCodeId,
-                            {
-                                active:
-                                    request.data.active
-                            }
-                        );
+                const stripePromotionCode = targetActive !== existingPromotionCode.active
+                    ? await stripe.promotionCodes.update(existingPromotionCode.stripePromotionCodeId, { active: targetActive })
+                    : await stripe.promotionCodes.retrieve(existingPromotionCode.stripePromotionCodeId);
+                if (targetName !== existingPromotionCode.name) {
+                    await stripe.coupons.update(existingPromotionCode.stripeCouponId, { name: targetName });
+                }
 
                 const updatedPromotionCode =
                     await updatePromotionCodeRecord(
                         promotionCodeUid,
                         {
-                            active:
-                                stripePromotionCode
-                                    .active,
+                            name: targetName,
+                            archived: requestedArchived === true,
+                            active: stripePromotionCode.active,
 
                             status:
                                 stripePromotionCode
