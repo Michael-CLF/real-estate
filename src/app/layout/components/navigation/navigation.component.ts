@@ -87,7 +87,7 @@ export class NavigationComponent {
         label:
           'Find a Pro',
         route:
-          '/find-a-pro/north-carolina'
+          '/find-a-pro'
       },
       {
         analyticsName:
