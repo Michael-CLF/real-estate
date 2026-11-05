@@ -82,6 +82,39 @@ export const PUBLIC_ROUTES:
                 component.PricingComponent
             )
         },
+        
+        /*
+         * NavStreet Blog
+         * Publicly accessible — no authentication required.
+         */
+        {
+          path: 'blog',
+          pathMatch: 'full',
+
+          loadComponent: () =>
+            import(
+              '../features/blog/pages/blog/blog.component'
+            ).then(
+              component =>
+                component.BlogComponent
+            )
+        },
+
+        /*
+         * Individual Blog Article
+         */
+        {
+          path: 'blog/:slug',
+
+          loadComponent: () =>
+            import(
+              '../features/blog/pages/blog-article/blog-article.component'
+            ).then(
+              component =>
+                component.BlogArticleComponent
+            )
+        },
+
 
         /*
          * Education Center

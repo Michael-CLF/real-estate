@@ -86,6 +86,13 @@ export class AdministrationSidebarComponent {
         icon:
           'fa-solid fa-building'
       },
+
+      {
+        label: 'Blog',
+        route: '/administration/blog',
+        icon: 'fa-solid fa-newspaper'
+      },
+
       {
         label:
           'Promotion codes',

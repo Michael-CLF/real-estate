@@ -1,0 +1,105 @@
+
+<section class="blog-article-page">
+  <div class="article-container">
+
+    <nav class="article-navigation" aria-label="Blog navigation">
+      <a routerLink="/blog">
+        <span aria-hidden="true">&larr;</span>
+        Back to Blog
+      </a>
+    </nav>
+
+    @if (loading()) {
+      <div class="article-message" role="status">
+        <p>Loading article...</p>
+      </div>
+    } @else if (notFound()) {
+      <div class="article-message">
+        <h1>Article Not Found</h1>
+        <p>
+          The article you're looking for may have been
+          removed or is no longer available.
+        </p>
+        <a routerLink="/blog">Browse All Articles</a>
+      </div>
+    } @else if (error()) {
+      <div class="article-message article-error" role="alert">
+        <h1>Unable to Load Article</h1>
+        <p>{{ error() }}</p>
+        <a routerLink="/blog">Return to Blog</a>
+      </div>
+    } @else if (article(); as currentArticle) {
+
+      <article class="article-content">
+
+        <header class="article-header">
+          <span class="article-category">
+            NAVSTREET REAL ESTATE BLOG
+          </span>
+
+          <h1>{{ currentArticle.title }}</h1>
+
+          <p class="article-summary">
+            {{ currentArticle.summary }}
+          </p>
+
+          <div class="article-meta">
+            <span class="article-author">
+              By {{ currentArticle.authorName || 'NavStreet' }}
+            </span>
+
+            @if (currentArticle.publishedAt) {
+              <span class="meta-separator" aria-hidden="true">
+                &bull;
+              </span>
+
+              <time
+                [attr.datetime]="currentArticle.publishedAt.toISOString()"
+              >
+                {{ formatDate(currentArticle.publishedAt) }}
+              </time>
+            }
+          </div>
+        </header>
+
+        @if (currentArticle.featuredImageUrl) {
+          <figure class="article-featured-image">
+            <img
+              [src]="currentArticle.featuredImageUrl"
+              [alt]="currentArticle.featuredImageAlt || currentArticle.title"
+              fetchpriority="high"
+            />
+          </figure>
+        }
+
+        <div
+          class="article-body"
+          [innerHTML]="articleHtml()"
+        ></div>
+
+        <footer class="article-footer">
+          <div class="article-footer-content">
+            <h2>Explore More on NavStreet</h2>
+            <p>
+              Discover homes for sale by owner and explore
+              tools designed to help buyers and sellers
+              navigate real estate transactions.
+            </p>
+
+            <div class="article-actions">
+              <a routerLink="/homes" class="primary-action">
+                Browse Homes
+              </a>
+
+              <a routerLink="/blog" class="secondary-action">
+                More Articles
+              </a>
+            </div>
+          </div>
+        </footer>
+
+      </article>
+    }
+
+  </div>
+</section>

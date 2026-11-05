@@ -1,0 +1,95 @@
+
+<section class="blog-page">
+  <div class="blog-container">
+
+    <header class="blog-header">
+      <span class="blog-eyebrow">
+        NAVSTREET REAL ESTATE BLOG
+      </span>
+
+      <h1>Real Estate Insights &amp; Home Selling Tips</h1>
+
+      <p>
+        Practical advice for homeowners, buyers, and
+        anyone interested in real estate. Learn how to
+        sell your home, navigate the buying process,
+        and make informed decisions.
+      </p>
+    </header>
+
+    @if (loading()) {
+      <div class="blog-message" role="status">
+        <p>Loading articles...</p>
+      </div>
+    } @else if (error()) {
+      <div class="blog-message blog-error" role="alert">
+        <p>{{ error() }}</p>
+      </div>
+    } @else if (articles().length === 0) {
+      <div class="blog-message">
+        <h2>Articles coming soon</h2>
+        <p>
+          We're preparing helpful real estate guides
+          and resources. Check back soon.
+        </p>
+      </div>
+    } @else {
+      <div class="blog-grid">
+        @for (article of articles(); track article.id) {
+          <article class="blog-card">
+
+            <a
+              class="blog-card-image"
+              [routerLink]="['/blog', article.slug]"
+              [attr.aria-label]="'Read ' + article.title"
+            >
+              @if (article.featuredImageUrl) {
+                <img
+                  [src]="article.featuredImageUrl"
+                  [alt]="article.featuredImageAlt || article.title"
+                  loading="lazy"
+                />
+              } @else {
+                <div class="blog-image-placeholder">
+                  <span>NavStreet</span>
+                </div>
+              }
+            </a>
+
+            <div class="blog-card-content">
+
+              @if (article.publishedAt) {
+                <time
+                  class="blog-date"
+                  [attr.datetime]="article.publishedAt.toISOString()"
+                >
+                  {{ formatDate(article.publishedAt) }}
+                </time>
+              }
+
+              <h2>
+                <a [routerLink]="['/blog', article.slug]">
+                  {{ article.title }}
+                </a>
+              </h2>
+
+              <p class="blog-summary">
+                {{ article.summary }}
+              </p>
+
+              <a
+                class="blog-read-more"
+                [routerLink]="['/blog', article.slug]"
+              >
+                Read Article
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+
+            </div>
+          </article>
+        }
+      </div>
+    }
+
+  </div>
+</section>

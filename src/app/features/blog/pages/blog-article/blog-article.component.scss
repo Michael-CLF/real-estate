@@ -1,0 +1,320 @@
+
+:host {
+  display: block;
+}
+
+.blog-article-page {
+  min-height: 75vh;
+  padding: 40px 24px 96px;
+  background: #f8fafc;
+}
+
+.article-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.article-navigation {
+  margin-bottom: 40px;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #154360;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    
+
+    &:hover {
+      color: #2874a6;
+      text-decoration: underline;
+    }
+  }
+}
+
+.article-content {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+
+.article-header {
+  padding: 56px 56px 36px;
+
+  .article-category {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: #2874a6;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  h1 {
+    margin: 0 0 24px;
+    color: #154360;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+.article-summary {
+  margin: 0 0 24px;
+  color: #526174;
+  font-size: 1.15rem;
+  line-height: 1.8;
+}
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.article-author {
+  font-weight: 600;
+  color: #334155;
+}
+
+.meta-separator {
+  color: #94a3b8;
+}
+
+.article-featured-image {
+  margin: 0;
+  padding: 0 56px 24px;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+}
+
+.article-body {
+  padding: 16px 56px 56px;
+  color: #334155;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+
+  // Article content is inserted using innerHTML.
+  // Angular's component style encapsulation requires
+  // a deep selector to style generated HTML elements.
+
+  :host ::ng-deep & {
+    h2,
+    h3,
+    h4 {
+      color: #154360;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    h2 {
+      margin: 42px 0 18px;
+      font-size: 1.7rem;
+    }
+
+    h3 {
+      margin: 30px 0 14px;
+      font-size: 1.35rem;
+    }
+
+    h4 {
+      margin: 24px 0 12px;
+      font-size: 1.15rem;
+    }
+
+    p {
+      margin: 0 0 22px;
+    }
+
+    ul,
+    ol {
+      margin: 0 0 24px;
+      padding-left: 28px;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    a {
+      color: #2874a6;
+      font-weight: 600;
+      text-decoration: underline;
+
+      &:hover {
+        color: #154360;
+      }
+    }
+
+    blockquote {
+      margin: 30px 0;
+      padding: 18px 24px;
+      border-left: 4px solid #2874a6;
+      background: #f1f5f9;
+      color: #475569;
+      font-style: italic;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 28px auto;
+      border-radius: 8px;
+    }
+
+    hr {
+      margin: 36px 0;
+      border: 0;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    strong {
+      color: #1e293b;
+    }
+  }
+}
+
+.article-footer {
+  padding: 40px 56px;
+  border-top: 1px solid #e2e8f0;
+  background: #f1f5f9;
+}
+
+.article-footer-content {
+  h2 {
+    margin: 0 0 12px;
+    color: #154360;
+    font-size: 1.5rem;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: #526174;
+    line-height: 1.7;
+  }
+}
+
+.article-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 12px 22px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+}
+
+.primary-action {
+  background: #154360;
+  color: #fff;
+
+  &:hover {
+    background: #2874a6;
+  }
+}
+
+.secondary-action {
+  border: 1px solid #154360;
+  color: #154360;
+
+  &:hover {
+    background: #e2e8f0;
+  }
+}
+
+.article-message {
+  padding: 64px 32px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 16px;
+    color: #154360;
+  }
+
+  p {
+    color: #526174;
+    line-height: 1.7;
+  }
+
+  a {
+    color: #2874a6;
+    font-weight: 600;
+  }
+}
+
+.article-error {
+  border-color: #fecaca;
+}
+
+@media (max-width: 768px) {
+  .blog-article-page {
+    padding: 24px 16px 64px;
+  }
+
+  .article-navigation {
+    margin-bottom: 24px;
+  }
+
+  .article-header {
+    padding: 32px 24px 24px;
+  }
+
+  .article-summary {
+    font-size: 1rem;
+  }
+
+  .article-featured-image {
+    padding: 0 24px 16px;
+  }
+
+  .article-body {
+    padding: 16px 24px 36px;
+    font-size: 1rem;
+  }
+
+  .article-footer {
+    padding: 32px 24px;
+  }
+
+  .article-actions {
+    flex-direction: column;
+
+    a {
+      width: 100%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-actions a {
+    transition: none;
+  }
+}

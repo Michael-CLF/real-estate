@@ -179,6 +179,19 @@ export const ADMINISTRATION_ROUTES:
                 component.PromotionCodesComponent
             )
         },
+        /*
+        * Blog
+        */
+        {
+          path: 'blog',
+          loadComponent: () =>
+            import(
+              './pages/blog-admin/blog-admin.component'
+            ).then(
+              component => component.BlogAdminComponent
+            )
+        },
+
 
         /*
          * Settings
