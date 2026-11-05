@@ -550,6 +550,190 @@
   margin-top: 28px;
 }
 
+
+/*
+ * Blog Article Formatting Toolbar
+ */
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px 8px 0 0;
+
+  .btn {
+    min-height: 36px;
+    padding: 7px 12px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    color: #154360;
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    &:hover:not(:disabled) {
+      background: #dbeafe;
+      border-color: #2874a6;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2874a6;
+      outline-offset: 2px;
+    }
+  }
+}
+
+/*
+ * HTML Article Editor
+ */
+
+#article-content {
+  min-height: 420px;
+  padding: 18px;
+  border: 1px solid #cbd5e1;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+  color: #1e293b;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  resize: vertical;
+
+  &:focus {
+    border-color: #2874a6;
+    outline: 2px solid rgb(40 116 166 / 12%);
+  }
+}
+
+/*
+ * Formatted Article Preview
+ */
+
+.preview-body {
+  color: #334155;
+  font-size: 1rem;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+
+  h2 {
+    margin: 36px 0 16px;
+    color: #154360;
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  h3 {
+    margin: 28px 0 12px;
+    color: #154360;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 0 0 18px;
+  }
+
+  ul,
+  ol {
+    margin: 14px 0 24px;
+    padding-left: 28px;
+  }
+
+  li {
+    margin-bottom: 8px;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  a {
+    color: #2874a6;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    &:hover {
+      color: #154360;
+    }
+  }
+
+  blockquote {
+    margin: 24px 0;
+    padding: 16px 22px;
+    background: #f8fafc;
+    border-left: 4px solid #2874a6;
+    color: #475569;
+  }
+
+  table {
+    width: 100%;
+    margin: 24px 0;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+  }
+
+  th {
+    background: #f1f5f9;
+    color: #154360;
+  }
+}
+
+/*
+ * Mobile Editor Adjustments
+ */
+
+@media (max-width: 768px) {
+  .editor-toolbar {
+    gap: 6px;
+    padding: 10px;
+
+    .btn {
+      flex: 1 1 auto;
+      padding: 8px 10px;
+    }
+  }
+
+  #article-content {
+    min-height: 320px;
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .preview-body {
+    h2 {
+      font-size: 1.35rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+
+    table {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+}
+
+
 @media (max-width: 480px) {
   .publish-dialog {
     padding: 24px;

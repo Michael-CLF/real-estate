@@ -87,5 +87,6 @@ export {activateReviewedAgreements} from './offers/activate-reviewed-agreements'
 export {
   getBlogAdminArticles,
   saveBlogDraft,
-  publishBlogArticle
+  publishBlogArticle,
+  updatePublishedBlogArticle
 } from './blog';

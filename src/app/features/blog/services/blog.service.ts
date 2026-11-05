@@ -227,4 +227,28 @@ export class BlogService {
       throw new Error('Unable to publish the blog article.');
     }
   }
+  
+  /**
+   * ADMIN: Update an existing published article.
+   * Preserves its URL, publication date, and published status.
+   */
+  async updatePublishedArticle(
+    input: BlogArticleInput
+  ): Promise<void> {
+    const callable = httpsCallable<
+      BlogArticleInput,
+      BlogOperationResponse
+    >(
+      functions,
+      'updatePublishedBlogArticle'
+    );
+
+    const result = await callable(input);
+
+    if (!result.data.success) {
+      throw new Error(
+        'Unable to update the published blog article.'
+      );
+    }
+  }
 }

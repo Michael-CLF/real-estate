@@ -224,3 +224,94 @@ export const publishBlogArticle = onCall(
     return { success: true, slug };
   }
 );
+
+/**
+ * ADMIN: Update an existing published blog article.
+ *
+ * Preserves the document ID, slug, publication date,
+ * creation date, and published status.
+ */
+export const updatePublishedBlogArticle = onCall(
+  { region: REGION },
+  async request => {
+    requireAdmin(request.auth);
+
+    const data = request.data ?? {};
+    const slug = validateSlug(data.slug);
+
+    const input = {
+      title: requiredString(data.title, 'title', 200),
+      summary: optionalString(data.summary, 'summary', 1000),
+      contentHtml: requiredString(
+        data.contentHtml,
+        'contentHtml',
+        200000
+      ),
+      seoTitle: optionalString(
+        data.seoTitle,
+        'seoTitle',
+        200
+      ),
+      metaDescription: optionalString(
+        data.metaDescription,
+        'metaDescription',
+        500
+      ),
+      featuredImageUrl: optionalString(
+        data.featuredImageUrl,
+        'featuredImageUrl',
+        2000
+      ),
+      featuredImagePath: optionalString(
+        data.featuredImagePath,
+        'featuredImagePath',
+        1000
+      ),
+      featuredImageAlt: optionalString(
+        data.featuredImageAlt,
+        'featuredImageAlt',
+        300
+      ),
+      authorName: optionalString(
+        data.authorName,
+        'authorName',
+        150
+      ) || 'NavStreet'
+    };
+
+    const ref = db.collection(COLLECTION).doc(slug);
+
+    await db.runTransaction(async transaction => {
+      const snapshot = await transaction.get(ref);
+
+      if (!snapshot.exists) {
+        throw new HttpsError(
+          'not-found',
+          'Published article not found.'
+        );
+      }
+
+      const existing = snapshot.data();
+
+      if (
+        existing?.['status'] !== 'published' ||
+        existing?.['slug'] !== slug
+      ) {
+        throw new HttpsError(
+          'failed-precondition',
+          'Only existing published articles can be updated.'
+        );
+      }
+
+      transaction.update(ref, {
+        ...input,
+        updatedAt: FieldValue.serverTimestamp()
+      });
+    });
+
+    return {
+      success: true,
+      slug
+    };
+  }
+);

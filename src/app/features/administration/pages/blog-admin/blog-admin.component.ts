@@ -7,7 +7,7 @@ import {
   computed
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import {
@@ -31,6 +31,7 @@ export class BlogAdminComponent implements OnInit {
   private readonly blogService = inject(BlogService);
   private readonly imageUpload = inject(BlogImageUploadService);
   private readonly seo = inject(PageSeoService);
+  private readonly document = inject(DOCUMENT);
 
   readonly articles = signal<BlogArticle[]>([]);
   readonly loading = signal(false);
@@ -45,6 +46,7 @@ export class BlogAdminComponent implements OnInit {
   readonly editorOpen = signal(false);
   readonly previewOpen = signal(false);
   readonly editingSlug = signal<string | null>(null);
+  readonly editingPublished = signal(false);
   readonly publishConfirmation = signal<string | null>(null);
 
   readonly publishedCount = computed(
@@ -54,6 +56,8 @@ export class BlogAdminComponent implements OnInit {
   readonly draftCount = computed(
     () => this.articles().filter(a => a.status === 'draft').length
   );
+
+
 
   form: BlogArticleInput = this.emptyForm();
 
@@ -107,6 +111,7 @@ export class BlogAdminComponent implements OnInit {
   createArticle(): void {
     this.form = this.emptyForm();
     this.editingSlug.set(null);
+    this.editingPublished.set(false);
     this.editorOpen.set(true);
     this.previewOpen.set(false);
     this.publishConfirmation.set(null);
@@ -129,6 +134,7 @@ export class BlogAdminComponent implements OnInit {
     };
 
     this.editingSlug.set(article.slug);
+    this.editingPublished.set(article.status === 'published');
     this.editorOpen.set(true);
     this.previewOpen.set(false);
     this.publishConfirmation.set(null);
@@ -152,6 +158,68 @@ export class BlogAdminComponent implements OnInit {
   togglePreview(): void {
     this.previewOpen.update(value => !value);
   }
+
+  insertFormatting(
+    format: 'h2' | 'h3' | 'bold' | 'italic' | 'ul' | 'ol' | 'link'
+  ): void {
+    const textarea = this.document.getElementById(
+      'article-content'
+    ) as HTMLTextAreaElement | null;
+
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = this.form.contentHtml.slice(start, end);
+
+    let replacement = '';
+    let cursorOffset = 0;
+
+    switch (format) {
+      case 'h2':
+        replacement = `<h2>${selected || 'Heading'}</h2>`;
+        cursorOffset = 4;
+        break;
+      case 'h3':
+        replacement = `<h3>${selected || 'Heading'}</h3>`;
+        cursorOffset = 4;
+        break;
+      case 'bold':
+        replacement = `<strong>${selected || 'Bold text'}</strong>`;
+        cursorOffset = 8;
+        break;
+      case 'italic':
+        replacement = `<em>${selected || 'Italic text'}</em>`;
+        cursorOffset = 4;
+        break;
+      case 'ul':
+        replacement = `<ul><li>${selected || 'List item'}</li></ul>`;
+        cursorOffset = 8;
+        break;
+      case 'ol':
+        replacement = `<ol><li>${selected || 'List item'}</li></ol>`;
+        cursorOffset = 8;
+        break;
+      case 'link':
+        replacement = `<a href="https://example.com">${selected || 'Link text'}</a>`;
+        cursorOffset = 30;
+        break;
+    }
+
+    this.form.contentHtml =
+      this.form.contentHtml.slice(0, start) +
+      replacement +
+      this.form.contentHtml.slice(end);
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(
+        start + cursorOffset,
+        start + cursorOffset + (selected || '').length
+      );
+    });
+  }
+
 
   closeEditor(): void {
     this.editorOpen.set(false);
@@ -183,12 +251,12 @@ export class BlogAdminComponent implements OnInit {
       input.value = '';
     }
   }
-
   async saveDraft(): Promise<void> {
     if (this.uploadingImage()) {
       this.error.set('Wait until the image finishes uploading.');
       return;
     }
+
     this.error.set('');
     this.success.set('');
 
@@ -217,17 +285,36 @@ export class BlogAdminComponent implements OnInit {
     this.saving.set(true);
 
     try {
-      await this.blogService.saveDraft({ ...this.form });
+      if (this.editingPublished()) {
+        await this.blogService.updatePublishedArticle({
+          ...this.form
+        });
 
-      this.success.set('Draft saved successfully.');
+        this.success.set(
+          'Published article updated successfully. Redeploy the website to refresh its static SEO page.'
+        );
+      } else {
+        await this.blogService.saveDraft({
+          ...this.form
+        });
+
+        this.success.set('Draft saved successfully.');
+      }
+
       this.editorOpen.set(false);
       this.previewOpen.set(false);
       this.editingSlug.set(null);
+      this.editingPublished.set(false);
 
       await this.loadArticles();
     } catch (error) {
-      console.error('Unable to save blog draft:', error);
-      this.error.set('Unable to save the article draft.');
+      console.error('Unable to save blog article:', error);
+
+      this.error.set(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save the blog article.'
+      );
     } finally {
       this.saving.set(false);
     }
