@@ -44,6 +44,9 @@ jobs:
       - name: Generate property SEO pages
         run: node scripts/generate-property-pages.mjs
 
+      - name: Generate blog SEO pages
+        run: node scripts/generate-blog-pages.mjs
+
       - name: Configure SSH known hosts
         env:
           KNOWN_HOSTS: ${{ secrets.IONOS_SFTP_KNOWN_HOSTS }}
