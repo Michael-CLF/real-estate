@@ -14,10 +14,41 @@ import {
   DashboardLayoutComponent
 } from './layout/dashboard-layout/dashboard-layout.component';
 
+import { DashboardStateService } from './services/dashboard-state.service';
+
+import { ListingService } from '../../core/domains/listings/services/listing.service';
+import { ListingRepository } from '../../core/domains/listings/repositories/listing.repository';
+import { FirebaseListingRepository } from '../../core/infrastructure/firebase/listings/firebase-listing.repository';
+import { ShowingService } from '../../core/domains/showings/services/showing.service';
+import { ShowingRepository } from '../../core/domains/showings/repositories/showing.repository';
+import { FirebaseShowingRepository } from '../../core/infrastructure/firebase/showings/firebase-showing.repository';
+import { DashboardService } from './services/dashboard.service';
+
 export const DASHBOARD_ROUTES:
   Routes = [
     {
       path: '',
+
+
+
+      providers: [
+        FirebaseListingRepository,
+        {
+          provide: ListingRepository,
+          useExisting: FirebaseListingRepository
+        },
+        FirebaseShowingRepository,
+        {
+          provide: ShowingRepository,
+          useExisting: FirebaseShowingRepository
+        },
+        ListingService,
+        ShowingService,
+        DashboardService,
+        DashboardStateService
+      ],
+
+
 
       component:
         DashboardLayoutComponent,

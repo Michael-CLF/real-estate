@@ -1,11 +1,10 @@
+﻿
 import {
   ApplicationConfig,
   provideZoneChangeDetection
 } from '@angular/core';
 
-import {
-  provideHttpClient
-} from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 
 import {
   provideRouter,
@@ -13,10 +12,6 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
-
-import {
-  CORE_PROVIDERS
-} from './core/core.providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,14 +21,12 @@ export const appConfig: ApplicationConfig = {
 
     provideHttpClient(),
 
-  provideRouter(
-  routes,
-  withInMemoryScrolling({
-    scrollPositionRestoration: 'top',
-    anchorScrolling: 'enabled'
-  })
-),
-
-    ...CORE_PROVIDERS
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled'
+      })
+    )
   ]
 };

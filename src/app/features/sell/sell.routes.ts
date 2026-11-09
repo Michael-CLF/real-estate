@@ -14,6 +14,13 @@ import {
   accountGuard
 } from '../../core/authentication/guards/account.guard';
 
+import { ListingService } from '../../core/domains/listings/services/listing.service';
+import { ListingRepository } from '../../core/domains/listings/repositories/listing.repository';
+import { FirebaseListingRepository } from '../../core/infrastructure/firebase/listings/firebase-listing.repository';
+import { ShowingService } from '../../core/domains/showings/services/showing.service';
+import { ShowingRepository } from '../../core/domains/showings/repositories/showing.repository';
+import { FirebaseShowingRepository } from '../../core/infrastructure/firebase/showings/firebase-showing.repository';
+
 export const SELL_ROUTES:
   Routes = [
     /*
@@ -22,6 +29,13 @@ export const SELL_ROUTES:
      */
     {
       path: '',
+
+      providers: [
+        ListingService,
+        { provide: ListingRepository, useExisting: FirebaseListingRepository },
+        ShowingService,
+        { provide: ShowingRepository, useExisting: FirebaseShowingRepository }
+      ],
 
       component:
         PublicLayoutComponent,

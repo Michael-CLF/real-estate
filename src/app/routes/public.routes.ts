@@ -26,6 +26,10 @@ import {
   offerIdentityGuard
 } from '../core/domains/identity/guards/offer-identity.guard';
 
+import { ShowingService } from '../core/domains/showings/services/showing.service';
+import { ShowingRepository } from '../core/domains/showings/repositories/showing.repository';
+import { FirebaseShowingRepository } from '../core/infrastructure/firebase/showings/firebase-showing.repository';
+
 export const PUBLIC_ROUTES:
   Routes = [
     {
@@ -601,6 +605,11 @@ export const PUBLIC_ROUTES:
         {
           path:
             'listings/:listingId',
+
+          providers: [
+            ShowingService,
+            { provide: ShowingRepository, useExisting: FirebaseShowingRepository }
+          ],
 
           loadComponent: () =>
             import(
