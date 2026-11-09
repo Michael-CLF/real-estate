@@ -1,18 +1,12 @@
-<section
-  class="state-explorer"
-  aria-labelledby="state-explorer-title"
->
+<section class="state-explorer" aria-labelledby="state-explorer-title">
 
-<div class="section-heading section-heading--centered section-heading--light">
-        <p class="section-eyebrow section-eyebrow--light">
-          A nationwide platform
-        </p>
-      </div>
+  <div class="section-heading section-heading--centered section-heading--light">
+    <p class="section-eyebrow section-eyebrow--light">
+      A nationwide platform
+    </p>
+  </div>
   <div class="state-explorer__header">
-    <h2
-      class="state-explorer__title"
-      id="state-explorer-title"
-    >
+    <h2 class="state-explorer__title" id="state-explorer-title">
       Find a home in every state
     </h2>
   </div>
@@ -20,39 +14,30 @@
   <div class="state-explorer__panel">
     <div class="state-explorer__grid">
       @for (state of states; track state.abbreviation) {
-        <a
-          class="state-card"
-          [class.state-card--active]="state.isActive"
-          [attr.aria-label]="'Explore real estate in ' + state.name"
-          
-         [routerLink]="['/states', state.slug]"
-        >
-          <span class="state-card__abbreviation">
-            {{ state.abbreviation }}
+      <a class="state-card" [class.state-card--active]="state.isActive"
+        [attr.aria-label]="'Explore real estate in ' + state.name" [routerLink]="['/states', state.slug]">
+        <span class="state-card__abbreviation">
+          {{ state.abbreviation }}
+        </span>
+
+        <span class="state-card__content">
+          <span class="state-card__name">
+            {{ state.name }}
           </span>
 
-          <span class="state-card__content">
-            <span class="state-card__name">
-              {{ state.name }}
-            </span>
-
-            <span class="state-card__status">
-              {{ state.isActive ? 'Available now' : 'Coming soon' }}
-            </span>
+          <span class="state-card__status">
+            {{ state.isActive ? 'Available now' : 'Coming soon' }}
           </span>
+        </span>
 
-          <span class="state-card__flag-wrapper">
-            <img
-              class="state-card__flag"
-              [alt]="state.name + ' state flag'"
-              [src]="
-                '/assets/images/state-flags/' +
-                state.abbreviation.toLowerCase() +
-                '.svg'
-              "
-            />
-          </span>
-        </a>
+        <span class="state-card__flag-wrapper">
+          <img class="state-card__flag" [alt]="state.name + ' state flag'" [src]="
+    '/assets/images/state-flags/' +
+    state.abbreviation.toLowerCase() +
+    '.svg'
+  " loading="lazy" decoding="async" width="56" height="36" />
+        </span>
+      </a>
       }
     </div>
   </div>
