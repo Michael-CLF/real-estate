@@ -86,6 +86,27 @@
             placeholder="NavStreet" />
         </div>
 
+         <section class="form-section">
+          <h3>Search Engine Optimization</h3>
+
+          <div class="form-group">
+            <label for="seo-title">SEO Page Title</label>
+            <input id="seo-title" name="seoTitle" type="text" [(ngModel)]="form.seoTitle"
+              placeholder="How to Sell Your House Without a Realtor | NavStreet" />
+            <small>
+              Recommended length: approximately 50–60 characters.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="meta-description">Meta Description</label>
+            <textarea id="meta-description" name="metaDescription" [(ngModel)]="form.metaDescription" rows="3"
+              placeholder="Learn how to sell your home without a real estate agent..."></textarea>
+            <small>
+              Recommended length: approximately 140–160 characters.
+            </small>
+          </div>
+        </section>
 
         <div class="form-group">
           <label for="article-content">Article Content (HTML) *</label>
@@ -158,28 +179,6 @@
             <img [src]="form.featuredImageUrl" [alt]="form.featuredImageAlt || 'Featured image preview'" />
           </div>
           }
-        </section>
-
-        <section class="form-section">
-          <h3>Search Engine Optimization</h3>
-
-          <div class="form-group">
-            <label for="seo-title">SEO Page Title</label>
-            <input id="seo-title" name="seoTitle" type="text" [(ngModel)]="form.seoTitle"
-              placeholder="How to Sell Your House Without a Realtor | NavStreet" />
-            <small>
-              Recommended length: approximately 50–60 characters.
-            </small>
-          </div>
-
-          <div class="form-group">
-            <label for="meta-description">Meta Description</label>
-            <textarea id="meta-description" name="metaDescription" [(ngModel)]="form.metaDescription" rows="3"
-              placeholder="Learn how to sell your home without a real estate agent..."></textarea>
-            <small>
-              Recommended length: approximately 140–160 characters.
-            </small>
-          </div>
         </section>
 
         <div class="editor-actions">
