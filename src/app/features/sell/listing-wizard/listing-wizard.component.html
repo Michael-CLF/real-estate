@@ -220,7 +220,7 @@
       @case (2) {
       <app-property-details-step [listingUid]="listingUid()" [initialValue]="
                 propertyDetailsData()
-              " [stateCode]="addressData()?.state ?? ''" [showEmailVerification]="!listingUid() && !emailVerificationOpen()" [emailVerificationBusy]="emailVerificationBusy()" (verifyEmailRequested)="openEmailVerification()" (valueChange)="
+              " [stateCode]="addressData()?.state ?? ''" [showEmailVerification]="!listingUid() && !emailVerificationOpen()" [sellerEmailVerified]="sellerEmailVerified()" [emailVerificationBusy]="emailVerificationBusy()" (verifyEmailRequested)="openEmailVerification()" (valueChange)="
                 onPropertyDetailsChange($event)
               " (validityChange)="
                 onStepValidityChange(2, $event)

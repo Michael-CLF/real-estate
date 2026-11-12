@@ -168,6 +168,7 @@ export class PropertyDetailsStepComponent
     input<string | null>(null);
   readonly stateCode = input('');
   readonly showEmailVerification = input(false);
+  readonly sellerEmailVerified = input(false);
   readonly emailVerificationBusy = input(false);
   readonly verifyEmailRequested = output<void>();
   requiresOwnershipFacts(): boolean {const registration=getEnabledStateOfferRegistration(this.stateCode());return registration?.requireOwnershipFacts === true && registration.supportedPropertyTypes.includes(this.form.controls.propertyType.value);}

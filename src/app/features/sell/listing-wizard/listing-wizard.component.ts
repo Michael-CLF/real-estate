@@ -6,6 +6,7 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   OnInit,
   inject,
   signal,
@@ -81,6 +82,13 @@ export class ListingWizardComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userRepository = inject(FirebaseUserRepository);
   private readonly accountState = inject(AccountState);
+  // The authenticated account email is the source of truth for verification.
+  // Recalculate when the seller edits their listing contact email.
+  protected readonly authenticatedEmail = signal('');
+  protected readonly sellerEmailVerified = computed(() => {
+    const listingEmail = this.propertyDetailsData()?.primarySeller?.email?.trim().toLowerCase();
+    return !!listingEmail && listingEmail === this.authenticatedEmail();
+  });
   protected readonly emailVerificationOpen = signal(false);
   protected readonly emailVerificationBusy = signal(false);
   protected readonly emailVerificationSent = signal(false);
@@ -178,6 +186,7 @@ export class ListingWizardComponent implements OnInit {
     }
     
     await auth.authStateReady();
+    this.authenticatedEmail.set(auth.currentUser?.email?.trim().toLowerCase() ?? '');
     await this.initializeDraft();
   }
   private async initializeDraft(): Promise<void> {
@@ -620,6 +629,7 @@ export class ListingWizardComponent implements OnInit {
     }
   }
   protected async openEmailVerification(): Promise<void> {
+    if (this.sellerEmailVerified()) return;
     const seller = this.propertyDetailsData()?.primarySeller;
     if (!seller?.firstName?.trim() || !seller.lastName?.trim() ||
         !seller.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(seller.email.trim()) ||
@@ -641,7 +651,7 @@ export class ListingWizardComponent implements OnInit {
 
   protected async sendListingOtp(): Promise<void> {
     const email = this.propertyDetailsData()?.primarySeller?.email?.trim().toLowerCase();
-    if (!email || this.emailVerificationBusy()) return;
+    if (!email || this.emailVerificationBusy() || this.sellerEmailVerified()) return;
     this.emailVerificationBusy.set(true);
     this.emailVerificationError.set('');
     try {
@@ -698,6 +708,7 @@ export class ListingWizardComponent implements OnInit {
       }
       await this.accountState.refresh();
       if (!this.accountState.isActive()) throw new Error('Your NavStreet account could not be activated.');
+      this.authenticatedEmail.set(email);
       // Email verification is independent of the rest of Section 2.
       // Keep the seller on this step until all required property fields are valid.
       this.emailVerificationOpen.set(false);

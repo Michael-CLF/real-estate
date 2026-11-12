@@ -922,7 +922,14 @@
         </div>
       </div>
       <p class="additional-seller__description">Editing these listing contact fields does not change your NavStreet sign-in email.</p>
-      @if (showEmailVerification()) {
+      @if (sellerEmailVerified()) {
+        <div class="seller-email-verification" style="margin: 1rem 0;">
+          <button type="button" class="button button--secondary" disabled aria-label="Email verified">
+            ✓ Email Verified
+          </button>
+          <p class="additional-seller__description">This email address is verified.</p>
+        </div>
+      } @else if (showEmailVerification()) {
         <div class="seller-email-verification" style="margin: 1rem 0;">
           <button type="button" id="verify-btn" class="button button--secondary"
             [disabled]="primarySeller.invalid || emailVerificationBusy()"
