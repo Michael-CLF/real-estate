@@ -32,9 +32,6 @@ if (getApps().length === 0) {
 const stripeSecretKey =
   defineSecret('STRIPE_SECRET_KEY');
 
-const DEVELOPMENT_SITE_URL =
-  'http://localhost:4200';
-
 
 interface CreateIdentityVerificationSessionRequest {
   listingUid: string;
@@ -140,9 +137,21 @@ export const createIdentityVerificationSession =
       }
 
 
+      const applicationUrl =
+        process.env['NAVSTREET_APP_URL']
+          ?.trim()
+          .replace(/\/$/, '');
+
+      if (!applicationUrl) {
+        throw new HttpsError(
+          'failed-precondition',
+          'NAVSTREET_APP_URL is not configured.'
+        );
+      }
+
       const verificationReturnUrl =
-        `${DEVELOPMENT_SITE_URL}` +
-        `/sell/listings/${listingUid}` +
+        `${applicationUrl}` +
+        `/sell/listings/${encodeURIComponent(listingUid)}` +
         `/verification-return`;
 
 
@@ -247,7 +256,7 @@ export const createIdentityVerificationSession =
       const user =
         userSnapshot.exists
           ? userSnapshot.data() as
-              UserIdentityDocument
+          UserIdentityDocument
           : undefined;
 
       const previouslyVerifiedDraft =
@@ -287,7 +296,7 @@ export const createIdentityVerificationSession =
               publishedListing['workflow']
                 ?.identityVerified === true ||
               publishedListing['identityStatus'] ===
-                'verified'
+              'verified'
             );
           }
         );
@@ -314,9 +323,9 @@ export const createIdentityVerificationSession =
 
             ...(verifiedSessionId
               ? {
-                  'identityVerification.stripeVerificationSessionId':
-                    verifiedSessionId
-                }
+                'identityVerification.stripeVerificationSessionId':
+                  verifiedSessionId
+              }
               : {}),
 
             'identityVerification.updatedAt':
@@ -335,12 +344,12 @@ export const createIdentityVerificationSession =
 
               ...(verifiedSessionId
                 ? {
-                    stripeIdentityVerificationSessionId:
-                      verifiedSessionId,
+                  stripeIdentityVerificationSessionId:
+                    verifiedSessionId,
 
-                    'identityVerification.stripeVerificationSessionId':
-                      verifiedSessionId
-                  }
+                  'identityVerification.stripeVerificationSessionId':
+                    verifiedSessionId
+                }
                 : {}),
 
               'identityVerification.status':
