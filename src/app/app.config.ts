@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 
 import { provideHttpClient } from '@angular/common/http';
+import { provideClientHydration } from '@angular/platform-browser';
 
 import {
   provideRouter,
@@ -20,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     }),
 
     provideHttpClient(),
+    provideClientHydration(),
 
     provideRouter(
       routes,
