@@ -166,6 +166,21 @@ export class RegisterComponent implements OnInit {
     );
   }
   ngOnInit(): void {
+    // A seller who completed Sections 1–2 should not retype contact details.
+    if (this.route.snapshot.queryParamMap.get('returnUrl')?.startsWith('/sell/new')) {
+      try {
+        const pending = JSON.parse(sessionStorage.getItem('navstreet:pending-listing:v1') ?? 'null');
+        const seller = pending?.propertyDetails?.primarySeller;
+        if (seller) {
+          const digits = String(seller.phone ?? '').replace(/\D/g, '').slice(0, 10);
+          this.registerForm.patchValue({
+            firstName: seller.firstName ?? '', lastName: seller.lastName ?? '',
+            email: seller.email ?? '',
+            phone: digits.length === 10 ? `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}` : '',
+          });
+        }
+      } catch { /* Invalid browser backup must not block registration. */ }
+    }
     const email =
       this.route.snapshot.queryParamMap
         .get('email')

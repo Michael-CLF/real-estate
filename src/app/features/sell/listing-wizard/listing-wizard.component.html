@@ -1,4 +1,33 @@
 <section class="listing-wizard">
+  @if (emailVerificationOpen()) {
+    <div class="listing-email-overlay" role="presentation">
+      <div class="listing-email-dialog" role="dialog" aria-modal="true" aria-labelledby="listing-email-title">
+        <h2 id="listing-email-title">Verify your email to save your listing</h2>
+        <p class="verify">We've kept your property details here. Enter the six-digit code sent to
+          <strong>{{ propertyDetailsData()?.primarySeller?.email }}</strong>.</p>
+        @if (emailVerificationSent()) {
+          <label class="verify" for="listing-email-code">Six-digit verification code</label>
+          <input id="listing-email-code" type="text" inputmode="numeric" autocomplete="one-time-code"
+            maxlength="6" [value]="emailVerificationCode()"
+            (input)="onListingCodeInput($event)" />
+          <button type="button" class="button button--primary"
+            [disabled]="emailVerificationBusy() || emailVerificationCode().length !== 6"
+            (click)="verifyListingOtp()">{{ emailVerificationBusy() ? 'Verifying…' : 'Verify and continue' }}</button>
+          <button type="button" class="button button--secondary" [disabled]="emailVerificationBusy()"
+            (click)="sendListingOtp()">Resend code</button>
+        } @else {
+          <p>{{ emailVerificationBusy() ? 'Sending verification code…' : 'Ready to send verification code.' }}</p>
+          @if (!emailVerificationBusy()) {
+            <button type="button" class="button button--primary" (click)="sendListingOtp()">Send code</button>
+          }
+        }
+        @if (emailVerificationError()) { <p role="alert" class="wizard-save-error">{{ emailVerificationError() }}</p> }
+        <button type="button" class="button button--secondary" [disabled]="emailVerificationBusy()"
+          (click)="closeEmailVerification()">Cancel</button>
+      </div>
+    </div>
+  }
+
   <div class="listing-wizard__container">
     @if (isInitializing()) {
     <div class="wizard-loading">
@@ -191,11 +220,12 @@
       @case (2) {
       <app-property-details-step [listingUid]="listingUid()" [initialValue]="
                 propertyDetailsData()
-              " [stateCode]="addressData()?.state ?? ''" (valueChange)="
+              " [stateCode]="addressData()?.state ?? ''" [showEmailVerification]="!listingUid() && !emailVerificationOpen()" [emailVerificationBusy]="emailVerificationBusy()" (verifyEmailRequested)="openEmailVerification()" (valueChange)="
                 onPropertyDetailsChange($event)
               " (validityChange)="
                 onStepValidityChange(2, $event)
               " />
+
       }
 
       @case (3) {

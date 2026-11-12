@@ -29,6 +29,10 @@ import {
   FirebaseUserRepository
 } from '../../../../core/infrastructure/firebase/firebase-user.repository';
 
+import {
+  AccountState
+} from '../../../../core/authentication/state/account.state';
+
 @Component({
   selector: 'app-sign-in',
   standalone: true,
@@ -49,6 +53,9 @@ export class SignInComponent {
 
   private readonly userRepository =
     inject(FirebaseUserRepository);
+
+  private readonly accountState =
+    inject(AccountState);
 
   private readonly router =
     inject(Router);
@@ -197,14 +204,13 @@ export class SignInComponent {
         );
 
       /*
-       * OTP authentication can create a Firebase Auth
-       * identity even when the person has never completed
-       * NavStreet registration.
-       *
-       * Do not leave that orphaned Firebase session signed in.
+       * OTP already verified the email and established Firebase
+       * authentication. Preserve that session so registration
+       * can complete the missing NavStreet profile without
+       * sending a second verification code.
        */
       if (!existingUser) {
-        await this.authService.logout();
+        await this.accountState.refresh();
 
         sessionStorage.removeItem(
           'pendingOtpEmail'

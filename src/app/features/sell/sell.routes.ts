@@ -40,11 +40,8 @@ export const SELL_ROUTES:
       component:
         PublicLayoutComponent,
 
-      canActivate: [
-        authGuard,
-        accountGuard
-      ],
-
+      // The public /sell/new entry point is open; each account-specific
+      // child route retains its own authentication and account guards.
       children: [
         /*
          * /sell
@@ -88,6 +85,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/edit',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               './listing-wizard/listing-wizard.component'
@@ -104,6 +103,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/manage/disclosures',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -122,6 +123,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/manage/edit',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-edit/listing-edit.component'
@@ -138,6 +141,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/manage/inquiries',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -156,6 +161,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/manage/marketing',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-marketing/marketing-toolkit/marketing-toolkit.component'
@@ -172,6 +179,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/manage/transaction',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -190,6 +199,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/manage/status',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-status/listing-status.component'
@@ -206,6 +217,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/manage/activity',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -224,6 +237,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/manage',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-management/listing-management.component'
@@ -240,6 +255,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/enhancements',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -258,6 +275,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/enhancements/construction',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-enhancement/construction-enhancement/construction-enhancement.component'
@@ -274,6 +293,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/enhancements/interior',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -292,6 +313,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/enhancements/kitchen',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-enhancement/kitchen-enhancement/kitchen-enhancement.component'
@@ -308,6 +331,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/enhancements/bedrooms-bathrooms',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -326,6 +351,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/enhancements/parking-storage',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-enhancement/parking-storage-enhancement/parking-storage-enhancement.component'
@@ -342,6 +369,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/enhancements/outdoor-living',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -360,6 +389,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/enhancements/systems-utilities',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-enhancement/systems-utilities-enhancement/systems-utilities-enhancement.component'
@@ -376,6 +407,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/enhancements/technology-security',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -394,6 +427,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/enhancements/accessibility',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-enhancement/accessibility-enhancement/accessibility-enhancement.component'
@@ -410,6 +445,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/enhancements/community-amenities',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -428,6 +465,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/enhancements/schools',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/listing-enhancement/schools-enhancement/schools-enhancement.component'
@@ -444,6 +483,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/showing-availability',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(
@@ -462,6 +503,8 @@ export const SELL_ROUTES:
           path:
             'listings/:listingUid/showing-requests',
 
+          canActivate: [authGuard, accountGuard],
+
           loadComponent: () =>
             import(
               '../dashboard/showings/showing-requests/showing-requests.component'
@@ -478,6 +521,8 @@ export const SELL_ROUTES:
         {
           path:
             'listings/:listingUid/showing-requests/:showingRequestUid',
+
+          canActivate: [authGuard, accountGuard],
 
           loadComponent: () =>
             import(

@@ -12,6 +12,11 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { auth } from '../../../core/infrastructure/firebase/firebase';
+import { GuestListingSessionService } from './guest-listing-session.service';
+import { OtpService } from '../../../core/authentication/services/otp.service';
+import { AuthService } from '../../../core/authentication/services/auth.service';
+import { FirebaseUserRepository } from '../../../core/infrastructure/firebase/firebase-user.repository';
+import { AccountState } from '../../../core/authentication/state/account.state';
 import { ListingService } from '../../../core/domains/listings/services/listing.service';
 import { IdentityVerificationService } from '../../identity/services/identity-verification.service';
 import {
@@ -71,6 +76,16 @@ interface WizardStep {
 })
 export class ListingWizardComponent implements OnInit {
   private readonly listingService = inject(ListingService);
+  private readonly guestSession = inject(GuestListingSessionService);
+  private readonly otpService = inject(OtpService);
+  private readonly authService = inject(AuthService);
+  private readonly userRepository = inject(FirebaseUserRepository);
+  private readonly accountState = inject(AccountState);
+  protected readonly emailVerificationOpen = signal(false);
+  protected readonly emailVerificationBusy = signal(false);
+  protected readonly emailVerificationSent = signal(false);
+  protected readonly emailVerificationCode = signal('');
+  protected readonly emailVerificationError = signal('');
   private readonly identityVerificationService = inject(
     IdentityVerificationService,
   );
@@ -138,37 +153,49 @@ export class ListingWizardComponent implements OnInit {
   constructor() {
     afterRenderEffect({
       write: () => {
-        if (
-          !this.isInitializing() &&
-          !this.showDocumentChecklist() &&
-          this.listingContentComplete()
-        ) {
-          // This card replaces the wizard in-place, so router scroll restoration
-          // does not run. Reset after the card has rendered, without animation.
+        // Scroll after the new wizard section has rendered.
+        this.currentStep();
+        this.showDocumentChecklist();
+        if (!this.isInitializing()) {
           window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         }
       },
     });
   }
   async ngOnInit(): Promise<void> {
+    // Never overwrite an existing authenticated draft with browser-session data.
+    if (!this.route.snapshot.paramMap.get('listingUid')) {
+      const saved = this.guestSession.load();
+      if (saved) {
+        this.addressData.set(saved.address);
+        this.propertyDetailsData.set(saved.propertyDetails);
+        this.checklistLocation.set(saved.checklistLocation);
+        this.checklistState.set(saved.checklistState);
+        this.currentStep.set(saved.currentStep);
+        if (saved.address) this.setStepValidity(1, true);
+        // Section 2 validity must be recalculated by its reactive form.
+      }
+    }
+    
+    await auth.authStateReady();
     await this.initializeDraft();
   }
   private async initializeDraft(): Promise<void> {
     const user = auth.currentUser;
-    if (!user) {
-      this.initializationError.set(
-        'Your authentication session could not be found. Please sign in again.',
-      );
-      this.isInitializing.set(false);
-      return;
-    }
     const routeListingUid = this.route.snapshot.paramMap.get('listingUid');
     try {
       if (routeListingUid) {
+        if (!user) throw new Error('Please sign in to edit this listing.');
         await this.loadExistingDraft(routeListingUid, user.uid);
         return;
       }
-      this.showDocumentChecklist.set(true);
+      // Returning from email verification: save both pending sections before
+      // entering the authenticated listing workspace.
+      if (user && this.route.snapshot.queryParamMap.get('resumeGuest') === '1') {
+        await this.persistPendingGuestListing(user.uid);
+        return;
+      }
+      this.showDocumentChecklist.set(!this.guestSession.load()?.address);
     } catch (error) {
       console.error('Failed to initialize listing draft.', error);
       this.initializationError.set(
@@ -192,6 +219,7 @@ export class ListingWizardComponent implements OnInit {
     if (this.isSaving() || !LISTING_CHECKLIST_STATES.some(state => state.abbreviation === stateCode)) return;
     this.checklistState.set(stateCode);
     this.checklistLocation.set(location);
+    this.saveGuestSession();
     if (this.listingUid()) {
       this.showDocumentChecklist.set(false);
       this.scrollToTop();
@@ -199,7 +227,14 @@ export class ListingWizardComponent implements OnInit {
     }
     const user = auth.currentUser;
     if (!user) {
-      this.initializationError.set('Your authentication session could not be found. Please sign in again.');
+      // Guests complete the checklist and first two sections locally.
+      this.addressData.set({
+        addressLine1: '', addressLine2: '', city: location.city ?? '',
+        state: stateCode, zipCode: location.zipCode ?? '', county: location.county ?? '',
+      });
+      this.showDocumentChecklist.set(false);
+      this.saveGuestSession();
+      this.scrollToTop();
       return;
     }
     this.initializationError.set('');
@@ -223,6 +258,30 @@ export class ListingWizardComponent implements OnInit {
       queryParams: { checklistState: this.checklistState(), checklistZip: location?.zipCode, checklistCity: location?.city, checklistCounty: location?.county },
     });
   }
+  private async persistPendingGuestListing(sellerUid: string): Promise<void> {
+    const pending = this.guestSession.load();
+    if (!pending?.address || !pending.propertyDetails || pending.currentStep !== 2) {
+      throw new Error('Your pending listing could not be restored. Please start again.');
+    }
+    const sellerEmail = pending.propertyDetails.primarySeller?.email?.trim().toLowerCase();
+    if (!sellerEmail || sellerEmail !== auth.currentUser?.email?.trim().toLowerCase()) {
+      throw new Error('Please verify the email address entered for the primary seller.');
+    }
+    // Set the draft UID immediately so retries do not accidentally create
+    // multiple drafts within this component instance.
+    if (!this.listingUid()) {
+      this.listingUid.set(await this.listingService.createInitialDraft(sellerUid));
+    }
+    this.addressData.set(pending.address);
+    this.propertyDetailsData.set(pending.propertyDetails);
+    this.currentStep.set(1);
+    await this.saveCurrentStep();
+    this.currentStep.set(2);
+    await this.saveCurrentStep();
+    const listingUid = this.listingUid()!;
+    await this.router.navigate(['/sell/listings', listingUid, 'edit'], { replaceUrl: true });
+  }
+
   private async loadExistingDraft(
     listingUid: string,
     sellerUid: string,
@@ -416,10 +475,12 @@ export class ListingWizardComponent implements OnInit {
   }
   protected onAddressChange(value: AddressFormValue): void {
     this.addressData.set(value);
+    this.saveGuestSession();
     this.invalidateCertification();
   }
   protected onPropertyDetailsChange(value: PropertyDetailsFormValue): void {
     this.propertyDetailsData.set(value);
+    this.saveGuestSession();
     this.invalidateCertification();
   }
   protected onPropertyFeaturesChange(value: PropertyFeaturesStepValue): void {
@@ -509,6 +570,7 @@ export class ListingWizardComponent implements OnInit {
       return;
     }
     this.currentStep.update((step) => step - 1);
+    this.saveGuestSession();
     this.scrollToTop();
   }
   protected async nextStep(): Promise<void> {
@@ -522,9 +584,28 @@ export class ListingWizardComponent implements OnInit {
     this.saveError.set('');
     this.isSaving.set(true);
     try {
-      await this.saveCurrentStep();
+      if (auth.currentUser && !this.listingUid() && this.currentStep() === 2 &&
+          this.guestSession.load()?.currentStep === 2) {
+        this.saveGuestSession();
+        await this.persistPendingGuestListing(auth.currentUser.uid);
+        return;
+      }
+      if (!auth.currentUser && !this.listingUid()) {
+        if (this.currentStep() === 1) {
+          this.addCompletedStep('address');
+        } else if (this.currentStep() === 2) {
+          const seller = this.propertyDetailsData()?.primarySeller;
+          if (!seller) throw new Error('Please complete the seller contact information.');
+          this.saveGuestSession();
+          await this.openEmailVerification();
+          return;
+        }
+      } else {
+        await this.saveCurrentStep();
+      }
       if (this.currentStep() < this.steps.length) {
         this.currentStep.update((step) => step + 1);
+        this.saveGuestSession();
         this.scrollToTop();
       }
     } catch (error) {
@@ -538,6 +619,100 @@ export class ListingWizardComponent implements OnInit {
       this.isSaving.set(false);
     }
   }
+  protected async openEmailVerification(): Promise<void> {
+    const seller = this.propertyDetailsData()?.primarySeller;
+    if (!seller?.firstName?.trim() || !seller.lastName?.trim() ||
+        !seller.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(seller.email.trim()) ||
+        seller.phone.replace(/\D/g, '').length !== 10) {
+      this.saveError.set('Complete all four primary seller contact fields first.');
+      return;
+    }
+    this.saveGuestSession();
+    this.emailVerificationError.set('');
+    this.emailVerificationOpen.set(true);
+    this.emailVerificationSent.set(false);
+    this.emailVerificationCode.set('');
+    await this.sendListingOtp();
+  }
+
+  protected closeEmailVerification(): void {
+    if (!this.emailVerificationBusy()) this.emailVerificationOpen.set(false);
+  }
+
+  protected async sendListingOtp(): Promise<void> {
+    const email = this.propertyDetailsData()?.primarySeller?.email?.trim().toLowerCase();
+    if (!email || this.emailVerificationBusy()) return;
+    this.emailVerificationBusy.set(true);
+    this.emailVerificationError.set('');
+    try {
+      await this.otpService.sendOtp(email);
+      this.emailVerificationSent.set(true);
+    } catch (error) {
+      this.emailVerificationError.set(error instanceof Error ? error.message : 'Could not send the verification code.');
+    } finally {
+      this.emailVerificationBusy.set(false);
+    }
+  }
+
+  protected onListingCodeInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '').slice(0, 6);
+    input.value = digits;
+    this.emailVerificationCode.set(digits);
+  }
+
+  protected async verifyListingOtp(): Promise<void> {
+    const seller = this.propertyDetailsData()?.primarySeller;
+    const email = seller?.email?.trim().toLowerCase();
+    if (!seller || !email || !/^\d{6}$/.test(this.emailVerificationCode()) || this.emailVerificationBusy()) return;
+    this.emailVerificationBusy.set(true);
+    this.emailVerificationError.set('');
+    try {
+      await this.otpService.verifyOtp(email, this.emailVerificationCode());
+      const user = this.authService.currentUser;
+      if (!user || user.email?.trim().toLowerCase() !== email) {
+        throw new Error('The verified email does not match the primary seller email.');
+      }
+      const existing = await this.userRepository.getById(user.uid);
+      if (!existing) {
+        await this.userRepository.create({
+          uid: user.uid,
+          firstName: seller.firstName.trim(),
+          lastName: seller.lastName.trim(),
+          displayName: `${seller.firstName.trim()} ${seller.lastName.trim()}`,
+          email,
+          phone: seller.phone.replace(/\D/g, ''),
+          photoURL: null,
+          emailVerified: true,
+          status: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastLoginAt: new Date(),
+        });
+      } else {
+        await this.userRepository.update(user.uid, {
+          emailVerified: true,
+          lastLoginAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+      await this.accountState.refresh();
+      if (!this.accountState.isActive()) throw new Error('Your NavStreet account could not be activated.');
+      // Email verification is independent of the rest of Section 2.
+      // Keep the seller on this step until all required property fields are valid.
+      this.emailVerificationOpen.set(false);
+      if (!this.stepValidity()[2]) {
+        this.saveError.set('Email verified. Complete the remaining required property details, then select Continue.');
+        return;
+      }
+      await this.persistPendingGuestListing(user.uid);
+    } catch (error) {
+      this.emailVerificationError.set(error instanceof Error ? error.message : 'Verification failed. Try again.');
+    } finally {
+      this.emailVerificationBusy.set(false);
+    }
+  }
+
   protected goToStep(step: number): void {
     if (
       step < this.currentStep() &&
@@ -545,6 +720,7 @@ export class ListingWizardComponent implements OnInit {
       !this.isSavingPhotos()
     ) {
       this.currentStep.set(step);
+      this.saveGuestSession();
       this.scrollToTop();
     }
   }
@@ -574,9 +750,9 @@ export class ListingWizardComponent implements OnInit {
           !propertyDetails ||
           !propertyDetails.propertyType ||
           (propertyDetails.propertyType !== 'land' && (propertyDetails.bedrooms === null ||
-          propertyDetails.bathrooms === null ||
-          propertyDetails.squareFeet === null ||
-          propertyDetails.yearBuilt === null))
+            propertyDetails.bathrooms === null ||
+            propertyDetails.squareFeet === null ||
+            propertyDetails.yearBuilt === null))
         ) {
           throw new Error('Please complete all required property details.');
         }
@@ -603,7 +779,7 @@ export class ListingWizardComponent implements OnInit {
             fullBathrooms: propertyDetails.propertyType === 'land' ? 0 : Math.floor(propertyDetails.bathrooms!),
             halfBathrooms: propertyDetails.propertyType === 'land' || propertyDetails.bathrooms! % 1 === 0 ? 0 : 1,
             squareFeet: propertyDetails.propertyType === 'land' ? 0 : propertyDetails.squareFeet!,
-            ...(propertyDetails.propertyType !== 'land' ? {yearBuilt:propertyDetails.yearBuilt!} : {}),
+            ...(propertyDetails.propertyType !== 'land' ? { yearBuilt: propertyDetails.yearBuilt! } : {}),
             lotSize: propertyDetails.lotSize ?? undefined,
             lotSizeUnit:
               propertyDetails.lotSize !== null
@@ -624,6 +800,8 @@ export class ListingWizardComponent implements OnInit {
           sellerStatements,
         );
         this.addCompletedStep('property_details');
+        // Both sections are now durably saved to the authenticated draft.
+        this.guestSession.clear();
         return;
       }
       case 3: {
@@ -805,6 +983,19 @@ export class ListingWizardComponent implements OnInit {
       URL.revokeObjectURL(photo.thumbnail.previewUrl);
     }
   }
+  private saveGuestSession(): void {
+    // Only a new, not-yet-persisted listing uses the temporary browser backup.
+    // Never save data from an existing listing edit to this shared session key.
+    if (this.route.snapshot.paramMap.get('listingUid') || this.currentStep() > 2) return;
+    this.guestSession.save({
+      address: this.addressData(),
+      propertyDetails: this.propertyDetailsData(),
+      checklistLocation: this.checklistLocation(),
+      checklistState: this.checklistState(),
+      currentStep: this.currentStep() === 2 ? 2 : 1,
+    });
+  }
+
   private scrollToTop(): void {
     window.scrollTo({
       top: 0,

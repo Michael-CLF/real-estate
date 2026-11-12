@@ -64,6 +64,14 @@ form {
   line-height: 1.5;
 }
 
+#verify-btn {
+  padding: 11px 12px;
+  color: #ffffff;
+  background-color: #154360;
+  border-radius: 6px;
+  border: none;
+}
+
 .colorado-loan__option,
 .colorado-loan__escrow label {
   display: flex;
@@ -529,3 +537,6 @@ form {
   opacity: 1;
   -webkit-text-fill-color: #475569;
 }
+
+.additional-seller .two-column { margin-top: 1rem; }
+.additional-seller .field input { width: 100%; box-sizing: border-box; }

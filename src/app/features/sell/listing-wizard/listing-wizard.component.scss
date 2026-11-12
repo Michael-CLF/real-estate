@@ -200,6 +200,12 @@
   letter-spacing: .12em;
 }
 
+#listing-email-title{
+  font-size: 2rem;
+  color: #154360;
+  text-align: center;
+}
+
 .verification-preparation h1 {
   margin: 0;
   color: #ffffff;
@@ -211,8 +217,12 @@
   max-width: 480px;
   margin: 1rem auto 0;
   color: #d7e2ea;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   line-height: 1.65;
+}
+
+.verify{
+  font-size: 1.15rem;
 }
 
 .verification-preparation__security {
@@ -324,6 +334,10 @@
   color: #154360;
 }
 
+#verify-btn {
+  padding: 10px 12px;
+}
+
 @media (max-width: 900px) {
   .listing-wizard {
     padding: 2rem 1rem 3rem;
@@ -400,3 +414,9 @@
     width: 100%;
   }
 }
+
+.listing-email-verification-entry { margin: 1.25rem 0; }
+.listing-email-verification-entry p { margin: .5rem 0; }
+.listing-email-overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.listing-email-dialog { width: min(100%, 480px); max-height: 90vh; overflow: auto; background: white; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 16px 60px rgba(0,0,0,.22); }
+.listing-email-dialog input { width: 100%; padding: .8rem; font-size: 1.2rem; letter-spacing: .2rem; }

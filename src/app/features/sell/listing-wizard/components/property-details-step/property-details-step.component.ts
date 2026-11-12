@@ -38,6 +38,7 @@ import {
 import { showsStateListingPropertyField, getStateListingPackage, getStateListingQuestionGroups, getStateListingFormFactory, getStateListingFormValidator } from '../../../../../core/domains/listings/state-packages/state-listing.registry';
 import { requiresStateListingField } from '../../../../../core/domains/listings/state-packages/state-listing-package';
 import { auth } from '../../../../../core/infrastructure/firebase/firebase';
+import { FirebaseUserRepository } from '../../../../../core/infrastructure/firebase/firebase-user.repository';
 type TexasLeaseDocumentType = Extract<
   DisclosureDocumentType,
   | 'texas-residential-leases'
@@ -109,6 +110,8 @@ export interface PropertyDetailsSellerStatementsFormValue {
   naturalResourceLeasesExist: boolean | null;
   methamphetamineContaminationKnown: boolean | null;
   additionalSellerIncluded: boolean;
+  additionalSellerFirstName?: string;
+  additionalSellerLastName?: string;
   additionalSellerLegalName: string;
   additionalSellerEmail: string;
   additionalSellerPhone: string;
@@ -123,6 +126,7 @@ export interface PropertyDetailsHoaFormValue {
 }
 export type { ColoradoSellerLoanFormValue } from '../../../../../core/domains/listings/state-packages/colorado/colorado-listing-form';
 export interface PropertyDetailsFormValue {
+  primarySeller?: { firstName: string; lastName: string; email: string; phone: string };
   coloradoPropertyFacts?: ColoradoPropertyFacts;
   coloradoAssumableLoan?: ColoradoSellerLoanFormValue | null;
   propertyType: PropertyType | '';
@@ -155,6 +159,7 @@ export interface PropertyDetailsFormValue {
 export class PropertyDetailsStepComponent
   implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly userRepository = inject(FirebaseUserRepository);
   private readonly disclosureService =
     inject(ListingDisclosureService);
   readonly initialValue =
@@ -162,6 +167,9 @@ export class PropertyDetailsStepComponent
   readonly listingUid =
     input<string | null>(null);
   readonly stateCode = input('');
+  readonly showEmailVerification = input(false);
+  readonly emailVerificationBusy = input(false);
+  readonly verifyEmailRequested = output<void>();
   requiresOwnershipFacts(): boolean {const registration=getEnabledStateOfferRegistration(this.stateCode());return registration?.requireOwnershipFacts === true && registration.supportedPropertyTypes.includes(this.form.controls.propertyType.value);}
   requiresUnitCount(): boolean {return Boolean(getEnabledStateOfferRegistration(this.stateCode())?.maximumDwellingUnits);}
   contractCoverageMessage(): string | null {
@@ -516,15 +524,29 @@ export class PropertyDetailsStepComponent
         additionalSellerIncluded: [
           false,
         ],
+        additionalSellerFirstName: [''],
+        additionalSellerLastName: [''],
         additionalSellerLegalName: [''],
         additionalSellerEmail: [''],
         additionalSellerPhone: [''],
       }),
   });
+  readonly primarySeller = this.fb.nonNullable.group({
+    firstName: ['', [Validators.required, Validators.maxLength(100)]],
+    lastName: ['', [Validators.required, Validators.maxLength(100)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(320)]],
+    phone: ['', [Validators.required, Validators.pattern(/^(?:\(\d{3}\) \d{3}-\d{4}|\d{10})$/)]],
+  });
   constructor() {
     effect(() => {
       const initialValue =
         this.initialValue();
+      if (initialValue?.primarySeller) {
+        this.primarySeller.patchValue({
+          ...initialValue.primarySeller,
+          phone: this.formatSellerPhone(initialValue.primarySeller.phone ?? ''),
+        }, { emitEvent: false });
+      }
       if (initialValue) {
         this.form.patchValue(
           {
@@ -630,6 +652,14 @@ export class PropertyDetailsStepComponent
         false,
       );
       this.configureLeaseValidators();
+      const coSeller = this.form.controls.sellerStatements.controls;
+      if (coSeller.additionalSellerIncluded.value &&
+          !coSeller.additionalSellerFirstName.value && !coSeller.additionalSellerLastName.value) {
+        const legalName = coSeller.additionalSellerLegalName.value.trim();
+        const parts = legalName.split(/\s+/);
+        coSeller.additionalSellerFirstName.setValue(parts.shift() ?? '', {emitEvent:false});
+        coSeller.additionalSellerLastName.setValue(parts.join(' '), {emitEvent:false});
+      }
       this.configureAdditionalSellerValidators(
         this.form.controls.sellerStatements
           .controls.additionalSellerIncluded
@@ -638,7 +668,7 @@ export class PropertyDetailsStepComponent
       );
       configureListingPropertyTypeControls(this.form.controls,this.form.controls.propertyType.value,this.currentYear);
       this.validityChange.emit(
-        this.form.valid,
+        this.form.valid && this.primarySeller.valid,
       );
       const derivedLead = this.form.controls.sellerStatements.controls.leadBasedPaintApplies.value;
       if (initialValue && typeof derivedLead === 'boolean' &&
@@ -698,6 +728,13 @@ export class PropertyDetailsStepComponent
         this.emitFormState();
       },
     );
+    this.primarySeller.controls.phone.valueChanges.subscribe(value => {
+      const formatted = this.formatSellerPhone(value);
+      if (formatted !== value) {
+        this.primarySeller.controls.phone.setValue(formatted, { emitEvent: false });
+      }
+    });
+    this.primarySeller.valueChanges.subscribe(() => this.emitFormState());
     this.form.valueChanges.subscribe(() => {
       this.configureOwnershipValidators();
       this.configureStateStatementValidators();
@@ -709,7 +746,25 @@ export class PropertyDetailsStepComponent
       this.emitFormState();
     });
   }
+  async loadPrimarySellerProfile(): Promise<void> {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    try {
+      const profile = await this.userRepository.getById(currentUser.uid);
+      if (!profile) return;
+      const existing = this.primarySeller.getRawValue();
+      this.primarySeller.patchValue({
+        firstName: existing.firstName || profile.firstName || '',
+        lastName: existing.lastName || profile.lastName || '',
+        email: existing.email || profile.email || currentUser.email || '',
+        phone: this.formatSellerPhone(existing.phone || profile.phone || ''),
+      });
+    } catch (error) {
+      console.error('Unable to prefill seller contact information.', error);
+    }
+  }
   ngOnInit(): void {
+    void this.loadPrimarySellerProfile();
     this.configureOwnershipValidators();
     this.form.controls.propertyType.valueChanges.subscribe(type => {
       synchronizeListingCondominiumOwnership(this.form.controls.sellerStatements.controls.contractFacts, type);
@@ -1063,6 +1118,24 @@ export class PropertyDetailsStepComponent
     control.clearValidators();
     control.updateValueAndValidity({emitEvent: false});
   }
+  protected formatSellerPhone(value: string): string {
+    const digits = String(value ?? '').replace(/\D/g, '').slice(0, 10);
+    if (!digits) return '';
+    if (digits.length < 4) return `(${digits}`;
+    if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  protected onSellerPhoneInput(event: Event, coSeller = false): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = this.formatSellerPhone(input.value);
+    const control = coSeller
+      ? this.form.controls.sellerStatements.controls.additionalSellerPhone
+      : this.primarySeller.controls.phone;
+    control.setValue(formatted);
+    input.value = formatted;
+  }
+
   private configureAdditionalSellerValidators(
     included: boolean,
     clearValues: boolean,
@@ -1071,11 +1144,15 @@ export class PropertyDetailsStepComponent
       this.form.controls.sellerStatements
         .controls;
     const fields = [
+      controls.additionalSellerFirstName,
+      controls.additionalSellerLastName,
       controls.additionalSellerLegalName,
       controls.additionalSellerEmail,
       controls.additionalSellerPhone,
     ];
     if (included) {
+      controls.additionalSellerFirstName.setValidators([Validators.required, Validators.maxLength(100)]);
+      controls.additionalSellerLastName.setValidators([Validators.required, Validators.maxLength(100)]);
       controls.additionalSellerLegalName.setValidators(
         [
           Validators.required,
@@ -1092,7 +1169,7 @@ export class PropertyDetailsStepComponent
       controls.additionalSellerPhone.setValidators(
         [
           Validators.required,
-          Validators.maxLength(50),
+          Validators.pattern(/^(?:\(\d{3}\) \d{3}-\d{4}|\d{10})$/),
         ],
       );
     } else {
@@ -1114,12 +1191,18 @@ export class PropertyDetailsStepComponent
     });
   }
   private emitFormState(): void {
-    this.valueChange.emit(
-      this.form.getRawValue() as PropertyDetailsFormValue,
-    );
-    this.validityChange.emit(
-      this.form.valid,
-    );
+    const coSeller = this.form.controls.sellerStatements.controls;
+    if (coSeller.additionalSellerIncluded.value) {
+      coSeller.additionalSellerLegalName.setValue(
+        [coSeller.additionalSellerFirstName.value.trim(), coSeller.additionalSellerLastName.value.trim()].filter(Boolean).join(' '),
+        {emitEvent:false},
+      );
+    }
+    this.valueChange.emit({
+      ...this.form.getRawValue(),
+      primarySeller: this.primarySeller.getRawValue(),
+    } as PropertyDetailsFormValue);
+    this.validityChange.emit(this.form.valid && this.primarySeller.valid);
   }
   protected stateQuestionControl(fieldPath: string): FormControl<boolean | null> {
     const control = this.form.get(fieldPath);

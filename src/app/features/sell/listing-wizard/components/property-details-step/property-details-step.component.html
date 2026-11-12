@@ -874,73 +874,113 @@
         }
       </fieldset>
     }
-    <fieldset class="additional-seller" formGroupName="sellerStatements">
-      <legend>Additional Seller</legend>
-      <p class="additional-seller__description">
-        Add another property owner who must appear on offers and sign the
-        purchase agreement.
-      </p>
-      <label class="additional-seller__option">
-        <input type="checkbox" formControlName="additionalSellerIncluded" />
-        <span>Include a co-seller on this listing</span>
-      </label>
-      @if (
-      form.controls.sellerStatements.controls.additionalSellerIncluded.value
-      ) {
-      <div class="three-column">
+    <fieldset class="additional-seller">
+      <legend>Sellers</legend>
+      <p class="additional-seller__description">Primary seller contact information for this listing.</p>
+      <div class="two-column" [formGroup]="primarySeller">
         <div class="field">
-          <label for="additionalSellerLegalName">
-            Co-seller legal name
-          </label>
-          <input id="additionalSellerLegalName" type="text" formControlName="additionalSellerLegalName"
-            maxlength="300" />
-          @if (
-          form.controls.sellerStatements.controls.additionalSellerLegalName.touched
-          ) {
-          @if (
-          form.controls.sellerStatements.controls.additionalSellerLegalName.hasError('required')
-          ) {
-          <p class="field-error">
-            Enter the co-seller’s legal name.
-          </p>
-          }
+          <label for="primarySellerFirstName">First name *</label>
+          <input id="primarySellerFirstName" type="text" formControlName="firstName" maxlength="100" autocomplete="given-name" [attr.aria-invalid]="primarySeller.controls.firstName.touched && primarySeller.controls.firstName.invalid" />
+          @if (primarySeller.controls.firstName.touched) {
+            @if (primarySeller.controls.firstName.hasError('required')) {
+              <p class="field-error">First name is required.</p>
+            }
           }
         </div>
         <div class="field">
-          <label for="additionalSellerEmail">Co-seller email</label>
-          <input id="additionalSellerEmail" type="email" formControlName="additionalSellerEmail" maxlength="320" />
-          @if (
-          form.controls.sellerStatements.controls.additionalSellerEmail.touched
-          ) {
-          @if (
-          form.controls.sellerStatements.controls.additionalSellerEmail.hasError('required')
-          ) {
-          <p class="field-error">
-            Enter the co-seller’s email address.
-          </p>
-          } @else if (
-          form.controls.sellerStatements.controls.additionalSellerEmail.hasError('email')
-          ) {
-          <p class="field-error">
-            Enter a valid co-seller email address.
-          </p>
-          }
+          <label for="primarySellerLastName">Last name *</label>
+          <input id="primarySellerLastName" type="text" formControlName="lastName" maxlength="100" autocomplete="family-name" [attr.aria-invalid]="primarySeller.controls.lastName.touched && primarySeller.controls.lastName.invalid" />
+          @if (primarySeller.controls.lastName.touched) {
+            @if (primarySeller.controls.lastName.hasError('required')) {
+              <p class="field-error">Last name is required.</p>
+            }
           }
         </div>
         <div class="field">
-          <label for="additionalSellerPhone">Co-seller phone</label>
-          <input id="additionalSellerPhone" type="tel" formControlName="additionalSellerPhone" maxlength="50" />
-          @if (
-          form.controls.sellerStatements.controls.additionalSellerPhone.touched &&
-          form.controls.sellerStatements.controls.additionalSellerPhone.hasError('required')
-          ) {
-          <p class="field-error">
-            Enter the co-seller’s phone number.
-          </p>
+          <label for="primarySellerEmail">Email *</label>
+          <input id="primarySellerEmail" type="email" formControlName="email" maxlength="320" autocomplete="email" [attr.aria-invalid]="primarySeller.controls.email.touched && primarySeller.controls.email.invalid" />
+          @if (primarySeller.controls.email.touched) {
+            @if (primarySeller.controls.email.hasError('required')) {
+              <p class="field-error">Email is required.</p>
+            }
+            @else if (primarySeller.controls.email.hasError('email')) {
+              <p class="field-error">Enter a valid email address.</p>
+            }
+          }
+        </div>
+        <div class="field">
+          <label for="primarySellerPhone">Phone *</label>
+          <input id="primarySellerPhone" type="tel" (input)="onSellerPhoneInput($event)" formControlName="phone" maxlength="14" autocomplete="tel" placeholder="(919) 555-1234" [attr.aria-invalid]="primarySeller.controls.phone.touched && primarySeller.controls.phone.invalid" />
+          @if (primarySeller.controls.phone.touched) {
+            @if (primarySeller.controls.phone.hasError('required')) {
+              <p class="field-error">Phone is required.</p>
+            }
+            @else if (primarySeller.controls.phone.hasError('pattern')) {
+              <p class="field-error">Enter a valid 10-digit phone number.</p>
+            }
           }
         </div>
       </div>
+      <p class="additional-seller__description">Editing these listing contact fields does not change your NavStreet sign-in email.</p>
+      @if (showEmailVerification()) {
+        <div class="seller-email-verification" style="margin: 1rem 0;">
+          <button type="button" id="verify-btn" class="button button--secondary"
+            [disabled]="primarySeller.invalid || emailVerificationBusy()"
+            (click)="verifyEmailRequested.emit()">
+            {{ emailVerificationBusy() ? 'Sending code…' : 'Verify Email' }}
+          </button>
+          <p class="additional-seller__description">Verify your email to save this listing. You will remain in the listing wizard.</p>
+        </div>
       }
+      <div formGroupName="sellerStatements">
+        <label class="additional-seller__option"><input type="checkbox" formControlName="additionalSellerIncluded" /><span>Include a co-seller on this listing</span></label>
+        @if (form.controls.sellerStatements.controls.additionalSellerIncluded.value) {
+          <div class="two-column">
+        <div class="field">
+          <label for="AdditionalSellerFirstName">Co-seller first name *</label>
+          <input id="AdditionalSellerFirstName" type="text" formControlName="additionalSellerFirstName" maxlength="100" [attr.aria-invalid]="form.controls.sellerStatements.controls.additionalSellerFirstName.touched && form.controls.sellerStatements.controls.additionalSellerFirstName.invalid" />
+          @if (form.controls.sellerStatements.controls.additionalSellerFirstName.touched) {
+            @if (form.controls.sellerStatements.controls.additionalSellerFirstName.hasError('required')) {
+              <p class="field-error">Co-seller first name is required.</p>
+            }
+          }
+        </div>
+        <div class="field">
+          <label for="AdditionalSellerLastName">Co-seller last name *</label>
+          <input id="AdditionalSellerLastName" type="text" formControlName="additionalSellerLastName" maxlength="100" [attr.aria-invalid]="form.controls.sellerStatements.controls.additionalSellerLastName.touched && form.controls.sellerStatements.controls.additionalSellerLastName.invalid" />
+          @if (form.controls.sellerStatements.controls.additionalSellerLastName.touched) {
+            @if (form.controls.sellerStatements.controls.additionalSellerLastName.hasError('required')) {
+              <p class="field-error">Co-seller last name is required.</p>
+            }
+          }
+        </div>
+        <div class="field">
+          <label for="AdditionalSellerEmail">Co-seller email *</label>
+          <input id="AdditionalSellerEmail" type="email" formControlName="additionalSellerEmail" maxlength="320" [attr.aria-invalid]="form.controls.sellerStatements.controls.additionalSellerEmail.touched && form.controls.sellerStatements.controls.additionalSellerEmail.invalid" />
+          @if (form.controls.sellerStatements.controls.additionalSellerEmail.touched) {
+            @if (form.controls.sellerStatements.controls.additionalSellerEmail.hasError('required')) {
+              <p class="field-error">Co-seller email is required.</p>
+            }
+            @else if (form.controls.sellerStatements.controls.additionalSellerEmail.hasError('email')) {
+              <p class="field-error">Enter a valid email address.</p>
+            }
+          }
+        </div>
+        <div class="field">
+          <label for="AdditionalSellerPhone">Co-seller phone *</label>
+          <input id="AdditionalSellerPhone" type="tel" formControlName="additionalSellerPhone" maxlength="14" placeholder="(919) 555-1234" [attr.aria-invalid]="form.controls.sellerStatements.controls.additionalSellerPhone.touched && form.controls.sellerStatements.controls.additionalSellerPhone.invalid" />
+          @if (form.controls.sellerStatements.controls.additionalSellerPhone.touched) {
+            @if (form.controls.sellerStatements.controls.additionalSellerPhone.hasError('required')) {
+              <p class="field-error">Co-seller phone is required.</p>
+            }
+            @else if (form.controls.sellerStatements.controls.additionalSellerPhone.hasError('pattern')) {
+              <p class="field-error">Enter a valid 10-digit phone number.</p>
+            }
+          }
+        </div>
+          </div>
+        }
+      </div>
     </fieldset>
     <div class="field description-field">
       <label for="description">Property Description</label>
