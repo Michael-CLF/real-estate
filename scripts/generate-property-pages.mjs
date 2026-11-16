@@ -283,9 +283,21 @@ const replaceMeta = (html, property, content) => {
   }
 
 
+  // Keep the SEO fallback OUTSIDE Angular's root. Angular replaces the
+  // contents of <app-root> during client bootstrap, which previously removed
+  // the listing details before Google's rendered-HTML snapshot.
+  // Hide the fallback once the real listing (or its error state) renders.
+  const fallbackStyle = `<style id="navstreet-listing-seo-fallback-style">
+    #navstreet-listing-seo-fallback { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+    body:has(app-root .listing-details__header) #navstreet-listing-seo-fallback,
+    body:has(app-root .listing-details__message) #navstreet-listing-seo-fallback { display: none; }
+  </style>`;
+
+  result = result.replace(/<\/head>/i, `${fallbackStyle}\n</head>`);
+
   return result.replace(
     /<app-root><\/app-root>/i,
-    `<app-root>${content}</app-root>`
+    `<app-root></app-root>\n<div id="navstreet-listing-seo-fallback">${content}</div>`
   );
 
 };
