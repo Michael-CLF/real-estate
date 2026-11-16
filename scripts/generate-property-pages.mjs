@@ -283,11 +283,16 @@ const replaceMeta = (html, property, content) => {
   }
 
 
+  // Keep the SEO fallback OUTSIDE Angular's root. Angular replaces the
+  // contents of <app-root> during client bootstrap, which previously removed
+  // the listing details before Google's rendered-HTML snapshot.
+  // Hide the fallback once the real listing (or its error state) renders.
   const fallbackStyle = `<style id="navstreet-listing-seo-fallback-style">
     #navstreet-listing-seo-fallback { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
     body:has(app-root .listing-details__header) #navstreet-listing-seo-fallback,
     body:has(app-root .listing-details__message) #navstreet-listing-seo-fallback { display: none; }
   </style>`;
+
   result = result.replace(/<\/head>/i, `${fallbackStyle}\n</head>`);
 
   return result.replace(
@@ -639,108 +644,6 @@ function renderListing(id, data, template) {
 
 
 /**
- * Add a small, visible, server-rendered directory of property links.
- * This lives outside app-root so Angular hydration cannot remove it.
- * Never add hidden links or change Angular's existing search UI.
- */
-const STATE_CODES = 'AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
-const STATE_NAMES = 'Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming'.split('|');
-const stateSlug = value => {
-  const input = text(value).toLowerCase();
-  const index = STATE_CODES.findIndex((code, i) => code.toLowerCase() === input || STATE_NAMES[i].toLowerCase() === input);
-  return index < 0 ? null : STATE_NAMES[index].toLowerCase().replace(/ /g, '-');
-};
-
-const directoryMarkup = (pages, heading) => {
-  if (!pages.length) return '';
-  const links = pages.map(page =>
-    `<li><a href="${escapeHtml(page.url)}">${escapeHtml(page.address)}</a></li>`
-  ).join('\n');
-  return `<section class="navstreet-property-directory" aria-label="${escapeHtml(heading)}">
-    <h2>${escapeHtml(heading)}</h2><ul>${links}</ul>
-  </section>`;
-};
-
-// The static directory must remain outside app-root in the delivered HTML so
-// Angular cannot erase it during bootstrap. After bootstrap, move the actual
-// element into the page layout immediately before the Angular footer.
-// Reattach if Angular subsequently recreates that footer.
-const directoryPlacementScript = `<script id="navstreet-property-directory-placement">
-(function () {
-  function placeDirectory() {
-    const directory = document.querySelector('.navstreet-property-directory');
-    const root = document.querySelector('app-root');
-    const footer = root && root.querySelector('footer');
-    if (!directory || !footer || !footer.parentNode) return;
-    if (directory.nextElementSibling !== footer || directory.parentNode !== footer.parentNode) {
-      footer.parentNode.insertBefore(directory, footer);
-    }
-  }
-  let queued = false;
-  const observer = new MutationObserver(function () {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(function () { queued = false; placeDirectory(); });
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-  placeDirectory();
-  document.addEventListener('DOMContentLoaded', placeDirectory);
-})();
-</script>`;
-
-const directoryStyle = `<style id="navstreet-property-directory-style">
-.navstreet-property-directory{max-width:1100px;margin:2rem auto;padding:1.5rem;font:inherit;color:#154360}
-.navstreet-property-directory h2{font-size:1.35rem;margin:0 0 1rem}
-.navstreet-property-directory ul{list-style:disc;padding-left:1.5rem;columns:3;column-gap:2rem}
-.navstreet-property-directory li{break-inside:avoid;margin-bottom:.55rem}
-.navstreet-property-directory a{color:#154360;text-decoration:underline}
-@media(max-width:750px){.navstreet-property-directory ul{columns:1}}
-</style>`;
-
-async function addPropertyDirectories(entries) {
-  const byState = new Map();
-  for (const page of entries) {
-    const slug = page.stateSlug;
-    if (!slug) continue;
-    if (!byState.has(slug)) byState.set(slug, []);
-    byState.get(slug).push(page);
-  }
-
-  const targets = [
-    { file: join(OUTPUT, 'homes', 'index.html'), pages: entries, heading: 'Browse NavStreet property listings' },
-    ...[...byState].map(([slug, pages]) => ({
-      file: join(OUTPUT, 'states', slug, 'index.html'),
-      pages,
-      heading: `Browse properties in ${STATE_NAMES.find(name => name.toLowerCase().replace(/ /g, '-') === slug)}`
-    }))
-  ];
-
-  let updated = 0;
-  for (const target of targets) {
-    let html;
-    try { html = await readFile(target.file, 'utf8'); }
-    catch (error) {
-      if (error.code === 'ENOENT') {
-        console.warn(`No prerendered page at ${target.file}; skipping property directory`);
-        continue;
-      }
-      throw error;
-    }
-    if (!/<\/body>/i.test(html)) throw new Error(`Missing body closing tag: ${target.file}`);
-    // Idempotent when the generator is run twice on the same build.
-    html = html.replace(/<style id="navstreet-property-directory-style">[\s\S]*?<\/style>/g, '');
-    html = html.replace(/<section class="navstreet-property-directory"[\s\S]*?<\/section>/g, '');
-    html = html.replace(/<script id="navstreet-property-directory-placement">[\s\S]*?<\/script>/g, '');
-    const content = directoryMarkup(target.pages.sort((a,b) => a.address.localeCompare(b.address)), target.heading);
-    html = html.replace(/<\/head>/i, `${directoryStyle}\n</head>`);
-    html = html.replace(/<\/body>/i, `${content}\n${directoryPlacementScript}\n</body>`);
-    await writeFile(target.file, html, 'utf8');
-    updated++;
-  }
-  console.log(`Added crawlable property directories to ${updated} prerendered pages`);
-}
-
-/**
  * Main build-time generation process.
  */
 
@@ -859,18 +762,12 @@ async function main() {
       );
 
 
-      entries.push({
-        ...page,
-        address: `${text(document.data().addressLine1)}, ${text(document.data().city)}, ${text(document.data().state)}`,
-        stateSlug: stateSlug(document.data().state)
-      });
+      entries.push(page);
 
     }
 
   }
 
-
-  await addPropertyDirectories(entries);
 
   /**
    * Preserve existing sitemap entries.
