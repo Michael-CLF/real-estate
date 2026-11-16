@@ -59,26 +59,30 @@
 
     @if (viewModel.result.totalPages > 1) {
     <nav class="search-results__pagination" aria-label="Listing result pages">
-      <button type="button" [disabled]="viewModel.result.page <= 1" (click)="goToPreviousPage(
-                viewModel.result.page
-              )">
-        Previous
-      </button>
+      @if (isUnfilteredPagination(viewModel.filters)) {
+        @if (viewModel.result.page > 1) {
+          <a [routerLink]="crawlablePageUrl(viewModel.result.page - 1)">Previous</a>
+        } @else {
+          <span class="search-results__page-disabled">Previous</span>
+        }
+      } @else {
+        <button type="button" [disabled]="viewModel.result.page <= 1" (click)="goToPreviousPage(viewModel.result.page)">Previous</button>
+      }
 
       <p>
         Page {{ viewModel.result.page }}
         of {{ viewModel.result.totalPages }}
       </p>
 
-      <button type="button" [disabled]="
-                viewModel.result.page >=
-                viewModel.result.totalPages
-              " (click)="goToNextPage(
-                viewModel.result.page,
-                viewModel.result.totalPages
-              )">
-        Next
-      </button>
+      @if (isUnfilteredPagination(viewModel.filters)) {
+        @if (viewModel.result.page < viewModel.result.totalPages) {
+          <a [routerLink]="crawlablePageUrl(viewModel.result.page + 1)">Next</a>
+        } @else {
+          <span class="search-results__page-disabled">Next</span>
+        }
+      } @else {
+        <button type="button" [disabled]="viewModel.result.page >= viewModel.result.totalPages" (click)="goToNextPage(viewModel.result.page, viewModel.result.totalPages)">Next</button>
+      }
     </nav>
     }
     } @else {

@@ -6,6 +6,7 @@ import {
 import {
   STATES
 } from './core/configuration/states.config';
+import snapshot from './core/domains/marketplace/public-listings.snapshot.json';
 
 export const serverRoutes: ServerRoute[] = [
   /*
@@ -22,6 +23,22 @@ export const serverRoutes: ServerRoute[] = [
   {
     path: 'homes',
     renderMode: RenderMode.Prerender
+  },
+
+  /*
+   * Build-time public inventory determines the number of crawlable pages.
+   * Page one remains /homes/; subsequent pages have their own URLs.
+   */
+  {
+    path: 'homes/page/:pageNumber',
+    renderMode: RenderMode.Prerender,
+    async getPrerenderParams() {
+      const count = snapshot.listings.length;
+      const pages = Math.ceil(count / 12);
+      return Array.from({ length: Math.max(0, pages - 1) }, (_, i) => ({
+        pageNumber: String(i + 2)
+      }));
+    }
   },
 
   /*

@@ -775,10 +775,16 @@ async function main() {
    */
 
   const base = sitemap.replace(
-    /<url>\s*<loc>https:\/\/navstreet\.com\/listings\/[^<]*<\/loc>[\s\S]*?<\/url>\s*/g,
+    /<url>\s*<loc>https:\/\/navstreet\.com\/(?:listings\/[^<]*|homes\/page\/\d+\/?)<\/loc>[\s\S]*?<\/url>\s*/g,
     ''
   );
 
+
+  const paginationSnapshot = JSON.parse(await readFile(resolve('.navstreet-public-listings-snapshot.json'), 'utf8'));
+  const pageCount = Math.ceil(paginationSnapshot.listings.length / 12);
+  const paginationXml = Array.from({ length: Math.max(0, pageCount - 1) }, (_, i) =>
+    `\n<url><loc>${ORIGIN}/homes/page/${i + 2}/</loc></url>`
+  ).join('');
 
   const propertyXml = entries
     .map(
@@ -805,7 +811,7 @@ async function main() {
 
     base.replace(
       '</urlset>',
-      `${propertyXml}\n</urlset>`
+      `${propertyXml}${paginationXml}\n</urlset>`
     ),
 
     'utf8'

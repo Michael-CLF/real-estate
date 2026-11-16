@@ -63,6 +63,8 @@ export class PageSeoService {
 
       const requiresTrailingSlash =
         canonicalPath.startsWith('/states/') ||
+        canonicalPath === '/homes' ||
+        /^\/homes\/page\/\d+$/.test(canonicalPath) ||
         canonicalPath === '/calculators' ||
         canonicalPath.startsWith('/calculators/') ||
         [

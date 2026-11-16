@@ -77,6 +77,9 @@ for (const status of STATUSES) {
     });
   }
 }
+if (listings.length === 0) {
+  throw new Error('Refusing to publish an empty public listing snapshot. Investigate Firestore access or inventory first.');
+}
 listings.sort((a, b) =>
   (Date.parse(b.publishedAt || b.createdAt || '') || 0) -
   (Date.parse(a.publishedAt || a.createdAt || '') || 0) ||

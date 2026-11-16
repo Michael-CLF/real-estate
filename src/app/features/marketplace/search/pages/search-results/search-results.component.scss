@@ -150,7 +150,13 @@
     font-weight: 650;
   }
 
-  button {
+  button,
+  a,
+  .search-results__page-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
     min-height: 44px;
     padding: 0 20px;
 
@@ -168,7 +174,7 @@
       background 150ms ease,
       color 150ms ease;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled):not(.search-results__page-disabled) {
       background: #154360;
       color: #ffffff;
     }
@@ -178,7 +184,8 @@
       outline-offset: 3px;
     }
 
-    &:disabled {
+    &:disabled,
+    &.search-results__page-disabled {
       border-color: #c8d2d8;
       color: #9aa8b0;
       cursor: not-allowed;
@@ -220,7 +227,7 @@
   .search-results__pagination {
     gap: 12px;
 
-    button {
+    button, a, .search-results__page-disabled {
       padding: 0 14px;
     }
   }
@@ -231,7 +238,7 @@
     align-items: stretch;
     flex-direction: column;
 
-    button {
+    button, a, .search-results__page-disabled {
       width: 100%;
     }
 

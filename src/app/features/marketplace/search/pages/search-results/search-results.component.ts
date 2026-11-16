@@ -9,7 +9,8 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import { getPrerenderedMarketplaceResult } from '../../../../../core/domains/marketplace/prerendered-marketplace-listings';
 import {
   ActivatedRoute,
-  Router
+  Router,
+  RouterLink
 } from '@angular/router';
 import {
   catchError,
@@ -57,6 +58,7 @@ interface SearchResultsViewModel {
   standalone: true,
   imports: [
     AsyncPipe,
+    RouterLink,
     ListingCardComponent,
     SearchFilterBarComponent
   ],
@@ -114,8 +116,8 @@ export class SearchResultsComponent {
     ];
 
   readonly viewModel$: Observable<SearchResultsViewModel> =
-    combineLatest([this.route.queryParamMap, this.browserRefresh]).pipe(
-      map(([queryParams, refreshed]) => {
+    combineLatest([this.route.queryParamMap, this.route.paramMap, this.browserRefresh]).pipe(
+      map(([queryParams, routeParams, refreshed]) => {
         const filters: ListingSearchFilters = {
           searchTerm:
             queryParams.get('query')?.trim() || undefined,
@@ -157,7 +159,7 @@ export class SearchResultsComponent {
           ),
 
           page: this.parsePositiveInteger(
-            queryParams.get('page'),
+            queryParams.get('page') ?? routeParams.get('pageNumber'),
             1
           ),
 
@@ -216,7 +218,9 @@ export class SearchResultsComponent {
 
   } else if (!filters.stateSlug && !hasAdditionalFilters) {
     this.pageSeo.set(
-      'For Sale By Owner Homes for Sale | NavStreet',
+      (filters.page ?? 1) > 1
+        ? `For Sale By Owner Homes — Page ${filters.page} | NavStreet`
+        : 'For Sale By Owner Homes for Sale | NavStreet',
       'Explore for-sale-by-owner homes across the United States. Browse property photos, prices, and details on NavStreet.'
     );
 
@@ -243,15 +247,29 @@ export class SearchResultsComponent {
       filters.minimumBedrooms === undefined &&
       filters.minimumBathrooms === undefined &&
       (filters.sort ?? 'newest') === 'newest' &&
-      (filters.page ?? 1) === 1;
+      (filters.page ?? 1) >= 1;
+  }
+
+  isUnfilteredPagination(filters: ListingSearchFilters): boolean {
+    return !filters.searchTerm && !filters.stateSlug &&
+      !filters.city && !filters.postalCode &&
+      !filters.propertyTypes?.length &&
+      filters.minimumPrice === undefined &&
+      filters.maximumPrice === undefined &&
+      filters.minimumBedrooms === undefined &&
+      filters.minimumBathrooms === undefined &&
+      (filters.sort ?? 'newest') === 'newest';
+  }
+
+  crawlablePageUrl(page: number): string {
+    return page <= 1 ? '/homes/' : `/homes/page/${page}/`;
   }
 
   onSortChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     const sort = this.parseSortOption(selectElement.value);
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
+    void this.router.navigate(['/homes'], {
       queryParams: {
         sort,
         page: 1

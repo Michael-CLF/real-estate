@@ -42,10 +42,11 @@ export function getPrerenderedMarketplaceResult(filters: ListingSearchFilters): 
     ...(item.publishedAt ? { publishedAt: new Date(item.publishedAt) } : {})
   }));
   const pageSize = filters.pageSize ?? 12;
+  const page = Math.max(1, filters.page ?? 1);
   return {
-    listings: listings.slice(0, pageSize),
+    listings: listings.slice((page - 1) * pageSize, page * pageSize),
     totalCount: listings.length,
-    page: 1,
+    page,
     pageSize,
     totalPages: Math.max(1, Math.ceil(listings.length / pageSize))
   };
