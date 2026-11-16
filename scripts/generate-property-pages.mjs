@@ -813,6 +813,17 @@ async function main() {
   );
 
 
+  // Private deployment inventory. Kept outside dist/template/browser so it
+  // is never published as a website asset.
+  await writeFile(
+    resolve('.navstreet-property-deploy-manifest.json'),
+    JSON.stringify({
+      generatedAt: new Date().toISOString(),
+      listingIds: entries.map(page => decodeURIComponent(new URL(page.url).pathname.split('/').pop())).sort()
+    }, null, 2) + '\n',
+    'utf8'
+  );
+
   console.log(
     `Generated ${entries.length} property HTML pages and updated sitemap.xml`
   );

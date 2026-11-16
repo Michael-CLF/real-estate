@@ -57,6 +57,55 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+      - name: Audit obsolete listing HTML on IONOS (report only)
+        env:
+          SFTP_HOST: ${{ secrets.IONOS_SFTP_HOST }}
+          SFTP_USER: ${{ secrets.IONOS_SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.IONOS_SFTP_PASSWORD }}
+        run: |
+          python3 -m pip install --user paramiko
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import stat
+          import paramiko
+
+          manifest = json.loads(pathlib.Path('.navstreet-property-deploy-manifest.json').read_text())
+          expected = set(manifest['listingIds'])
+          client = paramiko.SSHClient()
+          client.load_host_keys(os.path.expanduser('~/.ssh/known_hosts'))
+          client.set_missing_host_key_policy(paramiko.RejectPolicy())
+          client.connect(hostname=os.environ['SFTP_HOST'], port=22,
+                         username=os.environ['SFTP_USER'], password=os.environ['SFTP_PASSWORD'],
+                         look_for_keys=False, allow_agent=False, timeout=30)
+          try:
+              sftp = client.open_sftp()
+              try:
+                  folders = sftp.listdir_attr('/public/listings')
+              except FileNotFoundError:
+                  folders = []
+              stale = []
+              for folder in folders:
+                  if not stat.S_ISDIR(folder.st_mode) or folder.filename in expected:
+                      continue
+                  path = '/public/listings/' + folder.filename + '/index.html'
+                  try:
+                      if stat.S_ISREG(sftp.stat(path).st_mode):
+                          stale.append(path)
+                  except FileNotFoundError:
+                      pass
+              print(f'Expected published listing pages: {len(expected)}')
+              print(f'Potentially obsolete remote listing pages: {len(stale)}')
+              for path in sorted(stale)[:100]:
+                  print('REVIEW ONLY (not deleted):', path)
+              if len(stale) > 100:
+                  print(f'... and {len(stale)-100} more')
+              print('No remote files were deleted by this audit.')
+          finally:
+              client.close()
+          PY
+
       - name: Upload site to IONOS Plus via SFTP
         env:
           SFTP_HOST: ${{ secrets.IONOS_SFTP_HOST }}
