@@ -1,9 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject
+  inject,
+  afterNextRender
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { getPrerenderedMarketplaceResult } from '../../../../../core/domains/marketplace/prerendered-marketplace-listings';
 import {
   ActivatedRoute,
   Router
@@ -76,6 +79,14 @@ export class SearchResultsComponent {
     MarketplaceListingRepository
   );
 
+  private readonly browserRefresh = new BehaviorSubject(false);
+
+  constructor() {
+    // Keep the prerendered card tree identical during hydration.
+    // Fetch current Firestore results only after browser rendering begins.
+    afterNextRender(() => this.browserRefresh.next(true));
+  }
+
   readonly sortOptions: ReadonlyArray<{
     label: string;
     value: ListingSortOption;
@@ -103,8 +114,8 @@ export class SearchResultsComponent {
     ];
 
   readonly viewModel$: Observable<SearchResultsViewModel> =
-    this.route.queryParamMap.pipe(
-      map(queryParams => {
+    combineLatest([this.route.queryParamMap, this.browserRefresh]).pipe(
+      map(([queryParams, refreshed]) => {
         const filters: ListingSearchFilters = {
           searchTerm:
             queryParams.get('query')?.trim() || undefined,
@@ -153,11 +164,14 @@ export class SearchResultsComponent {
           pageSize: 12
         };
 
-        return filters;
+        return { filters, refreshed };
       }),
 
-      switchMap(filters =>
-        this.listingRepository.searchListings(filters).pipe(
+      switchMap(({ filters, refreshed }) =>
+        (refreshed || !this.canUsePrerenderedResult(filters)
+          ? this.listingRepository.searchListings(filters)
+          : of(getPrerenderedMarketplaceResult(filters))
+        ).pipe(
           map(result => ({
             result,
             filters,
@@ -219,6 +233,18 @@ export class SearchResultsComponent {
         refCount: true
       })
     );
+
+  private canUsePrerenderedResult(filters: ListingSearchFilters): boolean {
+    return !filters.searchTerm && !filters.stateSlug &&
+      !filters.city && !filters.postalCode &&
+      !filters.propertyTypes?.length &&
+      filters.minimumPrice === undefined &&
+      filters.maximumPrice === undefined &&
+      filters.minimumBedrooms === undefined &&
+      filters.minimumBathrooms === undefined &&
+      (filters.sort ?? 'newest') === 'newest' &&
+      (filters.page ?? 1) === 1;
+  }
 
   onSortChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;

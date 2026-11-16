@@ -23,14 +23,8 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - name: Build Angular site
-        env:
-          CI: 'true'
-          SITE_URL: https://navstreet.com
-        run: |
-          npm ci
-          npm run build
-          cp .deploy-now/real-estate/.htaccess.template dist/template/browser/.htaccess
+      - name: Install dependencies
+        run: npm ci
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -40,6 +34,18 @@ jobs:
           project_id: real-estate-dev-c4a6d
           create_credentials_file: true
           export_environment_variables: true
+
+      - name: Generate public listing snapshot (build-time only)
+        run: node scripts/generate-public-listing-snapshot.mjs
+
+      - name: Build Angular site
+        env:
+          CI: 'true'
+          SITE_URL: https://navstreet.com
+        run: |
+          npm run build
+          cp .deploy-now/real-estate/.htaccess.template dist/template/browser/.htaccess
+
 
       - name: Generate property SEO pages
         run: node scripts/generate-property-pages.mjs

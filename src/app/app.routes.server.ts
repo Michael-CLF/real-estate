@@ -17,6 +17,14 @@ export const serverRoutes: ServerRoute[] = [
   },
 
   /*
+   * Public marketplace (first page, no query parameters)
+   */
+  {
+    path: 'homes',
+    renderMode: RenderMode.Prerender
+  },
+
+  /*
    * Public informational pages
    */
   {
