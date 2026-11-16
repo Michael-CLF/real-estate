@@ -661,6 +661,33 @@ const directoryMarkup = (pages, heading) => {
   </section>`;
 };
 
+// The static directory must remain outside app-root in the delivered HTML so
+// Angular cannot erase it during bootstrap. After bootstrap, move the actual
+// element into the page layout immediately before the Angular footer.
+// Reattach if Angular subsequently recreates that footer.
+const directoryPlacementScript = `<script id="navstreet-property-directory-placement">
+(function () {
+  function placeDirectory() {
+    const directory = document.querySelector('.navstreet-property-directory');
+    const root = document.querySelector('app-root');
+    const footer = root && root.querySelector('footer');
+    if (!directory || !footer || !footer.parentNode) return;
+    if (directory.nextElementSibling !== footer || directory.parentNode !== footer.parentNode) {
+      footer.parentNode.insertBefore(directory, footer);
+    }
+  }
+  let queued = false;
+  const observer = new MutationObserver(function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; placeDirectory(); });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  placeDirectory();
+  document.addEventListener('DOMContentLoaded', placeDirectory);
+})();
+</script>`;
+
 const directoryStyle = `<style id="navstreet-property-directory-style">
 .navstreet-property-directory{max-width:1100px;margin:2rem auto;padding:1.5rem;font:inherit;color:#154360}
 .navstreet-property-directory h2{font-size:1.35rem;margin:0 0 1rem}
@@ -703,8 +730,10 @@ async function addPropertyDirectories(entries) {
     // Idempotent when the generator is run twice on the same build.
     html = html.replace(/<style id="navstreet-property-directory-style">[\s\S]*?<\/style>/g, '');
     html = html.replace(/<section class="navstreet-property-directory"[\s\S]*?<\/section>/g, '');
+    html = html.replace(/<script id="navstreet-property-directory-placement">[\s\S]*?<\/script>/g, '');
     const content = directoryMarkup(target.pages.sort((a,b) => a.address.localeCompare(b.address)), target.heading);
-    html = html.replace(/<\/body>/i, `${directoryStyle}\n${content}\n</body>`);
+    html = html.replace(/<\/head>/i, `${directoryStyle}\n</head>`);
+    html = html.replace(/<\/body>/i, `${content}\n${directoryPlacementScript}\n</body>`);
     await writeFile(target.file, html, 'utf8');
     updated++;
   }
