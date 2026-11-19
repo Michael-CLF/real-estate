@@ -129,8 +129,13 @@ export const recordListingView = onCall<
           }
 
           if (
-            listingData['status'] !==
-            'active'
+            ![
+              'active',
+              'under_contract',
+              'sold',
+            ].includes(
+              listingData['status'],
+            )
           ) {
             throw new HttpsError(
               'failed-precondition',
