@@ -224,6 +224,10 @@
         </section>
         }
         <section class="listing-details__showing-section">
+          @if (listing.status === 'under_contract') {
+          <h2>Online showing requests are unavailable</h2>
+          <p>This property is under contract. Online showing requests are unavailable while this property is under contract. You can still contact the seller for additional information using Contact Seller on this page.</p>
+          } @else if (listing.status === 'active') {
           <app-request-showing [listingUid]="listing.uid" [sellerUid]="listing.sellerUid"
             [propertyAddress]="listing.address.addressLine1" [propertyCity]="listing.address.city" [propertyState]="
       listing.address.stateAbbreviation
@@ -232,6 +236,10 @@
     " [primaryPhotoUrl]="
       listing.featuredPhotoUrl ?? null
     " />
+          } @else {
+          <h2>Online showing requests are unavailable</h2>
+          <p>This property is not currently accepting online showing requests. You can still contact the seller using Contact Seller on this page.</p>
+          }
         </section>
       </div>
 
@@ -379,7 +387,16 @@
         </div>
       </div>
 
-      @if (authenticationIsLoading()) {
+      @if (listing.status === 'under_contract') {
+      <div class="listing-details__disclosure-state" role="status">
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+        <span>This property is under contract. Seller disclosures are unavailable.</span>
+      </div>
+      } @else if (listing.status !== 'active') {
+      <div class="listing-details__disclosure-state" role="status">
+        <span>Seller disclosures are unavailable for this property.</span>
+      </div>
+      } @else if (authenticationIsLoading()) {
       <div class="listing-details__disclosure-state" aria-live="polite">
         <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
@@ -517,7 +534,7 @@
         </div>
       </div>
       }
-      @if (isAuthenticated() && !disclosuresAreLoading() && !disclosureLoadError()) {
+      @if (listing.status === 'active' && isAuthenticated() && !disclosuresAreLoading() && !disclosureLoadError()) {
         @for (explanation of californiaDisclosureExplanations(listing); track explanation.type) {
           <article class="listing-details__disclosure-card">
             <div class="listing-details__disclosure-card-content">

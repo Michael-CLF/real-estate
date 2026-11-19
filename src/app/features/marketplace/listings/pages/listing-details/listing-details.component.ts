@@ -292,11 +292,12 @@ export class ListingDetailsComponent
   private readonly destroyRef = inject(DestroyRef);
   constructor() {this.destroyRef.onDestroy(()=>{this.disclosureRequestId++;});}
 
-  private async preloadDisclosures(listingUid:string):Promise<void> {
+  private async preloadDisclosures(listingUid:string, status: string):Promise<void> {
     const requestId=++this.disclosureRequestId;
     this.disclosures.set([]);
     this.disclosureLoadError.set('');
-    this.disclosuresAreLoading.set(true);
+    this.disclosuresAreLoading.set(status === 'active');
+    if (status !== 'active') return;
     try {
       await firstValueFrom(this.authenticationReady$);
       if(requestId!==this.disclosureRequestId)return;
@@ -388,8 +389,6 @@ export class ListingDetailsComponent
           params.get('listingId') ?? ''
       ),
 
-      tap(listingId=>{void this.preloadDisclosures(listingId);}),
-
       switchMap(
         listingId =>
           this.listingRepository
@@ -445,7 +444,13 @@ export class ListingDetailsComponent
             )
       ),
 
-      tap(viewModel => this.updateListingSeo(viewModel.listing)),
+      tap(viewModel => {
+        void this.preloadDisclosures(
+          viewModel.listing?.uid ?? '',
+          viewModel.listing?.status ?? ''
+        );
+        this.updateListingSeo(viewModel.listing);
+      }),
       shareReplay({
         bufferSize: 1,
         refCount: true
