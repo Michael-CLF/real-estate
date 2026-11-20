@@ -95,7 +95,7 @@ export class NavigationComponent {
         label:
           'List Your Business',
         route:
-          '/professionals/register/north-carolina'
+          '/professionals/register/'
       },
       {
         analyticsName:
