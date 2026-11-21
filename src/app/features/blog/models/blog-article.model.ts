@@ -8,6 +8,7 @@ export interface BlogArticle {
   title: string;
   summary: string;
   contentHtml: string;
+  customCss?: string;
 
   seoTitle: string;
   metaDescription: string;
@@ -31,6 +32,7 @@ export interface BlogArticleInput {
   title: string;
   summary: string;
   contentHtml: string;
+  customCss?: string;
 
   seoTitle: string;
   metaDescription: string;

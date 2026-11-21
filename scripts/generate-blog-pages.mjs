@@ -18,6 +18,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { scopeArticleCss } from './article-css.mjs';
 
 const OUTPUT = resolve('dist/template/browser');
 const ORIGIN = 'https://navstreet.com';
@@ -84,6 +85,17 @@ const summaryPreview = value => {
 // Angular component SCSS remains unchanged.
 
 const STATIC_STYLES = `
+<style id="navstreet-rich-article-defaults">
+
+/* Shared rich-article formatting defaults. */
+.navstreet-custom-article table { width:100%; border-collapse:collapse; margin:24px 0; display:block; overflow-x:auto; }
+.navstreet-custom-article th, .navstreet-custom-article td { border:1px solid #dbe3ea; padding:12px 14px; text-align:left; }
+.navstreet-custom-article th { background:#eef4f8; color:#154360; }
+.navstreet-custom-article .callout { padding:20px 24px; margin:24px 0; background:#eef5fa; border-left:4px solid #2874a6; border-radius:6px; }
+.navstreet-custom-article .faq-item { padding:20px 0; border-bottom:1px solid #dbe3ea; }
+.navstreet-custom-article .faq-item:last-child { border-bottom:0; }
+.navstreet-custom-article .responsive-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:20px; }
+</style>
 <style id="navstreet-static-blog-styles">
 
 .navstreet-static-blog.blog-page {
@@ -698,6 +710,9 @@ function renderArticle(article, shell) {
   const published = toIso(article.publishedAt);
   const modified = toIso(article.updatedAt) || published;
   const author = article.authorName?.trim() || 'NavStreet';
+  let customCss = '';
+  try { customCss = scopeArticleCss(article.customCss ?? ''); }
+  catch (error) { throw new Error(`Invalid CSS for ${slug}: ${error.message}`); }
 
   const schema = {
     '@context': 'https://schema.org',
@@ -773,7 +788,8 @@ function renderArticle(article, shell) {
         </figure>
       ` : ''}
 
-      <div class="article-body">
+      <style>${customCss}</style>
+      <div class="article-body navstreet-custom-article">
         ${article.contentHtml}
       </div>
 

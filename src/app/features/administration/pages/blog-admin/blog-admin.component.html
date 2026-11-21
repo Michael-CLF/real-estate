@@ -86,7 +86,7 @@
             placeholder="NavStreet" />
         </div>
 
-         <section class="form-section">
+        <section class="form-section">
           <h3>Search Engine Optimization</h3>
 
           <div class="form-group">
@@ -155,6 +155,18 @@
 
 
         <section class="form-section">
+          <h3>Custom CSS (optional)</h3>
+          <div class="form-group">
+            <label for="article-custom-css">Article-only CSS</label>
+            <textarea id="article-custom-css" name="customCss" [(ngModel)]="form.customCss"
+              (ngModelChange)="updatePreviewCss($event)" rows="10"
+              placeholder=".callout { background-color: #eef5fa; padding: 20px; border-radius: 8px; }"></textarea>
+            <small>Use article content selectors such as .callout, table, th, td, and .faq-item. CSS is validated and
+              limited to this article. Simple @media width rules are supported.</small>
+          </div>
+        </section>
+
+        <section class="form-section">
           <h3>Featured Image</h3>
 
           <div class="form-group">
@@ -210,7 +222,8 @@
             [alt]="form.featuredImageAlt || form.title" />
           }
 
-          <div class="preview-body" [innerHTML]="form.contentHtml"></div>
+          <div class="preview-body navstreet-custom-article" [innerHTML]="form.contentHtml">
+          </div>
         </div>
       </section>
       }

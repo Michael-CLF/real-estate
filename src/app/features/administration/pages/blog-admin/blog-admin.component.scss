@@ -791,3 +791,12 @@ input[type='file'] {
     transition: none;
   }
 }
+
+/* Shared rich-article formatting defaults. */
+.navstreet-custom-article table { width:100%; border-collapse:collapse; margin:24px 0; display:block; overflow-x:auto; }
+.navstreet-custom-article th, .navstreet-custom-article td { border:1px solid #dbe3ea; padding:12px 14px; text-align:left; }
+.navstreet-custom-article th { background:#eef4f8; color:#154360; }
+.navstreet-custom-article .callout { padding:20px 24px; margin:24px 0; background:#eef5fa; border-left:4px solid #2874a6; border-radius:6px; }
+.navstreet-custom-article .faq-item { padding:20px 0; border-bottom:1px solid #dbe3ea; }
+.navstreet-custom-article .faq-item:last-child { border-bottom:0; }
+.navstreet-custom-article .responsive-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:20px; }

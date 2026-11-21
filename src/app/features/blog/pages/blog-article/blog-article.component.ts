@@ -21,6 +21,8 @@ import {
   SafeHtml
 } from '@angular/platform-browser';
 
+import { scopeArticleCss } from '../../utils/article-css';
+
 import {
   BlogService
 } from '../../services/blog.service';
@@ -52,6 +54,7 @@ export class BlogArticleComponent implements OnInit {
 
   readonly article = signal<BlogArticle | null>(null);
   readonly articleHtml = signal<SafeHtml>('');
+  readonly articleCss = signal('');
   readonly loading = signal(true);
   readonly error = signal('');
   readonly notFound = signal(false);
@@ -76,6 +79,7 @@ export class BlogArticleComponent implements OnInit {
     this.notFound.set(false);
     this.article.set(null);
     this.articleHtml.set('');
+    this.articleCss.set('');
 
     try {
       const article =
@@ -95,6 +99,8 @@ export class BlogArticleComponent implements OnInit {
       }
 
       this.article.set(article);
+      try { this.articleCss.set(scopeArticleCss(article.customCss ?? '')); }
+      catch (error) { console.warn('Ignoring invalid article CSS:', error); this.articleCss.set(''); }
 
       // Angular sanitizes HTML when bound with [innerHTML].
       // Do not bypass security for administrator-authored content.

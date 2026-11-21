@@ -1,6 +1,7 @@
 
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { scopeArticleCss } from './article-css';
 
 const db = getFirestore();
 
@@ -124,6 +125,7 @@ export const saveBlogDraft = onCall(
         'contentHtml',
         200000
       ),
+      customCss: optionalString(data.customCss, 'customCss', 20000),
       seoTitle: optionalString(data.seoTitle, 'seoTitle', 200),
       metaDescription: optionalString(
         data.metaDescription,
@@ -152,13 +154,17 @@ export const saveBlogDraft = onCall(
       ) || 'NavStreet'
     };
 
+    try { scopeArticleCss(input.customCss); } catch (error) {
+      throw new HttpsError('invalid-argument', error instanceof Error ? error.message : 'Invalid custom CSS.');
+    }
+
     const ref = db.collection(COLLECTION).doc(slug);
 
     await db.runTransaction(async transaction => {
       const existing = await transaction.get(ref);
 
       if (existing.exists &&
-          existing.data()?.['status'] === 'published') {
+        existing.data()?.['status'] === 'published') {
         throw new HttpsError(
           'failed-precondition',
           'Published articles cannot be overwritten as drafts.'
@@ -173,9 +179,9 @@ export const saveBlogDraft = onCall(
           updatedAt: FieldValue.serverTimestamp(),
           ...(!existing.exists
             ? {
-                createdAt: FieldValue.serverTimestamp(),
-                publishedAt: null
-              }
+              createdAt: FieldValue.serverTimestamp(),
+              publishedAt: null
+            }
             : {})
         },
         { merge: true }
@@ -192,6 +198,7 @@ export const publishBlogArticle = onCall(
     requireAdmin(request.auth);
 
     const slug = validateSlug(request.data?.slug);
+
     const ref = db.collection(COLLECTION).doc(slug);
 
     await db.runTransaction(async transaction => {
@@ -205,6 +212,17 @@ export const publishBlogArticle = onCall(
       }
 
       const article = snapshot.data();
+
+      try {
+        scopeArticleCss(article?.['customCss'] ?? '');
+      } catch (error) {
+        throw new HttpsError(
+          'invalid-argument',
+          error instanceof Error
+            ? error.message
+            : 'Invalid custom CSS.'
+        );
+      }
 
       if (!article?.['title'] || !article?.['contentHtml']) {
         throw new HttpsError(
@@ -247,6 +265,7 @@ export const updatePublishedBlogArticle = onCall(
         'contentHtml',
         200000
       ),
+      customCss: optionalString(data.customCss, 'customCss', 20000),
       seoTitle: optionalString(
         data.seoTitle,
         'seoTitle',
@@ -278,6 +297,10 @@ export const updatePublishedBlogArticle = onCall(
         150
       ) || 'NavStreet'
     };
+
+    try { scopeArticleCss(input.customCss); } catch (error) {
+      throw new HttpsError('invalid-argument', error instanceof Error ? error.message : 'Invalid custom CSS.');
+    }
 
     const ref = db.collection(COLLECTION).doc(slug);
 

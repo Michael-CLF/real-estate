@@ -33,6 +33,7 @@ interface BlogArticleResponse {
   title: string;
   summary: string;
   contentHtml: string;
+  customCss?: string;
   seoTitle: string;
   metaDescription: string;
   featuredImageUrl: string;
@@ -103,6 +104,7 @@ export class BlogService {
       title: String(data['title'] ?? ''),
       summary: String(data['summary'] ?? ''),
       contentHtml: String(data['contentHtml'] ?? ''),
+      customCss: String(data['customCss'] ?? ''),
       seoTitle: String(data['seoTitle'] ?? ''),
       metaDescription: String(data['metaDescription'] ?? ''),
       featuredImageUrl: String(data['featuredImageUrl'] ?? ''),

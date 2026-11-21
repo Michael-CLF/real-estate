@@ -3,6 +3,7 @@ import {
   Component,
   OnInit,
   inject,
+  OnDestroy,
   signal,
   computed
 } from '@angular/core';
@@ -14,6 +15,8 @@ import {
   BlogArticle,
   BlogArticleInput
 } from '../../../blog/models/blog-article.model';
+
+import { scopeArticleCss } from '../../../blog/utils/article-css';
 
 import { BlogService } from '../../../blog/services/blog.service';
 import { BlogImageUploadService } from '../../../blog/services/blog-image-upload.service';
@@ -27,11 +30,12 @@ import { PageSeoService } from '../../../../core/seo/page-seo.service';
   templateUrl: './blog-admin.component.html',
   styleUrl: './blog-admin.component.scss'
 })
-export class BlogAdminComponent implements OnInit {
+export class BlogAdminComponent implements OnInit, OnDestroy {
   private readonly blogService = inject(BlogService);
   private readonly imageUpload = inject(BlogImageUploadService);
   private readonly seo = inject(PageSeoService);
   private readonly document = inject(DOCUMENT);
+  private previewStyleElement: HTMLStyleElement | null = null;
 
   readonly articles = signal<BlogArticle[]>([]);
   readonly loading = signal(false);
@@ -77,6 +81,7 @@ export class BlogAdminComponent implements OnInit {
       title: '',
       summary: '',
       contentHtml: '',
+      customCss: '',
       seoTitle: '',
       metaDescription: '',
       featuredImageUrl: '',
@@ -125,6 +130,7 @@ export class BlogAdminComponent implements OnInit {
       title: article.title,
       summary: article.summary,
       contentHtml: article.contentHtml,
+      customCss: article.customCss ?? '',
       seoTitle: article.seoTitle,
       metaDescription: article.metaDescription,
       featuredImageUrl: article.featuredImageUrl,
@@ -155,8 +161,52 @@ export class BlogAdminComponent implements OnInit {
       .replace(/^-+|-+$/g, '');
   }
 
+  updatePreviewCss(css: string): void {
+    if (!this.previewOpen()) {
+      return;
+    }
+
+    try {
+      const scopedCss = scopeArticleCss(css ?? '');
+
+      if (!this.previewStyleElement) {
+        this.previewStyleElement =
+          this.document.createElement('style');
+
+        this.previewStyleElement.id =
+          'navstreet-blog-admin-preview-css';
+
+        this.document.head.appendChild(
+          this.previewStyleElement
+        );
+      }
+
+      this.previewStyleElement.textContent = scopedCss;
+    } catch (error) {
+      this.removePreviewCss();
+      console.warn('Invalid article CSS:', error);
+    }
+  }
+
+  private removePreviewCss(): void {
+    this.previewStyleElement?.remove();
+    this.previewStyleElement = null;
+  }
+
   togglePreview(): void {
-    this.previewOpen.update(value => !value);
+    const opening = !this.previewOpen();
+
+    this.previewOpen.set(opening);
+
+    if (opening) {
+      this.updatePreviewCss(this.form.customCss ?? '');
+    } else {
+      this.removePreviewCss();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.removePreviewCss();
   }
 
   insertFormatting(
@@ -222,6 +272,7 @@ export class BlogAdminComponent implements OnInit {
 
 
   closeEditor(): void {
+    this.removePreviewCss();
     this.editorOpen.set(false);
     this.previewOpen.set(false);
     this.publishConfirmation.set(null);
@@ -279,6 +330,11 @@ export class BlogAdminComponent implements OnInit {
 
     if (!this.form.contentHtml.trim()) {
       this.error.set('Article content is required.');
+      return;
+    }
+
+    try { scopeArticleCss(this.form.customCss ?? ''); } catch (error) {
+      this.error.set(error instanceof Error ? error.message : 'Invalid custom CSS.');
       return;
     }
 
