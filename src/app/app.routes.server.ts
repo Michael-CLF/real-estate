@@ -44,6 +44,16 @@ export const serverRoutes: ServerRoute[] = [
   /*
    * Public informational pages
    */
+  /*
+ * SEO Landing Pages — Seller Acquisition
+ *
+ * Prerender these pages so search engines
+ * receive their content in the initial HTML.
+ */
+  {
+    path: 'list-house-for-sale-by-owner',
+    renderMode: RenderMode.Prerender
+  },
   {
     path: 'how-navstreet-works',
     renderMode: RenderMode.Prerender

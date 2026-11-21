@@ -59,6 +59,9 @@ jobs:
       - name: Generate blog SEO pages
         run: node scripts/generate-blog-pages.mjs
 
+      - name: Generate landing page sitemap entries
+        run: node scripts/generate-landing-sitemap.mjs
+
       - name: Configure SSH known hosts
         env:
           KNOWN_HOSTS: ${{ secrets.IONOS_SFTP_KNOWN_HOSTS }}

@@ -55,6 +55,26 @@ export const PUBLIC_ROUTES:
                 component.HomeComponent
             )
         },
+        /*
+ * SEO Landing Pages — Seller Acquisition
+ *
+ * Publicly accessible.
+ * Lazy-loaded to protect the main bundle size.
+ */
+        {
+          path: 'list-house-for-sale-by-owner',
+
+          pathMatch: 'full',
+
+          title: 'List Your House for Sale by Owner Online for $49 | NavStreet',
+
+          loadComponent: () =>
+            import(
+              '../features/landing-pages/seller/list-by-owner/list-by-owner.component'
+            ).then(
+              component => component.ListByOwnerComponent
+            )
+        },
 
         /*
          * How NavStreet Works
@@ -86,7 +106,7 @@ export const PUBLIC_ROUTES:
                 component.PricingComponent
             )
         },
-        
+
         /*
          * NavStreet Blog
          * Publicly accessible — no authentication required.

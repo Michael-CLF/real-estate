@@ -1,0 +1,112 @@
+<main class="fsbo-page" data-navstreet-sitemap="landing">
+  <section class="hero" aria-labelledby="fsbo-title">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <p class="eyebrow">Sell by owner with NavStreet</p>
+        <h1 id="fsbo-title">List Your House for Sale by Owner Online for <span>$49</span></h1>
+        <p class="hero__lead">Advertise your home, connect with interested buyers, and manage showing requests—all while staying in control of your sale.</p>
+        <div class="hero__actions">
+          <a class="button button--primary" routerLink="/sell">Start Your $49 Listing</a>
+          <a class="button button--secondary" href="#how-it-works">See How It Works</a>
+        </div>
+        <p class="hero__note">One standard listing fee. Optional enhancements may cost extra. Not an MLS listing.</p>
+      </div>
+      <aside class="hero__summary" aria-label="NavStreet listing highlights">
+        <p class="summary__label">Your listing starts at</p>
+        <p class="summary__price">$49</p>
+        <p class="summary__description">A straightforward way to advertise your home for sale by owner.</p>
+        <ul>
+          <li>Publish your property details and photos</li>
+          <li>Receive buyer inquiries</li>
+          <li>Coordinate showing requests</li>
+          <li>Use NavStreet's Marketing Toolkit</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="why-title">
+    <div class="container">
+      <p class="eyebrow">A simpler way to advertise</p>
+      <h2 id="why-title">Keep control of your home sale</h2>
+      <p class="section__intro">NavStreet gives homeowners an online place to present their property to prospective buyers without requiring a traditional listing agent.</p>
+      <div class="benefits">
+        <article class="benefit">
+          <h3>Set your own asking price</h3>
+          <p>Choose your listing price and describe what makes your property stand out.</p>
+        </article>
+        <article class="benefit">
+          <h3>Connect with interested buyers</h3>
+          <p>Use buyer inquiries and showing requests to manage interest in your home.</p>
+        </article>
+        <article class="benefit">
+          <h3>Promote your property</h3>
+          <p>Use the Marketing Toolkit to help share your listing beyond NavStreet.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--muted" id="how-it-works" aria-labelledby="steps-title">
+    <div class="container">
+      <p class="eyebrow">Getting started</p>
+      <h2 id="steps-title">How to list your house for sale by owner</h2>
+      <div class="steps">
+        <article class="step">
+          <span class="step__number" aria-hidden="true">1</span>
+          <h3>Tell us about your property</h3>
+          <p>Enter the address, property details, description, and photos.</p>
+        </article>
+        <article class="step">
+          <span class="step__number" aria-hidden="true">2</span>
+          <h3>Review your listing</h3>
+          <p>Check your information and complete the applicable listing and verification steps.</p>
+        </article>
+        <article class="step">
+          <span class="step__number" aria-hidden="true">3</span>
+          <h3>Publish and promote</h3>
+          <p>Make your listing available to buyers and use NavStreet's tools to help market it.</p>
+        </article>
+      </div>
+      <div class="centered-action"><a class="button button--primary" routerLink="/sell">Create Your Listing</a></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="cost-title">
+    <div class="container cost-layout">
+      <div>
+        <p class="eyebrow">Transparent listing price</p>
+        <h2 id="cost-title">Advertise your home for $49</h2>
+        <p>Your standard NavStreet listing costs $49. You can choose optional listing enhancements if they fit your marketing plan.</p>
+        <p>Listing your home without a traditional listing agent may reduce certain expenses, but it does not eliminate all costs of selling. Closing costs and any negotiated professional compensation are separate.</p>
+      </div>
+      <div class="cost-card">
+        <span>Standard listing</span>
+        <strong>$49</strong>
+        <p>Optional enhancements priced separately.</p>
+        <a class="button button--primary" routerLink="/sell">Get Started</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--muted" aria-labelledby="faq-title">
+    <div class="container faq-container">
+      <p class="eyebrow">Common questions</p>
+      <h2 id="faq-title">Frequently asked questions</h2>
+      @for (faq of faqs; track faq.question) {
+        <details class="faq-item">
+          <summary>{{ faq.question }}</summary>
+          <p>{{ faq.answer }}</p>
+        </details>
+      }
+    </div>
+  </section>
+
+  <section class="final-cta" aria-labelledby="final-title">
+    <div class="container final-cta__inner">
+      <h2 id="final-title">Ready to list your house for sale by owner?</h2>
+      <p>Start creating your NavStreet listing and take the next step toward reaching buyers.</p>
+      <a class="button button--light" routerLink="/sell">Start Your $49 Listing</a>
+    </div>
+  </section>
+</main>
