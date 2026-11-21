@@ -3,11 +3,14 @@ import {
   Component,
   OnInit,
   inject,
-  signal
+  signal,
+  PLATFORM_ID
 } from '@angular/core';
 
 import {
-  CommonModule
+  CommonModule,
+  DOCUMENT,
+  isPlatformBrowser
 } from '@angular/common';
 
 import {
@@ -39,18 +42,36 @@ import {
 export class BlogComponent implements OnInit {
   private readonly blogService = inject(BlogService);
   private readonly seo = inject(PageSeoService);
+  private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly articles = signal<BlogArticle[]>([]);
   readonly loading = signal(true);
   readonly error = signal('');
 
   ngOnInit(): void {
+    // Restore scroll-to-top behavior for the blog listing page.
+    this.scrollToTop();
+
+    // Preserve existing SEO metadata.
     this.seo.set(
       'For Sale by Owner Blog & Home Selling Tips | NavStreet',
       'Explore home selling tips, for sale by owner guides, real estate insights, and helpful resources for buyers and sellers on NavStreet.'
     );
 
     void this.loadArticles();
+  }
+
+  private scrollToTop(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.document.defaultView?.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    });
   }
 
   private async loadArticles(): Promise<void> {
