@@ -328,11 +328,60 @@
   }
 }
 
-/* Shared rich-article formatting defaults. */
-.navstreet-custom-article table { width:100%; border-collapse:collapse; margin:24px 0; display:block; overflow-x:auto; }
-.navstreet-custom-article th, .navstreet-custom-article td { border:1px solid #dbe3ea; padding:12px 14px; text-align:left; }
-.navstreet-custom-article th { background:#eef4f8; color:#154360; }
-.navstreet-custom-article .callout { padding:20px 24px; margin:24px 0; background:#eef5fa; border-left:4px solid #2874a6; border-radius:6px; }
-.navstreet-custom-article .faq-item { padding:20px 0; border-bottom:1px solid #dbe3ea; }
-.navstreet-custom-article .faq-item:last-child { border-bottom:0; }
-.navstreet-custom-article .responsive-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:20px; }
+
+/*
+ * Shared rich-article formatting defaults.
+ *
+ * Article content is inserted through [innerHTML], so its
+ * elements do not receive Angular's emulated encapsulation
+ * attributes.
+ *
+ * Scope these rules to this component's host while allowing
+ * them to reach the dynamically inserted article elements.
+ */
+:host ::ng-deep .navstreet-custom-article {
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    display: block;
+    overflow-x: auto;
+  }
+
+  th,
+  td {
+    border: 1px solid #dbe3ea;
+    padding: 12px 14px;
+    text-align: left;
+  }
+
+  th {
+    background: #eef4f8;
+    color: #154360;
+  }
+
+  .callout {
+    padding: 20px 24px;
+    margin: 24px 0;
+    background: #eef5fa;
+    border-left: 4px solid #2874a6;
+    border-radius: 6px;
+  }
+
+  .faq-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #dbe3ea;
+  }
+
+  .faq-item:last-child {
+    border-bottom: 0;
+  }
+
+  .responsive-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 20px;
+  }
+}
