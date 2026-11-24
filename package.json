@@ -15,6 +15,11 @@
     "verify:document-review": "node tools/navstreet-refactor/verify-state-document-review.cjs ."
   },
   "private": true,
+  "overrides": {
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.14.7"
+    }
+  },
   "dependencies": {
     "@angular/animations": "22.2.4",
     "@angular/cdk": "22.2.5",
@@ -32,6 +37,7 @@
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "@svg-maps/usa": "^2.0.0",
     "firebase": "^12.16.0",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",

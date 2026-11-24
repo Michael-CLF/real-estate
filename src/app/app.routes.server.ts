@@ -114,6 +114,18 @@ export const serverRoutes: ServerRoute[] = [
     path: 'calculators/commission-savings',
     renderMode: RenderMode.Prerender
   },
+  /*
+ * Public research pages
+ */
+{
+  path: 'research',
+  renderMode: RenderMode.Prerender
+},
+{
+  path: 'research/real-estate-commission-savings-by-state',
+  renderMode: RenderMode.Prerender
+},
+  
 
   /*
    * Active state landing pages

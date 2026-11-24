@@ -16,6 +16,8 @@ export interface PageSeoConfig {
   imageUrl?: string;
   imageAlt?: string;
   noIndex?: boolean;
+  ogType?: 'website' | 'article';
+  structuredData?: Record<string, unknown>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -54,6 +56,7 @@ export class PageSeoService {
       .subscribe(event => {
         if (event instanceof NavigationStart) {
           this.explicitCanonicalUrl = null;
+          this.clearStructuredData();
 
           this.set(
             'NavStreet',
@@ -118,7 +121,11 @@ export class PageSeoService {
       config.imageUrl ??
       `${this.siteUrl}/assets/images/navstreet-social.png`;
 
-    this.updateSocialTag('property', 'og:type', 'website');
+    this.updateSocialTag(
+      'property',
+      'og:type',
+      config.ogType ?? 'website'
+    );
     this.updateSocialTag('property', 'og:title', config.title);
     this.updateSocialTag('property', 'og:description', config.description);
     this.updateSocialTag('property', 'og:url', canonicalUrl.href);
@@ -141,10 +148,36 @@ export class PageSeoService {
         'twitter:image:alt',
         config.imageAlt
       );
+      this.clearStructuredData();
+
+      if (config.structuredData && !config.noIndex) {
+        this.setStructuredData(config.structuredData);
+      }
     } else {
       this.meta.removeTag('property="og:image:alt"');
       this.meta.removeTag('name="twitter:image:alt"');
     }
+  }
+  private setStructuredData(
+    data: Record<string, unknown>
+  ): void {
+    this.clearStructuredData();
+
+    const script = this.document.createElement('script');
+
+    script.setAttribute('type', 'application/ld+json');
+    script.setAttribute('id', 'navstreet-page-structured-data');
+
+    script.textContent = JSON.stringify(data)
+      .replace(/</g, '\\u003c');
+
+    this.document.head.appendChild(script);
+  }
+
+  private clearStructuredData(): void {
+    this.document
+      .querySelectorAll('#navstreet-page-structured-data')
+      .forEach(element => element.remove());
   }
 
   private updateSocialTag(

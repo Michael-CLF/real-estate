@@ -1,0 +1,872 @@
+<div class="report-page" data-navstreet-sitemap="landing">
+
+  <!-- Research hero -->
+
+  <section class="report-hero">
+    <div class="report-container">
+
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a routerLink="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a routerLink="/research">Research</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Commission Savings</span>
+      </nav>
+
+      <span class="eyebrow">
+        NAVSTREET RESEARCH | 2026
+      </span>
+
+      <h1>
+        How Much Could You Save Selling Your Home
+        Without a Realtor? A 50-State Analysis
+      </h1>
+
+      <p class="hero-description">
+        Compare potential real estate listing-agent commission
+        savings across the United States using reported median
+        home sale prices and four illustrative commission scenarios.
+      </p>
+
+      <div class="hero-statistics">
+
+        <div>
+          <strong>{{ stateCount }}</strong>
+          <span>States analyzed</span>
+        </div>
+
+        <div>
+          <strong>$49</strong>
+          <span>NavStreet standard listing</span>
+        </div>
+
+        <div>
+          <strong>4</strong>
+          <span>Commission scenarios</span>
+        </div>
+
+        <div>
+          <strong>Oct. 2026</strong>
+          <span>Housing data period</span>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <div class="report-container report-content">
+
+    <!-- Introduction -->
+
+    <section class="report-section">
+
+      <h2>How Much Does a Real Estate Listing Agent Cost?</h2>
+
+      <p class="cost-text">
+        Real estate commissions can represent a significant
+        expense when selling a home. The amount a homeowner
+        pays depends on the property's sale price and the
+        compensation negotiated with their real estate agent.
+      </p>
+
+      <p class="cost-text">
+        This NavStreet analysis compares hypothetical
+        listing-agent commissions of 1.5%, 2%, 2.5% and 3%
+        with NavStreet's $49 standard for-sale-by-owner
+        listing fee.
+      </p>
+
+      <p class="cost-text">
+        The analysis illustrates potential differences in
+        listing expenses. It does not measure actual savings
+        achieved by homeowners who sold without an agent.
+      </p>
+
+    </section>
+
+    <!-- Commission selector -->
+
+    <section class="report-section">
+
+      <h2>Explore Potential Real Estate Commission Savings</h2>
+
+      <p class="cost-text">
+        Select an illustrative listing-agent commission rate
+        to update the research findings and state comparison.
+      </p>
+
+      <div class="commission-selector" role="group" aria-label="Illustrative listing-agent commission rate">
+
+        @for (rate of commissionRates; track rate) {
+
+        <button type="button" id="percentage" [class.active]="selectedRate() === rate" [attr.aria-pressed]="selectedRate() === rate"
+          (click)="setCommissionRate(rate)">
+
+          {{ rate }}%
+
+        </button>
+
+        }
+
+      </div>
+
+      <div class="statistics-grid" aria-live="polite">
+
+        <article class="statistic-card">
+
+          <span>Highest potential savings</span>
+
+          <strong>
+            {{ highestSavings()?.potentialSavings
+            | currency:'USD':'symbol':'1.0-0' }}
+          </strong>
+
+          <p class="cost-text">{{ highestSavings()?.state }}</p>
+
+        </article>
+
+        <article class="statistic-card">
+
+          <span>Average state-level savings</span>
+
+          <strong>
+            {{ averageSavings()
+            | currency:'USD':'symbol':'1.0-0' }}
+          </strong>
+
+          <p class="cost-text">Unweighted average across all states</p>
+
+        </article>
+
+        <article class="statistic-card">
+
+          <span>Lowest potential savings</span>
+
+          <strong>
+            {{ lowestSavings()?.potentialSavings
+            | currency:'USD':'symbol':'1.0-0' }}
+          </strong>
+
+          <p class="cost-text">{{ lowestSavings()?.state }}</p>
+
+        </article>
+
+      </div>
+
+      <p class="data-note">
+        Calculations use a {{ selectedRate() }}%
+        illustrative listing-agent commission, less the
+        $49 NavStreet standard listing fee.
+        Other selling expenses are excluded.
+      </p>
+
+    </section>
+
+    <!-- Interactive geographic state map -->
+
+    <section class="report-section">
+
+      <h2>
+        Potential Commission Savings Across the United States
+      </h2>
+
+      <p class="cost-text">
+        Select a state to explore potential commission savings
+        and filter the comparison table. The map updates
+        automatically with the {{ selectedRate() }}%
+        commission scenario.
+      </p>
+
+      <div class="state-map-scroll">
+
+        <svg class="us-geographic-map" xmlns="http://www.w3.org/2000/svg" [attr.viewBox]="mapViewBox" role="group"
+          aria-label="United States commission savings map">
+
+          @for (state of mapStates(); track state.code) {
+
+          <path class="geographic-state" [attr.d]="state.path" [attr.fill]="mapColor(state.potentialSavings)"
+            [class.selected]="mapSelection() === state.code" [attr.aria-pressed]="mapSelection() === state.code"
+            [attr.aria-label]="
+            state.state + ', potential savings ' +
+            (state.potentialSavings |
+              currency:'USD':'symbol':'1.0-0')
+          " role="button" tabindex="0" (mouseenter)="mapPreview.set(state.code)" (mouseleave)="mapPreview.set('')"
+            (focus)="mapPreview.set(state.code)" (blur)="mapPreview.set('')" (click)="selectMapState(state.code)"
+            (keydown)="handleMapKey($event, state.code)">
+
+            <title>
+              {{ state.state }}:
+              {{ state.potentialSavings |
+              currency:'USD':'symbol':'1.0-0' }}
+              potential savings
+            </title>
+
+          </path>
+
+          }
+
+        </svg>
+
+      </div>
+
+      <div class="map-legend" aria-label="Potential savings legend">
+
+        <span class="cost-text">
+          <i data-band="0"></i>
+          Under $5,000
+        </span>
+
+        <span class="cost-text">
+          <i data-band="1"></i>
+          $5,000–9,999
+        </span>
+
+        <span class="cost-text">
+          <i data-band="2"></i>
+          $10,000–14,999
+        </span>
+
+        <span class="cost-text">
+          <i data-band="3"></i>
+          $15,000–19,999
+        </span>
+
+        <span class="cost-text">
+          <i data-band="4"></i>
+          $20,000+
+        </span>
+
+      </div>
+
+      <div class="map-details" aria-live="polite">
+
+        @if (activeMapState(); as state) {
+
+        <strong>{{ state.state }}</strong>
+
+        <span>
+          Median sale price:
+          {{ state.medianSalePrice |
+          currency:'USD':'symbol':'1.0-0' }}
+        </span>
+
+        <span>
+          Estimated commission:
+          {{ state.estimatedCommission |
+          currency:'USD':'symbol':'1.0-0' }}
+        </span>
+
+        <span class="map-savings-value">
+          Potential savings:
+          {{ state.potentialSavings |
+          currency:'USD':'symbol':'1.0-0' }}
+        </span>
+
+        } @else {
+
+        <span class="cost-text">
+          Hover over, focus or select a state
+          to explore its figures.
+        </span>
+
+        }
+
+      </div>
+
+      @if (mapSelection()) {
+
+      <p class="map-selection">
+
+        Table filtered to {{ mapSelection() }}.
+
+        <button type="button" class="map-clear" (click)="selectMapState(mapSelection())">
+
+          Show all states
+
+        </button>
+
+      </p>
+
+      }
+
+    </section>
+
+    <!-- Top five states -->
+
+    <section class="report-section">
+
+      <h2>
+        Five States With the Highest Potential
+        Listing-Fee Savings
+      </h2>
+
+      <p class="cost-text">
+        Higher home sale prices generally result in larger
+        dollar differences when comparing percentage-based
+        listing-agent commissions with a fixed listing fee.
+      </p>
+
+      <div class="chart">
+
+        @for (state of topFiveStates(); track state.stateCode) {
+
+        <div class="chart-row">
+
+          <div class="chart-label">
+
+            <strong>{{ state.state }}</strong>
+
+            <span>
+              {{ state.potentialSavings
+              | currency:'USD':'symbol':'1.0-0' }}
+            </span>
+
+          </div>
+
+          <div class="chart-track">
+
+            <div class="chart-bar" [style.width.%]="barWidth(state.potentialSavings)">
+            </div>
+
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+    </section>
+
+    <!-- State comparison table -->
+
+    <section class="report-section">
+
+      <h2>Real Estate Commission Savings by State</h2>
+
+      <p class="cost-text">
+        Compare reported median home sale prices and
+        potential listing-fee savings across all 50 states.
+      </p>
+
+      <div class="table-controls">
+
+        <div class="control-group">
+
+          <label for="state-search">Find your state</label>
+
+          <input id="state-search" type="search" placeholder="Search by state or abbreviation" [ngModel]="searchTerm()"
+            (ngModelChange)="setSearchTerm($event)">
+
+        </div>
+
+        <div class="control-group">
+
+          <label for="state-sort">Sort results</label>
+
+          <select id="state-sort" [ngModel]="sortOption()" (ngModelChange)="setSortOption($event)">
+
+            <option value="savings-desc">
+              Highest potential savings
+            </option>
+
+            <option value="savings-asc">
+              Lowest potential savings
+            </option>
+
+            <option value="price-desc">
+              Highest median sale price
+            </option>
+
+            <option value="price-asc">
+              Lowest median sale price
+            </option>
+
+            <option value="state-asc">
+              State name (A–Z)
+            </option>
+
+          </select>
+
+        </div>
+
+        <button type="button" class="reset-button" (click)="resetFilters()">
+
+          Reset filters
+
+        </button>
+
+      </div>
+
+      <p class="results-count" aria-live="polite">
+        Showing {{ filteredStates().length }} of
+        {{ stateCount }} states
+      </p>
+
+      <div class="table-wrapper" tabindex="0" role="region" aria-label="State commission savings comparison">
+
+        <table class="comparison-table">
+
+          <caption>
+            October 2026 median home sale prices and
+            {{ selectedRate() }}% illustrative commission
+            comparison.
+          </caption>
+
+          <thead>
+
+            <tr>
+              <th scope="col">State</th>
+              <th scope="col">Median sale price</th>
+              <th scope="col">
+                {{ selectedRate() }}% commission
+              </th>
+              <th scope="col">NavStreet listing fee</th>
+              <th scope="col">Potential savings</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (state of filteredStates(); track state.stateCode) {
+
+            <tr>
+
+              <th scope="row">
+
+                {{ state.state }}
+
+                @if (state.stateCode === 'LA') {
+                <sup aria-label="See Louisiana data note">*</sup>
+                }
+
+              </th>
+
+              <td>
+                {{ state.medianSalePrice
+                | currency:'USD':'symbol':'1.0-0' }}
+              </td>
+
+              <td>
+                {{ state.estimatedCommission
+                | currency:'USD':'symbol':'1.0-0' }}
+              </td>
+
+              <td>
+                {{ listingFee | currency:'USD':'symbol':'1.0-0' }}
+              </td>
+
+              <td class="savings-value">
+                {{ state.potentialSavings
+                | currency:'USD':'symbol':'1.0-0' }}
+              </td>
+
+            </tr>
+
+            } @empty {
+
+            <tr>
+              <td colspan="5" class="empty-results">
+                No states match your search.
+              </td>
+            </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <p class="data-note">
+        * Louisiana uses supplemental Realtor.com data.
+        Differences in source methodology may affect
+        comparability with the other states.
+      </p>
+
+      <p class="data-note">
+        All displayed dollar amounts are rounded to the
+        nearest whole dollar.
+      </p>
+    </section>
+
+    <!-- Download research data -->
+
+    <section class="report-section research-download">
+
+      <h2>Download the Research Data</h2>
+
+      <p class="cost-text">
+        Download NavStreet's complete 50-state commission
+        savings dataset for your own research, analysis
+        or reporting.
+      </p>
+
+      <div class="research-download-card">
+
+        <div class="research-download-icon" aria-hidden="true">
+
+          <i class="fa-solid fa-file-csv"></i>
+
+        </div>
+
+        <div class="research-download-info">
+
+          <h3>
+            Real Estate Commission Savings by State
+          </h3>
+
+          <p class="cost-text">
+            CSV format &bull;
+            {{ stateCount }} states &bull;
+            Four commission scenarios
+          </p>
+
+          <span class="research-download-compatible">
+            Compatible with Microsoft Excel,
+            Google Sheets and other spreadsheet applications.
+          </span>
+
+        </div>
+
+        <button type="button" class="research-download-button" (click)="downloadResearchCsv()">
+
+          <i class="fa-solid fa-download" aria-hidden="true"></i>
+
+          Download Research Data (CSV)
+
+        </button>
+
+      </div>
+
+      <p class="research-download-note">
+        Commission savings are illustrative estimates.
+        Please cite NavStreet Research and the original
+        housing data sources when referencing this dataset.
+      </p>
+
+    </section>
+
+    <!-- Methodology -->
+
+    <section class="report-section" id="methodology">
+
+      <h2>Research Methodology and Data Sources</h2>
+
+      <h3>Housing market data</h3>
+
+      <p class="cost-text">
+        This analysis uses reported state-level median
+        home sale prices for October 2026. Redfin's
+        Housing Market Tracker is the primary source,
+        with supplemental Realtor.com data for Louisiana.
+      </p>
+
+      <ul class="source-list">
+
+        <li>
+          <a href="https://www.redfin.com/news/data-center/downloads/" target="_blank" rel="noopener noreferrer">
+
+            Redfin Data Center
+
+          </a>
+          — Primary housing market dataset.
+        </li>
+
+        <li>
+          <a href="https://www.redfin.com/news/data-center/methodology/" target="_blank" rel="noopener noreferrer">
+
+            Redfin Research Methodology
+
+          </a>
+          — Housing data methodology.
+        </li>
+
+        <li>
+          <a href="https://www.realtor.com/local/market/louisiana" target="_blank" rel="noopener noreferrer">
+
+            Realtor.com Louisiana Housing Market
+
+          </a>
+          — Supplemental median sold price.
+        </li>
+
+      </ul>
+
+      <h3>How potential savings are calculated</h3>
+
+      <div class="formula-box">
+
+        <strong>Potential listing-fee savings</strong>
+
+        <p>
+          (Median home sale price × illustrative
+          listing-agent commission rate) − $49
+        </p>
+
+      </div>
+
+      <p class="cost-text">
+        For example, a homeowner selling a $400,000
+        property under an illustrative 3% listing-agent
+        commission scenario would incur a $12,000
+        listing-agent commission.
+      </p>
+
+      <p class="cost-text">
+        Compared with NavStreet's $49 standard listing
+        fee, the potential difference in listing expenses
+        would be $11,951.
+      </p>
+
+      <h3>Research limitations</h3>
+
+      <ul class="cost-text">
+
+        <li>
+          Real estate commissions are negotiable and
+          are not established by law.
+        </li>
+
+        <li>
+          Commission percentages are hypothetical
+          scenarios, not measured state commission rates.
+        </li>
+
+        <li>
+          Median sale prices represent market-level
+          statistics, not individual property valuations.
+        </li>
+
+        <li>
+          Buyer-agent compensation, closing costs,
+          attorney fees, optional listing enhancements
+          and other expenses are excluded.
+        </li>
+
+        <li>
+          The average state-level savings figure is
+          unweighted and is not a national transaction-weighted
+          savings estimate.
+        </li>
+
+        <li>
+          Louisiana's supplemental data may differ in
+          methodology from the primary Redfin dataset.
+        </li>
+
+        <li>
+          Nationwide research coverage does not imply
+          that NavStreet listing services are available
+          in every state.
+        </li>
+
+      </ul>
+
+    </section>
+
+    <!-- SEO frequently asked questions -->
+
+    <section class="report-section">
+
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+
+        <h3>
+          How much can I save selling my house
+          without a Realtor?
+        </h3>
+
+        <p class="cost-text">
+          Potential savings depend on your home's sale
+          price, the listing-agent commission you would
+          otherwise negotiate and the expenses associated
+          with selling independently.
+        </p>
+
+      </div>
+
+      <div class="faq-item">
+
+        <h3>
+          Are real estate commission rates different
+          in every state?
+        </h3>
+
+        <p class="cost-text">
+          Real estate commissions are negotiable.
+          Compensation arrangements can vary by agent,
+          brokerage, property and transaction.
+          This report does not establish or estimate
+          prevailing commission rates by state.
+        </p>
+
+      </div>
+
+      <div class="faq-item">
+
+        <h3>
+          Do I have to pay a buyer's agent when
+          selling my home by owner?
+        </h3>
+
+        <p class="cost-text">
+          Buyer-agent compensation depends on the
+          agreements and negotiations involved in the
+          transaction. Sellers may agree to contribute
+          toward buyer-agent compensation.
+          These expenses are not included in this analysis.
+        </p>
+
+      </div>
+
+      <div class="faq-item">
+
+        <h3>
+          Does selling a home by owner eliminate
+          closing costs?
+        </h3>
+
+        <p class="cost-text">
+          No. Sellers may still incur title expenses,
+          transfer taxes, attorney fees, settlement charges
+          and other transaction-related expenses.
+        </p>
+
+      </div>
+
+      <div class="faq-item">
+
+        <h3>
+          How can I calculate commission savings
+          for my own home?
+        </h3>
+
+        <p class="cost-text">
+          Use NavStreet's free commission savings calculator
+          to compare selling expenses using your estimated
+          home sale price and your own commission assumptions.
+        </p>
+
+        <a class="text-link" routerLink="/calculators/commission-savings">
+
+          Use the real estate commission savings calculator
+          &rarr;
+
+        </a>
+
+      </div>
+
+    </section>
+
+    <!-- Publisher citation -->
+
+   <!-- Research citation and sharing -->
+
+<section class="report-section research-citation">
+
+  <h2>Cite This Research</h2>
+
+  <p class="cost-text">
+    If you reference this research in an article,
+    publication, blog post or real estate market
+    analysis, please use the following suggested
+    citation.
+  </p>
+
+  <div class="research-citation-box">
+
+    <span class="research-citation-label">
+      Suggested Citation
+    </span>
+
+    <p class="research-citation-text">
+      {{ researchCitation }}
+    </p>
+
+  </div>
+
+  <div class="research-citation-actions">
+
+    <button
+      type="button"
+      class="citation-button citation-primary"
+      (click)="copyResearchCitation()">
+
+      <i class="fa-solid fa-copy"
+         aria-hidden="true"></i>
+
+      Copy Citation
+
+    </button>
+
+    <button
+      type="button"
+      class="citation-button citation-secondary"
+      (click)="copyResearchLink()">
+
+      <i class="fa-solid fa-link"
+         aria-hidden="true"></i>
+
+      Copy Report Link
+
+    </button>
+
+  </div>
+
+  <div
+    class="citation-feedback"
+    role="status"
+    aria-live="polite">
+
+    {{ citationStatus() || reportLinkStatus() }}
+
+  </div>
+
+  <p class="research-citation-note">
+    When referencing this research, please acknowledge
+    NavStreet Research and the original housing data
+    sources identified in the methodology section.
+    Commission savings represent illustrative estimates
+    rather than guaranteed results.
+  </p>
+
+</section>
+
+    <!-- Seller call to action -->
+
+    <section class="report-cta">
+
+      <h2>Considering Selling Your Home Without a Realtor?</h2>
+
+      <p>
+        Explore your potential savings, learn about selling
+        your home independently and discover NavStreet's
+        tools for connecting directly with buyers.
+      </p>
+
+      <div class="cta-buttons">
+
+        <a class="primary-button" routerLink="/list-house-for-sale-by-owner">
+
+          Learn About Selling By Owner
+
+        </a>
+
+        <a class="secondary-button" routerLink="/calculators/commission-savings">
+
+          Calculate Your Potential Savings
+
+        </a>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>

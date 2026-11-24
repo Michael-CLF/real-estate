@@ -407,8 +407,8 @@ export const PUBLIC_ROUTES:
                 )
             },
             /*
- * Real Estate Commission Savings
- */
+  * Real Estate Commission Savings
+  */
             {
               path: 'commission-savings',
 
@@ -424,60 +424,13 @@ export const PUBLIC_ROUTES:
         },
 
         /*
- * Professional registration.
- * Reuses the existing registration component.
- */
-        {
-          path: 'professionals/register',
-          pathMatch: 'full',
-
-          loadComponent: () =>
-            import(
-              '../features/professionals/pages/professional-registration/professional-registration.component'
-            ).then(component =>
-              component.ProfessionalRegistrationComponent
-            )
-        },
-
-        /*
-         * Preserve existing state-specific registration links.
+         * NavStreet Research
+         *
+         * Publicly accessible.
+         * No authentication required.
          */
         {
-          path: 'professionals/register/:stateSlug',
-
-          loadComponent: () =>
-            import(
-              '../features/professionals/pages/professional-registration/professional-registration.component'
-            ).then(component =>
-              component.ProfessionalRegistrationComponent
-            )
-        },
-
-        /*
-         * Legacy directory shortcut.
-         */
-        {
-          path: 'professionals',
-          redirectTo: 'find-a-pro',
-          pathMatch: 'full'
-        },
-
-        /*
-         * National directory.
-         * A signed-in, active account is required.
-         */
-        {
-          path: 'find-a-pro',
-
-          canActivate: [
-            authGuard,
-            accountGuard
-          ],
-
-          canActivateChild: [
-            authGuard,
-            accountGuard
-          ],
+          path: 'research',
 
           children: [
             {
@@ -486,293 +439,377 @@ export const PUBLIC_ROUTES:
 
               loadComponent: () =>
                 import(
-                  '../features/professionals/professionals.component'
-                ).then(component =>
-                  component.ProfessionalsComponent
+                  '../features/research/research.component'
+                ).then(
+                  component =>
+                    component.ResearchComponent
                 )
             },
-
             {
-              path: ':stateSlug/:professionalSlug',
+              path: 'real-estate-commission-savings-by-state',
 
               loadComponent: () =>
                 import(
-                  '../features/professionals/pages/professional-profile/professional-profile.component'
-                ).then(component =>
-                  component.ProfessionalProfileComponent
-                )
-            },
-
-            {
-              path: ':stateSlug',
-
-              loadComponent: () =>
-                import(
-                  '../features/professionals/professionals.component'
-                ).then(component =>
-                  component.ProfessionalsComponent
+                  '../features/research/components/commission-savings-by-state/commission-savings-by-state.component'
+                ).then(
+                  component =>
+                    component.CommissionSavingsByStateComponent
                 )
             }
           ]
         },
 
-        /*
-         * Contact
-         */
+
+    /*
+* Professional registration.
+* Reuses the existing registration component.
+*/
+    {
+      path: 'professionals/register',
+      pathMatch: 'full',
+
+      loadComponent: () =>
+        import(
+          '../features/professionals/pages/professional-registration/professional-registration.component'
+        ).then(component =>
+          component.ProfessionalRegistrationComponent
+        )
+    },
+
+    /*
+     * Preserve existing state-specific registration links.
+     */
+    {
+      path: 'professionals/register/:stateSlug',
+
+      loadComponent: () =>
+        import(
+          '../features/professionals/pages/professional-registration/professional-registration.component'
+        ).then(component =>
+          component.ProfessionalRegistrationComponent
+        )
+    },
+
+    /*
+     * Legacy directory shortcut.
+     */
+    {
+      path: 'professionals',
+      redirectTo: 'find-a-pro',
+      pathMatch: 'full'
+    },
+
+    /*
+     * National directory.
+     * A signed-in, active account is required.
+     */
+    {
+      path: 'find-a-pro',
+
+      canActivate: [
+        authGuard,
+        accountGuard
+      ],
+
+      canActivateChild: [
+        authGuard,
+        accountGuard
+      ],
+
+      children: [
         {
-          path: 'contact',
+          path: '',
+          pathMatch: 'full',
 
           loadComponent: () =>
             import(
-              '../features/contact/contact.component'
-            ).then(
-              component =>
-                component.ContactComponent
+              '../features/professionals/professionals.component'
+            ).then(component =>
+              component.ProfessionalsComponent
             )
         },
 
-        /*
-         * Legacy route aliases
-         */
         {
-          path: 'buy',
-
-          redirectTo:
-            'homes',
-
-          pathMatch: 'full'
-        },
-
-        {
-          path: 'about',
-
-          redirectTo:
-            'faq',
-
-          pathMatch: 'full'
-        },
-
-        {
-          path: 'mortgage',
-
-          redirectTo:
-            'calculators',
-
-          pathMatch: 'full'
-        },
-
-        /*
-         * Registration
-         */
-        {
-          path: 'register',
-
-          canActivate: [
-            guestGuard
-          ],
+          path: ':stateSlug/:professionalSlug',
 
           loadComponent: () =>
             import(
-              '../features/authentication/pages/register/register.component'
-            ).then(
-              component =>
-                component.RegisterComponent
+              '../features/professionals/pages/professional-profile/professional-profile.component'
+            ).then(component =>
+              component.ProfessionalProfileComponent
             )
         },
 
-        /*
-         * Sign in
-         */
         {
-          path: 'sign-in',
-
-          canActivate: [
-            guestGuard
-          ],
+          path: ':stateSlug',
 
           loadComponent: () =>
             import(
-              '../features/authentication/pages/sign-in/sign-in.component'
-            ).then(
-              component =>
-                component.SignInComponent
+              '../features/professionals/professionals.component'
+            ).then(component =>
+              component.ProfessionalsComponent
             )
-        },
-
-        /*
-         * Marketplace
-         *
-         * KEEP your existing marketplace.routes.ts.
-         */
-        {
-          path: 'homes',
-
-          loadChildren: () =>
-            import(
-              '../features/marketplace/marketplace.routes'
-            ).then(
-              routes =>
-                routes.MARKETPLACE_ROUTES
-            )
-        },
-
-        /*
-         * Marketing share link
-         */
-        {
-          path:
-            'h/:shareCode',
-
-          loadComponent: () =>
-            import(
-              '../features/marketplace/listing-marketing-link-redirect/listing-marketing-link-redirect.component'
-            ).then(
-              component =>
-                component
-                  .ListingMarketingLinkRedirectComponent
-            )
-        },
-
-        /*
-         * Public listing
-         */
-        {
-          path:
-            'listings/:listingId',
-
-          providers: [
-            ShowingService,
-            { provide: ShowingRepository, useExisting: FirebaseShowingRepository }
-          ],
-
-          loadComponent: () =>
-            import(
-              '../features/marketplace/listings/pages/listing-details/listing-details.component'
-            ).then(
-              component =>
-                component
-                  .ListingDetailsComponent
-            )
-        },
-
-        /*
-         * Return from Stripe Identity.
-         *
-         * This route must remain outside offerIdentityGuard so it can
-         * check Stripe's result before reopening the offer wizard.
-         */
-        {
-          path:
-            'listings/:listingUid/offer/verification-return',
-
-          canActivate: [
-            authGuard,
-            accountGuard
-          ],
-
-          loadComponent: () =>
-            import(
-              '../features/identity/offer-verification-return/offer-verification-return.component'
-            ).then(
-              component =>
-                component
-                  .OfferVerificationReturnComponent
-            )
-        },
-
-        /*
-         * Create/resume offer
-         *
-         * Account and verified identity required.
-         */
-        {
-          path:
-            'listings/:listingUid/offer',
-
-          canActivate: [
-            authGuard,
-            accountGuard,
-            offerIdentityGuard
-          ],
-
-          loadComponent: () =>
-            import(
-              '../features/offers/engine/offer-entry/offer-entry.component'
-            ).then(
-              component =>
-                component.OfferEntryComponent
-            )
-        },
-
-        /* Utah and future state entry: creation and editing are separate actions. */
-        {
-          path: 'listings/:listingUid/offers/new',
-          canActivate: [authGuard, accountGuard, offerIdentityGuard],
-          loadComponent: () => import('../features/offers/engine/offer-entry/offer-entry.component').then(c => c.OfferEntryComponent)
-        },
-        {
-          path: 'offers/:offerUid/versions/:offerVersionUid/edit',
-          canActivate: [authGuard, accountGuard, offerAccessGuard],
-          loadComponent: () => import('../features/offers/engine/offer-entry/offer-entry.component').then(c => c.OfferEntryComponent)
-        },
-
-        /*
-         * Offer and counteroffer details
-         *
-         * Only buyers and sellers recorded on the offer
-         * may open this route.
-         */
-        {
-          path:
-            'offers/:offerUid',
-
-          canActivate: [
-            authGuard,
-            accountGuard,
-            offerAccessGuard
-          ],
-
-          loadComponent: () =>
-            import(
-              '../features/offers/offer-details/offer-details.component'
-            ).then(
-              component =>
-                component
-                  .OfferDetailsComponent
-            )
-        },
-
-        /*
-         * State page
-         */
-        {
-          path:
-            'states/:stateSlug',
-
-          loadComponent: () =>
-            import(
-              '../features/states/state-page/state-page.component'
-            ).then(
-              component =>
-                component.StatePageComponent
-            )
-        },
-
-        /*
-         * Legacy professional profile URL
-         *
-         * This MUST remain below the more-specific
-         * profile/setup and register routes above.
-         */
-        {
-          path:
-            'professionals/:stateSlug/:professionalSlug',
-
-          redirectTo:
-            'find-a-pro/:stateSlug/:professionalSlug',
-
-          pathMatch: 'full'
         }
       ]
+    },
+
+    /*
+     * Contact
+     */
+    {
+      path: 'contact',
+
+      loadComponent: () =>
+        import(
+          '../features/contact/contact.component'
+        ).then(
+          component =>
+            component.ContactComponent
+        )
+    },
+
+    /*
+     * Legacy route aliases
+     */
+    {
+      path: 'buy',
+
+      redirectTo:
+        'homes',
+
+      pathMatch: 'full'
+    },
+
+    {
+      path: 'about',
+
+      redirectTo:
+        'faq',
+
+      pathMatch: 'full'
+    },
+
+    {
+      path: 'mortgage',
+
+      redirectTo:
+        'calculators',
+
+      pathMatch: 'full'
+    },
+
+    /*
+     * Registration
+     */
+    {
+      path: 'register',
+
+      canActivate: [
+        guestGuard
+      ],
+
+      loadComponent: () =>
+        import(
+          '../features/authentication/pages/register/register.component'
+        ).then(
+          component =>
+            component.RegisterComponent
+        )
+    },
+
+    /*
+     * Sign in
+     */
+    {
+      path: 'sign-in',
+
+      canActivate: [
+        guestGuard
+      ],
+
+      loadComponent: () =>
+        import(
+          '../features/authentication/pages/sign-in/sign-in.component'
+        ).then(
+          component =>
+            component.SignInComponent
+        )
+    },
+
+    /*
+     * Marketplace
+     *
+     * KEEP your existing marketplace.routes.ts.
+     */
+    {
+      path: 'homes',
+
+      loadChildren: () =>
+        import(
+          '../features/marketplace/marketplace.routes'
+        ).then(
+          routes =>
+            routes.MARKETPLACE_ROUTES
+        )
+    },
+
+    /*
+     * Marketing share link
+     */
+    {
+      path:
+        'h/:shareCode',
+
+      loadComponent: () =>
+        import(
+          '../features/marketplace/listing-marketing-link-redirect/listing-marketing-link-redirect.component'
+        ).then(
+          component =>
+            component
+              .ListingMarketingLinkRedirectComponent
+        )
+    },
+
+    /*
+     * Public listing
+     */
+    {
+      path:
+        'listings/:listingId',
+
+      providers: [
+        ShowingService,
+        { provide: ShowingRepository, useExisting: FirebaseShowingRepository }
+      ],
+
+      loadComponent: () =>
+        import(
+          '../features/marketplace/listings/pages/listing-details/listing-details.component'
+        ).then(
+          component =>
+            component
+              .ListingDetailsComponent
+        )
+    },
+
+    /*
+     * Return from Stripe Identity.
+     *
+     * This route must remain outside offerIdentityGuard so it can
+     * check Stripe's result before reopening the offer wizard.
+     */
+    {
+      path:
+        'listings/:listingUid/offer/verification-return',
+
+      canActivate: [
+        authGuard,
+        accountGuard
+      ],
+
+      loadComponent: () =>
+        import(
+          '../features/identity/offer-verification-return/offer-verification-return.component'
+        ).then(
+          component =>
+            component
+              .OfferVerificationReturnComponent
+        )
+    },
+
+    /*
+     * Create/resume offer
+     *
+     * Account and verified identity required.
+     */
+    {
+      path:
+        'listings/:listingUid/offer',
+
+      canActivate: [
+        authGuard,
+        accountGuard,
+        offerIdentityGuard
+      ],
+
+      loadComponent: () =>
+        import(
+          '../features/offers/engine/offer-entry/offer-entry.component'
+        ).then(
+          component =>
+            component.OfferEntryComponent
+        )
+    },
+
+    /* Utah and future state entry: creation and editing are separate actions. */
+    {
+      path: 'listings/:listingUid/offers/new',
+      canActivate: [authGuard, accountGuard, offerIdentityGuard],
+      loadComponent: () => import('../features/offers/engine/offer-entry/offer-entry.component').then(c => c.OfferEntryComponent)
+    },
+    {
+      path: 'offers/:offerUid/versions/:offerVersionUid/edit',
+      canActivate: [authGuard, accountGuard, offerAccessGuard],
+      loadComponent: () => import('../features/offers/engine/offer-entry/offer-entry.component').then(c => c.OfferEntryComponent)
+    },
+
+    /*
+     * Offer and counteroffer details
+     *
+     * Only buyers and sellers recorded on the offer
+     * may open this route.
+     */
+    {
+      path:
+        'offers/:offerUid',
+
+      canActivate: [
+        authGuard,
+        accountGuard,
+        offerAccessGuard
+      ],
+
+      loadComponent: () =>
+        import(
+          '../features/offers/offer-details/offer-details.component'
+        ).then(
+          component =>
+            component
+              .OfferDetailsComponent
+        )
+    },
+
+    /*
+     * State page
+     */
+    {
+      path:
+        'states/:stateSlug',
+
+      loadComponent: () =>
+        import(
+          '../features/states/state-page/state-page.component'
+        ).then(
+          component =>
+            component.StatePageComponent
+        )
+    },
+
+    /*
+     * Legacy professional profile URL
+     *
+     * This MUST remain below the more-specific
+     * profile/setup and register routes above.
+     */
+    {
+      path:
+        'professionals/:stateSlug/:professionalSlug',
+
+      redirectTo:
+        'find-a-pro/:stateSlug/:professionalSlug',
+
+      pathMatch: 'full'
+    }
+  ]
     }
   ];
