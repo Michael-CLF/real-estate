@@ -110,6 +110,10 @@ export const serverRoutes: ServerRoute[] = [
     path: 'calculators/extra-payment',
     renderMode: RenderMode.Prerender
   },
+  {
+    path: 'calculators/commission-savings',
+    renderMode: RenderMode.Prerender
+  },
 
   /*
    * Active state landing pages

@@ -11,6 +11,7 @@ import {
 import {
   PageSeoService
 } from '../../core/seo/page-seo.service';
+import { CommonModule } from '@angular/common';
 
 interface CalculatorOption {
   title: string;
@@ -23,11 +24,10 @@ interface CalculatorOption {
 @Component({
   selector:
     'app-calculators',
-
   standalone: true,
-
   imports: [
-    RouterLink
+    RouterLink,
+    CommonModule,
   ],
 
   templateUrl:
@@ -45,10 +45,19 @@ export class CalculatorsComponent {
     inject(PageSeoService);
 
   constructor() {
-    this.pageSeo.set(
-      'Free Mortgage & Real Estate Calculators | NavStreet',
-      'Use NavStreet free mortgage and real estate calculators to estimate monthly payments, home affordability, loan-to-value ratios, and more.'
-    );
+    this.pageSeo.setPage({
+      title:
+        'Free Real Estate & Mortgage Calculators | NavStreet',
+
+      description:
+        'Use seven free real estate and mortgage calculators to estimate mortgage payments, home affordability, real estate commissions, FSBO savings and more.',
+
+      canonicalUrl:
+        'https://navstreet.com/calculators/',
+
+      imageAlt:
+        'NavStreet free real estate and mortgage calculators'
+    });
   }
 
   protected readonly calculators:
@@ -148,6 +157,22 @@ export class CalculatorsComponent {
 
         category:
           'Payoff planning'
+      },
+      {
+        title:
+          'Real Estate Commission Savings Calculator',
+
+        description:
+          'Compare potential real estate agent commissions with the cost of selling your home by owner and estimate your potential savings.',
+
+        route:
+          '/calculators/commission-savings',
+
+        icon:
+          'fa-solid fa-piggy-bank',
+
+        category:
+          'Home selling savings'
       }
     ];
 }

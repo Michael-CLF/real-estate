@@ -15,6 +15,7 @@ import {
 } from '../../core/authentication/guards/account.guard';
 
 export const CALCULATOR_ROUTES: Routes = [
+
   {
     path: '',
 
@@ -116,6 +117,17 @@ export const CALCULATOR_ROUTES: Routes = [
             component =>
               component
                 .ExtraPaymentCalculatorComponent
+          )
+      },
+      {
+        path: 'commission-savings',
+
+        loadComponent: () =>
+          import(
+            './components/commission-savings-calculator/commission-savings-calculator.component'
+          ).then(
+            component =>
+              component.CommissionSavingsCalculatorComponent
           )
       },
 

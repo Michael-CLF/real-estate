@@ -1,0 +1,673 @@
+
+<main class="commission-page">
+
+  <div class="page-container">
+
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a>
+      <span aria-hidden="true">/</span>
+      <a routerLink="/calculators">Calculators</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Commission Savings</span>
+    </nav>
+
+    <header class="page-header">
+
+      <span class="eyebrow">
+        FREE HOME SELLING CALCULATOR
+      </span>
+
+      <h1>Real Estate Commission Savings Calculator</h1>
+
+      <p>
+        How much could you save selling your house without
+        a listing agent? Compare estimated real estate
+        commissions with the cost of advertising your home
+        for sale by owner on NavStreet.
+      </p>
+
+      <div class="feature-labels">
+        <span>Free to use</span>
+        <span>No registration required</span>
+        <span>Instant results</span>
+      </div>
+
+    </header>
+
+    <div class="calculator-grid">
+
+      <!-- Calculator inputs -->
+
+      <section class="calculator-card">
+
+        <h2>Enter Your Home Selling Details</h2>
+
+        <p class="section-description">
+          Adjust the values below to compare your
+          estimated selling expenses.
+        </p>
+
+        <div class="form-field">
+
+          <label for="sale-price">
+            Estimated home sale price
+          </label>
+
+          <div class="input-wrapper">
+            <span class="input-prefix">$</span>
+
+            <input
+              id="sale-price"
+              type="number"
+              min="0"
+              max="100000000"
+              step="1000"
+              [ngModel]="salePrice()"
+              (ngModelChange)="setSalePrice($event)"
+            />
+          </div>
+
+        </div>
+
+        <div class="input-section">
+
+          <h3>Selling With a Listing Agent</h3>
+
+          <div class="form-field">
+
+            <label for="listing-commission">
+              Listing-agent commission
+            </label>
+
+            <div class="input-wrapper">
+
+              <input
+                id="listing-commission"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                [ngModel]="listingCommission()"
+                (ngModelChange)="setListingCommission($event)"
+              />
+
+              <span class="input-suffix">%</span>
+
+            </div>
+
+          </div>
+
+          <div class="form-field">
+
+            <label for="buyer-commission">
+              Seller-paid buyer-agent compensation
+            </label>
+
+            <div class="input-wrapper">
+
+              <input
+                id="buyer-commission"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                [ngModel]="buyerCommission()"
+                (ngModelChange)="setBuyerCommission($event)"
+              />
+
+              <span class="input-suffix">%</span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="input-section">
+
+          <h3>Selling For Sale by Owner</h3>
+
+          <div class="form-field">
+
+            <label for="fsbo-buyer-commission">
+              Seller-paid buyer-agent compensation
+            </label>
+
+            <div class="input-wrapper">
+
+              <input
+                id="fsbo-buyer-commission"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                [ngModel]="fsboBuyerCommission()"
+                (ngModelChange)="setFsboBuyerCommission($event)"
+              />
+
+              <span class="input-suffix">%</span>
+
+            </div>
+
+            <small>
+              Enter zero if you do not anticipate paying
+              buyer-agent compensation.
+            </small>
+
+          </div>
+
+          <div class="form-field">
+
+            <label for="additional-expenses">
+              Additional FSBO marketing expenses
+            </label>
+
+            <div class="input-wrapper">
+
+              <span class="input-prefix">$</span>
+
+              <input
+                id="additional-expenses"
+                type="number"
+                min="0"
+                max="100000000"
+                step="25"
+                [ngModel]="additionalExpenses()"
+                (ngModelChange)="setAdditionalExpenses($event)"
+              />
+
+            </div>
+
+            <small>
+              Include photography, advertising, signs,
+              optional listing enhancements or other
+              expenses you anticipate.
+            </small>
+
+          </div>
+
+          <div class="fixed-fee">
+
+            <span>NavStreet standard listing fee</span>
+
+            <strong>
+              {{ navstreetFee | currency:'USD':'symbol':'1.0-0' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          class="reset-button"
+          (click)="resetCalculator()">
+          Reset Calculator
+        </button>
+
+      </section>
+
+      <!-- Calculator results -->
+
+      <section
+        class="calculator-card results-card"
+        aria-label="Calculator results">
+
+        <h2>Your Estimated Savings</h2>
+
+        <p class="section-description">
+          Compare the estimated expenses of both
+          home selling methods.
+        </p>
+
+        <div
+          class="savings-highlight"
+          [class.negative-savings]="estimatedSavings() < 0"
+          aria-live="polite">
+
+          @if (estimatedSavings() >= 0) {
+
+            <span>Potential savings with NavStreet</span>
+
+            <strong class="savings-amount">
+              {{ estimatedSavings() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+
+            @if (traditionalCost() > 0) {
+              <span class="savings-percent">
+                {{ savingsPercentage() | number:'1.1-1' }}%
+                lower estimated expenses
+              </span>
+            }
+
+          } @else {
+
+            <span>Estimated additional FSBO expenses</span>
+
+            <strong class="savings-amount">
+              {{ -estimatedSavings() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+
+          }
+
+        </div>
+
+        <div class="comparison-chart">
+
+          <h3>Cost Comparison</h3>
+
+          <div class="chart-item">
+
+            <div class="chart-label">
+              <span>Agent-assisted sale</span>
+              <strong>
+                {{ traditionalCost() | currency:'USD':'symbol':'1.2-2' }}
+              </strong>
+            </div>
+
+            <div class="bar-track">
+              <div
+                class="chart-bar traditional-bar"
+                [style.width.%]="traditionalBarWidth()">
+              </div>
+            </div>
+
+          </div>
+
+          <div class="chart-item">
+
+            <div class="chart-label">
+              <span>For sale by owner</span>
+              <strong>
+                {{ fsboCost() | currency:'USD':'symbol':'1.2-2' }}
+              </strong>
+            </div>
+
+            <div class="bar-track">
+              <div
+                class="chart-bar fsbo-bar"
+                [style.width.%]="fsboBarWidth()">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="cost-breakdown">
+
+          <h3>Estimated Expense Breakdown</h3>
+
+          <h4>Agent-Assisted Sale</h4>
+
+          <div class="cost-row">
+            <span>Listing-agent commission</span>
+            <strong>
+              {{ listingAgentCost() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="cost-row">
+            <span>Buyer-agent compensation</span>
+            <strong>
+              {{ buyerAgentCost() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="cost-row total-row">
+            <span>Total estimated expenses</span>
+            <strong>
+              {{ traditionalCost() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <h4>For Sale by Owner</h4>
+
+          <div class="cost-row">
+            <span>NavStreet standard listing</span>
+            <strong>
+              {{ navstreetFee | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="cost-row">
+            <span>Buyer-agent compensation</span>
+            <strong>
+              {{ fsboBuyerAgentCost() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="cost-row">
+            <span>Additional marketing expenses</span>
+            <strong>
+              {{ additionalExpenses() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="cost-row total-row">
+            <span>Total estimated expenses</span>
+            <strong>
+              {{ fsboCost() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          </div>
+
+        </div>
+
+        <a
+          class="primary-button"
+          routerLink="/list-house-for-sale-by-owner">
+          Learn About Listing Your Home for $49
+        </a>
+
+        <p class="calculator-disclaimer">
+          Results are estimates only. Real estate commissions
+          and buyer-agent compensation are negotiable.
+          Closing costs, taxes, legal fees and other expenses
+          are not included unless entered above.
+        </p>
+
+      </section>
+
+    </div>
+
+    <!-- Search-optimized educational content -->
+
+    <section class="content-section">
+
+      <h2>
+        How Much Can You Save Selling Your House
+        Without a Realtor?
+      </h2>
+
+      <p>
+        Selling a house for sale by owner, commonly referred
+        to as FSBO, allows homeowners to advertise and
+        manage the sale of their property without hiring
+        a listing agent.
+      </p>
+
+      <p>
+        One potential financial benefit of selling your
+        home independently is avoiding a percentage-based
+        listing-agent commission. The amount you could save
+        depends on your home's sale price, negotiated
+        commissions, buyer-agent compensation and additional
+        selling expenses.
+      </p>
+
+      <p>
+        NavStreet offers homeowners a standard property
+        advertising listing for $49, along with tools
+        designed to help sellers market their homes and
+        connect directly with prospective buyers.
+      </p>
+
+    </section>
+
+    <section class="content-section">
+
+      <h2>How Real Estate Commission Savings Are Calculated</h2>
+
+      <p>
+        Our real estate commission savings calculator
+        compares estimated agent-assisted selling expenses
+        with estimated for-sale-by-owner advertising and
+        compensation expenses.
+      </p>
+
+      <div class="formula-grid">
+
+        <div class="formula-card">
+
+          <h3>Agent-Assisted Selling Expenses</h3>
+
+          <p>
+            Home sale price × combined seller-paid
+            agent commission percentages
+          </p>
+
+        </div>
+
+        <div class="formula-card">
+
+          <h3>For Sale by Owner Expenses</h3>
+
+          <p>
+            $49 listing fee + seller-paid buyer-agent
+            compensation + additional FSBO expenses
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="formula-result">
+        Potential savings = Agent-assisted expenses
+        − FSBO expenses
+      </div>
+
+      <p>
+        The default percentages are illustrative examples,
+        not established or required commission rates.
+        You can adjust the calculator to reflect your
+        individual circumstances.
+      </p>
+
+    </section>
+
+    <section class="content-section">
+
+      <h2>Example Real Estate Listing Commission Savings</h2>
+
+      <p>
+        The following examples compare a hypothetical
+        3% listing-agent commission with NavStreet's
+        $49 standard listing fee.
+      </p>
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <caption>
+            Illustrative listing-fee savings by home sale price
+          </caption>
+
+          <thead>
+            <tr>
+              <th scope="col">Home Sale Price</th>
+              <th scope="col">3% Listing Commission</th>
+              <th scope="col">NavStreet Listing</th>
+              <th scope="col">Potential Savings</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (
+              price of [200000, 300000, 400000, 500000, 750000, 1000000];
+              track price
+            ) {
+
+              <tr>
+                <td>
+                  {{ price | currency:'USD':'symbol':'1.0-0' }}
+                </td>
+
+                <td>
+                  {{ price * 0.03 | currency:'USD':'symbol':'1.0-0' }}
+                </td>
+
+                <td>$49</td>
+
+                <td class="table-savings">
+                  {{ price * 0.03 - navstreetFee |
+                    currency:'USD':'symbol':'1.0-0' }}
+                </td>
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <p class="small-print">
+        These examples compare listing fees only and assume
+        all other expenses are equal. They do not represent
+        guaranteed savings or actual transaction outcomes.
+      </p>
+
+    </section>
+
+    <!-- Frequently asked questions -->
+
+    <section class="content-section faq-section">
+
+      <h2>Frequently Asked Questions</h2>
+
+      <article class="faq-item">
+
+        <h3>
+          How much commission can I save selling my house
+          for sale by owner?
+        </h3>
+
+        <p>
+          Your potential savings depend on the listing-agent
+          commission you would otherwise negotiate and the
+          expenses associated with selling independently.
+          For example, a hypothetical 3% listing commission
+          on a $400,000 home would equal $12,000.
+        </p>
+
+      </article>
+
+      <article class="faq-item">
+
+        <h3>Are real estate commissions negotiable?</h3>
+
+        <p>
+          Yes. Real estate commissions are negotiable.
+          There is no universally required commission rate.
+          Homeowners should compare available services,
+          compensation arrangements and selling expenses.
+        </p>
+
+      </article>
+
+      <article class="faq-item">
+
+        <h3>
+          Do FSBO sellers have to pay a buyer's agent?
+        </h3>
+
+        <p>
+          Buyer-agent compensation depends on the agreements
+          and negotiations involved in the transaction.
+          Our calculator allows you to enter the amount
+          you anticipate paying, including zero.
+        </p>
+
+      </article>
+
+      <article class="faq-item">
+
+        <h3>Does NavStreet charge a real estate commission?</h3>
+
+        <p>
+          NavStreet charges $49 for a standard property
+          advertising listing rather than a percentage-based
+          listing-agent commission. Optional listing
+          enhancements may cost extra.
+        </p>
+
+      </article>
+
+      <article class="faq-item">
+
+        <h3>Does selling FSBO eliminate closing costs?</h3>
+
+        <p>
+          No. Homeowners may still incur closing costs,
+          attorney fees, title expenses, taxes, negotiated
+          compensation and other transaction-related costs.
+        </p>
+
+      </article>
+
+      <article class="faq-item">
+
+        <h3>Does the NavStreet listing include MLS placement?</h3>
+
+        <p>
+          No. NavStreet is an independent real estate
+          advertising platform. A standard NavStreet
+          listing is not an MLS listing.
+        </p>
+
+      </article>
+
+    </section>
+
+    <!-- Internal SEO links -->
+
+    <section class="content-section">
+
+      <h2>More Free Real Estate Resources</h2>
+
+      <div class="resource-grid">
+
+        <a routerLink="/calculators/mortgage-payment">
+          <strong>Mortgage Calculator</strong>
+          <span>Estimate monthly mortgage payments.</span>
+        </a>
+
+        <a routerLink="/calculators/affordability">
+          <strong>Affordability Calculator</strong>
+          <span>Estimate your potential home-buying budget.</span>
+        </a>
+
+        <a routerLink="/blog">
+          <strong>FSBO Home Selling Guides</strong>
+          <span>Explore real estate and home selling articles.</span>
+        </a>
+
+        <a routerLink="/how-navstreet-works">
+          <strong>How NavStreet Works</strong>
+          <span>Learn about advertising your home independently.</span>
+        </a>
+
+      </div>
+
+    </section>
+
+    <!-- Conversion section -->
+
+    <section class="closing-cta">
+
+      <span class="eyebrow">
+        SELL YOUR HOME YOUR WAY
+      </span>
+
+      <h2>Keep More of Your Home's Equity</h2>
+
+      <p>
+        Advertise your property, access home marketing
+        tools and connect directly with interested buyers
+        through NavStreet.
+      </p>
+
+      <a
+        routerLink="/list-house-for-sale-by-owner"
+        class="primary-button">
+        Explore Our $49 Property Listing
+      </a>
+
+    </section>
+
+  </div>
+
+</main>

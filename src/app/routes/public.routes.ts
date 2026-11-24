@@ -405,6 +405,20 @@ export const PUBLIC_ROUTES:
                     component
                       .ExtraPaymentCalculatorComponent
                 )
+            },
+            /*
+ * Real Estate Commission Savings
+ */
+            {
+              path: 'commission-savings',
+
+              loadComponent: () =>
+                import(
+                  '../features/calculators/components/commission-savings-calculator/commission-savings-calculator.component'
+                ).then(
+                  component =>
+                    component.CommissionSavingsCalculatorComponent
+                )
             }
           ]
         },

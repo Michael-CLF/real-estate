@@ -1,30 +1,25 @@
 <main class="calculators-page">
-  <section
-    class="calculators-hero"
-    aria-labelledby="calculators-title"
-  >
+  <section class="calculators-hero" aria-labelledby="calculators-title">
     <div class="calculators-shell">
       <p class="calculators-hero__eyebrow">
         NavStreet tools
       </p>
 
       <h1 id="calculators-title">
-        Residential mortgage calculators
+        Free Real Estate and Mortgage Calculators
       </h1>
 
       <p class="calculators-hero__description">
-        Explore common home-financing scenarios with
-        practical calculators designed to help you better
-        understand payments, affordability and loan
-        structure.
+        Make more informed decisions when buying, selling
+        or financing a home. Explore our free mortgage,
+        home affordability and real estate commission
+        savings calculators to better understand your
+        costs and potential savings.
       </p>
     </div>
   </section>
 
-  <section
-    class="calculators-directory"
-    aria-labelledby="calculator-directory-title"
-  >
+  <section class="calculators-directory" aria-labelledby="calculator-directory-title">
     <div class="calculators-shell">
       <header class="calculators-directory__header">
         <div>
@@ -45,46 +40,33 @@
 
       <div class="calculator-grid">
         @for (
-          calculator of calculators;
-          track calculator.route
+        calculator of calculators;
+        track calculator.route
         ) {
-          <article class="calculator-card">
-            <div class="calculator-card__icon">
-              <i
-                [class]="calculator.icon"
-                aria-hidden="true"
-              ></i>
-            </div>
+        <article class="calculator-card">
+          <div class="calculator-card__icon">
+            <i [class]="calculator.icon" aria-hidden="true"></i>
+          </div>
 
-            <p class="calculator-card__category">
-              {{ calculator.category }}
-            </p>
+          <p class="calculator-card__category">
+            {{ calculator.category }}
+          </p>
 
-            <h3 class="calc-title">
-              {{ calculator.title }}
-            </h3>
+          <h3 class="calc-title">
+            {{ calculator.title }}
+          </h3>
 
-            <p class="calculator-card__description">
-              {{ calculator.description }}
-            </p>
+          <p class="calculator-card__description">
+            {{ calculator.description }}
+          </p>
 
-            <button
-              class="calculator-card__button"
-              type="button"
-              [routerLink]="calculator.route"
-              [attr.aria-label]="
-                'Open ' + calculator.title
-              "
-            >
-              <span>
-                Open calculator
-              </span>
-
-              <span aria-hidden="true">
-                →
-              </span>
-            </button>
-          </article>
+          <a class="calculator-card__button" [routerLink]="calculator.route"
+            [attr.aria-label]="'Open ' + calculator.title">
+            <span>Open calculator</span>
+            <span aria-hidden="true"> → </span>
+          </a>
+          
+        </article>
         }
       </div>
     </div>
@@ -99,10 +81,10 @@
       <p>
         NavStreet calculators provide general estimates for
         educational purposes. Results are not a loan offer,
-        approval, rate quote or financial advice. Actual
-        payments and qualification requirements depend on
-        the lender, loan program, property and borrower
-        information.
+        approval, rate quote or financial advice. Real estate
+        commissions are negotiable. Actual financing costs,
+        selling expenses and potential savings vary by
+        transaction and individual circumstances.
       </p>
     </div>
   </aside>
