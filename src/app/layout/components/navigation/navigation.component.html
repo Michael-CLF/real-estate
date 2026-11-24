@@ -15,6 +15,32 @@
           {{ item.label }}
         </a>
       </li>
+      @if (item.analyticsName === 'sell_your_home') {
+        <li class="navigation__item navigation__resources"
+            routerLinkActive="navigation__resources--active"
+            (keydown.escape)="closeOnEscape($event, resourcesTrigger)">
+          <button #resourcesTrigger type="button"
+                  class="navigation__link navigation__resources-trigger"
+                  [attr.aria-expanded]="resourcesOpen()"
+                  aria-controls="navstreet-resources-links"
+                  (click)="toggleResources()">
+            Resources <span class="navigation__chevron" aria-hidden="true"></span>
+          </button>
+          <ul id="navstreet-resources-links" class="navigation__dropdown"
+              [hidden]="!resourcesOpen()">
+            @for (resource of resourceItems; track resource.route) {
+              <li>
+                <a class="navigation__link navigation__resource-link"
+                   [routerLink]="resource.route"
+                   routerLinkActive="navigation__link--active"
+                   [routerLinkActiveOptions]="{ exact: true }"
+                   ariaCurrentWhenActive="page"
+                   (click)="handleNavigationSelected(resource)">{{ resource.label }}</a>
+              </li>
+            }
+          </ul>
+        </li>
+      }
     }
   </ul>
 </nav>

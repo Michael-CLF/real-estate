@@ -2,6 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  effect,
+  ElementRef,
+  HostListener,
+  signal,
   input,
   output
 } from '@angular/core';
@@ -47,6 +51,41 @@ export class NavigationComponent {
   readonly navigationSelected =
     output<void>();
 
+  private readonly host = inject(ElementRef<HTMLElement>);
+  protected readonly resourcesOpen = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (!this.isMobileMenuOpen()) this.resourcesOpen.set(false);
+    });
+  }
+
+  protected toggleResources(): void {
+    this.resourcesOpen.update(open => !open);
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected closeOutside(event: MouseEvent): void {
+    if (!this.host.nativeElement.contains(event.target as Node)) {
+      this.resourcesOpen.set(false);
+    }
+  }
+
+  protected closeOnEscape(event: Event, trigger: HTMLButtonElement): void {
+    if (!this.resourcesOpen()) return;
+    event.stopPropagation();
+    this.resourcesOpen.set(false);
+    trigger.focus();
+  }
+
+  protected readonly resourceItems: readonly NavigationItem[] = [
+    { analyticsName: 'blog', label: 'Blog', route: '/blog' },
+    { analyticsName: 'calculators', label: 'Calculators', route: '/calculators' },
+    { analyticsName: 'education_center', label: 'Education Center', route: '/education' },
+    { analyticsName: 'research', label: 'Research', route: '/research' },
+    { analyticsName: 'real_estate_savings', label: 'Real Estate Savings', route: '/research/real-estate-commission-savings-by-state' }
+  ];
+
   protected readonly navigationItems:
     readonly NavigationItem[] = [
       {
@@ -64,22 +103,6 @@ export class NavigationComponent {
           'Sell Your Home',
         route:
           '/sell'
-      },
-      {
-        analyticsName:
-          'calculators',
-        label:
-          'Calculators',
-        route:
-          '/calculators'
-      },
-      {
-        analyticsName:
-          'education_center',
-        label:
-          'Education Center',
-        route:
-          '/education'
       },
       {
         analyticsName:
@@ -140,6 +163,7 @@ export class NavigationComponent {
       }
     );
 
+    this.resourcesOpen.set(false);
     this.navigationSelected.emit();
   }
 }
