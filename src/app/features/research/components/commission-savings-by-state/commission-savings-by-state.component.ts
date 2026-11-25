@@ -360,10 +360,7 @@ export class CommissionSavingsByStateComponent implements OnInit {
 
             temporalCoverage: '2026-10',
 
-            spatialCoverage: {
-              '@type': 'Country',
-              name: 'United States'
-            },
+           spatialCoverage: 'United States (All 50 States)',
 
             keywords: [
               'Real estate',
