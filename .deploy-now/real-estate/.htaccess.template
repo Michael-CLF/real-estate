@@ -1,58 +1,63 @@
 
 <IfModule mod_negotiation.c>
-    Options -MultiViews
+Options -MultiViews
 </IfModule>
 
 <IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
+RewriteEngine On
+RewriteBase /
 
-    # Preserve direct requests for existing files.
-    RewriteRule ^index\.html$ - [L]
+RewriteRule ^buy/?$ /homes/ [R=301,L]
+RewriteRule ^about/?$ /faq/ [R=301,L]
+RewriteRule ^mortgage/?$ /calculators/ [R=301,L]
 
-    # Serve prerendered Angular pages from their directories.
-    RewriteCond %{REQUEST_FILENAME}/index.html -f
-    RewriteRule ^(.+?)/?$ $1/index.html [L]
+RewriteRule ^index\.html$ - [L]
 
-    # Preserve existing static assets and directories.
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+RewriteCond %{REQUEST_FILENAME}/index.html -f
+RewriteRule ^(.+?)/?$ $1/index.html [L]
 
-    # All other routes use Angular client-side routing.
-    RewriteRule ^ /index.html [L]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^ /index.html [L]
 </IfModule>
 
 # Browser caching for static assets
 <IfModule mod_expires.c>
-    ExpiresActive On
+ExpiresActive On
 
-    # Images
-    ExpiresByType image/webp "access plus 1 month"
-    ExpiresByType image/svg+xml "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/x-icon "access plus 1 month"
+ExpiresByType image/webp "access plus 1 month"
+ExpiresByType image/svg+xml "access plus 1 month"
+ExpiresByType image/png "access plus 1 month"
+ExpiresByType image/jpeg "access plus 1 month"
+ExpiresByType image/x-icon "access plus 1 month"
 
-    # Video
-    ExpiresByType video/mp4 "access plus 1 month"
+ExpiresByType video/mp4 "access plus 1 month"
 
-    # Fonts
-    ExpiresByType font/woff2 "access plus 1 month"
-    ExpiresByType font/woff "access plus 1 month"
+ExpiresByType font/woff2 "access plus 1 month"
+ExpiresByType font/woff "access plus 1 month"
 
-    # Angular JavaScript and CSS (fingerprinted files)
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType text/javascript "access plus 1 year"
-    ExpiresByType text/css "access plus 1 year"
+ExpiresByType application/javascript "access plus 1 year"
+ExpiresByType text/javascript "access plus 1 year"
+ExpiresByType text/css "access plus 1 year"
 
-    # HTML
-    ExpiresByType text/html "access plus 0 seconds"
+ExpiresByType text/html "access plus 0 seconds"
 </IfModule>
 
 # Prevent browsers from retaining outdated HTML
 <IfModule mod_headers.c>
     <FilesMatch "\.(html)$">
-        Header set Cache-Control "no-cache, must-revalidate"
+Header set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
 </IfModule>
+# Permanent redirects for legacy public routes.
+# Preserve direct requests for existing files.
+# Serve prerendered Angular pages from their directories.
+# Preserve existing static assets and directories.
+# All other routes use Angular client-side routing.
+# Images
+# Video
+# Fonts
+# Angular JavaScript and CSS (fingerprinted files)
+# HTML

@@ -77,7 +77,7 @@ export class FooterComponent {
             label:
               'About',
             route:
-              '/about'
+              '/faq'
           },
           {
             analyticsName:
@@ -105,7 +105,7 @@ export class FooterComponent {
             label:
               'Buy a Home',
             route:
-              '/buy'
+              '/homes'
           },
           {
             analyticsName:
@@ -121,7 +121,7 @@ export class FooterComponent {
             label:
               'Mortgage',
             route:
-              '/mortgage'
+              '/calculators'
           }
         ],
         title:

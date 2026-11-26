@@ -695,7 +695,7 @@ function wrapContent(shell, content) {
 
 function renderArticle(article, shell) {
   const slug = article.slug;
-  const url = `${ORIGIN}/blog/${slug}`;
+  const url = `${ORIGIN}/blog/${slug}/`;
 
   const title =
     article.seoTitle?.trim() ||
@@ -804,7 +804,7 @@ function renderArticle(article, shell) {
           </p>
 
           <div class="article-actions">
-            <a href="/homes" class="primary-action">
+            <a href="/homes/" class="primary-action">
               Browse Homes
             </a>
 
@@ -848,7 +848,7 @@ function renderBlogIndex(articles, shell) {
 
   const cards = articles.map(article => {
     const articleUrl =
-      `/blog/${encodeURIComponent(article.slug)}`;
+     `/blog/${encodeURIComponent(article.slug)}/`;
 
     const image = safeUrl(article.featuredImageUrl);
     const published = toIso(article.publishedAt);

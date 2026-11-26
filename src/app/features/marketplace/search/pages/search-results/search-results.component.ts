@@ -170,7 +170,7 @@ export class SearchResultsComponent {
       }),
 
       switchMap(({ filters, refreshed }) =>
-        (refreshed || !this.canUsePrerenderedResult(filters)
+        (refreshed
           ? this.listingRepository.searchListings(filters)
           : of(getPrerenderedMarketplaceResult(filters))
         ).pipe(
@@ -192,63 +192,51 @@ export class SearchResultsComponent {
         )
       ),
 
-     tap(viewModel => {
-  const filters = viewModel.filters;
+      tap(viewModel => {
+        const filters = viewModel.filters;
 
-  const hasAdditionalFilters = Boolean(
-    filters.searchTerm ||
-    filters.city ||
-    filters.postalCode ||
-    filters.propertyTypes?.length ||
-    filters.minimumPrice != null ||
-    filters.maximumPrice != null ||
-    filters.minimumBedrooms != null ||
-    filters.minimumBathrooms != null
-  );
+        const hasAdditionalFilters = Boolean(
+          filters.searchTerm ||
+          filters.city ||
+          filters.postalCode ||
+          filters.propertyTypes?.length ||
+          filters.minimumPrice != null ||
+          filters.maximumPrice != null ||
+          filters.minimumBedrooms != null ||
+          filters.minimumBathrooms != null
+        );
 
-  if (filters.stateSlug && !hasAdditionalFilters) {
-    const stateName = this.stateNameFromSlug(
-      filters.stateSlug
-    );
+        if (filters.stateSlug && !hasAdditionalFilters) {
+          const stateName = this.stateNameFromSlug(
+            filters.stateSlug
+          );
 
-    this.pageSeo.set(
-      `${stateName} FSBO Homes for Sale | NavStreet`,
-      `Browse ${stateName} for-sale-by-owner homes on NavStreet. Explore property photos, prices, and details, and connect directly with sellers.`
-    );
+          this.pageSeo.set(
+            `${stateName} FSBO Homes for Sale | NavStreet`,
+            `Browse ${stateName} for-sale-by-owner homes on NavStreet. Explore property photos, prices, and details, and connect directly with sellers.`
+          );
 
-  } else if (!filters.stateSlug && !hasAdditionalFilters) {
-    this.pageSeo.set(
-      (filters.page ?? 1) > 1
-        ? `For Sale By Owner Homes — Page ${filters.page} | NavStreet`
-        : 'For Sale By Owner Homes for Sale | NavStreet',
-      'Explore for-sale-by-owner homes across the United States. Browse property photos, prices, and details on NavStreet.'
-    );
+        } else if (!filters.stateSlug && !hasAdditionalFilters) {
+          this.pageSeo.set(
+            (filters.page ?? 1) > 1
+              ? `For Sale By Owner Homes — Page ${filters.page} | NavStreet`
+              : 'For Sale By Owner Homes for Sale | NavStreet',
+            'Explore for-sale-by-owner homes across the United States. Browse property photos, prices, and details on NavStreet.'
+          );
 
-  } else {
-    this.pageSeo.set(
-      `${viewModel.heading} | NavStreet`,
-      'Browse for-sale-by-owner homes, photos, prices, and property details on NavStreet.'
-    );
-  }
-}),
+        } else {
+          this.pageSeo.set(
+            `${viewModel.heading} | NavStreet`,
+            'Browse for-sale-by-owner homes, photos, prices, and property details on NavStreet.'
+          );
+        }
+      }),
 
       shareReplay({
         bufferSize: 1,
         refCount: true
       })
     );
-
-  private canUsePrerenderedResult(filters: ListingSearchFilters): boolean {
-    return !filters.searchTerm && !filters.stateSlug &&
-      !filters.city && !filters.postalCode &&
-      !filters.propertyTypes?.length &&
-      filters.minimumPrice === undefined &&
-      filters.maximumPrice === undefined &&
-      filters.minimumBedrooms === undefined &&
-      filters.minimumBathrooms === undefined &&
-      (filters.sort ?? 'newest') === 'newest' &&
-      (filters.page ?? 1) >= 1;
-  }
 
   isUnfilteredPagination(filters: ListingSearchFilters): boolean {
     return !filters.searchTerm && !filters.stateSlug &&

@@ -150,7 +150,7 @@ protected readonly featuredListings$:
         title: 'Find your next home',
         description:
           'Browse detailed listings, save favorites, contact sellers, request showings, and prepare offers.',
-        route: '/buy',
+        route: '/homes',
         action: 'Browse homes'
       },
       {
@@ -159,7 +159,7 @@ protected readonly featuredListings$:
         title: 'Understand the numbers',
         description:
           'Estimate payments, affordability, closing costs, and financing scenarios with practical calculators.',
-        route: '/mortgage',
+        route: '/calculators',
         action: 'Use calculators'
       },
       {
@@ -255,7 +255,7 @@ protected readonly featuredListings$:
         title: 'Mortgage Calculator',
         description:
           'Estimate principal, interest, taxes, insurance, and the total monthly housing payment.',
-        route: '/mortgage'
+        route: '/calculators'
       },
       {
         icon: 'fa-solid fa-wallet',
@@ -263,7 +263,7 @@ protected readonly featuredListings$:
         title: 'Affordability Calculator',
         description:
           'Explore a potential price range using income, debts, available funds, and financing assumptions.',
-        route: '/mortgage'
+        route: '/calculators'
       },
       {
         icon: 'fa-solid fa-file-invoice-dollar',
@@ -271,7 +271,7 @@ protected readonly featuredListings$:
         title: 'Closing Cost Calculator',
         description:
           'Prepare for the expenses that may accompany a purchase, sale, or mortgage transaction.',
-        route: '/mortgage'
+        route: '/calculators'
       }
     ];
 }

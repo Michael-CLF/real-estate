@@ -148,14 +148,16 @@ export class PageSeoService {
         'twitter:image:alt',
         config.imageAlt
       );
-      this.clearStructuredData();
-
-      if (config.structuredData && !config.noIndex) {
-        this.setStructuredData(config.structuredData);
-      }
     } else {
       this.meta.removeTag('property="og:image:alt"');
       this.meta.removeTag('name="twitter:image:alt"');
+    }
+
+    // Structured data must be independent of image alt text.
+    this.clearStructuredData();
+
+    if (config.structuredData && !config.noIndex) {
+      this.setStructuredData(config.structuredData);
     }
   }
   private setStructuredData(
@@ -219,6 +221,11 @@ export class PageSeoService {
 
         const requiresTrailingSlash =
           canonicalPath.startsWith('/states/') ||
+          canonicalPath.startsWith('/listings/') ||
+          canonicalPath === '/blog' ||
+          canonicalPath.startsWith('/blog/') ||
+          canonicalPath === '/research' ||
+          canonicalPath.startsWith('/research/') ||
           canonicalPath === '/list-house-for-sale-by-owner' ||
           canonicalPath === '/homes' ||
           /^\/homes\/page\/\d+$/.test(canonicalPath) ||
@@ -245,7 +252,7 @@ export class PageSeoService {
 
         if (state) {
           canonicalPath =
-            `/homes?state=${encodeURIComponent(state)}`;
+            `/homes/?state=${encodeURIComponent(state)}`;
         }
       }
 

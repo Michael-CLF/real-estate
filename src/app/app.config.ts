@@ -1,9 +1,9 @@
-﻿
-import {
+﻿import {
   ApplicationConfig,
   provideZoneChangeDetection
 } from '@angular/core';
 
+import { LocationStrategy } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideClientHydration } from '@angular/platform-browser';
 
@@ -13,6 +13,10 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
+
+import {
+  PublicUrlLocationStrategy
+} from './core/seo/public-url-location.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,6 +33,11 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'top',
         anchorScrolling: 'enabled'
       })
-    )
+    ),
+
+    {
+      provide: LocationStrategy,
+      useClass: PublicUrlLocationStrategy
+    }
   ]
 };

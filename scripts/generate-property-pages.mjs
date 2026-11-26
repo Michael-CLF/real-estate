@@ -1,18 +1,3 @@
-/**
- * NavStreet Stage G — build-time public listing HTML generator.
- *
- * Run AFTER `npm run build`, BEFORE the IONOS artifact upload.
- *
- * Requires:
- * - firebase-admin as a development dependency
- * - GOOGLE_APPLICATION_CREDENTIALS
- *
- * Never place credentials in the generated output.
- *
- * This script does not alter Angular source files,
- * routes, or the existing offer system.
- */
-
 import {
   readFile,
   writeFile,
@@ -238,8 +223,8 @@ const replaceMeta = (html, property, content) => {
 
     ...(property.image
       ? [
-          `<meta property="og:image" content="${escapeHtml(property.image)}">`
-        ]
+        `<meta property="og:image" content="${escapeHtml(property.image)}">`
+      ]
       : []),
 
     `<meta name="twitter:card" content="${property.image ? 'summary_large_image' : 'summary'}">`,
@@ -250,8 +235,8 @@ const replaceMeta = (html, property, content) => {
 
     ...(property.image
       ? [
-          `<meta name="twitter:image" content="${escapeHtml(property.image)}">`
-        ]
+        `<meta name="twitter:image" content="${escapeHtml(property.image)}">`
+      ]
       : []),
 
     `<script type="application/ld+json">${safeJson(property.structuredData)}</script>`
@@ -437,8 +422,7 @@ function renderListing(id, data, template) {
 
 
   const url =
-    `${ORIGIN}/listings/${encodeURIComponent(id)}`;
-
+    `${ORIGIN}/listings/${encodeURIComponent(id)}/`;
 
   /**
    * Schema.org structured data.
@@ -459,11 +443,11 @@ function renderListing(id, data, template) {
 
     ...(primary
       ? {
-          image: [
-            primary,
-            ...images.filter(image => image !== primary)
-          ].slice(0, 12)
-        }
+        image: [
+          primary,
+          ...images.filter(image => image !== primary)
+        ].slice(0, 12)
+      }
       : {}),
 
     datePosted:
@@ -494,46 +478,46 @@ function renderListing(id, data, template) {
 
       ...(bedrooms !== undefined
         ? {
-            numberOfBedrooms: bedrooms
-          }
+          numberOfBedrooms: bedrooms
+        }
         : {}),
 
       ...(bathrooms !== undefined
         ? {
-            numberOfBathroomsTotal: bathrooms
-          }
+          numberOfBathroomsTotal: bathrooms
+        }
         : {}),
 
       ...(area !== undefined
         ? {
-            floorSize: {
+          floorSize: {
 
-              '@type': 'QuantitativeValue',
+            '@type': 'QuantitativeValue',
 
-              value: area,
+            value: area,
 
-              unitCode: 'FTK'
+            unitCode: 'FTK'
 
-            }
           }
+        }
         : {})
 
     },
 
     ...(price !== undefined
       ? {
-          offers: {
+        offers: {
 
-            '@type': 'Offer',
+          '@type': 'Offer',
 
-            price,
+          price,
 
-            priceCurrency: 'USD',
+          priceCurrency: 'USD',
 
-            url
+          url
 
-          }
         }
+      }
       : {})
 
   };
@@ -560,8 +544,8 @@ function renderListing(id, data, template) {
           <img
             src="${escapeHtml(image)}"
             alt="${escapeHtml(
-              `${address} — property photo ${index + 1}`
-            )}"
+        `${address} — property photo ${index + 1}`
+      )}"
             loading="${index === 0 ? 'eager' : 'lazy'}"
           >
         </figure>
@@ -586,9 +570,8 @@ function renderListing(id, data, template) {
 
         ${factsHtml}
 
-        ${
-          sellerDescription
-            ? `
+        ${sellerDescription
+      ? `
               <section>
 
                 <h2>Property description</h2>
@@ -597,12 +580,11 @@ function renderListing(id, data, template) {
 
               </section>
             `
-            : ''
-        }
+      : ''
+    }
 
-        ${
-          photosHtml
-            ? `
+        ${photosHtml
+      ? `
               <section>
 
                 <h2>Property photographs</h2>
@@ -611,8 +593,8 @@ function renderListing(id, data, template) {
 
               </section>
             `
-            : ''
-        }
+      : ''
+    }
 
       </article>
 
@@ -793,11 +775,10 @@ async function main() {
 
           <loc>${escapeHtml(page.url)}</loc>
 
-          ${
-            page.updated
-              ? `<lastmod>${page.updated.slice(0, 10)}</lastmod>`
-              : ''
-          }
+          ${page.updated
+          ? `<lastmod>${page.updated.slice(0, 10)}</lastmod>`
+          : ''
+        }
 
         </url>
       `
