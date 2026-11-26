@@ -806,7 +806,13 @@ async function main() {
     resolve('.navstreet-property-deploy-manifest.json'),
     JSON.stringify({
       generatedAt: new Date().toISOString(),
-      listingIds: entries.map(page => decodeURIComponent(new URL(page.url).pathname.split('/').pop())).sort()
+      listingIds: entries
+        .map(page =>
+          decodeURIComponent(
+            new URL(page.url).pathname.split('/').filter(Boolean).pop()
+          )
+        )
+        .sort()
     }, null, 2) + '\n',
     'utf8'
   );

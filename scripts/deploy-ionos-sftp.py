@@ -78,8 +78,8 @@ def main():
             raise RuntimeError(f'Missing generated listing HTML: {item}')
 
     sitemap = (ROOT / 'sitemap.xml').read_text(encoding='utf-8')
-    if any(f'https://navstreet.com/listings/{item}</loc>' not in sitemap for item in ids):
-        raise RuntimeError('Sitemap missing one or more public listings')
+    if any(f'https://navstreet.com/listings/{item}/</loc>' not in sitemap for item in ids):
+    raise RuntimeError('Sitemap missing one or more public listings')
     if any(f'https://navstreet.com/homes/page/{number}/</loc>' not in sitemap for number in range(2, pages + 1)):
         raise RuntimeError('Sitemap missing pagination pages')
 
